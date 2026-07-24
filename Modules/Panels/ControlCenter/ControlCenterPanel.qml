@@ -26,12 +26,19 @@ SmartPanel {
   panelAnchorBottom: resolvedPanelPosition === "bottom"
   panelAnchorTop: resolvedPanelPosition === "top"
 
-  preferredWidth: dashboardContent.contentPreferredWidth
-  preferredHeight: dashboardContent.contentPreferredHeight
+  preferredWidth: Math.round((cfg.panelWidth || 1120) * Style.uiScaleRatio * (cfg.panelScale || 1))
+  preferredHeight: Math.round((cfg.panelHeight || 700) * Style.uiScaleRatio * (cfg.panelScale || 1))
 
-  Panel {
-    id: dashboardContent
-    anchors.fill: parent
-    pluginApi: ControlCenterService.provider
+  panelContent: Component {
+    Item {
+      id: contentContainer
+      anchors.fill: parent
+
+      Panel {
+        id: dashboardContent
+        anchors.fill: parent
+        pluginApi: ControlCenterService.provider
+      }
+    }
   }
 }
