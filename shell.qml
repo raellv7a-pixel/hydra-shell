@@ -24,6 +24,7 @@ import qs.Modules.LockScreen
 import qs.Modules.MainScreen
 import qs.Modules.Notification
 import qs.Modules.OSD
+import qs.Modules.ScreenToolkit
 
 import qs.Modules.Panels.Launcher
 import qs.Modules.Panels.Settings
@@ -135,6 +136,7 @@ ShellRoot {
       Notification {}
       ToastOverlay {}
       OSD {}
+      Main {}
 
       // Launcher overlay window (for overlay layer mode)
       Loader {

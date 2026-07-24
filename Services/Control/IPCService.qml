@@ -938,4 +938,27 @@ Singleton {
                                             });
     }
   }
+
+  IpcHandler {
+    target: "screenToolkit"
+    function toggle()              { ScreenToolkitService.toggle(); }
+    function mirror()              { ScreenToolkitService.mirror(); }
+    function measure()             { ScreenToolkitService.measure(); }
+    function colorPicker()         { ScreenToolkitService.colorPicker(); }
+    function annotate()            { ScreenToolkitService.annotate(); }
+    function annotateFullscreen()  { ScreenToolkitService.annotateFullscreen(); }
+    function annotateWindow()      { ScreenToolkitService.annotateWindow(); }
+    function pin()                 { ScreenToolkitService.pin(); }
+    function pinImage()            { ScreenToolkitService.pinImage(); }
+    function ocr()                 { ScreenToolkitService.ocr(); }
+    function qr()                  { ScreenToolkitService.qr(); }
+    function palette()             { ScreenToolkitService.palette(); }
+    function lens()                { ScreenToolkitService.lens(); }
+    function record()              { ScreenToolkitService.record("gif"); }
+    function recordMp4()           { ScreenToolkitService.recordMp4(); }
+    function recordFullscreen()    { ScreenToolkitService.recordFullscreen("gif"); }
+    function recordFullscreenMp4() { ScreenToolkitService.recordFullscreenMp4(); }
+    function recordStop()          { ScreenToolkitService.recordStop(); }
+  }
+
 }
