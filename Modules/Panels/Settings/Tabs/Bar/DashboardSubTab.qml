@@ -7,53 +7,53 @@ import qs.Services.System
 import qs.Services.UI
 import qs.Widgets
 
-Flickable {
+ColumnLayout {
   id: root
 
-  contentWidth: width
-  contentHeight: contentCol.implicitHeight + Style.marginL * 2
-  clip: true
+  spacing: Style.marginM
+  Layout.fillWidth: true
+  implicitHeight: subTabBar.implicitHeight + contentCol.implicitHeight + Style.marginM * 4
 
   property var cfg: ControlCenterService.settings
   property int subTab: 0
 
+  // Navegação por abas em Português Brasileiro (pt_BR)
+  NTabBar {
+    id: subTabBar
+    Layout.fillWidth: true
+    currentIndex: root.subTab
+    distributeEvenly: true
+
+    NTabButton {
+      text: "Janela & Layout"
+      tabIndex: 0
+      checked: root.subTab === 0
+      onClicked: root.subTab = 0
+    }
+    NTabButton {
+      text: "Perfil & Banner"
+      tabIndex: 1
+      checked: root.subTab === 1
+      onClicked: root.subTab = 1
+    }
+    NTabButton {
+      text: "Efeitos & Áudio"
+      tabIndex: 2
+      checked: root.subTab === 2
+      onClicked: root.subTab = 2
+    }
+    NTabButton {
+      text: "Seções da Tela"
+      tabIndex: 3
+      checked: root.subTab === 3
+      onClicked: root.subTab = 3
+    }
+  }
+
   ColumnLayout {
     id: contentCol
-    width: parent.width - Style.marginL * 2
-    anchors.horizontalCenter: parent.horizontalCenter
+    Layout.fillWidth: true
     spacing: Style.marginL
-
-    // Sub-tab Navigation
-    NTabBar {
-      Layout.fillWidth: true
-      currentIndex: root.subTab
-      distributeEvenly: true
-
-      NTabButton {
-        text: "Janela & Layout"
-        tabIndex: 0
-        checked: root.subTab === 0
-        onClicked: root.subTab = 0
-      }
-      NTabButton {
-        text: "Perfil & Banner"
-        tabIndex: 1
-        checked: root.subTab === 1
-        onClicked: root.subTab = 1
-      }
-      NTabButton {
-        text: "Efeitos & Áudio"
-        tabIndex: 2
-        checked: root.subTab === 2
-        onClicked: root.subTab = 2
-      }
-      NTabButton {
-        text: "Seções & Mídia"
-        tabIndex: 3
-        checked: root.subTab === 3
-        onClicked: root.subTab = 3
-      }
-    }
 
     // ==========================================
     // SUBTAB 0: JANELA & LAYOUT
@@ -73,7 +73,7 @@ Flickable {
       NToggle {
         Layout.fillWidth: true
         label: "Painel Destacado (Flutuante)"
-        description: "Exibe a dashboard flutuante no centro ou posição fixa, desvinculada da barra"
+        description: "Exibe a central flutuante no centro ou posição fixa, desvinculada da barra"
         checked: root.cfg.panelDetached ?? true
         onToggled: checked => {
           root.cfg.panelDetached = checked;
@@ -85,7 +85,7 @@ Flickable {
         Layout.fillWidth: true
         visible: !root.cfg.panelDetached
         label: "Seguir Posição da Barra"
-        description: "Anexa a dashboard na mesma borda da tela onde a barra principal está posicionada"
+        description: "Anexa a central na mesma borda da tela onde a barra principal está posicionada"
         checked: root.cfg.followBarEdge ?? true
         onToggled: checked => {
           root.cfg.followBarEdge = checked;
@@ -95,8 +95,8 @@ Flickable {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Posição do Painel na Tela"
-        description: "Alinhamento padrão da janela da dashboard"
+        label: "Posição da Janela na Tela"
+        description: "Alinhamento padrão da janela da central de controle"
         currentKey: root.cfg.panelPosition ?? "center"
         model: [
           { key: "center", name: "Centralizado" },
@@ -124,7 +124,7 @@ Flickable {
 
       NValueSlider {
         Layout.fillWidth: true
-        label: "Largura do Painel (px)"
+        label: "Largura da Central (px)"
         from: 800
         to: 1400
         stepSize: 20
@@ -137,7 +137,7 @@ Flickable {
 
       NValueSlider {
         Layout.fillWidth: true
-        label: "Altura do Painel (px)"
+        label: "Altura da Central (px)"
         from: 500
         to: 950
         stepSize: 20
@@ -150,7 +150,7 @@ Flickable {
 
       NValueSlider {
         Layout.fillWidth: true
-        label: "Escala Geral da Dashboard"
+        label: "Escala Geral da Interface"
         from: 0.7
         to: 1.3
         stepSize: 0.05
@@ -171,7 +171,7 @@ Flickable {
       spacing: Style.marginM
 
       NText {
-        text: "Foto de Perfil & GIF"
+        text: "Foto de Perfil & Animação"
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -194,7 +194,7 @@ Flickable {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir GIF Dançante de Acompanhamento"
+        label: "Exibir Mascote GIF Animado"
         description: "Mostra um pequeno mascote GIF animado ao lado do cartão de perfil"
         checked: root.cfg.showProfileDanceGif ?? true
         onToggled: checked => {
@@ -214,14 +214,14 @@ Flickable {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Modo da Capa de Fundo"
+        label: "Modo de Imagem do Banner"
         description: "Origem da imagem exibida no topo do cartão de perfil"
         currentKey: root.cfg.profileCoverMode ?? "auto"
         model: [
-          { key: "auto", name: "Automático (Usa o Wallpaper Atual)" },
+          { key: "auto", name: "Automático (Usa o Papel de Parede Atual)" },
           { key: "custom", name: "Imagem Personalizada" },
           { key: "random", name: "Aleatório de uma Pasta" },
-          { key: "none", name: "Desativado (Apenas Cor Sólida)" }
+          { key: "none", name: "Desativado (Cor Sólida)" }
         ]
         onSelected: key => {
           root.cfg.profileCoverMode = key;
@@ -231,8 +231,8 @@ Flickable {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Escurecer Capa (Overlay)"
-        description: "Aplica um tom escuro suave sobre o banner para legibilidade dos textos"
+        label: "Escurecimento Suave (Overlay)"
+        description: "Aplica um tom escuro sobre o banner para destacar o texto"
         checked: root.cfg.profileCoverOverlayEnabled ?? true
         onToggled: checked => {
           root.cfg.profileCoverOverlayEnabled = checked;
@@ -268,11 +268,11 @@ Flickable {
       NComboBox {
         Layout.fillWidth: true
         visible: root.cfg.profileCoverBorder ?? true
-        label: "Animação da Borda"
+        label: "Efeito de Animação da Borda"
         currentKey: root.cfg.profileCoverBorderAnimation ?? "static"
         model: [
           { key: "static", name: "Estática" },
-          { key: "rotate", name: "Rotação Gradiente" },
+          { key: "rotate", name: "Rotação de Cores" },
           { key: "pulse", name: "Pulsação Suave" }
         ]
         onSelected: key => {
@@ -291,7 +291,7 @@ Flickable {
       spacing: Style.marginM
 
       NText {
-        text: "Visualizador de Mídia & Espectro"
+        text: "Visualizadores de Áudio"
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -299,12 +299,12 @@ Flickable {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Efeito do Visualizador no Painel"
-        description: "Estilo do espectro de áudio ao reproduzir músicas"
+        label: "Espectro de Mídia na Central"
+        description: "Estilo visual do espectro ao tocar músicas"
         currentKey: root.cfg.mediaVisualizerEffect ?? "bars"
         model: [
           { key: "bars", name: "Barras Verticais" },
-          { key: "wave", name: "Onda de Áudio" },
+          { key: "wave", name: "Onda Fluida" },
           { key: "dots", name: "Pontos Pulsantes" },
           { key: "none", name: "Desativado" }
         ]
@@ -316,12 +316,12 @@ Flickable {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Efeito no Slider de Áudio"
-        description: "Efeito visual animado sobre o controle de volume"
+        label: "Efeito no Controle de Volume"
+        description: "Efeito animado sobre a barra de volume principal"
         currentKey: root.cfg.audioSliderEffect ?? "wave"
         model: [
           { key: "wave", name: "Onda Fluida" },
-          { key: "pulse", name: "Pulsação" },
+          { key: "pulse", name: "Pulsação de Som" },
           { key: "none", name: "Padrão" }
         ]
         onSelected: key => {
@@ -332,8 +332,8 @@ Flickable {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Efeito no Slider de Microfone"
-        description: "Efeito visual ao utilizar a entrada de áudio"
+        label: "Efeito no Controle de Microfone"
+        description: "Efeito animado para a barra de entrada de áudio"
         currentKey: root.cfg.microphoneSliderEffect ?? "pulse"
         model: [
           { key: "pulse", name: "Pulsação de Voz" },
@@ -349,7 +349,7 @@ Flickable {
       Item { Layout.preferredHeight: Style.marginS }
 
       NText {
-        text: "Desempenho & Economia de Energia"
+        text: "Desempenho e Energia"
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -357,8 +357,8 @@ Flickable {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Pausar Animações no Modo Performance"
-        description: "Desativa espectros e efeitos visuais pesados quando o modo Performance da shell estiver ativo"
+        label: "Respeitar Modo Desempenho da Shell"
+        description: "Pausa os efeitos visuais pesados quando o modo Performance estiver ativo"
         checked: root.cfg.followNoctaliaPerformanceMode ?? true
         onToggled: checked => {
           root.cfg.followNoctaliaPerformanceMode = checked;
@@ -368,8 +368,8 @@ Flickable {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Economia no Modo Bateria"
-        description: "Reduz o consumo de renderização do visualizador de áudio quando em uso de bateria"
+        label: "Economia em Uso de Bateria"
+        description: "Reduz o uso de CPU/GPU ao usar a bateria do notebook"
         checked: root.cfg.powerSaverPerformanceMode ?? true
         onToggled: checked => {
           root.cfg.powerSaverPerformanceMode = checked;
@@ -379,7 +379,7 @@ Flickable {
     }
 
     // ==========================================
-    // SUBTAB 3: SEÇÕES & MÍDIA
+    // SUBTAB 3: SEÇÕES DA TELA
     // ==========================================
     ColumnLayout {
       Layout.fillWidth: true
@@ -387,7 +387,7 @@ Flickable {
       spacing: Style.marginM
 
       NText {
-        text: "Cards Visíveis na Dashboard"
+        text: "Cards Visíveis na Central de Controle"
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -405,7 +405,7 @@ Flickable {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Controle de Mídia / Player"
+        label: "Exibir Player de Mídia"
         checked: root.cfg.showMedia ?? true
         onToggled: checked => {
           root.cfg.showMedia = checked;
@@ -415,7 +415,7 @@ Flickable {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Calendário & Eventos"
+        label: "Exibir Calendário e Eventos"
         checked: root.cfg.showCalendar ?? true
         onToggled: checked => {
           root.cfg.showCalendar = checked;
@@ -425,7 +425,7 @@ Flickable {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Card de Ferramentas de Gravação"
+        label: "Exibir Ferramentas de Captura"
         checked: root.cfg.showRecordingCard ?? true
         onToggled: checked => {
           root.cfg.showRecordingCard = checked;
@@ -436,7 +436,7 @@ Flickable {
       Item { Layout.preferredHeight: Style.marginS }
 
       NText {
-        text: "Mídia na Barra de Tarefas"
+        text: "Mídia na Barra Superior"
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -444,7 +444,7 @@ Flickable {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Informações de Mídia na Barra"
+        label: "Exibir Mídia na Barra"
         checked: root.cfg.showBarMediaInfo ?? true
         onToggled: checked => {
           root.cfg.showBarMediaInfo = checked;
@@ -466,7 +466,7 @@ Flickable {
       NToggle {
         Layout.fillWidth: true
         visible: root.cfg.showBarMediaInfo ?? true
-        label: "Exibir Anel de Progresso na Barra"
+        label: "Exibir Progresso da Música na Barra"
         checked: root.cfg.barMediaShowProgressRing ?? true
         onToggled: checked => {
           root.cfg.barMediaShowProgressRing = checked;

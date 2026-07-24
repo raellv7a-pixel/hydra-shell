@@ -199,7 +199,7 @@ ColumnLayout {
       checked: subTabBar.currentIndex === 3
     }
     NTabButton {
-      text: "Dashboard"
+      text: "Central de Controle"
       tabIndex: 4
       checked: subTabBar.currentIndex === 4
     }
