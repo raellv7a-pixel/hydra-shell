@@ -31,6 +31,12 @@ sudo pacman -S --needed \
     xdg-desktop-portal \
     wf-recorder \
     translate-shell
+## Links Simbólicos Globais
+Para garantir a inicialização automática em qualquer gerenciador de login (Display Manager / SDDM / GDM / greetd):
+```bash
+sudo ln -sf /usr/local/bin/quickshell /usr/bin/quickshell
+sudo ln -sf /usr/local/bin/qs /usr/bin/qs
+```
 ```
 
 ## Resumo dos Recursos por Pacote
