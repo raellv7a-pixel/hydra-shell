@@ -45,31 +45,54 @@ Singleton {
   // Translation dictionaries
   property var translations: ({})
 
-  Component.onCompleted: {
-    loadTranslations();
-    loadSettings();
+  FileView {
+    id: ptFileView
+    path: Quickshell.shellDir + "/Modules/ScreenToolkit/i18n/pt.json"
+    printErrors: false
+    onLoaded: {
+      try {
+        var data = JSON.parse(text());
+        root.translations["pt"] = data;
+        Logger.d("ScreenToolkitService", "Loaded PT translations");
+      } catch(e) {
+        Logger.e("ScreenToolkitService", "Failed to parse PT translations:", e);
+      }
+    }
   }
 
-  function loadTranslations() {
-    var ptUrl = Quickshell.shellDir + "/Modules/ScreenToolkit/i18n/pt.json";
-    var enUrl = Quickshell.shellDir + "/Modules/ScreenToolkit/i18n/en.json";
-    
-    // Load en fallback first, then pt if available
-    try {
-      var enData = Quickshell.readFile(enUrl.replace("file://", ""));
-      if (enData) translations["en"] = JSON.parse(enData);
-    } catch(e) {}
+  FileView {
+    id: enFileView
+    path: Quickshell.shellDir + "/Modules/ScreenToolkit/i18n/en.json"
+    printErrors: false
+    onLoaded: {
+      try {
+        var data = JSON.parse(text());
+        root.translations["en"] = data;
+        Logger.d("ScreenToolkitService", "Loaded EN translations");
+      } catch(e) {
+        Logger.e("ScreenToolkitService", "Failed to parse EN translations:", e);
+      }
+    }
+  }
 
-    try {
-      var ptData = Quickshell.readFile(ptUrl.replace("file://", ""));
-      if (ptData) translations["pt"] = JSON.parse(ptData);
-    } catch(e) {}
+  FileView {
+    id: settingsFileView
+    path: Settings.directoriesCreated ? (Settings.configDir + "screen-toolkit.json") : undefined
+    printErrors: false
+    onLoaded: {
+      try {
+        var parsed = JSON.parse(text());
+        if (parsed && typeof parsed === "object") {
+          root.settings = Object.assign({}, root.settings, parsed);
+        }
+      } catch(e) {}
+    }
   }
 
   function tr(key, interp) {
     if (!key) return "";
-    var lang = (typeof I18n !== "undefined" && I18n.currentLanguage) ? I18n.currentLanguage : "pt";
-    var dict = translations[lang] || translations["pt"] || translations["en"] || {};
+    var lang = (typeof I18n !== "undefined" && I18n.langCode) ? I18n.langCode : "pt";
+    var dict = root.translations[lang] || root.translations["pt"] || root.translations["en"] || {};
 
     var parts = key.split(".");
     var curr = dict;
@@ -84,7 +107,7 @@ Singleton {
 
     if (typeof curr !== "string") {
       // Fallback to English
-      dict = translations["en"] || {};
+      dict = root.translations["en"] || root.translations["pt"] || {};
       curr = dict;
       for (var j = 0; j < parts.length; j++) {
         if (curr && typeof curr === "object" && parts[j] in curr) {
@@ -105,21 +128,6 @@ Singleton {
     }
 
     return curr;
-  }
-
-  function loadSettings() {
-    try {
-      var file = Settings.configDir + "screen-toolkit.json";
-      var content = Quickshell.readFile(file);
-      if (content) {
-        var parsed = JSON.parse(content);
-        if (parsed && typeof parsed === "object") {
-          root.settings = Object.assign({}, root.settings, parsed);
-        }
-      }
-    } catch(e) {
-      Logger.d("ScreenToolkitService", "No saved settings found, using defaults");
-    }
   }
 
   function saveSettings() {
