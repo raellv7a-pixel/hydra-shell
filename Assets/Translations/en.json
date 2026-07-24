@@ -1649,6 +1649,9 @@
     "region": {
       "title": "Region"
     },
+    "security": {
+      "title": "Security"
+    },
     "session-menu": {
       "countdown-duration-description": "Set how long the countdown timer lasts before executing power actions.",
       "countdown-duration-label": "Countdown duration",

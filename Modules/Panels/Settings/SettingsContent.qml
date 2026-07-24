@@ -24,6 +24,7 @@ import qs.Modules.Panels.Settings.Tabs.SessionMenu
 import qs.Modules.Panels.Settings.Tabs.SystemMonitor
 import qs.Modules.Panels.Settings.Tabs.UserInterface
 import qs.Modules.Panels.Settings.Tabs.Wallpaper
+import qs.Modules.Panels.Settings.Tabs.Security
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.System
@@ -498,6 +499,10 @@ Item {
     id: desktopWidgetsTab
     DesktopWidgetsTab {}
   }
+  Component {
+    id: securityTab
+    SecurityTab {}
+  }
 
   function updateTabsModel() {
     let newTabs = [
@@ -548,6 +553,12 @@ Item {
             "label": "panels.control-center.title",
             "icon": "settings-control-center",
             "source": controlCenterTab
+          },
+          {
+            "id": SettingsPanel.Tab.Security,
+            "label": "panels.security.title",
+            "icon": "shield-lock",
+            "source": securityTab
           },
           {
             "id": SettingsPanel.Tab.Launcher,

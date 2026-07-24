@@ -105,6 +105,7 @@ Singleton {
                                             "systemmonitor": SettingsPanel.Tab.System,
                                             "userinterface": SettingsPanel.Tab.UserInterface,
                                             "wallpaper": SettingsPanel.Tab.Wallpaper,
+                                            "security": SettingsPanel.Tab.Security,
                                             "idle": SettingsPanel.Tab.Idle
                                           })
 

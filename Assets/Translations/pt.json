@@ -1649,6 +1649,9 @@
     "region": {
       "title": "Região"
     },
+    "security": {
+      "title": "Segurança"
+    },
     "session-menu": {
       "countdown-duration-description": "Definir por quanto tempo o temporizador de contagem regressiva dura antes de executar ações de energia.",
       "countdown-duration-label": "Duração da contagem regressiva",

@@ -91,7 +91,8 @@ SmartPanel {
     SessionMenu,
     System,
     UserInterface,
-    Wallpaper
+    Wallpaper,
+    Security
   }
 
   property int requestedTab: SettingsPanel.Tab.General

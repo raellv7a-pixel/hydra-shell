@@ -25,6 +25,7 @@ import qs.Modules.MainScreen
 import qs.Modules.Notification
 import qs.Modules.OSD
 import qs.Modules.ScreenToolkit
+import qs.Modules.Polkit
 
 import qs.Modules.Panels.Launcher
 import qs.Modules.Panels.Settings
@@ -135,8 +136,8 @@ ShellRoot {
       Dock {}
       Notification {}
       ToastOverlay {}
-      OSD {}
-      Main {}
+      ScreenToolkitNative {}
+      PolkitNative { id: polkitAgent }
 
       // Launcher overlay window (for overlay layer mode)
       Loader {
