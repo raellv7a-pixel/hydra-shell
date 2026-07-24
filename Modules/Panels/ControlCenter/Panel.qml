@@ -118,6 +118,7 @@ Item {
   property string localGpuName: ""
   readonly property string screenUsageDirPath: (Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache") + "/raell-dashboard"
   readonly property string screenUsageFilePath: screenUsageDirPath + "/screen-usage.json"
+  property var screenUsageDays: ({})
   property string usageCurrentAppId: ""
   property string usageCurrentAppName: ""
   property string usageCurrentAppTitle: ""
@@ -557,7 +558,7 @@ Item {
 
   function addScreenUsage(appId, appName, appTitle, seconds) {
     const key = root.dateKey(new Date());
-    const days = Object.assign({}, screenUsageAdapter.days || {});
+    const days = Object.assign({}, root.screenUsageDays || {});
     const day = Object.assign({
                                 "total": 0,
                                 "apps": {}
@@ -589,7 +590,7 @@ Item {
     day.appHourly = appHourly;
     day.total = Math.max(0, Math.round(Number(day.total || 0) + Number(seconds || 0)));
     days[key] = day;
-    screenUsageAdapter.days = root.prunedScreenUsageDays(days);
+    root.screenUsageDays = root.prunedScreenUsageDays(days);
     screenUsageSaveTimer.restart();
   }
 
@@ -603,7 +604,7 @@ Item {
   }
 
   function screenUsageDay(key) {
-    const days = screenUsageAdapter.days || {};
+    const days = root.screenUsageDays || {};
     return days[key || root.dateKey(new Date())] || {
       "total": 0,
       "apps": {}
@@ -693,7 +694,14 @@ Item {
   }
 
   function saveScreenUsage() {
-    screenUsageFileView.writeAdapter();
+    try {
+      var dir = root.screenUsageDirPath;
+      var file = root.screenUsageFilePath;
+      var dataStr = JSON.stringify({ "days": root.screenUsageDays }, null, 2);
+      Quickshell.execDetached(["bash", "-c", "mkdir -p " + dir + " && cat << 'EOF' > " + file + "\n" + dataStr + "\nEOF"]);
+    } catch(e) {
+      Logger.e("ControlCenterPanel", "Failed to save screen usage:", e);
+    }
   }
 
   function nodeLabel(node) {
@@ -1423,14 +1431,17 @@ Item {
     id: screenUsageFileView
     path: root.screenUsageFilePath
     printErrors: false
+    onLoaded: {
+      try {
+        var parsed = JSON.parse(text());
+        if (parsed && parsed.days) {
+          root.screenUsageDays = parsed.days;
+        }
+      } catch(e) {}
+    }
     onLoadFailed: error => {
       if (!screenUsageInitProcess.running)
         screenUsageInitProcess.running = true;
-    }
-
-    JsonAdapter {
-      id: screenUsageAdapter
-      property var days: ({})
     }
   }
 
