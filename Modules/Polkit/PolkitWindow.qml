@@ -19,7 +19,7 @@ PanelWindow {
     property string resolvedMessage: ""
     property var transientMatch: null
 
-    readonly property string windowPosition: PolkitService.settings.position ?? "center"
+    readonly property string windowPosition: PolkitService.position ?? "center"
     readonly property bool isAttached: windowPosition === "attached"
 
     Connections {
@@ -36,7 +36,7 @@ PanelWindow {
 
     // Resolve transient service names when flow changes
     onFlowChanged: {
-        resolveTransientServiceName(flow.message);
+        resolveTransientServiceName(flow ? flow.message : "");
     }
     
     // Resolve transient service names (run-PID-random.service) to actual command
@@ -82,21 +82,26 @@ PanelWindow {
     // Layer above everything else (critical system prompt)
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-    WlrLayershell.anchor: isAttached ? WlrAnchor.Top : 0
-    WlrLayershell.margins.top: isAttached ? (Style.getBarHeightForScreen(screen?.name) + Style.marginM) : 0
+    WlrLayershell.namespace: "polkit-agent"
+
+    anchors.top: true
+    anchors.bottom: !isAttached
+    anchors.left: !isAttached
+    anchors.right: !isAttached
+
+    margins.top: isAttached ? (Style.getBarHeightForScreen(screen?.name) + Style.marginM) : 0
 
     readonly property real shadowPadding: Style.shadowBlurMax + Style.marginL
-
-    // Explicit size - include shadowPadding so the shadow isn't clipped at window corners
-    implicitWidth: 420 * Style.uiScaleRatio + shadowPadding * 2
-    implicitHeight: contentLayout.implicitHeight + (Style.marginL * 2) + shadowPadding * 2
 
     color: "transparent"
 
     Item {
         id: contentContainer
-        anchors.fill: parent
-        anchors.margins: shadowPadding
+        anchors.centerIn: isAttached ? undefined : parent
+        anchors.top: isAttached ? parent.top : undefined
+        anchors.horizontalCenter: isAttached ? parent.horizontalCenter : undefined
+        width: Math.max(460 * Style.uiScaleRatio, contentLayout.implicitWidth + (Style.marginL * 4)) + shadowPadding * 2
+        height: Math.max(260 * Style.uiScaleRatio, contentLayout.implicitHeight + (Style.marginL * 4)) + shadowPadding * 2
         focus: true
 
         Keys.onPressed: function(event) {
@@ -122,7 +127,7 @@ PanelWindow {
         // Error animation
         SequentialAnimation {
             id: errorShake
-            running: flow && flow.failed && (PolkitService.settings.errorShake ?? true)
+            running: flow && flow.failed && PolkitService.errorShake
             loops: 1
             
             NumberAnimation { target: shakeTranslate; property: "x"; from: 0; to: -10; duration: 50; easing.type: Easing.InOutQuad }
@@ -143,8 +148,9 @@ PanelWindow {
         Rectangle {
             id: customBackground
             anchors.fill: parent
+            anchors.margins: shadowPadding
             radius: Style.radiusL
-            color: Qt.alpha(Color.mSurface, 0.95)
+            color: Qt.alpha(Color.mSurface, 0.96)
             border.color: (flow && (flow.failed || flow.supplementaryIsError)) ? Color.mError : Color.mOutline
             border.width: Style.borderS
             
@@ -155,8 +161,8 @@ PanelWindow {
 
         ColumnLayout {
             id: contentLayout
-            anchors.centerIn: parent
-            width: parent.width - (Style.marginL * 2)
+            anchors.centerIn: customBackground
+            width: customBackground.width - (Style.marginL * 2)
             spacing: Style.marginM
 
             // Header with Icon
@@ -259,7 +265,7 @@ PanelWindow {
     
     // Focus handling
     Component.onCompleted: {
-        if (PolkitService.settings.autoFocus ?? true) {
+        if (PolkitService.autoFocus) {
             passwordInput.inputItem.forceActiveFocus()
         }
     }

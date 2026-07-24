@@ -9,44 +9,14 @@ Item {
 
     PolkitAgent {
         id: agent
-        
-        onIsActiveChanged: {
-            if (isActive && (PolkitService.settings.enabled ?? true)) {
-                openWindow()
-            } else {
-                closeWindow()
-            }
-        }
     }
 
-    property var window: null
-
-    function openWindow() {
-        if (agent.flow === null) {
-            Logger.w("PolkitNative: Cannot open window, agent.flow is null");
-            return;
-        }
-        if (window === null) {
-            var component = Qt.createComponent("PolkitWindow.qml");
-            if (component.status === Component.Ready) {
-                window = component.createObject(root, {
-                    flow: agent.flow
-                });
-                if (window !== null) {
-                    window.visible = true;
-                }
+    Loader {
+        active: agent.isActive && PolkitService.enabled
+        sourceComponent: Component {
+            PolkitWindow {
+                flow: agent.flow
             }
-            component.destroy();
-        } else {
-            window.flow = agent.flow;
-            window.visible = true;
-        }
-    }
-
-    function closeWindow() {
-        if (window !== null) {
-            window.destroy();
-            window = null;
         }
     }
 }

@@ -14,8 +14,6 @@ ColumnLayout {
   Layout.fillWidth: true
   Layout.fillHeight: true
 
-  property var cfg: PolkitService.settings
-
   ScrollView {
     Layout.fillWidth: true
     Layout.fillHeight: true
@@ -39,26 +37,24 @@ ColumnLayout {
         Layout.fillWidth: true
         label: "Agente Polkit Nativo da Shell"
         description: "Habilita a caixa de diálogo nativa da Hydra Shell para elevação de privilégios administrativos (sudo / pkexec)"
-        checked: root.cfg.enabled ?? true
+        checked: PolkitService.enabled
         onToggled: checked => {
-          root.cfg.enabled = checked;
-          PolkitService.saveSettings();
+          PolkitService.enabled = checked;
         }
       }
 
       NComboBox {
         Layout.fillWidth: true
-        visible: root.cfg.enabled ?? true
+        visible: PolkitService.enabled
         label: "Posição da Janela de Autenticação"
         description: "Escolha onde o prompt de senha de administrador será exibido"
-        currentKey: root.cfg.position ?? "center"
+        currentKey: PolkitService.position
         model: [
           { key: "center", name: "Centralizado no Centro da Tela" },
           { key: "attached", name: "Acoplado à Barra Superior da Shell" }
         ]
         onSelected: key => {
-          root.cfg.position = key;
-          PolkitService.saveSettings();
+          PolkitService.position = key;
         }
       }
 
@@ -73,25 +69,23 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        visible: root.cfg.enabled ?? true
+        visible: PolkitService.enabled
         label: "Efeito de Vibração em Caso de Erro"
         description: "Vibra a janela suavemente quando a senha de administrador estiver incorreta"
-        checked: root.cfg.errorShake ?? true
+        checked: PolkitService.errorShake
         onToggled: checked => {
-          root.cfg.errorShake = checked;
-          PolkitService.saveSettings();
+          PolkitService.errorShake = checked;
         }
       }
 
       NToggle {
         Layout.fillWidth: true
-        visible: root.cfg.enabled ?? true
+        visible: PolkitService.enabled
         label: "Foco Automático na Digitação"
         description: "Direciona o teclado automaticamente para o campo de senha ao abrir a janela"
-        checked: root.cfg.autoFocus ?? true
+        checked: PolkitService.autoFocus
         onToggled: checked => {
-          root.cfg.autoFocus = checked;
-          PolkitService.saveSettings();
+          PolkitService.autoFocus = checked;
         }
       }
     }
