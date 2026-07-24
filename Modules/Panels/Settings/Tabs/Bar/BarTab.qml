@@ -198,6 +198,11 @@ ColumnLayout {
       tabIndex: 3
       checked: subTabBar.currentIndex === 3
     }
+    NTabButton {
+      text: "Dashboard"
+      tabIndex: 4
+      checked: subTabBar.currentIndex === 4
+    }
   }
 
   Item {
@@ -224,6 +229,7 @@ ColumnLayout {
       addMonitor: root.addMonitor
       removeMonitor: root.removeMonitor
     }
+    DashboardSubTab {}
   }
 
   NPluginSettingsPopup {
