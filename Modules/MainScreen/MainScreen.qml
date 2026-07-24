@@ -29,6 +29,7 @@ import qs.Modules.Panels.SetupWizard
 import qs.Modules.Panels.SystemStats
 import qs.Modules.Panels.Tray
 import qs.Modules.Panels.Wallpaper
+import qs.Modules.Polkit
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI
@@ -379,6 +380,11 @@ PanelWindow {
     TrayDrawerPanel {
       id: trayDrawerPanel
       objectName: "trayDrawerPanel-" + (root.screen?.name || "unknown")
+      screen: root.screen
+    }
+    PolkitPanel {
+      id: polkitPanel
+      objectName: "polkitPanel-" + (root.screen?.name || "unknown")
       screen: root.screen
     }
 
