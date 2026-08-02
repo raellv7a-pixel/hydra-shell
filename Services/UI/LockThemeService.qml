@@ -25,9 +25,10 @@ Singleton {
         command: ["python", "${scriptPath}", "list"]
         stdout: StdioCollector {}
         onExited: function(exitCode) {
-          if (exitCode === 0 && stdout.readAll()) {
+          var outText = stdout.readAll();
+          if (exitCode === 0 && outText) {
             try {
-              var parsed = JSON.parse(stdout.readAll());
+              var parsed = JSON.parse(outText);
               if (parsed.error) {
                 Logger.e("LockThemeService", "Error listing themes:", parsed.error);
               } else {
@@ -53,9 +54,10 @@ Singleton {
         command: ["python", "${scriptPath}", "catalog"]
         stdout: StdioCollector {}
         onExited: function(exitCode) {
-          if (exitCode === 0 && stdout.readAll()) {
+          var outText = stdout.readAll();
+          if (exitCode === 0 && outText) {
             try {
-              var parsed = JSON.parse(stdout.readAll());
+              var parsed = JSON.parse(outText);
               if (parsed.error) {
                 Logger.e("LockThemeService", "Error fetching catalog:", parsed.error);
               } else {
@@ -83,9 +85,10 @@ Singleton {
         command: ["python", "${scriptPath}", "install", "${slug}"]
         stdout: StdioCollector {}
         onExited: function(exitCode) {
-          if (exitCode === 0 && stdout.readAll()) {
+          var outText = stdout.readAll();
+          if (exitCode === 0 && outText) {
             try {
-              var parsed = JSON.parse(stdout.readAll());
+              var parsed = JSON.parse(outText);
               if (parsed.error) {
                 Logger.e("LockThemeService", "Error installing theme:", parsed.error);
               } else {
