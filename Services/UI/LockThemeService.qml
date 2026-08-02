@@ -25,7 +25,7 @@ Singleton {
         command: ["python", "${scriptPath}", "list"]
         stdout: StdioCollector {}
         onExited: function(exitCode) {
-          var outText = stdout.readAll();
+          var outText = stdout.text;
           if (exitCode === 0 && outText) {
             try {
               var parsed = JSON.parse(outText);
@@ -43,6 +43,7 @@ Singleton {
       }
     `;
     var proc = Qt.createQmlObject(procString, root, "LockThemeListProc");
+    proc.running = true;
   }
 
   function fetchCatalog() {
@@ -54,7 +55,7 @@ Singleton {
         command: ["python", "${scriptPath}", "catalog"]
         stdout: StdioCollector {}
         onExited: function(exitCode) {
-          var outText = stdout.readAll();
+          var outText = stdout.text;
           if (exitCode === 0 && outText) {
             try {
               var parsed = JSON.parse(outText);
@@ -73,6 +74,7 @@ Singleton {
       }
     `;
     var proc = Qt.createQmlObject(procString, root, "LockThemeCatalogProc");
+    proc.running = true;
   }
 
   function installTheme(slug) {
@@ -85,7 +87,7 @@ Singleton {
         command: ["python", "${scriptPath}", "install", "${slug}"]
         stdout: StdioCollector {}
         onExited: function(exitCode) {
-          var outText = stdout.readAll();
+          var outText = stdout.text;
           if (exitCode === 0 && outText) {
             try {
               var parsed = JSON.parse(outText);
@@ -106,6 +108,7 @@ Singleton {
       }
     `;
     var proc = Qt.createQmlObject(procString, root, "LockThemeInstallProc");
+    proc.running = true;
   }
 
   function applyTheme(slug, path) {
@@ -129,6 +132,7 @@ Singleton {
       }
     `;
     var proc = Qt.createQmlObject(procString, root, "LockThemeApplyProc");
+    proc.running = true;
   }
 
   Component.onCompleted: {
