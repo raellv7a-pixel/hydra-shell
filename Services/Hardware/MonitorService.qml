@@ -119,4 +119,25 @@ Singleton {
     var res = root.activeBackend().buildConfigFileContent(root.draftOutputs);
     return (res && res.content) ? res.content : "";
   }
+
+  function generateLuaConfigSnippet() {
+    var backend = root.activeBackend();
+    if (backend && typeof backend.buildLuaConfigFileContent === "function") {
+      var res = backend.buildLuaConfigFileContent(root.draftOutputs);
+      return (res && res.content) ? res.content : "";
+    }
+    return generateConfigSnippet();
+  }
+
+  function saveToHyprlandConfig() {
+    var home = Quickshell.env("HOME") || "/home/raell";
+    var luaPath = home + "/.config/hypr/lua/monitors.lua";
+    var luaContent = generateLuaConfigSnippet();
+    if (luaContent && luaContent.length > 0) {
+      Quickshell.execDetached(["bash", "-c", "cat << 'EOF' > " + luaPath + "\n" + luaContent + "\nEOF"]);
+      ToastService.showNotice("Salvo no Hyprland", "Configuração de monitores salva em ~/.config/hypr/lua/monitors.lua!", "display");
+    } else {
+      ToastService.showError("Erro ao Salvar", "Não foi possível gerar a configuração de telas.");
+    }
+  }
 }

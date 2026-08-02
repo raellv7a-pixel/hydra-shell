@@ -30,20 +30,35 @@ Item {
     id: gridEntry
     anchors.fill: parent
     anchors.margins: Style.marginXXS
-    color: gridEntryContainer.isSelected ? Color.mHover : Color.mSurfaceVariant
+    color: gridEntryContainer.isSelected ? Color.mPrimary : Color.mSurfaceVariant
     forceOpaque: gridEntryContainer.isSelected
+    scale: gridEntryContainer.isSelected ? 1.035 : 1.0
+    border.color: gridEntryContainer.isSelected ? Qt.alpha(Color.mOnPrimary, 0.25) : "transparent"
+    border.width: gridEntryContainer.isSelected ? Style.borderS : 0
 
+    Behavior on scale {
+      NumberAnimation {
+        duration: Style.animationNormal
+        easing.type: Easing.OutQuint
+      }
+    }
     Behavior on color {
       ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCirc
+        duration: Style.animationNormal
+        easing.type: Easing.OutQuint
+      }
+    }
+    Behavior on border.color {
+      ColorAnimation {
+        duration: Style.animationNormal
+        easing.type: Easing.OutQuint
       }
     }
 
     ColumnLayout {
       anchors.fill: parent
-      anchors.margins: launcher.isCompactDensity ? Style.marginXS : Style.marginS
-      anchors.bottomMargin: launcher.isCompactDensity ? Style.marginXS : Style.marginS
+      anchors.margins: launcher.isCompactDensity ? Style.marginXS : Style.marginM
+      anchors.bottomMargin: launcher.isCompactDensity ? Style.marginXS : Style.marginM
       spacing: launcher.isCompactDensity ? 0 : Style.marginXXS
 
       // Icon badge or Image preview or Emoji
@@ -52,6 +67,22 @@ Item {
         Layout.preferredWidth: Math.round(gridEntry.width * 0.65)
         Layout.preferredHeight: Math.round(gridEntry.height * 0.65)
         Layout.alignment: Qt.AlignHCenter
+        scale: gridEntryContainer.isSelected ? 1.08 : 1.0
+        opacity: gridEntryContainer.isSelected ? 1.0 : 0.85
+
+        Behavior on scale {
+          NumberAnimation {
+            duration: Style.animationNormal
+            easing.type: Easing.OutQuint
+          }
+        }
+
+        Behavior on opacity {
+          NumberAnimation {
+            duration: Style.animationNormal
+            easing.type: Easing.OutQuint
+          }
+        }
 
         // Icon background
         Rectangle {
@@ -197,7 +228,7 @@ Item {
           return Math.min(Math.max(cellBasedSize, baseSize), maxSize);
         }
         font.weight: Style.fontWeightSemiBold
-        color: gridEntryContainer.isSelected ? Color.mOnHover : Color.mOnSurface
+        color: gridEntryContainer.isSelected ? Color.mOnPrimary : Color.mOnSurface
         elide: Text.ElideRight
         Layout.fillWidth: true
         Layout.maximumWidth: gridEntry.width - 8
@@ -206,6 +237,13 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.NoWrap
         maximumLineCount: 1
+
+        Behavior on color {
+          ColorAnimation {
+            duration: Style.animationNormal
+            easing.type: Easing.OutQuint
+          }
+        }
       }
     }
 

@@ -196,11 +196,6 @@ Item {
                     ? root.pluginApi?.tr("record.saveMp4Failed")
                     : root.pluginApi?.tr("record.saveGifFailed"))
             }
-            if (root.pluginApi) {
-                var screen = root._primaryScreen
-                if (screen) root.pluginApi.closePanel(screen)
-                else root.pluginApi.withCurrentScreen(sc => root.pluginApi.closePanel(sc))
-            }
             root.dismiss()
         }
     }

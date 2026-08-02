@@ -65,9 +65,9 @@ Item {
   readonly property real mediaControlsWidth: mediaHoverExpanded ? (hoverControlSize * 3 + Style.margin2XS) : 0
   readonly property string title: {
     if (!hasPlayer)
-      return pluginApi?.tr("bar.tooltip") || "Raell Dashboard";
+      return pluginApi?.tr("bar.tooltip") || "Dashboard Raell";
     const artist = MediaService.trackArtist;
-    const track = MediaService.trackTitle || pluginApi?.tr("bar.noMedia") || "No media";
+    const track = MediaService.trackTitle || pluginApi?.tr("bar.noMedia") || "Sem mídia";
     return showArtistFirst ? (artist ? `${artist} - ${track}` : track) : (artist ? `${track} - ${artist}` : track);
   }
   readonly property string spectrumComponentId: "plugin:raell-dashboard:bar:" + screenName + ":" + section + ":" + sectionWidgetIndex

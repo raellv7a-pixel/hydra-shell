@@ -564,13 +564,11 @@ Singleton {
   }
 
   function lock() {
-    Logger.i("Compositor", "LockScreen requested");
+    Logger.i("Compositor", "LockScreen requested (delegating to loginctl)");
     if (executeSessionAction("lock"))
       return;
 
-    if (PanelService && PanelService.lockScreen) {
-      PanelService.lockScreen.active = true;
-    }
+    Quickshell.execDetached(["loginctl", "lock-session"]);
   }
 
   function hibernate() {

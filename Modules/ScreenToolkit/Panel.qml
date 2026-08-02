@@ -16,9 +16,6 @@ Item {
     property real contentPreferredHeight:        mainCol.implicitHeight + Style.marginL * 2
     anchors.fill: parent
     property bool _settingsLoading: false
-    Component.onCompleted: {
-        root.mainInstance = ScreenToolkitService.mainInstance
-    }
     onPluginApiChanged: {
         if (pluginApi) {
             _settingsLoading = true
@@ -26,8 +23,6 @@ Item {
             if (saved && saved !== "") root.selectedOcrLang = saved
             _settingsLoading = false
             root.mainInstance = ScreenToolkitService.mainInstance
-        }
-    }
         } else {
             mainInstancePoller.stop()
             root.mainInstance = null
@@ -177,6 +172,7 @@ Item {
     }
     onActiveFocusChanged: if (activeFocus) toolBar.forceActiveFocus()
     Component.onCompleted: {
+        root.mainInstance = ScreenToolkitService.mainInstance
         Logger.i("ScreenToolkit", "Panel loaded — pluginApi=" + pluginApi)
     }
     Rectangle {

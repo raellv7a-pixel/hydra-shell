@@ -80,7 +80,9 @@ Singleton {
     onLoaded: {
       try {
         var data = JSON.parse(text());
-        root.translations["pt"] = data;
+        var updated = Object.assign({}, root.translations);
+        updated["pt"] = data;
+        root.translations = updated;
         Logger.d("ControlCenterService", "Loaded PT translations");
       } catch(e) {
         Logger.e("ControlCenterService", "Failed to parse PT translations:", e);
@@ -95,7 +97,9 @@ Singleton {
     onLoaded: {
       try {
         var data = JSON.parse(text());
-        root.translations["en"] = data;
+        var updated = Object.assign({}, root.translations);
+        updated["en"] = data;
+        root.translations = updated;
         Logger.d("ControlCenterService", "Loaded EN translations");
       } catch(e) {
         Logger.e("ControlCenterService", "Failed to parse EN translations:", e);

@@ -1236,25 +1236,25 @@ Variants {
                 }
             }
             readonly property var toolDefs: [
-                { id: "pencil",      icon: "pencil",         tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolPencil")      },
-                { id: "highlighter", icon: "highlight",      tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolHighlighter") },
-                { id: "line",        icon: "slash",          tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolLine")        },
-                { id: "arrow",       icon: "arrow-up-right", tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolArrow")       },
-                { id: "rect",        icon: "square",         tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolRect")        },
-                { id: "circle",      icon: "circle",         tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolCircle")      },
-                { id: "text",        icon: "text-size",      tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolText")        },
-                { id: "blur",        icon: "eye-off",        tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolBlur")        },
-                { id: "step",        icon: "number-123",     tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolStep")        },
-                { id: "ruler",       icon: "ruler-2",        tooltip: root.mainInstance?.pluginApi?.tr("annotate.toolRuler")       }
+                { id: "pencil",      icon: "pencil",         tooltipKey: "annotate.toolPencil"      },
+                { id: "highlighter", icon: "highlight",      tooltipKey: "annotate.toolHighlighter" },
+                { id: "line",        icon: "slash",          tooltipKey: "annotate.toolLine"        },
+                { id: "arrow",       icon: "arrow-up-right", tooltipKey: "annotate.toolArrow"       },
+                { id: "rect",        icon: "square",         tooltipKey: "annotate.toolRect"        },
+                { id: "circle",      icon: "circle",         tooltipKey: "annotate.toolCircle"      },
+                { id: "text",        icon: "text-size",      tooltipKey: "annotate.toolText"        },
+                { id: "blur",        icon: "eye-off",        tooltipKey: "annotate.toolBlur"        },
+                { id: "step",        icon: "number-123",     tooltipKey: "annotate.toolStep"        },
+                { id: "ruler",       icon: "ruler-2",        tooltipKey: "annotate.toolRuler"       }
             ]
             readonly property var colorDefs: [
                 "#FF4444", "#FF8C00", "#FFD700", "#44FF88",
                 "#44AAFF", "#CC44FF", "#FF44CC", "#FFFFFF", "#000000"
             ]
             readonly property var sizeDefs: [
-                { size: 2, label: root.mainInstance?.pluginApi?.tr("annotate.sizeS") },
-                { size: 4, label: root.mainInstance?.pluginApi?.tr("annotate.sizeM") },
-                { size: 7, label: root.mainInstance?.pluginApi?.tr("annotate.sizeL") }
+                { size: 2, labelKey: "annotate.sizeS" },
+                { size: 4, labelKey: "annotate.sizeM" },
+                { size: 7, labelKey: "annotate.sizeL" }
             ]
             function _reindexSteps(strokes) {
                 var result = []
@@ -1326,7 +1326,7 @@ Variants {
                     spacing: Style.marginXS
                     Repeater {
                         model: toolbar.toolDefs
-                        ToolBtn { toolId: modelData.id; iconName: modelData.icon; tip: modelData.tooltip }
+                        ToolBtn { toolId: modelData.id; iconName: modelData.icon; tip: root.mainInstance?.pluginApi?.tr(modelData.tooltipKey) }
                     }
                     ToolbarSeparator {}
                     ZoomBtn {
@@ -1431,7 +1431,7 @@ Variants {
                     spacing: Style.marginXS
                     Repeater {
                         model: toolbar.toolDefs
-                        ToolBtn { toolId: modelData.id; iconName: modelData.icon; tip: modelData.tooltip }
+                        ToolBtn { toolId: modelData.id; iconName: modelData.icon; tip: root.mainInstance?.pluginApi?.tr(modelData.tooltipKey) }
                     }
                     ToolbarSeparator {}
                     ZoomBtn {
@@ -1586,7 +1586,7 @@ Variants {
                             Row {
                                 anchors.centerIn: parent; spacing: Style.marginXS
                                 Rectangle { width: modelData.size * 2; height: modelData.size * 2; radius: modelData.size; color: overlayWin.drawColor; anchors.verticalCenter: parent.verticalCenter }
-                                NText { text: modelData.label; pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant; anchors.verticalCenter: parent.verticalCenter }
+                                NText { text: root.mainInstance?.pluginApi?.tr(modelData.labelKey); pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant; anchors.verticalCenter: parent.verticalCenter }
                             }
                             MouseArea {
                                 id: shH
@@ -1634,7 +1634,7 @@ Variants {
                             Row {
                                 anchors.centerIn: parent; spacing: Style.marginXS
                                 Rectangle { width: modelData.size * 2; height: modelData.size * 2; radius: modelData.size; color: overlayWin.drawColor; anchors.verticalCenter: parent.verticalCenter }
-                                NText { text: modelData.label; pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant; anchors.verticalCenter: parent.verticalCenter }
+                                NText { text: root.mainInstance?.pluginApi?.tr(modelData.labelKey); pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant; anchors.verticalCenter: parent.verticalCenter }
                             }
                             MouseArea {
                                 id: shV

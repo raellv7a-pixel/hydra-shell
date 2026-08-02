@@ -1,4 +1,5 @@
 import QtQuick
+import QtMultimedia
 import Quickshell
 import Quickshell.Wayland
 import qs.Commons
@@ -193,6 +194,62 @@ Variants {
               pendingTransition = false;
               currentWallpaper.asynchronous = false;
               transitionAnimation.start();
+            }
+          }
+        }
+      }
+
+      function isVideoPath(p) {
+        if (!p) return false;
+        var s = p.toString().toLowerCase();
+        return s.endsWith(".webm") || s.endsWith(".mp4") || s.endsWith(".mkv") || s.endsWith(".mov");
+      }
+
+      readonly property bool isCurrentVideoWallpaper: isVideoPath(futureWallpaper !== "" ? futureWallpaper : _pathStr(currentWallpaper.source))
+
+      Loader {
+        id: bgVideoLoader
+        anchors.fill: parent
+        active: root.isCurrentVideoWallpaper
+        visible: active
+        z: 2
+
+        sourceComponent: Item {
+          anchors.fill: parent
+
+          MediaPlayer {
+            id: bgVideoPlayer
+            source: {
+              var p = root.futureWallpaper !== "" ? root.futureWallpaper : root._pathStr(currentWallpaper.source);
+              if (!p || p === "") return "";
+              return p.startsWith("file://") || p.startsWith("/") ? (p.startsWith("/") ? "file://" + p : p) : p;
+            }
+            loops: MediaPlayer.Infinite
+            videoOutput: bgVideoOutput
+            audioOutput: AudioOutput { muted: true }
+            onSourceChanged: {
+              if (source !== "") {
+                play();
+              }
+            }
+            onMediaStatusChanged: {
+              if (mediaStatus === MediaPlayer.BufferedMedia || mediaStatus === MediaPlayer.LoadedMedia) {
+                play();
+              }
+            }
+            Component.onCompleted: play()
+          }
+
+          VideoOutput {
+            id: bgVideoOutput
+            anchors.fill: parent
+            fillMode: {
+              switch (root.fillMode) {
+                case 1: return VideoOutput.PreserveAspectFit;
+                case 2: return VideoOutput.Stretch;
+                case 0:
+                default: return VideoOutput.PreserveAspectCrop;
+              }
             }
           }
         }
@@ -494,6 +551,14 @@ Variants {
 
         const wallpaperPath = WallpaperService.getWallpaper(modelData.name);
 
+        // Check if the path is a video wallpaper
+        if (isVideoPath(wallpaperPath)) {
+          futureWallpaper = wallpaperPath;
+          performStartupTransition();
+          WallpaperService.wallpaperProcessingComplete(modelData.name, wallpaperPath, "");
+          return;
+        }
+
         // Check if the path is a solid color
         if (WallpaperService.isSolidColorPath(wallpaperPath)) {
           futureWallpaper = wallpaperPath;
@@ -528,6 +593,14 @@ Variants {
 
         // Store the original path we're working towards
         transitioningToOriginalPath = originalPath;
+
+        // Handle video wallpapers - no preprocessing needed
+        if (isVideoPath(originalPath)) {
+          futureWallpaper = originalPath;
+          debounceTimer.restart();
+          WallpaperService.wallpaperProcessingComplete(modelData.name, originalPath, "");
+          return;
+        }
 
         // Handle solid color paths - no preprocessing needed
         if (WallpaperService.isSolidColorPath(originalPath)) {
@@ -679,6 +752,17 @@ Variants {
       // ------------------------------------------------------
       // Main method that actually trigger the wallpaper change
       function changeWallpaper() {
+        if (isVideoPath(futureWallpaper)) {
+          transitionAnimation.stop();
+          transitionProgress = 0.0;
+          isSolid1 = false;
+          isSolid2 = false;
+          currentWallpaper.source = "";
+          nextWallpaper.source = "";
+          wallpaperReady = true;
+          return;
+        }
+
         // Pick a transition from the user's selected list
         var selected = Settings.data.wallpaper.transitionType;
         if (!selected || selected.length === 0) {
@@ -735,6 +819,12 @@ Variants {
       // Sets up transition params, then defers the actual animation
       // to allow the compositor time to map the window.
       function performStartupTransition() {
+        if (isVideoPath(futureWallpaper)) {
+          wallpaperReady = true;
+          isStartupTransition = false;
+          return;
+        }
+
         if (Settings.data.wallpaper.skipStartupTransition) {
           setWallpaperImmediate(futureWallpaper);
           isStartupTransition = false;

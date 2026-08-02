@@ -9,39 +9,15 @@ ColumnLayout {
   spacing: Style.marginL
   Layout.fillWidth: true
 
-  NToggle {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.session-menu.large-buttons-style-label")
-    description: I18n.tr("panels.session-menu.large-buttons-style-description")
-    checked: Settings.data.sessionMenu.largeButtonsStyle
-    onToggled: checked => Settings.data.sessionMenu.largeButtonsStyle = checked
-  }
-
-  NComboBox {
-    visible: Settings.data.sessionMenu.largeButtonsStyle
-    Layout.fillWidth: true
-    label: I18n.tr("panels.session-menu.large-buttons-layout-label")
-    description: I18n.tr("panels.session-menu.large-buttons-layout-description")
-    model: [
-      {
-        "key": "grid",
-        "name": I18n.tr("options.session-menu-grid-layout.grid")
-      },
-      {
-        "key": "single-row",
-        "name": I18n.tr("options.session-menu-grid-layout.single-row")
-      }
-    ]
-    currentKey: Settings.data.sessionMenu.largeButtonsLayout
-    defaultValue: Settings.getDefaultValue("sessionMenu.largeButtonsLayout")
-    onSelected: key => Settings.data.sessionMenu.largeButtonsLayout = key
-  }
-
   NComboBox {
     label: I18n.tr("common.position")
     description: I18n.tr("panels.session-menu.position-description")
     Layout.fillWidth: true
     model: [
+      {
+        "key": "follow_bar",
+        "name": I18n.tr("positions.follow-bar")
+      },
       {
         "key": "center",
         "name": I18n.tr("positions.center")
@@ -71,20 +47,78 @@ ColumnLayout {
         "name": I18n.tr("positions.bottom-right")
       }
     ]
-    currentKey: Settings.data.sessionMenu.position
+    currentKey: Settings.data.sessionMenu.position || "follow_bar"
     onSelected: key => Settings.data.sessionMenu.position = key
-    visible: !Settings.data.sessionMenu.largeButtonsStyle
     defaultValue: Settings.getDefaultValue("sessionMenu.position")
   }
 
   NToggle {
     Layout.fillWidth: true
-    label: I18n.tr("panels.session-menu.show-header-label")
-    description: I18n.tr("panels.session-menu.show-header-description")
-    checked: Settings.data.sessionMenu.showHeader
-    onToggled: checked => Settings.data.sessionMenu.showHeader = checked
-    visible: !Settings.data.sessionMenu.largeButtonsStyle
-    defaultValue: Settings.getDefaultValue("sessionMenu.showHeader")
+    label: I18n.tr("panels.session-menu.show-profile-badge-label")
+    description: I18n.tr("panels.session-menu.show-profile-badge-description")
+    checked: Settings.data.sessionMenu.showProfileBadge ?? true
+    onToggled: checked => Settings.data.sessionMenu.showProfileBadge = checked
+    defaultValue: Settings.getDefaultValue("sessionMenu.showProfileBadge")
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    label: I18n.tr("panels.session-menu.show-uptime-badge-label")
+    description: I18n.tr("panels.session-menu.show-uptime-badge-description")
+    checked: Settings.data.sessionMenu.showUptimeBadge ?? true
+    onToggled: checked => Settings.data.sessionMenu.showUptimeBadge = checked
+    defaultValue: Settings.getDefaultValue("sessionMenu.showUptimeBadge")
+  }
+
+  NComboBox {
+    label: I18n.tr("panels.session-menu.cover-card-mode-label")
+    description: I18n.tr("panels.session-menu.cover-card-mode-description")
+    Layout.fillWidth: true
+    model: [
+      {
+        "key": "auto",
+        "name": I18n.tr("options.session-menu-cover-mode.auto")
+      },
+      {
+        "key": "avatar",
+        "name": I18n.tr("options.session-menu-cover-mode.avatar")
+      },
+      {
+        "key": "custom",
+        "name": I18n.tr("options.session-menu-cover-mode.custom")
+      }
+    ]
+    currentKey: Settings.data.sessionMenu.coverCardMode || "auto"
+    onSelected: key => Settings.data.sessionMenu.coverCardMode = key
+    defaultValue: Settings.getDefaultValue("sessionMenu.coverCardMode")
+  }
+
+  NTextInputButton {
+    visible: (Settings.data.sessionMenu.coverCardMode || "auto") === "custom"
+    label: I18n.tr("panels.session-menu.cover-card-path-label")
+    description: I18n.tr("panels.session-menu.cover-card-path-description")
+    Layout.fillWidth: true
+    text: Settings.data.sessionMenu.coverCardPath || ""
+    placeholderText: "~/Pictures/Wallpapers/cover.png"
+    buttonIcon: "photo"
+    buttonTooltip: I18n.tr("widgets.file-picker.select-file")
+    onInputTextChanged: text => Settings.data.sessionMenu.coverCardPath = text
+    onButtonClicked: coverFilePicker.openFilePicker()
+  }
+
+  NFilePicker {
+    id: coverFilePicker
+    title: I18n.tr("widgets.file-picker.select-file")
+    selectionMode: "files"
+    nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"]
+    onAccepted: paths => {
+      if (paths && paths.length > 0)
+        Settings.data.sessionMenu.coverCardPath = paths[0];
+    }
+  }
+
+  NDivider {
+    Layout.fillWidth: true
   }
 
   NToggle {

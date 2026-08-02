@@ -258,11 +258,7 @@ Item {
 
     // If opacity is already 0 (closed during open animation before fade-in),
     // skip directly to size animation
-    if (root.opacity === 0.0) {
-      opacityFadeComplete = true;
-    } else {
-      opacityFadeComplete = false;
-    }
+    opacityFadeComplete = true;
 
     // Opacity will fade out, then size will shrink, then finalizeClose() will complete
     Logger.d("SmartPanel", "Closing panel", objectName);
@@ -708,8 +704,8 @@ Item {
     enabled: !PanelService.closedImmediately
     NumberAnimation {
       id: opacityAnimation
-      duration: root.isClosing ? Style.animationFaster : Style.animationFast
-      easing.type: Easing.OutQuad
+      duration: Style.animationFast
+      easing.type: Easing.OutCubic
 
       onRunningChanged: {
         // Safety: If animation didn't run (zero duration), handle immediately
@@ -730,7 +726,7 @@ Item {
         }
 
         // When opacity fade completes during close, trigger size animation
-        if (!running && root.isClosing && root.opacity === 0.0) {
+        if (!running && root.isClosing) {
           root.opacityFadeComplete = true;
           // If no size animation will run (centered attached panels only), finalize immediately
           // Detached panels (allowAttach === false) should always animate from top
@@ -753,8 +749,7 @@ Item {
   // Timer to trigger opacity fade at 50% of size animation
   Timer {
     id: opacityTrigger
-    interval: Style.animationNormal * 0.5
-    repeat: false
+    interval: 0
     onTriggered: {
       if (root.isPanelVisible) {
         root.sizeAnimationComplete = true;
@@ -1104,9 +1099,8 @@ Item {
           // During opening: use 0ms if not animating width, otherwise use normal duration
           // During closing: use 0ms if not animating width, otherwise use fast duration
           // During normal content resizing: always use normal duration
-          duration: !panelBackground.dimensionsInitialized ? 0 : (root.isOpening && !panelBackground.shouldAnimateWidth) ? 0 : root.isOpening ? Style.animationNormal : (root.isClosing && !panelBackground.shouldAnimateWidth) ? 0 : root.isClosing ? Style.animationFast : Style.animationNormal
-          easing.type: Easing.BezierSpline
-          easing.bezierCurve: panelBackground.bezierCurve
+          duration: !panelBackground.dimensionsInitialized ? 0 : (root.isOpening && !panelBackground.shouldAnimateWidth) ? 0 : root.isOpening ? Style.animationFast : (root.isClosing && !panelBackground.shouldAnimateWidth) ? 0 : root.isClosing ? Style.animationFast : Style.animationFast
+          easing.type: Easing.OutCubic
 
           onRunningChanged: {
             // Safety: Zero-duration animation handling
@@ -1134,9 +1128,8 @@ Item {
           // During opening: use 0ms if not animating height, otherwise use normal duration
           // During closing: use 0ms if not animating height, otherwise use fast duration
           // During normal content resizing: always use normal duration
-          duration: !panelBackground.dimensionsInitialized ? 0 : (root.isOpening && !panelBackground.shouldAnimateHeight) ? 0 : root.isOpening ? Style.animationNormal : (root.isClosing && !panelBackground.shouldAnimateHeight) ? 0 : root.isClosing ? Style.animationFast : Style.animationNormal
-          easing.type: Easing.BezierSpline
-          easing.bezierCurve: panelBackground.bezierCurve
+          duration: !panelBackground.dimensionsInitialized ? 0 : (root.isOpening && !panelBackground.shouldAnimateHeight) ? 0 : root.isOpening ? Style.animationFast : (root.isClosing && !panelBackground.shouldAnimateHeight) ? 0 : root.isClosing ? Style.animationFast : Style.animationFast
+          easing.type: Easing.OutCubic
 
           onRunningChanged: {
             // Safety: Zero-duration animation handling
@@ -1338,12 +1331,8 @@ Item {
           // Make panel visible, now only the intended dimension will animate
           root.isPanelVisible = true;
 
-          if (root.animationsDisabled) {
-            // Skip delay when animations are disabled
             root.sizeAnimationComplete = true;
-          } else {
             opacityTrigger.start();
-          }
 
           // Start open watchdog timer (skip when animations disabled - everything completes synchronously)
           if (!root.animationsDisabled) {

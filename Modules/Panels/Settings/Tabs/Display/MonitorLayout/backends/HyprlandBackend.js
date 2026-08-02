@@ -98,39 +98,43 @@ function buildApplyCommand(outputs, cfg, defaults) {
 
   for (var index = 0; index < outputs.length; index++) {
     var output = outputs[index];
-    if (!output || output.active === false) {
+    if (!output) continue;
+
+    if (output.active === false || output.disabled === true) {
+      commands.push(shellQuote(hyprctlCommand) + " keyword monitor " + shellQuote(output.name) + ",disable");
+      continue;
+    }
+
+    if (output.mirror && output.mirror !== "") {
+      commands.push(shellQuote(hyprctlCommand) + " keyword monitor " + shellQuote(output.name) + ",preferred,auto,1,mirror," + shellQuote(output.mirror));
       continue;
     }
 
     var resolution = output.width + "x" + output.height;
     var refresh = formatRefreshForCommand(output.refresh);
-    if (refresh === null) {
-      return {
-        "error": "Refusing to apply an invalid refresh rate for output '" + output.name + "'."
-      };
-    }
-
-    if (refresh !== "") {
+    if (refresh !== null && refresh !== "") {
       resolution += "@" + refresh;
     }
 
     var position = Math.round(output.x) + "x" + Math.round(output.y);
     var scale = sanitizeNumber(output.scale || 1);
+    var transform = (output.transform !== undefined && output.transform !== null) ? String(output.transform) : "0";
 
-    // hyprctl keyword monitor NAME,RESOLUTION,POSITION,SCALE
-    commands.push(
-      shellQuote(hyprctlCommand) +
-      " keyword monitor " +
+    var cmd = shellQuote(hyprctlCommand) + " keyword monitor " +
       shellQuote(output.name) + "," +
       shellQuote(resolution) + "," +
       shellQuote(position) + "," +
-      shellQuote(scale)
-    );
+      shellQuote(scale);
+
+    if (transform !== "0") {
+      cmd += ",transform," + transform;
+    }
+    commands.push(cmd);
   }
 
   if (commands.length === 0) {
     return {
-      "error": "There are no active outputs to configure."
+      "error": "There are no outputs to configure."
     };
   }
 
@@ -149,39 +153,84 @@ function buildConfigFileContent(outputs) {
   var lines = [];
   for (var index = 0; index < outputs.length; index++) {
     var output = outputs[index];
-    if (!output || output.active === false) {
+    if (!output) continue;
+
+    if (output.active === false || output.disabled === true) {
+      lines.push("monitor=" + output.name + ",disable");
+      continue;
+    }
+
+    if (output.mirror && output.mirror !== "") {
+      lines.push("monitor=" + output.name + ",preferred,auto,1,mirror," + output.mirror);
       continue;
     }
 
     var resolution = output.width + "x" + output.height;
     var refresh = formatRefreshForCommand(output.refresh);
-    if (refresh === null) {
-      return {
-        "error": "Refusing to generate config for invalid refresh rate for output '" + output.name + "'."
-      };
-    }
-
-    if (refresh !== "") {
+    if (refresh !== null && refresh !== "") {
       resolution += "@" + refresh;
     }
 
     var position = Math.round(output.x) + "x" + Math.round(output.y);
     var scale = sanitizeNumber(output.scale || 1);
+    var transform = (output.transform !== undefined && output.transform !== null) ? String(output.transform) : "0";
 
-    // Hyprland config format: monitor=NAME,RESOLUTION,POSITION,SCALE
     var line = "monitor=" + output.name + "," + resolution + "," + position + "," + scale;
+    if (transform !== "0") {
+      line += ",transform," + transform;
+    }
     lines.push(line);
-  }
-
-  if (lines.length === 0) {
-    return {
-      "error": "There are no active outputs to configure."
-    };
   }
 
   return {
     "content": lines.join("\n")
   };
+}
+
+function buildLuaConfigFileContent(outputs) {
+  if (!outputs || outputs.length === 0) {
+    return { "error": "No outputs available to configure." };
+  }
+
+  var lines = [];
+  for (var index = 0; index < outputs.length; index++) {
+    var output = outputs[index];
+    if (!output) continue;
+
+    if (output.active === false || output.disabled === true) {
+      lines.push('hl.monitor({\n    output = "' + output.name + '",\n    disabled = true\n})');
+      continue;
+    }
+
+    if (output.mirror && output.mirror !== "") {
+      lines.push('hl.monitor({\n    output = "' + output.name + '",\n    mode = "preferred",\n    position = "auto",\n    scale = 1,\n    mirror = "' + output.mirror + '"\n})');
+      continue;
+    }
+
+    var resolution = output.width + "x" + output.height;
+    var refresh = formatRefreshForCommand(output.refresh);
+    if (refresh !== null && refresh !== "") {
+      resolution += "@" + refresh;
+    }
+
+    var position = Math.round(output.x) + "x" + Math.round(output.y);
+    var scale = sanitizeNumber(output.scale || 1);
+    var transform = (output.transform !== undefined && output.transform !== null) ? Number(output.transform) : 0;
+
+    var block = 'hl.monitor({\n' +
+                '    output = "' + output.name + '",\n' +
+                '    mode = "' + resolution + '",\n' +
+                '    position = "' + position + '",\n' +
+                '    scale = ' + scale;
+
+    if (transform !== 0) {
+      block += ',\n    transform = ' + transform;
+    }
+    block += '\n})';
+    lines.push(block);
+  }
+
+  return { "content": lines.join("\n\n") };
 }
 
 function buildCommonModes(currentWidth, currentHeight, currentRefresh) {

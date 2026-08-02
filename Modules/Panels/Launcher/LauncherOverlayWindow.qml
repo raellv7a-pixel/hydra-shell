@@ -83,7 +83,7 @@ Variants {
       }
 
       // Preview panel support
-      readonly property int listPanelWidth: Math.round(500 * Style.uiScaleRatio)
+      readonly property int listPanelWidth: Math.round(680 * Style.uiScaleRatio)
       readonly property int previewPanelWidth: Math.round(400 * Style.uiScaleRatio)
       readonly property bool previewActive: {
         if (!launcherCore)
@@ -118,7 +118,7 @@ Variants {
       Item {
         id: launcherPanel
         width: Math.round(Math.max(parent.width * 0.25, launcherWindow.listPanelWidth + Style.margin2L * 2))
-        height: Math.round(Math.max(parent.height * 0.5, 600 * Style.uiScaleRatio))
+        height: Math.round(Math.max(parent.height * 0.5, 620 * Style.uiScaleRatio))
         clip: false
 
         // Entrance animation

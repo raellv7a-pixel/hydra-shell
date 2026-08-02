@@ -697,8 +697,15 @@
       "default": "Padrão"
     },
     "launcher-view-mode": {
+      "columns": "2 Colunas (Estilo Mockup)",
       "grid": "Grade",
-      "list": "Lista"
+      "list": "Lista (1 Coluna)"
+    },
+    "launcher-cover-mode": {
+      "auto": "Automático (Papel de parede)",
+      "custom": "Imagem / GIF Personalizado",
+      "random": "Aleatório de uma Pasta",
+      "none": "Desativado"
     },
     "notification-density": {
       "compact": "Compacto",
@@ -712,6 +719,11 @@
     "session-menu-grid-layout": {
       "grid": "Grade",
       "single-row": "Linha única"
+    },
+    "session-menu-cover-mode": {
+      "auto": "Automático (Papel de parede)",
+      "avatar": "Avatar do Perfil",
+      "custom": "Imagem / GIF Personalizado"
     },
     "settings-panel-mode": {
       "attached": "Painel anexado à barra",
@@ -1364,6 +1376,16 @@
       "settings-ignore-mouse-input-description": "Desativar a interação do mouse e a roda de rolagem no iniciador.",
       "settings-ignore-mouse-input-label": "Ignorar entrada do mouse",
       "settings-overlay-layer-description": "Exibe o lançador na camada de sobreposição, acima de janelas em tela cheia. Quando ativado, o lançador não será anexado à barra.",
+      "settings-cover-mode-label": "Capa do Lançador (Banner)",
+      "settings-cover-mode-description": "Exibe uma imagem de capa/banner no topo do iniciador, semelhante ao perfil.",
+      "settings-cover-path-label": "Imagem / GIF da Capa",
+      "settings-cover-path-description": "Caminho local da imagem ou GIF usado como capa do iniciador.",
+      "settings-cover-folder-label": "Pasta de Capas Aleatórias",
+      "settings-cover-folder-description": "Escolha uma pasta para selecionar uma imagem aleatória a cada abertura do iniciador.",
+      "settings-cover-height-label": "Altura da Capa",
+      "settings-cover-height-description": "Ajusta a altura do banner superior do iniciador.",
+      "settings-cover-overlay-label": "Escurecimento da Capa",
+      "settings-cover-overlay-description": "Ajusta o nível de escurecimento sobre a imagem da capa para manter o texto legível.",
       "settings-overlay-layer-label": "Mostrar acima da tela cheia",
       "settings-position-description": "Escolha onde o painel do lançador aparece.",
       "settings-show-categories-description": "Mostrar abas de categorias para filtrar aplicativos.",
@@ -1679,7 +1701,15 @@
       "show-header-description": "Exibir o título e o botão de fechar na parte superior do menu de sessão.",
       "show-header-label": "Mostrar cabeçalho",
       "show-keybinds-description": "Exibir dicas de atalhos de teclado nas opções de sessão.",
-      "show-keybinds-label": "Mostrar atalhos de teclado"
+      "show-keybinds-label": "Mostrar atalhos de teclado",
+      "show-profile-badge-label": "Mostrar crachá do perfil",
+      "show-profile-badge-description": "Exibe o nome/perfil do usuário no topo da capa do menu de sessão.",
+      "show-uptime-badge-label": "Mostrar tempo de atividade (Uptime)",
+      "show-uptime-badge-description": "Exibe o tempo de atividade do sistema no rodapé da capa do menu de sessão.",
+      "cover-card-mode-label": "Fundo da capa do menu",
+      "cover-card-mode-description": "Escolha a origem da imagem para a capa do menu de sessão.",
+      "cover-card-path-label": "Imagem de capa personalizada",
+      "cover-card-path-description": "Caminho local da imagem ou GIF usado na capa do menu de sessão."
     },
     "system": {
       "noctalia-performance-disable-desktop-widgets-description": "Manter os widgets da área de trabalho visíveis enquanto o modo de desempenho Noctalia estiver ativado.",
@@ -1832,7 +1862,7 @@
     "search": "Pesquisar...",
     "search-icons": "p. ex. noctalia, niri, battery, cloud",
     "search-launcher": "Pesquisar entradas... ou use > para comandos",
-    "search-wallhaven": "Pesquisar no Wallhaven...",
+    "search-wallhaven": "Pesquisar... (ex: gatos, @autor, like:id)",
     "search-wallpapers": "Digite para filtrar papéis de parede..."
   },
   "positions": {

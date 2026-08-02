@@ -78,6 +78,17 @@ Singleton {
   // Application configurations - consolidated from Theming + AppThemeService
   readonly property var applications: [
     {
+      "id": "corvusfiles",
+      "name": "Corvus Files",
+      "category": "system",
+      "input": "corvus-files.toml",
+      "outputs": [
+        {
+          "path": "~/.config/corvus-files/theme.toml"
+        }
+      ]
+    },
+    {
       "id": "gtk",
       "name": "GTK",
       "category": "system",

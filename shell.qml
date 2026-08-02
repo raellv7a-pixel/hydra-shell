@@ -147,7 +147,6 @@ ShellRoot {
         }
       }
 
-      LockScreen {}
       FadeOverlay {}
 
       // Settings window mode (single window across all monitors)

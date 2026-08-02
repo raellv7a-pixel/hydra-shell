@@ -948,11 +948,11 @@ Item {
     if (root.localGpuName !== "")
       return root.localGpuName;
     if (SystemStatService.gpuType === "nvidia")
-      return "NVIDIA GPU";
+      return "GPU NVIDIA";
     if (SystemStatService.gpuType === "amd")
-      return "AMD GPU";
+      return "GPU AMD";
     if (SystemStatService.gpuType === "intel")
-      return "Intel GPU";
+      return "GPU Intel";
     return SystemStatService.gpuType || root.tr("enabled");
   }
 
@@ -973,12 +973,20 @@ Item {
     return pluginApi?.panelOpenScreen || activeScreen;
   }
 
-  function toggleNativePanel(panelName) {
-    const panel = PanelService.getPanel(panelName, activePanelScreen());
-    panel?.toggle(null);
+  property var pendingNativePanelScreen: null
+
+  function toggleNativePanel(panelName, targetScreen) {
+    const scr = targetScreen || root.pendingNativePanelScreen || activePanelScreen();
+    const panel = PanelService.getPanel(panelName, scr);
+    if (panel) {
+      panel.open();
+    }
   }
 
   function closeDashboardPanel() {
+    if (pluginApi && pluginApi.closePanel) {
+      pluginApi.closePanel(activePanelScreen());
+    }
     if (PanelService.openedPanel && !PanelService.openedPanel.isClosing) {
       PanelService.openedPanel.close();
     }
@@ -1011,15 +1019,12 @@ Item {
   }
 
   function openWallpaperSelector() {
-    root.pendingNativePanelName = "wallpaperPanel";
-    root.closeDashboardPanel();
-    deferredNativePanelTimer.restart();
+    root.toggleNativePanel("wallpaperPanel");
   }
 
   function takeDashboardScreenshot(mode) {
     root.pendingScreenshotMode = mode;
     root.pendingCaptureAction = "screenshot";
-    root.closeDashboardPanel();
     deferredCaptureTimer.restart();
   }
 
@@ -1029,7 +1034,6 @@ Item {
 
     root.pendingRecordFormat = format === "mp4" ? "mp4" : "gif";
     root.pendingCaptureAction = "record-area";
-    root.closeDashboardPanel();
     deferredCaptureTimer.restart();
   }
 
@@ -1241,8 +1245,9 @@ Item {
     repeat: false
     onTriggered: {
       if (root.pendingNativePanelName.length > 0) {
-        root.toggleNativePanel(root.pendingNativePanelName);
+        root.toggleNativePanel(root.pendingNativePanelName, root.pendingNativePanelScreen);
         root.pendingNativePanelName = "";
+        root.pendingNativePanelScreen = null;
       }
     }
   }
@@ -1419,7 +1424,7 @@ Item {
 
   Process {
     id: screenUsageInitProcess
-    running: true
+    running: false
     command: ["bash", "-c", "mkdir -p '" + root.screenUsageDirPath + "' && if [ ! -f '" + root.screenUsageFilePath + "' ]; then printf '{\"days\":{}}' > '" + root.screenUsageFilePath + "'; fi"]
     onExited: code => {
       if (code === 0)
@@ -1450,7 +1455,7 @@ Item {
     interval: root.screenUsageDetailActive ? 5000 : 30000
     repeat: true
     running: true
-    triggeredOnStart: true
+    triggeredOnStart: false
     onTriggered: root.sampleScreenUsage()
   }
 
@@ -1459,6 +1464,16 @@ Item {
     interval: 1200
     repeat: false
     onTriggered: root.saveScreenUsage()
+  }
+  Timer {
+    id: deferredInitTimer
+    interval: 250
+    repeat: false
+    running: true
+    onTriggered: {
+      if (!screenUsageInitProcess.running)
+        screenUsageInitProcess.running = true;
+    }
   }
 
   Connections {
@@ -1533,16 +1548,20 @@ Item {
             Layout.fillHeight: true
           }
 
-          PerformanceDetailsCard {
-            visible: root.activeDetailView === "performance"
+          Loader {
+            active: root.activeDetailView === "performance"
+            visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            sourceComponent: Component { PerformanceDetailsCard {} }
           }
 
-          AudioDetailsCard {
-            visible: root.activeDetailView === "audio"
+          Loader {
+            active: root.activeDetailView === "audio"
+            visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            sourceComponent: Component { AudioDetailsCard {} }
           }
         }
 
@@ -1569,34 +1588,44 @@ Item {
             Layout.fillHeight: true
           }
 
-          MediaDetailsCard {
-            visible: root.activeDetailView === "media"
+          Loader {
+            active: root.activeDetailView === "media"
+            visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            sourceComponent: Component { MediaDetailsCard {} }
           }
 
-          NotificationsDetailsCard {
-            visible: root.activeDetailView === "notifications"
+          Loader {
+            active: root.activeDetailView === "notifications"
+            visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            sourceComponent: Component { NotificationsDetailsCard {} }
           }
 
-          WeatherDetailsCard {
-            visible: root.activeDetailView === "weather"
+          Loader {
+            active: root.activeDetailView === "weather"
+            visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            sourceComponent: Component { WeatherDetailsCard {} }
           }
 
-          CalendarDetailsCard {
-            visible: root.activeDetailView === "calendar"
+          Loader {
+            active: root.activeDetailView === "calendar"
+            visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            sourceComponent: Component { CalendarDetailsCard {} }
           }
 
-          ScreenUsageDetailsCard {
-            visible: root.activeDetailView === "screenUsage"
+          Loader {
+            active: root.activeDetailView === "screenUsage"
+            visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
+            sourceComponent: Component { ScreenUsageDetailsCard {} }
           }
         }
       }
@@ -3084,7 +3113,7 @@ Item {
         DetailMetricTile {
           Layout.fillWidth: true
           titleText: root.tr("gpu")
-          valueText: root.gpuCompactText()
+          valueText: root.gpuTemperatureText()
           detailText: root.gpuNameText()
           iconName: "device-desktop"
           ratio: root.gpuUsageRatio()

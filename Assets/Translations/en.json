@@ -697,8 +697,15 @@
       "default": "Default"
     },
     "launcher-view-mode": {
+      "columns": "2 Columns (Mockup Style)",
       "grid": "Grid",
-      "list": "List"
+      "list": "List (1 Column)"
+    },
+    "launcher-cover-mode": {
+      "auto": "Automatic (Wallpaper)",
+      "custom": "Custom Image / GIF",
+      "random": "Random from Folder",
+      "none": "Disabled"
     },
     "notification-density": {
       "compact": "Compact",
@@ -712,6 +719,11 @@
     "session-menu-grid-layout": {
       "grid": "Grid",
       "single-row": "Single row"
+    },
+    "session-menu-cover-mode": {
+      "auto": "Automatic (Wallpaper)",
+      "avatar": "Profile Avatar",
+      "custom": "Custom Image / GIF"
     },
     "settings-panel-mode": {
       "attached": "Panel attached to bar",
@@ -1364,6 +1376,16 @@
       "settings-ignore-mouse-input-description": "Disable mouse interaction and scrollwheel in the launcher.",
       "settings-ignore-mouse-input-label": "Ignore mouse input",
       "settings-overlay-layer-description": "Display the launcher on the overlay layer, above fullscreen windows. When enabled, the launcher will not attach to the bar.",
+      "settings-cover-mode-label": "Launcher Cover (Banner)",
+      "settings-cover-mode-description": "Displays a top cover/banner image above the search bar.",
+      "settings-cover-path-label": "Cover Image / GIF",
+      "settings-cover-path-description": "Local path for the image or GIF used as the launcher cover.",
+      "settings-cover-folder-label": "Random Cover Folder",
+      "settings-cover-folder-description": "Picks a random image from this folder every time the launcher opens.",
+      "settings-cover-height-label": "Cover Height",
+      "settings-cover-height-description": "Adjusts the height of the launcher header banner.",
+      "settings-cover-overlay-label": "Cover Darkening",
+      "settings-cover-overlay-description": "Adjusts the layer opacity over the cover image to keep text readable.",
       "settings-overlay-layer-label": "Show above fullscreen",
       "settings-position-description": "Choose where the launcher panel appears.",
       "settings-show-categories-description": "Show category tabs for filtering applications.",
@@ -1679,7 +1701,15 @@
       "show-header-description": "Display the title and close button at the top of the session menu.",
       "show-header-label": "Show header",
       "show-keybinds-description": "Display keybind hints on session options.",
-      "show-keybinds-label": "Show keybinds"
+      "show-keybinds-label": "Show keybinds",
+      "show-profile-badge-label": "Show profile badge",
+      "show-profile-badge-description": "Display user profile badge at the top of the session cover card.",
+      "show-uptime-badge-label": "Show uptime badge",
+      "show-uptime-badge-description": "Display system uptime at the bottom of the session cover card.",
+      "cover-card-mode-label": "Cover card background",
+      "cover-card-mode-description": "Choose the image source for the session cover card.",
+      "cover-card-path-label": "Custom cover image",
+      "cover-card-path-description": "Local path for custom image or GIF used on the cover card."
     },
     "system": {
       "noctalia-performance-disable-desktop-widgets-description": "Keep desktop widgets visible while Noctalia performance mode is enabled.",
@@ -1832,7 +1862,7 @@
     "search": "Search...",
     "search-icons": "e.g. noctalia, niri, battery, cloud",
     "search-launcher": "Search entries... or use > for commands",
-    "search-wallhaven": "Search Wallhaven...",
+    "search-wallhaven": "Search... (ex: mountains, @author, like:id)",
     "search-wallpapers": "Type to filter wallpapers..."
   },
   "positions": {

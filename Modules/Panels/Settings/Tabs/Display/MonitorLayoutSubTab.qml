@@ -12,13 +12,14 @@ ColumnLayout {
 
   spacing: Style.marginM
   Layout.fillWidth: true
-  implicitHeight: Math.max(540, contentRow.implicitHeight + subTabBar.implicitHeight + actionRow.implicitHeight + Style.marginL * 3)
+  implicitHeight: (root.activeSubTab === 0 ? tab0Layout.implicitHeight : tab1Layout.implicitHeight) + subTabBar.implicitHeight + Style.marginL * 3
 
   readonly property var outputs: MonitorService.draftOutputs
   readonly property var selectedOutput: MonitorService.getSelectedOutput()
+  readonly property string selectedOutputId: MonitorService.selectedOutputId
   property int activeSubTab: 0
 
-  property real scenePadding: 24 * Style.uiScaleRatio
+  property real scenePadding: 20 * Style.uiScaleRatio
   readonly property var sceneBounds: computeSceneBounds(outputs)
   readonly property real sceneScale: computeSceneScale()
 
@@ -74,7 +75,7 @@ ColumnLayout {
     return model;
   }
 
-  // Navigation Sub-Bar
+  // Sub-tab Bar
   NTabBar {
     id: subTabBar
     Layout.fillWidth: true
@@ -95,26 +96,29 @@ ColumnLayout {
     }
   }
 
-  // ==========================================
-  // TAB 0: ARRANJO VISUAL DAS TELAS
-  // ==========================================
-  ColumnLayout {
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-    visible: root.activeSubTab === 0
-    spacing: Style.marginM
-
-    RowLayout {
-      id: contentRow
+    // ==========================================
+    // TAB 0: ARRANJO VISUAL (EM CAMADAS VERTICAIS)
+    // ==========================================
+    ColumnLayout {
+      id: tab0Layout
       Layout.fillWidth: true
-      Layout.preferredHeight: 400
+      visible: root.activeSubTab === 0
       spacing: Style.marginL
 
-      // Visual Monitor Canvas
+      // ----------------------------------------------------
+      // 1. VISUAL DRAG-AND-DROP CANVAS (FULL WIDTH AT TOP)
+      // ----------------------------------------------------
+      NText {
+        text: "Arranjo Físico de Monitores"
+        pointSize: Style.fontSizeM
+        font.weight: Style.fontWeightBold
+        color: Color.mOnSurface
+      }
+
       Rectangle {
         id: sceneCanvas
         Layout.fillWidth: true
-        Layout.fillHeight: true
+        Layout.preferredHeight: 240
         color: Qt.alpha(Color.mSurface, 0.8)
         border.color: Color.mOutline
         border.width: Style.borderS
@@ -188,236 +192,316 @@ ColumnLayout {
                 pointSize: Style.fontSizeS
                 font.weight: Style.fontWeightBold
                 color: monitorTile.isSelected ? Color.mPrimary : Color.mOnSurface
-                anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
               }
 
               NText {
                 text: output.width + "x" + output.height + (output.refresh ? ("@" + Math.round(output.refresh) + "Hz") : "")
                 pointSize: Style.fontSizeXS
                 color: Color.mOnSurfaceVariant
-                anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
               }
             }
           }
         }
       }
 
-      // Right Side Inspector (Width: 340px)
+      Item { Layout.preferredHeight: Style.marginS }
+
+      // ----------------------------------------------------
+      // 2. INSPECTOR & CONTROLS (FULL WIDTH STACKED BELOW)
+      // ----------------------------------------------------
+      NText {
+        text: root.selectedOutput ? ("Ajustes do Monitor: " + root.selectedOutput.name + " (" + (root.selectedOutput.model || root.selectedOutput.make || "Monitor") + ")") : "Ajustes do Monitor"
+        pointSize: Style.fontSizeM
+        font.weight: Style.fontWeightBold
+        color: Color.mOnSurface
+      }
+
+      ColumnLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+        visible: root.selectedOutput !== null
+        NToggle {
+          Layout.fillWidth: true
+          label: "Ativar Monitor"
+          description: "Habilita ou desabilita a saída de vídeo deste monitor"
+          checked: root.selectedOutput ? (root.selectedOutput.active !== false && !root.selectedOutput.disabled) : true
+          onToggled: checked => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutput(root.selectedOutput.outputId, { "active": checked, "disabled": !checked });
+            }
+          }
+        }
+
+        NComboBox {
+          Layout.fillWidth: true
+          label: "Espelhar Tela (Mirror)"
+          description: "Espelha o conteúdo exibido em outro monitor"
+          currentKey: root.selectedOutput ? (root.selectedOutput.mirror || "") : ""
+          model: {
+            var list = [{ key: "", name: "Nenhum (Tela Independente)" }];
+            for (var i = 0; i < root.outputs.length; i++) {
+              var out = root.outputs[i];
+              if (root.selectedOutput && out.outputId !== root.selectedOutput.outputId) {
+                list.push({ key: out.outputId, name: "Espelhar " + out.name });
+              }
+            }
+            return list;
+          }
+          onSelected: key => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutput(root.selectedOutput.outputId, { "mirror": key });
+            }
+          }
+        }
+
+        NComboBox {
+          Layout.fillWidth: true
+          label: "Resolução & Taxa de Atualização"
+          description: "Selecione a resolução e frequência de atualização (Hz) do monitor selecionado"
+          model: root.resolutionModel(root.selectedOutput)
+          currentKey: root.selectedOutput ? (root.selectedOutput.modeId || (root.selectedOutput.width + "x" + root.selectedOutput.height + "@" + Math.round(root.selectedOutput.refresh) + "Hz")) : ""
+          onSelected: key => {
+            if (root.selectedOutput) {
+              var parts = key.split("@");
+              if (parts.length === 2) {
+                var wh = parts[0].split("x");
+                var w = parseInt(wh[0]) || root.selectedOutput.width;
+                var h = parseInt(wh[1]) || root.selectedOutput.height;
+                var hz = parseFloat(parts[1].replace("Hz", "")) || root.selectedOutput.refresh;
+                MonitorService.updateOutput(root.selectedOutput.outputId, { "width": w, "height": h, "refresh": hz });
+              }
+            }
+          }
+        }
+
+        NValueSlider {
+          Layout.fillWidth: true
+          label: "Escala do Monitor"
+          description: "Ajusta o fator de escala (DPI) para elementos e fontes nesta tela"
+          from: 0.8
+          to: 2.0
+          stepSize: 0.05
+          value: root.selectedOutput ? (root.selectedOutput.scale || 1.0) : 1.0
+          onMoved: val => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutput(root.selectedOutput.outputId, { "scale": Math.round(val * 100) / 100 });
+            }
+          }
+        }
+
+        NComboBox {
+          Layout.fillWidth: true
+          label: "Orientação / Rotação da Tela"
+          description: "Gira a exibição do monitor em ângulos de 90 graus"
+          currentKey: String(root.selectedOutput ? (root.selectedOutput.transform || 0) : 0)
+          model: [
+            { key: "0", name: "Normal (0° - Paisagem)" },
+            { key: "1", name: "90° Rotação (Retrato)" },
+            { key: "2", name: "180° Invertido" },
+            { key: "3", name: "270° Rotação" }
+          ]
+          onSelected: key => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutput(root.selectedOutput.outputId, { "transform": parseInt(key) });
+            }
+          }
+        }
+
+        NValueSlider {
+          Layout.fillWidth: true
+          label: "Posição Horizontal X (px)"
+          from: -3840
+          to: 7680
+          stepSize: 10
+          value: root.selectedOutput ? (root.selectedOutput.x || 0) : 0
+          onMoved: val => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutputPosition(root.selectedOutput.outputId, Math.round(val), root.selectedOutput.y);
+            }
+          }
+        }
+
+        NValueSlider {
+          Layout.fillWidth: true
+          label: "Posição Vertical Y (px)"
+          from: -2160
+          to: 4320
+          stepSize: 10
+          value: root.selectedOutput ? (root.selectedOutput.y || 0) : 0
+          onMoved: val => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutputPosition(root.selectedOutput.outputId, root.selectedOutput.x, Math.round(val));
+            }
+          }
+        }
+      }
+
+      Item { Layout.preferredHeight: Style.marginS }
+
+      // ----------------------------------------------------
+      // 3. ACTION BAR (FULL WIDTH AT BOTTOM)
+      // ----------------------------------------------------
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+        NButton {
+          text: "Aplicar Agora"
+          icon: "check"
+          backgroundColor: Color.mPrimary
+          textColor: Color.mOnPrimary
+          enabled: !MonitorService.isBusy
+          onClicked: MonitorService.applyLayout()
+        }
+
+        NButton {
+          text: "Salvar no Hyprland"
+          icon: "device-floppy"
+          backgroundColor: Color.mPrimary
+          textColor: Color.mOnPrimary
+          enabled: !MonitorService.isBusy
+          onClicked: MonitorService.saveToHyprlandConfig()
+        }
+
+        NButton {
+          text: "Copiar Configuração do Hyprland"
+          icon: "copy"
+          backgroundColor: Color.mSurfaceVariant
+          textColor: Color.mOnSurfaceVariant
+          onClicked: {
+            var snippet = MonitorService.generateConfigSnippet();
+            if (snippet) {
+              Quickshell.execDetached(["bash", "-c", "printf '%s' " + JSON.stringify(snippet) + " | wl-copy"]);
+              ToastService.showNotice("Configuração Copiada", "Linhas de monitor salvas na área de transferência!", "copy");
+            }
+          }
+        }
+
+        Item { Layout.fillWidth: true } // Spacer
+
+        NButton {
+          text: "Restaurar Padrão"
+          icon: "refresh"
+          backgroundColor: Color.mSurfaceVariant
+          textColor: Color.mOnSurfaceVariant
+          onClicked: MonitorService.fetchOutputs()
+        }
+      }
+    }
+
+    // ==========================================
+    // TAB 1: CONFIGURAÇÃO DO HYPRLAND
+    // ==========================================
+    ColumnLayout {
+      id: tab1Layout
+      Layout.fillWidth: true
+      visible: root.activeSubTab === 1
+      spacing: Style.marginM
+      NText {
+        text: "Código de Configuração dos Monitores"
+        pointSize: Style.fontSizeM
+        font.weight: Style.fontWeightBold
+        color: Color.mOnSurface
+      }
+
+      NText {
+        text: "Confira abaixo os códigos gerados para salvar o layout de monitores permanentemente no Hyprland (Lua ou conf):"
+        pointSize: Style.fontSizeS
+        color: Color.mOnSurfaceVariant
+        wrapMode: Text.WordWrap
+        Layout.fillWidth: true
+      }
+
+      NText {
+        text: "Sintaxe Lua (Hyprland 0.55+ em ~/.config/hypr/lua/monitors.lua):"
+        pointSize: Style.fontSizeS
+        font.weight: Style.fontWeightBold
+        color: Color.mPrimary
+      }
+
       Rectangle {
-        Layout.preferredWidth: 340
-        Layout.fillHeight: true
-        color: Qt.alpha(Color.mSurface, 0.6)
+        Layout.fillWidth: true
+        Layout.preferredHeight: 140
+        color: Qt.alpha(Color.mSurface, 0.9)
         border.color: Color.mOutline
         border.width: Style.borderS
-        radius: Style.radiusL
+        radius: Style.radiusM
 
-        ScrollView {
+        Flickable {
           anchors.fill: parent
           anchors.margins: Style.marginM
+          contentWidth: luaCodeText.implicitWidth
+          contentHeight: luaCodeText.implicitHeight
           clip: true
 
-          ColumnLayout {
-            width: parent.width - Style.marginS
-            spacing: Style.marginM
-            visible: root.selectedOutput !== null
+          NText {
+            id: luaCodeText
+            text: MonitorService.generateLuaConfigSnippet() || "-- Nenhum monitor"
+            font.family: "monospace"
+            pointSize: Style.fontSizeS
+            color: Color.mPrimary
+          }
+        }
+      }
 
-            NText {
-              text: root.selectedOutput ? (root.selectedOutput.name + " (" + (root.selectedOutput.model || root.selectedOutput.make || "Monitor") + ")") : "Nenhum monitor"
-              pointSize: Style.fontSizeM
-              font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
-            }
+      NText {
+        text: "Sintaxe Legada (para ~/.config/hypr/hyprland.conf):"
+        pointSize: Style.fontSizeS
+        font.weight: Style.fontWeightBold
+        color: Color.mOnSurfaceVariant
+      }
 
-            NText {
-              text: "Resolução & Frequência"
-              pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
-            }
+      Rectangle {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 110
+        color: Qt.alpha(Color.mSurface, 0.9)
+        border.color: Color.mOutline
+        border.width: Style.borderS
+        radius: Style.radiusM
 
-            NComboBox {
-              Layout.fillWidth: true
-              model: root.resolutionModel(root.selectedOutput)
-              currentKey: root.selectedOutput ? (root.selectedOutput.modeId || (root.selectedOutput.width + "x" + root.selectedOutput.height + "@" + Math.round(root.selectedOutput.refresh) + "Hz")) : ""
-              onSelected: key => {
-                if (root.selectedOutput) {
-                  var parts = key.split("@");
-                  if (parts.length === 2) {
-                    var wh = parts[0].split("x");
-                    var w = parseInt(wh[0]) || root.selectedOutput.width;
-                    var h = parseInt(wh[1]) || root.selectedOutput.height;
-                    var hz = parseFloat(parts[1].replace("Hz", "")) || root.selectedOutput.refresh;
-                    MonitorService.updateOutput(root.selectedOutput.outputId, { "width": w, "height": h, "refresh": hz });
-                  }
-                }
-              }
-            }
+        Flickable {
+          anchors.fill: parent
+          anchors.margins: Style.marginM
+          contentWidth: configCodeText.implicitWidth
+          contentHeight: configCodeText.implicitHeight
+          clip: true
 
-            NText {
-              text: "Escala do Monitor"
-              pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
-            }
+          NText {
+            id: configCodeText
+            text: MonitorService.generateConfigSnippet() || "# Nenhum monitor"
+            font.family: "monospace"
+            pointSize: Style.fontSizeS
+            color: Color.mOnSurfaceVariant
+          }
+        }
+      }
 
-            NValueSlider {
-              Layout.fillWidth: true
-              from: 0.8
-              to: 2.0
-              stepSize: 0.05
-              value: root.selectedOutput ? (root.selectedOutput.scale || 1.0) : 1.0
-              onMoved: val => {
-                if (root.selectedOutput) {
-                  MonitorService.updateOutput(root.selectedOutput.outputId, { "scale": Math.round(val * 100) / 100 });
-                }
-              }
-            }
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
 
-            NText {
-              text: "Orientação / Rotação"
-              pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
-            }
+        NButton {
+          text: "Salvar em monitors.lua"
+          icon: "device-floppy"
+          backgroundColor: Color.mPrimary
+          textColor: Color.mOnPrimary
+          onClicked: MonitorService.saveToHyprlandConfig()
+        }
 
-            NComboBox {
-              Layout.fillWidth: true
-              currentKey: String(root.selectedOutput ? (root.selectedOutput.transform || 0) : 0)
-              model: [
-                { key: "0", name: "Normal (0°)" },
-                { key: "1", name: "90° Rotação" },
-                { key: "2", name: "180° Invertido" },
-                { key: "3", name: "270° Rotação" }
-              ]
-              onSelected: key => {
-                if (root.selectedOutput) {
-                  MonitorService.updateOutput(root.selectedOutput.outputId, { "transform": parseInt(key) });
-                }
-              }
-            }
-
-            NText {
-              text: "Posição Manual (X, Y)"
-              pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
-            }
-
-            RowLayout {
-              Layout.fillWidth: true
-              spacing: Style.marginS
-
-              NTextInput {
-                Layout.fillWidth: true
-                label: "X"
-                text: String(root.selectedOutput ? Math.round(root.selectedOutput.x) : 0)
-                onEditingFinished: {
-                  if (root.selectedOutput) {
-                    MonitorService.updateOutputPosition(root.selectedOutput.outputId, parseInt(text) || 0, root.selectedOutput.y);
-                  }
-                }
-              }
-
-              NTextInput {
-                Layout.fillWidth: true
-                label: "Y"
-                text: String(root.selectedOutput ? Math.round(root.selectedOutput.y) : 0)
-                onEditingFinished: {
-                  if (root.selectedOutput) {
-                    MonitorService.updateOutputPosition(root.selectedOutput.outputId, root.selectedOutput.x, parseInt(text) || 0);
-                  }
-                }
-              }
+        NButton {
+          text: "Copiar Código Lua"
+          icon: "copy"
+          backgroundColor: Color.mSurfaceVariant
+          textColor: Color.mOnSurfaceVariant
+          onClicked: {
+            var snippet = MonitorService.generateLuaConfigSnippet();
+            if (snippet) {
+              Quickshell.execDetached(["bash", "-c", "printf '%s' " + JSON.stringify(snippet) + " | wl-copy"]);
+              ToastService.showNotice("Configuração Copiada", "Código Lua salvo na área de transferência!", "copy");
             }
           }
         }
       }
-    }
-
-    // Action Bar at Bottom
-    RowLayout {
-      id: actionRow
-      Layout.fillWidth: true
-      spacing: Style.marginM
-
-      NButton {
-        text: "Aplicar Layout"
-        icon: "check"
-        backgroundColor: Color.mPrimary
-        textColor: Color.mOnPrimary
-        enabled: !MonitorService.isBusy
-        onClicked: MonitorService.applyLayout()
-      }
-
-      NButton {
-        text: "Restaurar Padrão"
-        icon: "refresh"
-        backgroundColor: Color.mSurfaceVariant
-        textColor: Color.mOnSurfaceVariant
-        onClicked: MonitorService.fetchOutputs()
-      }
-
-      Item { Layout.fillWidth: true } // Spacer
-    }
-  }
-
-  // ==========================================
-  // TAB 1: CONFIGURAÇÃO DO HYPRLAND
-  // ==========================================
-  ColumnLayout {
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-    visible: root.activeSubTab === 1
-    spacing: Style.marginM
-
-    NText {
-      text: "Linhas para o seu hyprland.conf"
-      pointSize: Style.fontSizeM
-      font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
-    }
-
-    NText {
-      text: "Copie as linhas abaixo para salvar o layout de monitores permanentemente no seu arquivo ~/.config/hypr/hyprland.conf:"
-      pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
-      wrapMode: Text.WordWrap
-      Layout.fillWidth: true
-    }
-
-    Rectangle {
-      Layout.fillWidth: true
-      Layout.preferredHeight: 180
-      color: Qt.alpha(Color.mSurface, 0.9)
-      border.color: Color.mOutline
-      border.width: Style.borderS
-      radius: Style.radiusM
-
-      Flickable {
-        anchors.fill: parent
-        anchors.margins: Style.marginM
-        contentWidth: configCodeText.implicitWidth
-        contentHeight: configCodeText.implicitHeight
-        clip: true
-
-        NText {
-          id: configCodeText
-          text: MonitorService.generateConfigSnippet() || "monitor=DP-1,1920x1080@180,0x0,1.0\nmonitor=DP-2,1920x1080@165,-1920x0,1.0"
-          font.family: "monospace"
-          pointSize: Style.fontSizeS
-          color: Color.mPrimary
-        }
-      }
-    }
-
-    NButton {
-      text: "Copiar Linhas de Configuração"
-      icon: "copy"
-      backgroundColor: Color.mPrimary
-      textColor: Color.mOnPrimary
-      onClicked: {
-        var snippet = MonitorService.generateConfigSnippet();
-        if (snippet) {
-          Quickshell.execDetached(["bash", "-c", "printf '%s' " + JSON.stringify(snippet) + " | wl-copy"]);
-          ToastService.showNotice("Configuração Copiada", "Linhas de monitor salvas na área de transferência!", "copy");
-        }
-      }
-    }
   }
 }

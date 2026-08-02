@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Widgets
 import "Helpers/LauncherNavigation.js" as LauncherNav
 
@@ -63,7 +64,7 @@ Rectangle {
   readonly property string launcherDensity: (currentProvider && currentProvider.ignoreDensity === false) ? (Settings.data.appLauncher.density || "default") : "comfortable"
   readonly property int effectiveIconSize: launcherDensity === "comfortable" ? 48 : (launcherDensity === "default" ? 36 : 24)
   readonly property int badgeSize: Math.round(effectiveIconSize * Style.uiScaleRatio)
-  readonly property int entryHeight: Math.round(badgeSize + (launcherDensity === "compact" ? (Style.marginL + Style.marginXXS) : (Style.marginXL + Style.marginS)))
+  readonly property int entryHeight: Math.round(badgeSize + (launcherDensity === "compact" ? Style.margin2XS : Style.margin2M))
 
   readonly property bool providerShowsCategories: (currentProvider.showsCategories !== undefined ? currentProvider.showsCategories : true) && providerCategories.length > 0
 
@@ -111,10 +112,50 @@ Rectangle {
   }
 
   readonly property bool isGridView: layoutMode === "grid"
+  readonly property bool isColumnsView: layoutMode === "columns"
   readonly property bool isSingleView: layoutMode === "single"
   readonly property bool isCompactDensity: launcherDensity === "compact"
 
+  property string randomCoverPath: ""
+  readonly property string coverMode: Settings.data.appLauncher.coverMode || "auto"
+  readonly property bool hasCoverBanner: coverMode !== "none"
+  readonly property int coverBannerHeight: hasCoverBanner ? Math.round((Settings.data.appLauncher.coverHeight || 160) * Style.uiScaleRatio) : 0
+
+  readonly property string profileWallpaperPath: {
+    if (coverMode === "none") return "";
+    if (coverMode === "custom") return Settings.data.appLauncher.coverPath !== "" ? Settings.preprocessPath(Settings.data.appLauncher.coverPath) : "";
+    if (coverMode === "random") return randomCoverPath !== "" ? Settings.preprocessPath(randomCoverPath) : "";
+    // "auto" mode — use the current wallpaper
+    var wp = WallpaperService.getWallpaper(screen?.name ?? "");
+    if (wp && !WallpaperService.isSolidColorPath(wp)) return wp;
+    return WallpaperService.defaultWallpaper || "";
+  }
+
+  Process {
+    id: randomCoverProcess
+    stdout: StdioCollector {}
+    onExited: code => {
+      if (code === 0) {
+        root.randomCoverPath = String(stdout.text || "").trim();
+      } else {
+        root.randomCoverPath = "";
+      }
+    }
+  }
+
+  function pickRandomCover() {
+    if (coverMode !== "random" || !Settings.data.appLauncher.coverFolder) {
+      root.randomCoverPath = "";
+      return;
+    }
+    randomCoverProcess.exec({
+      command: ["bash", "-c", "dir=$1; find \"$dir\" -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \\) 2>/dev/null | shuf -n 1", "raell-launcher", Settings.preprocessPath(Settings.data.appLauncher.coverFolder)]
+    });
+  }
+
   readonly property int targetGridColumns: {
+    if (isColumnsView)
+      return 2;
     let base = 5;
     if (launcherDensity === "comfortable")
       base = 4;
@@ -171,7 +212,7 @@ Rectangle {
     globalMouseInitialized = false;
     mouseTrackingReady = false;
     mouseTrackingDelayTimer.restart();
-
+    pickRandomCover();
     // Show launcher immediately, results will populate asynchronously
     resultsReady = true;
     focusSearchInput();
@@ -239,8 +280,9 @@ Rectangle {
   }
 
   function focusSearchInput() {
-    if (searchInput.inputItem) {
-      searchInput.inputItem.forceActiveFocus();
+    var item = (hasCoverBanner && bannerSearchInput) ? bannerSearchInput : searchInput;
+    if (item && item.inputItem) {
+      item.inputItem.forceActiveFocus();
     }
   }
 
@@ -608,8 +650,8 @@ Rectangle {
 
   Behavior on opacity {
     NumberAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.OutCirc
+      duration: Style.animationNormal
+      easing.type: Easing.OutQuint
     }
   }
 
@@ -641,14 +683,115 @@ Rectangle {
 
   ColumnLayout {
     anchors.fill: parent
-    anchors.topMargin: Style.marginL
-    anchors.bottomMargin: Style.marginL
-    spacing: Style.marginL
+    anchors.topMargin: Style.marginM
+    anchors.bottomMargin: Style.marginM
+    spacing: Style.marginM
 
-    RowLayout {
+    // Header Cover Banner (when coverMode !== "none")
+    Item {
+      id: coverBannerHeader
+      visible: root.hasCoverBanner
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginL
-      Layout.rightMargin: Style.marginL
+      Layout.preferredHeight: root.coverBannerHeight
+      Layout.leftMargin: Style.marginM
+      Layout.rightMargin: Style.marginM
+      Layout.topMargin: 0
+      clip: false
+
+      NDropShadow {
+        anchors.fill: bannerContainer
+        source: bannerContainer
+        autoPaddingEnabled: true
+        shadowBlur: Style.shadowBlur * 2.5
+        shadowVerticalOffset: Settings.data.general.shadowOffsetY * 2.0
+        z: -1
+      }
+
+      Rectangle {
+        id: bannerContainer
+        anchors.fill: parent
+        radius: Style.radiusL
+        color: "transparent"
+        border.color: Qt.alpha(Color.mOnSurfaceVariant, 0.3)
+        border.width: Style.borderM
+
+        NImageRounded {
+          id: coverImage
+          anchors.fill: parent
+          anchors.margins: Style.borderM
+          imagePath: root.profileWallpaperPath
+          imageFillMode: Image.PreserveAspectCrop
+          radius: Style.radiusL - Style.borderM
+        }
+
+        Rectangle {
+          anchors.fill: parent
+          anchors.margins: Style.borderM
+          // Gradient-style overlay: stronger at bottom for text legibility
+          gradient: Gradient {
+            orientation: Gradient.Vertical
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.4) }
+            GradientStop { position: 0.6; color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.7) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40) }
+          }
+          radius: Style.radiusL - Style.borderM
+        }
+
+        ColumnLayout {
+          anchors.fill: parent
+          anchors.margins: Style.marginL
+          spacing: Style.marginS
+
+        Item { Layout.fillHeight: true }
+
+        RowLayout {
+          Layout.fillWidth: true
+          spacing: Style.marginS
+
+          NTextInput {
+            id: bannerSearchInput
+            Layout.fillWidth: true
+            radius: Style.iRadiusM
+            text: root.searchText
+            placeholderText: I18n.tr("placeholders.search-launcher")
+            fontSize: Style.fontSizeM
+            onTextChanged: root.searchText = text
+
+            Component.onCompleted: {
+              if (bannerSearchInput.inputItem) {
+                bannerSearchInput.inputItem.forceActiveFocus();
+                bannerSearchInput.inputItem.Keys.onPressed.connect(function (event) {
+                  root.handleKeyPress(event);
+                });
+              }
+            }
+          }
+
+          NIconButton {
+            visible: root.showLayoutToggle
+            icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
+            tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
+            customRadius: Style.iRadiusM
+            Layout.preferredWidth: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
+            Layout.preferredHeight: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
+            onClicked: {
+              const current = Settings.data.appLauncher.viewMode;
+              if (current === "columns") Settings.data.appLauncher.viewMode = "grid";
+              else if (current === "grid") Settings.data.appLauncher.viewMode = "list";
+              else Settings.data.appLauncher.viewMode = "columns";
+            }
+          }
+        }
+      }
+      } // ends bannerContainer
+    } // ends coverBannerHeader
+
+    // Standard Search Bar when coverMode === "none"
+    RowLayout {
+      visible: !root.hasCoverBanner
+      Layout.fillWidth: true
+      Layout.leftMargin: Style.marginM
+      Layout.rightMargin: Style.marginM
       spacing: Style.marginS
 
       NTextInput {
@@ -672,12 +815,17 @@ Rectangle {
 
       NIconButton {
         visible: root.showLayoutToggle
-        icon: Settings.data.appLauncher.viewMode === "grid" ? "layout-list" : "layout-grid"
-        tooltipText: Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("tooltips.list-view") : I18n.tr("tooltips.grid-view")
+        icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
+        tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
         customRadius: Style.iRadiusM
         Layout.preferredWidth: searchInput.height
         Layout.preferredHeight: searchInput.height
-        onClicked: Settings.data.appLauncher.viewMode = Settings.data.appLauncher.viewMode === "grid" ? "list" : "grid"
+        onClicked: {
+          const current = Settings.data.appLauncher.viewMode;
+          if (current === "columns") Settings.data.appLauncher.viewMode = "grid";
+          else if (current === "grid") Settings.data.appLauncher.viewMode = "list";
+          else Settings.data.appLauncher.viewMode = "columns";
+        }
       }
     }
 
@@ -686,8 +834,8 @@ Rectangle {
       id: categoryTabs
       visible: root.showProviderCategories
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginL
-      Layout.rightMargin: Style.marginL
+      Layout.leftMargin: Style.marginM
+      Layout.rightMargin: Style.marginM
       margins: 0
       border.color: Style.boxBorderColor
       border.width: Style.borderS
@@ -713,13 +861,63 @@ Rectangle {
     NSlideSwapView {
       id: resultsSwapView
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginL
-      Layout.rightMargin: Style.marginL
+      Layout.leftMargin: Style.marginM
+      Layout.rightMargin: Style.marginM
       Layout.fillHeight: true
       animationsEnabled: !root.animationsDisabled
-      sourceComponent: root.isSingleView ? singleViewComponent : (root.isGridView ? gridViewComponent : listViewComponent)
+      sourceComponent: root.isSingleView ? singleViewComponent : (root.isColumnsView ? columnsViewComponent : (root.isGridView ? gridViewComponent : listViewComponent))
     }
 
+    // --------------------------
+    // 2-COLUMNS LIST VIEW (MOCKUP STYLE)
+    Component {
+      id: columnsViewComponent
+      NGridView {
+        id: columnsGrid
+
+        horizontalPolicy: ScrollBar.AlwaysOff
+        verticalPolicy: ScrollBar.AlwaysOff
+        reserveScrollbarSpace: false
+        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurface
+        wheelScrollMultiplier: 4.0
+        trackedSelectionIndex: root.selectedIndex
+
+        width: parent.width
+        height: parent.height
+        cellWidth: parent.width / 2
+        cellHeight: root.entryHeight
+        leftMargin: 0
+        rightMargin: 0
+        topMargin: 0
+        bottomMargin: 0
+        model: root.results
+        cacheBuffer: columnsGrid.height * 2
+        keyNavigationEnabled: false
+        focus: false
+        interactive: !Settings.data.appLauncher.ignoreMouseInput
+
+        Keys.enabled: false
+
+        Connections {
+          target: root
+          enabled: root.isColumnsView
+          function onSelectedIndexChanged() {
+            if (!root.isColumnsView || root.selectedIndex < 0 || !columnsGrid)
+              return;
+            Qt.callLater(() => {
+                           if (root.isColumnsView && columnsGrid && columnsGrid.cancelFlick) {
+                             columnsGrid.cancelFlick();
+                             columnsGrid.positionViewAtIndex(root.selectedIndex, GridView.Contain);
+                           }
+                         });
+          }
+        }
+
+        delegate: LauncherListDelegate {
+          launcher: root
+        }
+      }
+    }
     // --------------------------
     // LIST VIEW
     Component {
@@ -735,7 +933,7 @@ Rectangle {
 
         width: parent.width
         height: parent.height
-        spacing: Style.marginS
+        spacing: Style.marginXS
         model: root.results
         currentIndex: root.selectedIndex
         cacheBuffer: resultsList.height * 2
@@ -875,16 +1073,20 @@ Rectangle {
     }
 
     ColumnLayout {
-      Layout.leftMargin: Style.marginL
-      Layout.rightMargin: Style.marginL
+      Layout.leftMargin: Style.marginM
+      Layout.rightMargin: Style.marginM
+      spacing: 0
 
       NDivider {
         Layout.fillWidth: true
-        Layout.bottomMargin: Style.marginS
+        Layout.bottomMargin: Style.marginXS
+        opacity: 0.5
       }
 
       NText {
         Layout.fillWidth: true
+        Layout.topMargin: Style.marginXXS
+        Layout.bottomMargin: Style.marginM
         text: {
           if (root.results.length === 0) {
             if (root.searchText) {
@@ -902,7 +1104,8 @@ Rectangle {
         }
         pointSize: Style.fontSizeXS
         color: Color.mOnSurfaceVariant
-        horizontalAlignment: Text.AlignCenter
+        horizontalAlignment: Text.AlignLeft
+        opacity: 0.7
       }
     }
   }

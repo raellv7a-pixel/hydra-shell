@@ -23,10 +23,17 @@ Singleton {
   readonly property string notificationsDir: baseDir + "notifications/"
   readonly property string contributorsDir: baseDir + "contributors/"
 
-  // Supported image formats - extended list when ImageMagick is available
-  readonly property var basicImageFilters: ["*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp"]
-  readonly property var extendedImageFilters: ["*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp", "*.webp", "*.avif", "*.heic", "*.heif", "*.tiff", "*.tif", "*.pnm", "*.pgm", "*.ppm", "*.pbm", "*.svg", "*.svgz", "*.ico", "*.icns", "*.jxl", "*.jp2", "*.j2k", "*.exr", "*.hdr", "*.dds", "*.tga"]
+  // Supported image and video wallpaper formats
+  readonly property var videoFilters: ["*.webm", "*.mp4", "*.mkv", "*.mov"]
+  readonly property var basicImageFilters: ["*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp", "*.webm", "*.mp4", "*.mkv", "*.mov"]
+  readonly property var extendedImageFilters: ["*.jpg", "*.jpeg", "*.png", "*.gif", "*.bmp", "*.webp", "*.avif", "*.heic", "*.heif", "*.tiff", "*.tif", "*.pnm", "*.pgm", "*.ppm", "*.pbm", "*.svg", "*.svgz", "*.ico", "*.icns", "*.jxl", "*.jp2", "*.j2k", "*.exr", "*.hdr", "*.dds", "*.tga", "*.webm", "*.mp4", "*.mkv", "*.mov"]
   readonly property var imageFilters: imageMagickAvailable ? extendedImageFilters : basicImageFilters
+
+  function isVideoPath(filePath) {
+    if (!filePath) return false;
+    const ext = "*." + filePath.toLowerCase().split('.').pop();
+    return videoFilters.includes(ext);
+  }
 
   // Check if a file format needs conversion (not natively supported by Qt)
   function needsConversion(filePath) {
@@ -334,8 +341,12 @@ Singleton {
     const srcEsc = sourcePath.replace(/'/g, "'\\''");
     const dstEsc = outputPath.replace(/'/g, "'\\''");
 
-    // Use Lanczos filter for high-quality downscaling, subtle unsharp mask, and PNG for lossless output
-    const command = `magick '${srcEsc}' -auto-orient -filter Lanczos -resize '384x384^' -gravity center -extent 384x384 -unsharp 0x0.5 '${dstEsc}'`;
+    var command;
+    if (isVideoPath(sourcePath)) {
+      command = `ffmpeg -ss 00:00:01 -i '${srcEsc}' -vframes 1 -vf 'scale=384:384:force_original_aspect_ratio=increase,crop=384:384' '${dstEsc}' -y 2>/dev/null || magick '${srcEsc}[0]' -resize '384x384^' -gravity center -extent 384x384 '${dstEsc}'`;
+    } else {
+      command = `magick '${srcEsc}' -auto-orient -filter Lanczos -resize '384x384^' -gravity center -extent 384x384 -unsharp 0x0.5 '${dstEsc}'`;
+    }
 
     runProcess(command, cacheKey, outputPath, sourcePath);
   }

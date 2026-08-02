@@ -8,14 +8,15 @@ import qs.Modules.Panels.Settings
 import qs.Services.Theming
 import qs.Services.UI
 import qs.Widgets
+import "./Components"
 
 SmartPanel {
   id: root
 
-  preferredWidth: 800 * Style.uiScaleRatio
-  preferredHeight: 650 * Style.uiScaleRatio
-  preferredWidthRatio: 0.5
-  preferredHeightRatio: 0.5
+  preferredWidth: 1100 * Style.uiScaleRatio
+  preferredHeight: 700 * Style.uiScaleRatio
+  preferredWidthRatio: 0.72
+  preferredHeightRatio: 0.75
 
   // Positioning
   readonly property string screenBarPosition: Settings.getBarPositionForScreen(screen?.name)
@@ -141,9 +142,33 @@ SmartPanel {
     property var currentScreen: Quickshell.screens[currentScreenIndex]
     property string filterText: ""
     property int appearanceTabIndex: 0
+    property string activeSourceKey: Settings.data.wallpaper.useWallhaven ? "wallhaven" : "local"
     readonly property bool headerScreensStripAvailable: !Settings.data.wallpaper.setWallpaperOnAllMonitors || Settings.data.wallpaper.enableMultiMonitorDirectories
     readonly property bool headerDevicesButtonVisible: Quickshell.screens.length > 1 || Settings.data.wallpaper.enableMultiMonitorDirectories
     property alias screenRepeater: screenRepeater
+    property string previewOverridePath: ""
+    onCurrentScreenIndexChanged: {
+      previewOverridePath = WallpaperService.getWallpaper(currentScreen?.name ?? "") || "";
+    }
+    readonly property string effectivePreviewWallpaperPath: {
+      if (previewOverridePath !== "") {
+        return previewOverridePath;
+      }
+      let view = screenRepeater ? screenRepeater.itemAt(currentScreenIndex) : null;
+      if (view && view.currentWallpaper && view.currentWallpaper !== "") {
+        return view.currentWallpaper;
+      }
+      return WallpaperService.getWallpaper(currentScreen?.name ?? "") || "";
+    }
+
+    Connections {
+      target: WallpaperService
+      function onWallpaperChanged(screenName, path) {
+        if (!panelContent.currentScreen || screenName === panelContent.currentScreen.name || screenName === undefined || Settings.data.wallpaper.setWallpaperOnAllMonitors) {
+          panelContent.previewOverridePath = path;
+        }
+      }
+    }
 
     Component.onCompleted: {
       root.contentItem = panelContent;
@@ -203,6 +228,24 @@ SmartPanel {
       onColorSelected: color => WallpaperService.setSolidColor(color.toString())
     }
 
+    // Local Wallpaper (Video & Image) File Picker
+    NFilePicker {
+      id: localWallpaperFilePicker
+      title: "Selecionar Wallpaper Local (Vídeo Animado ou Imagem)"
+      selectionMode: "files"
+      initialPath: Settings.data.wallpaper.directory || Quickshell.env("HOME") + "/Pictures"
+      nameFilters: ["Wallpapers Animados e Imagens (*.webm *.mp4 *.mkv *.mov *.png *.jpg *.jpeg *.webp)", "Todos os Arquivos (*)"]
+      onAccepted: paths => {
+        if (paths.length > 0) {
+          var selPath = paths[0];
+          var targetSc = Settings.data.wallpaper.setWallpaperOnAllMonitors ? undefined : currentScreen?.name;
+          WallpaperService.changeWallpaper(selPath, targetSc, WallpaperService.wallpaperSelectionAppearance);
+          WallpaperService.applyFavoriteTheme(selPath, targetSc, WallpaperService.wallpaperSelectionAppearance);
+          ToastService.showNotice("Papel de Parede", "Wallpaper aplicado com sucesso!", "check", 3000);
+        }
+      }
+    }
+
     // Focus management
     Connections {
       target: root
@@ -223,6 +266,7 @@ SmartPanel {
         }
         panelContent.appearanceTabIndex = Settings.data.colorSchemes.darkMode ? 1 : 0;
         WallpaperService.wallpaperSelectionAppearance = panelContent.appearanceTabIndex === 1 ? "dark" : "light";
+        panelContent.previewOverridePath = WallpaperService.getWallpaper(panelContent.currentScreen?.name ?? "") || "";
         // Give initial focus to search input
         Qt.callLater(() => {
                        if (searchInput.inputItem) {
@@ -248,99 +292,496 @@ SmartPanel {
       }
     }
 
-    ColumnLayout {
+    RowLayout {
       anchors.fill: parent
       anchors.margins: Style.marginL
-      spacing: Style.marginM
+      spacing: Style.marginL
 
-      // Debounce timer for Wallhaven search
-      Timer {
-        id: wallhavenSearchDebounceTimer
-        interval: 500
-        onTriggered: {
-          Settings.data.wallpaper.wallhavenQuery = searchInput.text;
-          if (typeof WallhavenService !== "undefined") {
-            wallhavenView.loading = true;
-            WallhavenService.search(searchInput.text, 1);
+      // LEFT COLUMN: Controls, Source Switcher, Tabs, and Main Grid/Adjuster/Palette (62% width)
+      ColumnLayout {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        Layout.preferredWidth: 62
+        spacing: Style.marginM
+
+        // Debounce timer for Wallhaven search
+        Timer {
+          id: wallhavenSearchDebounceTimer
+          interval: 500
+          onTriggered: {
+            Settings.data.wallpaper.wallhavenQuery = searchInput.text;
+            if (typeof WallhavenService !== "undefined") {
+              wallhavenView.loading = true;
+              WallhavenService.search(searchInput.text, 1);
+            }
+          }
+        }
+
+        // Header
+        NBox {
+          Layout.fillWidth: true
+          Layout.preferredHeight: headerColumn.implicitHeight + Style.margin2L
+          color: Color.mSurfaceVariant
+
+          ColumnLayout {
+            id: headerColumn
+            anchors.fill: parent
+            anchors.margins: Style.marginL
+            spacing: Style.marginM
+
+            RowLayout {
+              Layout.fillWidth: true
+              spacing: Style.marginM
+
+              NIcon {
+                icon: "settings-wallpaper-selector"
+                pointSize: Style.fontSizeXXL
+                color: Color.mPrimary
+              }
+
+              NText {
+                text: I18n.tr("wallpaper.panel.title")
+                pointSize: Style.fontSizeL
+                font.weight: Style.fontWeightBold
+                color: Color.mOnSurface
+                Layout.fillWidth: true
+              }
+
+              NIconButton {
+                visible: Settings.data.wallpaper.enabled
+                icon: "dark-mode"
+                tooltipText: Settings.data.wallpaper.linkLightAndDarkWallpapers ? I18n.tr("wallpaper.panel.header-separate-light-dark-tooltip") : I18n.tr("wallpaper.panel.header-link-light-dark-tooltip")
+                baseSize: Style.baseWidgetSize * 0.8
+                colorBg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mPrimary : Color.smartAlpha(Color.mSurfaceVariant)
+                colorFg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mOnPrimary : Color.mPrimary
+                onClicked: Settings.data.wallpaper.linkLightAndDarkWallpapers = !Settings.data.wallpaper.linkLightAndDarkWallpapers
+              }
+
+              NIconButton {
+                visible: Settings.data.wallpaper.enabled && panelContent.headerDevicesButtonVisible
+                icon: "devices"
+                tooltipText: Settings.data.wallpaper.setWallpaperOnAllMonitors ? I18n.tr("wallpaper.panel.header-devices-apply-all-tooltip") : I18n.tr("wallpaper.panel.header-devices-per-monitor-tooltip")
+                baseSize: Style.baseWidgetSize * 0.8
+                colorBg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mPrimary : Color.smartAlpha(Color.mSurfaceVariant)
+                colorFg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mOnPrimary : Color.mPrimary
+                onClicked: Settings.data.wallpaper.setWallpaperOnAllMonitors = !Settings.data.wallpaper.setWallpaperOnAllMonitors
+              }
+
+              NIconButton {
+                icon: "folder-open"
+                tooltipText: "Importar Wallpaper Local (Vídeo Animado ou Imagem)"
+                baseSize: Style.baseWidgetSize * 0.8
+                onClicked: localWallpaperFilePicker.open()
+              }
+
+              NIconButton {
+                icon: "palette"
+                tooltipText: I18n.tr("wallpaper.panel.solid-color-tooltip")
+                baseSize: Style.baseWidgetSize * 0.8
+                colorBg: Settings.data.wallpaper.useSolidColor ? Color.mPrimary : Color.mSurfaceVariant
+                colorFg: Settings.data.wallpaper.useSolidColor ? Color.mOnPrimary : Color.mPrimary
+                onClicked: solidColorPicker.open()
+              }
+
+              NIconButton {
+                icon: "settings"
+                tooltipText: I18n.tr("panels.wallpaper.settings-title")
+                baseSize: Style.baseWidgetSize * 0.8
+                onClicked: {
+                  var settingsPanel = PanelService.getPanel("settingsPanel", screen);
+                  settingsPanel.requestedTab = SettingsPanel.Tab.Wallpaper;
+                  settingsPanel.open();
+                }
+              }
+
+              NIconButton {
+                icon: "close"
+                tooltipText: I18n.tr("common.close")
+                baseSize: Style.baseWidgetSize * 0.8
+                onClicked: root.close()
+              }
+            }
+
+            NDivider {
+              Layout.fillWidth: true
+            }
+
+            NTabBar {
+              id: mainViewTabBar
+              Layout.fillWidth: true
+              currentIndex: 0
+              spacing: Style.marginM
+              distributeEvenly: true
+
+              NTabButton {
+                text: "Galeria"
+                tabIndex: 0
+                checked: mainViewTabBar.currentIndex === 0
+              }
+              NTabButton {
+                text: "Ajustes de Imagem"
+                tabIndex: 1
+                checked: mainViewTabBar.currentIndex === 1
+              }
+              NTabButton {
+                text: "Paleta de Cores"
+                tabIndex: 2
+                checked: mainViewTabBar.currentIndex === 2
+              }
+            }
+
+            NTabBar {
+              id: appearanceTabBar
+              visible: mainViewTabBar.currentIndex === 0 && Settings.data.wallpaper.enabled && !Settings.data.wallpaper.linkLightAndDarkWallpapers
+              Layout.fillWidth: true
+              currentIndex: panelContent.appearanceTabIndex
+              spacing: Style.marginM
+              distributeEvenly: true
+
+              onCurrentIndexChanged: {
+                if (currentIndex < 0) {
+                  return;
+                }
+                panelContent.appearanceTabIndex = currentIndex;
+                WallpaperService.wallpaperSelectionAppearance = currentIndex === 1 ? "dark" : "light";
+                Settings.data.colorSchemes.darkMode = currentIndex === 1;
+              }
+
+              NTabButton {
+                text: I18n.tr("wallpaper.panel.appearance-light-tab")
+                tabIndex: 0
+                checked: appearanceTabBar.currentIndex === 0
+              }
+              NTabButton {
+                text: I18n.tr("wallpaper.panel.appearance-dark-tab")
+                tabIndex: 1
+                checked: appearanceTabBar.currentIndex === 1
+              }
+            }
+
+            NTabBar {
+              id: screenTabBar
+              visible: mainViewTabBar.currentIndex === 0 && panelContent.headerScreensStripAvailable
+              Layout.fillWidth: true
+              currentIndex: currentScreenIndex
+              onCurrentIndexChanged: currentScreenIndex = currentIndex
+              spacing: Style.marginM
+              distributeEvenly: true
+
+              Repeater {
+                model: Quickshell.screens
+                NTabButton {
+                  required property var modelData
+                  required property int index
+                  text: modelData.name || `Screen ${index + 1}`
+                  tabIndex: index
+                  checked: {
+                    screenTabBar.currentIndex === index;
+                  }
+                }
+              }
+            }
+
+            // Unified search input and source
+            RowLayout {
+              visible: mainViewTabBar.currentIndex === 0
+              Layout.fillWidth: true
+              spacing: Style.marginM
+
+              NTextInput {
+                id: searchInput
+                placeholderText: Settings.data.wallpaper.useWallhaven ? I18n.tr("placeholders.search-wallhaven") : I18n.tr("placeholders.search-wallpapers")
+                fontSize: Style.fontSizeM
+                Layout.fillWidth: true
+
+                property bool initializing: true
+                Component.onCompleted: {
+                  // Initialize text based on current mode
+                  if (Settings.data.wallpaper.useWallhaven) {
+                    searchInput.text = Settings.data.wallpaper.wallhavenQuery || "";
+                  } else {
+                    searchInput.text = panelContent.filterText || "";
+                  }
+                  // Give focus to search input
+                  if (searchInput.inputItem && searchInput.inputItem.visible) {
+                    searchInput.inputItem.forceActiveFocus();
+                  }
+                  // Mark initialization as complete after a short delay
+                  Qt.callLater(function () {
+                    searchInput.initializing = false;
+                  });
+                }
+
+                Connections {
+                  target: Settings.data.wallpaper
+                  function onUseWallhavenChanged() {
+                    // Update text when mode changes
+                    if (Settings.data.wallpaper.useWallhaven) {
+                      searchInput.text = Settings.data.wallpaper.wallhavenQuery || "";
+                    } else {
+                      searchInput.text = panelContent.filterText || "";
+                    }
+                  }
+                }
+
+                onTextChanged: {
+                  // Don't trigger search during initialization - Component.onCompleted will handle initial search
+                  if (initializing) {
+                    return;
+                  }
+                  if (Settings.data.wallpaper.useWallhaven) {
+                    wallhavenSearchDebounceTimer.restart();
+                  } else {
+                    searchDebounceTimer.restart();
+                  }
+                }
+
+                onEditingFinished: {
+                  if (Settings.data.wallpaper.useWallhaven) {
+                    wallhavenSearchDebounceTimer.stop();
+                    // Only search if the query actually changed
+                    if (typeof WallhavenService !== "undefined" && text !== WallhavenService.currentQuery) {
+                      Settings.data.wallpaper.wallhavenQuery = text;
+                      wallhavenView.loading = true;
+                      WallhavenService.search(text, 1);
+                    }
+                  }
+                }
+
+                Keys.onPressed: event => {
+                                  if (Keybinds.checkKey(event, 'down', Settings)) {
+                                    if (Settings.data.wallpaper.useWallhaven) {
+                                      if (wallhavenView && wallhavenView.gridView) {
+                                        wallhavenView.gridView.forceActiveFocus();
+                                      }
+                                    } else {
+                                      let currentView = screenRepeater.itemAt(currentScreenIndex);
+                                      if (currentView && currentView.gridView) {
+                                        currentView.gridView.forceActiveFocus();
+                                      }
+                                    }
+                                    event.accepted = true;
+                                  }
+                                }
+              }
+
+              NIconButton {
+                icon: "color-swatch"
+                tooltipText: Settings.data.colorSchemes.useWallpaperColors ? I18n.tr("wallpaper.panel.color-extraction-enabled") : I18n.tr("wallpaper.panel.color-extraction-disabled")
+                baseSize: Style.baseWidgetSize * 0.8
+                onClicked: {
+                  Settings.data.colorSchemes.useWallpaperColors = !Settings.data.colorSchemes.useWallpaperColors;
+                  if (Settings.data.colorSchemes.useWallpaperColors) {
+                    AppThemeService.generate();
+                  } else {
+                    ColorSchemeService.setPredefinedScheme(Settings.data.colorSchemes.predefinedScheme);
+                  }
+                }
+              }
+
+              NComboBox {
+                id: colorSchemeComboBox
+                Layout.fillWidth: false
+                Layout.minimumWidth: 200
+                minimumWidth: 200
+
+                property bool _initialized: false
+                property bool _userChanging: false
+                Component.onCompleted: Qt.callLater(() => {
+                                                      _initialized = true;
+                                                    })
+
+                model: Settings.data.colorSchemes.useWallpaperColors ? TemplateProcessor.schemeTypes : ColorSchemeService.schemes.map(s => ({
+                                                                                                                                              "key": ColorSchemeService.getBasename(s),
+                                                                                                                                              "name": ColorSchemeService.getBasename(s)
+                                                                                                                                            }))
+                currentKey: Settings.data.colorSchemes.useWallpaperColors ? Settings.data.colorSchemes.generationMethod : Settings.data.colorSchemes.predefinedScheme
+                onCurrentKeyChanged: {
+                  if (!_initialized)
+                    return;
+                  if (_userChanging) {
+                    _userChanging = false;
+                    return;
+                  }
+                  schemeGlowAnimation.restart();
+                }
+                onSelected: key => {
+                              _userChanging = true;
+                              if (Settings.data.colorSchemes.useWallpaperColors) {
+                                Settings.data.colorSchemes.generationMethod = key;
+                                AppThemeService.generate();
+                              } else {
+                                ColorSchemeService.setPredefinedScheme(key);
+                              }
+                              Qt.callLater(() => {
+                                             _userChanging = false;
+                                           });
+                            }
+
+                SequentialAnimation {
+                  id: schemeGlowAnimation
+                  NumberAnimation {
+                    target: colorSchemeComboBox
+                    property: "opacity"
+                    to: 0.3
+                    duration: Style.animationSlow
+                    easing.type: Easing.OutCubic
+                  }
+                  NumberAnimation {
+                    target: colorSchemeComboBox
+                    property: "opacity"
+                    to: 1.0
+                    duration: Style.animationSlow
+                    easing.type: Easing.InCubic
+                  }
+                }
+              }
+
+              NComboBox {
+                id: sourceComboBox
+                Layout.fillWidth: false
+
+                model: [
+                  {
+                    "key": "local",
+                    "name": I18n.tr("common.local")
+                  },
+                  {
+                    "key": "wallhaven",
+                    "name": I18n.tr("wallpaper.panel.source-wallhaven")
+                  },
+                  {
+                    "key": "moewalls",
+                    "name": "MoeWalls (Live)"
+                  }
+                ]
+                currentKey: panelContent.activeSourceKey
+                onSelected: key => {
+                              panelContent.activeSourceKey = key;
+                              Settings.data.wallpaper.useWallhaven = (key === "wallhaven");
+                            }
+              }
+
+              // Settings button (only visible for Wallhaven)
+              NIconButton {
+                id: wallhavenSettingsButton
+                icon: "settings"
+                tooltipText: I18n.tr("wallpaper.panel.wallhaven-settings-title")
+                baseSize: Style.baseWidgetSize * 0.8
+                visible: Settings.data.wallpaper.useWallhaven
+                onClicked: {
+                  if (searchInput.inputItem) {
+                    searchInput.inputItem.focus = false;
+                  }
+                  if (wallhavenSettingsPopup.item) {
+                    wallhavenSettingsPopup.item.showAt(wallhavenSettingsButton);
+                  }
+                }
+              }
+            }
+              WallhavenQuickFiltersBar {
+                visible: typeof WallhavenService !== "undefined" && Settings.data.wallpaper.useWallhaven && mainViewTabBar.currentIndex === 0
+                onSearchRequested: {
+                  wallhavenView.loading = true;
+                  WallhavenService.search(Settings.data.wallpaper.wallhavenQuery || "", 1);
+                }
+              }
+          }
+        }
+
+        // Left Main Content (Grid / Grading / Palette)
+        NBox {
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          color: Color.mSurfaceVariant
+
+          StackLayout {
+            id: contentStack
+            anchors.fill: parent
+            anchors.margins: Style.marginL
+
+            currentIndex: {
+              if (mainViewTabBar.currentIndex === 1)
+                return 3;
+              if (mainViewTabBar.currentIndex === 2)
+                return 4;
+              if (panelContent.activeSourceKey === "moewalls")
+                return 2;
+              if (Settings.data.wallpaper.useWallhaven)
+                return 1;
+              return 0;
+            }
+
+            // Local wallpapers (index 0)
+            StackLayout {
+              id: screenStack
+              currentIndex: currentScreenIndex
+
+              Repeater {
+                id: screenRepeater
+                model: Quickshell.screens
+                delegate: WallpaperScreenView {
+                  targetScreen: modelData
+                }
+              }
+            }
+
+            // Wallhaven wallpapers (index 1)
+            WallhavenView {
+              id: wallhavenView
+            }
+
+            // MoeWalls Live Video Wallpapers (index 2)
+            MoeWallsView {
+              id: moeWallsView
+              screenName: currentScreen?.name ?? ""
+            }
+
+            // Wallpaper Grading & Filters (index 3)
+            WallpaperGradingCard {
+              id: wallpaperGradingCard
+              wallpaperPath: panelContent.effectivePreviewWallpaperPath
+              screenName: currentScreen?.name ?? ""
+            }
+
+            // Extracted Palette Sheet (index 4)
+            WallpaperPaletteSheet {
+              id: wallpaperPaletteSheet
+              wallpaperPath: panelContent.effectivePreviewWallpaperPath
+              screenName: currentScreen?.name ?? ""
+            }
           }
         }
       }
 
-      // Header
+      // RIGHT COLUMN: Pinned Live Desktop Preview Stack & Apply Card (38% width)
       NBox {
         Layout.fillWidth: true
-        Layout.preferredHeight: headerColumn.implicitHeight + Style.margin2L
+        Layout.fillHeight: true
+        Layout.preferredWidth: 38
         color: Color.mSurfaceVariant
+        radius: Style.radiusM
 
         ColumnLayout {
-          id: headerColumn
           anchors.fill: parent
           anchors.margins: Style.marginL
           spacing: Style.marginM
 
           RowLayout {
             Layout.fillWidth: true
-            spacing: Style.marginM
 
             NIcon {
-              icon: "settings-wallpaper-selector"
-              pointSize: Style.fontSizeXXL
+              icon: "device-desktop"
+              pointSize: Style.fontSizeL
               color: Color.mPrimary
             }
 
             NText {
-              text: I18n.tr("wallpaper.panel.title")
-              pointSize: Style.fontSizeL
+              text: "Pré-visualização do Desktop"
+              pointSize: Style.fontSizeM
               font.weight: Style.fontWeightBold
               color: Color.mOnSurface
               Layout.fillWidth: true
-            }
-
-            NIconButton {
-              visible: Settings.data.wallpaper.enabled
-              icon: "dark-mode"
-              tooltipText: Settings.data.wallpaper.linkLightAndDarkWallpapers ? I18n.tr("wallpaper.panel.header-separate-light-dark-tooltip") : I18n.tr("wallpaper.panel.header-link-light-dark-tooltip")
-              baseSize: Style.baseWidgetSize * 0.8
-              colorBg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mPrimary : Color.smartAlpha(Color.mSurfaceVariant)
-              colorFg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mOnPrimary : Color.mPrimary
-              onClicked: Settings.data.wallpaper.linkLightAndDarkWallpapers = !Settings.data.wallpaper.linkLightAndDarkWallpapers
-            }
-
-            NIconButton {
-              visible: Settings.data.wallpaper.enabled && panelContent.headerDevicesButtonVisible
-              icon: "devices"
-              tooltipText: Settings.data.wallpaper.setWallpaperOnAllMonitors ? I18n.tr("wallpaper.panel.header-devices-apply-all-tooltip") : I18n.tr("wallpaper.panel.header-devices-per-monitor-tooltip")
-              baseSize: Style.baseWidgetSize * 0.8
-              colorBg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mPrimary : Color.smartAlpha(Color.mSurfaceVariant)
-              colorFg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mOnPrimary : Color.mPrimary
-              onClicked: Settings.data.wallpaper.setWallpaperOnAllMonitors = !Settings.data.wallpaper.setWallpaperOnAllMonitors
-            }
-
-            NIconButton {
-              icon: "palette"
-              tooltipText: I18n.tr("wallpaper.panel.solid-color-tooltip")
-              baseSize: Style.baseWidgetSize * 0.8
-              colorBg: Settings.data.wallpaper.useSolidColor ? Color.mPrimary : Color.mSurfaceVariant
-              colorFg: Settings.data.wallpaper.useSolidColor ? Color.mOnPrimary : Color.mPrimary
-              onClicked: solidColorPicker.open()
-            }
-
-            NIconButton {
-              icon: "settings"
-              tooltipText: I18n.tr("panels.wallpaper.settings-title")
-              baseSize: Style.baseWidgetSize * 0.8
-              onClicked: {
-                var settingsPanel = PanelService.getPanel("settingsPanel", screen);
-                settingsPanel.requestedTab = SettingsPanel.Tab.Wallpaper;
-                settingsPanel.open();
-              }
-            }
-
-            NIconButton {
-              icon: "close"
-              tooltipText: I18n.tr("common.close")
-              baseSize: Style.baseWidgetSize * 0.8
-              onClicked: root.close()
             }
           }
 
@@ -348,319 +789,18 @@ SmartPanel {
             Layout.fillWidth: true
           }
 
-          NTabBar {
-            id: appearanceTabBar
-            visible: Settings.data.wallpaper.enabled && !Settings.data.wallpaper.linkLightAndDarkWallpapers
+          MockDesktopPreview {
+            id: mockDesktopPreview
             Layout.fillWidth: true
-            currentIndex: panelContent.appearanceTabIndex
-            spacing: Style.marginM
-            distributeEvenly: true
-
-            onCurrentIndexChanged: {
-              if (currentIndex < 0) {
-                return;
-              }
-              panelContent.appearanceTabIndex = currentIndex;
-              WallpaperService.wallpaperSelectionAppearance = currentIndex === 1 ? "dark" : "light";
-              Settings.data.colorSchemes.darkMode = currentIndex === 1;
+            Layout.fillHeight: true
+            wallpaperPath: panelContent.effectivePreviewWallpaperPath
+            screenName: currentScreen?.name ?? ""
+            onApplyRequested: (path, fillMode) => {
+              Settings.data.wallpaper.fillMode = fillMode;
+              WallpaperService.changeWallpaper(path, currentScreen?.name, WallpaperService.wallpaperSelectionAppearance);
+              AppThemeService.generate();
+              ToastService.showNotice("Papel de Parede", "Papel de parede aplicado com sucesso!", "check", 3000);
             }
-
-            NTabButton {
-              text: I18n.tr("wallpaper.panel.appearance-light-tab")
-              tabIndex: 0
-              checked: appearanceTabBar.currentIndex === 0
-            }
-            NTabButton {
-              text: I18n.tr("wallpaper.panel.appearance-dark-tab")
-              tabIndex: 1
-              checked: appearanceTabBar.currentIndex === 1
-            }
-          }
-
-          NTabBar {
-            id: screenTabBar
-            visible: panelContent.headerScreensStripAvailable
-            Layout.fillWidth: true
-            currentIndex: currentScreenIndex
-            onCurrentIndexChanged: currentScreenIndex = currentIndex
-            spacing: Style.marginM
-            distributeEvenly: true
-
-            Repeater {
-              model: Quickshell.screens
-              NTabButton {
-                required property var modelData
-                required property int index
-                text: modelData.name || `Screen ${index + 1}`
-                tabIndex: index
-                checked: {
-                  screenTabBar.currentIndex === index;
-                }
-              }
-            }
-          }
-
-          // Unified search input and source
-          RowLayout {
-            Layout.fillWidth: true
-            spacing: Style.marginM
-
-            NTextInput {
-              id: searchInput
-              placeholderText: Settings.data.wallpaper.useWallhaven ? I18n.tr("placeholders.search-wallhaven") : I18n.tr("placeholders.search-wallpapers")
-              fontSize: Style.fontSizeM
-              Layout.fillWidth: true
-
-              property bool initializing: true
-              Component.onCompleted: {
-                // Initialize text based on current mode
-                if (Settings.data.wallpaper.useWallhaven) {
-                  searchInput.text = Settings.data.wallpaper.wallhavenQuery || "";
-                } else {
-                  searchInput.text = panelContent.filterText || "";
-                }
-                // Give focus to search input
-                if (searchInput.inputItem && searchInput.inputItem.visible) {
-                  searchInput.inputItem.forceActiveFocus();
-                }
-                // Mark initialization as complete after a short delay
-                Qt.callLater(function () {
-                  searchInput.initializing = false;
-                });
-              }
-
-              Connections {
-                target: Settings.data.wallpaper
-                function onUseWallhavenChanged() {
-                  // Update text when mode changes
-                  if (Settings.data.wallpaper.useWallhaven) {
-                    searchInput.text = Settings.data.wallpaper.wallhavenQuery || "";
-                  } else {
-                    searchInput.text = panelContent.filterText || "";
-                  }
-                }
-              }
-
-              onTextChanged: {
-                // Don't trigger search during initialization - Component.onCompleted will handle initial search
-                if (initializing) {
-                  return;
-                }
-                if (Settings.data.wallpaper.useWallhaven) {
-                  wallhavenSearchDebounceTimer.restart();
-                } else {
-                  searchDebounceTimer.restart();
-                }
-              }
-
-              onEditingFinished: {
-                if (Settings.data.wallpaper.useWallhaven) {
-                  wallhavenSearchDebounceTimer.stop();
-                  // Only search if the query actually changed
-                  if (typeof WallhavenService !== "undefined" && text !== WallhavenService.currentQuery) {
-                    Settings.data.wallpaper.wallhavenQuery = text;
-                    wallhavenView.loading = true;
-                    WallhavenService.search(text, 1);
-                  }
-                }
-              }
-
-              Keys.onPressed: event => {
-                                if (Keybinds.checkKey(event, 'down', Settings)) {
-                                  if (Settings.data.wallpaper.useWallhaven) {
-                                    if (wallhavenView && wallhavenView.gridView) {
-                                      wallhavenView.gridView.forceActiveFocus();
-                                    }
-                                  } else {
-                                    let currentView = screenRepeater.itemAt(currentScreenIndex);
-                                    if (currentView && currentView.gridView) {
-                                      currentView.gridView.forceActiveFocus();
-                                    }
-                                  }
-                                  event.accepted = true;
-                                }
-                              }
-            }
-
-            NIconButton {
-              icon: "color-swatch"
-              tooltipText: Settings.data.colorSchemes.useWallpaperColors ? I18n.tr("wallpaper.panel.color-extraction-enabled") : I18n.tr("wallpaper.panel.color-extraction-disabled")
-              baseSize: Style.baseWidgetSize * 0.8
-              onClicked: {
-                Settings.data.colorSchemes.useWallpaperColors = !Settings.data.colorSchemes.useWallpaperColors;
-                if (Settings.data.colorSchemes.useWallpaperColors) {
-                  AppThemeService.generate();
-                } else {
-                  ColorSchemeService.setPredefinedScheme(Settings.data.colorSchemes.predefinedScheme);
-                }
-              }
-            }
-
-            NComboBox {
-              id: colorSchemeComboBox
-              Layout.fillWidth: false
-              Layout.minimumWidth: 200
-              minimumWidth: 200
-
-              property bool _initialized: false
-              property bool _userChanging: false
-              Component.onCompleted: Qt.callLater(() => {
-                                                    _initialized = true;
-                                                  })
-
-              model: Settings.data.colorSchemes.useWallpaperColors ? TemplateProcessor.schemeTypes : ColorSchemeService.schemes.map(s => ({
-                                                                                                                                            "key": ColorSchemeService.getBasename(s),
-                                                                                                                                            "name": ColorSchemeService.getBasename(s)
-                                                                                                                                          }))
-              currentKey: Settings.data.colorSchemes.useWallpaperColors ? Settings.data.colorSchemes.generationMethod : Settings.data.colorSchemes.predefinedScheme
-              onCurrentKeyChanged: {
-                if (!_initialized)
-                  return;
-                if (_userChanging) {
-                  _userChanging = false;
-                  return;
-                }
-                schemeGlowAnimation.restart();
-              }
-              onSelected: key => {
-                            _userChanging = true;
-                            if (Settings.data.colorSchemes.useWallpaperColors) {
-                              Settings.data.colorSchemes.generationMethod = key;
-                              AppThemeService.generate();
-                            } else {
-                              ColorSchemeService.setPredefinedScheme(key);
-                            }
-                            Qt.callLater(() => {
-                                           _userChanging = false;
-                                         });
-                          }
-
-              SequentialAnimation {
-                id: schemeGlowAnimation
-                NumberAnimation {
-                  target: colorSchemeComboBox
-                  property: "opacity"
-                  to: 0.3
-                  duration: Style.animationSlow
-                  easing.type: Easing.OutCubic
-                }
-                NumberAnimation {
-                  target: colorSchemeComboBox
-                  property: "opacity"
-                  to: 1.0
-                  duration: Style.animationSlow
-                  easing.type: Easing.InCubic
-                }
-              }
-            }
-
-            NComboBox {
-              id: sourceComboBox
-              Layout.fillWidth: false
-
-              model: [
-                {
-                  "key": "local",
-                  "name": I18n.tr("common.local")
-                },
-                {
-                  "key": "wallhaven",
-                  "name": I18n.tr("wallpaper.panel.source-wallhaven")
-                }
-              ]
-              currentKey: Settings.data.wallpaper.useWallhaven ? "wallhaven" : "local"
-              property bool skipNextSelected: false
-              Component.onCompleted: {
-                // Skip the first onSelected if it fires during initialization
-                skipNextSelected = true;
-                Qt.callLater(function () {
-                  skipNextSelected = false;
-                });
-              }
-              onSelected: key => {
-                            if (skipNextSelected) {
-                              return;
-                            }
-                            var useWallhaven = (key === "wallhaven");
-                            Settings.data.wallpaper.useWallhaven = useWallhaven;
-                            // Update search input text based on mode
-                            if (useWallhaven) {
-                              searchInput.text = Settings.data.wallpaper.wallhavenQuery || "";
-                            } else {
-                              searchInput.text = panelContent.filterText || "";
-                            }
-                            if (useWallhaven && typeof WallhavenService !== "undefined") {
-                              // Update service properties when switching to Wallhaven
-                              // Don't search here - Component.onCompleted will handle it when the component is created
-                              // This prevents duplicate searches
-                              WallhavenService.categories = Settings.data.wallpaper.wallhavenCategories;
-                              WallhavenService.purity = Settings.data.wallpaper.wallhavenPurity;
-                              WallhavenService.sorting = Settings.data.wallpaper.wallhavenSorting;
-                              WallhavenService.order = Settings.data.wallpaper.wallhavenOrder;
-
-                              // Update resolution settings
-                              panelContent.updateWallhavenResolution();
-
-                              // If the view is already initialized, trigger a new search when switching to it
-                              // Preserve current page when switching back to Wallhaven source
-                              if (wallhavenView && wallhavenView.initialized && !WallhavenService.fetching) {
-                                wallhavenView.loading = true;
-                                WallhavenService.search(Settings.data.wallpaper.wallhavenQuery || "", WallhavenService.currentPage);
-                              }
-                            }
-                          }
-            }
-
-            // Settings button (only visible for Wallhaven)
-            NIconButton {
-              id: wallhavenSettingsButton
-              icon: "settings"
-              tooltipText: I18n.tr("wallpaper.panel.wallhaven-settings-title")
-              baseSize: Style.baseWidgetSize * 0.8
-              visible: Settings.data.wallpaper.useWallhaven
-              onClicked: {
-                if (searchInput.inputItem) {
-                  searchInput.inputItem.focus = false;
-                }
-                if (wallhavenSettingsPopup.item) {
-                  wallhavenSettingsPopup.item.showAt(wallhavenSettingsButton);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // Content stack: Wallhaven or Local
-      NBox {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        color: Color.mSurfaceVariant
-
-        StackLayout {
-          id: contentStack
-          anchors.fill: parent
-          anchors.margins: Style.marginL
-
-          currentIndex: Settings.data.wallpaper.useWallhaven ? 1 : 0
-
-          // Local wallpapers
-          StackLayout {
-            id: screenStack
-            currentIndex: currentScreenIndex
-
-            Repeater {
-              id: screenRepeater
-              model: Quickshell.screens
-              delegate: WallpaperScreenView {
-                targetScreen: modelData
-              }
-            }
-          }
-
-          // Wallhaven wallpapers
-          WallhavenView {
-            id: wallhavenView
           }
         }
       }
@@ -1484,6 +1624,7 @@ SmartPanel {
     id: wallhavenViewRoot
     property alias gridView: wallhavenGridView
     property alias pageInput: pageInput
+    property alias previewOverlay: previewOverlayItem
 
     property var wallpapers: []
     property bool loading: false
@@ -1523,6 +1664,8 @@ SmartPanel {
         WallhavenService.purity = Settings.data.wallpaper.wallhavenPurity;
         WallhavenService.sorting = Settings.data.wallpaper.wallhavenSorting;
         WallhavenService.order = Settings.data.wallpaper.wallhavenOrder;
+        WallhavenService.topRange = Settings.data.wallpaper.wallhavenTopRange || "1M";
+        WallhavenService.colors = Settings.data.wallpaper.wallhavenColors || "";
 
         // Initialize resolution settings
         var width = Settings.data.wallpaper.wallhavenResolutionWidth || "";
@@ -1691,6 +1834,19 @@ SmartPanel {
 
                 HoverHandler {
                   id: hoverHandler
+                }
+
+                Timer {
+                  id: previewTimer
+                  interval: 800
+                  running: hoverHandler.hovered
+                  onTriggered: {
+                    if (wallhavenViewRoot.previewOverlay) {
+                      wallhavenViewRoot.previewOverlay.show(modelData);
+                    } else {
+                      console.log("previewOverlay is null!");
+                    }
+                  }
                 }
 
                 TapHandler {
@@ -1931,6 +2087,21 @@ SmartPanel {
             WallpaperService.applyFavoriteTheme(localPath, whScreen, WallpaperService.wallpaperSelectionAppearance);
           }
         });
+      }
+    }
+
+    WallhavenPreviewOverlay {
+      id: previewOverlayItem
+      onFindSimilarRequested: id => {
+        if (typeof WallhavenService !== "undefined") {
+          Settings.data.wallpaper.wallhavenQuery = "like:" + id;
+          if (searchInput) searchInput.text = "like:" + id;
+          wallhavenViewRoot.loading = true;
+          WallhavenService.search("like:" + id, 1);
+        }
+      }
+      onApplyRequested: wallpaper => {
+        wallhavenDownloadAndApply(wallpaper);
       }
     }
   }

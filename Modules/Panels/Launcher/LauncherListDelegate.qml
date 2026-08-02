@@ -14,11 +14,13 @@ NBox {
   required property var launcher
 
   property bool isSelected: (!launcher.ignoreMouseHover && mouseArea.containsMouse) || (index === launcher.selectedIndex)
+  property bool isHovered: !launcher.ignoreMouseHover && mouseArea.containsMouse && !isSelected
 
   width: ListView.view.width
   implicitHeight: launcher.entryHeight
-  clip: true
-  color: entry.isSelected ? Color.mHover : Color.mSurfaceVariant
+  clip: false
+  radius: Style.radiusM
+  color: entry.isSelected ? Color.mPrimary : (entry.isHovered ? Color.mHover : "transparent")
   forceOpaque: entry.isSelected
 
   // Prepare item when it becomes visible (e.g., decode images)
@@ -31,16 +33,43 @@ NBox {
 
   Behavior on color {
     ColorAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.OutCirc
+      duration: Style.animationNormal
+      easing.type: Easing.OutQuint
     }
+  }
+
+  // Focus indicator bar on the left edge
+  Rectangle {
+    id: focusIndicator
+    anchors.left: parent.left
+    anchors.leftMargin: 4
+    anchors.verticalCenter: parent.verticalCenter
+    width: 4
+    height: entry.isSelected ? Math.round(parent.height * 0.60) : Math.round(parent.height * 0.20)
+    radius: 4
+    color: Color.mOnPrimary
+    opacity: entry.isSelected ? 0.9 : 0.0
+    z: 5
+
+    Behavior on height { NumberAnimation { duration: Style.animationNormal; easing.type: Easing.OutQuint } }
+    Behavior on opacity { NumberAnimation { duration: Style.animationNormal; easing.type: Easing.OutQuint } }
   }
 
   ColumnLayout {
     id: contentLayout
     anchors.fill: parent
-    anchors.margins: launcher.isCompactDensity ? Style.marginXS : Style.marginM
+    anchors.leftMargin: entry.isSelected ? Style.marginXL + Style.marginXS : Style.marginL
+    anchors.rightMargin: Style.marginL
+    anchors.topMargin: launcher.isCompactDensity ? Style.marginXS : Style.marginM
+    anchors.bottomMargin: launcher.isCompactDensity ? Style.marginXS : Style.marginM
     spacing: launcher.isCompactDensity ? Style.marginXS : Style.marginM
+
+    Behavior on anchors.leftMargin {
+      NumberAnimation {
+        duration: Style.animationNormal
+        easing.type: Easing.OutQuint
+      }
+    }
 
     // Top row - Main entry content with action buttons
     RowLayout {
@@ -52,7 +81,22 @@ NBox {
         visible: !modelData.hideIcon
         Layout.preferredWidth: modelData.hideIcon ? 0 : launcher.badgeSize
         Layout.preferredHeight: modelData.hideIcon ? 0 : launcher.badgeSize
+        scale: entry.isSelected ? 1.08 : 1.0
+        opacity: entry.isSelected ? 1.0 : 0.85
 
+        Behavior on scale {
+          NumberAnimation {
+            duration: Style.animationNormal
+            easing.type: Easing.OutQuint
+          }
+        }
+
+        Behavior on opacity {
+          NumberAnimation {
+            duration: Style.animationNormal
+            easing.type: Easing.OutQuint
+          }
+        }
         // Icon background
         Rectangle {
           anchors.fill: parent
@@ -136,7 +180,7 @@ NBox {
               icon: modelData.icon
               pointSize: Style.fontSizeXXXL
               visible: modelData.icon && !modelData.displayString
-              color: (entry.isSelected && !Settings.data.appLauncher.showIconBackground) ? Color.mOnHover : Color.mOnSurface
+              color: entry.isSelected ? Color.mOnPrimary : Color.mOnSurface
             }
           }
 
@@ -206,31 +250,44 @@ NBox {
         }
       }
 
-      // Text content
+      // Text content (Title on top, description on the line below)
       ColumnLayout {
         Layout.fillWidth: true
-        spacing: 0
+        Layout.alignment: Qt.AlignVCenter
+        spacing: Style.marginXXS
 
         NText {
           text: modelData.name || "Unknown"
-          pointSize: Style.fontSizeL
-          font.weight: Style.fontWeightBold
-          color: entry.isSelected ? Color.mOnHover : Color.mOnSurface
+          pointSize: Style.fontSizeM
+          font.weight: Font.Bold
+          color: entry.isSelected ? Color.mOnPrimary : Color.mOnSurface
           elide: Text.ElideRight
           maximumLineCount: 1
-          wrapMode: Text.Wrap
-          clip: true
           Layout.fillWidth: true
+
+          Behavior on color {
+            ColorAnimation {
+              duration: Style.animationNormal
+              easing.type: Easing.OutQuint
+            }
+          }
         }
 
         NText {
           text: modelData.description || ""
           pointSize: Style.fontSizeS
-          color: entry.isSelected ? Color.mOnHover : Color.mOnSurfaceVariant
+          color: entry.isSelected ? Qt.alpha(Color.mOnPrimary, 0.78) : Color.mOnSurfaceVariant
           elide: Text.ElideRight
           maximumLineCount: 1
           Layout.fillWidth: true
           visible: text !== "" && !launcher.isCompactDensity
+
+          Behavior on color {
+            ColorAnimation {
+              duration: Style.animationNormal
+              easing.type: Easing.OutQuint
+            }
+          }
         }
       }
 

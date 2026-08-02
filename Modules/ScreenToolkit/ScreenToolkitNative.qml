@@ -341,7 +341,6 @@ function clearPaletteResult() {
                 annotateRegionState._pendingScreen = null
                 if (pluginApi) {
                     pluginApi.withCurrentScreen(s => {
-                        pluginApi.closePanel(s)
                         annotateOverlay.parseAndShow(region, "/tmp/screen-toolkit-annotate.png", screen)
                     })
                 } else {
@@ -382,7 +381,6 @@ function clearPaletteResult() {
             root.activeTool = ""
             if (pluginApi) {
                 pluginApi.withCurrentScreen(s => {
-                    pluginApi.closePanel(s)
                     annotateOverlay.parseAndShow(regionStr, "/tmp/screen-toolkit-annotate.png", screen)
                 })
             } else {
@@ -558,7 +556,6 @@ function clearPaletteResult() {
         if (!pluginApi) { timer.start(); return }
         pluginApi.withCurrentScreen(screen => {
             if (timer === launchRegionSelector) launchRegionSelector.targetScreen = screen
-            pluginApi.closePanel(screen)
             timer.start()
         })
     }
@@ -594,7 +591,6 @@ function clearPaletteResult() {
         root.isRunning = true
         if (!pluginApi) { launchAnnotateFullscreen.start(); return }
         pluginApi.withCurrentScreen(screen => {
-            pluginApi.closePanel(screen)
             root._regionScreen = screen
             root._regionX = 0; root._regionY = 0
             root._regionW = Math.round(screen.width  * (screen.devicePixelRatio ?? 1.0))
@@ -610,7 +606,6 @@ function clearPaletteResult() {
         root.isRunning = true
         if (!pluginApi) { launchAnnotateActiveWindow.start(); return }
         pluginApi.withCurrentScreen(screen => {
-            pluginApi.closePanel(screen)
             root._regionScreen = screen
             launchAnnotateActiveWindow.start()
         })
@@ -623,7 +618,6 @@ function clearPaletteResult() {
     function runPinFromFile() {
         if (!pluginApi) { launchPinFile.start(); return }
         pluginApi.withCurrentScreen(screen => {
-            pluginApi.closePanel(screen)
             launchPinFile.start()
         })
     }
@@ -634,7 +628,6 @@ function clearPaletteResult() {
     function runMeasure() {
         if (root.isRunning) return
         root.activeTool = "measure"
-        if (pluginApi) pluginApi.withCurrentScreen(screen => pluginApi.closePanel(screen))
         measureOverlay.show()
     }
     function runRecordStop()    { recordOverlay.stopRecording() }
@@ -658,7 +651,6 @@ function clearPaletteResult() {
         pluginApi.withCurrentScreen(screen => {
             root.isRunning  = true
             root.activeTool = "record"
-            pluginApi.closePanel(screen)
             launchRecordFullscreen.targetScreen = screen
             launchRecordFullscreen.start()
         })
@@ -666,7 +658,6 @@ function clearPaletteResult() {
     function runMirror() {
         if (pluginApi) {
             pluginApi.withCurrentScreen(screen => {
-                pluginApi.closePanel(screen)
                 if (!mirrorOverlay.isVisible) mirrorOverlay.show(screen)
             })
         } else {

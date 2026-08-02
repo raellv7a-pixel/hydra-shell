@@ -301,6 +301,7 @@ Singleton {
 
     // general
     property JsonObject general: JsonObject {
+      property string sddmTheme: ""
       property string avatarImage: ""
       property real dimmerOpacity: 0.2
       property bool showScreenCorners: false
