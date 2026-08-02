@@ -440,8 +440,9 @@ Singleton {
       property string wallhavenApiKey: ""
       property string wallhavenResolutionMode: "atleast" // "atleast" or "exact"
       property string wallhavenResolutionWidth: ""
-
       property string wallhavenResolutionHeight: ""
+      property string wallhavenTopRange: "1M" // 1d, 3d, 1w, 1M, 3M, 6M, 1y
+      property string wallhavenColors: "" // Hex color without #
       property string sortOrder: "name" // "name", "name_desc", "date", "date_desc", "random"
       property list<var> favorites: []
       // Format: [{ "path": "...", "appearance": "light"|"dark", "colorScheme": "...", "darkMode": bool, "useWallpaperColors": bool, "generationMethod": "...", "paletteColors": [...] }]
@@ -464,8 +465,14 @@ Singleton {
       property string terminalCommand: "alacritty -e"
       property bool customLaunchPrefixEnabled: false
       property string customLaunchPrefix: ""
-      // View mode: "list" or "grid"
-      property string viewMode: "list"
+      // View mode: "list", "columns", or "grid"
+      property string viewMode: "columns"
+      property string coverMode: "auto"
+      property string coverPath: ""
+      property string coverFolder: ""
+      property int coverHeight: 160
+      property real coverOverlay: 0.40
+      property bool coverBlurEnabled: false
       property bool showCategories: true
       // Icon mode: "tabler" or "native"
       property string iconMode: "tabler"
@@ -626,6 +633,10 @@ Singleton {
       property string position: "center"
       property bool showHeader: true
       property bool showKeybinds: true
+      property bool showProfileBadge: true
+      property bool showUptimeBadge: true
+      property string coverCardMode: "auto"
+      property string coverCardPath: ""
       property bool largeButtonsStyle: true
       property string largeButtonsLayout: "single-row"
       property list<var> powerOptions: [
