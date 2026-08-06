@@ -53,6 +53,7 @@ Variants {
 
       // Used to debounce wallpaper changes
       property string futureWallpaper: ""
+      property string activeVideoSource: ""
       // Track the original wallpaper path being transitioned to (before caching)
       property string transitioningToOriginalPath: ""
 
@@ -74,9 +75,21 @@ Variants {
         transitionAnimation.stop();
         startupTransitionTimer.stop();
         debounceTimer.stop();
+        videoSourceTimer.stop();
+        activeVideoSource = "";
         shaderLoader.active = false;
         currentWallpaper.source = "";
         nextWallpaper.source = "";
+      }
+
+      onFutureWallpaperChanged: scheduleVideoSourceReload()
+
+      function scheduleVideoSourceReload() {
+        videoSourceTimer.stop();
+        activeVideoSource = "";
+        if (isVideoPath(futureWallpaper)) {
+          videoSourceTimer.restart();
+        }
       }
 
       Connections {
@@ -142,6 +155,16 @@ Variants {
         running: false
         repeat: false
         onTriggered: changeWallpaper()
+      }
+
+      Timer {
+        id: videoSourceTimer
+        interval: 100
+        repeat: false
+        onTriggered: {
+          var path = root.futureWallpaper;
+          root.activeVideoSource = path.startsWith("file://") || path.startsWith("/") ? (path.startsWith("/") ? "file://" + path : path) : path;
+        }
       }
 
       // Delay startup transition to ensure the compositor has mapped the window
@@ -219,17 +242,15 @@ Variants {
 
           MediaPlayer {
             id: bgVideoPlayer
-            source: {
-              var p = root.futureWallpaper !== "" ? root.futureWallpaper : root._pathStr(currentWallpaper.source);
-              if (!p || p === "") return "";
-              return p.startsWith("file://") || p.startsWith("/") ? (p.startsWith("/") ? "file://" + p : p) : p;
-            }
+            source: root.activeVideoSource
             loops: MediaPlayer.Infinite
             videoOutput: bgVideoOutput
             audioOutput: AudioOutput { muted: true }
             onSourceChanged: {
               if (source !== "") {
                 play();
+              } else {
+                stop();
               }
             }
             onMediaStatusChanged: {
@@ -238,6 +259,7 @@ Variants {
               }
             }
             Component.onCompleted: play()
+            Component.onDestruction: stop()
           }
 
           VideoOutput {

@@ -17,6 +17,7 @@ Singleton {
   signal searchCompleted(var results)
   signal searchFailed(string error)
   signal videoDownloaded(string videoId, string localPath)
+  signal videoDownloadFailed(string videoId, string error)
 
   readonly property string searchScript: [
     "bash", "-c",
@@ -60,6 +61,7 @@ Singleton {
     fetching = true;
     currentQuery = query || "";
     currentPage = page || 1;
+    lastError = "";
 
     var cmdStr = "query='" + currentQuery.replace(/'/g, "'\\''") + "'; page='" + currentPage + "'; " +
       "mw=\"https://moewalls.com/wp-json/wp/v2/posts?per_page=20&page=${page}&_embed=1\"; " +
@@ -91,7 +93,8 @@ Singleton {
         if (callback) callback(outPath);
         root.videoDownloaded(item.id, outPath);
       } else {
-        ToastService.showError("MoeWalls", "Falha ao baixar vídeo do live wallpaper.");
+        if (callback) callback("");
+        root.videoDownloadFailed(item.id, I18n.tr("wallpaper.live-video.download-failed"));
       }
       dlProc.destroy();
     });

@@ -29,8 +29,8 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredWidth: 3
-      color: Color.mSurfaceVariant
-      radius: Style.radiusM
+      color: Color.mSurfaceContainerLow
+      radius: Style.radiusL
 
       ColumnLayout {
         anchors.fill: parent
@@ -187,8 +187,8 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredWidth: 2
-      color: Color.mSurfaceVariant
-      radius: Style.radiusM
+      color: Color.mSurfaceContainerHigh
+      radius: Style.radiusL
 
       ColumnLayout {
         anchors.fill: parent
@@ -231,8 +231,8 @@ Item {
         NBox {
           Layout.fillWidth: true
           Layout.preferredHeight: 70
-          color: Color.mSurface
-          radius: Style.radiusS
+          color: Color.mSurfaceContainerHighest
+          radius: Style.radiusL
 
           ColumnLayout {
             anchors.fill: parent
@@ -258,8 +258,10 @@ Item {
                 icon: "palette"
                 tooltipText: "Alternar entre cores dinâmicas do wallpaper e esquemas manuais"
                 baseSize: Style.baseWidgetSize * 0.8
-                colorBg: Settings.data.colorSchemes.useWallpaperColors ? Color.mPrimary : Color.mSurfaceVariant
-                colorFg: Settings.data.colorSchemes.useWallpaperColors ? Color.mOnPrimary : Color.mPrimary
+                colorBg: Settings.data.colorSchemes.useWallpaperColors ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
+                colorFg: Settings.data.colorSchemes.useWallpaperColors ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 onClicked: {
                   Settings.data.colorSchemes.useWallpaperColors = !Settings.data.colorSchemes.useWallpaperColors;
                   if (Settings.data.colorSchemes.useWallpaperColors) {

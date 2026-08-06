@@ -20,6 +20,25 @@ Item {
     var p = root.wallpaperPath.toLowerCase();
     return p.endsWith(".webm") || p.endsWith(".mp4") || p.endsWith(".mkv") || p.endsWith(".mov");
   }
+  property string activeVideoSource: ""
+
+  onWallpaperPathChanged: refreshVideoSource()
+  Component.onCompleted: refreshVideoSource()
+
+  function refreshVideoSource() {
+    videoSourceTimer.stop();
+    activeVideoSource = "";
+    if (isVideoPath && wallpaperPath !== "") {
+      videoSourceTimer.restart();
+    }
+  }
+
+  Timer {
+    id: videoSourceTimer
+    interval: 100
+    repeat: false
+    onTriggered: root.activeVideoSource = root.wallpaperPath.startsWith("/") ? "file://" + root.wallpaperPath : root.wallpaperPath
+  }
 
   signal applyRequested(string path, string fillMode)
 
@@ -31,7 +50,8 @@ Item {
     NBox {
       Layout.fillWidth: true
       Layout.preferredHeight: 48
-      color: Color.mSurfaceVariant
+      color: Color.mSurfaceContainerHigh
+      radius: Style.radiusL
 
       RowLayout {
         anchors.fill: parent
@@ -69,8 +89,10 @@ Item {
           icon: root.previewDarkMode ? "moon" : "sun"
           tooltipText: root.previewDarkMode ? "Modo Claro" : "Modo Escuro"
           baseSize: Style.baseWidgetSize * 0.8
-          colorBg: root.previewDarkMode ? Color.mPrimary : Color.mSurfaceVariant
-          colorFg: root.previewDarkMode ? Color.mOnPrimary : Color.mPrimary
+          colorBg: root.previewDarkMode ? Color.mSecondaryContainer : Color.mSurfaceContainerHighest
+          colorFg: root.previewDarkMode ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+          colorBorder: "transparent"
+          colorBorderHover: "transparent"
           onClicked: root.previewDarkMode = !root.previewDarkMode
         }
 
@@ -100,8 +122,10 @@ Item {
         width: Math.min(screenContainer.width, screenContainer.height * 16 / 9)
         height: Math.min(screenContainer.height, screenContainer.width * 9 / 16)
         anchors.centerIn: parent
-        color: "#0d0e15"
-        radius: Style.radiusM
+        color: Color.mSurfaceContainerHighest
+        radius: Style.radiusL
+        border.color: Qt.alpha(Color.mOutline, 0.35)
+        border.width: Style.borderS
         clip: true
 
       // Live Video Preview Loader
@@ -115,13 +139,15 @@ Item {
 
           MediaPlayer {
             id: previewVideoPlayer
-            source: root.wallpaperPath.startsWith("/") ? "file://" + root.wallpaperPath : root.wallpaperPath
+            source: root.activeVideoSource
             loops: MediaPlayer.Infinite
             videoOutput: previewVideoOutput
             audioOutput: AudioOutput { muted: true }
             onSourceChanged: {
               if (source !== "") {
                 play();
+              } else {
+                stop();
               }
             }
             onMediaStatusChanged: {
@@ -130,6 +156,7 @@ Item {
               }
             }
             Component.onCompleted: play()
+            Component.onDestruction: stop()
           }
 
           VideoOutput {
@@ -151,7 +178,7 @@ Item {
       Image {
         id: bgImage
         anchors.fill: parent
-        source: root.wallpaperPath !== "" ? (root.wallpaperPath.startsWith("/") ? "file://" + root.wallpaperPath : root.wallpaperPath) : ""
+        source: !root.isVideoPath && root.wallpaperPath !== "" ? (root.wallpaperPath.startsWith("/") ? "file://" + root.wallpaperPath : root.wallpaperPath) : ""
         fillMode: {
           switch (root.currentFillMode) {
             case "fit": return Image.PreserveAspectFit;
@@ -170,7 +197,7 @@ Item {
         Rectangle {
           anchors.fill: parent
           visible: bgImage.status !== Image.Ready
-          color: Color.mSurface
+          color: Color.mSurfaceContainer
           NText {
             anchors.centerIn: parent
             text: "Selecione um papel de parede para visualizar"

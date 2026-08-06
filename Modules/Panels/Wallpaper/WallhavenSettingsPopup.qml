@@ -18,9 +18,9 @@ Popup {
     font.pointSize: Style.fontSizeM
   }
 
-  // Dynamic width: use measured ENV placeholder width + input padding, or fallback to 440
-  width: Math.max(440, Math.round(envPlaceholderMetrics.width + (Style.marginL * 4)), Math.round(contentColumn.implicitWidth + Style.margin2L))
-  height: Math.round(contentColumn.implicitHeight + Style.margin2L)
+  // Keep the settings usable on smaller screens and at larger UI scales.
+  width: Math.min(screen ? screen.width * 0.9 : 720, Math.max(440, Math.round(envPlaceholderMetrics.width + (Style.marginL * 4)), Math.round(contentColumn.implicitWidth + Style.margin2L)))
+  height: Math.min(screen ? screen.height * 0.86 : 760, Math.round(contentColumn.implicitHeight + Style.margin2L))
   padding: Style.marginL
   modal: true
   dim: false
@@ -53,23 +53,7 @@ Popup {
       return;
     }
 
-    var width = Settings.data.wallpaper.wallhavenResolutionWidth || "";
-    var height = Settings.data.wallpaper.wallhavenResolutionHeight || "";
-    var mode = Settings.data.wallpaper.wallhavenResolutionMode || "atleast";
-
-    if (width && height) {
-      var resolution = width + "x" + height;
-      if (mode === "atleast") {
-        WallhavenService.minResolution = resolution;
-        WallhavenService.resolutions = "";
-      } else {
-        WallhavenService.minResolution = "";
-        WallhavenService.resolutions = resolution;
-      }
-    } else {
-      WallhavenService.minResolution = "";
-      WallhavenService.resolutions = "";
-    }
+    WallhavenService.syncFromSettings();
 
     // Trigger new search with updated resolution only if requested
     if (triggerSearch && Settings.data.wallpaper.useWallhaven) {
@@ -89,9 +73,18 @@ Popup {
     }
   }
 
-  contentItem: ColumnLayout {
-    id: contentColumn
-    spacing: Style.marginM
+  contentItem: NScrollView {
+    id: settingsScrollView
+    horizontalPolicy: ScrollBar.AlwaysOff
+    verticalPolicy: ScrollBar.AsNeeded
+    reserveScrollbarSpace: true
+    showGradientMasks: true
+    gradientColor: Color.mSurface
+
+    ColumnLayout {
+      id: contentColumn
+      width: settingsScrollView.availableWidth
+      spacing: Style.marginM
 
     // Header
     RowLayout {
@@ -195,7 +188,10 @@ Popup {
         }
 
         function updatePurity(sfw, sketchy, nsfw) {
-          var purity = (sfw ? "1" : "0") + (sketchy ? "1" : "0") + (nsfw ? "1" : "0");
+          if (!sfw && !sketchy && !nsfw) {
+            sfw = true;
+          }
+          const purity = (sfw ? "1" : "0") + (sketchy ? "1" : "0") + (nsfw ? "1" : "0");
           Settings.data.wallpaper.wallhavenPurity = purity;
           // Update checkboxes immediately
           sfwToggle.checked = sfw;
@@ -647,16 +643,7 @@ Popup {
       onClicked: {
         // Ensure all settings are synced to the service
         if (typeof WallhavenService !== "undefined" && Settings.data.wallpaper.useWallhaven) {
-          // Sync all settings to the service
-          WallhavenService.categories = Settings.data.wallpaper.wallhavenCategories;
-          WallhavenService.purity = Settings.data.wallpaper.wallhavenPurity;
-          WallhavenService.sorting = Settings.data.wallpaper.wallhavenSorting;
-          WallhavenService.order = Settings.data.wallpaper.wallhavenOrder;
-          WallhavenService.ratios = Settings.data.wallpaper.wallhavenRatios;
-          WallhavenService.apiKey = Settings.data.wallpaper.wallhavenApiKey;
-
-          // Update resolution settings (without triggering search)
-          updateResolution(false);
+          WallhavenService.syncFromSettings();
 
           // Refresh the wallpaper search with current settings
           WallhavenService.search(Settings.data.wallpaper.wallhavenQuery || "", 1);
@@ -668,5 +655,6 @@ Popup {
         }
       }
     }
+  }
   }
 }

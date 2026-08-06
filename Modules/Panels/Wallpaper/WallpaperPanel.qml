@@ -17,6 +17,8 @@ SmartPanel {
   preferredHeight: 700 * Style.uiScaleRatio
   preferredWidthRatio: 0.72
   preferredHeightRatio: 0.75
+  panelBackgroundColor: Color.mSurface
+  panelBorderColor: Qt.alpha(Color.mOutline, 0.30)
 
   // Positioning
   readonly property string screenBarPosition: Settings.getBarPositionForScreen(screen?.name)
@@ -40,6 +42,12 @@ SmartPanel {
 
   // Store direct reference to content for instant access
   property var contentItem: null
+
+  onClosed: {
+    if (contentItem?.wallhavenView?.previewOverlay) {
+      contentItem.wallhavenView.previewOverlay.hide();
+    }
+  }
 
   // Override keyboard handlers to enable grid navigation
   function onDownPressed() {
@@ -179,24 +187,7 @@ SmartPanel {
       if (typeof WallhavenService === "undefined") {
         return;
       }
-
-      var width = Settings.data.wallpaper.wallhavenResolutionWidth || "";
-      var height = Settings.data.wallpaper.wallhavenResolutionHeight || "";
-      var mode = Settings.data.wallpaper.wallhavenResolutionMode || "atleast";
-
-      if (width && height) {
-        var resolution = width + "x" + height;
-        if (mode === "atleast") {
-          WallhavenService.minResolution = resolution;
-          WallhavenService.resolutions = "";
-        } else {
-          WallhavenService.minResolution = "";
-          WallhavenService.resolutions = resolution;
-        }
-      } else {
-        WallhavenService.minResolution = "";
-        WallhavenService.resolutions = "";
-      }
+      WallhavenService.syncFromSettings();
 
       // Trigger new search with updated resolution
       if (Settings.data.wallpaper.useWallhaven) {
@@ -267,6 +258,9 @@ SmartPanel {
         panelContent.appearanceTabIndex = Settings.data.colorSchemes.darkMode ? 1 : 0;
         WallpaperService.wallpaperSelectionAppearance = panelContent.appearanceTabIndex === 1 ? "dark" : "light";
         panelContent.previewOverridePath = WallpaperService.getWallpaper(panelContent.currentScreen?.name ?? "") || "";
+        if (Settings.data.wallpaper.useWallhaven && wallhavenView && (!wallhavenView.initialized || wallhavenView.wallpapers.length === 0)) {
+          Qt.callLater(() => wallhavenView.activate(false));
+        }
         // Give initial focus to search input
         Qt.callLater(() => {
                        if (searchInput.inputItem) {
@@ -321,7 +315,8 @@ SmartPanel {
         NBox {
           Layout.fillWidth: true
           Layout.preferredHeight: headerColumn.implicitHeight + Style.margin2L
-          color: Color.mSurfaceVariant
+          color: Color.mSurfaceContainerLow
+          radius: Style.radiusL
 
           ColumnLayout {
             id: headerColumn
@@ -352,8 +347,10 @@ SmartPanel {
                 icon: "dark-mode"
                 tooltipText: Settings.data.wallpaper.linkLightAndDarkWallpapers ? I18n.tr("wallpaper.panel.header-separate-light-dark-tooltip") : I18n.tr("wallpaper.panel.header-link-light-dark-tooltip")
                 baseSize: Style.baseWidgetSize * 0.8
-                colorBg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mPrimary : Color.smartAlpha(Color.mSurfaceVariant)
-                colorFg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mOnPrimary : Color.mPrimary
+                colorBg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
+                colorFg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 onClicked: Settings.data.wallpaper.linkLightAndDarkWallpapers = !Settings.data.wallpaper.linkLightAndDarkWallpapers
               }
 
@@ -362,8 +359,10 @@ SmartPanel {
                 icon: "devices"
                 tooltipText: Settings.data.wallpaper.setWallpaperOnAllMonitors ? I18n.tr("wallpaper.panel.header-devices-apply-all-tooltip") : I18n.tr("wallpaper.panel.header-devices-per-monitor-tooltip")
                 baseSize: Style.baseWidgetSize * 0.8
-                colorBg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mPrimary : Color.smartAlpha(Color.mSurfaceVariant)
-                colorFg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mOnPrimary : Color.mPrimary
+                colorBg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
+                colorFg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 onClicked: Settings.data.wallpaper.setWallpaperOnAllMonitors = !Settings.data.wallpaper.setWallpaperOnAllMonitors
               }
 
@@ -371,6 +370,12 @@ SmartPanel {
                 icon: "folder-open"
                 tooltipText: "Importar Wallpaper Local (Vídeo Animado ou Imagem)"
                 baseSize: Style.baseWidgetSize * 0.8
+                colorBg: Color.mSurfaceContainerHigh
+                colorBgHover: Color.mSecondaryContainer
+                colorFg: Color.mOnSurfaceVariant
+                colorFgHover: Color.mOnSecondaryContainer
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 onClicked: localWallpaperFilePicker.open()
               }
 
@@ -378,8 +383,10 @@ SmartPanel {
                 icon: "palette"
                 tooltipText: I18n.tr("wallpaper.panel.solid-color-tooltip")
                 baseSize: Style.baseWidgetSize * 0.8
-                colorBg: Settings.data.wallpaper.useSolidColor ? Color.mPrimary : Color.mSurfaceVariant
-                colorFg: Settings.data.wallpaper.useSolidColor ? Color.mOnPrimary : Color.mPrimary
+                colorBg: Settings.data.wallpaper.useSolidColor ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
+                colorFg: Settings.data.wallpaper.useSolidColor ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 onClicked: solidColorPicker.open()
               }
 
@@ -387,6 +394,12 @@ SmartPanel {
                 icon: "settings"
                 tooltipText: I18n.tr("panels.wallpaper.settings-title")
                 baseSize: Style.baseWidgetSize * 0.8
+                colorBg: Color.mSurfaceContainerHigh
+                colorBgHover: Color.mSecondaryContainer
+                colorFg: Color.mOnSurfaceVariant
+                colorFgHover: Color.mOnSecondaryContainer
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 onClicked: {
                   var settingsPanel = PanelService.getPanel("settingsPanel", screen);
                   settingsPanel.requestedTab = SettingsPanel.Tab.Wallpaper;
@@ -398,19 +411,26 @@ SmartPanel {
                 icon: "close"
                 tooltipText: I18n.tr("common.close")
                 baseSize: Style.baseWidgetSize * 0.8
+                colorBg: Color.mSurfaceContainerHigh
+                colorBgHover: Color.mSecondaryContainer
+                colorFg: Color.mOnSurfaceVariant
+                colorFgHover: Color.mOnSecondaryContainer
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 onClicked: root.close()
               }
             }
 
             NDivider {
               Layout.fillWidth: true
+              opacity: 0.35
             }
 
             NTabBar {
               id: mainViewTabBar
               Layout.fillWidth: true
               currentIndex: 0
-              spacing: Style.marginM
+              spacing: Style.marginXS
               distributeEvenly: true
 
               NTabButton {
@@ -435,7 +455,7 @@ SmartPanel {
               visible: mainViewTabBar.currentIndex === 0 && Settings.data.wallpaper.enabled && !Settings.data.wallpaper.linkLightAndDarkWallpapers
               Layout.fillWidth: true
               currentIndex: panelContent.appearanceTabIndex
-              spacing: Style.marginM
+              spacing: Style.marginXS
               distributeEvenly: true
 
               onCurrentIndexChanged: {
@@ -465,7 +485,7 @@ SmartPanel {
               Layout.fillWidth: true
               currentIndex: currentScreenIndex
               onCurrentIndexChanged: currentScreenIndex = currentIndex
-              spacing: Style.marginM
+              spacing: Style.marginXS
               distributeEvenly: true
 
               Repeater {
@@ -490,6 +510,7 @@ SmartPanel {
 
               NTextInput {
                 id: searchInput
+                inputIconName: "search"
                 placeholderText: Settings.data.wallpaper.useWallhaven ? I18n.tr("placeholders.search-wallhaven") : I18n.tr("placeholders.search-wallpapers")
                 fontSize: Style.fontSizeM
                 Layout.fillWidth: true
@@ -516,11 +537,15 @@ SmartPanel {
                   target: Settings.data.wallpaper
                   function onUseWallhavenChanged() {
                     // Update text when mode changes
+                    searchInput.initializing = true;
                     if (Settings.data.wallpaper.useWallhaven) {
                       searchInput.text = Settings.data.wallpaper.wallhavenQuery || "";
+                      Qt.callLater(() => wallhavenView.activate(false));
                     } else {
                       searchInput.text = panelContent.filterText || "";
+                      wallhavenView.previewOverlay.hide();
                     }
+                    Qt.callLater(() => searchInput.initializing = false);
                   }
                 }
 
@@ -569,6 +594,12 @@ SmartPanel {
                 icon: "color-swatch"
                 tooltipText: Settings.data.colorSchemes.useWallpaperColors ? I18n.tr("wallpaper.panel.color-extraction-enabled") : I18n.tr("wallpaper.panel.color-extraction-disabled")
                 baseSize: Style.baseWidgetSize * 0.8
+                colorBg: Settings.data.colorSchemes.useWallpaperColors ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
+                colorBgHover: Color.mSecondaryContainer
+                colorFg: Settings.data.colorSchemes.useWallpaperColors ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+                colorFgHover: Color.mOnSecondaryContainer
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 onClicked: {
                   Settings.data.colorSchemes.useWallpaperColors = !Settings.data.colorSchemes.useWallpaperColors;
                   if (Settings.data.colorSchemes.useWallpaperColors) {
@@ -652,7 +683,11 @@ SmartPanel {
                   },
                   {
                     "key": "moewalls",
-                    "name": "MoeWalls (Live)"
+                    "name": I18n.tr("wallpaper.panel.source-moewalls")
+                  },
+                  {
+                    "key": "motionbgs",
+                    "name": I18n.tr("wallpaper.panel.source-motionbgs")
                   }
                 ]
                 currentKey: panelContent.activeSourceKey
@@ -668,6 +703,12 @@ SmartPanel {
                 icon: "settings"
                 tooltipText: I18n.tr("wallpaper.panel.wallhaven-settings-title")
                 baseSize: Style.baseWidgetSize * 0.8
+                colorBg: Color.mSurfaceContainerHigh
+                colorBgHover: Color.mSecondaryContainer
+                colorFg: Color.mOnSurfaceVariant
+                colorFgHover: Color.mOnSecondaryContainer
+                colorBorder: "transparent"
+                colorBorderHover: "transparent"
                 visible: Settings.data.wallpaper.useWallhaven
                 onClicked: {
                   if (searchInput.inputItem) {
@@ -693,7 +734,8 @@ SmartPanel {
         NBox {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceVariant
+          color: Color.mSurfaceContainerLow
+          radius: Style.radiusL
 
           StackLayout {
             id: contentStack
@@ -702,9 +744,11 @@ SmartPanel {
 
             currentIndex: {
               if (mainViewTabBar.currentIndex === 1)
-                return 3;
-              if (mainViewTabBar.currentIndex === 2)
                 return 4;
+              if (mainViewTabBar.currentIndex === 2)
+                return 5;
+              if (panelContent.activeSourceKey === "motionbgs")
+                return 3;
               if (panelContent.activeSourceKey === "moewalls")
                 return 2;
               if (Settings.data.wallpaper.useWallhaven)
@@ -737,14 +781,20 @@ SmartPanel {
               screenName: currentScreen?.name ?? ""
             }
 
-            // Wallpaper Grading & Filters (index 3)
+            // MotionBGS Live Video Wallpapers (index 3)
+            MotionBgsView {
+              id: motionBgsView
+              screenName: currentScreen?.name ?? ""
+            }
+
+            // Wallpaper Grading & Filters (index 4)
             WallpaperGradingCard {
               id: wallpaperGradingCard
               wallpaperPath: panelContent.effectivePreviewWallpaperPath
               screenName: currentScreen?.name ?? ""
             }
 
-            // Extracted Palette Sheet (index 4)
+            // Extracted Palette Sheet (index 5)
             WallpaperPaletteSheet {
               id: wallpaperPaletteSheet
               wallpaperPath: panelContent.effectivePreviewWallpaperPath
@@ -759,8 +809,8 @@ SmartPanel {
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.preferredWidth: 38
-        color: Color.mSurfaceVariant
-        radius: Style.radiusM
+        color: Color.mSurfaceContainerLow
+        radius: Style.radiusL
 
         ColumnLayout {
           anchors.fill: parent
@@ -787,6 +837,7 @@ SmartPanel {
 
           NDivider {
             Layout.fillWidth: true
+            opacity: 0.35
           }
 
           MockDesktopPreview {
@@ -1254,6 +1305,9 @@ SmartPanel {
           id: wallpaperItemWrapper
           width: wallpaperGridView.cellWidth
           height: wallpaperGridView.cellHeight
+          Accessible.role: Accessible.ListItem
+          Accessible.name: wallpaperItem.filename
+          Accessible.selected: wallpaperItem.isSelected || wallpaperGridView.currentIndex === index
 
           ColumnLayout {
             id: wallpaperItem
@@ -1296,11 +1350,11 @@ SmartPanel {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 height: imageContainer.imageHeight
-                color: Color.mSurfaceVariant
-                radius: Style.radiusM
+                color: Color.mSurfaceContainerHigh
+                radius: Style.radiusL
                 visible: wallpaperItem.isDirectory
-                border.color: wallpaperGridView.currentIndex === index ? Color.mHover : Color.mSurface
-                border.width: Math.max(1, Style.borderL * 1.5)
+                border.color: wallpaperGridView.currentIndex === index ? Color.mPrimary : "transparent"
+                border.width: wallpaperGridView.currentIndex === index ? Style.borderL : 0
 
                 ColumnLayout {
                   anchors.centerIn: parent
@@ -1324,17 +1378,17 @@ SmartPanel {
                 height: imageContainer.imageHeight
                 visible: !wallpaperItem.isDirectory
                 imagePath: wallpaperItem.cachedPath
-                radius: Style.radiusM
+                radius: Style.radiusL
                 borderColor: {
                   if (wallpaperItem.isSelected) {
-                    return Color.mSecondary;
+                    return Color.mPrimary;
                   }
                   if (wallpaperGridView.currentIndex === index) {
-                    return Color.mHover;
+                    return Color.mPrimary;
                   }
-                  return Color.mSurface;
+                  return "transparent";
                 }
-                borderWidth: Math.max(1, Style.borderL * 1.5)
+                borderWidth: (wallpaperItem.isSelected || wallpaperGridView.currentIndex === index) ? Style.borderL : 0
                 imageFillMode: Image.PreserveAspectCrop
               }
 
@@ -1344,8 +1398,8 @@ SmartPanel {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 height: imageContainer.imageHeight
-                color: Color.mSurfaceVariant
-                radius: Style.radiusM
+                color: Color.mSurfaceContainerHigh
+                radius: Style.radiusL
                 visible: !wallpaperItem.isDirectory && (img.status === Image.Loading || img.status === Image.Error || wallpaperItem.cachedPath === "")
 
                 NIcon {
@@ -1372,15 +1426,15 @@ SmartPanel {
                 height: 28
                 radius: width / 2
                 z: 6
-                color: Color.mSecondary
-                border.color: Color.mOutline
-                border.width: Style.borderS
+                color: Color.mPrimaryContainer
+                border.color: "transparent"
+                border.width: 0
                 visible: wallpaperItem.isSelected
 
                 NIcon {
                   icon: "check"
                   pointSize: Style.fontSizeM
-                  color: Color.mOnSecondary
+                  color: Color.mOnPrimaryContainer
                   anchors.centerIn: parent
                 }
 
@@ -1401,8 +1455,8 @@ SmartPanel {
                 visible: !wallpaperItem.isDirectory && (wallpaperItem.isFavorited || hoverHandler.hovered || wallpaperGridView.currentIndex === index)
                 color: {
                   if (wallpaperItem.isFavorited)
-                    return starHoverHandler.hovered ? Color.mHover : Color.mPrimary;
-                  return starHoverHandler.hovered ? Color.mSurfaceVariant : Color.mSurface;
+                    return starHoverHandler.hovered ? Color.mPrimaryContainer : Color.mSecondaryContainer;
+                  return starHoverHandler.hovered ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh;
                 }
                 opacity: wallpaperItem.isFavorited || starHoverHandler.hovered ? 1.0 : 0.7
                 z: 11
@@ -1423,7 +1477,7 @@ SmartPanel {
                   pointSize: Style.fontSizeM
                   color: {
                     if (wallpaperItem.isFavorited)
-                      return starHoverHandler.hovered ? Color.mOnHover : Color.mOnPrimary;
+                      return starHoverHandler.hovered ? Color.mOnPrimaryContainer : Color.mOnSecondaryContainer;
                     return starHoverHandler.hovered ? Color.mOnSurface : Color.mOnSurfaceVariant;
                   }
                   anchors.centerIn: parent
@@ -1531,8 +1585,8 @@ SmartPanel {
                 anchors.top: parent.top
                 height: imageContainer.imageHeight
                 color: Color.mSurface
-                radius: Style.radiusM
-                opacity: (hoverHandler.hovered || wallpaperItem.isSelected || wallpaperGridView.currentIndex === index) ? 0 : 0.3
+                radius: Style.radiusL
+                opacity: (hoverHandler.hovered || wallpaperItem.isSelected || wallpaperGridView.currentIndex === index) ? 0 : 0.18
                 Behavior on opacity {
                   NumberAnimation {
                     duration: Style.animationFast
@@ -1571,10 +1625,10 @@ SmartPanel {
 
       // Empty / scanning state
       Rectangle {
-        color: Color.mSurface
-        radius: Style.radiusM
-        border.color: Color.mOutline
-        border.width: Style.borderS
+        color: Color.mSurfaceContainerLow
+        radius: Style.radiusL
+        border.color: "transparent"
+        border.width: 0
         visible: (wallpaperModel.count === 0 && !WallpaperService.scanning) || WallpaperService.scanning
         Layout.fillWidth: true
         Layout.preferredHeight: 130
@@ -1630,7 +1684,6 @@ SmartPanel {
     property bool loading: false
     property string errorMessage: ""
     property bool initialized: false
-    property bool searchScheduled: false
 
     Connections {
       target: typeof WallhavenService !== "undefined" ? WallhavenService : null
@@ -1638,58 +1691,30 @@ SmartPanel {
         wallhavenViewRoot.wallpapers = results || [];
         wallhavenViewRoot.loading = false;
         wallhavenViewRoot.errorMessage = "";
-        wallhavenViewRoot.searchScheduled = false;
       }
       function onSearchFailed(error) {
         wallhavenViewRoot.loading = false;
         wallhavenViewRoot.errorMessage = error || "";
-        wallhavenViewRoot.searchScheduled = false;
       }
     }
 
     Component.onCompleted: {
-      // Initialize service properties and perform initial search if Wallhaven is active
-      if (typeof WallhavenService !== "undefined" && Settings.data.wallpaper.useWallhaven && !initialized) {
-        // Set flags immediately to prevent race conditions
-        if (WallhavenService.initialSearchScheduled) {
-          // Another instance already scheduled the search, just initialize properties
-          initialized = true;
-          return;
-        }
-
-        // We're the first one - claim the search
-        initialized = true;
-        WallhavenService.initialSearchScheduled = true;
-        WallhavenService.categories = Settings.data.wallpaper.wallhavenCategories;
-        WallhavenService.purity = Settings.data.wallpaper.wallhavenPurity;
-        WallhavenService.sorting = Settings.data.wallpaper.wallhavenSorting;
-        WallhavenService.order = Settings.data.wallpaper.wallhavenOrder;
-        WallhavenService.topRange = Settings.data.wallpaper.wallhavenTopRange || "1M";
-        WallhavenService.colors = Settings.data.wallpaper.wallhavenColors || "";
-
-        // Initialize resolution settings
-        var width = Settings.data.wallpaper.wallhavenResolutionWidth || "";
-        var height = Settings.data.wallpaper.wallhavenResolutionHeight || "";
-        var mode = Settings.data.wallpaper.wallhavenResolutionMode || "atleast";
-        if (width && height) {
-          var resolution = width + "x" + height;
-          if (mode === "atleast") {
-            WallhavenService.minResolution = resolution;
-            WallhavenService.resolutions = "";
-          } else {
-            WallhavenService.minResolution = "";
-            WallhavenService.resolutions = resolution;
-          }
-        } else {
-          WallhavenService.minResolution = "";
-          WallhavenService.resolutions = "";
-        }
-
-        // Now check if we can actually search (fetching check is in WallhavenService.search)
-        // Use persisted currentPage to maintain state across window reopening
-        loading = true;
-        WallhavenService.search(Settings.data.wallpaper.wallhavenQuery || "", WallhavenService.currentPage);
+      if (Settings.data.wallpaper.useWallhaven) {
+        activate(false);
       }
+    }
+
+    function activate(forceRefresh) {
+      if (typeof WallhavenService === "undefined") {
+        return;
+      }
+      initialized = true;
+      loading = true;
+      errorMessage = "";
+      WallhavenService.syncFromSettings();
+      const query = Settings.data.wallpaper.wallhavenQuery || "";
+      const page = WallhavenService.currentQuery === query ? WallhavenService.currentPage : 1;
+      WallhavenService.search(query, page, forceRefresh === true);
     }
 
     ColumnLayout {
@@ -1724,7 +1749,7 @@ SmartPanel {
             positionViewAtBeginning();
           }
 
-          property int columns: (screen.width > 1920) ? 5 : 4
+          property int columns: Math.max(2, Math.min(6, Math.floor(availableWidth / (190 * Style.uiScaleRatio))))
           property int itemSize: cellWidth
 
           cellWidth: Math.floor((availableWidth - leftMargin - rightMargin) / columns)
@@ -1755,14 +1780,18 @@ SmartPanel {
             id: wallhavenItemWrapper
             width: wallhavenGridView.cellWidth
             height: wallhavenGridView.cellHeight
+            Accessible.role: Accessible.ListItem
+            Accessible.name: wallhavenItem.wallpaperId
+            Accessible.selected: wallhavenGridView.currentIndex === index
 
-            ColumnLayout {
-              id: wallhavenItem
-              anchors.fill: parent
-              anchors.margins: Style.marginXS
+              ColumnLayout {
+                id: wallhavenItem
+                anchors.fill: parent
+                anchors.margins: Style.marginXS
 
-              property string thumbnailUrl: (modelData && typeof WallhavenService !== "undefined") ? WallhavenService.getThumbnailUrl(modelData, "large") : ""
-              property string wallpaperId: (modelData && modelData.id) ? modelData.id : ""
+                property string thumbnailUrl: (modelData && typeof WallhavenService !== "undefined") ? WallhavenService.getThumbnailUrl(modelData, "large") : ""
+                property string wallpaperId: (modelData && modelData.id) ? modelData.id : ""
+                readonly property bool downloading: typeof WallhavenService !== "undefined" && WallhavenService.isDownloading(wallpaperId)
 
               spacing: Style.marginXS
 
@@ -1780,14 +1809,14 @@ SmartPanel {
                   anchors.top: parent.top
                   height: imageContainer.imageHeight
                   imagePath: wallhavenItem.thumbnailUrl
-                  radius: Style.radiusM
+                  radius: Style.radiusL
                   borderColor: {
                     if (wallhavenGridView.currentIndex === index) {
-                      return Color.mHover;
+                      return Color.mPrimary;
                     }
-                    return Color.mSurface;
+                    return "transparent";
                   }
-                  borderWidth: Math.max(1, Style.borderL * 1.5)
+                  borderWidth: wallhavenGridView.currentIndex === index ? Style.borderL : 0
                   imageFillMode: Image.PreserveAspectCrop
                 }
 
@@ -1797,8 +1826,8 @@ SmartPanel {
                   anchors.right: parent.right
                   anchors.top: parent.top
                   height: imageContainer.imageHeight
-                  color: Color.mSurfaceVariant
-                  radius: Style.radiusM
+                  color: Color.mSurfaceContainerHigh
+                  radius: Style.radiusL
                   visible: img.status === Image.Loading || img.status === Image.Error || wallhavenItem.thumbnailUrl === ""
 
                   NIcon {
@@ -1812,9 +1841,10 @@ SmartPanel {
                 NBusyIndicator {
                   anchors.horizontalCenter: parent.horizontalCenter
                   y: (imageContainer.imageHeight - height) / 2
-                  visible: img.status === Image.Loading
+                  visible: img.status === Image.Loading || wallhavenItem.downloading
                   running: visible
                   size: 18
+                  z: 12
                 }
 
                 Rectangle {
@@ -1823,8 +1853,8 @@ SmartPanel {
                   anchors.top: parent.top
                   height: imageContainer.imageHeight
                   color: Color.mSurface
-                  radius: Style.radiusM
-                  opacity: (hoverHandler.hovered || wallhavenGridView.currentIndex === index) ? 0 : 0.3
+                  radius: Style.radiusL
+                  opacity: (hoverHandler.hovered || wallhavenGridView.currentIndex === index) ? 0 : 0.18
                   Behavior on opacity {
                     NumberAnimation {
                       duration: Style.animationFast
@@ -1843,13 +1873,12 @@ SmartPanel {
                   onTriggered: {
                     if (wallhavenViewRoot.previewOverlay) {
                       wallhavenViewRoot.previewOverlay.show(modelData);
-                    } else {
-                      console.log("previewOverlay is null!");
                     }
                   }
                 }
 
                 TapHandler {
+                  enabled: !wallhavenItem.downloading
                   onTapped: {
                     wallhavenGridView.forceActiveFocus();
                     wallhavenGridView.currentIndex = index;
@@ -1877,10 +1906,10 @@ SmartPanel {
         // Loading overlay - fills same space as GridView to prevent jumping
         Rectangle {
           anchors.fill: parent
-          color: Color.mSurface
-          radius: Style.radiusM
-          border.color: Color.mOutline
-          border.width: Style.borderS
+          color: Color.mSurfaceContainerLow
+          radius: Style.radiusL
+          border.color: "transparent"
+          border.width: 0
           visible: loading || (typeof WallhavenService !== "undefined" && WallhavenService.fetching)
           z: 10
 
@@ -1900,7 +1929,9 @@ SmartPanel {
             }
 
             NText {
-              text: I18n.tr("wallpaper.wallhaven.loading")
+              text: WallhavenService.retrySeconds > 0
+                ? I18n.tr("wallpaper.wallhaven.retrying", { seconds: WallhavenService.retrySeconds })
+                : I18n.tr("wallpaper.wallhaven.loading")
               color: Color.mOnSurfaceVariant
               pointSize: Style.fontSizeM
               Layout.alignment: Qt.AlignHCenter
@@ -1915,10 +1946,10 @@ SmartPanel {
         // Error overlay
         Rectangle {
           anchors.fill: parent
-          color: Color.mSurface
-          radius: Style.radiusM
-          border.color: Color.mOutline
-          border.width: Style.borderS
+          color: Color.mSurfaceContainerLow
+          radius: Style.radiusL
+          border.color: "transparent"
+          border.width: 0
           visible: errorMessage !== "" && !loading
           z: 10
 
@@ -1947,6 +1978,13 @@ SmartPanel {
               horizontalAlignment: Text.AlignHCenter
             }
 
+            NButton {
+              text: I18n.tr("common.retry")
+              icon: "refresh"
+              Layout.alignment: Qt.AlignHCenter
+              onClicked: wallhavenViewRoot.activate(true)
+            }
+
             Item {
               Layout.fillHeight: true
             }
@@ -1956,10 +1994,10 @@ SmartPanel {
         // Empty state overlay
         Rectangle {
           anchors.fill: parent
-          color: Color.mSurface
-          radius: Style.radiusM
-          border.color: Color.mOutline
-          border.width: Style.borderS
+          color: Color.mSurfaceContainerLow
+          radius: Style.radiusL
+          border.color: "transparent"
+          border.width: 0
           visible: (!wallpapers || wallpapers.length === 0) && !loading && errorMessage === ""
           z: 10
 
@@ -2007,6 +2045,12 @@ SmartPanel {
 
         NIconButton {
           icon: "chevron-left"
+          colorBg: Color.mSurfaceContainerHigh
+          colorBgHover: Color.mSecondaryContainer
+          colorFg: Color.mOnSurfaceVariant
+          colorFgHover: Color.mOnSecondaryContainer
+          colorBorder: "transparent"
+          colorBorderHover: "transparent"
           enabled: !loading && WallhavenService.currentPage > 1 && !WallhavenService.fetching
           onClicked: WallhavenService.previousPage()
         }
@@ -2061,11 +2105,30 @@ SmartPanel {
           }
         }
 
-        NIconButton {
-          icon: "chevron-right"
+          NIconButton {
+            icon: "chevron-right"
+          colorBg: Color.mSurfaceContainerHigh
+          colorBgHover: Color.mSecondaryContainer
+          colorFg: Color.mOnSurfaceVariant
+          colorFgHover: Color.mOnSecondaryContainer
+          colorBorder: "transparent"
+          colorBorderHover: "transparent"
           enabled: WallhavenService.currentPage < WallhavenService.lastPage && !WallhavenService.fetching
-          onClicked: WallhavenService.nextPage()
-        }
+            onClicked: WallhavenService.nextPage()
+          }
+
+          NIconButton {
+            icon: "refresh"
+            tooltipText: I18n.tr("tooltips.refresh-wallhaven")
+            colorBg: Color.mSurfaceContainerHigh
+            colorBgHover: Color.mSecondaryContainer
+            colorFg: Color.mOnSurfaceVariant
+            colorFgHover: Color.mOnSecondaryContainer
+            colorBorder: "transparent"
+            colorBorderHover: "transparent"
+            enabled: !WallhavenService.fetching
+            onClicked: wallhavenViewRoot.activate(true)
+          }
 
         Item {
           Layout.fillWidth: true
@@ -2076,15 +2139,19 @@ SmartPanel {
     // -------------------------------
     function wallhavenDownloadAndApply(wallpaper, targetScreen) {
       if (typeof WallhavenService !== "undefined") {
+        const applyToAll = Settings.data.wallpaper.setWallpaperOnAllMonitors;
+        const selectedScreen = currentScreenIndex >= 0 && currentScreenIndex < Quickshell.screens.length
+          ? Quickshell.screens[currentScreenIndex]
+          : null;
+        const explicitScreenName = typeof targetScreen === "string" ? targetScreen : targetScreen?.name;
+        const screenName = applyToAll ? undefined : (explicitScreenName || selectedScreen?.name);
+        const appearance = WallpaperService.wallpaperSelectionAppearance;
         WallhavenService.downloadWallpaper(wallpaper, function (success, localPath) {
           if (success) {
-            var whScreen = Settings.data.wallpaper.setWallpaperOnAllMonitors ? undefined : Quickshell.screens[currentScreenIndex].name;
-            if (!Settings.data.wallpaper.setWallpaperOnAllMonitors && currentScreenIndex < Quickshell.screens.length) {
-              WallpaperService.changeWallpaper(localPath, Quickshell.screens[currentScreenIndex].name, WallpaperService.wallpaperSelectionAppearance);
-            } else {
-              WallpaperService.changeWallpaper(localPath, undefined, WallpaperService.wallpaperSelectionAppearance);
-            }
-            WallpaperService.applyFavoriteTheme(localPath, whScreen, WallpaperService.wallpaperSelectionAppearance);
+            WallpaperService.changeWallpaper(localPath, screenName, appearance);
+            WallpaperService.applyFavoriteTheme(localPath, screenName, appearance);
+          } else {
+            ToastService.showError("Wallhaven", I18n.tr("wallpaper.wallhaven.download-failed"));
           }
         });
       }

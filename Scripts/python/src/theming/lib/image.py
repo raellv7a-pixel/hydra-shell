@@ -1,16 +1,21 @@
 """
-Image reading utilities for PNG and JPEG files.
+Image and video-frame reading utilities for wallpaper color extraction.
 
-This module provides functions for extracting RGB pixels from image files
-without external dependencies (except ImageMagick for fallback).
+This module extracts bounded RGB samples with ImageMagick for still images and
+FFmpeg for a single representative frame of video wallpapers.
 """
 
 import struct
+import subprocess
 import zlib
 from pathlib import Path
 
 # Type alias
 RGB = tuple[int, int, int]
+
+_VIDEO_SUFFIXES = frozenset({'.mp4', '.webm', '.mkv', '.mov'})
+_COLOR_SAMPLE_SIZE = "112x112"
+_PROCESS_TIMEOUT_SECONDS = 30
 
 
 class ImageReadError(Exception):
@@ -241,8 +246,6 @@ def _read_image_imagemagick(path: Path, resize_filter: str = "Triangle") -> list
     Converts image to PPM format (trivial to parse) and extracts RGB pixels.
     This method works accurately for any image format ImageMagick supports.
     """
-    import subprocess
-
     # Use magick or convert command
     # -depth 8: 8 bits per channel
     # -resize: downsample for performance (we don't need full resolution for color extraction)
@@ -252,7 +255,7 @@ def _read_image_imagemagick(path: Path, resize_filter: str = "Triangle") -> list
     # Use -filter Triangle (bilinear) for M3 schemes to match matugen's FilterType::Triangle default
     # Use -filter Box for k-means schemes (sharper, preserves distinct color regions)
     # Use -depth 8 -colorspace sRGB -strip to reduce variance between HDRI/non-HDRI builds
-    resize_spec = "112x112!"
+    resize_spec = f"{_COLOR_SAMPLE_SIZE}!"
 
     try:
         # Try 'magick' first (ImageMagick 7+), fallback to 'convert' (ImageMagick 6)
@@ -261,22 +264,79 @@ def _read_image_imagemagick(path: Path, resize_filter: str = "Triangle") -> list
                 ['magick', str(path), '-filter', resize_filter, '-resize', resize_spec,
                  '-depth', '8', '-colorspace', 'sRGB', '-strip', 'ppm:-'],
                 capture_output=True,
-                check=True
+                check=True,
+                timeout=_PROCESS_TIMEOUT_SECONDS
             )
         except FileNotFoundError:
             result = subprocess.run(
                 ['convert', str(path), '-filter', resize_filter, '-resize', resize_spec,
                  '-depth', '8', '-colorspace', 'sRGB', '-strip', 'ppm:-'],
                 capture_output=True,
-                check=True
+                check=True,
+                timeout=_PROCESS_TIMEOUT_SECONDS
             )
     except subprocess.CalledProcessError as e:
         raise ImageReadError(f"ImageMagick failed: {e.stderr.decode()}")
+    except subprocess.TimeoutExpired as e:
+        raise ImageReadError(
+            f"ImageMagick timed out after {_PROCESS_TIMEOUT_SECONDS} seconds"
+        ) from e
     except FileNotFoundError:
         raise ImageReadError("ImageMagick not found. Please install imagemagick.")
 
     ppm_data = result.stdout
     return _parse_ppm(ppm_data)
+
+
+def _read_video_frame_ffmpeg(path: Path, resize_filter: str = "Triangle") -> list[RGB]:
+    """Extract one bounded color-sampling frame from a video with FFmpeg."""
+    scale_filter = "bilinear" if resize_filter == "Triangle" else "area"
+
+    def extract_frame(seek_seconds: str | None) -> bytes:
+        command = ['ffmpeg', '-v', 'error', '-threads', '2']
+        if seek_seconds is not None:
+            command.extend(['-ss', seek_seconds])
+        command.extend([
+            '-i', str(path),
+            '-map', '0:v:0',
+            '-frames:v', '1',
+            '-vf', f'scale={_COLOR_SAMPLE_SIZE}:flags={scale_filter}',
+            '-an', '-sn', '-dn',
+            '-f', 'image2pipe',
+            '-vcodec', 'ppm',
+            'pipe:1',
+        ])
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            check=True,
+            timeout=_PROCESS_TIMEOUT_SECONDS,
+        )
+        return result.stdout
+
+    last_process_error: subprocess.CalledProcessError | None = None
+    for seek_seconds in ('1', None):
+        try:
+            ppm_data = extract_frame(seek_seconds)
+        except subprocess.CalledProcessError as e:
+            last_process_error = e
+            continue
+        except subprocess.TimeoutExpired as e:
+            raise ImageReadError(
+                f"FFmpeg timed out after {_PROCESS_TIMEOUT_SECONDS} seconds"
+            ) from e
+        except FileNotFoundError as e:
+            raise ImageReadError(
+                "FFmpeg not found. Please install ffmpeg to extract colors from videos."
+            ) from e
+
+        if ppm_data:
+            return _parse_ppm(ppm_data)
+
+    if last_process_error is not None:
+        stderr = (last_process_error.stderr or b'').decode(errors='replace').strip()
+        raise ImageReadError(f"FFmpeg failed: {stderr}") from last_process_error
+    raise ImageReadError("FFmpeg produced no video frame")
 
 
 def _parse_ppm(data: bytes) -> list[RGB]:
@@ -346,7 +406,7 @@ def read_image(path: Path, resize_filter: str = "Triangle") -> list[RGB]:
     """
     Read an image file and return its pixels as RGB tuples.
 
-    Uses ImageMagick for accurate color extraction from any format.
+    Uses FFmpeg for one bounded video frame and ImageMagick for still images.
     Falls back to native PNG parsing if ImageMagick is unavailable.
 
     Args:
@@ -355,6 +415,9 @@ def read_image(path: Path, resize_filter: str = "Triangle") -> list[RGB]:
                        (matches matugen), "Box" for k-means schemes.
     """
     suffix = path.suffix.lower()
+
+    if suffix in _VIDEO_SUFFIXES:
+        return _read_video_frame_ffmpeg(path, resize_filter)
 
     # Try ImageMagick first (works for any format)
     try:

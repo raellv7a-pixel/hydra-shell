@@ -21,6 +21,7 @@ Item {
   property string activePreset: "Original"
   property string previewImagePath: ""
   property bool isBaking: false
+  readonly property bool isVideoWallpaper: isVideoPath(wallpaperPath)
 
   Timer {
     id: bakeDebounceTimer
@@ -29,12 +30,34 @@ Item {
     onTriggered: root.bakePreview()
   }
 
-  onWallpaperPathChanged: bakeDebounceTimer.restart()
-  onBrightnessValueChanged: bakeDebounceTimer.restart()
-  onContrastValueChanged: bakeDebounceTimer.restart()
-  onSaturationValueChanged: bakeDebounceTimer.restart()
-  onWarmthValueChanged: bakeDebounceTimer.restart()
-  onVignetteActiveChanged: bakeDebounceTimer.restart()
+  onWallpaperPathChanged: schedulePreviewBake()
+  onBrightnessValueChanged: schedulePreviewBake()
+  onContrastValueChanged: schedulePreviewBake()
+  onSaturationValueChanged: schedulePreviewBake()
+  onWarmthValueChanged: schedulePreviewBake()
+  onVignetteActiveChanged: schedulePreviewBake()
+
+  Component.onDestruction: {
+    bakeDebounceTimer.stop();
+    bakeProc.running = false;
+    applyProc.running = false;
+  }
+
+  function isVideoPath(path) {
+    const lowerPath = (path || "").toLowerCase();
+    return lowerPath.endsWith(".mp4") || lowerPath.endsWith(".webm") || lowerPath.endsWith(".mkv") || lowerPath.endsWith(".mov");
+  }
+
+  function schedulePreviewBake() {
+    if (isVideoWallpaper) {
+      bakeDebounceTimer.stop();
+      bakeProc.running = false;
+      previewImagePath = "";
+      isBaking = false;
+      return;
+    }
+    bakeDebounceTimer.restart();
+  }
 
   function resetGrading() {
     brightnessValue = 0.0;
@@ -127,7 +150,7 @@ Item {
   }
 
   function bakePreview() {
-    if (wallpaperPath === "") return;
+    if (wallpaperPath === "" || isVideoWallpaper) return;
     isBaking = true;
 
     var br = Math.round(100 + brightnessValue * 100);
@@ -145,14 +168,14 @@ Item {
       "args+=(-modulate '" + br + "," + sat + ",100'); " +
       "if [ '" + ct + "' != '0' ]; then args+=(-brightness-contrast '0x" + ct + "'); fi; " +
       "if [ '" + (vignetteActive ? 1 : 0) + "' = '1' ]; then args+=(-background black -vignette 0x18); fi; " +
-      "magick \"$src\" \"${args[@]}\" \"$out\" 2>/dev/null";
+      "exec magick \"$src\" \"${args[@]}\" \"$out\" 2>/dev/null";
 
     bakeProc.command = ["bash", "-c", cmd];
     bakeProc.running = true;
   }
 
   function applyFullGraded() {
-    if (wallpaperPath === "") return;
+    if (wallpaperPath === "" || isVideoWallpaper) return;
     isBaking = true;
 
     var br = Math.round(100 + brightnessValue * 100);
@@ -170,7 +193,7 @@ Item {
       "args+=(-modulate '" + br + "," + sat + ",100'); " +
       "if [ '" + ct + "' != '0' ]; then args+=(-brightness-contrast '0x" + ct + "'); fi; " +
       "if [ '" + (vignetteActive ? 1 : 0) + "' = '1' ]; then args+=(-background black -vignette 0x18); fi; " +
-      "magick \"$src\" \"${args[@]}\" \"$out\" 2>/dev/null && echo \"$out\"";
+      "exec magick \"$src\" \"${args[@]}\" \"$out\" 2>/dev/null";
 
     applyProc.targetOutPath = outPath;
     applyProc.command = ["bash", "-c", cmd];
@@ -211,15 +234,15 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredWidth: 3
-      color: Color.mSurfaceVariant
-      radius: Style.radiusM
+      color: Color.mSurfaceContainerLow
+      radius: Style.radiusL
       clip: true
 
       Image {
         id: previewImg
         anchors.fill: parent
         anchors.margins: Style.marginS
-        source: root.previewImagePath !== "" ? root.previewImagePath : (root.wallpaperPath !== "" ? (root.wallpaperPath.startsWith("/") ? "file://" + root.wallpaperPath : root.wallpaperPath) : "")
+        source: root.isVideoWallpaper ? "" : (root.previewImagePath !== "" ? root.previewImagePath : (root.wallpaperPath !== "" ? (root.wallpaperPath.startsWith("/") ? "file://" + root.wallpaperPath : root.wallpaperPath) : ""))
         fillMode: Image.PreserveAspectFit
         horizontalAlignment: Image.AlignHCenter
         verticalAlignment: Image.AlignVCenter
@@ -260,8 +283,8 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredWidth: 2
-      color: Color.mSurfaceVariant
-      radius: Style.radiusM
+      color: Color.mSurfaceContainerHigh
+      radius: Style.radiusL
 
       ColumnLayout {
         anchors.fill: parent
@@ -317,8 +340,8 @@ Item {
               text: modelData
               Layout.fillWidth: true
               fontSize: Style.fontSizeS
-              backgroundColor: root.activePreset === modelData ? Color.mPrimary : Color.mSurface
-              textColor: root.activePreset === modelData ? Color.mOnPrimary : Color.mOnSurface
+              backgroundColor: root.activePreset === modelData ? Color.mSecondaryContainer : Color.mSurfaceContainerHighest
+              textColor: root.activePreset === modelData ? Color.mOnSecondaryContainer : Color.mOnSurface
               onClicked: root.applyPreset(modelData)
             }
           }
@@ -401,6 +424,7 @@ Item {
           Layout.fillWidth: true
           text: "Aplicar Papel de Parede Editado"
           icon: "check"
+          enabled: !root.isVideoWallpaper && !root.isBaking
           backgroundColor: Color.mPrimary
           textColor: Color.mOnPrimary
           onClicked: root.applyFullGraded()

@@ -2,6 +2,6 @@ import QtQuick
 import qs.Services.UI
 
 OnlineVideoWallpaperView {
-  providerService: MoeWallsService
-  providerName: "MoeWalls"
+  providerService: MotionBgsService
+  providerName: "MotionBGS"
 }
