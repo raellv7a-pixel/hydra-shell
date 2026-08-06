@@ -17,6 +17,10 @@ Item {
   height: GridView.view.cellHeight
 
   property bool isSelected: (!launcher.ignoreMouseHover && mouseArea.containsMouse) || (index === launcher.selectedIndex)
+  Accessible.role: Accessible.ListItem
+  Accessible.name: modelData.name || ""
+  Accessible.description: modelData.description || ""
+  Accessible.selected: gridEntryContainer.isSelected
 
   // Prepare item when it becomes visible (e.g., decode images)
   Component.onCompleted: {
@@ -30,18 +34,21 @@ Item {
     id: gridEntry
     anchors.fill: parent
     anchors.margins: Style.marginXXS
-    color: gridEntryContainer.isSelected ? Color.mPrimary : Color.mSurfaceVariant
-    forceOpaque: gridEntryContainer.isSelected
-    scale: gridEntryContainer.isSelected ? 1.035 : 1.0
-    border.color: gridEntryContainer.isSelected ? Qt.alpha(Color.mOnPrimary, 0.25) : "transparent"
+    radius: Style.radiusL
+    color: gridEntryContainer.isSelected ? Color.mPrimaryContainer : Color.mSurfaceContainerLow
+    forceOpaque: false
+    border.color: gridEntryContainer.isSelected ? Color.mPrimary : "transparent"
     border.width: gridEntryContainer.isSelected ? Style.borderS : 0
+    scale: mouseArea.pressed ? 0.95 : (gridEntryContainer.isSelected ? 1.0 : 0.975)
+    transformOrigin: Item.Center
 
     Behavior on scale {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuint
+      ScaleAnimator {
+        duration: Style.animationFast
+        easing.type: Easing.OutCubic
       }
     }
+
     Behavior on color {
       ColorAnimation {
         duration: Style.animationNormal
@@ -88,7 +95,7 @@ Item {
         Rectangle {
           anchors.fill: parent
           radius: Style.radiusM
-          color: Color.mSurface
+          color: Color.mSurfaceContainerHighest
           visible: Settings.data.appLauncher.showIconBackground && !modelData.isImage
         }
 
@@ -115,7 +122,7 @@ Item {
           Rectangle {
             anchors.fill: parent
             visible: parent.status === Image.Loading
-            color: Color.mSurfaceVariant
+            color: Color.mSurfaceContainerHigh
 
             BusyIndicator {
               anchors.centerIn: parent
@@ -149,7 +156,7 @@ Item {
               icon: modelData.icon
               pointSize: Style.fontSizeXXXL
               visible: modelData.icon && !modelData.displayString
-              color: (gridEntryContainer.isSelected && !Settings.data.appLauncher.showIconBackground) ? Color.mOnHover : Color.mOnSurface
+              color: (gridEntryContainer.isSelected && !Settings.data.appLauncher.showIconBackground) ? Color.mOnPrimaryContainer : Color.mOnSurface
             }
           }
 
@@ -191,7 +198,7 @@ Item {
             return Math.min(Math.max(cellBasedSize, baseSize), maxSize);
           }
           font.weight: Style.fontWeightBold
-          color: modelData.displayString ? Color.mOnSurface : Color.mOnPrimary
+          color: modelData.displayString ? Color.mOnSurface : (gridEntryContainer.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface)
         }
 
         // Badge icon overlay (generic indicator for any provider)
@@ -202,7 +209,7 @@ Item {
           anchors.margins: 2
           width: height
           height: Style.fontSizeM + Style.marginXS
-          color: Color.mSurfaceVariant
+          color: Color.mSurfaceContainerHighest
           radius: Style.radiusXXS
           NIcon {
             anchors.centerIn: parent
@@ -228,7 +235,7 @@ Item {
           return Math.min(Math.max(cellBasedSize, baseSize), maxSize);
         }
         font.weight: Style.fontWeightSemiBold
-        color: gridEntryContainer.isSelected ? Color.mOnPrimary : Color.mOnSurface
+        color: gridEntryContainer.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface
         elide: Text.ElideRight
         Layout.fillWidth: true
         Layout.maximumWidth: gridEntry.width - 8
@@ -275,6 +282,12 @@ Item {
           tooltipText: modelData.tooltip
           z: 11
           handleWheel: true
+          colorBg: Color.mSurfaceContainerHighest
+          colorBgHover: Color.mSecondaryContainer
+          colorFg: Color.mOnSurfaceVariant
+          colorFgHover: Color.mOnSecondaryContainer
+          colorBorder: "transparent"
+          colorBorderHover: "transparent"
           onClicked: {
             if (modelData.action) {
               modelData.action();

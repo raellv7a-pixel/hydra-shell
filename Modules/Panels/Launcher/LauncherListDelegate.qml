@@ -19,9 +19,15 @@ NBox {
   width: ListView.view.width
   implicitHeight: launcher.entryHeight
   clip: false
-  radius: Style.radiusM
-  color: entry.isSelected ? Color.mPrimary : (entry.isHovered ? Color.mHover : "transparent")
-  forceOpaque: entry.isSelected
+  radius: Style.radiusL
+  color: entry.isSelected ? Color.mPrimaryContainer : (entry.isHovered ? Color.mSurfaceContainerHigh : "transparent")
+  forceOpaque: false
+  scale: mouseArea.pressed ? 0.975 : (entry.isSelected ? 1.0 : 0.988)
+  transformOrigin: Item.Center
+  Accessible.role: Accessible.ListItem
+  Accessible.name: modelData.name || ""
+  Accessible.description: modelData.description || ""
+  Accessible.selected: entry.isSelected
 
   // Prepare item when it becomes visible (e.g., decode images)
   Component.onCompleted: {
@@ -38,6 +44,13 @@ NBox {
     }
   }
 
+  Behavior on scale {
+    ScaleAnimator {
+      duration: Style.animationFast
+      easing.type: Easing.OutCubic
+    }
+  }
+
   // Focus indicator bar on the left edge
   Rectangle {
     id: focusIndicator
@@ -45,31 +58,26 @@ NBox {
     anchors.leftMargin: 4
     anchors.verticalCenter: parent.verticalCenter
     width: 4
-    height: entry.isSelected ? Math.round(parent.height * 0.60) : Math.round(parent.height * 0.20)
+    height: Math.round(parent.height * 0.60)
     radius: 4
-    color: Color.mOnPrimary
+    color: Color.mPrimary
     opacity: entry.isSelected ? 0.9 : 0.0
+    scale: entry.isSelected ? 1.0 : 0.34
+    transformOrigin: Item.Center
     z: 5
 
-    Behavior on height { NumberAnimation { duration: Style.animationNormal; easing.type: Easing.OutQuint } }
-    Behavior on opacity { NumberAnimation { duration: Style.animationNormal; easing.type: Easing.OutQuint } }
+    Behavior on scale { ScaleAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic } }
+    Behavior on opacity { OpacityAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic } }
   }
 
   ColumnLayout {
     id: contentLayout
     anchors.fill: parent
-    anchors.leftMargin: entry.isSelected ? Style.marginXL + Style.marginXS : Style.marginL
+    anchors.leftMargin: Style.marginL
     anchors.rightMargin: Style.marginL
     anchors.topMargin: launcher.isCompactDensity ? Style.marginXS : Style.marginM
     anchors.bottomMargin: launcher.isCompactDensity ? Style.marginXS : Style.marginM
     spacing: launcher.isCompactDensity ? Style.marginXS : Style.marginM
-
-    Behavior on anchors.leftMargin {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuint
-      }
-    }
 
     // Top row - Main entry content with action buttons
     RowLayout {
@@ -101,7 +109,7 @@ NBox {
         Rectangle {
           anchors.fill: parent
           radius: Style.radiusXS
-          color: Color.mSurface
+          color: Color.mSurfaceContainerHighest
           visible: Settings.data.appLauncher.showIconBackground && !modelData.isImage
         }
 
@@ -131,7 +139,7 @@ NBox {
           Rectangle {
             anchors.fill: parent
             visible: parent.status === Image.Loading
-            color: Color.mSurfaceVariant
+            color: Color.mSurfaceContainerHigh
 
             BusyIndicator {
               anchors.centerIn: parent
@@ -180,7 +188,7 @@ NBox {
               icon: modelData.icon
               pointSize: Style.fontSizeXXXL
               visible: modelData.icon && !modelData.displayString
-              color: entry.isSelected ? Color.mOnPrimary : Color.mOnSurface
+              color: Settings.data.appLauncher.showIconBackground ? Color.mOnSurface : (entry.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface)
             }
           }
 
@@ -203,7 +211,7 @@ NBox {
           text: modelData.displayString ? modelData.displayString : (modelData.name ? modelData.name.charAt(0).toUpperCase() : "?")
           pointSize: modelData.displayString ? (modelData.displayStringSize || Style.fontSizeXXXL) : Style.fontSizeXXL
           font.weight: Style.fontWeightBold
-          color: modelData.displayString ? Color.mOnSurface : Color.mOnPrimary
+          color: modelData.displayString ? Color.mOnSurface : (entry.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface)
         }
 
         // Image type indicator overlay
@@ -214,7 +222,7 @@ NBox {
           anchors.margins: 2
           width: formatLabel.width + Style.marginXS
           height: formatLabel.height + Style.marginXXS
-          color: Color.mSurfaceVariant
+          color: Color.mSurfaceContainerHighest
           radius: Style.radiusXXS
           NText {
             id: formatLabel
@@ -239,7 +247,7 @@ NBox {
           anchors.margins: 2
           width: height
           height: Style.fontSizeM + Style.marginXS
-          color: Color.mSurfaceVariant
+          color: Color.mSurfaceContainerHighest
           radius: Style.radiusXXS
           NIcon {
             anchors.centerIn: parent
@@ -260,7 +268,7 @@ NBox {
           text: modelData.name || "Unknown"
           pointSize: Style.fontSizeM
           font.weight: Font.Bold
-          color: entry.isSelected ? Color.mOnPrimary : Color.mOnSurface
+          color: entry.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface
           elide: Text.ElideRight
           maximumLineCount: 1
           Layout.fillWidth: true
@@ -276,7 +284,7 @@ NBox {
         NText {
           text: modelData.description || ""
           pointSize: Style.fontSizeS
-          color: entry.isSelected ? Qt.alpha(Color.mOnPrimary, 0.78) : Color.mOnSurfaceVariant
+          color: entry.isSelected ? Qt.alpha(Color.mOnPrimaryContainer, 0.78) : Color.mOnSurfaceVariant
           elide: Text.ElideRight
           maximumLineCount: 1
           Layout.fillWidth: true
@@ -316,6 +324,12 @@ NBox {
             tooltipText: modelData.tooltip
             z: 1
             handleWheel: true
+            colorBg: Color.mSurfaceContainerHighest
+            colorBgHover: Color.mSecondaryContainer
+            colorFg: Color.mOnSurfaceVariant
+            colorFgHover: Color.mOnSecondaryContainer
+            colorBorder: "transparent"
+            colorBorderHover: "transparent"
             onClicked: {
               if (modelData.action) {
                 modelData.action();

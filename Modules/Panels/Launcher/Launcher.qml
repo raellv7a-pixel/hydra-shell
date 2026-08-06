@@ -52,6 +52,8 @@ SmartPanel {
   preferredHeight: Math.round(620 * Style.uiScaleRatio)
   preferredWidthRatio: 0.25
   preferredHeightRatio: 0.5
+  panelBackgroundColor: Color.mSurfaceContainer
+  panelBorderColor: Qt.alpha(Color.mOutline, 0.32)
 
   // Positioning
   readonly property string screenBarPosition: Settings.getBarPositionForScreen(screen?.name)
@@ -76,14 +78,38 @@ SmartPanel {
   panelContent: Rectangle {
     id: ui
     color: "transparent"
-    opacity: launcherCore.resultsReady ? 1.0 : 0.0
+    property bool presented: false
+
+    opacity: launcherCore.resultsReady && presented ? 1.0 : 0.0
+    scale: presented ? 1.0 : 0.965
+    transformOrigin: Item.Center
 
     Component.onCompleted: root.launcherCoreRef = launcherCore
 
     Behavior on opacity {
-      NumberAnimation {
+      OpacityAnimator {
         duration: Style.animationFast
-        easing.type: Easing.OutCirc
+        easing.type: presented ? Easing.OutCubic : Easing.InCubic
+      }
+    }
+
+    Behavior on scale {
+      ScaleAnimator {
+        duration: Style.animationFast
+        easing.type: presented ? Easing.OutCubic : Easing.InCubic
+      }
+    }
+
+    Connections {
+      target: root
+
+      function onOpened() {
+        ui.presented = true;
+      }
+
+      function onIsClosingChanged() {
+        if (root.isClosing)
+          ui.presented = false;
       }
     }
 
@@ -102,6 +128,7 @@ SmartPanel {
       width: root.previewPanelWidth
       height: Math.round(400 * Style.uiScaleRatio)
       forceOpaque: true // no blur for now
+      color: Color.mSurfaceContainerLow
       x: root.panelAnchorRight ? -(root.previewPanelWidth + Style.marginM) : ui.width + Style.marginM
       y: {
         var view = launcherCore.resultsView;

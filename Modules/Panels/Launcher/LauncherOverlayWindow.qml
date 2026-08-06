@@ -19,8 +19,40 @@ Variants {
     id: windowLoader
 
     required property ShellScreen modelData
+    readonly property bool requestedOpen: PanelService.overlayLauncherOpen && PanelService.overlayLauncherScreen === modelData
+    property bool retainedActive: false
+    property bool closing: false
 
-    active: PanelService.overlayLauncherOpen && PanelService.overlayLauncherScreen === modelData
+    active: retainedActive
+
+    function syncVisibility() {
+      if (requestedOpen) {
+        closeRetentionTimer.stop();
+        closing = false;
+        retainedActive = true;
+      } else if (retainedActive) {
+        if (PanelService.closedImmediately || Style.animationFast <= 0) {
+          closing = false;
+          retainedActive = false;
+        } else {
+          closing = true;
+          closeRetentionTimer.restart();
+        }
+      }
+    }
+
+    onRequestedOpenChanged: syncVisibility()
+    Component.onCompleted: syncVisibility()
+
+    Timer {
+      id: closeRetentionTimer
+      interval: Style.animationFast
+      repeat: false
+      onTriggered: {
+        windowLoader.retainedActive = false;
+        windowLoader.closing = false;
+      }
+    }
 
     sourceComponent: PanelWindow {
       id: launcherWindow
@@ -100,6 +132,14 @@ Variants {
       Rectangle {
         anchors.fill: parent
         color: Qt.alpha(Color.mSurface, Settings.data.general.dimmerOpacity)
+        opacity: launcherPanel.presented ? 1.0 : 0.0
+
+        Behavior on opacity {
+          OpacityAnimator {
+            duration: Style.animationFast
+            easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
+          }
+        }
 
         MouseArea {
           anchors.fill: parent
@@ -120,9 +160,10 @@ Variants {
         width: Math.round(Math.max(parent.width * 0.25, launcherWindow.listPanelWidth + Style.margin2L * 2))
         height: Math.round(Math.max(parent.height * 0.5, 620 * Style.uiScaleRatio))
         clip: false
+        property bool presented: false
 
-        // Entrance animation
-        opacity: 0
+        opacity: presented ? 1.0 : 0.0
+        scale: presented ? 1.0 : 0.965
         transformOrigin: {
           if (touchingTop && touchingLeft)
             return Item.TopLeft;
@@ -144,13 +185,30 @@ Variants {
         }
 
         Component.onCompleted: {
-          opacity = 1;
+          Qt.callLater(() => {
+                         if (!windowLoader.closing)
+                           presented = true;
+                       });
         }
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutCubic
+          OpacityAnimator {
+            duration: Style.animationFast
+            easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
+          }
+        }
+
+        Behavior on scale {
+          ScaleAnimator {
+            duration: Style.animationFast
+            easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
+          }
+        }
+
+        Connections {
+          target: windowLoader
+          function onClosingChanged() {
+            launcherPanel.presented = !windowLoader.closing;
           }
         }
 
@@ -255,7 +313,7 @@ Variants {
 
           ShapePath {
             strokeWidth: -1
-            fillColor: Qt.alpha(Color.mSurface, Color.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
+            fillColor: Qt.alpha(Color.mSurfaceContainer, Color.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
 
             // Offset by radius to account for Shape's extended bounds
             startX: panelShape.radius + panelShape.radius * panelShape.tlMultX
@@ -321,7 +379,7 @@ Variants {
           anchors.fill: parent
           color: "transparent"
           radius: Style.radiusL
-          border.color: Style.boxBorderColor
+          border.color: Qt.alpha(Color.mOutline, 0.32)
           border.width: Style.borderS
           visible: !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
         }
@@ -330,7 +388,7 @@ Variants {
           id: launcherCore
           anchors.fill: parent
           screen: windowLoader.modelData
-          isOpen: true
+          isOpen: !windowLoader.closing
           onRequestClose: PanelService.closeOverlayLauncher()
           onRequestCloseImmediately: PanelService.closeOverlayLauncherImmediately()
 
@@ -354,6 +412,7 @@ Variants {
         width: launcherWindow.previewPanelWidth
         height: Math.round(400 * Style.uiScaleRatio)
         forceOpaque: true
+        color: Color.mSurfaceContainerLow
         x: {
           if (panelPosition.endsWith("_right"))
             return launcherPanel.x - launcherWindow.previewPanelWidth - Style.marginM;
@@ -371,10 +430,11 @@ Variants {
           return Math.max(launcherPanel.y + Style.marginL, Math.min(mapped.y, launcherPanel.y + launcherPanel.height - previewBox.height - Style.marginL));
         }
 
-        opacity: visible ? 1.0 : 0.0
+        opacity: visible && !windowLoader.closing ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
+          OpacityAnimator {
             duration: Style.animationFast
+            easing.type: windowLoader.closing ? Easing.InCubic : Easing.OutCubic
           }
         }
         Behavior on y {

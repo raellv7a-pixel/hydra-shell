@@ -649,9 +649,9 @@ Rectangle {
   opacity: resultsReady ? 1.0 : 0.0
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutQuint
+    OpacityAnimator {
+      duration: Style.animationFast
+      easing.type: Easing.OutCubic
     }
   }
 
@@ -685,7 +685,7 @@ Rectangle {
     anchors.fill: parent
     anchors.topMargin: Style.marginM
     anchors.bottomMargin: Style.marginM
-    spacing: Style.marginM
+    spacing: Style.marginS
 
     // Header Cover Banner (when coverMode !== "none")
     Item {
@@ -711,22 +711,20 @@ Rectangle {
         id: bannerContainer
         anchors.fill: parent
         radius: Style.radiusL
-        color: "transparent"
-        border.color: Qt.alpha(Color.mOnSurfaceVariant, 0.3)
-        border.width: Style.borderM
+        color: Color.mSurfaceContainerLow
+        border.color: "transparent"
+        border.width: 0
 
         NImageRounded {
           id: coverImage
           anchors.fill: parent
-          anchors.margins: Style.borderM
           imagePath: root.profileWallpaperPath
           imageFillMode: Image.PreserveAspectCrop
-          radius: Style.radiusL - Style.borderM
+          radius: Style.radiusL
         }
 
         Rectangle {
           anchors.fill: parent
-          anchors.margins: Style.borderM
           // Gradient-style overlay: stronger at bottom for text legibility
           gradient: Gradient {
             orientation: Gradient.Vertical
@@ -734,7 +732,7 @@ Rectangle {
             GradientStop { position: 0.6; color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.7) }
             GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40) }
           }
-          radius: Style.radiusL - Style.borderM
+          radius: Style.radiusL
         }
 
         ColumnLayout {
@@ -751,7 +749,8 @@ Rectangle {
           NTextInput {
             id: bannerSearchInput
             Layout.fillWidth: true
-            radius: Style.iRadiusM
+            radius: Style.iRadiusL
+            inputIconName: "search"
             text: root.searchText
             placeholderText: I18n.tr("placeholders.search-launcher")
             fontSize: Style.fontSizeM
@@ -771,7 +770,13 @@ Rectangle {
             visible: root.showLayoutToggle
             icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
             tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
-            customRadius: Style.iRadiusM
+            customRadius: Style.iRadiusL
+            colorBg: Color.mSurfaceContainerHigh
+            colorBgHover: Color.mPrimaryContainer
+            colorFg: Color.mOnSurfaceVariant
+            colorFgHover: Color.mOnPrimaryContainer
+            colorBorder: "transparent"
+            colorBorderHover: "transparent"
             Layout.preferredWidth: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
             Layout.preferredHeight: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
             onClicked: {
@@ -797,7 +802,8 @@ Rectangle {
       NTextInput {
         id: searchInput
         Layout.fillWidth: true
-        radius: Style.iRadiusM
+        radius: Style.iRadiusL
+        inputIconName: "search"
         text: root.searchText
         placeholderText: I18n.tr("placeholders.search-launcher")
         fontSize: Style.fontSizeM
@@ -817,7 +823,13 @@ Rectangle {
         visible: root.showLayoutToggle
         icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
         tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
-        customRadius: Style.iRadiusM
+        customRadius: Style.iRadiusL
+        colorBg: Color.mSurfaceContainerHigh
+        colorBgHover: Color.mPrimaryContainer
+        colorFg: Color.mOnSurfaceVariant
+        colorFgHover: Color.mOnPrimaryContainer
+        colorBorder: "transparent"
+        colorBorderHover: "transparent"
         Layout.preferredWidth: searchInput.height
         Layout.preferredHeight: searchInput.height
         onClicked: {
@@ -837,8 +849,8 @@ Rectangle {
       Layout.leftMargin: Style.marginM
       Layout.rightMargin: Style.marginM
       margins: 0
-      border.color: Style.boxBorderColor
-      border.width: Style.borderS
+      border.color: "transparent"
+      border.width: 0
 
       property int computedCurrentIndex: visible && root.providerCategories.length > 0 ? root.providerCategories.indexOf(root.currentProvider.selectedCategory) : 0
       currentIndex: computedCurrentIndex
@@ -878,8 +890,9 @@ Rectangle {
         horizontalPolicy: ScrollBar.AlwaysOff
         verticalPolicy: ScrollBar.AlwaysOff
         reserveScrollbarSpace: false
-        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurface
-        wheelScrollMultiplier: 4.0
+        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurfaceContainer
+        wheelScrollMultiplier: 2.25
+        smoothWheelAnimationDuration: Style.animationFast
         trackedSelectionIndex: root.selectedIndex
 
         width: parent.width
@@ -928,8 +941,9 @@ Rectangle {
         horizontalPolicy: ScrollBar.AlwaysOff
         verticalPolicy: ScrollBar.AlwaysOff
         reserveScrollbarSpace: false
-        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurface
-        wheelScrollMultiplier: 4.0
+        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurfaceContainer
+        wheelScrollMultiplier: 2.25
+        smoothWheelAnimationDuration: Style.animationFast
 
         width: parent.width
         height: parent.height
@@ -963,7 +977,7 @@ Rectangle {
 
         NBox {
           anchors.fill: parent
-          color: Color.mSurfaceVariant
+          color: Color.mSurfaceContainerLow
           forceOpaque: true
           Layout.fillWidth: true
           Layout.fillHeight: true
@@ -980,7 +994,7 @@ Rectangle {
                 text: root.results.length > 0 ? root.results[0].name : ""
                 pointSize: Style.fontSizeL
                 font.weight: Font.Bold
-                color: Color.mPrimary
+                color: Color.mOnSurface
               }
             }
 
@@ -1020,8 +1034,9 @@ Rectangle {
         horizontalPolicy: ScrollBar.AlwaysOff
         verticalPolicy: ScrollBar.AlwaysOff
         reserveScrollbarSpace: false
-        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurface
-        wheelScrollMultiplier: 4.0
+        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurfaceContainer
+        wheelScrollMultiplier: 2.25
+        smoothWheelAnimationDuration: Style.animationFast
         trackedSelectionIndex: root.selectedIndex
 
         width: parent.width
@@ -1080,7 +1095,7 @@ Rectangle {
       NDivider {
         Layout.fillWidth: true
         Layout.bottomMargin: Style.marginXS
-        opacity: 0.5
+        opacity: 0.35
       }
 
       NText {
@@ -1105,7 +1120,7 @@ Rectangle {
         pointSize: Style.fontSizeXS
         color: Color.mOnSurfaceVariant
         horizontalAlignment: Text.AlignLeft
-        opacity: 0.7
+        opacity: 1.0
       }
     }
   }
