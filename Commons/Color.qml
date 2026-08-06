@@ -81,6 +81,24 @@ Singleton {
   property color mHover: defaultColors.mHover
   property color mOnHover: defaultColors.mOnHover
 
+  // --- Material 3 container roles derived from the active dynamic scheme
+  readonly property color mSurfaceContainerLow: blend(mSurface, mSurfaceVariant, 0.18)
+  readonly property color mSurfaceContainer: blend(mSurface, mSurfaceVariant, 0.36)
+  readonly property color mSurfaceContainerHigh: blend(mSurface, mSurfaceVariant, 0.56)
+  readonly property color mSurfaceContainerHighest: blend(mSurface, mSurfaceVariant, 0.76)
+  readonly property color mPrimaryContainer: blend(mSurfaceContainerHigh, mPrimary, 0.22)
+  readonly property color mOnPrimaryContainer: mOnSurface
+  readonly property color mSecondaryContainer: blend(mSurfaceContainerHigh, mSecondary, 0.20)
+  readonly property color mOnSecondaryContainer: mOnSurface
+
+  function blend(base, accent, amount) {
+    const ratio = Math.max(0, Math.min(1, Number(amount || 0)));
+    return Qt.rgba(base.r + (accent.r - base.r) * ratio,
+                   base.g + (accent.g - base.g) * ratio,
+                   base.b + (accent.b - base.b) * ratio,
+                   base.a + (accent.a - base.a) * ratio);
+  }
+
   // --- Color transition animations ---
   Behavior on mPrimary {
     enabled: !root.skipTransition
