@@ -90,6 +90,8 @@ Singleton {
   readonly property color mOnPrimaryContainer: mOnSurface
   readonly property color mSecondaryContainer: blend(mSurfaceContainerHigh, mSecondary, 0.20)
   readonly property color mOnSecondaryContainer: mOnSurface
+  readonly property color mErrorContainer: blend(mSurfaceContainerHigh, mError, 0.22)
+  readonly property color mOnErrorContainer: mOnSurface
 
   function blend(base, accent, amount) {
     const ratio = Math.max(0, Math.min(1, Number(amount || 0)));

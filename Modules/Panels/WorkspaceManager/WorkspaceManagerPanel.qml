@@ -465,7 +465,7 @@ PanelWindow {
           Layout.fillWidth: true
           height: 28 * Style.uiScaleRatio
           radius: Style.radiusS
-          color: Qt.alpha(Color.mErrorContainer || Color.mError, 0.9)
+          color: Qt.alpha(Color.mErrorContainer, 0.9)
           visible: root.privateWindowToastInfo !== null
 
           RowLayout {
