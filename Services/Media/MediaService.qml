@@ -26,6 +26,8 @@ Singleton {
   }
 
   property var currentPlayer: null
+  readonly property var positionSource: currentPlayer ? (currentPlayer._stateSource || currentPlayer) : null
+  readonly property bool positionSourcePlaying: positionSource ? (positionSource.playbackState === MprisPlaybackState.Playing || positionSource.isPlaying) : false
   property string playerIdentity: currentPlayer ? (currentPlayer.identity || "") : ""
   property real currentPosition: 0
   property bool isSeeking: false
@@ -292,15 +294,15 @@ Singleton {
     }
   }
 
-  // Update progress bar every second while playing
+  // Keep progress and synchronized lyrics responsive while playing
   Timer {
     id: positionTimer
-    interval: 1000
-    running: currentPlayer && !root.isSeeking && currentPlayer.isPlaying && currentPlayer.length > 0 && currentPlayer.playbackState === MprisPlaybackState.Playing
+    interval: 250
+    running: positionSource && !root.isSeeking && positionSourcePlaying && positionSource.length > 0
     repeat: true
     onTriggered: {
-      if (currentPlayer && !root.isSeeking && currentPlayer.isPlaying && currentPlayer.playbackState === MprisPlaybackState.Playing) {
-        currentPosition = currentPlayer.position;
+      if (positionSource && !root.isSeeking && positionSourcePlaying) {
+        currentPosition = positionSource.position;
       } else {
         running = false;
       }
@@ -309,15 +311,15 @@ Singleton {
 
   // Avoid overwriting currentPosition while seeking due to backend position changes
   Connections {
-    target: currentPlayer
+    target: positionSource
     function onPositionChanged() {
-      if (!root.isSeeking && currentPlayer) {
-        currentPosition = currentPlayer.position;
+      if (!root.isSeeking && positionSource) {
+        currentPosition = positionSource.position;
       }
     }
     function onPlaybackStateChanged() {
-      if (!root.isSeeking && currentPlayer) {
-        currentPosition = currentPlayer.position;
+      if (!root.isSeeking && positionSource) {
+        currentPosition = positionSource.position;
       }
     }
   }
