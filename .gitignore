@@ -11,3 +11,5 @@ build
 .direnv/
 .envrc
 .prowl/
+*.log
+patch_*.py
