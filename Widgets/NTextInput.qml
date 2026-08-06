@@ -18,7 +18,7 @@ ColumnLayout {
   property int fontWeight: Style.fontWeightRegular
   property var defaultValue: undefined
   property string settingsPath: ""
-  property real radius: Style.iRadiusM
+  property real radius: Style.iRadiusL
   property real minimumInputWidth: 80 * Style.uiScaleRatio
   property bool showClearButton: true
 
@@ -67,9 +67,9 @@ ColumnLayout {
       id: frame
 
       radius: root.radius
-      color: Color.mSurface
-      border.color: input.activeFocus ? Color.mSecondary : Color.mOutline
-      border.width: Style.borderS
+      color: Color.mSurfaceContainerHigh
+      border.color: input.activeFocus ? Color.mPrimary : Color.mOutline
+      border.width: input.activeFocus ? Style.borderM : Style.borderS
 
       Behavior on border.color {
         ColorAnimation {

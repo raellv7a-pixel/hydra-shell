@@ -66,11 +66,11 @@ Rectangle {
   }
 
   // Styling
-  Layout.margins: Style.borderS
+  Layout.margins: 0
   implicitWidth: tabRow.implicitWidth + (margins * 2)
   implicitHeight: tabHeight + (margins * 2)
-  color: Color.smartAlpha(Color.mSurfaceVariant)
-  radius: Style.iRadiusM
+  color: Color.mSurfaceContainerHigh
+  radius: Style.iRadiusL
 
   RowLayout {
     id: tabRow

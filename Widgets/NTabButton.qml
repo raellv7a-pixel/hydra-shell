@@ -23,18 +23,26 @@ Rectangle {
 
   signal clicked
 
+  function activate() {
+    root.clicked();
+    if (root.parent && root.parent.parent && root.parent.parent.currentIndex !== undefined) {
+      root.parent.parent.currentIndex = root.tabIndex;
+    }
+  }
+
   // Sizing
   Layout.fillHeight: true
   implicitWidth: contentLayout.implicitWidth + Style.margin2M
 
-  topLeftRadius: isFirst ? Style.iRadiusM : Style.iRadiusXXXS
-  bottomLeftRadius: isFirst ? Style.iRadiusM : Style.iRadiusXXXS
-  topRightRadius: isLast ? Style.iRadiusM : Style.iRadiusXXXS
-  bottomRightRadius: isLast ? Style.iRadiusM : Style.iRadiusXXXS
+  radius: height / 2
+  activeFocusOnTab: true
+  Accessible.role: Accessible.PageTab
+  Accessible.name: root.text
+  Accessible.selected: root.checked
 
-  color: root.isHovered ? Color.mHover : (root.checked ? Color.mPrimary : Color.smartAlpha(Color.mSurface))
-  border.color: root.checked ? Color.mPrimary : Color.mOutline
-  border.width: Style.borderS
+  color: root.checked ? Color.mSecondaryContainer : (root.isHovered ? Color.mSurfaceContainerHighest : "transparent")
+  border.color: root.activeFocus ? Color.mPrimary : "transparent"
+  border.width: root.activeFocus ? Style.borderM : 0
 
   Behavior on color {
     enabled: !Color.isTransitioning
@@ -56,7 +64,7 @@ Rectangle {
       Layout.alignment: Qt.AlignVCenter
       icon: root.icon
       pointSize: root.pointSize * 1.2
-      color: root.isHovered ? Color.mOnHover : (root.checked ? Color.mOnPrimary : Color.mOnSurface)
+      color: root.checked ? Color.mOnSecondaryContainer : Color.mOnSurface
 
       Behavior on color {
         enabled: !Color.isTransitioning
@@ -74,7 +82,7 @@ Rectangle {
       text: root.text
       pointSize: root.pointSize
       font.weight: Style.fontWeightSemiBold
-      color: root.isHovered ? Color.mOnHover : (root.checked ? Color.mOnPrimary : Color.mOnSurface)
+      color: root.checked ? Color.mOnSecondaryContainer : Color.mOnSurface
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
 
@@ -117,11 +125,11 @@ Rectangle {
       }
     }
     onClicked: {
-      root.clicked();
-      // Update parent NTabBar's currentIndex
-      if (root.parent && root.parent.parent && root.parent.parent.currentIndex !== undefined) {
-        root.parent.parent.currentIndex = root.tabIndex;
-      }
+      root.forceActiveFocus();
+      root.activate();
     }
   }
+
+  Keys.onReturnPressed: root.activate()
+  Keys.onSpacePressed: root.activate()
 }

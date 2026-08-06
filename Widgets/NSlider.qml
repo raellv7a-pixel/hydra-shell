@@ -19,7 +19,9 @@ Slider {
   readonly property color effectiveFillColor: enabled ? fillColor : Color.mOutline
 
   readonly property real knobDiameter: Math.round((Style.baseWidgetSize * heightRatio * Style.uiScaleRatio) / 2) * 2
-  readonly property real trackHeight: Math.round((knobDiameter * 0.4 * Style.uiScaleRatio) / 2) * 2
+  readonly property real handleWidth: Math.max(3, Math.round(4 * Style.uiScaleRatio))
+  readonly property real handleTouchWidth: Math.max(knobDiameter, Math.round(28 * Style.uiScaleRatio))
+  readonly property real trackHeight: Math.max(6, Math.round(8 * Style.uiScaleRatio))
   readonly property real trackRadius: Math.min(Style.iRadiusL, trackHeight / 2)
   readonly property real cutoutExtra: Math.round((Style.baseWidgetSize * 0.1 * Style.uiScaleRatio) / 2) * 2
 
@@ -48,9 +50,9 @@ Slider {
 
       ShapePath {
         id: bgPath
-        strokeColor: Qt.alpha(Color.mOutline, 0.5)
-        strokeWidth: Style.borderS
-        fillColor: Qt.alpha(Color.mSurface, 0.5)
+        strokeColor: "transparent"
+        strokeWidth: 0
+        fillColor: Color.mSurfaceContainerHighest
 
         readonly property real w: bgContainer.width
         readonly property real h: bgContainer.height
@@ -110,7 +112,7 @@ Slider {
       y2: 0
       GradientStop {
         position: 0.0
-        color: Qt.darker(effectiveFillColor, 1.2)
+        color: effectiveFillColor
       }
       GradientStop {
         position: 1.0
@@ -182,32 +184,32 @@ Slider {
       }
     }
 
-    // Circular cutout
+    // Material 3 gap around the handle
     Rectangle {
       id: knobCutout
-      implicitWidth: root.knobDiameter + root.cutoutExtra
+      implicitWidth: root.handleWidth + root.cutoutExtra
       implicitHeight: root.knobDiameter + root.cutoutExtra
       radius: Math.min(Style.iRadiusL, width / 2)
       color: root.cutoutColor !== undefined ? root.cutoutColor : Color.mSurface
-      x: root.visualPosition * (root.availableWidth - root.knobDiameter) - root.cutoutExtra / 2
+      x: root.visualPosition * (root.availableWidth - root.handleTouchWidth) + (root.handleTouchWidth - width) / 2
       anchors.verticalCenter: parent.verticalCenter
     }
   }
 
   handle: Item {
-    implicitWidth: knobDiameter
+    implicitWidth: handleTouchWidth
     implicitHeight: knobDiameter
     x: root.leftPadding + root.visualPosition * (root.availableWidth - width)
     anchors.verticalCenter: parent.verticalCenter
 
     Rectangle {
       id: knob
-      implicitWidth: knobDiameter
+      implicitWidth: root.pressed ? Math.max(2, root.handleWidth / 2) : root.handleWidth
       implicitHeight: knobDiameter
-      radius: Math.min(Style.iRadiusL, width / 2)
-      color: root.pressed ? Color.mHover : Color.mSurface
-      border.color: effectiveFillColor
-      border.width: Style.borderL
+      radius: width / 2
+      color: effectiveFillColor
+      border.color: "transparent"
+      border.width: 0
       anchors.centerIn: parent
 
       Behavior on color {

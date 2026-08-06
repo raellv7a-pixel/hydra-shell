@@ -195,10 +195,10 @@ RowLayout {
     background: Rectangle {
       implicitWidth: Math.round(Style.baseWidgetSize * 3.75 * Style.uiScaleRatio)
       implicitHeight: Math.round(root.preferredHeight * Style.uiScaleRatio)
-      color: Color.mSurface
-      border.color: combo.activeFocus ? Color.mSecondary : Color.mOutline
-      border.width: Style.borderS
-      radius: Style.iRadiusM
+      color: Color.mSurfaceContainerHigh
+      border.color: combo.activeFocus ? Color.mPrimary : Color.mOutline
+      border.width: combo.activeFocus ? Style.borderM : Style.borderS
+      radius: Style.iRadiusL
 
       Behavior on border.color {
         ColorAnimation {
@@ -271,8 +271,8 @@ RowLayout {
 
           width: listView.availableWidth
           height: delegateText.implicitHeight + Style.margin2S
-          radius: Style.iRadiusS
-          color: isHighlighted ? Color.mHover : "transparent"
+          radius: height / 2
+          color: isHighlighted ? Color.mSecondaryContainer : "transparent"
 
           NText {
             id: delegateText
@@ -282,7 +282,7 @@ RowLayout {
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
             pointSize: Style.fontSizeM
-            color: delegateRect.isHighlighted ? Color.mOnHover : Color.mOnSurface
+            color: delegateRect.isHighlighted ? Color.mOnSecondaryContainer : Color.mOnSurface
             text: {
               var item = root.getItem(delegateRect.index);
               return item && item.name ? item.name : "";
@@ -310,10 +310,10 @@ RowLayout {
       }
 
       background: Rectangle {
-        color: Color.mSurfaceVariant
-        border.color: Color.mOutline
-        border.width: Style.borderS
-        radius: Style.iRadiusM
+        color: Color.mSurfaceContainerHigh
+        border.color: "transparent"
+        border.width: 0
+        radius: Style.iRadiusL
       }
     }
 

@@ -770,13 +770,13 @@ Item {
         id: sidebar
 
         clip: true
-        Layout.preferredWidth: Math.round(root.sidebarExpanded ? 200 * Style.uiScaleRatio : sidebarToggle.width + (root.sidebarCardStyle ? Style.margin2M : 0) + (sidebarList.verticalScrollBarActive ? Style.marginM : 0))
+        Layout.preferredWidth: Math.round(root.sidebarExpanded ? 212 * Style.uiScaleRatio : sidebarToggle.width + (root.sidebarCardStyle ? Style.margin2M : 0) + (sidebarList.verticalScrollBarActive ? Style.marginM : 0))
         Layout.fillHeight: true
         Layout.alignment: Qt.AlignTop
 
-        radius: root.sidebarCardStyle ? Style.radiusM : 0
-        color: root.sidebarCardStyle ? Color.mSurfaceVariant : "transparent"
-        border.color: root.sidebarCardStyle ? Style.boxBorderColor : "transparent"
+        radius: root.sidebarCardStyle ? Style.radiusL : 0
+        color: root.sidebarCardStyle ? Color.mSurfaceContainerLow : "transparent"
+        border.color: "transparent"
 
         Behavior on Layout.preferredWidth {
           NumberAnimation {
@@ -802,8 +802,13 @@ Item {
               width: Math.round(toggleRow.implicitWidth + Style.margin2S)
               height: parent.height
               anchors.left: parent.left
-              radius: Style.radiusS
-              color: toggleMouseArea.containsMouse ? Color.mHover : "transparent"
+              radius: height / 2
+              color: toggleMouseArea.containsMouse || activeFocus ? Color.mSurfaceContainerHigh : "transparent"
+              border.color: activeFocus ? Color.mPrimary : "transparent"
+              border.width: activeFocus ? Style.borderM : 0
+              activeFocusOnTab: true
+              Accessible.role: Accessible.Button
+              Accessible.name: root.sidebarExpanded ? I18n.tr("tooltips.collapse") : I18n.tr("tooltips.expand")
 
               Behavior on color {
                 enabled: !Color.isTransitioning
@@ -840,9 +845,13 @@ Item {
                 }
                 onClicked: {
                   TooltipService.hide();
+                  sidebarToggle.forceActiveFocus();
                   root.sidebarExpanded = !root.sidebarExpanded;
                 }
               }
+
+              Keys.onReturnPressed: root.sidebarExpanded = !root.sidebarExpanded
+              Keys.onSpacePressed: root.sidebarExpanded = !root.sidebarExpanded
             }
           }
 
@@ -899,8 +908,13 @@ Item {
                 width: Math.round(searchCollapsedRow.implicitWidth + Style.margin2S)
                 height: parent.height
                 anchors.left: parent.left
-                radius: Style.radiusS
-                color: searchCollapsedMouseArea.containsMouse ? Color.mHover : "transparent"
+                radius: height / 2
+                color: searchCollapsedMouseArea.containsMouse || activeFocus ? Color.mSurfaceContainerHigh : "transparent"
+                border.color: activeFocus ? Color.mPrimary : "transparent"
+                border.width: activeFocus ? Style.borderM : 0
+                activeFocusOnTab: true
+                Accessible.role: Accessible.Button
+                Accessible.name: I18n.tr("common.search")
 
                 Behavior on color {
                   enabled: !Color.isTransitioning
@@ -930,6 +944,7 @@ Item {
                   hoverEnabled: true
                   cursorShape: Qt.PointingHandCursor
                   onClicked: {
+                    searchCollapsedButton.forceActiveFocus();
                     root.sidebarExpanded = true;
                     root.wasCollapsedBeforeSearch = false; // Expanding manually resets this
                     Qt.callLater(() => searchInput.inputItem.forceActiveFocus());
@@ -940,6 +955,15 @@ Item {
                   onExited: {
                     TooltipService.hide();
                   }
+                }
+
+                Keys.onReturnPressed: {
+                  root.sidebarExpanded = true;
+                  Qt.callLater(() => searchInput.inputItem.forceActiveFocus());
+                }
+                Keys.onSpacePressed: {
+                  root.sidebarExpanded = true;
+                  Qt.callLater(() => searchInput.inputItem.forceActiveFocus());
                 }
               }
             }
@@ -984,10 +1008,10 @@ Item {
                 id: resultItem
                 width: searchResultsList.width - (searchResultsList.verticalScrollBarActive ? Style.marginM : 0)
                 height: resultColumn.implicitHeight + Style.margin2M
-                radius: Style.iRadiusS
+                radius: Style.iRadiusL
                 readonly property bool selected: index === root.searchSelectedIndex
                 readonly property bool effectiveHover: !root.ignoreMouseHover && resultMouseArea.containsMouse
-                color: (effectiveHover || selected) ? Color.mHover : "transparent"
+                color: selected ? Color.mSecondaryContainer : (effectiveHover ? Color.mSurfaceContainerHigh : "transparent")
 
                 Behavior on color {
                   enabled: !Color.isTransitioning
@@ -1010,7 +1034,7 @@ Item {
                     text: I18n.tr(modelData.labelKey)
                     pointSize: Style.fontSizeM
                     font.weight: Style.fontWeightSemiBold
-                    color: (resultItem.effectiveHover || resultItem.selected) ? Color.mOnHover : Color.mOnSurface
+                    color: resultItem.selected ? Color.mOnSecondaryContainer : Color.mOnSurface
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -1024,7 +1048,7 @@ Item {
                       return t;
                     }
                     pointSize: Style.fontSizeXS
-                    color: (resultItem.effectiveHover || resultItem.selected) ? Color.mOnHover : Color.mOnSurfaceVariant
+                    color: resultItem.selected ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -1065,12 +1089,18 @@ Item {
               delegate: Rectangle {
                 id: tabItem
                 width: sidebarList.width
-                height: tabEntryRow.implicitHeight + Style.margin2XS
-                radius: Style.iRadiusS
-                color: selected ? Color.mPrimary : (tabItem.hovering ? Color.mHover : "transparent")
+                height: Math.max(Math.round(32 * Style.uiScaleRatio), tabEntryRow.implicitHeight + Style.margin2XS)
+                radius: height / 2
+                color: selected ? Color.mSecondaryContainer : (tabItem.hovering ? Color.mSurfaceContainerHigh : "transparent")
+                border.color: activeFocus ? Color.mPrimary : "transparent"
+                border.width: activeFocus ? Style.borderM : 0
+                activeFocusOnTab: true
+                Accessible.role: Accessible.PageTab
+                Accessible.name: I18n.tr(modelData.label)
+                Accessible.selected: selected
                 readonly property bool selected: index === root.currentTabIndex
                 property bool hovering: false
-                property color tabTextColor: selected ? Color.mOnPrimary : (tabItem.hovering ? Color.mOnHover : Color.mOnSurface)
+                property color tabTextColor: selected ? Color.mOnSecondaryContainer : Color.mOnSurface
 
                 Behavior on color {
                   enabled: !Color.isTransitioning
@@ -1147,6 +1177,7 @@ Item {
                     }
                   }
                   onClicked: {
+                    tabItem.forceActiveFocus();
                     root.currentTabIndex = index;
                     // Hide tooltip on click
                     if (!root.sidebarExpanded) {
@@ -1154,6 +1185,9 @@ Item {
                     }
                   }
                 }
+
+                Keys.onReturnPressed: root.currentTabIndex = index
+                Keys.onSpacePressed: root.currentTabIndex = index
               }
 
               onCurrentIndexChanged: {
@@ -1182,8 +1216,9 @@ Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.alignment: Qt.AlignTop
-        radius: Style.radiusM
-        color: Color.mSurfaceVariant
+        radius: Style.radiusL
+        color: Color.mSurfaceContainerLow
+        border.color: "transparent"
 
         ColumnLayout {
           id: contentLayout
@@ -1198,19 +1233,20 @@ Item {
           RowLayout {
             id: headerRow
             Layout.fillWidth: true
+            Layout.preferredHeight: Math.round(42 * Style.uiScaleRatio)
             spacing: Style.marginS
 
             NIcon {
               icon: root.tabsModel[currentTabIndex]?.icon ?? ""
               color: Color.mPrimary
-              pointSize: Style.fontSizeXXL
+              pointSize: Style.fontSizeXXXL
             }
 
             NText {
               text: root.tabsModel[root.currentTabIndex]?.label ? I18n.tr(root.tabsModel[root.currentTabIndex].label) : ""
-              pointSize: Style.fontSizeXL
-              font.weight: Style.fontWeightBold
-              color: Color.mPrimary
+              pointSize: Style.fontSizeXXL
+              font.weight: Style.fontWeightSemiBold
+              color: Color.mOnSurface
               Layout.fillWidth: true
               Layout.alignment: Qt.AlignVCenter
             }
@@ -1219,6 +1255,12 @@ Item {
               icon: "close"
               tooltipText: I18n.tr("common.close")
               Layout.alignment: Qt.AlignVCenter
+              colorBg: Color.mSurfaceContainerHigh
+              colorBgHover: Color.mSecondaryContainer
+              colorFg: Color.mOnSurfaceVariant
+              colorFgHover: Color.mOnSecondaryContainer
+              colorBorder: "transparent"
+              colorBorderHover: "transparent"
               onClicked: root.closeRequested()
             }
           }
@@ -1244,7 +1286,7 @@ Item {
                   id: fadeInAnim
                   from: 0
                   to: 1
-                  duration: Style.animationSlowest
+                  duration: Style.animationNormal
                   easing.type: Easing.OutCubic
                   running: false
                 }
@@ -1304,8 +1346,8 @@ Item {
               id: highlightOverlay
               visible: opacity > 0
               opacity: 0
-              color: Qt.alpha(Color.mSecondary, 0.2)
-              border.color: Qt.alpha(Color.mSecondary, 0.6)
+              color: Qt.alpha(Color.mSecondaryContainer, 0.72)
+              border.color: Color.mSecondary
               border.width: Style.borderM
               radius: Style.radiusS
               z: 100

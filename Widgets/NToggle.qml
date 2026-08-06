@@ -22,6 +22,11 @@ RowLayout {
 
   Layout.fillWidth: true
   spacing: Style.marginM
+  activeFocusOnTab: true
+  Accessible.role: Accessible.CheckBox
+  Accessible.name: root.label
+  Accessible.description: root.description
+  Accessible.checked: root.checked
 
   readonly property bool isValueChanged: (defaultValue !== undefined) && (checked !== defaultValue)
   readonly property string indicatorTooltip: defaultValue !== undefined ? I18n.tr("panels.indicator.default-value", {
@@ -48,9 +53,9 @@ RowLayout {
     implicitWidth: Math.round(root.baseSize * .85) * 2
     implicitHeight: Math.round(root.baseSize * .5) * 2
     radius: Math.min(Style.iRadiusL, height / 2)
-    color: root.checked ? Color.mPrimary : Color.mSurface
-    border.color: Color.mOutline
-    border.width: Style.borderS
+    color: root.checked ? Color.mPrimary : Color.mSurfaceContainerHighest
+    border.color: root.activeFocus ? Color.mPrimary : (root.checked ? "transparent" : Color.mOutline)
+    border.width: root.activeFocus ? Style.borderM : (root.checked ? 0 : Style.borderS)
 
     Behavior on color {
       ColorAnimation {
@@ -68,9 +73,9 @@ RowLayout {
       implicitWidth: Math.round(root.baseSize * 0.4) * 2
       implicitHeight: Math.round(root.baseSize * 0.4) * 2
       radius: Math.min(Style.iRadiusL, height / 2)
-      color: root.checked ? Color.mOnPrimary : Color.mPrimary
-      border.color: root.checked ? Color.mSurface : Color.mSurface
-      border.width: Style.borderM
+      color: root.checked ? Color.mOnPrimary : Color.mOnSurfaceVariant
+      border.color: "transparent"
+      border.width: 0
       anchors.verticalCenter: parent.verticalCenter
       anchors.verticalCenterOffset: 0
       x: root.checked ? switcher.width - width - 3 : 3
@@ -103,8 +108,12 @@ RowLayout {
       onClicked: {
         if (!enabled)
           return;
+        root.forceActiveFocus();
         root.toggled(!root.checked);
       }
     }
   }
+
+  Keys.onReturnPressed: root.toggled(!root.checked)
+  Keys.onSpacePressed: root.toggled(!root.checked)
 }

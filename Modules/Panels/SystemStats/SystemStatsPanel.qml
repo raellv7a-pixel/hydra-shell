@@ -15,11 +15,13 @@ SmartPanel {
   Component.onDestruction: SystemStatService.unregisterComponent("panel-systemstats")
 
   preferredWidth: Math.round(440 * Style.uiScaleRatio)
+  panelBackgroundColor: Color.mSurface
+  panelBorderColor: Qt.alpha(Color.mOutline, 0.28)
 
   panelContent: Item {
     id: panelContent
     property real contentPreferredHeight: mainColumn.implicitHeight + Style.margin2L
-    readonly property real cardHeight: 90 * Style.uiScaleRatio
+    readonly property real cardHeight: 96 * Style.uiScaleRatio
 
     // Get diskPath from bar's SystemMonitor widget if available, otherwise use "/"
     readonly property string diskPath: {
@@ -40,6 +42,8 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         implicitHeight: headerRow.implicitHeight + Style.margin2M
+        color: Color.mSurfaceContainerHigh
+        radius: Style.radiusL
 
         RowLayout {
           id: headerRow
@@ -47,10 +51,18 @@ SmartPanel {
           anchors.margins: Style.marginM
           spacing: Style.marginM
 
-          NIcon {
-            icon: "device-analytics"
-            pointSize: Style.fontSizeXXL
-            color: Color.mPrimary
+          Rectangle {
+            Layout.preferredWidth: Style.baseWidgetSize * 0.8
+            Layout.preferredHeight: Style.baseWidgetSize * 0.8
+            radius: height / 2
+            color: Color.mPrimaryContainer
+
+            NIcon {
+              anchors.centerIn: parent
+              icon: "device-analytics"
+              pointSize: Style.fontSizeL
+              color: Color.mPrimary
+            }
           }
 
           NText {
@@ -76,12 +88,13 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         Layout.preferredHeight: panelContent.cardHeight
+        color: Color.mSurfaceContainer
+        radius: Style.radiusL
 
         ColumnLayout {
           anchors.fill: parent
-          anchors.margins: Style.marginS
-          anchors.bottomMargin: Style.radiusM * 0.5
-          spacing: Style.marginXS
+          anchors.margins: Style.marginM
+          spacing: Style.marginS
 
           RowLayout {
             Layout.fillWidth: true
@@ -89,15 +102,19 @@ SmartPanel {
 
             NIcon {
               icon: "cpu-usage"
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeM
               color: Color.mPrimary
             }
 
             NText {
-              text: `${Math.round(SystemStatService.cpuUsage)}% (${SystemStatService.cpuFreq.replace(/[^0-9.]/g, "")} GHz)`
+              text: I18n.tr("system-monitor.cpu-usage")
               pointSize: Style.fontSizeXS
-              color: Color.mPrimary
-              font.family: Settings.data.ui.fontFixed
+              color: Color.mOnSurface
+              font.weight: Style.fontWeightMedium
+            }
+
+            Item {
+              Layout.fillWidth: true
             }
 
             NIcon {
@@ -111,35 +128,39 @@ SmartPanel {
               pointSize: Style.fontSizeXS
               color: Color.mSecondary
               font.family: Settings.data.ui.fontFixed
-              Layout.rightMargin: Style.marginS
-            }
-
-            Item {
-              Layout.fillWidth: true
             }
 
             NText {
-              text: I18n.tr("system-monitor.cpu-usage")
+              text: `${Math.round(SystemStatService.cpuUsage)}% · ${SystemStatService.cpuFreq.replace(/[^0-9.]/g, "")} GHz`
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: Color.mPrimary
+              font.family: Settings.data.ui.fontFixed
+              font.weight: Style.fontWeightBold
             }
           }
 
-          NGraph {
+          Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            values: SystemStatService.cpuHistory
-            values2: SystemStatService.cpuTempHistory
-            minValue: 0
-            maxValue: 100
-            minValue2: Math.max(SystemStatService.cpuTempHistoryMin - 5, 0)
-            maxValue2: Math.max(SystemStatService.cpuTempHistoryMax + 5, 1)
-            color: Color.mPrimary
-            color2: Color.mSecondary
-            strokeWidth: Math.max(1, Style.uiScaleRatio)
-            fill: true
-            fillOpacity: 0.15
-            updateInterval: SystemStatService.cpuUsageIntervalMs
+            color: Color.mSurfaceContainerLow
+            radius: Style.iRadiusM
+
+            NGraph {
+              anchors.fill: parent
+              anchors.margins: Style.marginXS
+              values: SystemStatService.cpuHistory
+              values2: SystemStatService.cpuTempHistory
+              minValue: 0
+              maxValue: 100
+              minValue2: Math.max(SystemStatService.cpuTempHistoryMin - 5, 0)
+              maxValue2: Math.max(SystemStatService.cpuTempHistoryMax + 5, 1)
+              color: Color.mPrimary
+              color2: Color.mSecondary
+              strokeWidth: Math.max(1, Style.uiScaleRatio)
+              fill: true
+              fillOpacity: 0.18
+              updateInterval: SystemStatService.cpuUsageIntervalMs
+            }
           }
         }
       }
@@ -148,12 +169,13 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         Layout.preferredHeight: panelContent.cardHeight
+        color: Color.mSurfaceContainer
+        radius: Style.radiusL
 
         ColumnLayout {
           anchors.fill: parent
-          anchors.margins: Style.marginS
-          anchors.bottomMargin: Style.radiusM * 0.5
-          spacing: Style.marginXS
+          anchors.margins: Style.marginM
+          spacing: Style.marginS
 
           RowLayout {
             Layout.fillWidth: true
@@ -161,15 +183,15 @@ SmartPanel {
 
             NIcon {
               icon: "memory"
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeM
               color: Color.mPrimary
             }
 
             NText {
-              text: `${Math.round(SystemStatService.memPercent)}% (${(SystemStatService.memGb).toFixed(1)} GiB)`
+              text: I18n.tr("common.memory")
               pointSize: Style.fontSizeXS
-              color: Color.mPrimary
-              font.family: Settings.data.ui.fontFixed
+              color: Color.mOnSurface
+              font.weight: Style.fontWeightMedium
             }
 
             Item {
@@ -177,23 +199,32 @@ SmartPanel {
             }
 
             NText {
-              text: I18n.tr("common.memory")
+              text: `${Math.round(SystemStatService.memPercent)}% · ${(SystemStatService.memGb).toFixed(1)} GiB`
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: Color.mPrimary
+              font.family: Settings.data.ui.fontFixed
+              font.weight: Style.fontWeightBold
             }
           }
 
-          NGraph {
+          Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            values: SystemStatService.memHistory
-            minValue: 0
-            maxValue: 100
-            color: Color.mPrimary
-            strokeWidth: Math.max(1, Style.uiScaleRatio)
-            fill: true
-            fillOpacity: 0.15
-            updateInterval: SystemStatService.memIntervalMs
+            color: Color.mSurfaceContainerLow
+            radius: Style.iRadiusM
+
+            NGraph {
+              anchors.fill: parent
+              anchors.margins: Style.marginXS
+              values: SystemStatService.memHistory
+              minValue: 0
+              maxValue: 100
+              color: Color.mPrimary
+              strokeWidth: Math.max(1, Style.uiScaleRatio)
+              fill: true
+              fillOpacity: 0.18
+              updateInterval: SystemStatService.memIntervalMs
+            }
           }
         }
       }
@@ -202,16 +233,34 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         Layout.preferredHeight: panelContent.cardHeight
+        color: Color.mSurfaceContainer
+        radius: Style.radiusL
 
         ColumnLayout {
           anchors.fill: parent
-          anchors.margins: Style.marginS
-          anchors.bottomMargin: Style.radiusM * 0.5
-          spacing: Style.marginXS
+          anchors.margins: Style.marginM
+          spacing: Style.marginS
 
           RowLayout {
             Layout.fillWidth: true
             spacing: Style.marginXS
+
+            NIcon {
+              icon: "network"
+              pointSize: Style.fontSizeM
+              color: Color.mPrimary
+            }
+
+            NText {
+              text: I18n.tr("common.network")
+              pointSize: Style.fontSizeXS
+              color: Color.mOnSurface
+              font.weight: Style.fontWeightMedium
+            }
+
+            Item {
+              Layout.fillWidth: true
+            }
 
             NIcon {
               icon: "download-speed"
@@ -224,7 +273,6 @@ SmartPanel {
               pointSize: Style.fontSizeXS
               color: Color.mPrimary
               font.family: Settings.data.ui.fontFixed
-              Layout.rightMargin: Style.marginS
             }
 
             NIcon {
@@ -239,34 +287,31 @@ SmartPanel {
               color: Color.mSecondary
               font.family: Settings.data.ui.fontFixed
             }
-
-            Item {
-              Layout.fillWidth: true
-            }
-
-            NText {
-              text: I18n.tr("common.network")
-              pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
-            }
           }
 
-          NGraph {
+          Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            values: SystemStatService.rxSpeedHistory
-            values2: SystemStatService.txSpeedHistory
-            minValue: 0
-            maxValue: SystemStatService.rxMaxSpeed
-            minValue2: 0
-            maxValue2: SystemStatService.txMaxSpeed
-            color: Color.mPrimary
-            color2: Color.mSecondary
-            strokeWidth: Math.max(1, Style.uiScaleRatio)
-            fill: true
-            fillOpacity: 0.15
-            updateInterval: SystemStatService.networkIntervalMs
-            animateScale: true
+            color: Color.mSurfaceContainerLow
+            radius: Style.iRadiusM
+
+            NGraph {
+              anchors.fill: parent
+              anchors.margins: Style.marginXS
+              values: SystemStatService.rxSpeedHistory
+              values2: SystemStatService.txSpeedHistory
+              minValue: 0
+              maxValue: SystemStatService.rxMaxSpeed
+              minValue2: 0
+              maxValue2: SystemStatService.txMaxSpeed
+              color: Color.mPrimary
+              color2: Color.mSecondary
+              strokeWidth: Math.max(1, Style.uiScaleRatio)
+              fill: true
+              fillOpacity: 0.18
+              updateInterval: SystemStatService.networkIntervalMs
+              animateScale: true
+            }
           }
         }
       }
@@ -275,6 +320,8 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         implicitHeight: detailsColumn.implicitHeight + Style.margin2M
+        color: Color.mSurfaceContainerHigh
+        radius: Style.radiusL
 
         ColumnLayout {
           id: detailsColumn
