@@ -17,13 +17,14 @@ SmartPanel {
   id: root
 
   // Sizing - modern attached panel matching reference design
-  preferredWidth: Math.round(380 * Style.uiScaleRatio)
+  preferredWidth: Math.round(392 * Style.uiScaleRatio)
   preferredHeight: Math.round(580 * Style.uiScaleRatio)
   preferredWidthRatio: 0
   preferredHeightRatio: 0
 
   blurEnabled: true
   panelBackgroundColor: Color.mSurface
+  panelBorderColor: Qt.alpha(Color.mOutline, 0.28)
 
   // Attachment to bar & screen positioning
   readonly property string screenBarPosition: Settings.getBarPositionForScreen(screen?.name)
@@ -467,7 +468,7 @@ SmartPanel {
     NBox {
       anchors.fill: parent
       anchors.margins: Style.marginM
-      color: Color.mSurfaceVariant
+      color: Color.mSurfaceContainerLow
       radius: Style.radiusL
 
       ColumnLayout {
@@ -486,14 +487,14 @@ SmartPanel {
             anchors.fill: parent
             imagePath: root.profileWallpaperPath
             imageFillMode: Image.PreserveAspectCrop
-            radius: Style.radiusM
+            radius: Style.radiusL
           }
 
           Rectangle {
             anchors.fill: parent
             color: "black"
-            opacity: 0.25
-            radius: Style.radiusM
+            opacity: 0.18
+            radius: Style.radiusL
           }
 
           ColumnLayout {
@@ -506,9 +507,9 @@ SmartPanel {
               visible: Settings.data.sessionMenu.showProfileBadge ?? true
               Layout.fillWidth: true
               Layout.preferredHeight: Math.round(42 * Style.uiScaleRatio)
-              radius: Style.radiusM
-              color: Qt.rgba(1, 1, 1, 0.18)
-              border.color: Qt.rgba(1, 1, 1, 0.3)
+              radius: Style.iRadiusL
+              color: Qt.alpha(Color.mSurfaceContainerHigh, 0.82)
+              border.color: Qt.alpha(Color.mOutline, 0.32)
               border.width: Style.borderS
 
               RowLayout {
@@ -518,14 +519,14 @@ SmartPanel {
                 NIcon {
                   icon: "person"
                   pointSize: Style.fontSizeM
-                  color: "white"
+                  color: Color.mPrimary
                 }
 
                 NText {
                   text: HostService.displayName || Quickshell.env("USER") || "user"
                   font.weight: Style.fontWeightBold
                   pointSize: Style.fontSizeM
-                  color: "white"
+                  color: Color.mOnSurface
                   elide: Text.ElideRight
                 }
               }
@@ -538,10 +539,8 @@ SmartPanel {
               visible: Settings.data.sessionMenu.showUptimeBadge ?? true
               Layout.fillWidth: true
               Layout.preferredHeight: Math.round(36 * Style.uiScaleRatio)
-              radius: Style.radiusM
-              color: Qt.rgba(0, 0, 0, 0.5)
-              border.color: Qt.rgba(255, 255, 255, 0.15)
-              border.width: Style.borderS
+              radius: Style.iRadiusL
+              color: Qt.alpha(Color.mSurfaceContainerHighest, 0.88)
 
               RowLayout {
                 anchors.centerIn: parent
@@ -550,13 +549,13 @@ SmartPanel {
                 NIcon {
                   icon: "clock"
                   pointSize: Style.fontSizeS
-                  color: "white"
+                  color: Color.mPrimary
                 }
 
                 NText {
                   text: I18n.tr("system.uptime", { "uptime": root.uptimeText })
                   pointSize: Style.fontSizeS
-                  color: "white"
+                  color: Color.mOnSurface
                   font.weight: Style.fontWeightMedium
                 }
               }
@@ -613,26 +612,46 @@ SmartPanel {
 
     readonly property bool effectiveHover: !root.ignoreMouseHover && mouseArea.containsMouse
     readonly property bool activeFocusOrHover: isSelected || effectiveHover
+    readonly property bool destructiveState: isShutdown && (pending || activeFocusOrHover)
+    readonly property color containerColor: {
+      if (destructiveState) return Color.blend(Color.mSurfaceContainerHigh, Color.mError, 0.24);
+      if (pending) return Color.mPrimaryContainer;
+      if (mouseArea.pressed) return Color.mPrimaryContainer;
+      if (activeFocusOrHover) return Color.mSecondaryContainer;
+      return Color.mSurfaceContainerHigh;
+    }
+    readonly property color contentColor: {
+      if (destructiveState) return Color.mError;
+      if (pending || mouseArea.pressed) return Color.mOnPrimaryContainer;
+      if (activeFocusOrHover) return Color.mOnSecondaryContainer;
+      return Color.mOnSurface;
+    }
 
     signal clicked
 
-    radius: Style.radiusM
-    color: {
-      if (pending) return Color.mPrimary;
-      if (activeFocusOrHover) return Color.mPrimary;
-      return Color.mSurface;
+    Accessible.role: Accessible.Button
+    Accessible.name: title
+    Accessible.description: pending ? (Math.ceil(timeRemaining / 1000) + "s") : keybind
+    Accessible.pressed: mouseArea.pressed
+
+    radius: pending || activeFocusOrHover ? Style.iRadiusL : Style.iRadiusM
+    color: containerColor
+    border.width: isSelected ? Style.borderM : 0
+    border.color: destructiveState ? Color.mError : Color.mPrimary
+
+    scale: mouseArea.pressed ? 0.98 : 1.0
+
+    Behavior on radius {
+      NumberAnimation {
+        duration: Style.animationFast
+        easing.type: Easing.OutCubic
+      }
     }
-
-    border.width: Style.borderS
-    border.color: activeFocusOrHover ? Color.mOnPrimary : Color.mOutline
-
-    scale: activeFocusOrHover ? 1.05 : 1.0
 
     Behavior on scale {
       NumberAnimation {
         duration: Style.animationFast
-        easing.type: Easing.OutBack
-        easing.overshoot: 1.2
+        easing.type: Easing.OutCubic
       }
     }
 
@@ -651,21 +670,9 @@ SmartPanel {
         id: iconElem
         Layout.alignment: Qt.AlignHCenter
         icon: buttonRoot.icon
-        pointSize: Style.fontSizeXXXL * 1.1
-        color: {
-          if (buttonRoot.pending || buttonRoot.activeFocusOrHover) return Color.mOnPrimary;
-          if (buttonRoot.isShutdown) return Color.mError;
-          return Color.mOnSurface;
-        }
-        scale: buttonRoot.activeFocusOrHover ? 1.15 : 1.0
+        pointSize: Style.fontSizeXXXL
+        color: buttonRoot.isShutdown ? Color.mError : buttonRoot.contentColor
 
-        Behavior on scale {
-          NumberAnimation {
-            duration: Style.animationFast
-            easing.type: Easing.OutBack
-            easing.overshoot: 1.2
-          }
-        }
         Behavior on color {
           ColorAnimation { duration: Style.animationFast }
         }
@@ -676,7 +683,7 @@ SmartPanel {
         text: buttonRoot.pending ? (Math.ceil(timeRemaining / 1000) + "s") : buttonRoot.title
         pointSize: Style.fontSizeXS
         font.weight: Style.fontWeightMedium
-        color: (buttonRoot.pending || buttonRoot.activeFocusOrHover) ? Color.mOnPrimary : Color.mOnSurfaceVariant
+        color: buttonRoot.contentColor
         elide: Text.ElideRight
         maximumLineCount: 1
 
@@ -692,9 +699,9 @@ SmartPanel {
       anchors.right: parent.right
       anchors.margins: Style.marginXS
       width: keybindText.implicitWidth + Style.marginS
-      height: keybindText.implicitHeight + 2
-      radius: Style.radiusXS
-      color: buttonRoot.activeFocusOrHover ? Color.mOnPrimary : Color.mSurfaceVariant
+      height: keybindText.implicitHeight + Style.marginXS
+      radius: height / 2
+      color: buttonRoot.activeFocusOrHover ? Color.mSurfaceContainerHighest : Color.mSurfaceContainer
       visible: Settings.data.sessionMenu.showKeybinds && (buttonRoot.keybind !== "") && !buttonRoot.pending
       z: 5
 
@@ -703,7 +710,8 @@ SmartPanel {
         anchors.centerIn: parent
         text: buttonRoot.keybind
         pointSize: Style.fontSizeXXS
-        color: buttonRoot.activeFocusOrHover ? Color.mPrimary : Color.mOnSurfaceVariant
+        color: buttonRoot.activeFocusOrHover ? Color.mOnSurface : Color.mOnSurfaceVariant
+        font.weight: Style.fontWeightMedium
       }
     }
 

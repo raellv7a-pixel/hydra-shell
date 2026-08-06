@@ -229,6 +229,61 @@ ColumnLayout {
         }
       }
 
+      NTextInputButton {
+        Layout.fillWidth: true
+        visible: root.cfg.profileCoverMode === "custom"
+        label: "Arquivo da capa"
+        description: "Imagem ou GIF local usado como fundo"
+        text: root.cfg.profileCoverPath ?? ""
+        placeholderText: "~/"
+        buttonIcon: "photo"
+        onInputTextChanged: text => {
+          root.cfg.profileCoverPath = text;
+          ControlCenterService.saveSettings();
+        }
+        onButtonClicked: coverImagePicker.openFilePicker()
+      }
+
+      NTextInputButton {
+        Layout.fillWidth: true
+        visible: root.cfg.profileCoverMode === "random"
+        label: "Pasta de capas aleatórias"
+        description: "Escolhe uma imagem aleatória desta pasta"
+        text: root.cfg.profileCoverFolder ?? ""
+        placeholderText: "~/"
+        buttonIcon: "folder"
+        onInputTextChanged: text => {
+          root.cfg.profileCoverFolder = text;
+          ControlCenterService.saveSettings();
+        }
+        onButtonClicked: coverFolderPicker.openFilePicker()
+      }
+
+      NFilePicker {
+        id: coverImagePicker
+        title: "Selecionar Imagem de Capa"
+        selectionMode: "files"
+        nameFilters: ImageCacheService.basicImageFilters
+        onAccepted: paths => {
+          if (paths.length > 0) {
+            root.cfg.profileCoverPath = paths[0];
+            ControlCenterService.saveSettings();
+          }
+        }
+      }
+
+      NFilePicker {
+        id: coverFolderPicker
+        title: "Selecionar Pasta de Capas"
+        selectionMode: "folders"
+        onAccepted: paths => {
+          if (paths.length > 0) {
+            root.cfg.profileCoverFolder = paths[0];
+            ControlCenterService.saveSettings();
+          }
+        }
+      }
+
       NToggle {
         Layout.fillWidth: true
         label: "Escurecimento Suave (Overlay)"
@@ -272,8 +327,24 @@ ColumnLayout {
         currentKey: root.cfg.profileCoverBorderAnimation ?? "static"
         model: [
           { key: "static", name: "Estática" },
-          { key: "rotate", name: "Rotação de Cores" },
-          { key: "pulse", name: "Pulsação Suave" }
+          { key: "fade", name: "Alternar cores" },
+          { key: "flow", name: "Cores circulando" },
+          { key: "flowEase", name: "Circular elástico" },
+          { key: "spark", name: "Circular com faíscas" },
+          { key: "pulse", name: "Pulso" },
+          { key: "chase", name: "Traços correndo" },
+          { key: "comet", name: "Cometa" },
+          { key: "neon", name: "Neon pulsante" },
+          { key: "corners", name: "Cantos vivos" },
+          { key: "orbitDots", name: "Pontos orbitais" },
+          { key: "scan", name: "Varredura luminosa" },
+          { key: "profileAurora", name: "Perfil: aurora" },
+          { key: "profileHalo", name: "Perfil: halo interno" },
+          { key: "profileHeartbeat", name: "Perfil: batida cardíaca" },
+          { key: "profileSpotlight", name: "Perfil: reflexo diagonal" },
+          { key: "reactivePulse", name: "Reativa: pulso" },
+          { key: "reactiveFlow", name: "Reativa: circular" },
+          { key: "reactiveSpark", name: "Reativa: faíscas" }
         ]
         onSelected: key => {
           root.cfg.profileCoverBorderAnimation = key;
@@ -303,10 +374,15 @@ ColumnLayout {
         description: "Estilo visual do espectro ao tocar músicas"
         currentKey: root.cfg.mediaVisualizerEffect ?? "bars"
         model: [
+          { key: "none", name: "Desativado" },
           { key: "bars", name: "Barras Verticais" },
           { key: "wave", name: "Onda Fluida" },
-          { key: "dots", name: "Pontos Pulsantes" },
-          { key: "none", name: "Desativado" }
+          { key: "shock", name: "Ondas de Choque" },
+          { key: "pulse", name: "Pulso Central" },
+          { key: "nebula", name: "Nebulosa" },
+          { key: "aurora", name: "Aurora" },
+          { key: "constellation", name: "Constelação" },
+          { key: "radar", name: "Radar" }
         ]
         onSelected: key => {
           root.cfg.mediaVisualizerEffect = key;
@@ -320,9 +396,18 @@ ColumnLayout {
         description: "Efeito animado sobre a barra de volume principal"
         currentKey: root.cfg.audioSliderEffect ?? "wave"
         model: [
+          { key: "none", name: "Padrão" },
           { key: "wave", name: "Onda Fluida" },
+          { key: "zigzag", name: "Zigzag" },
           { key: "pulse", name: "Pulsação de Som" },
-          { key: "none", name: "Padrão" }
+          { key: "bars", name: "Barras" },
+          { key: "spectrum", name: "Espectro Aberto" },
+          { key: "filament", name: "Filamento Neon" },
+          { key: "ripple", name: "Ondas de Impacto" },
+          { key: "glow", name: "Brilho Dinâmico" },
+          { key: "wavy_fill", name: "Onda Sólida" },
+          { key: "blocks", name: "Blocos" },
+          { key: "dots", name: "Pontos" }
         ]
         onSelected: key => {
           root.cfg.audioSliderEffect = key;
@@ -336,9 +421,15 @@ ColumnLayout {
         description: "Efeito animado para a barra de entrada de áudio"
         currentKey: root.cfg.microphoneSliderEffect ?? "pulse"
         model: [
-          { key: "pulse", name: "Pulsação de Voz" },
+          { key: "none", name: "Padrão" },
           { key: "wave", name: "Onda Fluida" },
-          { key: "none", name: "Padrão" }
+          { key: "zigzag", name: "Zigzag" },
+          { key: "pulse", name: "Pulsação de Voz" },
+          { key: "bars", name: "Barras" },
+          { key: "glow", name: "Brilho Dinâmico" },
+          { key: "wavy_fill", name: "Onda Sólida" },
+          { key: "blocks", name: "Blocos" },
+          { key: "dots", name: "Pontos" }
         ]
         onSelected: key => {
           root.cfg.microphoneSliderEffect = key;
