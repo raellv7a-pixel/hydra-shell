@@ -299,6 +299,20 @@ Singleton {
       property list<var> screenOverrides: []
     }
 
+    property JsonObject workspaceManager: JsonObject {
+      property string presentationMode: "adaptive" // "adaptive" or "floating"
+      property bool livePreviews: true
+      property bool dimBackground: true
+      property list<string> privateWorkspaces: []
+      property list<string> customOrder: []
+      property list<string> pinnedSpecials: []
+      property bool gameMode: false
+      property bool hideSpecials: false
+      property bool showOnlyActiveSpecial: false
+      property bool borderOnlyPrivacy: false
+      property JsonObject presentationModePerMonitor: JsonObject {}
+    }
+
     // general
     property JsonObject general: JsonObject {
       property string sddmTheme: ""

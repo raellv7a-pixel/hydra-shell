@@ -445,6 +445,40 @@ Singleton {
     }
   }
 
+  function moveWindowToWorkspace(address, workspace) {
+    if (backend && backend.moveWindowToWorkspace) {
+      backend.moveWindowToWorkspace(address, workspace);
+    } else {
+      Logger.w("Compositor", "Current backend cannot move a window by address");
+    }
+  }
+
+  function closeWindowByAddress(address) {
+    if (backend && backend.closeWindowByAddress) {
+      backend.closeWindowByAddress(address);
+    } else {
+      Logger.w("Compositor", "Current backend cannot close a window by address");
+    }
+  }
+
+  function focusWindowByAddress(address) {
+    if (backend && backend.focusWindowByAddress) {
+      backend.focusWindowByAddress(address);
+    } else {
+      Logger.w("Compositor", "Current backend cannot focus a window by address");
+    }
+  }
+
+  function isWorkspacePrivate(workspace) {
+    return backend && backend.isWorkspacePrivate ? backend.isWorkspacePrivate(workspace) : false;
+  }
+
+  function setWorkspacePrivate(workspace, enabled) {
+    return backend && backend.setWorkspacePrivate
+        ? backend.setWorkspacePrivate(workspace, enabled)
+        : false;
+  }
+
   // Spawn command
   function spawn(command) {
     // Ensure command is a proper JS array (QML lists can behave unexpectedly in some contexts)

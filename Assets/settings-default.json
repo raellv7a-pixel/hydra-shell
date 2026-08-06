@@ -80,6 +80,19 @@
     "rightClickCommand": "",
     "screenOverrides": []
   },
+  "workspaceManager": {
+    "presentationMode": "adaptive",
+    "livePreviews": true,
+    "dimBackground": true,
+    "privateWorkspaces": [],
+    "customOrder": [],
+    "pinnedSpecials": [],
+    "gameMode": false,
+    "hideSpecials": false,
+    "showOnlyActiveSpecial": false,
+    "borderOnlyPrivacy": false,
+    "presentationModePerMonitor": {}
+  },
   "general": {
     "avatarImage": "",
     "dimmerOpacity": 0.2,
@@ -234,6 +247,8 @@
     "wallhavenResolutionMode": "atleast",
     "wallhavenResolutionWidth": "",
     "wallhavenResolutionHeight": "",
+    "wallhavenTopRange": "1M",
+    "wallhavenColors": "",
     "sortOrder": "name",
     "favorites": []
   },

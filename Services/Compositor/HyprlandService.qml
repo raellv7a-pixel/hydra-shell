@@ -23,7 +23,11 @@ Item {
   property bool initialized: false
   property var workspaceCache: ({})
   property var windowCache: ({})
-
+  property bool screenshareActive: false
+  property int screenshareCount: 0
+  property var urgentAddresses: ({})
+  property var recentWorkspaces: []
+  property string currentLayout: "dwindle"
   // Dispatch compatibility state
   property bool dispatchModeChecked: false
   property bool useLuaDispatch: false
@@ -56,9 +60,12 @@ Item {
                      safeUpdateWorkspaces();
                      safeUpdateWindows();
                      queryDisplayScales();
-                     queryKeyboardLayout();
-                     // Detect Hyprland dispatch syntax once during startup
-                     detectDispatchMode();
+                      queryKeyboardLayout();
+                      // Detect Hyprland dispatch syntax once during startup
+                      detectDispatchMode();
+                      reapplyWorkspacePrivacy();
+                      if (Settings.data.workspaceManager.gameMode)
+                        applyGameMode(true);
                    });
       initialized = true;
       Logger.i("HyprlandService", "Service started");
@@ -583,8 +590,46 @@ Item {
         Qt.callLater(queryDisplayScales);
       }
 
-      if (event.name == "activelayout") {
+      if (event.name === "configreloaded") {
+        Qt.callLater(reapplyWorkspacePrivacy);
+        if (Settings.data.workspaceManager.gameMode)
+          Qt.callLater(() => applyGameMode(true));
+      }
+
+      if (event.name === "activelayout") {
         handleActiveLayoutEvent(event.data);
+      }
+
+      if (event.name === "screencastv2") {
+        const parts = String(event.data || "").split(",");
+        const state = parts.length > 0 ? parts[0].trim() : "0";
+        screenshareCount = Math.max(0, screenshareCount + (state === "1" ? 1 : -1));
+        screenshareActive = screenshareCount > 0;
+      }
+
+      if (event.name === "urgent") {
+        const addr = normalizeWindowAddress(event.data);
+        if (addr) {
+          const map = Object.assign({}, urgentAddresses);
+          map[addr] = true;
+          urgentAddresses = map;
+        }
+      }
+
+      if (event.name === "activewindowv2" || event.name === "closewindow") {
+        const addr = normalizeWindowAddress(event.data);
+        if (addr && urgentAddresses[addr]) {
+          const map = Object.assign({}, urgentAddresses);
+          delete map[addr];
+          urgentAddresses = map;
+        }
+      }
+
+      if (event.name === "workspacev2" || event.name === "activespecialv2") {
+        const parts = String(event.data || "").split(",");
+        const wsKey = parts.length > 1 ? parts[1].trim() : "";
+        if (wsKey)
+          recordRecentWorkspace(wsKey);
       }
     }
   }
@@ -592,6 +637,13 @@ Item {
   // Dispatch helpers
   function luaQuote(str) {
     return String(str).replace(/\\/g, "\\\\").replace(/"/g, "\\\"").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
+  }
+
+  function normalizeWindowAddress(address) {
+    const raw = String(address || "").trim();
+    if (!raw)
+      return "";
+    return raw.startsWith("0x") ? raw : `0x${raw}`;
   }
 
   // ------------------------------------------------------------
@@ -663,6 +715,15 @@ Item {
     }
   }
 
+  function focusWindowByAddress(address) {
+    const normalizedAddress = normalizeWindowAddress(address);
+    if (!normalizedAddress)
+      return;
+    const selector = `address:${normalizedAddress}`;
+    dispatchCommand("focuswindow", selector,
+                    `hl.dsp.focus({ window = "${luaQuote(selector)}" })`);
+  }
+
   function closeWindow(window) {
     try {
       const addr = `address:0x${window.id}`;
@@ -670,6 +731,147 @@ Item {
       dispatchCommand("killwindow", addr, `hl.dsp.window.close("${luaQuote(addr)}")`);
     } catch (e) {
       Logger.e("HyprlandService", "Failed to close window:", e);
+    }
+  }
+
+  function moveWindowToWorkspace(address, workspace) {
+    try {
+      if (!address || !workspace) {
+        Logger.w("HyprlandService", "Invalid window or workspace for move");
+        return;
+      }
+
+      const normalizedAddress = normalizeWindowAddress(address);
+      const addressSelector = `address:${normalizedAddress}`;
+      const workspaceName = workspace.name ? String(workspace.name) : "";
+      const workspaceTarget = workspaceName
+          ? (workspaceName.startsWith("special:") ? workspaceName : `name:${workspaceName}`)
+          : String(workspace.idx);
+      const luaWorkspace = workspaceName ? `"${luaQuote(workspaceTarget)}"` : String(workspace.idx);
+
+      dispatchCommand("movetoworkspacesilent", `${workspaceTarget},${addressSelector}`,
+                      `hl.dsp.window.move({ workspace = ${luaWorkspace}, window = "${luaQuote(addressSelector)}" })`);
+      Hyprland.refreshToplevels();
+      Hyprland.refreshWorkspaces();
+    } catch (e) {
+      Logger.e("HyprlandService", "Failed to move window:", e);
+    }
+  }
+
+  function closeWindowByAddress(address) {
+    try {
+      if (!address)
+        return;
+      const normalizedAddress = normalizeWindowAddress(address);
+      const addressSelector = `address:${normalizedAddress}`;
+      dispatchCommand("killwindow", addressSelector,
+                      `hl.dsp.window.close({ window = "${luaQuote(addressSelector)}" })`);
+      Hyprland.refreshToplevels();
+      Hyprland.refreshWorkspaces();
+    } catch (e) {
+      Logger.e("HyprlandService", "Failed to close window by address:", e);
+    }
+  }
+
+  function workspacePrivacyKey(workspace) {
+    if (!workspace)
+      return "";
+    if (workspace.name !== undefined && workspace.name !== "")
+      return String(workspace.name);
+    if (workspace.idx !== undefined)
+      return String(workspace.idx);
+    if (workspace.id !== undefined)
+      return String(workspace.id);
+    return "";
+  }
+
+  function workspacePrivacySelector(workspaceKey) {
+    const key = String(workspaceKey);
+    if (key.startsWith("special:") || /^\d+$/.test(key) || key.startsWith("name:"))
+      return key;
+    return `name:${key}`;
+  }
+
+  function workspacePrivacyRuleId(workspaceKey) {
+    let encoded = "";
+    const key = String(workspaceKey);
+    for (let index = 0; index < key.length; index++)
+      encoded += key.charCodeAt(index).toString(16) + "_";
+    return `workspace_${encoded}`;
+  }
+
+  function isWorkspacePrivate(workspace) {
+    const key = workspacePrivacyKey(workspace);
+    const privateWorkspaces = Settings.data.workspaceManager.privateWorkspaces || [];
+    return key !== "" && privateWorkspaces.includes(key);
+  }
+
+  function applyWorkspacePrivacyRule(workspaceKey, enabled) {
+    if (!workspaceKey)
+      return;
+
+    const ruleId = workspacePrivacyRuleId(workspaceKey);
+    const selector = workspacePrivacySelector(workspaceKey);
+    let lua = "hydra_shell_private_workspace_rules = hydra_shell_private_workspace_rules or {}; ";
+    lua += `local current = hydra_shell_private_workspace_rules["${luaQuote(ruleId)}"]; `;
+    lua += "if current then current:set_enabled(false) end; ";
+    if (enabled) {
+      lua += `hydra_shell_private_workspace_rules["${luaQuote(ruleId)}"] = hl.window_rule({ `;
+      lua += `name = "hydra-shell-private-${luaQuote(ruleId)}", `;
+      lua += `match = { workspace = "${luaQuote(selector)}" }, no_screen_share = true });`;
+    } else {
+      lua += `hydra_shell_private_workspace_rules["${luaQuote(ruleId)}"] = nil;`;
+    }
+    Quickshell.execDetached(["hyprctl", "repl", lua]);
+
+    const toplevels = Hyprland.toplevels.values || [];
+    for (let index = 0; index < toplevels.length; index++) {
+      const ipc = toplevels[index]?.lastIpcObject;
+      if (!ipc?.address || ipc.workspace?.name !== workspaceKey)
+        continue;
+      const address = String(ipc.address).startsWith("0x") ? String(ipc.address) : `0x${ipc.address}`;
+      Quickshell.execDetached(["hyprctl", "setprop", `address:${address}`,
+                              "no_screen_share", enabled ? "1" : "unset"]);
+    }
+  }
+
+  function setWorkspacePrivate(workspace, enabled) {
+    const key = workspacePrivacyKey(workspace);
+    if (!key)
+      return false;
+
+    const current = Array.from(Settings.data.workspaceManager.privateWorkspaces || []);
+    const next = current.filter(item => item !== key);
+    if (enabled)
+      next.push(key);
+    Settings.data.workspaceManager.privateWorkspaces = next;
+    applyWorkspacePrivacyRule(key, enabled);
+    return true;
+  }
+
+  function reapplyWorkspacePrivacy() {
+    const privateWorkspaces = Array.from(Settings.data.workspaceManager.privateWorkspaces || []);
+    let lua = "if hydra_shell_private_workspace_rules then ";
+    lua += "for _, rule in pairs(hydra_shell_private_workspace_rules) do rule:set_enabled(false) end end; ";
+    lua += "hydra_shell_private_workspace_rules = {}; ";
+    for (let index = 0; index < privateWorkspaces.length; index++) {
+      const key = privateWorkspaces[index];
+      const ruleId = workspacePrivacyRuleId(key);
+      const selector = workspacePrivacySelector(key);
+      lua += `hydra_shell_private_workspace_rules["${luaQuote(ruleId)}"] = hl.window_rule({ `;
+      lua += `name = "hydra-shell-private-${luaQuote(ruleId)}", `;
+      lua += `match = { workspace = "${luaQuote(selector)}" }, no_screen_share = true }); `;
+    }
+    Quickshell.execDetached(["hyprctl", "repl", lua]);
+  }
+
+  Connections {
+    target: Settings
+    function onSettingsLoaded() {
+      Qt.callLater(root.reapplyWorkspacePrivacy);
+    }
+    function onSettingsReloaded() {
+      Qt.callLater(root.reapplyWorkspacePrivacy);
     }
   }
 
@@ -703,6 +905,86 @@ Item {
     } catch (e) {
       Logger.e("HyprlandService", "Failed to cycle keyboard layout:", e);
     }
+  }
+
+  function recordRecentWorkspace(wsKey) {
+    if (!wsKey)
+      return;
+    const list = Array.from(recentWorkspaces || []);
+    const idx = list.indexOf(wsKey);
+    if (idx !== -1)
+      list.splice(idx, 1);
+    list.unshift(wsKey);
+    if (list.length > 8)
+      list.pop();
+    recentWorkspaces = list;
+  }
+
+  function focusRecentWorkspace() {
+    const list = Array.from(recentWorkspaces || []);
+    if (list.length > 1) {
+      const target = list[1];
+      if (/^\d+$/.test(target))
+        switchToWorkspace({ "idx": parseInt(target) });
+      else
+        switchToWorkspace({ "name": target });
+    }
+  }
+
+  function cycleWorkspaceLayout(workspaceKey) {
+    const layouts = ["dwindle", "master", "scrolling"];
+    const key = String(workspaceKey || "");
+    const workspace = (Hyprland.workspaces.values || []).find(ws => String(ws.name) === key
+                                                                      || String(ws.id) === key);
+    const current = workspace?.lastIpcObject?.tiledLayout
+        || workspace?.tiledLayout || "dwindle";
+    const nextIdx = (layouts.indexOf(current) + 1) % layouts.length;
+    const nextLayout = layouts[nextIdx];
+    currentLayout = nextLayout;
+    const selector = key.startsWith("special:") || /^\d+$/.test(key) ? key : `name:${key}`;
+    const ruleId = workspacePrivacyRuleId(`layout_${key}`);
+    let lua = "hydra_shell_workspace_layout_rules = hydra_shell_workspace_layout_rules or {}; ";
+    lua += `local current = hydra_shell_workspace_layout_rules["${luaQuote(ruleId)}"]; `;
+    lua += "if current then current:set_enabled(false) end; ";
+    lua += `hydra_shell_workspace_layout_rules["${luaQuote(ruleId)}"] = hl.workspace_rule({ `;
+    lua += `workspace = "${luaQuote(selector)}", layout = "${luaQuote(nextLayout)}" });`;
+    Quickshell.execDetached(["hyprctl", "repl", lua]);
+    refreshWorkspaceTimer.restart();
+  }
+
+  function applyGameMode(enabled) {
+    if (enabled) {
+      Quickshell.execDetached(["hyprctl", "--batch",
+                               "keyword animations:enabled 0 ; keyword decoration:blur:enabled 0 ; keyword general:gaps_in 0 ; keyword general:gaps_out 0"]);
+    } else {
+      Quickshell.execDetached(["hyprctl", "reload"]);
+    }
+  }
+
+  Timer {
+    id: refreshWorkspaceTimer
+    interval: 100
+    onTriggered: Hyprland.refreshWorkspaces()
+  }
+
+  function createSpecialWorkspace(name, isPrivate, launchCmd) {
+    const cleanName = String(name || "").trim().replace(/^special:/, "");
+    if (!cleanName)
+      return;
+    const wsName = "special:" + cleanName;
+    const workspace = { "name": wsName };
+    if (isPrivate)
+      setWorkspacePrivate(workspace, true);
+    if (launchCmd && launchCmd.trim()) {
+      const ruleId = workspacePrivacyRuleId(`autolaunch_${wsName}`);
+      let lua = "hydra_shell_workspace_launch_rules = hydra_shell_workspace_launch_rules or {}; ";
+      lua += `local current = hydra_shell_workspace_launch_rules["${luaQuote(ruleId)}"]; `;
+      lua += "if current then current:set_enabled(false) end; ";
+      lua += `hydra_shell_workspace_launch_rules["${luaQuote(ruleId)}"] = hl.workspace_rule({ `;
+      lua += `workspace = "${luaQuote(wsName)}", on_created_empty = "${luaQuote(launchCmd.trim())}" });`;
+      Quickshell.execDetached(["hyprctl", "repl", lua]);
+    }
+    switchToWorkspace(workspace);
   }
   function getFocusedScreen() {
     const hyprMon = Hyprland.focusedMonitor;

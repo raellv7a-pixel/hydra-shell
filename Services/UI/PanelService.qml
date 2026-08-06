@@ -21,6 +21,48 @@ Singleton {
   property bool overlayLauncherOpen: false
   property var overlayLauncherScreen: null
   property var overlayLauncherCore: null  // Reference to LauncherCore when overlay is active
+
+  // Workspace manager state
+  property bool workspaceManagerOpen: false
+  property var workspaceManagerScreen: null
+  property bool workspaceManagerOverviewMode: false
+
+  function openWorkspaceManager(screen, overviewMode) {
+    if (!screen)
+      return;
+    if (overlayLauncherOpen) {
+      overlayLauncherOpen = false;
+      overlayLauncherScreen = null;
+    }
+    if (openedPanel) {
+      closingPanel = openedPanel;
+      assignToSlot(1, closingPanel);
+      openedPanel.close();
+      openedPanel = null;
+      assignToSlot(0, null);
+    }
+    workspaceManagerScreen = screen;
+    workspaceManagerOverviewMode = overviewMode === true;
+    workspaceManagerOpen = true;
+    willOpen();
+  }
+
+  function closeWorkspaceManager() {
+    if (!workspaceManagerOpen)
+      return;
+    workspaceManagerOpen = false;
+    workspaceManagerScreen = null;
+    workspaceManagerOverviewMode = false;
+    didClose();
+  }
+
+  function toggleWorkspaceManager(screen) {
+    if (workspaceManagerOpen)
+      closeWorkspaceManager();
+    else
+      openWorkspaceManager(screen);
+  }
+
   // Brief window after panel opens where Exclusive keyboard is allowed on Hyprland
   // This allows text inputs to receive focus, then switches to OnDemand for click-to-close
   property bool isInitializingKeyboard: false
@@ -237,6 +279,7 @@ Singleton {
 
   // Helper to keep only one panel open at any time
   function willOpenPanel(panel) {
+    closeWorkspaceManager();
     // Close overlay launcher if open
     if (overlayLauncherOpen) {
       overlayLauncherOpen = false;
@@ -266,6 +309,7 @@ Singleton {
 
   // Open launcher panel (handles both normal and overlay mode)
   function openLauncher(screen) {
+    closeWorkspaceManager();
     if (Settings.data.appLauncher.overviewLayer) {
       // Close any regular panel first
       if (openedPanel) {
@@ -275,6 +319,7 @@ Singleton {
         openedPanel = null;
       }
       // Open overlay launcher
+      closedImmediately = false;
       overlayLauncherOpen = true;
       overlayLauncherScreen = screen;
       willOpen();
@@ -304,6 +349,7 @@ Singleton {
   // Close overlay launcher
   function closeOverlayLauncher() {
     if (overlayLauncherOpen) {
+      closedImmediately = false;
       overlayLauncherOpen = false;
       overlayLauncherScreen = null;
       didClose();

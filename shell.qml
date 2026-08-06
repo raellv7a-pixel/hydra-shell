@@ -20,7 +20,6 @@ import qs.Modules.Background
 import qs.Modules.Bar
 import qs.Modules.DesktopWidgets
 import qs.Modules.Dock
-import qs.Modules.LockScreen
 import qs.Modules.MainScreen
 import qs.Modules.Notification
 import qs.Modules.OSD
@@ -29,6 +28,7 @@ import qs.Modules.Polkit
 
 import qs.Modules.Panels.Launcher
 import qs.Modules.Panels.Settings
+import qs.Modules.Panels.WorkspaceManager
 import qs.Modules.Toast
 import qs.Services.Control
 import qs.Services.Hardware
@@ -151,6 +151,14 @@ ShellRoot {
 
       // Settings window mode (single window across all monitors)
       SettingsPanelWindow {}
+
+      // Workspace manager overlay
+      Loader {
+        active: PanelService.workspaceManagerOpen
+        sourceComponent: Component {
+          WorkspaceManagerPanel {}
+        }
+      }
 
       // Shared screen detector for IPC and plugins
       CurrentScreenDetector {
