@@ -1869,7 +1869,10 @@ SmartPanel {
                 Timer {
                   id: previewTimer
                   interval: 800
-                  running: hoverHandler.hovered
+                  // Don't let hover on other cells re-trigger while the overlay is
+                  // already open — the cursor crosses neighboring cells on its way
+                  // to the overlay's Apply button, and their hover shouldn't hijack it.
+                  running: hoverHandler.hovered && !(wallhavenViewRoot.previewOverlay && wallhavenViewRoot.previewOverlay.visible)
                   onTriggered: {
                     if (wallhavenViewRoot.previewOverlay) {
                       wallhavenViewRoot.previewOverlay.show(modelData);

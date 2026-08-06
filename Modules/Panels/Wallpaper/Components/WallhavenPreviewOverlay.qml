@@ -256,6 +256,12 @@ Rectangle {
   }
 
   function show(wallpaper) {
+    // Once open, only an explicit hide() may change the target — incidental
+    // hover from the cursor crossing other grid cells on the way to the
+    // Apply button must not swap what's about to be applied.
+    if (root.visible && root.opacity > 0) {
+      return;
+    }
     releaseTimer.stop();
     activeWallpaper = wallpaper;
     loadOriginal = false;
