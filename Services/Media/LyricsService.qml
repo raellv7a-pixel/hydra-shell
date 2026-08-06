@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.Commons
 import qs.Services.Media
 
 Singleton {
@@ -62,7 +63,7 @@ Singleton {
       isLoading = false
       currentStatus = ""
       lyricTimings = []
-      lyrics = ["Nenhuma música tocando."]
+      lyrics = [I18n.tr("lyrics.no-track")]
       return
     }
 
@@ -73,9 +74,9 @@ Singleton {
     _requestId++
     _cancelActiveRequest()
     isLoading = true
-    currentStatus = "Buscando letras..."
+    currentStatus = I18n.tr("lyrics.searching")
     lyricTimings = []
-    lyrics = ["Buscando letras..."]
+    lyrics = [I18n.tr("lyrics.searching")]
 
     _fetchExact(artist, title, album, duration, trackKey, _requestId)
   }
@@ -239,18 +240,18 @@ Singleton {
     if (!_isCurrentRequest(trackKey, requestId))
       return
     isLoading = false
-    currentStatus = "Sem letras."
+    currentStatus = I18n.tr("lyrics.not-found-status")
     lyricTimings = []
-    lyrics = ["Letra não encontrada."]
+    lyrics = [I18n.tr("lyrics.not-found")]
   }
 
   function _finishWithError(trackKey, requestId) {
     if (!_isCurrentRequest(trackKey, requestId))
       return
     isLoading = false
-    currentStatus = "Erro ao buscar letra."
+    currentStatus = I18n.tr("lyrics.error-status")
     lyricTimings = []
-    lyrics = ["Erro ao buscar letra."]
+    lyrics = [I18n.tr("lyrics.error")]
   }
 
   function _normalizedArtist(artist) {

@@ -653,6 +653,14 @@
     "restart": "Reiniciar",
     "shut-down": "Desligar"
   },
+  "lyrics": {
+    "error": "Erro ao buscar letra.",
+    "error-status": "Erro ao buscar letra.",
+    "no-track": "Nenhuma música tocando.",
+    "not-found": "Letra não encontrada.",
+    "not-found-status": "Sem letras.",
+    "searching": "Buscando letras..."
+  },
   "notifications": {
     "panel": {
       "click-to-collapse": "Clique para recolher",

@@ -653,6 +653,14 @@
     "restart": "Restart",
     "shut-down": "Shut down"
   },
+  "lyrics": {
+    "error": "Error fetching lyrics.",
+    "error-status": "Error fetching lyrics.",
+    "no-track": "No track playing.",
+    "not-found": "Lyrics not found.",
+    "not-found-status": "No lyrics.",
+    "searching": "Searching for lyrics..."
+  },
   "notifications": {
     "panel": {
       "click-to-collapse": "Click to collapse",
