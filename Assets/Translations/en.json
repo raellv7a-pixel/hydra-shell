@@ -2175,6 +2175,7 @@
       "source-moewalls": "MoeWalls (Live)",
       "source-motionbgs": "MotionBGS (Live)",
       "source-wallhaven": "Wallhaven",
+      "theme-diff-summary": "{changed} of {total} colors will change",
       "title": "Wallpaper Selector",
       "wallhaven-settings-title": "Wallhaven Settings"
     },
