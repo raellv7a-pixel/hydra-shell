@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
+import Quickshell.Widgets
 import qs.Commons
 import qs.Modules.Cards
 import qs.Modules.Panels.Settings
@@ -90,6 +91,11 @@ Item {
   readonly property real requestedPanelHeight: panelBaseHeight * Style.uiScaleRatio * localScale
   readonly property real autoFitScale: Math.min(1, Math.min(maxPanelWidth / Math.max(1, requestedPanelWidth), maxPanelHeight / Math.max(1, requestedPanelHeight)))
   readonly property real panelUnit: Style.uiScaleRatio * localScale * autoFitScale
+  readonly property color m3SurfaceContainerLow: Color.mSurfaceContainerLow
+  readonly property color m3SurfaceContainer: Color.mSurfaceContainer
+  readonly property color m3SurfaceContainerHigh: Color.mSurfaceContainerHigh
+  readonly property color m3SurfaceContainerHighest: Color.mSurfaceContainerHighest
+  readonly property color m3PrimaryContainer: Color.mPrimaryContainer
 
   readonly property var geometryPlaceholder: panelContainer
   readonly property bool allowAttach: !panelDetached
@@ -103,6 +109,9 @@ Item {
   property real contentPreferredHeight: Math.min(panelBaseHeight * panelUnit, maxPanelHeight)
   property string expandedNotificationId: ""
   property string activeDetailView: ""
+  property string processUsageMetric: "cpu"
+  property var processUsageRows: []
+  property var processAppMetadataCache: ({})
   readonly property bool centerDetailOpen: activeDetailView === "performance" || activeDetailView === "audio"
   readonly property bool rightDetailOpen: activeDetailView === "media" || activeDetailView === "notifications" || activeDetailView === "weather" || activeDetailView === "calendar" || activeDetailView === "screenUsage"
   property var pendingIpcCommand: []
@@ -370,7 +379,7 @@ Item {
   }
 
   function componentBackground(componentKey) {
-    return root.componentColor(componentKey, "background", Qt.alpha(Color.mSurfaceVariant, 0.82));
+    return root.componentColor(componentKey, "background", root.m3SurfaceContainerLow);
   }
 
   function componentText(componentKey, strong) {
@@ -956,6 +965,92 @@ Item {
     return SystemStatService.gpuType || root.tr("enabled");
   }
 
+  function processAppMetadata(processName) {
+    if (root.processAppMetadataCache[processName])
+      return root.processAppMetadataCache[processName];
+
+    let entry = null;
+    try {
+      entry = ThemeIcons.findAppEntry(processName);
+    } catch (error) {}
+
+    const metadata = {
+      "displayName": entry?.name || CompositorService.getCleanAppName(processName, "") || processName,
+      "icon": entry?.icon || "application-x-executable"
+    };
+    root.processAppMetadataCache[processName] = metadata;
+    return metadata;
+  }
+
+  function parseProcessUsage(output) {
+    const grouped = {};
+    const lines = String(output || "").trim().split("\n");
+    const totalMemoryKiB = Math.max(1, Number(SystemStatService.memTotalGb || 0) * 1024 * 1024);
+
+    for (let i = 0; i < lines.length; i++) {
+      const fields = lines[i].split("\t");
+      if (fields.length < 6)
+        continue;
+
+      const processName = String(fields[1] || "").trim();
+      if (processName === "")
+        continue;
+
+      const processTicks = Math.max(0, Number(fields[2]) || 0);
+      const totalTicks = Math.max(1, Number(fields[3]) || 1);
+      const rssKiB = Math.max(0, Number(fields[4]) || 0);
+      const gpu = root.clamp(Number(fields[5]) || 0, 0, 100);
+      const current = grouped[processName] || {
+        "processName": processName,
+        "cpu": 0,
+        "rssKiB": 0,
+        "gpu": 0
+      };
+
+      current.cpu += processTicks / totalTicks * 100;
+      current.rssKiB += rssKiB;
+      current.gpu = root.clamp(current.gpu + gpu, 0, 100);
+      grouped[processName] = current;
+    }
+
+    const rows = [];
+    const names = Object.keys(grouped);
+    for (let i = 0; i < names.length; i++) {
+      const row = grouped[names[i]];
+      if (row.cpu < 0.02 && row.rssKiB < 4096 && row.gpu <= 0)
+        continue;
+
+      row.ram = root.clamp(row.rssKiB / totalMemoryKiB * 100, 0, 100);
+      rows.push(row);
+    }
+
+    root.processUsageRows = rows;
+  }
+
+  function rankedProcessUsageRows() {
+    const metric = root.processUsageMetric;
+    const rows = (root.processUsageRows || []).filter(row => Number(row[metric] || 0) > 0.01).slice();
+    rows.sort((left, right) => Number(right[metric] || 0) - Number(left[metric] || 0));
+    return rows.slice(0, 4).map(row => {
+      const rankedRow = Object.assign({}, row);
+      const metadata = root.processAppMetadata(rankedRow.processName);
+      rankedRow.displayName = metadata.displayName;
+      rankedRow.icon = metadata.icon;
+      return rankedRow;
+    });
+  }
+
+  function processUsageValue(row, metric) {
+    if (!row)
+      return "--";
+    if (metric === "ram") {
+      const gib = Number(row.rssKiB || 0) / 1024 / 1024;
+      return gib >= 1 ? gib.toFixed(1) + " GiB" : Math.round(Number(row.rssKiB || 0) / 1024) + " MiB";
+    }
+    const value = Number(row[metric] || 0);
+    return value.toFixed(value < 10 ? 1 : 0) + "%";
+  }
+
   function gpuUsageFilePath() {
     if (!SystemStatService.gpuAvailable)
       return "";
@@ -1357,6 +1452,32 @@ Item {
     }
   }
 
+  Timer {
+    interval: root.dashboardPerformanceMode ? 6000 : 3000
+    repeat: true
+    running: root.visible && root.activeDetailView === "performance"
+    triggeredOnStart: true
+    onTriggered: {
+      if (!processUsageProcess.running)
+        processUsageProcess.running = true;
+    }
+  }
+
+  Process {
+    id: processUsageProcess
+    command: [
+      "bash",
+      Quickshell.shellDir + "/Modules/Panels/ControlCenter/scripts/process-usage.sh",
+      SystemStatService.gpuType === "nvidia" && Settings.data.systemMonitor.enableDgpuMonitoring ? "nvidia" : "none"
+    ]
+    running: false
+    stdout: StdioCollector {}
+    onExited: code => {
+      if (code === 0)
+        root.parseProcessUsage(stdout.text);
+    }
+  }
+
   Process {
     id: randomCoverProcess
     stdout: StdioCollector {}
@@ -1654,9 +1775,9 @@ Item {
     property real detailOffset: 0
     readonly property bool borderEffectVisible: root.componentBorderVisible(styleKey, styleRoot)
 
-    color: styleKey !== "" ? root.componentBackground(styleKey) : Qt.alpha(Color.mSurfaceVariant, 0.82)
-    radius: Style.radiusM
-    border.color: borderEffectVisible ? Qt.alpha(root.componentAccent(styleKey), 0.42) : Qt.alpha(Color.mOutline, 0.16)
+    color: styleKey !== "" ? root.componentBackground(styleKey) : root.m3SurfaceContainer
+    radius: styleRoot ? Style.radiusL : Style.radiusM
+    border.color: borderEffectVisible ? Qt.alpha(root.componentAccent(styleKey), 0.42) : (styleRoot ? "transparent" : Qt.alpha(Color.mOutline, 0.10))
     border.width: borderEffectVisible ? Math.max(1, Style.borderS) : Style.borderS
 
     transform: Translate {
@@ -1676,18 +1797,16 @@ Item {
     ParallelAnimation {
       id: detailEnterAnimation
 
-      NumberAnimation {
+      OpacityAnimator {
         target: dashboardCard
-        property: "opacity"
         from: 0
         to: 1
         duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
         easing.type: Easing.OutCubic
       }
 
-      NumberAnimation {
+      ScaleAnimator {
         target: dashboardCard
-        property: "scale"
         from: 0.985
         to: 1
         duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
@@ -1950,13 +2069,18 @@ Item {
     implicitHeight: Layout.preferredHeight
     width: implicitWidth
     height: implicitHeight
+    scale: submoduleTap.pressed ? 0.96 : (submoduleHover.hovered || activeFocus ? 1.025 : 1)
+    transformOrigin: Item.Center
+    activeFocusOnTab: true
+    Accessible.role: Accessible.Button
+    Accessible.name: labelText
 
     Rectangle {
       anchors.fill: parent
       radius: height / 2
-      color: submoduleHover.hovered ? root.componentButtonBackground(submoduleButton.styleKey) : Qt.alpha(root.componentButtonBackground(submoduleButton.styleKey), 0.13)
-      border.width: Style.borderS
-      border.color: submoduleHover.hovered ? root.componentButtonBackground(submoduleButton.styleKey) : Qt.alpha(root.componentButtonBackground(submoduleButton.styleKey), 0.34)
+      color: submoduleHover.hovered || submoduleButton.activeFocus ? root.componentButtonBackground(submoduleButton.styleKey) : root.m3PrimaryContainer
+      border.width: submoduleButton.activeFocus ? Style.borderM : 0
+      border.color: root.componentAccent(submoduleButton.styleKey)
 
       Behavior on color {
         ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
@@ -1971,13 +2095,13 @@ Item {
           text: submoduleButton.labelText
           pointSize: Style.fontSizeXS
           font.weight: Style.fontWeightSemiBold
-          color: submoduleHover.hovered ? root.componentButtonText(submoduleButton.styleKey) : root.componentAccent(submoduleButton.styleKey)
+          color: submoduleHover.hovered || submoduleButton.activeFocus ? root.componentButtonText(submoduleButton.styleKey) : root.componentText(submoduleButton.styleKey, true)
         }
 
         NIcon {
           icon: submoduleButton.iconName
           pointSize: Style.fontSizeS
-          color: submoduleHover.hovered ? root.componentButtonText(submoduleButton.styleKey) : root.componentAccent(submoduleButton.styleKey)
+          color: submoduleHover.hovered || submoduleButton.activeFocus ? root.componentButtonText(submoduleButton.styleKey) : root.componentAccent(submoduleButton.styleKey)
         }
       }
     }
@@ -1987,8 +2111,19 @@ Item {
     }
 
     TapHandler {
+      id: submoduleTap
       onTapped: root.activeDetailView = submoduleButton.targetView
     }
+
+    Behavior on scale {
+      ScaleAnimator {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+        easing.type: submoduleTap.pressed ? Easing.OutCubic : Easing.OutBack
+      }
+    }
+
+    Keys.onReturnPressed: root.activeDetailView = submoduleButton.targetView
+    Keys.onSpacePressed: root.activeDetailView = submoduleButton.targetView
 
     MouseArea {
       anchors.fill: parent
@@ -2658,7 +2793,7 @@ Item {
           onTriggered: {
             const panel = PanelService.getPanel("settingsPanel", pluginApi?.panelOpenScreen);
             if (panel) {
-              panel.requestedTab = SettingsPanel.Tab.General;
+              panel.requestedTab = SettingsPanel.Tab.ControlCenter;
               panel.open();
             }
           }
@@ -2695,14 +2830,17 @@ Item {
     signal secondaryTriggered
 
     Layout.fillWidth: true
-    Layout.preferredHeight: hoverHandler.hovered ? Math.round(86 * root.panelUnit) : Math.round(58 * root.panelUnit)
-    color: active ? Qt.alpha(root.componentAccent(styleKey), 0.18) : root.componentColor(styleKey, "buttonBackground", Qt.alpha(Color.mSurface, 0.45))
-    radius: Style.radiusS
-    border.color: borderEffectVisible ? Qt.alpha(root.componentAccent(styleKey), 0.48) : (active ? Qt.alpha(root.componentAccent(styleKey), 0.45) : "transparent")
-
-    Behavior on Layout.preferredHeight {
-      NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
-    }
+    Layout.preferredHeight: Math.round(64 * root.panelUnit)
+    color: active ? root.m3PrimaryContainer : root.componentColor(styleKey, "buttonBackground", root.m3SurfaceContainerHigh)
+    radius: Style.iRadiusL
+    border.color: activeFocus ? root.componentAccent(styleKey) : "transparent"
+    border.width: activeFocus ? Style.borderM : 0
+    scale: actionTap.pressed ? 0.975 : (hoverHandler.hovered || activeFocus ? 1.012 : 1)
+    transformOrigin: Item.Center
+    activeFocusOnTab: true
+    Accessible.role: Accessible.Button
+    Accessible.name: labelText
+    Accessible.description: detailText
 
     Behavior on color {
       ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
@@ -2710,6 +2848,13 @@ Item {
 
     Behavior on border.color {
       ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on scale {
+      ScaleAnimator {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+        easing.type: actionTap.pressed ? Easing.OutCubic : Easing.OutBack
+      }
     }
 
     HoverHandler {
@@ -2737,27 +2882,36 @@ Item {
           icon: iconName
           color: active ? root.componentAccent(actionTile.styleKey) : root.componentText(actionTile.styleKey, false)
           pointSize: Style.fontSizeXL
+          scale: active ? 1.08 : 1
+
+          Behavior on scale {
+            ScaleAnimator {
+              duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+              easing.type: Easing.OutBack
+            }
+          }
         }
 
         NText {
           Layout.fillWidth: true
           text: labelText
-          color: active ? root.componentText(actionTile.styleKey, true) : root.componentText(actionTile.styleKey, false)
+          color: root.componentText(actionTile.styleKey, true)
           pointSize: Style.fontSizeM
+          font.weight: Style.fontWeightSemiBold
           elide: Text.ElideRight
         }
       }
 
       RowLayout {
         Layout.fillWidth: true
-        opacity: hoverHandler.hovered ? 1 : 0
-        enabled: hoverHandler.hovered
+        opacity: 1
+        enabled: true
         spacing: Style.marginS
 
         NText {
           Layout.fillWidth: true
           text: detailText
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeXS
           color: root.componentText(actionTile.styleKey, false)
           elide: Text.ElideRight
         }
@@ -2767,20 +2921,24 @@ Item {
           icon: secondaryIcon
           baseSize: Math.round(24 * root.panelUnit)
           tooltipText: secondaryTooltip
-          colorBg: Qt.alpha(root.componentButtonBackground(actionTile.styleKey), 0.18)
+          colorBg: "transparent"
           colorBgHover: root.componentButtonBackground(actionTile.styleKey)
-          colorFg: root.componentText(actionTile.styleKey, true)
+          colorFg: root.componentText(actionTile.styleKey, false)
           colorFgHover: root.componentButtonText(actionTile.styleKey)
-          colorBorder: Qt.alpha(root.componentButtonBackground(actionTile.styleKey), 0.32)
-          colorBorderHover: root.componentButtonBackground(actionTile.styleKey)
+          colorBorder: "transparent"
+          colorBorderHover: "transparent"
           onClicked: actionTile.secondaryTriggered()
         }
       }
     }
 
     TapHandler {
+      id: actionTap
       onTapped: parent.triggered()
     }
+
+    Keys.onReturnPressed: actionTile.triggered()
+    Keys.onSpacePressed: actionTile.triggered()
   }
 
   component RecordingCard: DashboardCard {
@@ -2879,17 +3037,25 @@ Item {
 
     Layout.fillWidth: true
     Layout.preferredHeight: Math.round(32 * root.panelUnit)
-    color: destructive ? Qt.alpha(Color.mError, 0.14) : (active ? Qt.alpha(root.componentAccent(styleKey), 0.16) : root.componentColor(styleKey, "buttonBackground", Qt.alpha(Color.mSurface, 0.42)))
-    radius: Style.radiusS
-    border.color: borderEffectVisible ? Qt.alpha(destructive ? Color.mError : root.componentAccent(styleKey), 0.5) : (mouseArea.containsMouse ? (destructive ? Color.mError : root.componentAccent(styleKey)) : "transparent")
-    scale: mouseArea.containsMouse ? 1.02 : 1.0
+    color: destructive ? Qt.alpha(Color.mError, 0.14) : (active ? root.m3PrimaryContainer : root.componentColor(styleKey, "buttonBackground", root.m3SurfaceContainerHigh))
+    radius: height / 2
+    border.color: activeFocus ? (destructive ? Color.mError : root.componentAccent(styleKey)) : "transparent"
+    border.width: activeFocus ? Style.borderM : 0
+    scale: mouseArea.pressed ? 0.96 : (mouseArea.containsMouse || activeFocus ? 1.02 : 1)
+    transformOrigin: Item.Center
+    activeFocusOnTab: true
+    Accessible.role: Accessible.Button
+    Accessible.name: labelText
 
     Behavior on border.color {
       ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
     }
 
     Behavior on scale {
-      NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+      ScaleAnimator {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+        easing.type: mouseArea.pressed ? Easing.OutCubic : Easing.OutBack
+      }
     }
 
     RowLayout {
@@ -2920,11 +3086,16 @@ Item {
       cursorShape: Qt.PointingHandCursor
       onClicked: toolkitButton.triggered()
     }
+
+    Keys.onReturnPressed: toolkitButton.triggered()
+    Keys.onSpacePressed: toolkitButton.triggered()
   }
 
   component PerformanceCard: DashboardCard {
     styleKey: "performance"
     styleRoot: true
+    detailTransition: true
+    detailTransitionDirection: "left"
     ColumnLayout {
       anchors.fill: parent
       anchors.margins: Style.marginL
@@ -2937,7 +3108,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("performance")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: root.componentText("performance", true)
           elide: Text.ElideRight
@@ -2996,7 +3167,7 @@ Item {
       DashboardCard {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         radius: Style.radiusS
 
         ColumnLayout {
@@ -3060,7 +3231,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("performance")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: Color.mOnSurface
           elide: Text.ElideRight
@@ -3086,7 +3257,6 @@ Item {
           valueText: root.percentText(SystemStatService.cpuUsage)
           detailText: Math.round(SystemStatService.cpuTemp) + "°C · " + SystemStatService.cpuFreq
           iconName: "cpu"
-          ratio: SystemStatService.cpuUsage / 100
           fillColor: SystemStatService.cpuColor
         }
 
@@ -3096,7 +3266,6 @@ Item {
           valueText: root.percentText(SystemStatService.memPercent)
           detailText: root.formatGb(SystemStatService.memGb) + " / " + root.formatGb(SystemStatService.memTotalGb)
           iconName: "device-desktop-analytics"
-          ratio: SystemStatService.memPercent / 100
           fillColor: SystemStatService.memColor
         }
 
@@ -3106,109 +3275,30 @@ Item {
           valueText: root.percentText(root.primaryDiskPercent())
           detailText: root.diskLabel(Settings.data.controlCenter.diskPath || "/")
           iconName: "database"
-          ratio: root.primaryDiskPercent() / 100
           fillColor: SystemStatService.getDiskColor(Settings.data.controlCenter.diskPath || "/")
         }
 
         DetailMetricTile {
           Layout.fillWidth: true
           titleText: root.tr("gpu")
-          valueText: root.gpuTemperatureText()
+          valueText: root.gpuCompactText()
+          valuePointSize: Style.fontSizeL
           detailText: root.gpuNameText()
           iconName: "device-desktop"
-          ratio: root.gpuUsageRatio()
           fillColor: SystemStatService.gpuColor
         }
       }
 
-      DashboardCard {
+      ProcessUsageCard {
         Layout.fillWidth: true
-        Layout.preferredHeight: Math.round(148 * root.panelUnit)
-        color: Qt.alpha(Color.mSurface, 0.42)
-        radius: Style.radiusS
-
-        ColumnLayout {
-          anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginS
-
-          NText {
-            text: root.tr("usageHistory")
-            color: Color.mOnSurface
-            font.weight: Style.fontWeightSemiBold
-          }
-
-          RowLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: Style.marginM
-
-            HistoryGraph {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              titleText: root.tr("cpu")
-              valueText: root.percentText(SystemStatService.cpuUsage)
-              values: SystemStatService.cpuHistory
-              maxValue: 100
-              lineColor: SystemStatService.cpuColor
-            }
-
-            HistoryGraph {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              titleText: root.tr("ram")
-              valueText: root.percentText(SystemStatService.memPercent)
-              values: SystemStatService.memHistory
-              maxValue: 100
-              lineColor: SystemStatService.memColor
-            }
-          }
-        }
+        Layout.fillHeight: true
+        Layout.minimumHeight: Math.round(230 * root.panelUnit)
       }
 
       DashboardCard {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(120 * root.panelUnit)
-        color: Qt.alpha(Color.mSurface, 0.42)
-        radius: Style.radiusS
-
-        ColumnLayout {
-          anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginS
-
-          NText {
-            text: root.tr("networkTraffic")
-            color: Color.mOnSurface
-            font.weight: Style.fontWeightSemiBold
-          }
-
-          RowLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: Style.marginM
-
-            TrafficTile {
-              Layout.fillWidth: true
-              iconName: "download"
-              titleText: root.tr("down")
-              valueText: root.formatBytes(SystemStatService.rxSpeed)
-            }
-
-            TrafficTile {
-              Layout.fillWidth: true
-              iconName: "upload"
-              titleText: root.tr("up")
-              valueText: root.formatBytes(SystemStatService.txSpeed)
-            }
-          }
-        }
-      }
-
-      DashboardCard {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         radius: Style.radiusS
 
         ColumnLayout {
@@ -3257,13 +3347,13 @@ Item {
 
     property string titleText: ""
     property string valueText: ""
+    property real valuePointSize: Style.fontSizeXL
     property string detailText: ""
     property string iconName: ""
-    property real ratio: 0
     property color fillColor: root.componentAccent(styleKey)
 
-    Layout.preferredHeight: Math.round(86 * root.panelUnit)
-    color: Qt.alpha(Color.mSurface, 0.42)
+    Layout.preferredHeight: Math.round(78 * root.panelUnit)
+    color: root.m3SurfaceContainerHigh
     radius: Style.radiusS
 
     RowLayout {
@@ -3271,11 +3361,18 @@ Item {
       anchors.margins: Style.marginM
       spacing: Style.marginM
 
-      NCircleStat {
-        ratio: detailMetric.ratio
-        icon: detailMetric.iconName
-        fillColor: detailMetric.fillColor
-        contentScale: 0.68 * root.localScale
+      Rectangle {
+        Layout.preferredWidth: Math.round(38 * root.panelUnit)
+        Layout.preferredHeight: Layout.preferredWidth
+        radius: width / 2
+        color: Qt.alpha(detailMetric.fillColor, 0.16)
+
+        NIcon {
+          anchors.centerIn: parent
+          icon: detailMetric.iconName
+          pointSize: Style.fontSizeL
+          color: detailMetric.fillColor
+        }
       }
 
       ColumnLayout {
@@ -3289,10 +3386,12 @@ Item {
         }
 
         NText {
+          Layout.fillWidth: true
           text: detailMetric.valueText
           color: root.componentText(detailMetric.styleKey, true)
-          pointSize: Style.fontSizeXL
+          pointSize: detailMetric.valuePointSize
           font.weight: Style.fontWeightSemiBold
+          elide: Text.ElideRight
         }
 
         NText {
@@ -3302,6 +3401,262 @@ Item {
           pointSize: Style.fontSizeXS
           elide: Text.ElideRight
         }
+      }
+    }
+  }
+
+  component ProcessUsageCard: DashboardCard {
+    id: processUsageCard
+
+    styleKey: "performance"
+    color: root.m3SurfaceContainerHigh
+    radius: Style.radiusS
+    readonly property real highestValue: processModel.count > 0 ? Math.max(0.01, Number(processModel.get(0).usage[root.processUsageMetric] || 0)) : 1
+
+    function refreshModel() {
+      const rows = root.rankedProcessUsageRows();
+      for (let targetIndex = 0; targetIndex < rows.length; targetIndex++) {
+        let sourceIndex = -1;
+        for (let currentIndex = targetIndex; currentIndex < processModel.count; currentIndex++) {
+          if (processModel.get(currentIndex).usage.processName === rows[targetIndex].processName) {
+            sourceIndex = currentIndex;
+            break;
+          }
+        }
+
+        if (sourceIndex < 0)
+          processModel.insert(targetIndex, { "usage": rows[targetIndex] });
+        else if (sourceIndex !== targetIndex)
+          processModel.move(sourceIndex, targetIndex, 1);
+
+        processModel.setProperty(targetIndex, "usage", rows[targetIndex]);
+      }
+
+      while (processModel.count > rows.length)
+        processModel.remove(processModel.count - 1);
+    }
+
+    Component.onCompleted: refreshModel()
+
+    Connections {
+      target: root
+      function onProcessUsageRowsChanged() { processUsageCard.refreshModel(); }
+      function onProcessUsageMetricChanged() { processUsageCard.refreshModel(); }
+    }
+
+    ListModel {
+      id: processModel
+      dynamicRoles: true
+    }
+
+    ColumnLayout {
+      anchors.fill: parent
+      anchors.margins: Style.marginM
+      spacing: Style.marginS
+
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginS
+
+        ColumnLayout {
+          Layout.fillWidth: true
+          spacing: 0
+
+          NText {
+            text: root.tr("applicationUsage")
+            color: Color.mOnSurface
+            font.weight: Style.fontWeightSemiBold
+          }
+
+          NText {
+            Layout.fillWidth: true
+            text: root.tr("applicationUsageSubtitle")
+            color: Color.mOnSurfaceVariant
+            pointSize: Style.fontSizeXS
+            elide: Text.ElideRight
+          }
+        }
+
+        NIcon {
+          icon: "activity"
+          pointSize: Style.fontSizeL
+          color: Color.mPrimary
+        }
+      }
+
+      NTabBar {
+        id: processMetricTabs
+        Layout.fillWidth: true
+        tabHeight: Math.round(30 * root.panelUnit)
+        distributeEvenly: true
+        currentIndex: root.processUsageMetric === "ram" ? 1 : (root.processUsageMetric === "gpu" ? 2 : 0)
+        onCurrentIndexChanged: root.processUsageMetric = currentIndex === 1 ? "ram" : (currentIndex === 2 ? "gpu" : "cpu")
+
+        NTabButton {
+          text: root.tr("cpu")
+          icon: "cpu"
+          pointSize: Style.fontSizeXS
+          tabIndex: 0
+          checked: processMetricTabs.currentIndex === 0
+        }
+
+        NTabButton {
+          text: root.tr("ram")
+          icon: "device-desktop-analytics"
+          pointSize: Style.fontSizeXS
+          tabIndex: 1
+          checked: processMetricTabs.currentIndex === 1
+        }
+
+        NTabButton {
+          text: root.tr("gpu")
+          icon: "device-desktop"
+          pointSize: Style.fontSizeXS
+          tabIndex: 2
+          checked: processMetricTabs.currentIndex === 2
+        }
+      }
+
+      ListView {
+        id: processList
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        visible: processModel.count > 0
+        model: processModel
+        spacing: Style.marginXXS
+        interactive: contentHeight > height
+        clip: true
+
+        delegate: Rectangle {
+          id: processRow
+
+          required property var usage
+          required property int index
+
+          width: ListView.view.width
+          height: Math.max(Math.round(44 * root.panelUnit), (ListView.view.height - Math.max(0, processModel.count - 1) * processList.spacing) / Math.max(1, processModel.count))
+          radius: Style.radiusS
+          color: processHover.hovered ? root.m3PrimaryContainer : root.m3SurfaceContainerHighest
+          scale: processHover.hovered ? 1.008 : 1
+          transformOrigin: Item.Center
+          readonly property real metricValue: Number(usage[root.processUsageMetric] || 0)
+          readonly property real metricRatio: root.clamp(metricValue / processUsageCard.highestValue, 0, 1)
+
+          Behavior on color {
+            ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+          }
+
+          Behavior on scale {
+            ScaleAnimator { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+          }
+
+          HoverHandler {
+            id: processHover
+          }
+
+          RowLayout {
+            anchors.fill: parent
+            anchors.margins: Style.marginS
+            spacing: Style.marginS
+
+            Rectangle {
+              Layout.preferredWidth: Math.round(30 * root.panelUnit)
+              Layout.preferredHeight: Layout.preferredWidth
+              radius: Style.radiusS
+              color: Qt.alpha(Color.mPrimary, 0.12)
+
+              IconImage {
+                anchors.fill: parent
+                anchors.margins: Style.marginXS
+                source: ThemeIcons.iconFromName(processRow.usage.icon, "application-x-executable")
+                asynchronous: true
+              }
+            }
+
+            ColumnLayout {
+              Layout.fillWidth: true
+              spacing: Style.marginXXS
+
+              RowLayout {
+                Layout.fillWidth: true
+                spacing: Style.marginS
+
+                NText {
+                  Layout.fillWidth: true
+                  text: processRow.usage.displayName
+                  color: Color.mOnSurface
+                  pointSize: Style.fontSizeS
+                  font.weight: Style.fontWeightSemiBold
+                  elide: Text.ElideRight
+                }
+
+                NText {
+                  text: root.processUsageValue(processRow.usage, root.processUsageMetric)
+                  color: Color.mPrimary
+                  pointSize: Style.fontSizeS
+                  font.family: Settings.data.ui.fontFixed
+                  font.weight: Style.fontWeightSemiBold
+                }
+              }
+
+              Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.max(4, Math.round(5 * root.panelUnit))
+
+                Rectangle {
+                  anchors.fill: parent
+                  radius: height / 2
+                  color: Qt.alpha(Color.mOutline, 0.16)
+                }
+
+                Rectangle {
+                  width: parent.width * processRow.metricRatio
+                  height: parent.height
+                  radius: height / 2
+                  color: Color.mPrimary
+
+                  Behavior on width {
+                    NumberAnimation {
+                      duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+                      easing.type: Easing.OutCubic
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        displaced: Transition {
+          NumberAnimation {
+            properties: "y"
+            duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+            easing.type: Easing.OutCubic
+          }
+        }
+      }
+
+      RowLayout {
+        visible: processModel.count === 0
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        spacing: Style.marginS
+
+        Item { Layout.fillWidth: true }
+
+        NIcon {
+          icon: root.processUsageMetric === "gpu" ? "device-desktop-off" : "hourglass-empty"
+          pointSize: Style.fontSizeL
+          color: Color.mOnSurfaceVariant
+        }
+
+        NText {
+          text: root.processUsageMetric === "gpu" ? root.tr("noGpuProcesses") : root.tr("noActiveProcesses")
+          color: Color.mOnSurfaceVariant
+          pointSize: Style.fontSizeS
+        }
+
+        Item { Layout.fillWidth: true }
       }
     }
   }
@@ -3316,7 +3671,7 @@ Item {
     NText {
       Layout.fillWidth: true
       text: title
-      pointSize: Style.fontSizeL
+      pointSize: Style.fontSizeXL
       font.weight: Style.fontWeightSemiBold
       color: root.componentText(styleKey, true)
       elide: Text.ElideRight
@@ -3325,7 +3680,7 @@ Item {
     NText {
       text: subtitle
       pointSize: Style.fontSizeS
-      font.family: Settings.data.ui.fontFixed
+      font.weight: Style.fontWeightMedium
       color: root.componentText(styleKey, false)
     }
   }
@@ -3375,7 +3730,7 @@ Item {
     property color fillColor: Color.mPrimary
 
     Layout.preferredHeight: Math.round(104 * root.panelUnit)
-    color: Qt.alpha(Color.mSurface, 0.42)
+    color: root.m3SurfaceContainerHigh
     radius: Style.radiusS
 
     RowLayout {
@@ -3432,7 +3787,7 @@ Item {
     readonly property real safeRatio: Math.max(0, Math.min(1, ratio))
 
     Layout.preferredHeight: Math.round(62 * root.panelUnit)
-    color: Qt.alpha(Color.mSurface, 0.42)
+    color: root.m3SurfaceContainerHigh
     radius: Style.radiusS
     border.color: borderEffectVisible ? Qt.alpha(fillColor, 0.36) : Qt.alpha(fillColor, 0.08 + safeRatio * 0.16)
 
@@ -3540,7 +3895,7 @@ Item {
     readonly property real sizeGb: Number(SystemStatService.diskSizeGb[currentPath] || 0)
 
     Layout.preferredHeight: Math.round(76 * root.panelUnit)
-    color: Qt.alpha(Color.mSurface, 0.42)
+    color: root.m3SurfaceContainerHigh
     radius: Style.radiusS
 
     onPageCountChanged: currentIndex = Math.min(currentIndex, Math.max(0, pageCount - 1))
@@ -3905,7 +4260,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("audio")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: Color.mOnSurface
           elide: Text.ElideRight
@@ -3922,7 +4277,7 @@ Item {
       DashboardCard {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(150 * root.panelUnit)
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         radius: Style.radiusS
 
         ColumnLayout {
@@ -3939,6 +4294,7 @@ Item {
             reactiveActive: root.musicActive
             reactiveLevel: root.musicActive ? root.spectrumAverage() : 0
             reactiveValues: SpectrumService.values
+            reactiveOverflow: true
             enabled: AudioService.sink !== null || AudioService.wpctlAvailable
             onMoved: value => AudioService.setVolume(value)
           }
@@ -3998,7 +4354,7 @@ Item {
       DashboardCard {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         radius: Style.radiusS
 
         ColumnLayout {
@@ -4076,7 +4432,7 @@ Item {
     signal deviceSelected(string key)
 
     Layout.preferredHeight: Math.round(102 * root.panelUnit)
-    color: Qt.alpha(Color.mSurface, 0.42)
+    color: root.m3SurfaceContainerHigh
     radius: Style.radiusS
     clip: true
 
@@ -4210,7 +4566,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("media")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: Color.mOnSurface
           elide: Text.ElideRight
@@ -4224,189 +4580,329 @@ Item {
         }
       }
 
-      DashboardCard {
-        Layout.fillWidth: true
-        Layout.preferredHeight: Math.round(178 * root.panelUnit)
-        color: Qt.alpha(Color.mSurface, 0.42)
-        radius: Style.radiusS
-        clip: true
-
-        MusicVisualizer {
-          anchors.fill: parent
-          anchors.margins: Math.round(4 * root.panelUnit)
-          effect: root.mediaVisualizerEffect
-          active: root.musicActive
-          clipRadius: Math.max(0, Style.radiusS - Math.round(4 * root.panelUnit))
-        }
-
-        RowLayout {
-          anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginM
-
-          NImageRounded {
-            Layout.preferredWidth: Math.round(132 * root.panelUnit)
-            Layout.preferredHeight: Math.round(132 * root.panelUnit)
-            radius: Style.radiusS
-            imagePath: MediaService.trackArtUrl
-            fallbackIcon: "music"
-            fallbackIconSize: Style.fontSizeXXXL
-            borderColor: Qt.alpha(Color.mOutline, 0.18)
-            borderWidth: Style.borderS
-          }
-
-          ColumnLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: Style.marginS
-
-            NText {
-              Layout.fillWidth: true
-              text: MediaService.trackTitle || root.tr("nothingPlaying")
-              color: Color.mOnSurface
-              pointSize: Style.fontSizeXL
-              font.weight: Style.fontWeightSemiBold
-              elide: Text.ElideRight
-            }
-
-            NText {
-              Layout.fillWidth: true
-              text: MediaService.trackArtist || MediaService.playerIdentity || ""
-              color: Color.mOnSurfaceVariant
-              pointSize: Style.fontSizeS
-              elide: Text.ElideRight
-            }
-
-            NText {
-              Layout.fillWidth: true
-              visible: MediaService.trackAlbum !== ""
-              text: MediaService.trackAlbum
-              color: Qt.alpha(Color.mOnSurfaceVariant, 0.78)
-              pointSize: Style.fontSizeXS
-              elide: Text.ElideRight
-            }
-
-            Item {
-              Layout.fillHeight: true
-            }
-
-            RowLayout {
-              Layout.fillWidth: true
-              spacing: Style.marginS
-
-              NIconButton {
-                icon: "player-track-prev"
-                baseSize: Math.round(34 * root.panelUnit)
-                enabled: MediaService.canGoPrevious
-                onClicked: MediaService.previous()
-              }
-
-              NIconButton {
-                icon: MediaService.isPlaying ? "player-pause" : "player-play"
-                baseSize: Math.round(42 * root.panelUnit)
-                enabled: MediaService.currentPlayer !== null
-                onClicked: MediaService.playPause()
-              }
-
-              NIconButton {
-                icon: "player-track-next"
-                baseSize: Math.round(34 * root.panelUnit)
-                enabled: MediaService.canGoNext
-                onClicked: MediaService.next()
-              }
-            }
-          }
-        }
-      }
-
-      DashboardCard {
-        Layout.fillWidth: true
-        Layout.preferredHeight: Math.round(84 * root.panelUnit)
-        color: Qt.alpha(Color.mSurface, 0.42)
-        radius: Style.radiusS
-
-        ColumnLayout {
-          anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginXS
-
-          NSlider {
-            Layout.fillWidth: true
-            from: 0
-            to: 1
-            stepSize: 0
-            snapAlways: false
-            enabled: MediaService.trackLength > 0 && MediaService.canSeek
-            value: root.mediaProgressRatio()
-            onMoved: MediaService.seekByRatio(value)
-          }
-
-          RowLayout {
-            Layout.fillWidth: true
-
-            NText {
-              text: MediaService.positionString || "0:00"
-              color: Color.mOnSurfaceVariant
-              pointSize: Style.fontSizeXS
-              font.family: Settings.data.ui.fontFixed
-            }
-
-            Item {
-              Layout.fillWidth: true
-            }
-
-            NText {
-              text: MediaService.lengthString || "0:00"
-              color: Color.mOnSurfaceVariant
-              pointSize: Style.fontSizeXS
-              font.family: Settings.data.ui.fontFixed
-            }
-          }
-        }
-      }
-
-      EasyEffectsCard {
-        Layout.fillWidth: true
-      }
-
-      DashboardCard {
+      Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Qt.alpha(Color.mSurface, 0.42)
-        radius: Style.radiusS
 
-        ColumnLayout {
+        SwipeView {
+          id: mediaSwipeView
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginS
+          anchors.bottomMargin: Math.round(20 * root.panelUnit)
+          currentIndex: 0
+          clip: true
 
-          NText {
-            text: root.tr("players")
-            color: Color.mOnSurface
-            font.weight: Style.fontWeightSemiBold
+          Item {
+            ListView {
+              id: lyricsList
+              anchors.fill: parent
+              clip: true
+              spacing: Style.marginM
+              model: LyricsService.lyrics
+              currentIndex: LyricsService.currentLineIndex
+              highlightRangeMode: ListView.ApplyRange
+              preferredHighlightBegin: height * 0.42
+              preferredHighlightEnd: height * 0.58
+              highlightMoveDuration: Style.animationNormal
+              highlightMoveVelocity: -1
+
+              onModelChanged: Qt.callLater(function() {
+                if (lyricsList.currentIndex >= 0)
+                  lyricsList.positionViewAtIndex(lyricsList.currentIndex, ListView.Center)
+                else
+                  lyricsList.positionViewAtBeginning()
+              })
+
+              header: Item {
+                width: 1
+                height: LyricsService.hasSyncedLyrics ? Math.max(0, lyricsList.height * 0.4) : 0
+              }
+
+              footer: Item {
+                width: 1
+                height: LyricsService.hasSyncedLyrics ? Math.max(0, lyricsList.height * 0.4) : 0
+              }
+
+              delegate: NText {
+                required property string modelData
+                readonly property bool activeLine: LyricsService.hasSyncedLyrics && ListView.isCurrentItem
+
+                width: lyricsList.width
+                text: modelData || "· · ·"
+                color: activeLine ? Color.mPrimary : Color.mOnSurfaceVariant
+                pointSize: activeLine ? Style.fontSizeL : Style.fontSizeM
+                font.weight: activeLine ? Style.fontWeightBold : Style.fontWeightNormal
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                opacity: LyricsService.isLoading ? 0.5 : (activeLine || !LyricsService.hasSyncedLyrics ? 1.0 : 0.58)
+                scale: activeLine ? 1.06 : 1.0
+                transformOrigin: Item.Center
+
+                Behavior on color {
+                  ColorAnimation { duration: Style.animationFast }
+                }
+
+                Behavior on opacity {
+                  NumberAnimation { duration: Style.animationFast }
+                }
+
+                Behavior on scale {
+                  ScaleAnimator {
+                    duration: Style.animationNormal
+                    easing.type: Easing.OutCubic
+                  }
+                }
+              }
+            }
           }
 
-          Flickable {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            contentWidth: width
-            contentHeight: playersColumn.implicitHeight
-            boundsBehavior: Flickable.StopAtBounds
-            clip: true
+          Item {
+            Flickable {
+              anchors.fill: parent
+              contentWidth: width
+              contentHeight: redesignedDetailsLayout.implicitHeight
+              clip: true
+              boundsBehavior: Flickable.StopAtBounds
 
-            ColumnLayout {
-              id: playersColumn
-              width: parent.width
-              spacing: Style.marginS
+              ColumnLayout {
+                id: redesignedDetailsLayout
+                width: parent.width
+                spacing: Style.marginL
 
-              Repeater {
-                model: MediaService.getAvailablePlayers()
+                DashboardCard {
+                  id: mediaArtworkCard
 
-                PlayerRow {
                   Layout.fillWidth: true
-                  playerData: modelData
-                  playerIndex: index
+                  Layout.preferredHeight: Math.round(380 * root.panelUnit)
+                  color: root.m3SurfaceContainerHigh
+                  radius: Style.radiusM
+                  clip: true
+                  layer.enabled: true
+                  layer.effect: MultiEffect {
+                    maskEnabled: true
+                    maskSource: ShaderEffectSource {
+                      sourceItem: Rectangle {
+                        width: mediaArtworkCard.width
+                        height: mediaArtworkCard.height
+                        radius: mediaArtworkCard.radius
+                        color: "black"
+                      }
+                    }
+                  }
+
+                  Image {
+                    id: bgImage
+                    anchors.fill: parent
+                    source: MediaService.trackArtUrl
+                    fillMode: Image.PreserveAspectCrop
+                    opacity: 0.3
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                      blurEnabled: true
+                      blurMax: 32
+                      blur: 1.0
+                      maskEnabled: true
+                      maskSource: ShaderEffectSource {
+                        sourceItem: Rectangle {
+                          width: bgImage.width
+                          height: bgImage.height
+                          radius: Style.radiusM
+                          color: "black"
+                        }
+                      }
+                    }
+                  }
+
+                  MusicVisualizer {
+                    anchors.fill: parent
+                    effect: root.mediaVisualizerEffect
+                    active: root.musicActive
+                    opacity: 0.5
+                  }
+
+                  ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: Style.marginL
+                    spacing: Style.marginM
+
+                    Item { Layout.fillHeight: true }
+
+                    NImageRounded {
+                      Layout.alignment: Qt.AlignHCenter
+                      Layout.preferredWidth: Math.round(160 * root.panelUnit)
+                      Layout.preferredHeight: Math.round(160 * root.panelUnit)
+                      radius: Style.radiusM
+                      imagePath: MediaService.trackArtUrl
+                      fallbackIcon: "music"
+                      fallbackIconSize: Style.fontSizeXXXL * 2
+                      borderColor: Qt.alpha(Color.mOutline, 0.3)
+                      borderWidth: Style.borderS
+
+                      SequentialAnimation on scale {
+                        id: page2CoverBounce
+                        running: false
+                        NumberAnimation { to: 1.04; duration: 150; easing.type: Easing.OutCubic }
+                        NumberAnimation { to: 1.0; duration: 300; easing.type: Easing.OutBounce }
+                      }
+
+                      Connections {
+                        target: MediaService
+                        function onTrackTitleChanged() { page2CoverBounce.restart() }
+                      }
+                    }
+
+                    ColumnLayout {
+                      Layout.fillWidth: true
+                      spacing: Style.marginXXS
+
+                      NText {
+                        Layout.fillWidth: true
+                        text: MediaService.trackTitle || root.tr("nothingPlaying")
+                        color: Color.mOnSurface
+                        pointSize: Style.fontSizeXXL
+                        font.weight: Style.fontWeightBold
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                      }
+
+                      NText {
+                        Layout.fillWidth: true
+                        text: MediaService.trackArtist || MediaService.playerIdentity || ""
+                        color: Color.mOnSurfaceVariant
+                        pointSize: Style.fontSizeL
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                      }
+                    }
+
+                    Item { Layout.fillHeight: true }
+
+                    ColumnLayout {
+                      Layout.fillWidth: true
+                      spacing: Style.marginXXS
+
+                      NSlider {
+                        Layout.fillWidth: true
+                        from: 0
+                        to: 1
+                        stepSize: 0
+                        snapAlways: false
+                        enabled: MediaService.trackLength > 0 && MediaService.canSeek
+                        value: root.mediaProgressRatio()
+                        onMoved: MediaService.seekByRatio(value)
+                      }
+
+                      RowLayout {
+                        Layout.fillWidth: true
+                        NText {
+                          text: MediaService.positionString || "0:00"
+                          color: Color.mOnSurfaceVariant
+                          pointSize: Style.fontSizeXS
+                          font.family: Settings.data.ui.fontFixed
+                        }
+                        Item { Layout.fillWidth: true }
+                        NText {
+                          text: MediaService.lengthString || "0:00"
+                          color: Color.mOnSurfaceVariant
+                          pointSize: Style.fontSizeXS
+                          font.family: Settings.data.ui.fontFixed
+                        }
+                      }
+                    }
+
+                    RowLayout {
+                      Layout.alignment: Qt.AlignHCenter
+                      spacing: Style.marginL
+
+                      NIconButton {
+                        icon: "player-track-prev"
+                        baseSize: Math.round(36 * root.panelUnit)
+                        enabled: MediaService.canGoPrevious
+                        onClicked: MediaService.previous()
+                        colorBg: Qt.alpha(Color.mPrimary, 0.1)
+                      }
+
+                      NIconButton {
+                        icon: MediaService.isPlaying ? "player-pause" : "player-play"
+                        baseSize: Math.round(52 * root.panelUnit)
+                        enabled: MediaService.currentPlayer !== null
+                        onClicked: MediaService.playPause()
+                        colorBg: Color.mPrimary
+                        colorFg: Color.mOnPrimary
+                      }
+
+                      NIconButton {
+                        icon: "player-track-next"
+                        baseSize: Math.round(36 * root.panelUnit)
+                        enabled: MediaService.canGoNext
+                        onClicked: MediaService.next()
+                        colorBg: Qt.alpha(Color.mPrimary, 0.1)
+                      }
+                    }
+
+                    Item { Layout.preferredHeight: Style.marginS }
+                  }
                 }
+
+                EasyEffectsCard {
+                  Layout.fillWidth: true
+                }
+
+                DashboardCard {
+                  Layout.fillWidth: true
+                  Layout.preferredHeight: playersColumn2.implicitHeight + Style.marginM * 2 + Style.marginS + Math.round(20 * root.panelUnit)
+                  color: root.m3SurfaceContainerHigh
+                  radius: Style.radiusS
+
+                  ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: Style.marginM
+                    spacing: Style.marginS
+
+                    NText {
+                      text: root.tr("players")
+                      color: Color.mOnSurface
+                      font.weight: Style.fontWeightSemiBold
+                    }
+
+                    ColumnLayout {
+                      id: playersColumn2
+                      Layout.fillWidth: true
+                      spacing: Style.marginS
+
+                      Repeater {
+                        model: MediaService.getAvailablePlayers()
+
+                        PlayerRow {
+                          Layout.fillWidth: true
+                          playerData: modelData
+                          playerIndex: index
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        Row {
+          anchors.bottom: parent.bottom
+          anchors.horizontalCenter: parent.horizontalCenter
+          spacing: Style.marginS
+
+          Repeater {
+            model: mediaSwipeView.count
+            Rectangle {
+              width: mediaSwipeView.currentIndex === index ? Math.round(24 * root.panelUnit) : Math.round(8 * root.panelUnit)
+              height: Math.round(8 * root.panelUnit)
+              radius: height / 2
+              color: mediaSwipeView.currentIndex === index ? Color.mPrimary : Color.mSurfaceVariant
+              Behavior on width {
+                NumberAnimation { duration: 300; easing.type: Easing.OutElastic; easing.amplitude: 2.0; easing.period: 1.5 }
+              }
+              Behavior on color {
+                ColorAnimation { duration: 300 }
               }
             }
           }
@@ -4418,15 +4914,17 @@ Item {
   component EasyEffectsCard: DashboardCard {
     id: easyEffectsCard
 
-    Layout.preferredHeight: Math.round(158 * root.panelUnit)
-    color: Qt.alpha(Color.mSurface, 0.42)
+    Layout.fillWidth: true
+    Layout.preferredHeight: easyEffectsLayout.implicitHeight + Style.marginM * 2
+    color: root.m3SurfaceContainerHigh
     radius: Style.radiusS
     clip: true
 
     ColumnLayout {
+      id: easyEffectsLayout
       anchors.fill: parent
       anchors.margins: Style.marginM
-      spacing: Style.marginXS
+      spacing: Style.marginM
 
       RowLayout {
         Layout.fillWidth: true
@@ -4438,86 +4936,97 @@ Item {
           color: Color.mPrimary
         }
 
-        ColumnLayout {
+        NText {
           Layout.fillWidth: true
-          spacing: 0
-
-          NText {
-            Layout.fillWidth: true
-            text: root.tr("easyEffects")
-            color: Color.mOnSurface
-            font.weight: Style.fontWeightSemiBold
-            elide: Text.ElideRight
-          }
-
-          NText {
-            Layout.fillWidth: true
-            text: root.activeEasyEffectsPreset !== "" ? root.activeEasyEffectsPreset : root.tr("easyEffectsNoActive")
-            color: root.activeEasyEffectsPreset !== "" ? Color.mPrimary : Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
-            elide: Text.ElideRight
-          }
+          text: root.tr("easyEffects")
+          color: Color.mOnSurface
+          font.weight: Style.fontWeightSemiBold
+          elide: Text.ElideRight
         }
 
         NIconButton {
           icon: "refresh"
-          baseSize: Math.round(24 * root.panelUnit)
+          baseSize: Math.round(28 * root.panelUnit)
           tooltipText: root.tr("refresh")
           onClicked: root.refreshEasyEffects()
+          colorBg: Qt.alpha(Color.mSurfaceVariant, 0.4)
         }
       }
 
-      RowLayout {
+      Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(54 * root.panelUnit)
-        spacing: Style.marginS
+        color: Qt.alpha(Color.mSurfaceVariant, 0.3)
+        radius: Style.radiusS
 
-        Repeater {
-          model: 10
+        RowLayout {
+          anchors.fill: parent
+          anchors.margins: Style.marginS
+          spacing: Math.round(6 * root.panelUnit)
 
-          Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+          Repeater {
+            model: 10
+            Item {
+              Layout.fillWidth: true
+              Layout.fillHeight: true
+              readonly property real bandLevel: root.equalizerBandLevel(index, 10)
 
-            readonly property real bandLevel: root.equalizerBandLevel(index, 10)
+              Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                width: Math.max(4, Math.round(7 * root.panelUnit))
+                height: Math.max(Math.round(6 * root.panelUnit), parent.height * bandLevel)
+                radius: width / 2
+                color: index % 2 === 0 ? Color.mPrimary : Color.mSecondary
+                opacity: root.musicActive ? 0.86 : 0.42
 
-            Rectangle {
-              anchors.horizontalCenter: parent.horizontalCenter
-              anchors.bottom: parent.bottom
-              width: Math.max(4, Math.round(7 * root.panelUnit))
-              height: Math.max(Math.round(8 * root.panelUnit), parent.height * bandLevel)
-              radius: width / 2
-              color: index % 2 === 0 ? Color.mPrimary : Color.mSecondary
-              opacity: root.musicActive ? 0.86 : 0.42
-
-              Behavior on height {
-                NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
-              }
-
-              Behavior on opacity {
-                NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast }
+                Behavior on height {
+                  NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                }
+                Behavior on opacity {
+                  NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast }
+                }
               }
             }
           }
         }
       }
 
-      NComboBox {
+      NButton {
+        id: presetButton
         Layout.fillWidth: true
+        implicitHeight: Math.round(36 * root.panelUnit)
         visible: root.easyEffectsPresets.length > 0
-        baseSize: 0.78
-        model: root.easyEffectsPresetOptions()
-        currentKey: root.activeEasyEffectsPreset
-        placeholder: root.tr("easyEffectsPreset")
-        minimumWidth: Math.max(180, easyEffectsCard.width - Style.marginM * 2)
-        popupHeight: 220
-        onSelected: key => root.applyEasyEffectsPreset(key)
+        text: root.activeEasyEffectsPreset !== "" ? root.activeEasyEffectsPreset : root.tr("easyEffectsPreset")
+        icon: "chevron-down"
+        fontSize: Style.fontSizeS
+        horizontalAlignment: Qt.AlignLeft
+        backgroundColor: Qt.alpha(Color.mSurfaceVariant, 0.5)
+        textColor: Color.mOnSurface
+        onClicked: {
+          var items = []
+          for (var i = 0; i < root.easyEffectsPresets.length; i++) {
+            items.push({
+              "label": root.easyEffectsPresets[i],
+              "action": root.easyEffectsPresets[i],
+              "icon": root.activeEasyEffectsPreset === root.easyEffectsPresets[i] ? "circle-filled" : "circle",
+              "visible": true
+            })
+          }
+          presetMenu.model = items
+          presetMenu.openAtItem(presetButton, 0, presetButton.height)
+        }
+
+        NContextMenu {
+          id: presetMenu
+          width: presetButton.width
+          onTriggered: action => root.applyEasyEffectsPreset(action)
+        }
       }
 
       NText {
         Layout.fillWidth: true
         visible: root.easyEffectsPresets.length === 0
-        Layout.preferredHeight: Math.round(32 * root.panelUnit)
         text: root.easyEffectsStatus !== "" ? root.easyEffectsStatus : root.tr("easyEffectsNoPresets")
         color: Color.mOnSurfaceVariant
         pointSize: Style.fontSizeXS
@@ -4581,6 +5090,8 @@ Item {
   component SystemControlsCard: DashboardCard {
     styleKey: "systemControls"
     styleRoot: true
+    detailTransition: true
+    detailTransitionDirection: "left"
     ColumnLayout {
       anchors.fill: parent
       anchors.margins: Style.marginL
@@ -4593,7 +5104,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("system")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: root.componentText("systemControls", true)
           elide: Text.ElideRight
@@ -4614,6 +5125,7 @@ Item {
         reactiveActive: root.musicActive
         reactiveLevel: root.musicActive ? root.spectrumAverage() : 0
         reactiveValues: SpectrumService.values
+        reactiveOverflow: true
         enabled: AudioService.sink !== null || AudioService.wpctlAvailable
         onMoved: value => AudioService.setVolume(value)
       }
@@ -4662,6 +5174,7 @@ Item {
     property bool reactiveActive: false
     property real reactiveLevel: 0
     property var reactiveValues: []
+    property bool reactiveOverflow: false
     signal moved(real value)
 
     Layout.fillWidth: true
@@ -4702,6 +5215,7 @@ Item {
       effectActive: controlSlider.reactiveActive
       effectLevel: controlSlider.reactiveLevel
       effectValues: controlSlider.reactiveValues
+      overflowEffects: controlSlider.reactiveOverflow
       onMoved: controlSlider.moved(value)
     }
   }
@@ -4713,12 +5227,15 @@ Item {
     property bool effectActive: false
     property real effectLevel: 0
     property var effectValues: []
+    property bool overflowEffects: false
 
-    readonly property real knobDiameter: Math.round((20 * root.panelUnit) / 2) * 2
+    readonly property real handleWidth: Math.max(2, Math.round((pressed ? 2 : 4) * root.panelUnit))
+    readonly property real handleHeight: Math.round(28 * root.panelUnit)
     readonly property real baseTrackHeight: Math.max(6, Math.round(7 * root.panelUnit))
     readonly property real activeTrackHeight: Math.max(baseTrackHeight, Math.round((8 + root.clamp(effectLevel, 0, 1) * 8) * root.panelUnit))
     readonly property real visualTrackHeight: effectActive && effect !== "none" ? activeTrackHeight : baseTrackHeight
-    readonly property real trackCanvasHeight: Math.max(knobDiameter, Math.round(26 * root.panelUnit))
+    readonly property real trackCanvasHeight: Math.max(handleHeight, Math.round(28 * root.panelUnit))
+    readonly property real effectCanvasHeight: overflowEffects ? Math.max(trackCanvasHeight, Math.round(42 * root.panelUnit)) : trackCanvasHeight
     readonly property real fillRatio: root.clamp(visualPosition, 0, 1)
 
     Layout.preferredHeight: trackCanvasHeight
@@ -4732,6 +5249,7 @@ Item {
     onEffectActiveChanged: trackCanvas.requestPaint()
     onEffectLevelChanged: trackCanvas.requestPaint()
     onEffectValuesChanged: trackCanvas.requestPaint()
+    onOverflowEffectsChanged: trackCanvas.requestPaint()
     onEnabledChanged: trackCanvas.requestPaint()
     onWidthChanged: trackCanvas.requestPaint()
     onHeightChanged: trackCanvas.requestPaint()
@@ -4747,9 +5265,9 @@ Item {
       id: trackCanvas
 
       x: reactiveSlider.leftPadding
-      y: reactiveSlider.topPadding + Style.pixelAlignCenter(reactiveSlider.availableHeight, reactiveSlider.trackCanvasHeight)
+      y: reactiveSlider.topPadding + Style.pixelAlignCenter(reactiveSlider.availableHeight, reactiveSlider.effectCanvasHeight)
       width: reactiveSlider.availableWidth
-      height: reactiveSlider.trackCanvasHeight
+      height: reactiveSlider.effectCanvasHeight
       antialiasing: true
 
       onPaint: {
@@ -4800,12 +5318,7 @@ Item {
           ctx.fill();
         }
 
-        fillRoundedTrack(0, centerY - baseH / 2, width, baseH, rgba(Color.mSurface, 0.54 * inactiveAlpha));
-        ctx.strokeStyle = rgba(Color.mOutline, 0.46 * inactiveAlpha);
-        ctx.lineWidth = Style.borderS;
-        ctx.beginPath();
-        roundedRect(0, centerY - baseH / 2, width, baseH, baseH / 2);
-        ctx.stroke();
+        fillRoundedTrack(0, centerY - baseH / 2, width, baseH, rgba(root.m3SurfaceContainerHighest, inactiveAlpha));
 
         const grad = ctx.createLinearGradient(0, 0, width, 0);
         grad.addColorStop(0, rgba(Color.mPrimary, active ? 0.84 : 0.9));
@@ -4816,16 +5329,87 @@ Item {
           return;
 
         if (!active) {
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, grad);
+          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, inactiveAlpha));
           return;
         }
 
         ctx.save();
         ctx.beginPath();
-        roundedRect(0, centerY - effectH / 2, activeW, effectH, effectH / 2);
+        if (reactiveSlider.overflowEffects && reactiveSlider.effect === "ripple")
+          ctx.rect(0, 0, width, height);
+        else if (reactiveSlider.overflowEffects)
+          ctx.rect(0, 0, activeW, height);
+        else
+          roundedRect(0, centerY - effectH / 2, activeW, effectH, effectH / 2);
         ctx.clip();
 
-        if (reactiveSlider.effect === "bars") {
+        if (reactiveSlider.effect === "spectrum") {
+          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, 0.2 + level * 0.12));
+          const bands = Math.max(12, Math.min(36, Math.round(activeW / Math.max(4, 6 * root.panelUnit))));
+          const slot = activeW / bands;
+          const maxBandH = Math.max(baseH, height - Math.round(3 * root.panelUnit));
+          for (let i = 0; i < bands; i++) {
+            const p = i / Math.max(1, bands - 1);
+            const amp = sample(p);
+            const bandH = root.clamp(baseH + amp * maxBandH * (0.5 + level * 0.38), baseH, maxBandH);
+            const bandW = Math.max(1.5, slot * 0.42);
+            const x = i * slot + (slot - bandW) / 2;
+            const bandColor = i % 3 === 0 ? Color.mSecondary : Color.mPrimary;
+            ctx.fillStyle = rgba(bandColor, 0.42 + amp * 0.5);
+            ctx.beginPath();
+            roundedRect(x, centerY - bandH / 2, bandW, bandH, bandW / 2);
+            ctx.fill();
+
+            if (amp > 0.34) {
+              const capH = Math.max(1.5, 2 * root.panelUnit);
+              ctx.fillStyle = rgba(Color.mSecondary, 0.48 + amp * 0.42);
+              ctx.beginPath();
+              roundedRect(x, centerY - bandH / 2 - capH, bandW, capH, capH / 2);
+              ctx.fill();
+            }
+          }
+        } else if (reactiveSlider.effect === "filament") {
+          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(root.m3SurfaceContainerHighest, 0.7));
+          const filamentStep = Math.max(2, activeW / 64);
+          function traceFilament(lineWidth, alpha, blur) {
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = rgba(Color.mPrimary, alpha);
+            ctx.shadowBlur = blur;
+            ctx.shadowColor = rgba(Color.mSecondary, alpha * 0.9);
+            ctx.beginPath();
+            for (let x = 0; x <= activeW + filamentStep; x += filamentStep) {
+              const p = x / Math.max(1, activeW);
+              const amp = sample(p);
+              const carrier = Math.sin(p * Math.PI * 7 + phase * 1.8);
+              const detail = Math.sin(p * Math.PI * 17 - phase * 1.15) * 0.34;
+              const y = centerY + (carrier + detail) * (2 + amp * height * 0.3 + level * 2);
+              if (x === 0)
+                ctx.moveTo(x, y);
+              else
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+          }
+          traceFilament(Math.max(5, 7 * root.panelUnit), 0.16 + level * 0.08, 7 + level * 5);
+          ctx.shadowBlur = 0;
+          traceFilament(Math.max(1.5, 2 * root.panelUnit), 0.78 + level * 0.2, 0);
+          ctx.shadowColor = "transparent";
+        } else if (reactiveSlider.effect === "ripple") {
+          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, grad);
+          const pulseOriginX = Math.max(1, Math.min(width - 1, activeW));
+          for (let i = 0; i < 4; i++) {
+            const progress = (phase * 0.24 + i * 0.25) % 1;
+            const radius = (3 + progress * (14 + level * 7)) * root.panelUnit;
+            ctx.lineWidth = Math.max(1, (2.2 - progress * 1.2) * root.panelUnit);
+            ctx.strokeStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary,
+                                   (1 - progress) * (0.22 + level * 0.42));
+            ctx.beginPath();
+            ctx.arc(pulseOriginX, centerY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        } else if (reactiveSlider.effect === "bars") {
           fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, 0.24 + level * 0.16));
           const bars = 30;
           const slot = width / bars;
@@ -4840,17 +5424,45 @@ Item {
             roundedRect(x, centerY - h / 2, barW, h, barW / 2);
             ctx.fill();
           }
+        } else if (reactiveSlider.effect === "blocks") {
+          const blocks = 40;
+          const slot = activeW / blocks;
+          for (let i = 0; i < blocks; i++) {
+            const p = i / Math.max(1, blocks - 1);
+            const amp = sample(p);
+            const blockW = Math.max(2, slot * 0.75);
+            const x = i * slot + slot * 0.125;
+            const op = 0.3 + (amp * 0.7) + (level * 0.2);
+            ctx.fillStyle = rgba(Color.mPrimary, Math.min(1, op));
+            ctx.beginPath();
+            roundedRect(x, centerY - baseH / 2, blockW, baseH, baseH / 2);
+            ctx.fill();
+          }
+        } else if (reactiveSlider.effect === "dots") {
+          const numDots = 24;
+          const slot = activeW / numDots;
+          for (let i = 0; i < numDots; i++) {
+            const p = i / Math.max(1, numDots - 1);
+            const amp = sample(p);
+            const radius = (baseH * 0.3) + (amp * effectH * 0.35);
+            const x = i * slot + slot * 0.5;
+            ctx.fillStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary, 0.5 + amp * 0.5);
+            ctx.beginPath();
+            ctx.arc(x, centerY, radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
         } else if (reactiveSlider.effect === "zigzag") {
           ctx.lineCap = "round";
           ctx.lineJoin = "round";
           ctx.lineWidth = Math.max(baseH, effectH * 0.62);
           ctx.strokeStyle = grad;
           ctx.beginPath();
-          const steps = 18;
+          const steps = 24;
           const amp = Math.max(2, effectH * (0.28 + level * 0.5));
           for (let i = 0; i <= steps; i++) {
             const x = (i / steps) * width;
-            const y = centerY + (i % 2 === 0 ? -amp : amp);
+            const shift = Math.sin(phase * 2 + i * 0.5) * amp;
+            const y = centerY + shift;
             if (i === 0)
               ctx.moveTo(x, y);
             else
@@ -4864,6 +5476,26 @@ Item {
           ctx.fillStyle = rgba(Color.mSecondary, 0.1 + pulse * 0.16 + level * 0.14);
           ctx.beginPath();
           roundedRect(0, centerY - h / 2, activeW, h * 0.48, h * 0.24);
+          ctx.fill();
+        } else if (reactiveSlider.effect === "glow") {
+          ctx.shadowBlur = 12 + level * 8;
+          ctx.shadowColor = rgba(Color.mPrimary, 0.6 + level * 0.4);
+          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, grad);
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = "transparent";
+        } else if (reactiveSlider.effect === "wavy_fill") {
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(0, centerY + baseH / 2);
+          const step = Math.max(2, activeW / 40);
+          for (let x = 0; x <= activeW; x += step) {
+            const p = x / Math.max(1, activeW);
+            const amp = sample(p);
+            const y = centerY - baseH / 2 - Math.sin(p * Math.PI * 6 + phase * 2.5) * (effectH * (0.2 + amp * 0.5 + level * 0.3));
+            ctx.lineTo(x, y);
+          }
+          ctx.lineTo(activeW, centerY + baseH / 2);
+          ctx.closePath();
           ctx.fill();
         } else {
           ctx.lineCap = "round";
@@ -4888,14 +5520,15 @@ Item {
 
         ctx.fillStyle = rgba(Color.mPrimary, 0.1 + level * 0.12);
         ctx.beginPath();
-        roundedRect(0, centerY - effectH / 2, activeW, effectH, effectH / 2);
+        const overlayH = reactiveSlider.overflowEffects ? baseH : effectH;
+        roundedRect(0, centerY - overlayH / 2, activeW, overlayH, overlayH / 2);
         ctx.fill();
       }
     }
 
     handle: Item {
-      implicitWidth: reactiveSlider.knobDiameter
-      implicitHeight: reactiveSlider.knobDiameter
+      implicitWidth: reactiveSlider.handleWidth
+      implicitHeight: reactiveSlider.handleHeight
       x: reactiveSlider.leftPadding + reactiveSlider.visualPosition * (reactiveSlider.availableWidth - width)
       anchors.verticalCenter: parent.verticalCenter
 
@@ -4903,10 +5536,8 @@ Item {
         anchors.centerIn: parent
         width: parent.width
         height: parent.height
-        radius: Math.min(Style.iRadiusL, width / 2)
-        color: reactiveSlider.pressed ? Color.mHover : Color.mSurface
-        border.color: reactiveSlider.enabled ? Color.mPrimary : Color.mOutline
-        border.width: Style.borderL
+        radius: width / 2
+        color: reactiveSlider.enabled ? Color.mPrimary : Color.mOutline
 
         Behavior on color {
           ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast }
@@ -4918,6 +5549,8 @@ Item {
   component NotificationsCard: DashboardCard {
     styleKey: "notifications"
     styleRoot: true
+    detailTransition: true
+    detailTransitionDirection: "left"
     ColumnLayout {
       anchors.fill: parent
       anchors.margins: Style.marginL
@@ -4930,7 +5563,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("notifications")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: root.componentText("notifications", true)
           elide: Text.ElideRight
@@ -5027,7 +5660,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("notifications")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: Color.mOnSurface
           elide: Text.ElideRight
@@ -5048,7 +5681,7 @@ Item {
         DashboardCard {
           Layout.fillWidth: true
           Layout.preferredHeight: Math.round(72 * root.panelUnit)
-          color: Qt.alpha(Color.mSurface, 0.42)
+          color: root.m3SurfaceContainerHigh
           radius: Style.radiusS
 
           RowLayout {
@@ -5099,7 +5732,7 @@ Item {
         DashboardCard {
           Layout.fillWidth: true
           Layout.preferredHeight: Math.round(72 * root.panelUnit)
-          color: Qt.alpha(Color.mSurface, 0.42)
+          color: root.m3SurfaceContainerHigh
           radius: Style.radiusS
 
           RowLayout {
@@ -5144,7 +5777,7 @@ Item {
       DashboardCard {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         radius: Style.radiusS
 
         ColumnLayout {
@@ -5220,9 +5853,9 @@ Item {
 
     Layout.fillWidth: true
     Layout.preferredHeight: Math.max(Math.round(66 * root.panelUnit), contentColumn.implicitHeight + Style.marginS * 2)
-    color: isExpanded ? Qt.alpha(Color.mSurface, 0.52) : Qt.alpha(Color.mSurface, 0.28)
-    radius: Style.radiusS
-    border.color: isExpanded ? Qt.alpha(Color.mPrimary, 0.22) : Qt.alpha(Color.mOutline, 0.10)
+    color: isExpanded ? root.m3SurfaceContainerHighest : root.m3SurfaceContainerHigh
+    radius: Style.radiusM
+    border.color: isExpanded ? Qt.alpha(Color.mPrimary, 0.28) : "transparent"
     border.width: Style.borderS
     clip: true
 
@@ -5377,10 +6010,12 @@ Item {
   component MediaCard: DashboardCard {
     styleKey: "media"
     styleRoot: true
+    detailTransition: true
+    detailTransitionDirection: "left"
     id: mediaCard
 
-    color: root.componentColor("media", "background", root.musicActive ? Qt.alpha(Color.mSurfaceVariant, 0.9) : Qt.alpha(Color.mSurfaceVariant, 0.82))
-    border.color: borderEffectVisible ? Qt.alpha(root.componentAccent("media"), 0.42) : (root.musicActive ? Qt.alpha(root.componentAccent("media"), 0.32) : Qt.alpha(Color.mOutline, 0.16))
+    color: root.componentColor("media", "background", root.musicActive ? root.m3PrimaryContainer : root.m3SurfaceContainerLow)
+    border.color: borderEffectVisible ? Qt.alpha(root.componentAccent("media"), 0.42) : "transparent"
     clip: true
 
     Behavior on color {
@@ -5687,7 +6322,7 @@ Item {
         const t = visualizer.phase;
         const avg = visualizer.average();
         const beat = visualizer.active ? root.clamp(0.25 + avg * 1.8, 0.25, 1.35) : 0.16;
-        
+
         const primary = Color.mPrimary;
         const secondary = Color.mSecondary;
         const tertiary = Color.mTertiary;
@@ -5702,16 +6337,16 @@ Item {
             const h = height * level;
             const x = i * (barWidth + gap);
             const y = height - h;
-            
+
             const grad = ctx.createLinearGradient(x, y, x, height);
             grad.addColorStop(0, visualizer.colorToRgba(primary, 0.08 + level * 0.4));
             grad.addColorStop(1, visualizer.colorToRgba(secondary, 0.08 + level * 0.2));
             ctx.fillStyle = grad;
-            
+
             ctx.beginPath();
             visualizer.roundedRect(ctx, x, y, barWidth, h, barWidth / 2);
             ctx.fill();
-            
+
             ctx.fillStyle = visualizer.colorToRgba(primary, 0.2 + level * 0.5);
             ctx.beginPath();
             ctx.arc(x + barWidth/2, y + barWidth/2, barWidth/2, 0, Math.PI * 2);
@@ -5722,7 +6357,7 @@ Item {
 
         if (visualizer.effect === "wave") {
           ctx.lineWidth = Math.max(1.5, 2.5 * root.panelUnit);
-          
+
           ctx.strokeStyle = visualizer.colorToRgba(secondary, visualizer.active ? 0.2 : 0.1);
           ctx.beginPath();
           for (let x = 0; x <= width; x += 4) {
@@ -5746,7 +6381,7 @@ Item {
             else ctx.lineTo(x, y);
           }
           ctx.stroke();
-          
+
           ctx.lineTo(width, height);
           ctx.lineTo(0, height);
           ctx.closePath();
@@ -5755,7 +6390,7 @@ Item {
           grad.addColorStop(1, visualizer.colorToRgba(primary, 0.0));
           ctx.fillStyle = grad;
           ctx.fill();
-          
+
           return;
         }
 
@@ -5763,15 +6398,15 @@ Item {
           const cx = width * 0.5;
           const cy = height * 0.5;
           const maxR = Math.max(width, height) * 0.9;
-          
+
           for (let i = 0; i < 5; i++) {
             const progress = (t * (0.06 + avg * 0.16) + i * 0.2) % 1;
             const radius = 16 + progress * maxR;
             const colors = [primary, secondary, tertiary];
             const color = colors[i % 3];
-            
+
             ctx.lineWidth = Math.max(1, (1.4 + beat * 2 * (1-progress)) * root.panelUnit);
-            
+
             ctx.strokeStyle = visualizer.colorToRgba(color, (1 - progress) * (visualizer.active ? 0.42 : 0.12));
             ctx.beginPath();
             ctx.arc(cx, cy, radius, 0, Math.PI * 2);
@@ -5788,10 +6423,10 @@ Item {
             const x = width * ((i * 37 % 101) / 100);
             const y = height * ((Math.sin(i * 7.3 + t) + 1) / 2);
             const r = 1.2 + 7 * amp * beat;
-            
+
             const colors = [primary, secondary, tertiary];
             const color = colors[i % 3];
-            
+
             if (amp > 0.4 && visualizer.active) {
                 for(let j=0; j<5; j++) {
                     const jx = width * (((i+j) * 37 % 101) / 100);
@@ -5820,7 +6455,7 @@ Item {
           }
           return;
         }
-        
+
         if (visualizer.effect === "nebula") {
            for (let i = 0; i < 6; i++) {
                const sampleIndex = (i / 5) * ((visualizer.values?.length ?? 1) - 1);
@@ -5828,14 +6463,14 @@ Item {
                const x = width * (0.2 + 0.6 * ((i * 1.618 + t * 0.02) % 1));
                const y = height * (0.2 + 0.6 * ((i * 2.718 + Math.sin(t * 0.05)) % 1));
                const r = Math.max(width, height) * 0.3 * (1 + amp * beat * 0.5);
-               
+
                const colors = [primary, secondary, tertiary];
                const color = colors[i % 3];
-               
+
                const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
                grad.addColorStop(0, visualizer.colorToRgba(color, 0.15 + amp * 0.15));
                grad.addColorStop(1, visualizer.colorToRgba(color, 0));
-               
+
                ctx.fillStyle = grad;
                ctx.beginPath();
                ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -5843,42 +6478,42 @@ Item {
            }
            return;
         }
-        
+
         if (visualizer.effect === "aurora") {
             const bands = 3;
             for(let b=0; b<bands; b++) {
                 const colors = [primary, secondary, tertiary];
                 const color = colors[b % 3];
-                
+
                 ctx.beginPath();
                 ctx.moveTo(0, height);
-                
+
                 for(let x=0; x<=width; x+=10) {
                     const p = x / width;
                     const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
                     const amp = visualizer.sample(sampleIndex, 0);
-                    
+
                     const wave1 = Math.sin(p * Math.PI * 2 + t * 0.5 + b * 2);
                     const wave2 = Math.sin(p * Math.PI * 4 - t * 0.3 + b);
                     const y = height * 0.5 + (wave1 * 0.3 + wave2 * 0.2) * height * (1 + amp * beat);
-                    
+
                     ctx.lineTo(x, y);
                 }
-                
+
                 ctx.lineTo(width, height);
                 ctx.closePath();
-                
+
                 const grad = ctx.createLinearGradient(0, 0, 0, height);
                 grad.addColorStop(0, visualizer.colorToRgba(color, 0));
                 grad.addColorStop(0.5, visualizer.colorToRgba(color, 0.1 + b * 0.05 + beat * 0.05));
                 grad.addColorStop(1, visualizer.colorToRgba(color, 0.02));
-                
+
                 ctx.fillStyle = grad;
                 ctx.fill();
             }
             return;
         }
-        
+
         if (visualizer.effect === "constellation") {
             const nodes = 30;
             const points = [];
@@ -5887,7 +6522,7 @@ Item {
                 const py = ((i * 93.1) % 100) / 100 * height;
                 points.push({x: px, y: py, i: i});
             }
-            
+
             ctx.lineWidth = 1;
             for(let i=0; i<nodes; i++) {
                 const p1 = points[i];
@@ -5897,7 +6532,7 @@ Item {
                     if(dist < width * 0.3) {
                         const sampleIndex = ((i+j) / (nodes*2)) * ((visualizer.values?.length ?? 1) - 1);
                         const amp = visualizer.sample(sampleIndex, 0);
-                        
+
                         if(amp > 0.3) {
                             ctx.strokeStyle = visualizer.colorToRgba(secondary, (1 - dist/(width*0.3)) * amp * beat * 0.5);
                             ctx.beginPath();
@@ -5908,12 +6543,12 @@ Item {
                     }
                 }
             }
-            
+
             for(let i=0; i<nodes; i++) {
                 const p = points[i];
                 const sampleIndex = (i / nodes) * ((visualizer.values?.length ?? 1) - 1);
                 const amp = visualizer.sample(sampleIndex, 0);
-                
+
                 const r = 1 + amp * 4 * beat;
                 ctx.fillStyle = visualizer.colorToRgba(primary, 0.3 + amp * 0.7);
                 ctx.beginPath();
@@ -5922,32 +6557,32 @@ Item {
             }
             return;
         }
-        
+
         if (visualizer.effect === "radar") {
             const cx = width / 2;
             const cy = height + 10;
             const r = Math.max(width, height);
-            
+
             const sweepAngle = Math.PI + (t * 0.8) % Math.PI;
-            
+
             ctx.beginPath();
             ctx.moveTo(cx, cy);
             ctx.arc(cx, cy, r, sweepAngle - 0.5, sweepAngle);
             ctx.closePath();
-            
+
             ctx.fillStyle = visualizer.colorToRgba(primary, 0.15);
             ctx.fill();
-            
+
             for(let i=0; i<30; i++) {
                 const sampleIndex = (i / 30) * ((visualizer.values?.length ?? 1) - 1);
                 const amp = visualizer.sample(sampleIndex, 0);
-                
+
                 if(amp > 0.4) {
                     const blipAngle = Math.PI + (i / 30) * Math.PI;
                     const blipDist = amp * r * 0.9;
                     const bx = cx + Math.cos(blipAngle) * blipDist;
                     const by = cy + Math.sin(blipAngle) * blipDist;
-                    
+
                     const age = (sweepAngle - blipAngle + Math.PI*2) % (Math.PI*2);
                     if(age < Math.PI) {
                         const alpha = Math.max(0, 1 - age/Math.PI);
@@ -5958,7 +6593,7 @@ Item {
                     }
                 }
             }
-            
+
             ctx.strokeStyle = visualizer.colorToRgba(primary, 0.1);
             ctx.lineWidth = 1;
             for(let i=1; i<=3; i++) {
@@ -6102,7 +6737,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("weather")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: Color.mOnSurface
           elide: Text.ElideRight
@@ -6122,7 +6757,7 @@ Item {
         forecastDays: 5
         showLocation: true
         radius: Style.radiusS
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         border.color: "transparent"
       }
 
@@ -6190,7 +6825,7 @@ Item {
         visible: weatherReady
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         radius: Style.radiusS
 
         ColumnLayout {
@@ -6241,7 +6876,7 @@ Item {
     property string valueText: ""
 
     Layout.preferredHeight: Math.round(62 * root.panelUnit)
-    color: Qt.alpha(Color.mSurface, 0.42)
+    color: root.m3SurfaceContainerHigh
     radius: Style.radiusS
 
     RowLayout {
@@ -6349,7 +6984,7 @@ Item {
         NText {
           Layout.fillWidth: true
           text: root.tr("calendar")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
           color: Color.mOnSurface
           elide: Text.ElideRight
@@ -6392,6 +7027,8 @@ Item {
     id: calendarShell
     styleKey: "calendar"
     styleRoot: true
+    detailTransition: true
+    detailTransitionDirection: "left"
 
     clip: true
 
@@ -6410,7 +7047,7 @@ Item {
           forecastDays: 5
           showLocation: false
           radius: Style.radiusS
-          color: Qt.alpha(Color.mSurface, 0.42)
+          color: root.m3SurfaceContainerHigh
           border.color: "transparent"
         }
 
@@ -6493,7 +7130,7 @@ Item {
           NText {
             Layout.fillWidth: true
             text: root.tr("screenUsage")
-            pointSize: Style.fontSizeL
+            pointSize: Style.fontSizeXL
             font.weight: Style.fontWeightSemiBold
             color: Color.mOnSurface
             elide: Text.ElideRight
@@ -6543,7 +7180,7 @@ Item {
       DashboardCard {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(94 * root.panelUnit)
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         radius: Style.radiusS
 
         RowLayout {
@@ -6598,7 +7235,7 @@ Item {
       DashboardCard {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Qt.alpha(Color.mSurface, 0.42)
+        color: root.m3SurfaceContainerHigh
         radius: Style.radiusS
 
         ColumnLayout {
@@ -7039,7 +7676,7 @@ Item {
     readonly property bool selected: root.screenUsageRangeDays === days
 
     Layout.preferredHeight: Math.round(32 * root.panelUnit)
-    color: selected ? Color.mPrimary : Qt.alpha(Color.mSurface, 0.42)
+    color: selected ? Color.mPrimary : root.m3SurfaceContainerHigh
     radius: Style.radiusS
     border.color: selected ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.18)
 

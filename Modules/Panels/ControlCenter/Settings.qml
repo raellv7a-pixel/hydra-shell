@@ -700,6 +700,34 @@ ColumnLayout {
       {
         "key": "bars",
         "name": pluginApi?.tr("settings.sliderEffectBars")
+      },
+      {
+        "key": "spectrum",
+        "name": pluginApi?.tr("settings.sliderEffectSpectrum")
+      },
+      {
+        "key": "filament",
+        "name": pluginApi?.tr("settings.sliderEffectFilament")
+      },
+      {
+        "key": "ripple",
+        "name": pluginApi?.tr("settings.sliderEffectRipple")
+      },
+      {
+        "key": "glow",
+        "name": pluginApi?.tr("settings.sliderEffectGlow")
+      },
+      {
+        "key": "wavy_fill",
+        "name": pluginApi?.tr("settings.sliderEffectWavyFill")
+      },
+      {
+        "key": "blocks",
+        "name": pluginApi?.tr("settings.sliderEffectBlocks")
+      },
+      {
+        "key": "dots",
+        "name": pluginApi?.tr("settings.sliderEffectDots")
       }
     ]
     currentKey: root.editAudioSliderEffect
@@ -731,6 +759,22 @@ ColumnLayout {
       {
         "key": "bars",
         "name": pluginApi?.tr("settings.sliderEffectBars")
+      },
+      {
+        "key": "glow",
+        "name": pluginApi?.tr("settings.sliderEffectGlow")
+      },
+      {
+        "key": "wavy_fill",
+        "name": pluginApi?.tr("settings.sliderEffectWavyFill")
+      },
+      {
+        "key": "blocks",
+        "name": pluginApi?.tr("settings.sliderEffectBlocks")
+      },
+      {
+        "key": "dots",
+        "name": pluginApi?.tr("settings.sliderEffectDots")
       }
     ]
     currentKey: root.editMicrophoneSliderEffect
