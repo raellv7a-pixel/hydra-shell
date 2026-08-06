@@ -61,6 +61,15 @@ Popup {
     }
   }
 
+  // Debounces the width/height inputs so a Tab between the two fields
+  // (each firing its own onEditingFinished) doesn't trigger two searches.
+  Timer {
+    id: resolutionDebounceTimer
+    interval: 300
+    repeat: false
+    onTriggered: root.updateResolution(true)
+  }
+
   background: Rectangle {
     id: backgroundRect
     color: Color.mSurface
@@ -540,7 +549,7 @@ Popup {
 
           onSelected: key => {
                         Settings.data.wallpaper.wallhavenResolutionMode = key;
-                        updateResolution(false);
+                        updateResolution(true);
                       }
         }
       }
@@ -582,7 +591,7 @@ Popup {
 
           onEditingFinished: {
             Settings.data.wallpaper.wallhavenResolutionWidth = text;
-            updateResolution(false);
+            resolutionDebounceTimer.restart();
           }
         }
 
@@ -625,7 +634,7 @@ Popup {
 
           onEditingFinished: {
             Settings.data.wallpaper.wallhavenResolutionHeight = text;
-            updateResolution(false);
+            resolutionDebounceTimer.restart();
           }
         }
       }
