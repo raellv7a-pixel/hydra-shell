@@ -126,7 +126,7 @@ Item {
           ColorCard { title: "Terciária"; swColor: Color.mTertiary }
           ColorCard { title: "Superfície"; swColor: Color.mSurface }
           ColorCard { title: "Variante"; swColor: Color.mSurfaceVariant }
-          ColorCard { title: "Fundo"; swColor: Color.mBackground }
+          ColorCard { title: "Fundo"; swColor: Color.mSurface }
         }
 
         NDivider { Layout.fillWidth: true }
@@ -152,7 +152,7 @@ Item {
               { name: "S-40", col: Qt.darker(Color.mSecondary, 1.4) },
               { name: "T-80", col: Color.mTertiary },
               { name: "Surf", col: Color.mSurface },
-              { name: "Bg", col: Color.mBackground }
+              { name: "Bg", col: Color.mSurfaceContainerLow }
             ]
 
             Rectangle {
@@ -174,7 +174,7 @@ Item {
                 text: modelData.name
                 pointSize: Style.fontSizeXS
                 font.weight: Style.fontWeightBold
-                color: Qt.luminance(modelData.col) > 0.5 ? "#000000" : "#ffffff"
+                color: modelData.col.hslLightness > 0.5 ? "#000000" : "#ffffff"
               }
             }
           }
