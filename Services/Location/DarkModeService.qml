@@ -90,6 +90,10 @@ Singleton {
       initComplete = true;
       applyCurrentMode(changes);
       scheduleNextMode(changes);
+    } else if (Settings.data.colorSchemes.schedulingMode == "wallpaper") {
+      // No-op by design: in "wallpaper" mode, dark/light isn't decided by a
+      // schedule — it's derived from the active wallpaper's luminance whenever
+      // it changes, handled in Services/Theming/AppThemeService.qml.
     }
   }
 

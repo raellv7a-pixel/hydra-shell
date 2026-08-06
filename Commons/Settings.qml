@@ -763,6 +763,8 @@ Singleton {
       property bool useWallpaperColors: false
       property string predefinedScheme: "Noctalia (default)"
       property bool darkMode: true
+      // Valid values: "off", "manual" (fixed sunrise/sunset), "location" (weather API
+      // sunrise/sunset), "wallpaper" (derived from the active wallpaper's luminance).
       property string schedulingMode: "off"
       property string manualSunrise: "06:30"
       property string manualSunset: "18:30"

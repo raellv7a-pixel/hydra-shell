@@ -8,6 +8,12 @@ import qs.Services.UI
 Singleton {
   id: root
 
+  // Suppresses the onDarkModeChanged auto-regenerate reaction while smart mode
+  // itself is writing the resolved darkMode — that write is already followed by
+  // a generation call further down the same code path, so reacting to it too
+  // would spawn a redundant, duplicate generation pass.
+  property bool _applyingSmartDecision: false
+
   Connections {
     target: WallpaperService
 
@@ -21,21 +27,46 @@ Singleton {
       if (screenName !== effectiveMonitor)
         return;
 
-      if (Settings.data.colorSchemes.useWallpaperColors) {
-        generateFromWallpaper();
-      } else if (ColorSchemeService.lastPredefinedSchemeData) {
-        // Regenerate templates only; skip applyScheme so colors.json and scheme reload stay untouched
-        // when outputs are unchanged (see template processor skip-identical writes).
-        generateFromPredefinedScheme(ColorSchemeService.lastPredefinedSchemeData);
-      } else {
-        ColorSchemeService.applyScheme(Settings.data.colorSchemes.predefinedScheme);
+      // Smart mode: decide dark/light from the new wallpaper's luminance before
+      // regenerating, regardless of whether colors come from the wallpaper or a
+      // predefined scheme — schedulingMode is "how to decide the mode", which is
+      // orthogonal to "where colors come from" (same as "manual"/"location").
+      if (Settings.data.colorSchemes.schedulingMode === "wallpaper") {
+        const wp = WallpaperService.getWallpaper(effectiveMonitor);
+        if (wp) {
+          TemplateProcessor.previewWallpaperPalette(wp, TemplateProcessor.getSchemeType(), function (result) {
+            if (result && result.recommendedMode) {
+              root._applyingSmartDecision = true;
+              Settings.data.colorSchemes.darkMode = (result.recommendedMode === "dark");
+              root._applyingSmartDecision = false;
+            }
+            root._continueAfterWallpaperChanged();
+          });
+          return;
+        }
       }
+
+      root._continueAfterWallpaperChanged();
+    }
+  }
+
+  function _continueAfterWallpaperChanged() {
+    if (Settings.data.colorSchemes.useWallpaperColors) {
+      generateFromWallpaper();
+    } else if (ColorSchemeService.lastPredefinedSchemeData) {
+      // Regenerate templates only; skip applyScheme so colors.json and scheme reload stay untouched
+      // when outputs are unchanged (see template processor skip-identical writes).
+      generateFromPredefinedScheme(ColorSchemeService.lastPredefinedSchemeData);
+    } else {
+      ColorSchemeService.applyScheme(Settings.data.colorSchemes.predefinedScheme);
     }
   }
 
   Connections {
     target: Settings.data.colorSchemes
     function onDarkModeChanged() {
+      if (root._applyingSmartDecision)
+        return;
       Logger.d("AppThemeService", "Detected dark mode change");
       generate();
     }

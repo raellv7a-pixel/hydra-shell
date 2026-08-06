@@ -53,7 +53,7 @@ from pathlib import Path
 from lib import (
     read_image, ImageReadError, extract_palette, generate_theme,
     TemplateRenderer, expand_predefined_scheme,
-    extract_source_color, source_color_to_rgb, Color,
+    extract_source_color, source_color_to_rgb, Color, is_dark,
 )
 from lib.scheme import inject_terminal_colors
 
@@ -153,6 +153,9 @@ def main() -> int:
 
     # Initialize result dictionary
     result: dict[str, dict[str, str]] = {}
+    # Set only on the image-extraction path (below) — a wallpaper-luminance-derived
+    # "dark"/"light" recommendation, absent for --scheme/JSON-palette inputs.
+    recommended_mode: str | None = None
 
     # Determine mode from arguments
     if args.mode == 'dark':
@@ -296,12 +299,22 @@ def main() -> int:
                 print("Error: Could not extract colors from image", file=sys.stderr)
                 return 1
 
+            # Recommend a mode from the source color's perceptual luminance, reusing
+            # the palette already extracted above (no extra image read/quantization).
+            # palette[0] is the dominant/source color for every scheme_type branch.
+            recommended_mode = "light" if not is_dark(palette[0]) else "dark"
+
             # Generate theme for each mode
             for mode in modes:
                 result[mode] = generate_theme(palette, mode, scheme_type)
 
-    # Output JSON
-    json_output = json.dumps(result, indent=2)
+    # Output JSON. `_recommended_mode` is metadata, not a mode's color dict — keep it
+    # out of `result` itself, since `result` is reused below as TemplateRenderer's
+    # theme_data, which assumes every top-level value is a {color_name: hex} dict.
+    output_data = result
+    if recommended_mode is not None:
+        output_data = dict(result, _recommended_mode=recommended_mode)
+    json_output = json.dumps(output_data, indent=2)
 
     if args.output:
         try:

@@ -326,6 +326,107 @@ Singleton {
     return false;
   }
 
+  // ================================================================================
+  // PREVIEW — read-only palette computation, no templates/files touched
+  // ================================================================================
+  // Maps the snake_case keys template-processor.py returns to the "m*" keys that
+  // feed colors.json / Commons/Color.qml, per Assets/Templates/noctalia.json.
+  // Only the roles that template actually consumes — the rest of Color.qml's
+  // properties are derived locally (blend()) from these, not sourced from Python.
+  readonly property var colorKeyMap: ({
+                                         "mPrimary": "primary",
+                                         "mOnPrimary": "on_primary",
+                                         "mSecondary": "secondary",
+                                         "mOnSecondary": "on_secondary",
+                                         "mTertiary": "tertiary",
+                                         "mOnTertiary": "on_tertiary",
+                                         "mError": "error",
+                                         "mOnError": "on_error",
+                                         "mSurface": "surface",
+                                         "mOnSurface": "on_surface",
+                                         "mSurfaceVariant": "surface_container",
+                                         "mOnSurfaceVariant": "on_surface_variant",
+                                         "mOutline": "outline_variant",
+                                         "mShadow": "shadow",
+                                         "mHover": "tertiary",
+                                         "mOnHover": "on_tertiary"
+                                       })
+
+  function mapToColorKeys(pythonDict) {
+    if (!pythonDict)
+      return null;
+    var mapped = {};
+    for (var qmlKey in colorKeyMap) {
+      var pyKey = colorKeyMap[qmlKey];
+      if (pythonDict[pyKey] !== undefined) {
+        mapped[qmlKey] = pythonDict[pyKey];
+      }
+    }
+    return mapped;
+  }
+
+  Component {
+    id: previewProcessComponent
+
+    Process {
+      id: previewProcess
+
+      property var callback: null
+
+      stdout: StdioCollector {}
+      stderr: StdioCollector {}
+
+      onExited: function (exitCode, exitStatus) {
+        const cb = previewProcess.callback;
+        let result = null;
+        if (exitCode === 0) {
+          try {
+            const parsed = JSON.parse(previewProcess.stdout.text);
+            result = {
+              "dark": parsed.dark || null,
+              "light": parsed.light || null,
+              "recommendedMode": parsed._recommended_mode || null
+            };
+          } catch (e) {
+            Logger.w("TemplateProcessor", "previewWallpaperPalette: failed to parse output:", e);
+          }
+        } else {
+          Logger.w("TemplateProcessor", "previewWallpaperPalette: process exited with code", exitCode, previewProcess.stderr.text);
+        }
+        // Leave the Process.onExited stack before destroying the dynamic object.
+        Qt.callLater(() => {
+                       previewProcess.destroy();
+                     });
+        if (cb) {
+          cb(result);
+        }
+      }
+    }
+  }
+
+  /**
+  * Compute the full dark+light palette (and a recommended dark/light mode) for a
+  * wallpaper WITHOUT touching colors.json, templates, or any application theming —
+  * read-only, no side effects. Used for candidate previews and the smart mode decision.
+  * callback receives { dark, light, recommendedMode } (Python's raw snake_case keys —
+  * pass through mapToColorKeys() for the "m*" keys) or null on failure.
+  */
+  function previewWallpaperPalette(wallpaperPath, schemeType, callback) {
+    if (!wallpaperPath) {
+      callback(null);
+      return;
+    }
+    const process = previewProcessComponent.createObject(root, {
+                                                             "callback": callback
+                                                           });
+    if (!process) {
+      callback(null);
+      return;
+    }
+    process.command = ["python3", templateProcessorScript, wallpaperPath, "--scheme-type", schemeType];
+    process.running = true;
+  }
+
   // Get scheme type, defaulting to tonal-spot if not a recognized value
   function getSchemeType() {
     const method = Settings.data.colorSchemes.generationMethod;
