@@ -4547,6 +4547,9 @@ Item {
     detailTransitionDirection: "right"
     clip: true
 
+    Component.onCompleted: MediaService.highFrequencyPositionRequests++
+    Component.onDestruction: MediaService.highFrequencyPositionRequests--
+
     ColumnLayout {
       anchors.fill: parent
       anchors.margins: Style.marginL

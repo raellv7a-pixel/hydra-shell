@@ -28,6 +28,10 @@ Singleton {
   property var currentPlayer: null
   readonly property var positionSource: currentPlayer ? (currentPlayer._stateSource || currentPlayer) : null
   readonly property bool positionSourcePlaying: positionSource ? (positionSource.playbackState === MprisPlaybackState.Playing || positionSource.isPlaying) : false
+  // Raised by consumers (e.g. the synced lyrics view) that need sub-second position
+  // updates. Falls back to the cheaper 1s cadence otherwise.
+  property int highFrequencyPositionRequests: 0
+  readonly property bool highFrequencyPosition: highFrequencyPositionRequests > 0
   property string playerIdentity: currentPlayer ? (currentPlayer.identity || "") : ""
   property real currentPosition: 0
   property bool isSeeking: false
@@ -297,7 +301,7 @@ Singleton {
   // Keep progress and synchronized lyrics responsive while playing
   Timer {
     id: positionTimer
-    interval: 250
+    interval: root.highFrequencyPosition ? 250 : 1000
     running: positionSource && !root.isSeeking && positionSourcePlaying && positionSource.length > 0
     repeat: true
     onTriggered: {
