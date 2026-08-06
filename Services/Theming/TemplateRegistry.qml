@@ -89,6 +89,17 @@ Singleton {
       ]
     },
     {
+      "id": "sims4modtranslator",
+      "name": "Sims 4 Mod Translator",
+      "category": "system",
+      "input": "sims4-mod-translator.json",
+      "outputs": [
+        {
+          "path": "~/.config/sims4-mod-translator/theme.json"
+        }
+      ]
+    },
+    {
       "id": "gtk",
       "name": "GTK",
       "category": "system",
