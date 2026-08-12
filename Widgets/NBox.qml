@@ -12,6 +12,12 @@ Item {
   property bool forceOpaque: false
   property alias radius: bg.radius
   property alias border: bg.border
+  // Per-corner overrides (-1 keeps the shared `radius`), used to fuse a box with
+  // an adjacent one into a single Material 3 connected group.
+  property alias topLeftRadius: bg.topLeftRadius
+  property alias topRightRadius: bg.topRightRadius
+  property alias bottomLeftRadius: bg.bottomLeftRadius
+  property alias bottomRightRadius: bg.bottomRightRadius
 
   Rectangle {
     id: bg

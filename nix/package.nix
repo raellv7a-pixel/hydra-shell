@@ -27,6 +27,11 @@
   wlr-randr,
   imagemagick,
   wget,
+  # GTK3 theme so @define-color overrides from the theming templates actually
+  # apply — plain GTK3 apps (no libadwaita) fall back to a non-themeable
+  # embedded Adwaita stub without it. Exposed via XDG_DATA_DIRS, not PATH:
+  # it ships no binary, only share/themes/adw-gtk3{,-dark}.
+  adw-gtk3,
   python3,
   wayland-scanner,
   # calendar support
@@ -92,6 +97,7 @@ stdenvNoCC.mkDerivation {
     qtWrapperArgs+=(
       --prefix PATH : ${lib.makeBinPath (runtimeDeps ++ extraPackages)}
       --prefix XDG_DATA_DIRS : ${wayland-scanner}/share
+      --prefix XDG_DATA_DIRS : ${adw-gtk3}/share
       --set-default QS_CONFIG_PATH "$out/share/noctalia-shell"
       ${lib.optionalString calendarSupport "--prefix GI_TYPELIB_PATH : ${giTypelibPath}"}
     )

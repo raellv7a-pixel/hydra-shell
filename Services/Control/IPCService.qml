@@ -106,7 +106,8 @@ Singleton {
                                             "userinterface": SettingsPanel.Tab.UserInterface,
                                             "wallpaper": SettingsPanel.Tab.Wallpaper,
                                             "security": SettingsPanel.Tab.Security,
-                                            "idle": SettingsPanel.Tab.Idle
+                                            "idle": SettingsPanel.Tab.Idle,
+                                            "hyprland": SettingsPanel.Tab.Hyprland
                                           })
 
   function _parseSettingsTabArg(tabArg) {

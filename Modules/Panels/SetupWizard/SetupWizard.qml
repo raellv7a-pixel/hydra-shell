@@ -33,7 +33,7 @@ SmartPanel {
 
     // Wizard state (lazy-loaded with panelContent)
     property int currentStep: 0
-    readonly property int totalSteps: root.telemetryOnlyMode ? 1 : 5
+    readonly property int totalSteps: root.telemetryOnlyMode ? 1 : 6
     property bool isCompleting: false
 
     // Setup wizard data
@@ -282,6 +282,11 @@ SmartPanel {
             }
           }
 
+          // Step 1: Hyprland ownership (PLANO_INTEGRACAO_HYPRMOD.md §4.2)
+          SetupHyprlandStep {
+            id: stepHyprland
+          }
+
           // Step 1: Wallpaper Setup
           SetupWallpaperStep {
             id: step1
@@ -348,6 +353,10 @@ SmartPanel {
               {
                 "icon": "sparkles",
                 "label": I18n.tr("setup.welcome")
+              },
+              {
+                "icon": "keyboard",
+                "label": "Hyprland"
               },
               {
                 "icon": "image",

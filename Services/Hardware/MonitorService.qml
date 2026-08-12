@@ -129,13 +129,29 @@ Singleton {
     return generateConfigSnippet();
   }
 
+  // Reload once the write lands (FileView.setText() is async — see
+  // HyprlandLuaWriter's saved()/saveFailed() signals).
+  Connections {
+    target: HyprlandLuaWriter
+    function onMonitorsSaved() {
+      reloadProc.running = true;
+      ToastService.showNotice("Salvo no Hyprland", "Configuração de monitores salva em ~/.config/hypr/hydra-shell/monitors.lua!", "display");
+    }
+    function onMonitorsSaveFailed(error) {
+      ToastService.showError("Erro ao Salvar", "Não foi possível salvar a configuração de telas: " + error);
+    }
+  }
+
+  Process {
+    id: reloadProc
+    running: false
+    command: ["hyprctl", "reload"]
+  }
+
   function saveToHyprlandConfig() {
-    var home = Quickshell.env("HOME") || "/home/raell";
-    var luaPath = home + "/.config/hypr/lua/monitors.lua";
     var luaContent = generateLuaConfigSnippet();
     if (luaContent && luaContent.length > 0) {
-      Quickshell.execDetached(["bash", "-c", "cat << 'EOF' > " + luaPath + "\n" + luaContent + "\nEOF"]);
-      ToastService.showNotice("Salvo no Hyprland", "Configuração de monitores salva em ~/.config/hypr/lua/monitors.lua!", "display");
+      HyprlandLuaWriter.writeMonitors(luaContent);
     } else {
       ToastService.showError("Erro ao Salvar", "Não foi possível gerar a configuração de telas.");
     }

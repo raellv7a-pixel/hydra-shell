@@ -11,9 +11,12 @@ FloatingWindow {
   id: root
 
   title: "Noctalia"
-  minimumSize: Qt.size(840 * Style.uiScaleRatio, 910 * Style.uiScaleRatio)
-  implicitWidth: Math.round(840 * Style.uiScaleRatio)
-  implicitHeight: Math.round(910 * Style.uiScaleRatio)
+  // A real toplevel window (FloatingWindow, not layer-shell) — resizing by
+  // dragging an edge already works via the compositor, no maximumSize cap
+  // and no custom chrome needed for it.
+  minimumSize: Qt.size(900 * Style.uiScaleRatio, 600 * Style.uiScaleRatio)
+  implicitWidth: Math.round(1280 * Style.uiScaleRatio)
+  implicitHeight: Math.round(840 * Style.uiScaleRatio)
   color: "transparent"
 
   visible: false

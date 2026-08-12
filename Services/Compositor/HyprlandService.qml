@@ -952,10 +952,16 @@ Item {
     refreshWorkspaceTimer.restart();
   }
 
+  // hyprctl keyword is rejected outright when Hyprland runs its Lua config
+  // ("keyword can't work with non-legacy parsers. Use eval.", confirmed live
+  // against Hyprland 0.56.2) — this silently no-op'd on any Lua-config
+  // install; hyprctl eval + hl.config(...) is the only live-apply path that
+  // works in both modes. See PLANO_INTEGRACAO_HYPRMOD.md for the same class
+  // of fix applied to MonitorService/HyprlandBackend.js.
   function applyGameMode(enabled) {
     if (enabled) {
-      Quickshell.execDetached(["hyprctl", "--batch",
-                               "keyword animations:enabled 0 ; keyword decoration:blur:enabled 0 ; keyword general:gaps_in 0 ; keyword general:gaps_out 0"]);
+      Quickshell.execDetached(["hyprctl", "eval",
+                               " hl.config({ animations = { enabled = false }, decoration = { blur = { enabled = false } }, general = { gaps_in = 0, gaps_out = 0 } })"]);
     } else {
       Quickshell.execDetached(["hyprctl", "reload"]);
     }

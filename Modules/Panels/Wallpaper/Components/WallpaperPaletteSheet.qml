@@ -79,11 +79,11 @@ Item {
             property string hexStr: swColor.toString()
 
             Layout.fillWidth: true
-            height: 70
+            Layout.preferredHeight: Math.round(70 * Style.uiScaleRatio)
             radius: Style.radiusS
             color: swColor
             border.color: Qt.alpha(Color.mOnSurface, 0.2)
-            border.width: 1
+            border.width: Style.borderS
 
             MouseArea {
               anchors.fill: parent
@@ -95,14 +95,14 @@ Item {
               anchors.bottom: parent.bottom
               anchors.left: parent.left
               anchors.right: parent.right
-              height: 28
+              height: Math.round(28 * Style.uiScaleRatio)
               color: Qt.alpha("#000000", 0.65)
               radius: Style.radiusS
 
               RowLayout {
                 anchors.fill: parent
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
+                anchors.leftMargin: Style.marginS
+                anchors.rightMargin: Style.marginS
 
                 NText {
                   text: cCard.title
@@ -158,7 +158,7 @@ Item {
             Rectangle {
               required property var modelData
               Layout.fillWidth: true
-              height: 48
+              Layout.preferredHeight: Math.round(48 * Style.uiScaleRatio)
               radius: Style.radiusS
               color: modelData.col
               border.color: Qt.alpha(Color.mOnSurface, 0.2)
@@ -230,7 +230,7 @@ Item {
         // Live Mode Switcher
         NBox {
           Layout.fillWidth: true
-          Layout.preferredHeight: 70
+          Layout.preferredHeight: Math.round(70 * Style.uiScaleRatio)
           color: Color.mSurfaceContainerHighest
           radius: Style.radiusL
 

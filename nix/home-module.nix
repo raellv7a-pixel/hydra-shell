@@ -179,6 +179,24 @@ in
         or filepath, to be written to ~/.config/noctalia/plugins/plugin-name/settings.json.
       '';
     };
+
+    hyprland = {
+      enable = lib.mkEnableOption ''
+        letting noctalia-shell manage ~/.config/hypr/hyprland.lua and
+        ~/.config/hypr/modules, symlinked from the package's own
+        Assets/Hyprland (see PLANO_INTEGRACAO_HYPRMOD.md §4.3). This is the
+        declarative equivalent of accepting the adoption offer in the Setup
+        Wizard's Hyprland step — use one or the other, not both, on the same
+        machine.
+
+        NOT managed by this option, by design: ~/.config/hypr/user.lua
+        (hand-edited, must stay mutable — put personal Hyprland overrides in
+        your home-manager config and materialize them as a separate
+        xdg.configFile entry instead) and
+        ~/.config/hypr/hydra-shell/{settings,rebinds}.lua (written at runtime
+        by the Settings panel, also must stay mutable)
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -236,6 +254,12 @@ in
           else
             tomlFormat.generate "noctalia-user-templates.toml" cfg.user-templates;
       };
+      "hypr/hyprland.lua" = lib.mkIf cfg.hyprland.enable {
+        source = "${cfg.package}/share/noctalia-shell/Assets/Hyprland/hyprland.lua";
+      };
+      "hypr/modules" = lib.mkIf cfg.hyprland.enable {
+        source = "${cfg.package}/share/noctalia-shell/Assets/Hyprland/modules";
+      };
     }
     // lib.mapAttrs' (
       name: value:
@@ -248,6 +272,10 @@ in
       {
         assertion = !cfg.systemd.enable || cfg.package != null;
         message = "noctalia-shell: The package option must not be null when systemd service is enabled.";
+      }
+      {
+        assertion = !cfg.hyprland.enable || cfg.package != null;
+        message = "noctalia-shell: The package option must not be null when programs.noctalia-shell.hyprland.enable is set.";
       }
     ];
   };

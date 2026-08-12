@@ -84,9 +84,20 @@ Variants {
 
       onFutureWallpaperChanged: scheduleVideoSourceReload()
 
+      // True once the video layer has actual frames on screen, which is when
+      // the still image underneath can be released without flashing black.
+      property bool videoBuffered: false
+
+      onVideoBufferedChanged: {
+        if (videoBuffered) {
+          currentWallpaper.source = "";
+        }
+      }
+
       function scheduleVideoSourceReload() {
         videoSourceTimer.stop();
         activeVideoSource = "";
+        videoBuffered = false;
         if (isVideoPath(futureWallpaper)) {
           videoSourceTimer.restart();
         }
@@ -179,6 +190,10 @@ Variants {
       Image {
         id: currentWallpaper
 
+        // Set when the shown source is already the fallback, so a broken
+        // fallback doesn't retry itself in a loop.
+        property bool usingFallback: false
+
         source: ""
         smooth: true
         mipmap: false
@@ -188,8 +203,12 @@ Variants {
         onStatusChanged: {
           if (status === Image.Error) {
             Logger.w("Current wallpaper failed to load:", source);
-          } else if (status === Image.Ready && !wallpaperReady) {
-            wallpaperReady = true;
+            root._recoverFromCurrentWallpaperError();
+          } else if (status === Image.Ready) {
+            usingFallback = false;
+            if (!wallpaperReady) {
+              wallpaperReady = true;
+            }
           }
         }
       }
@@ -209,6 +228,13 @@ Variants {
           if (status === Image.Error) {
             Logger.w("Next wallpaper failed to load:", source);
             pendingTransition = false;
+            // Release the in-flight marker, otherwise requestPreprocessedWallpaper()
+            // keeps short-circuiting and no later pick can ever be applied.
+            root.transitioningToOriginalPath = "";
+            source = "";
+            if (!root.wallpaperReady) {
+              root.wallpaperReady = true;
+            }
           } else if (status === Image.Ready) {
             if (!wallpaperReady) {
               wallpaperReady = true;
@@ -256,6 +282,10 @@ Variants {
             onMediaStatusChanged: {
               if (mediaStatus === MediaPlayer.BufferedMedia || mediaStatus === MediaPlayer.LoadedMedia) {
                 play();
+                root.videoBuffered = true;
+              } else if (mediaStatus === MediaPlayer.InvalidMedia || mediaStatus === MediaPlayer.NoMedia) {
+                // Leave the still image up as the fallback for a bad video.
+                Logger.w("Background", "Video wallpaper failed to load:", source);
               }
             }
             Component.onCompleted: play()
@@ -551,6 +581,26 @@ Variants {
       }
 
       // ------------------------------------------------------
+      // A missing or corrupt file must not leave the desktop with a hidden
+      // background window (visible is bound to wallpaperReady). Try the
+      // service default once; if that is broken too, drop the source and show
+      // the window anyway — the shader then paints the configured fill color.
+      function _recoverFromCurrentWallpaperError() {
+        transitioningToOriginalPath = "";
+        const fallback = WallpaperService.defaultWallpaper;
+        if (!currentWallpaper.usingFallback && fallback && _pathStr(currentWallpaper.source) !== _pathStr(fallback)) {
+          Logger.w("Background", "Falling back to default wallpaper");
+          currentWallpaper.usingFallback = true;
+          currentWallpaper.source = fallback;
+          return;
+        }
+        currentWallpaper.source = "";
+        if (!wallpaperReady) {
+          wallpaperReady = true;
+        }
+      }
+
+      // ------------------------------------------------------
       function setWallpaperInitial() {
         // On startup, defer assigning wallpaper until the services are ready
         if (!WallpaperService || !WallpaperService.isInitialized) {
@@ -779,8 +829,12 @@ Variants {
           transitionProgress = 0.0;
           isSolid1 = false;
           isSolid2 = false;
-          currentWallpaper.source = "";
           nextWallpaper.source = "";
+          // Keep the outgoing still frame up: the MediaPlayer buffers
+          // asynchronously (100-500ms) and clearing both layers now shows a
+          // black flash. onVideoBufferedChanged frees the texture instead,
+          // once the video layer actually covers the screen.
+          videoBuffered = false;
           wallpaperReady = true;
           return;
         }

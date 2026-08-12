@@ -236,6 +236,16 @@ Singleton {
                                        });
   }
 
+  function addTemplateColorMatching(lines, app) {
+    if (!app.colorsToCompare || !app.compareTo)
+      return;
+
+    const candidates = app.colorsToCompare.map(candidate =>
+                                                  `{ name = "${escapeTomlString(candidate.name)}", color = "${escapeTomlString(candidate.color)}" }`);
+    lines.push(`colors_to_compare = [${candidates.join(", ")}]`);
+    lines.push(`compare_to = "${escapeTomlString(app.compareTo)}"`);
+  }
+
   function addApplicationTheming(lines, mode) {
     const homeDir = Quickshell.env("HOME");
     TemplateRegistry.applications.forEach(app => {
@@ -296,6 +306,7 @@ Singleton {
                                                                       lines.push(`input_path = "${Quickshell.shellDir}/Assets/Templates/${inputFile}"`);
                                                                       const outputPath = output.path.replace("~", homeDir);
                                                                       lines.push(`output_path = "${outputPath}"`);
+                                                                      addTemplateColorMatching(lines, app);
                                                                       if (app.postProcess && output.postProcess !== false) {
                                                                         const postHook = escapeTomlString(app.postProcess(mode));
                                                                         lines.push(`post_hook = "${postHook}"`);

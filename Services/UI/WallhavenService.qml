@@ -157,8 +157,27 @@ Singleton {
       fetching = false;
     }
 
+    // A newer query supersedes whatever is in flight — drop the socket instead
+    // of keeping it open (and parsing its payload) for a discarded result.
+    if (fetching) {
+      _abortActiveRequest();
+    }
+
     if (!fetching) {
       _startNextSearch();
+    }
+  }
+
+  // Cancels the in-flight request, if any, and leaves the service idle.
+  // Bumping the generation makes any late readyState callback a no-op.
+  function _abortActiveRequest() {
+    requestGeneration++;
+    const xhr = activeXhr;
+    activeXhr = null;
+    fetching = false;
+    if (xhr) {
+      xhr.onreadystatechange = function () {};
+      xhr.abort();
     }
   }
 
@@ -356,11 +375,21 @@ Singleton {
     const entry = searchCache[key];
     if (!entry || Date.now() - entry.timestamp > searchCacheTtlMs) {
       if (entry) {
-        delete searchCache[key];
+        _cacheDrop(key);
       }
       return null;
     }
     return entry;
+  }
+
+  // Always drop from both the map and the FIFO order — leaving a dangling key
+  // in searchCacheOrder makes the eviction shift() free nothing.
+  function _cacheDrop(key) {
+    delete searchCache[key];
+    const index = searchCacheOrder.indexOf(key);
+    if (index >= 0) {
+      searchCacheOrder.splice(index, 1);
+    }
   }
 
   function _cachePut(key, results, meta) {
@@ -566,11 +595,7 @@ Singleton {
   }
 
   function reset() {
-    requestGeneration++;
-    if (activeXhr) {
-      activeXhr.abort();
-      activeXhr = null;
-    }
+    _abortActiveRequest();
     retryTimer.stop();
     pendingSearch = null;
     retrySearch = null;

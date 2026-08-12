@@ -2793,7 +2793,7 @@ Item {
           onTriggered: {
             const panel = PanelService.getPanel("settingsPanel", pluginApi?.panelOpenScreen);
             if (panel) {
-              panel.requestedTab = SettingsPanel.Tab.ControlCenter;
+              panel.requestedTab = SettingsPanel.Tab.General;
               panel.open();
             }
           }
@@ -2917,6 +2917,7 @@ Item {
         }
 
         NIconButton {
+          id: secBtn
           visible: secondaryIcon !== ""
           icon: secondaryIcon
           baseSize: Math.round(24 * root.panelUnit)
@@ -2934,7 +2935,14 @@ Item {
 
     TapHandler {
       id: actionTap
-      onTapped: parent.triggered()
+      onTapped: (eventPoint) => {
+        if (secBtn.visible) {
+          const pt = secBtn.mapFromItem(actionTile, eventPoint.position);
+          if (pt.x >= 0 && pt.x <= secBtn.width && pt.y >= 0 && pt.y <= secBtn.height)
+            return;
+        }
+        parent.triggered();
+      }
     }
 
     Keys.onReturnPressed: actionTile.triggered()
@@ -3789,11 +3797,6 @@ Item {
     Layout.preferredHeight: Math.round(62 * root.panelUnit)
     color: root.m3SurfaceContainerHigh
     radius: Style.radiusS
-    border.color: borderEffectVisible ? Qt.alpha(fillColor, 0.36) : Qt.alpha(fillColor, 0.08 + safeRatio * 0.16)
-
-    Behavior on border.color {
-      ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
-    }
 
     ColumnLayout {
       anchors.fill: parent

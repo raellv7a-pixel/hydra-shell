@@ -164,21 +164,45 @@ PopupWindow {
 
     targetItem = target;
 
-    // Find the correct screen dimensions based on target's global position
-    // Respect all screens positionning
-    const targetGlobal = target.mapToGlobal(target.width / 2, target.height / 2);
+    // Find the correct screen dimensions for the target's own window.
+    // Match by screen name rather than raw global coordinates: Quickshell's
+    // screen geometry and Qt's mapToGlobal() can disagree on multi-monitor
+    // setups with negative-offset layouts, which made this lookup fail
+    // (and desync the tooltip position) every time on such setups.
     let foundScreen = false;
-    for (let i = 0; i < Quickshell.screens.length; i++) {
-      const s = Quickshell.screens[i];
-      if (targetGlobal.x >= s.x && targetGlobal.x < s.x + s.width && targetGlobal.y >= s.y && targetGlobal.y < s.y + s.height) {
-        screenWidth = s.width;
-        screenHeight = s.height;
-        screenX = s.x;
-        screenY = s.y;
-        foundScreen = true;
-        break;
+    const targetWindow = target.Window && target.Window.window;
+    const targetScreenName = targetWindow && targetWindow.screen ? targetWindow.screen.name : null;
+
+    if (targetScreenName) {
+      for (let i = 0; i < Quickshell.screens.length; i++) {
+        const s = Quickshell.screens[i];
+        if (s.name === targetScreenName) {
+          screenWidth = s.width;
+          screenHeight = s.height;
+          screenX = s.x;
+          screenY = s.y;
+          foundScreen = true;
+          break;
+        }
       }
     }
+
+    if (!foundScreen) {
+      // Fallback for the rare case a target has no window yet: match by global position.
+      const targetGlobal = target.mapToGlobal(target.width / 2, target.height / 2);
+      for (let i = 0; i < Quickshell.screens.length; i++) {
+        const s = Quickshell.screens[i];
+        if (targetGlobal.x >= s.x && targetGlobal.x < s.x + s.width && targetGlobal.y >= s.y && targetGlobal.y < s.y + s.height) {
+          screenWidth = s.width;
+          screenHeight = s.height;
+          screenX = s.x;
+          screenY = s.y;
+          foundScreen = true;
+          break;
+        }
+      }
+    }
+
     if (!foundScreen) {
       Logger.w("Tooltip", "No screen found for target position!");
     }

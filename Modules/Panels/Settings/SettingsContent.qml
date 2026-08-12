@@ -13,6 +13,7 @@ import qs.Modules.Panels.Settings.Tabs.ControlCenter
 import qs.Modules.Panels.Settings.Tabs.Display
 import qs.Modules.Panels.Settings.Tabs.Dock
 import qs.Modules.Panels.Settings.Tabs.Hooks
+import qs.Modules.Panels.Settings.Tabs.Hyprland
 import qs.Modules.Panels.Settings.Tabs.Idle
 import qs.Modules.Panels.Settings.Tabs.Launcher
 import qs.Modules.Panels.Settings.Tabs.LockScreen
@@ -503,6 +504,10 @@ Item {
     id: securityTab
     SecurityTab {}
   }
+  Component {
+    id: hyprlandTab
+    HyprlandTab {}
+  }
 
   function updateTabsModel() {
     let newTabs = [
@@ -639,12 +644,23 @@ Item {
             "source": hooksTab
           },
           {
+            "id": SettingsPanel.Tab.Hyprland,
+            "label": "panels.hyprland.title",
+            "icon": "keyboard",
+            "source": hyprlandTab
+          },
+          {
             "id": SettingsPanel.Tab.About,
             "label": "panels.about.title",
             "icon": "settings-about",
             "source": aboutTab
           }
         ];
+
+    // Hyprland tab only makes sense with Hyprland as the active compositor
+    // (PLANO_INTEGRACAO_HYPRMOD.md §5) — every other tab is compositor-
+    // agnostic and always shown.
+    newTabs = newTabs.filter(t => t.id !== SettingsPanel.Tab.Hyprland || CompositorService.isHyprland);
 
     root.tabsModel = newTabs;
   }
@@ -1226,7 +1242,10 @@ Item {
           anchors.bottom: parent.bottom
           anchors.horizontalCenter: parent.horizontalCenter
           anchors.margins: Style.marginL
-          width: Math.min(parent.width - Style.marginL * 2, 780 * Style.uiScaleRatio)
+          // Capped so lines of text don't stretch unreadably wide in the
+          // spacious window mode; still clamped to parent.width so the
+          // smaller attached/centered SmartPanel modes are unaffected.
+          width: Math.min(parent.width - Style.marginL * 2, 1040 * Style.uiScaleRatio)
           spacing: Style.marginS
 
           // Header row

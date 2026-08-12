@@ -86,6 +86,39 @@ function parseOutputs(rawText) {
   }
 }
 
+// Single hl.monitor({...}) block for one output — shared by buildApplyCommand
+// (live hyprctl eval) and buildLuaConfigFileContent (saved config) so the two
+// can never drift apart.
+function buildHlMonitorBlock(output) {
+  if (output.active === false || output.disabled === true) {
+    return 'hl.monitor({ output = "' + output.name + '", disabled = true })';
+  }
+
+  if (output.mirror && output.mirror !== "") {
+    return 'hl.monitor({ output = "' + output.name + '", mode = "preferred", position = "auto", scale = 1, mirror = "' + output.mirror + '" })';
+  }
+
+  var resolution = output.width + "x" + output.height;
+  var refresh = formatRefreshForCommand(output.refresh);
+  if (refresh !== null && refresh !== "") {
+    resolution += "@" + refresh;
+  }
+
+  var position = Math.round(output.x) + "x" + Math.round(output.y);
+  var scale = sanitizeNumber(output.scale || 1);
+  var transform = (output.transform !== undefined && output.transform !== null) ? Number(output.transform) : 0;
+
+  var block = 'hl.monitor({ output = "' + output.name + '", mode = "' + resolution + '", position = "' + position + '", scale = ' + scale;
+  if (transform !== 0) {
+    block += ", transform = " + transform;
+  }
+  block += " })";
+  return block;
+}
+
+// Hyprland running its Lua config rejects `hyprctl keyword` outright — the
+// only live-apply path is `hyprctl eval "<hl.monitor(...) calls>"`. See
+// PLANO_INTEGRACAO_HYPRMOD.md §2.5/§2.6/§4.1 for the confirmed evidence.
 function buildApplyCommand(outputs, cfg, defaults) {
   if (!outputs || outputs.length === 0) {
     return {
@@ -94,52 +127,26 @@ function buildApplyCommand(outputs, cfg, defaults) {
   }
 
   var hyprctlCommand = extractSettings(cfg, defaults).hyprctlCommand;
-  var commands = [];
+  var blocks = [];
 
   for (var index = 0; index < outputs.length; index++) {
     var output = outputs[index];
     if (!output) continue;
-
-    if (output.active === false || output.disabled === true) {
-      commands.push(shellQuote(hyprctlCommand) + " keyword monitor " + shellQuote(output.name) + ",disable");
-      continue;
-    }
-
-    if (output.mirror && output.mirror !== "") {
-      commands.push(shellQuote(hyprctlCommand) + " keyword monitor " + shellQuote(output.name) + ",preferred,auto,1,mirror," + shellQuote(output.mirror));
-      continue;
-    }
-
-    var resolution = output.width + "x" + output.height;
-    var refresh = formatRefreshForCommand(output.refresh);
-    if (refresh !== null && refresh !== "") {
-      resolution += "@" + refresh;
-    }
-
-    var position = Math.round(output.x) + "x" + Math.round(output.y);
-    var scale = sanitizeNumber(output.scale || 1);
-    var transform = (output.transform !== undefined && output.transform !== null) ? String(output.transform) : "0";
-
-    var cmd = shellQuote(hyprctlCommand) + " keyword monitor " +
-      shellQuote(output.name) + "," +
-      shellQuote(resolution) + "," +
-      shellQuote(position) + "," +
-      shellQuote(scale);
-
-    if (transform !== "0") {
-      cmd += ",transform," + transform;
-    }
-    commands.push(cmd);
+    blocks.push(buildHlMonitorBlock(output));
   }
 
-  if (commands.length === 0) {
+  if (blocks.length === 0) {
     return {
       "error": "There are no outputs to configure."
     };
   }
 
+  // Leading space defends against hyprctl's arg parser mistaking a snippet
+  // for a flag if it ever starts with "-"; harmless here (blocks start with
+  // "hl.") but kept for consistency with HyprlandEvalService.evalLua().
+  var luaSnippet = " " + blocks.join("; ");
   return {
-    "script": commands.join(" && ")
+    "script": shellQuote(hyprctlCommand) + " eval " + shellQuote(luaSnippet)
   };
 }
 

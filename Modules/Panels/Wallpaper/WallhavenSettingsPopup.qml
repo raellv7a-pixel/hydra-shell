@@ -26,8 +26,20 @@ Popup {
   dim: false
   closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
+  // Item that had focus before opening, so keyboard users land back on the
+  // button that opened the popup instead of nowhere.
+  property Item previousFocusItem: null
+
   function showAt(item) {
+    previousFocusItem = item ?? null;
     open();
+  }
+
+  onClosed: {
+    if (previousFocusItem) {
+      previousFocusItem.forceActiveFocus();
+      previousFocusItem = null;
+    }
   }
 
   onOpened: {

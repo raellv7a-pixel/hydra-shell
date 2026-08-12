@@ -1,0 +1,24 @@
+-- ~/.config/hypr/user.lua — your Hyprland overrides, in raw `hl` Lua.
+--
+-- Seeded here once by the Setup Wizard the first time hydra-shell adopts
+-- your Hyprland config; never touched again by the Settings panel or by a
+-- hydra-shell update. Anything here wins over hydra-shell's shipped modules
+-- AND over anything you changed through the Settings panel — it loads last.
+--
+-- --- who owns what ----------------------------------------------------
+--   hydra-shell defaults   modules/*.lua                 never edit these
+--   Settings panel          hydra-shell/settings.lua,     the panel writes
+--                            hydra-shell/rebinds.lua        these, not you
+--   you                     this file                      yours
+--
+-- --- take over a shipped module entirely -------------------------------
+-- Copy the file you want to own from modules/ into this one (or a require()d
+-- file next to it) and stop requiring the original — but then a hydra-shell
+-- update to that module never reaches you. Prefer overriding individual
+-- calls below over copying a whole module.
+--
+-- --- examples ------------------------------------------------------------
+-- hl.bind("SUPER + SHIFT + T", hl.dsp.exec_cmd("alacritty"))
+-- hl.unbind("SUPER,T"); hl.bind("SUPER,T", hl.dsp.exec_cmd("alacritty"))
+-- hl.window_rule({ name = "float-mpv", match = { class = "^(mpv)$" }, float = true })
+-- hl.config({ general = { border_size = 3 } })

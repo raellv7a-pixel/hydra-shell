@@ -377,7 +377,7 @@ Singleton {
       property real panelBackgroundOpacity: 0.93
       property bool translucentWidgets: false
       property bool panelsAttachedToBar: true
-      property string settingsPanelMode: "attached" // "centered", "attached", "window"
+      property string settingsPanelMode: "window" // "centered", "attached", "window"
       property bool settingsPanelSideBarCardStyle: false
     }
 
@@ -440,6 +440,8 @@ Singleton {
       property bool skipStartupTransition: false
       property real transitionEdgeSmoothness: 0.05
       property string panelPosition: "follow_bar"
+      // Active source tab of the wallpaper panel: "local" | "wallhaven" | "moewalls" | "motionbgs"
+      property string wallpaperSource: "local"
       property bool hideWallpaperFilenames: false
       property bool useOriginalImages: false
       property real overviewBlur: 0.4
@@ -476,6 +478,7 @@ Singleton {
       property string clipboardWatchImageCommand: "wl-paste --type image --watch cliphist store"
       property string position: "center"  // Position: center, top_left, top_right, bottom_left, bottom_right, bottom_center, top_center
       property list<string> pinnedApps: []
+      property list<string> hiddenApps: []
       property bool sortByMostUsed: true
       property string terminalCommand: "alacritty -e"
       property bool customLaunchPrefixEnabled: false
@@ -835,6 +838,73 @@ Singleton {
       property bool gridSnapScale: false
       property list<var> monitorWidgets: []
       // Format: [{ "name": "DP-1", "widgets": [...] }, { "name": "HDMI-1", "widgets": [...] }]
+    }
+
+    // hyprland ownership + Settings-panel-managed overrides (see
+    // PLANO_INTEGRACAO_HYPRMOD.md). Only the fields a user actually changed
+    // matter for what gets written to hydra-shell/settings.lua — the
+    // generator (Helpers/HyprlandLuaGen.js) diffs every value here against
+    // the shipped modules/*.lua defaults and only emits the divergence.
+    property JsonObject hyprland: JsonObject {
+      // { "SUPER + T": "SUPER + Y" } — consulted by modules/binds.lua's K()
+      // helper; written to hydra-shell/rebinds.lua, never to settings.lua.
+      // NOTE: must stay the FIRST property declared in this JsonObject.
+      // Quickshell's JsonAdapter segfaults in QQmlVMEMetaObject::writeProperty
+      // while reloading (FileView watchChanges) this JsonObject if a
+      // `property var` holding an object-literal default is preceded by any
+      // sibling property — repro'd and bisected 2026-08-11.
+      property var rebinds: ({})
+
+      // Adoption state, written by SetupHyprlandStep.qml.
+      property bool ownershipAdopted: false
+      property bool ownershipDeclined: false
+      property string adoptedModulesVersion: ""
+
+      // Mirrors modules/decoration.lua + modules/animations.lua's hl.config
+      // leaves. Defaults below match the shipped modules exactly so an
+      // untouched install never emits an override.
+      property JsonObject appearance: JsonObject {
+        property int gapsIn: 5
+        property int gapsOut: 10
+        property int borderSize: 2
+        property string layout: "dwindle"
+        property bool resizeOnBorder: true
+        property bool allowTearing: false
+        property int rounding: 10
+        property int roundingPower: 2
+        property real activeOpacity: 1.0
+        property real inactiveOpacity: 1.0
+        property bool shadowEnabled: true
+        property int shadowRange: 4
+        property int shadowRenderPower: 3
+        property bool blurEnabled: true
+        property int blurSize: 8
+        property int blurPasses: 2
+        property bool blurXray: false
+        property bool animationsEnabled: true
+      }
+
+      // [{ name, value }] -> hl.env(name, value)
+      property list<var> envVars: []
+      // [{ command, enabled }] -> hl.exec_cmd(command) inside hl.on("hyprland.start", ...)
+      property list<var> autostart: []
+      // [{ name, match: {class, title, ...}, action, value }] -> hl.window_rule({...})
+      property list<var> windowRules: []
+      // [{ name, match: {namespace}, action, value }] -> hl.layer_rule({...})
+      property list<var> layerRules: []
+      // [{ name, x0, y0, x1, y1 }] -> hl.curve(name, {...})
+      property list<var> animCurves: []
+      // [{ leaf, enabled, speed, bezier, style }] -> hl.animation({...})
+      property list<var> animItems: []
+      // [{ combo, dispatcher, args, description }] custom binds ADDED on top
+      // of modules/binds.lua (distinct from rebinds above, which remap a
+      // shipped combo instead of adding a new one) -> hl.bind({...})
+      property list<var> keybinds: []
+      // { theme, size } -> env override + live `hyprctl setcursor`
+      property JsonObject cursor: JsonObject {
+        property string theme: ""
+        property int size: 24
+      }
     }
   }
 

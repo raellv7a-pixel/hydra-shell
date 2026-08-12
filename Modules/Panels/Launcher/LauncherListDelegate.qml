@@ -9,19 +9,31 @@ import qs.Widgets
 NBox {
   id: entry
 
+  // Laid out by LauncherRowDelegate, which owns the row metrics and the index
+  // of the entry this cell shows.
   required property var modelData
-  required property int index
+  required property int entryIndex
   required property var launcher
 
-  property bool isSelected: (!launcher.ignoreMouseHover && mouseArea.containsMouse) || (index === launcher.selectedIndex)
-  property bool isHovered: !launcher.ignoreMouseHover && mouseArea.containsMouse && !isSelected
+  property bool isContextMenuTarget: launcher.appPanelItem === modelData
+  // An open panel owns the highlight: hovering other entries must not steal it,
+  // or the panel would end up hanging off an entry that no longer looks selected.
+  property bool hoverActive: !launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse
+  property bool isSelected: isContextMenuTarget || hoverActive || (entryIndex === launcher.selectedIndex)
+  property bool isHovered: hoverActive && !isSelected
+  // In a single-column list the inline panel expands right underneath this entry,
+  // so the two are fused into one Material 3 connected group: tight facing
+  // corners, no outline, and the tonal fills carry the grouping instead.
+  readonly property bool isPanelAnchor: isContextMenuTarget && launcher.rowColumns === 1
 
-  width: ListView.view.width
-  implicitHeight: launcher.entryHeight
   clip: false
   radius: Style.radiusL
+  bottomLeftRadius: entry.isPanelAnchor ? Style.radiusXXS : Style.radiusL
+  bottomRightRadius: entry.isPanelAnchor ? Style.radiusXXS : Style.radiusL
   color: entry.isSelected ? Color.mPrimaryContainer : (entry.isHovered ? Color.mSurfaceContainerHigh : "transparent")
-  forceOpaque: false
+  border.color: (entry.isContextMenuTarget && !entry.isPanelAnchor) ? Color.mPrimary : "transparent"
+  border.width: (entry.isContextMenuTarget && !entry.isPanelAnchor) ? Style.borderM : 0
+  z: entry.isContextMenuTarget ? 10 : 0
   scale: mouseArea.pressed ? 0.975 : (entry.isSelected ? 1.0 : 0.988)
   transformOrigin: Item.Center
   Accessible.role: Accessible.ListItem
@@ -299,45 +311,6 @@ NBox {
         }
       }
 
-      // Action buttons row - dynamically populated from provider
-      RowLayout {
-        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-        spacing: Style.marginXS
-        visible: entry.isSelected && itemActions.length > 0
-
-        property var itemActions: {
-          if (!entry.isSelected)
-            return [];
-          var provider = modelData.provider || launcher.currentProvider;
-          if (provider && provider.getItemActions) {
-            return provider.getItemActions(modelData);
-          }
-          return [];
-        }
-
-        Repeater {
-          model: parent.itemActions
-          NIconButton {
-            required property var modelData
-            icon: modelData.icon
-            baseSize: Style.baseWidgetSize * 0.75
-            tooltipText: modelData.tooltip
-            z: 1
-            handleWheel: true
-            colorBg: Color.mSurfaceContainerHighest
-            colorBgHover: Color.mSecondaryContainer
-            colorFg: Color.mOnSurfaceVariant
-            colorFgHover: Color.mOnSecondaryContainer
-            colorBorder: "transparent"
-            colorBorderHover: "transparent"
-            onClicked: {
-              if (modelData.action) {
-                modelData.action();
-              }
-            }
-          }
-        }
-      }
     }
   }
 
@@ -348,18 +321,20 @@ NBox {
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     enabled: !Settings.data.appLauncher.ignoreMouseInput
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     onEntered: {
-      if (!launcher.ignoreMouseHover) {
-        launcher.selectedIndex = entry.index;
-      }
+      if (!launcher.ignoreMouseHover && !launcher.appPanelOpen)
+        launcher.selectedIndex = entry.entryIndex;
     }
     onClicked: mouse => {
-                 if (mouse.button === Qt.LeftButton) {
-                   launcher.selectedIndex = entry.index;
+                 launcher.selectedIndex = entry.entryIndex;
+                 if (mouse.button === Qt.RightButton) {
+                   launcher.toggleAppPanel(modelData);
+                   mouse.accepted = true;
+                 } else if (mouse.button === Qt.LeftButton) {
                    launcher.activate();
                    mouse.accepted = true;
                  }
                }
-    acceptedButtons: Qt.LeftButton
   }
 }

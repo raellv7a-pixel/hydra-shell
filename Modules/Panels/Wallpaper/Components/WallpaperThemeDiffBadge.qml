@@ -39,8 +39,12 @@ Item {
   implicitWidth: contentRow.implicitWidth
   implicitHeight: contentRow.implicitHeight
 
+  // Fills the width given by the parent layout so the label elides instead of
+  // overflowing on top of its neighbours in a narrow column.
   RowLayout {
     id: contentRow
+    anchors.left: parent.left
+    anchors.right: parent.right
     spacing: Style.marginXS
 
     NIcon {
@@ -56,6 +60,8 @@ Item {
                     })
       pointSize: Style.fontSizeXS
       color: Color.mOnSurfaceVariant
+      elide: Text.ElideRight
+      Layout.fillWidth: true
     }
   }
 }

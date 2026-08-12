@@ -16,10 +16,36 @@ SmartPanel {
   property AuthFlow flow: null
   property string resolvedMessage: ""
   property var transientMatch: null
+  property var appEntry: null
 
   readonly property string windowPosition: PolkitService.position ?? "center"
   readonly property bool isAttached: windowPosition === "attached"
   readonly property string barPosition: Settings.getBarPositionForScreen(screen?.name)
+
+  // App identity resolved from the requesting action (icon, common name, description)
+  readonly property string appIconPath: {
+    if (typeof ThemeIcons === 'undefined' || !root.flow) return "";
+    const fallback = root.flow.iconName || "shield-lock";
+    return root.appEntry ? ThemeIcons.iconFromName(root.appEntry.icon, fallback) : ThemeIcons.iconFromName(fallback, "shield-lock");
+  }
+  readonly property string appName: root.appEntry ? root.appEntry.name : prettifyActionId(root.flow ? root.flow.actionId : "")
+  readonly property string appDescription: root.resolvedMessage || (root.flow ? root.flow.message : "")
+
+  function prettifyActionId(actionId) {
+    if (!actionId) return "Autenticação Requerida";
+    var parts = actionId.split(".");
+    var segment = parts.length > 2 ? parts[2] : parts[parts.length - 1];
+    segment = segment.replace(/[-_]/g, " ").trim();
+    return segment.length > 0 ? segment.charAt(0).toUpperCase() + segment.slice(1) : actionId;
+  }
+
+  function refreshAppEntry() {
+    if (typeof ThemeIcons === 'undefined' || !root.flow) {
+      root.appEntry = null;
+      return;
+    }
+    root.appEntry = ThemeIcons.findAppEntry(root.flow.actionId) || (root.flow.iconName ? ThemeIcons.findAppEntry(root.flow.iconName) : null);
+  }
 
   // Anchoring via native SmartPanel behavior
   panelAnchorHorizontalCenter: true
@@ -28,12 +54,43 @@ SmartPanel {
   panelAnchorBottom: isAttached && barPosition === "bottom"
 
   preferredWidth: Math.round(460 * Style.uiScaleRatio)
-  preferredHeight: Math.round(270 * Style.uiScaleRatio)
+  preferredHeight: Math.round(330 * Style.uiScaleRatio)
+
+  // The prompt is a modal: it layers over the panel that triggered the privileged
+  // action (the launcher, for a package update) instead of closing it, and a click
+  // on the desktop cannot dismiss it — that used to leave the request stranded
+  // with no way left to type the password.
+  modalOverlay: true
+
+  // True once the user has either submitted a password or cancelled, so an
+  // agent-driven close is not mistaken for an abandoned prompt.
+  property bool authResolved: false
+
+  function submitPassword(password) {
+    if (!flow || password === "")
+      return;
+    authResolved = true;
+    flow.submit(password);
+  }
+
+  function cancelAuth() {
+    authResolved = true;
+    if (flow)
+      flow.cancelAuthenticationRequest();
+  }
 
   // Escape key cancels authentication
   function onEscapePressed() {
-    if (flow) flow.cancelAuthenticationRequest();
+    cancelAuth();
     close();
+  }
+
+  // Whatever route closed this panel, never leave the caller waiting on a prompt
+  // that is no longer on screen.
+  onClosed: {
+    if (!authResolved && flow && flow.isResponseRequired)
+      flow.cancelAuthenticationRequest();
+    authResolved = false;
   }
 
   Connections {
@@ -49,7 +106,9 @@ SmartPanel {
   }
 
   onFlowChanged: {
+    root.authResolved = false;
     resolveTransientServiceName(flow ? flow.message : "");
+    refreshAppEntry();
   }
 
   Process {
@@ -117,39 +176,58 @@ SmartPanel {
         anchors.margins: Style.marginM
         spacing: Style.marginM
 
-        // Header with Icon
-        RowLayout {
+        // Header with app icon, common name, description and action-id pill
+        ColumnLayout {
           Layout.fillWidth: true
-          spacing: Style.marginM
+          Layout.alignment: Qt.AlignHCenter
+          spacing: Style.marginXXS
 
           NImageRounded {
-            Layout.preferredWidth: Style.fontSizeXXL * 1.8
-            Layout.preferredHeight: Style.fontSizeXXL * 1.8
-            imagePath: Settings.preprocessPath(Settings.data.general.avatarImage) || ((root.flow && root.flow.iconName) ? Quickshell.iconPath(root.flow.iconName) : "")
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: Style.fontSizeXXL * 2.6
+            Layout.preferredHeight: Style.fontSizeXXL * 2.6
+            imagePath: root.appIconPath
             fallbackIcon: "shield-lock"
             borderWidth: 0
           }
 
-          ColumnLayout {
+          NText {
             Layout.fillWidth: true
-            spacing: Style.marginXS
+            Layout.topMargin: Style.marginS
+            text: root.appName
+            horizontalAlignment: Text.AlignHCenter
+            pointSize: Style.fontSizeXXL
+            font.weight: Style.fontWeightBold
+            color: Color.mOnSurface
+            wrapMode: Text.Wrap
+          }
+
+          NText {
+            Layout.fillWidth: true
+            visible: text !== ""
+            text: root.appDescription
+            horizontalAlignment: Text.AlignHCenter
+            pointSize: Style.fontSizeS
+            color: Color.mOnSurfaceVariant
+            wrapMode: Text.Wrap
+          }
+
+          Rectangle {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: Style.marginXS
+            visible: actionIdLabel.text !== ""
+            radius: height / 2
+            color: Qt.alpha(Color.mPrimary, 0.16)
+            implicitWidth: actionIdLabel.implicitWidth + Style.marginM * 2
+            implicitHeight: actionIdLabel.implicitHeight + Style.marginXS * 2
 
             NText {
-              text: root.resolvedMessage || (root.flow ? root.flow.message : "Autenticação Requerida")
-              pointSize: Style.fontSizeM
-              font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
-              wrapMode: Text.Wrap
-              Layout.fillWidth: true
-            }
-
-            NText {
+              id: actionIdLabel
+              anchors.centerIn: parent
               text: root.flow ? root.flow.actionId : ""
-              pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
-              wrapMode: Text.Wrap
-              Layout.fillWidth: true
-              visible: text !== ""
+              pointSize: Style.fontSizeXXS
+              font.weight: Style.fontWeightSemiBold
+              color: Color.mPrimary
             }
           }
         }
@@ -174,10 +252,8 @@ SmartPanel {
           visible: root.flow && root.flow.isResponseRequired
 
           onAccepted: {
-            if (root.flow && passwordInput.text !== "") {
-              root.flow.submit(passwordInput.text);
-              passwordInput.text = "";
-            }
+            root.submitPassword(passwordInput.text);
+            passwordInput.text = "";
           }
 
           Component.onCompleted: {
@@ -201,7 +277,7 @@ SmartPanel {
             textColor: Color.mOnSurfaceVariant
             outlined: false
             onClicked: {
-              if (root.flow) root.flow.cancelAuthenticationRequest();
+              root.cancelAuth();
               root.close();
             }
           }
@@ -212,10 +288,8 @@ SmartPanel {
             textColor: Color.mOnPrimary
             enabled: root.flow && root.flow.isResponseRequired
             onClicked: {
-              if (root.flow && passwordInput.text !== "") {
-                root.flow.submit(passwordInput.text);
-                passwordInput.text = "";
-              }
+              root.submitPassword(passwordInput.text);
+              passwordInput.text = "";
             }
           }
         }

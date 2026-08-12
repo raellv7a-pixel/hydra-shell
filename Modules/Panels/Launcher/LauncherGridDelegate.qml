@@ -9,14 +9,16 @@ import qs.Widgets
 Item {
   id: gridEntryContainer
 
+  // Laid out by LauncherRowDelegate, which owns the cell metrics and the index
+  // of the entry this cell shows.
   required property var modelData
-  required property int index
+  required property int entryIndex
   required property var launcher
 
-  width: GridView.view.cellWidth
-  height: GridView.view.cellHeight
-
-  property bool isSelected: (!launcher.ignoreMouseHover && mouseArea.containsMouse) || (index === launcher.selectedIndex)
+  property bool isContextMenuTarget: launcher.appPanelItem === modelData
+  // An open panel owns the highlight: hovering other cards must not steal it.
+  property bool isSelected: isContextMenuTarget || (!launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse) || (entryIndex === launcher.selectedIndex)
+  z: isContextMenuTarget ? 10 : 0
   Accessible.role: Accessible.ListItem
   Accessible.name: modelData.name || ""
   Accessible.description: modelData.description || ""
@@ -37,8 +39,8 @@ Item {
     radius: Style.radiusL
     color: gridEntryContainer.isSelected ? Color.mPrimaryContainer : Color.mSurfaceContainerLow
     forceOpaque: false
-    border.color: gridEntryContainer.isSelected ? Color.mPrimary : "transparent"
-    border.width: gridEntryContainer.isSelected ? Style.borderS : 0
+    border.color: gridEntryContainer.isContextMenuTarget ? Color.mPrimary : (gridEntryContainer.isSelected ? Color.mPrimary : "transparent")
+    border.width: gridEntryContainer.isContextMenuTarget ? Style.borderM : (gridEntryContainer.isSelected ? Style.borderS : 0)
     scale: mouseArea.pressed ? 0.95 : (gridEntryContainer.isSelected ? 1.0 : 0.975)
     transformOrigin: Item.Center
 
@@ -254,48 +256,6 @@ Item {
       }
     }
 
-    // Action buttons (overlay in top-right corner) - dynamically populated from provider
-    Row {
-      visible: gridEntryContainer.isSelected && gridItemActions.length > 0
-      anchors.top: parent.top
-      anchors.right: parent.right
-      anchors.margins: Style.marginXS
-      z: 10
-      spacing: Style.marginXXS
-
-      property var gridItemActions: {
-        if (!gridEntryContainer.isSelected)
-          return [];
-        var provider = modelData.provider || launcher.currentProvider;
-        if (provider && provider.getItemActions) {
-          return provider.getItemActions(modelData);
-        }
-        return [];
-      }
-
-      Repeater {
-        model: parent.gridItemActions
-        NIconButton {
-          required property var modelData
-          icon: modelData.icon
-          baseSize: Style.baseWidgetSize * 0.75
-          tooltipText: modelData.tooltip
-          z: 11
-          handleWheel: true
-          colorBg: Color.mSurfaceContainerHighest
-          colorBgHover: Color.mSecondaryContainer
-          colorFg: Color.mOnSurfaceVariant
-          colorFgHover: Color.mOnSecondaryContainer
-          colorBorder: "transparent"
-          colorBorderHover: "transparent"
-          onClicked: {
-            if (modelData.action) {
-              modelData.action();
-            }
-          }
-        }
-      }
-    }
   }
 
   MouseArea {
@@ -305,19 +265,20 @@ Item {
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     enabled: !Settings.data.appLauncher.ignoreMouseInput
-
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     onEntered: {
-      if (!launcher.ignoreMouseHover) {
-        launcher.selectedIndex = gridEntryContainer.index;
-      }
+      if (!launcher.ignoreMouseHover && !launcher.appPanelOpen)
+        launcher.selectedIndex = gridEntryContainer.entryIndex;
     }
     onClicked: mouse => {
-                 if (mouse.button === Qt.LeftButton) {
-                   launcher.selectedIndex = gridEntryContainer.index;
+                 launcher.selectedIndex = gridEntryContainer.entryIndex;
+                 if (mouse.button === Qt.RightButton) {
+                   launcher.toggleAppPanel(modelData);
+                   mouse.accepted = true;
+                 } else if (mouse.button === Qt.LeftButton) {
                    launcher.activate();
                    mouse.accepted = true;
                  }
                }
-    acceptedButtons: Qt.LeftButton
   }
 }

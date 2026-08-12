@@ -17,6 +17,14 @@ Singleton {
   property var closingPanel: null
   property bool closedImmediately: false
 
+  // Modal panel (SmartPanel.modalOverlay), tracked separately from openedPanel.
+  // A modal layers on top of whatever is already open instead of replacing it,
+  // so an authentication prompt never tears down the panel that asked for it.
+  property var modalPanel: null
+  readonly property bool modalOpen: modalPanel !== null
+  // Whoever should receive Escape and the arrow-key shortcuts right now.
+  readonly property var activePanel: modalPanel || openedPanel
+
   // Overlay launcher state (separate from normal panels)
   property bool overlayLauncherOpen: false
   property var overlayLauncherScreen: null
@@ -74,8 +82,9 @@ Singleton {
   signal didClose
 
   // Background slot assignments for dynamic panel background rendering
-  // Slot 0: currently opening/open panel, Slot 1: closing panel
-  property var backgroundSlotAssignments: [null, null]
+  // Slot 0: currently opening/open panel, Slot 1: closing panel,
+  // Slot 2: modal overlay (stacks over slot 0 rather than replacing it)
+  property var backgroundSlotAssignments: [null, null, null]
   signal slotAssignmentChanged(int slotIndex, var panel)
 
   function assignToSlot(slotIndex, panel) {
@@ -307,6 +316,32 @@ Singleton {
     willOpen();
   }
 
+  // Modal counterpart of willOpenPanel: deliberately leaves openedPanel and the
+  // overlay launcher untouched so the modal stacks over them.
+  function willOpenModal(panel) {
+    modalPanel = panel;
+    assignToSlot(2, panel);
+
+    // The modal owns keyboard focus while it is up (password fields et al).
+    if (panel && panel.exclusiveKeyboard) {
+      isInitializingKeyboard = true;
+      keyboardInitTimer.restart();
+    }
+
+    willOpen();
+  }
+
+  function closedModal(panel) {
+    if (modalPanel && modalPanel !== panel)
+      return;
+
+    modalPanel = null;
+    assignToSlot(2, null);
+    isInitializingKeyboard = false;
+    keyboardInitTimer.stop();
+    didClose();
+  }
+
   // Open launcher panel (handles both normal and overlay mode)
   function openLauncher(screen) {
     closeWorkspaceManager();
@@ -344,6 +379,23 @@ Singleton {
       if (panel)
         panel.toggle();
     }
+  }
+
+  // App the launcher should re-anchor its inline panel on as soon as it has
+  // results. Set after a package operation so the outcome shows up where the
+  // action was started, whether the launcher stayed open or had to be reopened.
+  // LauncherCore consumes this once its results are built.
+  property string pendingLauncherAppPanelId: ""
+
+  function openLauncherWithAppPanel(appId) {
+    const id = String(appId || "");
+    if (id === "")
+      return;
+
+    pendingLauncherAppPanelId = id;
+    const screen = Settings.data.appLauncher.overviewLayer ? (overlayLauncherScreen || findScreenForPanels()) : findScreenForPanels();
+    if (!isLauncherOpen(screen))
+      openLauncher(screen);
   }
 
   // Close overlay launcher
@@ -445,9 +497,13 @@ Singleton {
       assignToSlot(1, null);
     }
 
-    // Reset keyboard init state
-    isInitializingKeyboard = false;
-    keyboardInitTimer.stop();
+    // Reset keyboard init state — unless a modal is up, in which case the
+    // keyboard grab belongs to it and a panel closing underneath must not
+    // cut its focus window short.
+    if (!modalOpen) {
+      isInitializingKeyboard = false;
+      keyboardInitTimer.stop();
+    }
 
     // emit signal
     didClose();

@@ -24,6 +24,7 @@ import qs.Modules.MainScreen
 import qs.Modules.Notification
 import qs.Modules.OSD
 import qs.Modules.ScreenToolkit
+import qs.Modules.ScreenShare
 import qs.Modules.Polkit
 
 import qs.Modules.Panels.Launcher
@@ -137,6 +138,7 @@ ShellRoot {
       Notification {}
       ToastOverlay {}
       ScreenToolkitNative {}
+      ScreenShareNative {}
       PolkitNative { id: polkitAgent }
 
       // Launcher overlay window (for overlay layer mode)

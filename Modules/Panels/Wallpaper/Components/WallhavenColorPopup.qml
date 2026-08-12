@@ -9,8 +9,12 @@ import qs.Widgets
 Popup {
   id: root
 
-  width: 250
-  height: 200
+  // Swatch geometry scales with the UI so the targets stay clickable on HiDPI.
+  readonly property int swatchSize: Math.round(24 * Style.uiScaleRatio)
+  readonly property int swatchesPerRow: 8
+
+  width: Math.round((swatchSize + Style.marginXS) * swatchesPerRow + Style.marginM * 2)
+  height: Math.round(contentColumn.implicitHeight + Style.marginM * 2)
   padding: Style.marginM
   modal: true
   dim: false
@@ -18,13 +22,24 @@ Popup {
 
   signal colorSelected(string colorHex)
 
+  // Item that had focus before opening, restored on close.
+  property Item previousFocusItem: null
+
   function showAt(item) {
+    previousFocusItem = item ?? null;
     if (item) {
-      var localPos = item.mapToItem(parent, 0, item.height + Style.marginS);
+      const localPos = item.mapToItem(parent, 0, item.height + Style.marginS);
       x = localPos.x - width + item.width; // align right
       y = localPos.y;
     }
     open();
+  }
+
+  onClosed: {
+    if (previousFocusItem) {
+      previousFocusItem.forceActiveFocus();
+      previousFocusItem = null;
+    }
   }
 
   background: Rectangle {
@@ -37,12 +52,14 @@ Popup {
   }
 
   contentItem: ColumnLayout {
+    id: contentColumn
+
     spacing: Style.marginM
 
     RowLayout {
       Layout.fillWidth: true
       NText {
-        text: "Cor Predominante"
+        text: I18n.tr("wallpaper.panel.color-filter")
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
         Layout.fillWidth: true
@@ -73,29 +90,31 @@ Popup {
         ]
         
         Rectangle {
-          width: 24
-          height: 24
-          radius: 12
+          required property string modelData
+
+          width: root.swatchSize
+          height: root.swatchSize
+          radius: width / 2
           color: "#" + modelData
           border.color: Color.mOutline
-          border.width: Settings.data.wallpaper.wallhavenColors === modelData ? 2 : 1
-          
+          border.width: Settings.data.wallpaper.wallhavenColors === modelData ? Style.borderM : Style.borderS
+
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-              root.colorSelected(modelData);
+              root.colorSelected(parent.modelData);
               root.close();
             }
           }
-          
-          // Selection Indicator
+
+          // Selection indicator
           NIcon {
             anchors.centerIn: parent
             icon: "check"
-            pointSize: 14
-            color: (modelData === "ffffff" || modelData === "cccccc") ? "#000000" : "#ffffff"
-            visible: Settings.data.wallpaper.wallhavenColors === modelData
+            pointSize: Style.fontSizeS
+            color: (parent.modelData === "ffffff" || parent.modelData === "cccccc") ? "#000000" : "#ffffff"
+            visible: Settings.data.wallpaper.wallhavenColors === parent.modelData
           }
         }
       }

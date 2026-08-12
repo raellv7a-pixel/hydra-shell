@@ -75,12 +75,12 @@ Singleton {
     property string pendingPath: ""
     property string pendingSlot: ""
     onTriggered: {
-      var p = pendingPath;
-      var s = pendingSlot;
+      const path = pendingPath;
+      const slot = pendingSlot;
       pendingPath = "";
       pendingSlot = "";
-      if (p && root.isFavorite(p)) {
-        root.updateFavoriteColorScheme(p, s);
+      if (path && root.isFavorite(path)) {
+        root.updateFavoriteColorScheme(path, slot);
       }
     }
   }
@@ -216,11 +216,11 @@ Singleton {
 
     // Initialize cache file path
     Qt.callLater(() => {
-                   if (typeof Settings !== 'undefined' && Settings.cacheDir) {
-                     wallpaperCacheFile = Settings.cacheDir + "wallpapers.json";
-                     wallpaperCacheView.path = wallpaperCacheFile;
-                   }
-                 });
+      if (typeof Settings !== 'undefined' && Settings.cacheDir) {
+        wallpaperCacheFile = Settings.cacheDir + "wallpapers.json";
+        wallpaperCacheView.path = wallpaperCacheFile;
+      }
+    });
 
     // Note: isInitialized will be set to true in wallpaperCacheView.onLoaded
     Logger.d("Wallpaper", "Triggering initial wallpaper scan");
@@ -461,37 +461,31 @@ Singleton {
     for (var i = 0; i < Quickshell.screens.length; i++) {
       names[Quickshell.screens[i].name] = true;
     }
+    const linked = Settings.data.wallpaper.linkLightAndDarkWallpapers;
     Object.keys(names).forEach(function (name) {
-      var e = currentWallpapers[name];
-      if (!e) {
+      const entry = currentWallpapers[name];
+      if (!entry) {
         return;
       }
-      if (typeof e === "string") {
-        if (Settings.data.wallpaper.linkLightAndDarkWallpapers) {
-          currentWallpapers[name] = {
-            light: e,
-            dark: e
-          };
-        } else {
-          currentWallpapers[name] = {
-            light: e,
-            dark: e
-          };
-        }
-      } else if (_isSplitWallpaperEntry(e)) {
-        var p = _pathsFromEntry(e);
-        if (Settings.data.wallpaper.linkLightAndDarkWallpapers) {
-          currentWallpapers[name] = {
-            light: p.light || p.dark || "",
-            dark: p.dark || p.light || ""
-          };
-        } else {
-          currentWallpapers[name] = {
-            light: p.light || "",
-            dark: p.dark || ""
-          };
-        }
+      if (typeof entry === "string") {
+        // Legacy single-path entry: both slots start from it.
+        currentWallpapers[name] = {
+          light: entry,
+          dark: entry
+        };
+        return;
       }
+      if (!_isSplitWallpaperEntry(entry)) {
+        return;
+      }
+      const p = _pathsFromEntry(entry);
+      currentWallpapers[name] = linked ? {
+                                           light: p.light || p.dark || "",
+                                           dark: p.dark || p.light || ""
+                                         } : {
+        light: p.light || "",
+        dark: p.dark || ""
+      };
     });
     saveTimer.restart();
   }
@@ -506,14 +500,16 @@ Singleton {
   // -------------------------------------------------------------------
   // Get specific monitor wallpaper data
   function getMonitorConfig(screenName) {
-    var monitors = Settings.data.wallpaper.monitorDirectories;
-    if (monitors !== undefined) {
-      for (var i = 0; i < monitors.length; i++) {
-        if (monitors[i].name !== undefined && monitors[i].name === screenName) {
-          return monitors[i];
-        }
+    const monitors = Settings.data.wallpaper.monitorDirectories;
+    if (monitors === undefined) {
+      return undefined;
+    }
+    for (let i = 0; i < monitors.length; i++) {
+      if (monitors[i].name !== undefined && monitors[i].name === screenName) {
+        return monitors[i];
       }
     }
+    return undefined;
   }
 
   // -------------------------------------------------------------------
@@ -589,7 +585,53 @@ Singleton {
   }
 
   // -------------------------------------------------------------------
+  // -------------------------------------------------------------------
+  // "Apply intent" ticketing: lets async apply flows (Wallhaven downloads,
+  // grading exports, video downloads) detect that a newer pick landed for
+  // the same target while they were in flight, so their eventual
+  // completion can be dropped instead of clobbering whatever the user
+  // picked afterwards. changeWallpaper() bumps the generation on every
+  // call, sync or async, so any ticket taken before it is now stale.
+  property var _applyIntentGeneration: ({})
+
+  function _applyIntentKey(screenName) {
+    return screenName === undefined ? "__all__" : screenName;
+  }
+
+  function _bumpApplyIntent(screenName) {
+    if (screenName === undefined) {
+      var names = new Set(Object.keys(currentWallpapers));
+      for (var i = 0; i < Quickshell.screens.length; i++) {
+        names.add(Quickshell.screens[i].name);
+      }
+      names.forEach(name => {
+        _applyIntentGeneration[name] = (_applyIntentGeneration[name] || 0) + 1;
+      });
+    }
+    var key = _applyIntentKey(screenName);
+    _applyIntentGeneration[key] = (_applyIntentGeneration[key] || 0) + 1;
+  }
+
+  // Call before starting async work (a download, an export) that will
+  // eventually apply a wallpaper to screenName. Hold onto the returned
+  // ticket and check isApplyIntentCurrent(ticket) once the async work
+  // completes, before actually applying.
+  function beginApplyIntent(screenName) {
+    _bumpApplyIntent(screenName);
+    var key = _applyIntentKey(screenName);
+    return {
+      "key": key,
+      "token": _applyIntentGeneration[key]
+    };
+  }
+
+  function isApplyIntentCurrent(ticket) {
+    return !!ticket && _applyIntentGeneration[ticket.key] === ticket.token;
+  }
+
   function changeWallpaper(path, screenName, appearanceSlot) {
+    _bumpApplyIntent(screenName);
+
     // Turn off solid color mode when selecting a wallpaper
     if (Settings.data.wallpaper.useSolidColor) {
       Settings.data.wallpaper.useSolidColor = false;
@@ -942,7 +984,7 @@ Singleton {
 
   // -------------------------------------------------------------------
   function getWallpapersList(screenName) {
-    if (screenName != undefined && wallpaperLists[screenName] != undefined) {
+    if (screenName !== undefined && wallpaperLists[screenName] !== undefined) {
       return wallpaperLists[screenName];
     }
     return [];
@@ -1042,41 +1084,39 @@ Singleton {
   }
 
   function _scanForDirectories(directory, callback) {
-    var findArgs = ["find", "-L", directory, "-maxdepth", "1", "-mindepth", "1", "-type", "d"];
-
-    var processString = `
-    import QtQuick
-    import Quickshell.Io
-    Process {
-      id: process
-      command: ${JSON.stringify(findArgs)}
-      stdout: StdioCollector {}
-      stderr: StdioCollector {}
+    const process = scanProcessComponent.createObject(root, {
+                                                        "argv": ["find", "-L", directory, "-maxdepth", "1", "-mindepth", "1", "-type", "d"]
+                                                      });
+    if (!process) {
+      Logger.e("Wallpaper", "Failed to create directory scan process for", directory);
+      callback([]);
+      return;
     }
-    `;
 
-    var processObject = Qt.createQmlObject(processString, root, "DirScan");
-
-    processObject.exited.connect(function (exitCode) {
-      var dirs = [];
-      if (exitCode === 0) {
-        var lines = processObject.stdout.text.split('\n');
-        for (var i = 0; i < lines.length; i++) {
-          var line = lines[i].trim();
-          if (line !== '') {
-            var showHidden = Settings.data.wallpaper.showHiddenFiles;
-            var name = line.split('/').pop();
-            if (showHidden || !name.startsWith('.')) {
-              dirs.push(line);
-            }
-          }
+    process.exited.connect(function (exitCode) {
+      // `find` exits non-zero on partial failures (unreadable subdirectory),
+      // but whatever it did print is still valid — parse it either way.
+      const dirs = [];
+      const lines = process.stdout.text.split('\n');
+      const showHidden = Settings.data.wallpaper.showHiddenFiles;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line === '') {
+          continue;
+        }
+        const name = line.split('/').pop();
+        if (showHidden || !name.startsWith('.')) {
+          dirs.push(line);
         }
       }
+      if (exitCode !== 0 && dirs.length === 0) {
+        Logger.w("Wallpaper", "Directory scan failed for", directory, "exit code:", exitCode);
+      }
       callback(dirs);
-      processObject.destroy();
+      process.destroy();
     });
 
-    processObject.running = true;
+    process.running = true;
   }
 
   // -------------------------------------------------------------------
@@ -1087,217 +1127,242 @@ Singleton {
       return;
     }
 
-    var mode = Settings.data.wallpaper.viewMode;
+    const mode = Settings.data.wallpaper.viewMode;
     Logger.d("Wallpaper", "refreshWallpapersList", "viewMode:", mode);
-    scanningCount = 0;
 
-    if (mode === "recursive") {
-      // Use Process-based recursive search for all screens
-      for (var i = 0; i < Quickshell.screens.length; i++) {
-        var screenName = Quickshell.screens[i].name;
-        var directory = getMonitorDirectory(screenName);
-        scanDirectoryRecursive(screenName, directory);
-      }
-    } else if (mode === "browse") {
-      // Browse mode: scan current browse path (non-recursive)
-      // Note: The actual directory+subdirectory scanning happens in WallpaperPanel
-      // Here we just scan the current browse path for files
-      for (var i = 0; i < Quickshell.screens.length; i++) {
-        var screenName = Quickshell.screens[i].name;
-        var directory = getCurrentBrowsePath(screenName);
-        _scanDirectoryInternal(screenName, directory, false, true, null);
-      }
-    } else {
-      // Single directory mode (non-recursive)
-      for (var i = 0; i < Quickshell.screens.length; i++) {
-        var screenName = Quickshell.screens[i].name;
-        var directory = getMonitorDirectory(screenName);
-        _scanDirectoryInternal(screenName, directory, false, true, null);
+    // Drop scans for screens that vanished, so their counter slots are released
+    // instead of pinning `scanning` to true forever.
+    _cancelOrphanListScans();
+
+    for (let i = 0; i < Quickshell.screens.length; i++) {
+      const screenName = Quickshell.screens[i].name;
+      if (mode === "recursive") {
+        _scanDirectoryInternal(screenName, getMonitorDirectory(screenName), true, true, null);
+      } else if (mode === "browse") {
+        // Browse mode only lists files of the current browse path here; the
+        // directory listing is requested separately by the panel.
+        _scanDirectoryInternal(screenName, getCurrentBrowsePath(screenName), false, true, null);
+      } else {
+        _scanDirectoryInternal(screenName, getMonitorDirectory(screenName), false, true, null);
       }
     }
   }
 
+  // Process instances for the per-screen list scans (the ones counted by
+  // scanningCount). One-shot scans (browse listings) are not tracked here.
+  property var recursiveProcesses: ({})
+
+  // Recursive scans follow symlinks (-L), so a cyclic link would make `find`
+  // spin forever. A depth cap bounds both the cycle and the parse cost.
+  readonly property int recursiveScanMaxDepth: 6
+
+  Component {
+    id: scanProcessComponent
+
+    Process {
+      // Set at creation; kept as a plain property so the command is a binding
+      // over data rather than generated QML source.
+      property var argv: []
+      // Marks a scan whose result must be discarded (superseded or cancelled).
+      property bool cancelled: false
+
+      command: argv
+      stdout: StdioCollector {}
+      stderr: StdioCollector {}
+    }
+  }
+
+  function _beginListScan() {
+    scanningCount++;
+  }
+
+  function _endListScan() {
+    scanningCount = Math.max(0, scanningCount - 1);
+  }
+
+  // Cancel the tracked list scan of a screen, releasing its counter slot exactly once.
+  function _cancelListScan(screenName) {
+    const process = recursiveProcesses[screenName];
+    if (!process) {
+      return;
+    }
+    Logger.d("Wallpaper", "Cancelling existing scan for", screenName);
+    delete recursiveProcesses[screenName];
+    process.cancelled = true;
+    process.running = false;
+    process.destroy();
+    _endListScan();
+  }
+
+  function _cancelOrphanListScans() {
+    const live = {};
+    for (let i = 0; i < Quickshell.screens.length; i++) {
+      live[Quickshell.screens[i].name] = true;
+    }
+    Object.keys(recursiveProcesses).forEach(function (name) {
+      if (!live[name]) {
+        _cancelListScan(name);
+      }
+    });
+  }
+
+  function _buildFindArgs(directory, recursive) {
+    const findArgs = ["find", "-L", directory, "-maxdepth", recursive ? String(recursiveScanMaxDepth) : "1", "-mindepth", "1", "-type", "f", "("];
+    const filters = ImageCacheService.imageFilters;
+    for (let i = 0; i < filters.length; i++) {
+      if (i > 0) {
+        findArgs.push("-o");
+      }
+      findArgs.push("-iname", filters[i]);
+    }
+    findArgs.push(")");
+    // %T@ gives the mtime used by the date sort orders
+    findArgs.push("-printf", "%T@|%p\\n");
+    return findArgs;
+  }
+
+  // Parse `find -printf "%T@|%p\n"` output into { path, time, name } records,
+  // dropping dotfiles unless the user asked to see them.
+  function _parseScanOutput(text) {
+    const showHidden = Settings.data.wallpaper.showHiddenFiles;
+    const lines = (text || "").split('\n');
+    const parsed = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line === '') {
+        continue;
+      }
+      const separator = line.indexOf('|');
+      // Filenames may contain '|', so only the first one separates the fields.
+      const path = separator === -1 ? line : line.slice(separator + 1);
+      const time = separator === -1 ? 0 : (parseFloat(line.slice(0, separator)) || 0);
+      const name = path.split('/').pop();
+      if (showHidden || !name.startsWith('.')) {
+        parsed.push({
+                      "path": path,
+                      "time": time,
+                      "name": name
+                    });
+      }
+    }
+    return parsed;
+  }
+
+  function _sortParsedFiles(parsedFiles) {
+    const sortOrder = Settings.data.wallpaper.sortOrder || "name";
+
+    if (sortOrder === "random") {
+      // Fisher-Yates shuffle
+      for (let i = parsedFiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = parsedFiles[i];
+        parsedFiles[i] = parsedFiles[j];
+        parsedFiles[j] = temp;
+      }
+      return parsedFiles;
+    }
+
+    parsedFiles.sort(function (a, b) {
+      switch (sortOrder) {
+      case "date_desc":
+        return b.time - a.time;
+      case "date_asc":
+        return a.time - b.time;
+      case "name_desc":
+        return b.name.localeCompare(a.name);
+      default:
+        return a.name.localeCompare(b.name);
+      }
+    });
+    return parsedFiles;
+  }
+
+  function _publishScanResult(screenName, files) {
+    wallpaperLists[screenName] = files;
+
+    // Keep the alphabetical cursor pointing at the current wallpaper
+    if (alphabeticalIndices[screenName] !== undefined) {
+      const foundIndex = files.indexOf(getWallpaper(screenName) || "");
+      alphabeticalIndices[screenName] = (foundIndex >= 0) ? foundIndex : 0;
+    }
+
+    wallpaperListChanged(screenName, files.length);
+  }
+
   // Internal scan function
   // recursive: whether to scan subdirectories
-  // updateList: whether to update wallpaperLists and emit signal
+  // updateList: whether to update wallpaperLists and emit signal (tracked by scanningCount)
   // callback: optional callback with files array
   function _scanDirectoryInternal(screenName, directory, recursive, updateList, callback) {
     if (!directory || directory === "") {
       Logger.w("Wallpaper", "Empty directory for", screenName);
       if (updateList) {
-        wallpaperLists[screenName] = [];
-        wallpaperListChanged(screenName, 0);
+        _cancelListScan(screenName);
+        _publishScanResult(screenName, []);
       }
-      if (callback)
+      if (callback) {
         callback([]);
+      }
       return;
     }
 
-    // Cancel any existing scan for this screen
-    if (recursiveProcesses[screenName]) {
-      Logger.d("Wallpaper", "Cancelling existing scan for", screenName);
-      recursiveProcesses[screenName].running = false;
-      recursiveProcesses[screenName].destroy();
-      delete recursiveProcesses[screenName];
-      if (updateList)
-        scanningCount--;
+    if (updateList) {
+      _cancelListScan(screenName);
+      _beginListScan();
     }
 
-    if (updateList)
-      scanningCount++;
     Logger.i("Wallpaper", "Starting scan for", screenName, "in", directory, "recursive:", recursive);
 
-    // Build find command args dynamically from ImageCacheService filters
-    var filters = ImageCacheService.imageFilters;
-    var findArgs = ["find", "-L", directory];
-
-    // Add depth limit for non-recursive
-    if (!recursive) {
-      findArgs.push("-maxdepth", "1", "-mindepth", "1");
-    }
-
-    findArgs.push("-type", "f", "(");
-    for (var i = 0; i < filters.length; i++) {
-      if (i > 0) {
-        findArgs.push("-o");
-      }
-      findArgs.push("-iname");
-      findArgs.push(filters[i]);
-    }
-    findArgs.push(")");
-    // Add printf to get modification time
-    findArgs.push("-printf", "%T@|%p\\n");
-
-    // Create Process component inline
-    var processString = `
-    import QtQuick
-    import Quickshell.Io
-    Process {
-      id: process
-      command: ${JSON.stringify(findArgs)}
-      stdout: StdioCollector {}
-      stderr: StdioCollector {}
-    }
-    `;
-
-    var processObject = Qt.createQmlObject(processString, root, "Scan_" + screenName);
-
-    // Store reference to avoid garbage collection
-    if (updateList) {
-      recursiveProcesses[screenName] = processObject;
-    }
-
-    var handler = function (exitCode) {
-      if (updateList)
-        scanningCount--;
-      Logger.d("Wallpaper", "Process exited with code", exitCode, "for", screenName);
-
-      var files = [];
-      if (exitCode === 0) {
-        var lines = processObject.stdout.text.split('\n');
-        var parsedFiles = [];
-
-        for (var i = 0; i < lines.length; i++) {
-          var line = lines[i].trim();
-          if (line !== '') {
-            var parts = line.split('|');
-            if (parts.length >= 2) { // Handle potential extra pipes in filename by joining rest
-              var timestamp = parseFloat(parts[0]);
-              var path = parts.slice(1).join('|');
-
-              var showHidden = Settings.data.wallpaper.showHiddenFiles;
-              var name = path.split('/').pop();
-              if (showHidden || !name.startsWith('.')) {
-                parsedFiles.push({
-                                   path: path,
-                                   time: timestamp,
-                                   name: name
-                                 });
-              }
-            } else if (line.indexOf('|') === -1) {
-              // Fallback for unexpected output format or old find versions (unlikely but safe)
-              var path = line;
-              var showHidden = Settings.data.wallpaper.showHiddenFiles;
-              var name = path.split('/').pop();
-              if (showHidden || !name.startsWith('.')) {
-                parsedFiles.push({
-                                   path: path,
-                                   time: 0,
-                                   name: name
-                                 });
-              }
-            }
-          }
-        }
-        // Sort files based on settings
-        var sortOrder = Settings.data.wallpaper.sortOrder || "name";
-
-        // Fischer-Yates shuffle
-        if (sortOrder === "random") {
-          for (let i = parsedFiles.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            const temp = parsedFiles[i];
-            parsedFiles[i] = parsedFiles[j];
-            parsedFiles[j] = temp;
-          }
-        } else {
-          parsedFiles.sort(function (a, b) {
-            if (sortOrder === "date_desc") { // Newest first
-              return b.time - a.time;
-            } else if (sortOrder === "date_asc") { // Oldest first
-              return a.time - b.time;
-            } else if (sortOrder === "name_desc") {
-              return b.name.localeCompare(a.name);
-            } else { // name (asc)
-              return a.name.localeCompare(b.name);
-            }
-          });
-        }
-
-        // Map back to string array
-        files = parsedFiles.map(f => f.path);
-
-        if (updateList) {
-          wallpaperLists[screenName] = files;
-
-          // Reset alphabetical indices when list changes
-          if (alphabeticalIndices[screenName] !== undefined) {
-            var currentWallpaper = getWallpaper(screenName) || "";
-            var foundIndex = files.indexOf(currentWallpaper);
-            alphabeticalIndices[screenName] = (foundIndex >= 0) ? foundIndex : 0;
-          }
-
-          Logger.i("Wallpaper", "Scan completed for", screenName, "found", files.length, "files");
-          wallpaperListChanged(screenName, files.length);
-        }
-      } else {
-        Logger.w("Wallpaper", "Scan failed for", screenName, "exit code:", exitCode, "(directory might not exist)");
-        if (updateList) {
-          wallpaperLists[screenName] = [];
-          if (alphabeticalIndices[screenName] !== undefined) {
-            alphabeticalIndices[screenName] = 0;
-          }
-          wallpaperListChanged(screenName, 0);
-        }
-      }
-
-      // Clean up
+    const process = scanProcessComponent.createObject(root, {
+                                                        "argv": _buildFindArgs(directory, recursive)
+                                                      });
+    if (!process) {
+      Logger.e("Wallpaper", "Failed to create scan process for", screenName);
       if (updateList) {
-        delete recursiveProcesses[screenName];
+        _endListScan();
+        _publishScanResult(screenName, []);
+      }
+      if (callback) {
+        callback([]);
+      }
+      return;
+    }
+
+    if (updateList) {
+      recursiveProcesses[screenName] = process;
+    }
+
+    process.exited.connect(function (exitCode) {
+      if (process.cancelled) {
+        return;
+      }
+      if (updateList) {
+        if (recursiveProcesses[screenName] === process) {
+          delete recursiveProcesses[screenName];
+        }
+        _endListScan();
       }
 
-      if (callback)
+      // A non-zero exit still leaves valid lines on stdout when only part of
+      // the tree was unreadable, so parse first and judge by the result.
+      const files = _sortParsedFiles(_parseScanOutput(process.stdout.text)).map(f => f.path);
+      if (exitCode !== 0 && files.length === 0) {
+        Logger.w("Wallpaper", "Scan failed for", screenName, "exit code:", exitCode, "(directory might not exist)");
+      } else {
+        Logger.i("Wallpaper", "Scan completed for", screenName, "found", files.length, "files");
+      }
+
+      if (updateList) {
+        _publishScanResult(screenName, files);
+      }
+      if (callback) {
         callback(files);
-      processObject.destroy();
-    };
+      }
+      process.destroy();
+    });
 
-    processObject.exited.connect(handler);
-    Logger.d("Wallpaper", "Starting process for", screenName);
-    processObject.running = true;
+    process.running = true;
   }
-
-  // Process instances for scanning (one per screen)
-  property var recursiveProcesses: ({})
 
   // -------------------------------------------------------------------
   function scanDirectoryRecursive(screenName, directory) {

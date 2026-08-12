@@ -457,6 +457,7 @@
     "gateway": "Gateway",
     "general": "General",
     "height": "Height",
+    "hide": "Hide",
     "hibernate": "Hibernate",
     "history": "History",
     "icon": "Icon",
@@ -531,7 +532,9 @@
     "select-color-description": "Apply theme colors for emphasis.",
     "select-icon-color": "Select icon color",
     "select-text-color": "Select text color",
+    "properties": "Properties",
     "settings": "Settings",
+    "show": "Show",
     "shortcuts": "Shortcuts",
     "shutdown": "Shutdown",
     "signal": "Signal",
@@ -614,12 +617,42 @@
       "emoji-symbols": "Symbols",
       "emoji-travel": "Travel & Places",
       "game": "Games",
+      "hidden": "Hidden",
       "graphics": "Graphics",
       "misc": "Misc",
       "office": "Office",
       "pinned": "Pinned",
       "system": "System",
       "webbrowser": "Web Browser"
+    },
+    "app-actions": {
+      "title": "App actions",
+      "update-to": "Update to {value}",
+      "update-available": "Update available",
+      "up-to-date": "No update available",
+      "busy-update": "Updating…",
+      "busy-remove": "Uninstalling…",
+      "operation-failed": "The operation failed",
+      "auth-denied": "Authentication cancelled or denied",
+      "toast-updated": "Application updated",
+      "toast-removed": "Application uninstalled",
+      "toast-update-failed": "Update failed",
+      "toast-remove-failed": "Uninstall failed",
+      "elevator-missing": "Could not elevate privileges: {value} not found",
+      "unavailable": "Shelly is not available",
+      "confirm-uninstall": "Uninstall {value}?",
+      "backend-standard": "Repository package",
+      "backend-aur": "AUR package",
+      "backend-flatpak": "Flatpak",
+      "backend-appimage": "AppImage"
+    },
+    "app-properties": {
+      "description": "Application details",
+      "app-id": "App ID",
+      "command": "Command",
+      "categories": "Categories",
+      "backend": "Package",
+      "version": "Installed version"
     },
     "providers": {
       "applications": "Applications",
@@ -1307,6 +1340,9 @@
       "wallpaper-changed-label": "Wallpaper changed",
       "wallpaper-changed-placeholder": "e.g. notify-send \"Wallpaper\" \"Changed\""
     },
+    "hyprland": {
+      "title": "Hyprland"
+    },
     "idle": {
       "custom-add": "Add command",
       "custom-description": "Run a shell command after a period of inactivity.",
@@ -1892,6 +1928,30 @@
     "top-left": "Top left",
     "top-right": "Top right"
   },
+  "screen-share": {
+    "title": "Share your screen",
+    "subtitle-app": "{app} wants to capture your screen",
+    "subtitle-generic": "An application wants to capture your screen",
+    "tab-screens": "Screens",
+    "tab-windows": "Windows",
+    "tab-region": "Region",
+    "no-windows": "No windows available to share",
+    "region-hint": "Pick an area of the screen to share. Only what is inside it will be visible.",
+    "region-select": "Select region",
+    "screen-warning": "Everything on {screen} will be visible, including notifications and on-screen passwords.",
+    "remember": "Remember this choice",
+    "remember-description": "Lets the application resume capturing without asking again",
+    "cancel": "Cancel",
+    "confirm": "Share",
+    "region-selector": {
+      "drag": "Drag",
+      "toSelect": "to select",
+      "clickWindow": "Click a window",
+      "toSnap": "to snap",
+      "esc": "Esc",
+      "toCancel": "to cancel"
+    }
+  },
   "session-menu": {
     "action-in-seconds": "{action} in {seconds} seconds...",
     "cancel-timer": "Cancel timer",
@@ -2177,7 +2237,23 @@
       "source-wallhaven": "Wallhaven",
       "theme-diff-summary": "{changed} of {total} colors will change",
       "title": "Wallpaper Selector",
-      "wallhaven-settings-title": "Wallhaven Settings"
+      "wallhaven-settings-title": "Wallhaven Settings",
+      "applied-toast-body": "Wallpaper applied successfully!",
+      "applied-toast-title": "Wallpaper",
+      "import-filter-all": "All files",
+      "import-filter-media": "Animated wallpapers and images",
+      "import-local-title": "Select a local wallpaper (animated video or image)",
+      "import-local-tooltip": "Import local wallpaper (video or image)",
+      "preview-title": "Desktop preview",
+      "tab-gallery": "Gallery",
+      "tab-grading": "Image Adjustments",
+      "tab-palette": "Color Palette",
+      "preview-empty": "Pick a wallpaper to preview it",
+      "preview-chip-candidate": "Preview",
+      "preview-chip-applied": "Applied",
+      "preview-light-tooltip": "Preview in light mode",
+      "preview-dark-tooltip": "Preview in dark mode",
+      "info-modified": "Modified on {date}"
     },
     "transitions": {
       "disc": "Disc",
@@ -2226,6 +2302,20 @@
       "page-suffix": "of {total}",
       "preview-failed": "The preview could not be loaded.",
       "retrying": "Trying again in {seconds}s..."
+    },
+    "upscale": {
+      "warning-title": "Low resolution for this screen",
+      "warning-body": "{candidate} is smaller than the screen ({target}). It will look blurry when stretched.",
+      "improve-with-ai": "Improve with AI",
+      "apply-as-is": "Apply anyway",
+      "no-vulkan-tooltip": "No Vulkan-capable GPU was detected",
+      "obtaining": "Downloading wallpaper…",
+      "installing": "Installing waifu2x-ncnn-vulkan (may ask for your administrator password)…",
+      "phase-probe": "Checking",
+      "phase-prepare": "Preparing",
+      "phase-enhance": "Applying AI",
+      "phase-assemble": "Finishing",
+      "generic-error": "Failed to process the image."
     }
   },
   "weather": {

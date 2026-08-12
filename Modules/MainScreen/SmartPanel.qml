@@ -85,6 +85,13 @@ Item {
 
   property bool exclusiveKeyboard: true
 
+  // Modal panels sit outside the one-panel-at-a-time rule: they layer on top of
+  // whatever is already open instead of replacing it, and a click on the
+  // background does not dismiss them. Used by the polkit prompt, which must not
+  // tear down the panel that triggered the privileged action, and must not be
+  // dismissable by accident while an authentication is in flight.
+  property bool modalOverlay: false
+
   // Keyboard event handler
   // These are called from MainScreen's centralized shortcuts
   // override these in specific panels to handle shortcuts
@@ -232,7 +239,10 @@ Item {
     isPanelOpen = true;
 
     // Notify PanelService
-    PanelService.willOpenPanel(root);
+    if (root.modalOverlay)
+      PanelService.willOpenModal(root);
+    else
+      PanelService.willOpenPanel(root);
 
     // Position and visibility will be set by Loader.onLoaded
     // This ensures no flicker from default size to content size
@@ -283,7 +293,10 @@ Item {
 
     // Signal immediate close so MainScreen can skip dimmer animation
     PanelService.closedImmediately = true;
-    PanelService.closedPanel(root);
+    if (root.modalOverlay)
+      PanelService.closedModal(root);
+    else
+      PanelService.closedPanel(root);
     closed();
 
     // Flush pending double-buffered Wayland state (blur regions) that won't
@@ -314,7 +327,10 @@ Item {
     // Reset dimensionsInitialized for next opening
     panelBackground.dimensionsInitialized = false;
 
-    PanelService.closedPanel(root);
+    if (root.modalOverlay)
+      PanelService.closedModal(root);
+    else
+      PanelService.closedPanel(root);
     closed();
 
     // Flush pending double-buffered Wayland state (blur regions).

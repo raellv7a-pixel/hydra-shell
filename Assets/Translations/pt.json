@@ -457,6 +457,7 @@
     "gateway": "Porta de entrada",
     "general": "Geral",
     "height": "Altura",
+    "hide": "Ocultar",
     "hibernate": "Hibernar",
     "history": "História",
     "icon": "Ícone",
@@ -531,7 +532,9 @@
     "select-color-description": "Aplicar cores do tema para enfatizar.",
     "select-icon-color": "Selecionar cor do ícone",
     "select-text-color": "Selecionar cor do texto",
+    "properties": "Propriedades",
     "settings": "Definições",
+    "show": "Mostrar",
     "shortcuts": "Atalhos",
     "shutdown": "Desligar",
     "signal": "Sinal",
@@ -614,12 +617,42 @@
       "emoji-symbols": "Símbolos",
       "emoji-travel": "Viagens e lugares",
       "game": "Jogos",
+      "hidden": "Ocultos",
       "graphics": "Gráficos",
       "misc": "Diversos",
       "office": "Escritório",
       "pinned": "Fixado",
       "system": "Sistema",
       "webbrowser": "Navegador web"
+    },
+    "app-actions": {
+      "title": "Ações do aplicativo",
+      "update-to": "Atualizar para {value}",
+      "update-available": "Atualização disponível",
+      "up-to-date": "Nenhuma atualização disponível",
+      "busy-update": "Atualizando…",
+      "busy-remove": "Desinstalando…",
+      "operation-failed": "A operação falhou",
+      "auth-denied": "Autenticação cancelada ou negada",
+      "toast-updated": "Aplicativo atualizado",
+      "toast-removed": "Aplicativo desinstalado",
+      "toast-update-failed": "Falha ao atualizar",
+      "toast-remove-failed": "Falha ao desinstalar",
+      "elevator-missing": "Não foi possível elevar privilégios: {value} não encontrado",
+      "unavailable": "O Shelly não está disponível",
+      "confirm-uninstall": "Desinstalar {value}?",
+      "backend-standard": "Pacote do repositório",
+      "backend-aur": "Pacote do AUR",
+      "backend-flatpak": "Flatpak",
+      "backend-appimage": "AppImage"
+    },
+    "app-properties": {
+      "description": "Detalhes do aplicativo",
+      "app-id": "ID do aplicativo",
+      "command": "Comando",
+      "categories": "Categorias",
+      "backend": "Pacote",
+      "version": "Versão instalada"
     },
     "providers": {
       "applications": "Aplicativos",
@@ -1307,6 +1340,9 @@
       "wallpaper-changed-label": "Papel de parede alterado",
       "wallpaper-changed-placeholder": "p. ex. notify-send \"Papel de parede\" \"Alterado\""
     },
+    "hyprland": {
+      "title": "Hyprland"
+    },
     "idle": {
       "custom-add": "Adicionar comando",
       "custom-description": "Executa um comando de shell após um período de inatividade.",
@@ -1892,6 +1928,30 @@
     "top-left": "Superior esquerda",
     "top-right": "Superior direita"
   },
+  "screen-share": {
+    "title": "Compartilhar tela",
+    "subtitle-app": "{app} quer capturar sua tela",
+    "subtitle-generic": "Um aplicativo quer capturar sua tela",
+    "tab-screens": "Telas",
+    "tab-windows": "Janelas",
+    "tab-region": "Região",
+    "no-windows": "Nenhuma janela disponível para compartilhar",
+    "region-hint": "Escolha uma área da tela para compartilhar. Só o que estiver dentro dela ficará visível.",
+    "region-select": "Selecionar região",
+    "screen-warning": "Tudo em {screen} ficará visível, incluindo notificações e senhas na tela.",
+    "remember": "Lembrar desta escolha",
+    "remember-description": "Permite que o aplicativo retome a captura sem perguntar de novo",
+    "cancel": "Cancelar",
+    "confirm": "Compartilhar",
+    "region-selector": {
+      "drag": "Arraste",
+      "toSelect": "para selecionar",
+      "clickWindow": "Clique numa janela",
+      "toSnap": "para encaixar",
+      "esc": "Esc",
+      "toCancel": "para cancelar"
+    }
+  },
   "session-menu": {
     "action-in-seconds": "{action} em {seconds} segundos...",
     "cancel-timer": "Cancelar temporizador",
@@ -2177,7 +2237,23 @@
       "source-wallhaven": "Wallhaven",
       "theme-diff-summary": "{changed} de {total} cores vão mudar",
       "title": "Seletor de papel de parede",
-      "wallhaven-settings-title": "Configurações do Wallhaven"
+      "wallhaven-settings-title": "Configurações do Wallhaven",
+      "applied-toast-body": "Papel de parede aplicado com sucesso!",
+      "applied-toast-title": "Papel de Parede",
+      "import-filter-all": "Todos os arquivos",
+      "import-filter-media": "Wallpapers animados e imagens",
+      "import-local-title": "Selecionar wallpaper local (vídeo animado ou imagem)",
+      "import-local-tooltip": "Importar wallpaper local (vídeo animado ou imagem)",
+      "preview-title": "Pré-visualização do desktop",
+      "tab-gallery": "Galeria",
+      "tab-grading": "Ajustes de Imagem",
+      "tab-palette": "Paleta de Cores",
+      "preview-empty": "Escolha um papel de parede para visualizar",
+      "preview-chip-candidate": "Pré-visualização",
+      "preview-chip-applied": "Aplicado",
+      "preview-light-tooltip": "Visualizar no modo claro",
+      "preview-dark-tooltip": "Visualizar no modo escuro",
+      "info-modified": "Modificado em {date}"
     },
     "transitions": {
       "disc": "Disco",
@@ -2226,6 +2302,20 @@
       "page-suffix": "de {total}",
       "preview-failed": "Não foi possível carregar a pré-visualização.",
       "retrying": "Tentando novamente em {seconds}s..."
+    },
+    "upscale": {
+      "warning-title": "Resolução baixa para esta tela",
+      "warning-body": "{candidate} é menor que a tela ({target}). Vai ficar borrado ao esticar.",
+      "improve-with-ai": "Melhorar com IA",
+      "apply-as-is": "Aplicar mesmo assim",
+      "no-vulkan-tooltip": "Nenhuma GPU com suporte a Vulkan foi detectada",
+      "obtaining": "Baixando papel de parede…",
+      "installing": "Instalando waifu2x-ncnn-vulkan (pode pedir sua senha de administrador)…",
+      "phase-probe": "Verificando",
+      "phase-prepare": "Preparando",
+      "phase-enhance": "Aplicando IA",
+      "phase-assemble": "Finalizando",
+      "generic-error": "Falha ao processar a imagem."
     }
   },
   "weather": {

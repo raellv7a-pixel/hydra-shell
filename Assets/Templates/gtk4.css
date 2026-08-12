@@ -44,6 +44,18 @@
 @define-color secondary_sidebar_bg_color {{colors.surface.default.hex}};
 @define-color secondary_sidebar_fg_color {{colors.on_surface.default.hex}};
 
+/* Legacy GTK symbolic colors used by GTK3 and GTK4 applications. */
+@define-color theme_bg_color @window_bg_color;
+@define-color theme_fg_color @window_fg_color;
+@define-color theme_base_color @view_bg_color;
+@define-color theme_text_color @view_fg_color;
+@define-color theme_selected_bg_color @accent_bg_color;
+@define-color theme_selected_fg_color @accent_fg_color;
+@define-color success_color {{colors.secondary.default.hex}};
+@define-color warning_color {{colors.tertiary.default.hex}};
+@define-color error_color {{colors.error.default.hex}};
+@define-color insensitive_fg_color {{colors.on_surface_variant.default.hex}};
+
 /* Backdrop/unfocused states */
 @define-color theme_unfocused_fg_color @window_fg_color;
 @define-color theme_unfocused_text_color @view_fg_color;

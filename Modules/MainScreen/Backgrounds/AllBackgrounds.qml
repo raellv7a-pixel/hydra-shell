@@ -63,7 +63,8 @@ Item {
 
         /**
         *  Panel Background Slots
-        *  Only 2 slots needed: one for currently open/opening panel, one for closing panel
+        *  Slot 0: open/opening panel, slot 1: closing panel, slot 2: modal
+        *  overlay (polkit), which stacks on top of slot 0 instead of replacing it.
         */
 
         // Slot 0: Currently open/opening panel
@@ -82,6 +83,16 @@ Item {
           assignedPanel: {
             var p = PanelService.backgroundSlotAssignments[1];
             // Only render if this panel belongs to this screen
+            return (p && p.screen === root.windowRoot.screen) ? p : null;
+          }
+          shapeContainer: unifiedBackgroundsShape
+          defaultBackgroundColor: panelBackgroundColor
+        }
+
+        // Slot 2: Modal overlay, drawn over whatever occupies slot 0
+        PanelBackground {
+          assignedPanel: {
+            var p = PanelService.backgroundSlotAssignments[2];
             return (p && p.screen === root.windowRoot.screen) ? p : null;
           }
           shapeContainer: unifiedBackgroundsShape
@@ -117,7 +128,8 @@ Item {
 
           /**
           *  Panel Background Slots
-          *  Only 2 slots needed: one for currently open/opening panel, one for closing panel
+          *  Slot 0: open/opening panel, slot 1: closing panel, slot 2: modal
+          *  overlay (polkit), which stacks on top of slot 0 instead of replacing it.
           */
 
           // Slot 0: Currently open/opening panel
@@ -136,6 +148,16 @@ Item {
             assignedPanel: {
               var p = PanelService.backgroundSlotAssignments[1];
               // Only render if this panel belongs to this screen
+              return (p && p.screen === root.windowRoot.screen) ? p : null;
+            }
+            shapeContainer: panelBackgroundsShape
+            defaultBackgroundColor: panelBackgroundColor
+          }
+
+          // Slot 2: Modal overlay, drawn over whatever occupies slot 0
+          PanelBackground {
+            assignedPanel: {
+              var p = PanelService.backgroundSlotAssignments[2];
               return (p && p.screen === root.windowRoot.screen) ? p : null;
             }
             shapeContainer: panelBackgroundsShape

@@ -38,6 +38,17 @@ Rectangle {
   property var activeProvider: null
   property bool resultsReady: false
   property var pluginProviderInstances: ({})
+  property var propertiesApp: null
+  // Inline app actions panel (right-click / Menu key on a result)
+  property var appPanelItem: null
+  property var appPanelActions: []
+  property bool appPanelShowingProperties: false
+  property int appPanelActionIndex: -1
+  property int appPanelConfirmIndex: -1
+  readonly property bool appPanelOpen: appPanelItem !== null
+  // Resolved once here instead of once per row delegate: every row needs to know
+  // whether the open panel belongs to it, and results can hold hundreds of items.
+  readonly property int appPanelIndex: appPanelItem ? results.indexOf(appPanelItem) : -1
   property bool ignoreMouseHover: true // Transient flag, should always be true on init
 
   // Global mouse tracking for movement detection across delegates
@@ -178,6 +189,9 @@ Rectangle {
 
   readonly property int gridColumns: targetGridColumns
 
+  // Columns per row in the unified rows view, per layout mode.
+  readonly property int rowColumns: isGridView ? Math.max(1, gridColumns) : (isColumnsView ? 2 : 1)
+
   // Check if current provider allows wrap navigation (default true)
   readonly property bool allowWrapNavigation: {
     var provider = activeProvider || currentProvider;
@@ -203,6 +217,8 @@ Rectangle {
 
   onSearchTextChanged: {
     if (isOpen) {
+      // Typing is a new intent: drop the panel instead of dragging it along.
+      closeAppPanel();
       updateResults();
     }
   }
@@ -229,6 +245,7 @@ Rectangle {
 
   function onClosed() {
     searchText = "";
+    closeAppPanel();
     ignoreMouseHover = true;
     if (resultsSwapView)
       resultsSwapView.resetVisuals();
@@ -242,13 +259,145 @@ Rectangle {
     requestClose();
   }
 
+  function openAppPanel(item) {
+    if (!item)
+      return;
+
+    const provider = item.provider || currentProvider;
+    if (!provider || !provider.getContextMenuActions)
+      return;
+
+    const index = results.indexOf(item);
+    selectedIndex = index >= 0 ? index : 0;
+    appPanelItem = item;
+    appPanelActions = provider.getContextMenuActions(item);
+    appPanelShowingProperties = false;
+    appPanelActionIndex = -1;
+    appPanelConfirmIndex = -1;
+    propertiesApp = null;
+    Logger.d("Launcher", `App panel: ${item.name || "unknown"} (${appPanelActions.length} actions)`);
+    ignoreMouseHover = true;
+  }
+
+  function toggleAppPanel(item) {
+    if (appPanelItem === item)
+      closeAppPanel();
+    else
+      openAppPanel(item);
+  }
+
+  // Opens the panel for whatever result is currently selected (keyboard path).
+  function openAppPanelForSelection() {
+    if (selectedIndex >= 0 && results && results[selectedIndex])
+      openAppPanel(results[selectedIndex]);
+  }
+
+  function closeAppPanel() {
+    appPanelItem = null;
+    appPanelActions = [];
+    appPanelShowingProperties = false;
+    appPanelActionIndex = -1;
+    appPanelConfirmIndex = -1;
+    propertiesApp = null;
+    ignoreMouseHover = false;
+    globalMouseInitialized = false;
+  }
+
+  // Rebuilds the action list in place so labels and busy/enabled states follow
+  // the provider without collapsing the panel.
+  function refreshAppPanelActions() {
+    if (!appPanelItem)
+      return;
+    const provider = appPanelItem.provider || currentProvider;
+    if (provider && provider.getContextMenuActions)
+      appPanelActions = provider.getContextMenuActions(appPanelItem);
+  }
+
+  function setAppPanelActionIndex(index) {
+    // Moving the cursor away disarms a pending confirmation, exactly like the
+    // keyboard path does — otherwise a destructive action could stay armed while
+    // the pointer wanders and fire on the very next click.
+    if (index !== appPanelConfirmIndex)
+      appPanelConfirmIndex = -1;
+    appPanelActionIndex = index;
+  }
+
+  function cancelAppPanelConfirm() {
+    appPanelConfirmIndex = -1;
+  }
+
+  function activateAppPanelAction(index) {
+    const action = appPanelActions[index];
+    if (!action || action.enabled === false || action.busy)
+      return;
+
+    // Destructive actions arm first, then run on a second activation.
+    if (action.confirm && appPanelConfirmIndex !== index) {
+      appPanelConfirmIndex = index;
+      appPanelActionIndex = index;
+      return;
+    }
+
+    appPanelConfirmIndex = -1;
+    if (action.action)
+      action.action();
+
+    if (action.keepOpen) {
+      Qt.callLater(() => root.refreshAppPanelActions());
+    } else {
+      closeAppPanel();
+    }
+  }
+
+  function selectNextAppPanelAction(step) {
+    const count = appPanelActions.length;
+    if (count === 0)
+      return;
+    appPanelConfirmIndex = -1;
+    let index = appPanelActionIndex;
+    // Skip over disabled entries so the cursor never parks on a dead row.
+    for (let i = 0; i < count; i++) {
+      index = (index + step + count) % count;
+      const action = appPanelActions[index];
+      if (action && action.enabled !== false && !action.busy) {
+        appPanelActionIndex = index;
+        return;
+      }
+    }
+  }
+
+  function showAppProperties(item) {
+    propertiesApp = item?.appData || item;
+    appPanelShowingProperties = true;
+    appPanelActionIndex = -1;
+    appPanelConfirmIndex = -1;
+  }
+
+  function hideAppProperties() {
+    appPanelShowingProperties = false;
+    propertiesApp = null;
+  }
+
+  // Keep the panel in sync with package-manager progress.
+  Connections {
+    target: appsProvider
+    function onUpdateRevisionChanged() {
+      root.refreshAppPanelActions();
+    }
+  }
+
+
   function applyCategorySelection(tabIndex, categories) {
     const categoryList = categories || providerCategories;
     if (!categoryList || tabIndex < 0 || tabIndex >= categoryList.length)
       return false;
 
     currentProvider.selectCategory(categoryList[tabIndex]);
-    categoryTabs.currentIndex = tabIndex;
+    // Don't assign categoryTabs.currentIndex imperatively here: it has a
+    // live binding to computedCurrentIndex (which tracks selectedCategory).
+    // Overwriting it breaks that binding permanently, so any future
+    // selectedCategory change from elsewhere (e.g. a provider resetting it)
+    // would stop being reflected in the tab highlight.
     return true;
   }
 
@@ -407,6 +556,44 @@ Rectangle {
     // Update activeProvider only after computing new state to avoid UI flicker
     activeProvider = newActiveProvider;
     selectedIndex = 0;
+    reanchorAppPanel();
+    applyPendingAppPanel();
+  }
+
+  // A finished package operation asks (via PanelService) for the panel to come
+  // back on the app it touched. Results arrive asynchronously, so the request is
+  // parked until there is something to anchor to.
+  function applyPendingAppPanel() {
+    const wanted = PanelService.pendingLauncherAppPanelId;
+    if (!wanted || results.length === 0)
+      return;
+
+    const normalize = id => appsProvider.normalizeAppId ? appsProvider.normalizeAppId(String(id || "")) : String(id || "");
+    const target = normalize(wanted);
+    const entry = results.find(item => item && item.appId && normalize(item.appId) === target);
+    if (!entry)
+      return;
+
+    PanelService.pendingLauncherAppPanelId = "";
+    openAppPanel(entry);
+  }
+
+  // Results are rebuilt from scratch on every refresh, so an open panel has to
+  // be re-bound to the new entry object (or closed if the app is gone).
+  function reanchorAppPanel() {
+    if (!appPanelItem)
+      return;
+
+    const key = appPanelItem.appId || appPanelItem.usageKey;
+    const rebound = key ? results.find(entry => (entry.appId || entry.usageKey) === key) : null;
+    if (!rebound) {
+      closeAppPanel();
+      return;
+    }
+
+    appPanelItem = rebound;
+    selectedIndex = results.indexOf(rebound);
+    refreshAppPanelActions();
   }
 
   // Navigation functions (delegated to LauncherNavigation.js)
@@ -477,8 +664,79 @@ Rectangle {
     return Keybinds.checkKey(event, settingName, Settings);
   }
 
+  // Returns true when the event was consumed by the inline app panel.
+  function handleAppPanelKeyPress(event) {
+    if (checkKey(event, 'escape')) {
+      // Unwind one layer at a time: confirmation, then properties, then panel.
+      if (appPanelConfirmIndex >= 0)
+        appPanelConfirmIndex = -1;
+      else if (appPanelShowingProperties)
+        hideAppProperties();
+      else
+        closeAppPanel();
+      event.accepted = true;
+      return true;
+    }
+
+    if (appPanelShowingProperties) {
+      // Properties has no list to walk; only Enter/Backspace step back.
+      if (checkKey(event, 'enter') || event.key === Qt.Key_Backspace) {
+        hideAppProperties();
+        event.accepted = true;
+        return true;
+      }
+      // Swallow navigation too: letting it through would move the selection out
+      // from under the panel while it keeps showing the previous app.
+      if (checkKey(event, 'up') || checkKey(event, 'down') || checkKey(event, 'left') || checkKey(event, 'right')) {
+        event.accepted = true;
+        return true;
+      }
+      return false;
+    }
+
+    if (checkKey(event, 'up')) {
+      selectNextAppPanelAction(-1);
+      event.accepted = true;
+      return true;
+    }
+
+    if (checkKey(event, 'down')) {
+      selectNextAppPanelAction(1);
+      event.accepted = true;
+      return true;
+    }
+
+    // Grid and columns layouts map left/right to the results grid; while the
+    // panel owns the focus they must not move the selection out from under it.
+    if (checkKey(event, 'left') || checkKey(event, 'right')) {
+      event.accepted = true;
+      return true;
+    }
+
+    if (checkKey(event, 'enter')) {
+      if (appPanelActionIndex < 0)
+        selectNextAppPanelAction(1);
+      else
+        activateAppPanelAction(appPanelActionIndex);
+      event.accepted = true;
+      return true;
+    }
+
+    if (event.key === Qt.Key_Menu || (event.key === Qt.Key_F10 && (event.modifiers & Qt.ShiftModifier))) {
+      closeAppPanel();
+      event.accepted = true;
+      return true;
+    }
+
+    return false;
+  }
+
   // Keyboard handler
   function handleKeyPress(event) {
+    // The inline app panel grabs navigation keys while it is open.
+    if (appPanelOpen && handleAppPanelKeyPress(event))
+      return;
+
     if (checkKey(event, 'escape')) {
       close();
       event.accepted = true;
@@ -487,6 +745,13 @@ Rectangle {
 
     if (checkKey(event, 'enter')) {
       activate();
+      event.accepted = true;
+      return;
+    }
+
+    // Context-menu key opens the panel on the current selection
+    if (event.key === Qt.Key_Menu || (event.key === Qt.Key_F10 && (event.modifiers & Qt.ShiftModifier))) {
+      openAppPanelForSelection();
       event.accepted = true;
       return;
     }
@@ -698,12 +963,28 @@ Rectangle {
       Layout.topMargin: 0
       clip: false
 
+      // Two-layer elevation: a wide ambient halo plus a tight contact shadow.
+      // Both stay well inside the panel's side margins so they never bleed past
+      // the launcher edges (Style.marginM on each side, blurMax is 22px).
       NDropShadow {
         anchors.fill: bannerContainer
         source: bannerContainer
         autoPaddingEnabled: true
-        shadowBlur: Style.shadowBlur * 2.5
-        shadowVerticalOffset: Settings.data.general.shadowOffsetY * 2.0
+        shadowBlur: 0.30
+        shadowOpacity: 0.22
+        shadowHorizontalOffset: 0
+        shadowVerticalOffset: Math.round(2 * Style.uiScaleRatio)
+        z: -2
+      }
+
+      NDropShadow {
+        anchors.fill: bannerContainer
+        source: bannerContainer
+        autoPaddingEnabled: true
+        shadowBlur: 0.13
+        shadowOpacity: 0.26
+        shadowHorizontalOffset: 0
+        shadowVerticalOffset: Math.round(5 * Style.uiScaleRatio)
         z: -1
       }
 
@@ -733,6 +1014,27 @@ Rectangle {
             GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40) }
           }
           radius: Style.radiusL
+        }
+
+        // Rim light: reads as a lit top edge, which is what actually sells the
+        // floating look now that the shadow no longer carries it alone.
+        Rectangle {
+          anchors.fill: parent
+          radius: Style.radiusL
+          gradient: Gradient {
+            orientation: Gradient.Vertical
+            GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.10) }
+            GradientStop { position: 0.35; color: Qt.rgba(1, 1, 1, 0.0) }
+          }
+        }
+
+        // Hairline outline so the banner keeps a crisp edge against the panel
+        Rectangle {
+          anchors.fill: parent
+          radius: Style.radiusL
+          color: "transparent"
+          border.width: Style.borderS
+          border.color: Qt.rgba(1, 1, 1, 0.14)
         }
 
         ColumnLayout {
@@ -842,31 +1144,18 @@ Rectangle {
     }
 
     // Unified category tabs (works with any provider that has categories)
-    NTabBar {
+    LauncherCategoryTabs {
       id: categoryTabs
       visible: root.showProviderCategories
       Layout.fillWidth: true
       Layout.leftMargin: Style.marginM
       Layout.rightMargin: Style.marginM
-      margins: 0
-      border.color: "transparent"
-      border.width: 0
 
-      property int computedCurrentIndex: visible && root.providerCategories.length > 0 ? root.providerCategories.indexOf(root.currentProvider.selectedCategory) : 0
-      currentIndex: computedCurrentIndex
-
-      Repeater {
-        model: root.providerCategories
-        NTabButton {
-          required property string modelData
-          required property int index
-          icon: root.currentProvider.categoryIcons ? (root.currentProvider.categoryIcons[modelData] || "star") : "star"
-          tooltipText: root.currentProvider.getCategoryName ? root.currentProvider.getCategoryName(modelData) : modelData
-          tabIndex: index
-          checked: categoryTabs.currentIndex === index
-          onClicked: root.selectCategoryWithSlide(index)
-        }
-      }
+      categories: root.providerCategories
+      currentIndex: visible && root.providerCategories.length > 0 ? root.providerCategories.indexOf(root.currentProvider.selectedCategory) : 0
+      iconFor: category => root.currentProvider.categoryIcons ? root.currentProvider.categoryIcons[category] : undefined
+      nameFor: category => root.currentProvider.getCategoryName ? root.currentProvider.getCategoryName(category) : category
+      onCategorySelected: index => root.selectCategoryWithSlide(index)
     }
 
     // Results view
@@ -877,15 +1166,29 @@ Rectangle {
       Layout.rightMargin: Style.marginM
       Layout.fillHeight: true
       animationsEnabled: !root.animationsDisabled
-      sourceComponent: root.isSingleView ? singleViewComponent : (root.isColumnsView ? columnsViewComponent : (root.isGridView ? gridViewComponent : listViewComponent))
+      sourceComponent: root.isSingleView ? singleViewComponent : rowsViewComponent
     }
 
     // --------------------------
-    // 2-COLUMNS LIST VIEW (MOCKUP STYLE)
+    // LIST / 2-COLUMNS / GRID VIEW
+    // All three are rows of N cells; only the column count, the row height and
+    // the cell style differ. Rows (instead of a GridView) are what let the
+    // inline app panel expand full-width and push the rows below it down.
     Component {
-      id: columnsViewComponent
-      NGridView {
-        id: columnsGrid
+      id: rowsViewComponent
+      NListView {
+        id: resultsRows
+
+        readonly property int columns: root.rowColumns
+        readonly property int rowCount: Math.ceil(root.results.length / columns)
+        readonly property int selectedRow: root.selectedIndex >= 0 ? Math.floor(root.selectedIndex / columns) : 0
+        readonly property real cellWidth: width / Math.max(1, columns)
+        readonly property real rowHeight: {
+          if (!root.isGridView)
+            return root.entryHeight;
+          const ratio = root.currentProvider && root.currentProvider.preferredGridCellRatio ? root.currentProvider.preferredGridCellRatio : 1;
+          return cellWidth * ratio;
+        }
 
         horizontalPolicy: ScrollBar.AlwaysOff
         verticalPolicy: ScrollBar.AlwaysOff
@@ -893,75 +1196,39 @@ Rectangle {
         gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurfaceContainer
         wheelScrollMultiplier: 2.25
         smoothWheelAnimationDuration: Style.animationFast
-        trackedSelectionIndex: root.selectedIndex
 
         width: parent.width
         height: parent.height
-        cellWidth: parent.width / 2
-        cellHeight: root.entryHeight
-        leftMargin: 0
-        rightMargin: 0
-        topMargin: 0
-        bottomMargin: 0
-        model: root.results
-        cacheBuffer: columnsGrid.height * 2
-        keyNavigationEnabled: false
-        focus: false
+        spacing: root.isGridView ? 0 : Style.marginXS
+        model: rowCount
+        currentIndex: selectedRow
+        cacheBuffer: resultsRows.height * 2
         interactive: !Settings.data.appLauncher.ignoreMouseInput
 
-        Keys.enabled: false
+        onCurrentIndexChanged: {
+          cancelFlick();
+          if (currentIndex >= 0)
+            positionViewAtIndex(currentIndex, ListView.Contain);
+        }
 
+        // Keep an expanding panel inside the viewport.
         Connections {
           target: root
-          enabled: root.isColumnsView
-          function onSelectedIndexChanged() {
-            if (!root.isColumnsView || root.selectedIndex < 0 || !columnsGrid)
+          function onAppPanelItemChanged() {
+            if (!root.appPanelItem)
               return;
             Qt.callLater(() => {
-                           if (root.isColumnsView && columnsGrid && columnsGrid.cancelFlick) {
-                             columnsGrid.cancelFlick();
-                             columnsGrid.positionViewAtIndex(root.selectedIndex, GridView.Contain);
-                           }
+                           if (resultsRows)
+                             resultsRows.positionViewAtIndex(resultsRows.selectedRow, ListView.Contain);
                          });
           }
         }
 
-        delegate: LauncherListDelegate {
+        delegate: LauncherRowDelegate {
           launcher: root
-        }
-      }
-    }
-    // --------------------------
-    // LIST VIEW
-    Component {
-      id: listViewComponent
-      NListView {
-        id: resultsList
-
-        horizontalPolicy: ScrollBar.AlwaysOff
-        verticalPolicy: ScrollBar.AlwaysOff
-        reserveScrollbarSpace: false
-        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurfaceContainer
-        wheelScrollMultiplier: 2.25
-        smoothWheelAnimationDuration: Style.animationFast
-
-        width: parent.width
-        height: parent.height
-        spacing: Style.marginXS
-        model: root.results
-        currentIndex: root.selectedIndex
-        cacheBuffer: resultsList.height * 2
-        interactive: !Settings.data.appLauncher.ignoreMouseInput
-        onCurrentIndexChanged: {
-          cancelFlick();
-          if (currentIndex >= 0) {
-            positionViewAtIndex(currentIndex, ListView.Contain);
-          }
-        }
-        onModelChanged: {}
-
-        delegate: LauncherListDelegate {
-          launcher: root
+          columns: resultsRows.columns
+          rowHeight: resultsRows.rowHeight
+          useCards: root.isGridView
         }
       }
     }
@@ -1024,69 +1291,6 @@ Rectangle {
       }
     }
 
-    // // --------------------------
-    // GRID VIEW
-    Component {
-      id: gridViewComponent
-      NGridView {
-        id: resultsGrid
-
-        horizontalPolicy: ScrollBar.AlwaysOff
-        verticalPolicy: ScrollBar.AlwaysOff
-        reserveScrollbarSpace: false
-        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurfaceContainer
-        wheelScrollMultiplier: 2.25
-        smoothWheelAnimationDuration: Style.animationFast
-        trackedSelectionIndex: root.selectedIndex
-
-        width: parent.width
-        height: parent.height
-        cellWidth: parent.width / root.targetGridColumns
-        cellHeight: {
-          var cellWidth = parent.width / root.targetGridColumns;
-          // Use provider's preferred ratio if available
-          if (root.currentProvider && root.currentProvider.preferredGridCellRatio) {
-            return cellWidth * root.currentProvider.preferredGridCellRatio;
-          }
-          return cellWidth;
-        }
-        leftMargin: 0
-        rightMargin: 0
-        topMargin: 0
-        bottomMargin: 0
-        model: root.results
-        cacheBuffer: resultsGrid.height * 2
-        keyNavigationEnabled: false
-        focus: false
-        interactive: !Settings.data.appLauncher.ignoreMouseInput
-
-        // Completely disable GridView key handling
-        Keys.enabled: false
-
-        // Handle scrolling to show selected item when it changes
-        Connections {
-          target: root
-          enabled: root.isGridView
-          function onSelectedIndexChanged() {
-            if (!root.isGridView || root.selectedIndex < 0 || !resultsGrid) {
-              return;
-            }
-
-            Qt.callLater(() => {
-                           if (root.isGridView && resultsGrid && resultsGrid.cancelFlick) {
-                             resultsGrid.cancelFlick();
-                             resultsGrid.positionViewAtIndex(root.selectedIndex, GridView.Contain);
-                           }
-                         });
-          }
-        }
-
-        delegate: LauncherGridDelegate {
-          launcher: root
-        }
-      }
-    }
-
     ColumnLayout {
       Layout.leftMargin: Style.marginM
       Layout.rightMargin: Style.marginM
@@ -1124,4 +1328,5 @@ Rectangle {
       }
     }
   }
+
 }

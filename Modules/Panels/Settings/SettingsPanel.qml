@@ -92,7 +92,8 @@ SmartPanel {
     System,
     UserInterface,
     Wallpaper,
-    Security
+    Security,
+    Hyprland
   }
 
   property int requestedTab: SettingsPanel.Tab.General

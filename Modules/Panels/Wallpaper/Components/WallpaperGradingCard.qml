@@ -310,7 +310,7 @@ Item {
 
           NButton {
             text: "Restaurar"
-            icon: "rotate-ccw"
+            icon: "rotate-2"
             fontSize: Style.fontSizeS
             onClicked: root.resetGrading()
           }

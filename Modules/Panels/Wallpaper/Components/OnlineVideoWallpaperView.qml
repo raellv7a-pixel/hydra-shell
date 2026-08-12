@@ -15,6 +15,27 @@ Item {
 
   readonly property int resultCount: providerService?.currentResults?.length || 0
 
+  // Emitted when a card is picked for the side preview (a single click);
+  // applying takes a double click or the download button.
+  signal previewRequested(var candidate)
+
+  // The still thumbnail stands in for the video in the preview: decoding a
+  // remote clip just to fill the mock-up is not worth the cost.
+  function candidateFor(item) {
+    if (!item) {
+      return null;
+    }
+    return {
+      "source": "video",
+      "path": item.thumb || "",
+      "title": item.name || I18n.tr("wallpaper.live-video.unnamed"),
+      "data": item,
+      "meta": {
+        "resolution": item.resolution || ""
+      }
+    };
+  }
+
   Component.onCompleted: {
     if (resultCount === 0 && !providerService.fetching) {
       providerService.search("", 1);
@@ -35,14 +56,22 @@ Item {
       return;
     }
     applyingVideoId = String(item?.id || "");
+    // An empty screenName means "all monitors" for the service.
+    const targetScreen = screenName === "" ? undefined : screenName;
+    const appearance = WallpaperService.wallpaperSelectionAppearance;
+    // Downloads take a while; if the user picks another wallpaper meanwhile,
+    // this ticket goes stale and the finished download is dropped instead of
+    // clobbering the newer choice.
+    const applyTicket = WallpaperService.beginApplyIntent(targetScreen);
+
     ToastService.showNotice(providerName, I18n.tr("wallpaper.live-video.downloading"), "download", 2500);
     providerService.downloadVideo(item, path => {
-                                    applyingVideoId = "";
-                                    if (path === "") {
+                                    root.applyingVideoId = "";
+                                    if (path === "" || !WallpaperService.isApplyIntentCurrent(applyTicket)) {
                                       return;
                                     }
-                                    WallpaperService.changeWallpaper(path, screenName, WallpaperService.wallpaperSelectionAppearance);
-                                    ToastService.showNotice(providerName, I18n.tr("wallpaper.live-video.applied"), "check", 3000);
+                                    WallpaperService.changeWallpaper(path, targetScreen, appearance);
+                                    ToastService.showNotice(root.providerName, I18n.tr("wallpaper.live-video.applied"), "check", 3000);
                                   });
   }
 
@@ -162,7 +191,8 @@ Item {
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               enabled: root.applyingVideoId === ""
-              onClicked: root.downloadAndApply(delegateRoot.modelData)
+              onClicked: root.previewRequested(root.candidateFor(delegateRoot.modelData))
+              onDoubleClicked: root.downloadAndApply(delegateRoot.modelData)
             }
 
             ColumnLayout {
@@ -191,11 +221,34 @@ Item {
                   color: Color.mOnSurfaceVariant
                 }
 
+                // Spinning up a hardware decoder costs several frames, so a
+                // cursor sweeping across the grid must not instantiate one per
+                // cell it grazes — only a deliberate hover starts playback.
+                Timer {
+                  id: hoverDwellTimer
+                  interval: 300
+                  repeat: false
+                  running: cardMouse.containsMouse
+                  onTriggered: videoHoverLoader.dwelled = true
+                }
+
                 Loader {
                   id: videoHoverLoader
+
+                  property bool dwelled: false
+
                   anchors.fill: parent
-                  active: root.visible && cardMouse.containsMouse && delegateRoot.modelData.video && root.applyingVideoId !== String(delegateRoot.modelData.id || "")
+                  active: root.visible && cardMouse.containsMouse && dwelled && delegateRoot.modelData.video && root.applyingVideoId !== String(delegateRoot.modelData.id || "")
                   asynchronous: true
+
+                  Connections {
+                    target: cardMouse
+                    function onContainsMouseChanged() {
+                      if (!cardMouse.containsMouse) {
+                        videoHoverLoader.dwelled = false;
+                      }
+                    }
+                  }
 
                   sourceComponent: Component {
                     Item {

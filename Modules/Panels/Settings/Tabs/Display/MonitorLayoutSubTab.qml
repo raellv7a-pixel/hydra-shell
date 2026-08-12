@@ -21,7 +21,14 @@ ColumnLayout {
 
   property real scenePadding: 20 * Style.uiScaleRatio
   readonly property var sceneBounds: computeSceneBounds(outputs)
+  // Scale is computed against the scroll viewport (fixed), not the canvas
+  // itself — the canvas is free to grow past the viewport (see
+  // computeRequiredSceneSize below) when the 90x55 minimum tile size would
+  // otherwise force a monitor tile outside the visible area. That overflow
+  // becomes scrollable instead of silently clipped.
+  readonly property real viewportWidth: sceneScrollWrapper ? sceneScrollWrapper.availableWidth : 0
   readonly property real sceneScale: computeSceneScale()
+  readonly property var requiredSceneSize: computeRequiredSceneSize()
 
   function computeSceneBounds(list) {
     if (!list || list.length === 0) {
@@ -46,17 +53,64 @@ ColumnLayout {
     };
   }
 
+  // How much of the box the current arrangement should occupy. Too high and
+  // the tiles touch the edges with nowhere to drag them; too low and they
+  // shrink into a small cluster adrift in empty space. 0.72 keeps the tiles
+  // comfortably large while leaving a usable margin to rearrange into.
+  readonly property real sceneFitFraction: 0.72
+
+  // The box height follows the arrangement's own aspect ratio instead of
+  // being a fixed strip: side-by-side monitors get a shorter box, stacked
+  // ones a taller box, so the tiles and the box always stay proportionate
+  // to each other. Clamped so it never collapses or dominates the tab.
+  readonly property real viewportHeight: {
+    var usableWidth = (root.viewportWidth - scenePadding * 2) * sceneFitFraction;
+    if (usableWidth <= 0)
+      return 280;
+    // Height the arrangement would take once scaled to that usable width,
+    // then grossed back up by the same fraction to re-add the drag margin.
+    var arrangementHeight = usableWidth * (sceneBounds.height / sceneBounds.width);
+    return Math.max(280, Math.min(560, arrangementHeight / sceneFitFraction + scenePadding * 2));
+  }
+
+  // Centers the arrangement in the box. Without this the tiles anchor to the
+  // top-left corner and all the slack piles up on the right/bottom, which
+  // reads as wasted space rather than room to drag into.
+  readonly property real sceneOffsetX: Math.max(scenePadding, (root.viewportWidth - sceneBounds.width * sceneScale) / 2)
+  readonly property real sceneOffsetY: Math.max(scenePadding, (root.viewportHeight - sceneBounds.height * sceneScale) / 2)
+
   function computeSceneScale() {
-    var availableWidth = sceneCanvas.width - (scenePadding * 2);
-    var availableHeight = sceneCanvas.height - (scenePadding * 2);
+    var availableWidth = (root.viewportWidth - (scenePadding * 2)) * sceneFitFraction;
+    var availableHeight = (root.viewportHeight - (scenePadding * 2)) * sceneFitFraction;
     if (availableWidth <= 0 || availableHeight <= 0) return 1;
     return Math.max(0.02, Math.min(availableWidth / sceneBounds.width, availableHeight / sceneBounds.height));
   }
 
-  function layoutToCanvasX(val) { return scenePadding + ((val - sceneBounds.minX) * sceneScale); }
-  function layoutToCanvasY(val) { return scenePadding + ((val - sceneBounds.minY) * sceneScale); }
-  function canvasToLayoutX(val) { return sceneBounds.minX + ((val - scenePadding) / sceneScale); }
-  function canvasToLayoutY(val) { return sceneBounds.minY + ((val - scenePadding) / sceneScale); }
+  // The canvas must be at least as big as every tile actually needs once the
+  // 90x55 minimum tile size (applied in the delegate below) is accounted
+  // for — otherwise a tile can extend past a canvas sized only for the
+  // "ideal" scaled bounds. Falls back to the viewport size when everything
+  // fits naturally, so the common case never scrolls.
+  function computeRequiredSceneSize() {
+    var maxX = root.viewportWidth;
+    var maxY = root.viewportHeight;
+    for (var i = 0; i < outputs.length; i++) {
+      var output = outputs[i];
+      var tileRight = layoutToCanvasX(output.x) + Math.max(90, (output.logicalWidth || output.width) * sceneScale);
+      var tileBottom = layoutToCanvasY(output.y) + Math.max(55, (output.logicalHeight || output.height) * sceneScale);
+      maxX = Math.max(maxX, tileRight + scenePadding);
+      maxY = Math.max(maxY, tileBottom + scenePadding);
+    }
+    return {
+      "width": maxX,
+      "height": maxY
+    };
+  }
+
+  function layoutToCanvasX(val) { return sceneOffsetX + ((val - sceneBounds.minX) * sceneScale); }
+  function layoutToCanvasY(val) { return sceneOffsetY + ((val - sceneBounds.minY) * sceneScale); }
+  function canvasToLayoutX(val) { return sceneBounds.minX + ((val - sceneOffsetX) / sceneScale); }
+  function canvasToLayoutY(val) { return sceneBounds.minY + ((val - sceneOffsetY) / sceneScale); }
 
   function resolutionModel(output) {
     if (!output || !output.availableModes) return [];
@@ -115,10 +169,21 @@ ColumnLayout {
         color: Color.mOnSurface
       }
 
+      // Scrollable so a tile forced to its 90x55 minimum size (see
+      // computeRequiredSceneSize) can overflow the viewport without being
+      // silently clipped — the common 2-monitor case fits and never scrolls.
+      NScrollView {
+        id: sceneScrollWrapper
+        Layout.fillWidth: true
+        Layout.preferredHeight: root.viewportHeight
+        horizontalPolicy: ScrollBar.AsNeeded
+        verticalPolicy: ScrollBar.AsNeeded
+        reserveScrollbarSpace: false
+
       Rectangle {
         id: sceneCanvas
-        Layout.fillWidth: true
-        Layout.preferredHeight: 240
+        width: Math.max(sceneScrollWrapper.availableWidth, root.requiredSceneSize.width)
+        height: Math.max(root.viewportHeight, root.requiredSceneSize.height)
         color: Qt.alpha(Color.mSurface, 0.8)
         border.color: Color.mOutline
         border.width: Style.borderS
@@ -166,6 +231,11 @@ ColumnLayout {
             MouseArea {
               id: dragArea
               anchors.fill: parent
+              // Without this, the NScrollView wrapping sceneCanvas (added to
+              // fix clipping) steals the mouse grab via Flickable's
+              // childMouseEventFilter as soon as the drag threshold is
+              // crossed, so drag.target never actually moves.
+              preventStealing: true
               drag.target: parent
               drag.axis: Drag.XAndYAxis
               drag.minimumX: root.scenePadding
@@ -174,12 +244,17 @@ ColumnLayout {
               drag.maximumY: sceneCanvas.height - monitorTile.height - root.scenePadding
 
               onPressed: MonitorService.selectOutput(output.outputId)
-              onPositionChanged: {
-                if (drag.active) {
-                  var newX = root.canvasToLayoutX(monitorTile.x);
-                  var newY = root.canvasToLayoutY(monitorTile.y);
-                  MonitorService.updateOutputPosition(output.outputId, newX, newY);
-                }
+              // Committing on every onPositionChanged (every mouse-move frame
+              // during the drag) was the real cause of the reported lag: each
+              // call deep-clones the whole output list and reassigns
+              // draftOutputs, which cascades into recomputing sceneBounds/
+              // sceneScale and re-laying-out every tile — dozens of times a
+              // second. drag.target already moves this tile smoothly on its
+              // own; only sync the data model once, when the drag ends.
+              onReleased: {
+                var newX = root.canvasToLayoutX(monitorTile.x);
+                var newY = root.canvasToLayoutY(monitorTile.y);
+                MonitorService.updateOutputPosition(output.outputId, newX, newY);
               }
             }
 
@@ -204,6 +279,7 @@ ColumnLayout {
             }
           }
         }
+      }
       }
 
       Item { Layout.preferredHeight: Style.marginS }

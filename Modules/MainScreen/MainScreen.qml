@@ -29,6 +29,7 @@ import qs.Modules.Panels.SetupWizard
 import qs.Modules.Panels.SystemStats
 import qs.Modules.Panels.Tray
 import qs.Modules.Panels.Wallpaper
+import qs.Modules.ScreenShare
 import qs.Modules.ScreenToolkit
 import qs.Modules.Polkit
 import qs.Services.Compositor
@@ -62,7 +63,7 @@ PanelWindow {
       if (CompositorService.isHyprland) {
         return PanelService.isInitializingKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand;
       }
-      return PanelService.openedPanel.exclusiveKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand;
+      return PanelService.activePanel.exclusiveKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand;
     }
     // Panel open on ANOTHER screen: OnDemand allows receiving pointer events for click-to-close
     return WlrKeyboardFocus.OnDemand;
@@ -77,9 +78,14 @@ PanelWindow {
 
   // Desktop dimming when panels are open
   property real dimmerOpacity: Settings.data.general.dimmerOpacity ?? 0.8
-  property bool isPanelOpen: (PanelService.openedPanel !== null) && (PanelService.openedPanel.screen === screen)
-  property bool isPanelClosing: (PanelService.openedPanel !== null) && PanelService.openedPanel.isClosing
-  property bool isAnyPanelOpen: PanelService.openedPanel !== null
+  // A modal (polkit) stacks on top of openedPanel instead of replacing it, so
+  // "is something on screen" has to consider both slots — the input mask and the
+  // keyboard grab hang off these, and a modal-only state must still be clickable.
+  readonly property bool hasOpenPanelHere: (PanelService.openedPanel !== null) && (PanelService.openedPanel.screen === screen)
+  readonly property bool hasModalHere: (PanelService.modalPanel !== null) && (PanelService.modalPanel.screen === screen)
+  property bool isPanelOpen: hasOpenPanelHere || hasModalHere
+  property bool isPanelClosing: (PanelService.activePanel !== null) && PanelService.activePanel.isClosing
+  property bool isAnyPanelOpen: (PanelService.openedPanel !== null) || (PanelService.modalPanel !== null)
 
   color: {
     if (dimmerOpacity > 0 && isPanelOpen && !isPanelClosing) {
@@ -251,6 +257,19 @@ PanelWindow {
       bottomRightCorner: backgroundBlur.panelBg ? backgroundBlur.panelBg.bottomRightCornerState : CornerState.Normal
     }
 
+    // Modal overlay (coexists with the panel it is layered over)
+    Region {
+      x: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.x) : 0
+      y: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.y) : 0
+      width: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.width) : 0
+      height: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.height) : 0
+      radius: Style.radiusL
+      topLeftCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.topLeftCornerState : CornerState.Normal
+      topRightCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.topRightCornerState : CornerState.Normal
+      bottomLeftCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.bottomLeftCornerState : CornerState.Normal
+      bottomRightCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.bottomRightCornerState : CornerState.Normal
+    }
+
     // Closing panel (coexists with opening panel during transition)
     Region {
       x: backgroundBlur.closingPanelBg ? Math.round(backgroundBlur.closingPanelBg.x) : 0
@@ -287,7 +306,9 @@ PanelWindow {
     // Uses isAnyPanelOpen so clicking on any screen's background closes the panel
     MouseArea {
       anchors.fill: parent
-      enabled: root.isAnyPanelOpen
+      // A modal blocks click-to-close entirely: dismissing an authentication
+      // prompt with a stray click would strand the request that is waiting on it.
+      enabled: root.isAnyPanelOpen && !PanelService.modalOpen
       acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
       onClicked: mouse => {
                    if (PanelService.openedPanel) {
@@ -386,6 +407,15 @@ PanelWindow {
     PolkitPanel {
       id: polkitPanel
       objectName: "polkitPanel-" + (root.screen?.name || "unknown")
+      screen: root.screen
+      // Modal: it layers over whatever panel asked for the privileged action,
+      // so it has to sit above every other panel declared here.
+      z: 50
+    }
+
+    ScreenSharePanel {
+      id: screenSharePanel
+      objectName: "screenSharePanel-" + (root.screen?.name || "unknown")
       screen: root.screen
     }
 
@@ -574,6 +604,15 @@ PanelWindow {
         return (region && region.visible) ? region.panelItem : null;
       }
 
+      // Modal overlay geometry (coexists with panelBg — it stacks over it)
+      readonly property var modalBg: {
+        var mp = PanelService.modalPanel;
+        if (!mp || mp.screen !== root.screen || mp.blurEnabled === false)
+          return null;
+        var region = mp.panelRegion;
+        return (region && region.visible) ? region.panelItem : null;
+      }
+
       // Panel background geometry for the closing panel (may coexist with panelBg)
       readonly property var closingPanelBg: {
         var cp = PanelService.closingPanel;
@@ -608,36 +647,38 @@ PanelWindow {
 
   // Centralized Keyboard Shortcuts
 
-  // These shortcuts delegate to the opened panel's handler functions
+  // These shortcuts delegate to the active panel's handler functions — a modal
+  // (polkit) takes precedence over the panel underneath it, so Escape cancels the
+  // authentication rather than the panel that requested it.
   // Panels can implement: onEscapePressed, onTabPressed, onBackTabPressed,
   // onUpPressed, onDownPressed, onReturnPressed, etc...
   Instantiator {
     model: Settings.data.general.keybinds.keyEscape || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.openedPanel.onEscapePressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.openedPanel.onEscapePressed()
+      enabled: root.isPanelOpen && (PanelService.activePanel.onEscapePressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: PanelService.activePanel.onEscapePressed()
     }
   }
 
   Shortcut {
     sequence: "Tab"
-    enabled: root.isPanelOpen && (PanelService.openedPanel.onTabPressed !== undefined)
-    onActivated: PanelService.openedPanel.onTabPressed()
+    enabled: root.isPanelOpen && (PanelService.activePanel.onTabPressed !== undefined)
+    onActivated: PanelService.activePanel.onTabPressed()
   }
 
   Shortcut {
     sequence: "Backtab"
-    enabled: root.isPanelOpen && (PanelService.openedPanel.onBackTabPressed !== undefined)
-    onActivated: PanelService.openedPanel.onBackTabPressed()
+    enabled: root.isPanelOpen && (PanelService.activePanel.onBackTabPressed !== undefined)
+    onActivated: PanelService.activePanel.onBackTabPressed()
   }
 
   Instantiator {
     model: Settings.data.general.keybinds.keyUp || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.openedPanel.onUpPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.openedPanel.onUpPressed()
+      enabled: root.isPanelOpen && (PanelService.activePanel.onUpPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: PanelService.activePanel.onUpPressed()
     }
   }
 
@@ -645,8 +686,8 @@ PanelWindow {
     model: Settings.data.general.keybinds.keyDown || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.openedPanel.onDownPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.openedPanel.onDownPressed()
+      enabled: root.isPanelOpen && (PanelService.activePanel.onDownPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: PanelService.activePanel.onDownPressed()
     }
   }
 
@@ -654,8 +695,8 @@ PanelWindow {
     model: Settings.data.general.keybinds.keyEnter || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.openedPanel.onEnterPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.openedPanel.onEnterPressed()
+      enabled: root.isPanelOpen && (PanelService.activePanel.onEnterPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: PanelService.activePanel.onEnterPressed()
     }
   }
 
@@ -663,8 +704,8 @@ PanelWindow {
     model: Settings.data.general.keybinds.keyLeft || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.openedPanel.onLeftPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.openedPanel.onLeftPressed()
+      enabled: root.isPanelOpen && (PanelService.activePanel.onLeftPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: PanelService.activePanel.onLeftPressed()
     }
   }
 
@@ -672,32 +713,32 @@ PanelWindow {
     model: Settings.data.general.keybinds.keyRight || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.openedPanel.onRightPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.openedPanel.onRightPressed()
+      enabled: root.isPanelOpen && (PanelService.activePanel.onRightPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: PanelService.activePanel.onRightPressed()
     }
   }
 
   Shortcut {
     sequence: "Home"
-    enabled: root.isPanelOpen && (PanelService.openedPanel.onHomePressed !== undefined)
-    onActivated: PanelService.openedPanel.onHomePressed()
+    enabled: root.isPanelOpen && (PanelService.activePanel.onHomePressed !== undefined)
+    onActivated: PanelService.activePanel.onHomePressed()
   }
 
   Shortcut {
     sequence: "End"
-    enabled: root.isPanelOpen && (PanelService.openedPanel.onEndPressed !== undefined)
-    onActivated: PanelService.openedPanel.onEndPressed()
+    enabled: root.isPanelOpen && (PanelService.activePanel.onEndPressed !== undefined)
+    onActivated: PanelService.activePanel.onEndPressed()
   }
 
   Shortcut {
     sequence: "PgUp"
-    enabled: root.isPanelOpen && (PanelService.openedPanel.onPageUpPressed !== undefined)
-    onActivated: PanelService.openedPanel.onPageUpPressed()
+    enabled: root.isPanelOpen && (PanelService.activePanel.onPageUpPressed !== undefined)
+    onActivated: PanelService.activePanel.onPageUpPressed()
   }
 
   Shortcut {
     sequence: "PgDown"
-    enabled: root.isPanelOpen && (PanelService.openedPanel.onPageDownPressed !== undefined)
-    onActivated: PanelService.openedPanel.onPageDownPressed()
+    enabled: root.isPanelOpen && (PanelService.activePanel.onPageDownPressed !== undefined)
+    onActivated: PanelService.activePanel.onPageDownPressed()
   }
 }
