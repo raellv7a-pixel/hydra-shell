@@ -41,3 +41,30 @@ do
     hl.env("__GL_SHADER_DISK_CACHE_SKIP_CLEANUP", "1")
   end
 end
+
+-- Propagate the vars above into the systemd --user / D-Bus activation
+-- environment. Hyprland's own `env` keyword only sets them for itself and
+-- for processes *it* execs directly (exec-once, dispatch exec) — it does
+-- NOT reach D-Bus-activated systemd --user services. xdg-desktop-portal and
+-- its backends (xdg-desktop-portal-hyprland, -gtk, ...) are exactly such
+-- services: activated on first request, not spawned by Hyprland, so
+-- without this they start with none of the vars above — including
+-- QT_QPA_PLATFORM, which Quickshell's own `qs ipc call` needs to find a
+-- running shell instance. That's what silently broke the screen-share
+-- picker bridge (Scripts/bash/corvus-share-picker.sh calls `qs ipc call`
+-- as a child of xdg-desktop-portal-hyprland.service): the call failed with
+-- "No running instances", so the script fell back to hyprland-share-picker
+-- instead of the shell's own panel. Standard fix per the Hyprland wiki's
+-- xdg-desktop-portal setup — must run after the `hl.env` calls above so it
+-- reads their already-applied values from Hyprland's own environment.
+hl.on("hyprland.start", function()
+  hl.exec_cmd(
+    "dbus-update-activation-environment --systemd " ..
+    "XCURSOR_SIZE HYPRCURSOR_SIZE " ..
+    "XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP " ..
+    "GDK_BACKEND QT_QPA_PLATFORM QT_WAYLAND_DISABLE_WINDOWDECORATION QT_QPA_PLATFORMTHEME " ..
+    "SDL_VIDEODRIVER CLUTTER_BACKEND " ..
+    "MOZ_ENABLE_WAYLAND MOZ_DISABLE_RDD_SANDBOX ELECTRON_OZONE_PLATFORM_HINT " ..
+    "LIBVA_DRIVER_NAME GBM_BACKEND __GLX_VENDOR_LIBRARY_NAME NVD_BACKEND __GL_SHADER_DISK_CACHE_SKIP_CLEANUP"
+  )
+end)

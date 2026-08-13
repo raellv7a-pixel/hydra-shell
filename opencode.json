@@ -4,7 +4,9 @@
     "prowl-agent": {
       "command": [
         "prowl-agent",
-        "serve"
+        "serve",
+        "--mcp-surface",
+        "core"
       ],
       "enabled": true,
       "type": "local"

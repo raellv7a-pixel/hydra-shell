@@ -17,6 +17,7 @@ Singleton {
   readonly property string gtkRefreshScript: Quickshell.shellDir + '/Scripts/python/src/theming/gtk-refresh.py'
   readonly property string kdeApplyScript: Quickshell.shellDir + '/Scripts/python/src/theming/kde-apply-scheme.py'
   readonly property string vscodeHelperScript: Quickshell.shellDir + '/Scripts/python/src/theming/vscode-helper.py'
+  readonly property string cursorGenerateScript: Quickshell.shellDir + '/Scripts/python/src/theming/cursor-generate.py'
 
   // Dynamically resolved VSCode extension theme paths (all matching noctalia extensions)
   property var resolvedCodePaths: []
@@ -532,6 +533,23 @@ Singleton {
       ],
       "compareTo": "{{ colors.primary.default.hex }}",
       "postProcess": () => "nohup sudo -n papirus-folders -C {{ closest_color }} -u > /dev/null 2>&1 &"
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "category": "system",
+      "input": "cursor-primary",
+      "outputs": [
+        {
+          "path": "~/.cache/noctalia/cursor-primary-color"
+        }
+      ],
+      // Recolors the vendored Bibata "Modern" cursor set (Assets/Cursor/Bibata)
+      // from the live primary accent and installs it as a hyprcursor +
+      // Xcursor theme (Scripts/python/src/theming/cursor-generate.py), then
+      // applies it live via hyprctl/gsettings. Backgrounded like
+      // papirusFolders above so the generation pipeline never blocks on it.
+      "postProcess": () => `nohup python3 ${cursorGenerateScript} '{{ colors.primary.default.hex }}' ${Settings.data.templates.cursorSize} >> ${Settings.cacheDir}cursor-generate.log 2>&1 &`
     },
     {
       "id": "vivaldi",

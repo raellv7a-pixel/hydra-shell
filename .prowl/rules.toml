@@ -1,0 +1,14 @@
+[[rule]]
+  name = "no-dangling-includes"
+  kind = "dangling_includes"
+  description = "every source/include/import/require must resolve to a file in the project"
+
+[[rule]]
+  name = "no-orphan-scripts"
+  kind = "orphan_script"
+  description = "scripts should be referenced by some config or keybind"
+
+[[rule]]
+  name = "use-theme-variables"
+  kind = "hardcoded_color"
+  description = "prefer theme variables over hardcoded color literals"

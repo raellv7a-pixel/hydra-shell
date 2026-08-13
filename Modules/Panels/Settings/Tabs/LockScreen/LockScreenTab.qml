@@ -9,153 +9,88 @@ ColumnLayout {
   id: root
   spacing: Style.marginL
 
-  Component.onCompleted: {
-    LockThemeService.fetchCatalog();
+  property string searchText: ""
+  property bool showInstalledOnly: false
+
+  readonly property var filteredThemes: {
+    var result = LockThemeService.allThemes;
+    if (showInstalledOnly) {
+      result = result.filter(t => t.installed);
+    }
+    const query = searchText.trim().toLowerCase();
+    if (query !== "") {
+      result = result.filter(t => t.name.toLowerCase().includes(query));
+    }
+    return result;
   }
 
-  // No TabBar needed anymore, just directly show the content
+  Component.onCompleted: LockThemeService.fetchCatalog()
 
-  NHeader {
-    label: "Installed SDDM Themes"
-    description: "Themes available locally. Click 'Apply' to set as your system SDDM theme."
-  }
+  NSettingsSection {
+    icon: "lock"
+    title: I18n.tr("panels.lock-screen.sddm-section-title")
+    description: I18n.tr("panels.lock-screen.sddm-section-description")
 
-  NGridView {
-    id: installedGrid
-    Layout.fillWidth: true
-    // Dynamic height based on elements
-    Layout.preferredHeight: Math.max(220, (Math.ceil(LockThemeService.installedThemes.length / 2) * 230))
-    model: LockThemeService.installedThemes
-    cellWidth: width / 2
-    cellHeight: 230
-    interactive: false
-    delegate: Item {
-      width: installedGrid.cellWidth
-      height: installedGrid.cellHeight
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginS
 
-      Rectangle {
-        anchors.fill: parent
-        anchors.margins: Style.marginS
-        color: Qt.rgba(Color.mSurface.r, Color.mSurface.g, Color.mSurface.b, 0.4)
-        radius: Style.radiusM
-        border.color: (Settings.data.general && Settings.data.general.sddmTheme === modelData.slug) ? Color.mPrimary : Qt.rgba(Color.mOnSurface.r, Color.mOnSurface.g, Color.mOnSurface.b, 0.1)
-        border.width: 2
-        
-        ColumnLayout {
-          anchors.fill: parent
-          anchors.margins: Style.marginM
-          
-          Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            color: Qt.rgba(0, 0, 0, 0.5)
-            radius: Style.radiusS
-            clip: true
-            
-            AnimatedImage {
-              anchors.fill: parent
-              source: modelData.preview_url || ""
-              fillMode: Image.PreserveAspectCrop
-              visible: source.toString() !== ""
-            }
-          }
-          
-          RowLayout {
-            Layout.fillWidth: true
-            NText {
-              Layout.fillWidth: true
-              text: modelData.name
-              font.bold: true
-              pointSize: Style.fontSizeS
-            }
-            NButton {
-              text: "Apply"
-              onClicked: {
-                LockThemeService.applyTheme(modelData.slug, modelData.path);
-              }
-            }
-          }
+      NTextInput {
+        Layout.fillWidth: true
+        placeholderText: I18n.tr("placeholders.search")
+        text: root.searchText
+        onTextChanged: root.searchText = text
+      }
+
+      NIconButton {
+        icon: "filter"
+        tooltipText: root.showInstalledOnly ? I18n.tr("actions.show-all") : I18n.tr("actions.show-active-only")
+        colorBg: root.showInstalledOnly ? Color.mPrimary : Color.mSurface
+        colorFg: root.showInstalledOnly ? Color.mOnPrimary : Color.mOnSurface
+        onClicked: root.showInstalledOnly = !root.showInstalledOnly
+      }
+
+      NIconButton {
+        icon: "refresh"
+        tooltipText: I18n.tr("panels.lock-screen.sddm-refresh")
+        onClicked: {
+          LockThemeService.refreshInstalled();
+          LockThemeService.fetchCatalog();
         }
       }
-    }
-  }
 
-  NHeader {
-    label: "Theme Store (Qylock Catalog)"
-    description: "Browse and install themes from the upstream Qylock repository."
-  }
-
-  RowLayout {
-    Layout.fillWidth: true
-    NButton {
-      text: "Refresh Catalog"
-      icon: "refresh"
-      onClicked: LockThemeService.fetchCatalog()
-    }
-    BusyIndicator {
-      running: LockThemeService.isFetchingCatalog || LockThemeService.isInstalling
-      visible: running
-    }
-  }
-
-  NGridView {
-    id: catalogGrid
-    Layout.fillWidth: true
-    Layout.preferredHeight: Math.max(220, (Math.ceil(LockThemeService.catalogThemes.length / 2) * 230))
-    model: LockThemeService.catalogThemes
-    cellWidth: width / 2
-    cellHeight: 230
-    interactive: false
-    delegate: Item {
-      width: catalogGrid.cellWidth
-      height: catalogGrid.cellHeight
-
-      Rectangle {
-        anchors.fill: parent
-        anchors.margins: Style.marginS
-        color: Qt.rgba(Color.mSurface.r, Color.mSurface.g, Color.mSurface.b, 0.4)
-        radius: Style.radiusM
-        border.color: Qt.rgba(Color.mOnSurface.r, Color.mOnSurface.g, Color.mOnSurface.b, 0.1)
-        border.width: 1
-        
-        ColumnLayout {
-          anchors.fill: parent
-          anchors.margins: Style.marginM
-          
-          Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            color: Qt.rgba(0, 0, 0, 0.5)
-            radius: Style.radiusS
-            clip: true
-            
-            AnimatedImage {
-              anchors.fill: parent
-              source: modelData.preview_url || ""
-              fillMode: Image.PreserveAspectCrop
-              visible: source.toString() !== ""
-            }
-          }
-          
-          RowLayout {
-            Layout.fillWidth: true
-            NText {
-              Layout.fillWidth: true
-              text: modelData.name
-              font.bold: true
-              pointSize: Style.fontSizeS
-            }
-            NButton {
-              text: modelData.installed ? "Installed" : "Install"
-              enabled: !modelData.installed && !LockThemeService.isInstalling
-              icon: "download"
-              onClicked: {
-                LockThemeService.installTheme(modelData.slug);
-              }
-            }
-          }
-        }
+      NBusyIndicator {
+        running: LockThemeService.isFetchingCatalog || LockThemeService.isRefreshingInstalled
+        visible: running
+        size: Math.round(Style.baseWidgetSize * 0.5)
       }
+    }
+
+    NGridView {
+      id: themeGrid
+      Layout.fillWidth: true
+      Layout.preferredHeight: Math.max(cellHeight, Math.ceil(root.filteredThemes.length / Math.max(1, columns)) * cellHeight)
+      readonly property int columns: Math.max(2, Math.floor(availableWidth / (260 * Style.uiScaleRatio)))
+      cellWidth: Math.floor(availableWidth / columns)
+      cellHeight: Math.round(cellWidth * 0.78) + Style.marginXS + Style.fontSizeS + Style.marginM
+      model: root.filteredThemes
+      interactive: false
+
+      delegate: SddmThemeCard {
+        required property var modelData
+        width: themeGrid.cellWidth
+        height: themeGrid.cellHeight
+        themeData: modelData
+      }
+    }
+
+    NText {
+      Layout.fillWidth: true
+      Layout.topMargin: Style.marginM
+      visible: root.filteredThemes.length === 0
+      text: LockThemeService.isFetchingCatalog ? I18n.tr("panels.lock-screen.sddm-loading") : I18n.tr("common.no-results")
+      color: Color.mOnSurfaceVariant
+      horizontalAlignment: Text.AlignHCenter
     }
   }
 }

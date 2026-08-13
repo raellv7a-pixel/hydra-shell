@@ -21,6 +21,11 @@ Singleton {
   property var lastPredefinedSchemeData: null
   readonly property string gtkRefreshScript: Quickshell.shellDir + "/Scripts/python/src/theming/gtk-refresh.py"
 
+  signal namedSchemeSaved(bool success, string name, string path, string error)
+
+  property string pendingSchemeName: ""
+  property string pendingSchemePath: ""
+
   // prefer-light/prefer-dark only; GTK template post_hook still runs full gtk-refresh.
   function pushSystemColorScheme() {
     if (!Settings.data.colorSchemes.syncGsettings)
@@ -147,6 +152,49 @@ Singleton {
     } else {
       Logger.e("ColorScheme", "Scheme not found:", schemeName);
       ToastService.showError(I18n.tr("panels.color-scheme.title"), `'${basename}' ` + I18n.tr("common.not-found"));
+    }
+  }
+
+  function saveNamedScheme(name, scheme) {
+    const normalizedName = String(name || "").trim();
+    if (!normalizedName || normalizedName === "." || normalizedName === ".." || normalizedName.indexOf("/") !== -1 || normalizedName.indexOf("\\") !== -1) {
+      namedSchemeSaved(false, normalizedName, "", "invalid-name");
+      return false;
+    }
+    if (!scheme || !scheme.dark || !scheme.light) {
+      namedSchemeSaved(false, normalizedName, "", "invalid-scheme");
+      return false;
+    }
+    if (schemeSaveProcess.running) {
+      namedSchemeSaved(false, normalizedName, "", "busy");
+      return false;
+    }
+
+    const directory = downloadedSchemesDirectory + "/" + normalizedName;
+    pendingSchemeName = normalizedName;
+    pendingSchemePath = directory + "/" + normalizedName + ".json";
+    schemeSaveProcess.command = [
+      "python3", "-c",
+      "import json,os,sys; data=json.loads(sys.argv[1]); os.makedirs(sys.argv[2],exist_ok=True); tmp=sys.argv[3]+'.tmp'; open(tmp,'w',encoding='utf-8').write(json.dumps(data,indent=2)+'\\n'); os.replace(tmp,sys.argv[3])",
+      JSON.stringify(scheme), directory, pendingSchemePath
+    ];
+    schemeSaveProcess.running = true;
+    return true;
+  }
+
+  Process {
+    id: schemeSaveProcess
+    running: false
+    stdout: StdioCollector {}
+    stderr: StdioCollector {}
+
+    onExited: function(exitCode) {
+      const name = root.pendingSchemeName;
+      const path = root.pendingSchemePath;
+      const error = stderr.text.trim();
+      root.pendingSchemeName = "";
+      root.pendingSchemePath = "";
+      root.namedSchemeSaved(exitCode === 0, name, path, error);
     }
   }
 

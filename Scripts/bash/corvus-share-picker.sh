@@ -20,6 +20,20 @@
 
 set -uo pipefail
 
+# xdph hardcodes QT_QPA_PLATFORM=wayland (strict, no fallback list) for every
+# picker it spawns, to make Qt-based picker UIs render on Wayland — see
+# xdg-desktop-portal-hyprland's screencopy picker launch code. That single-
+# value form makes `qs ipc call` fail with "No running instances" even
+# though the shell IS running (confirmed independent of every other env var:
+# QT_QPA_PLATFORM=wayland or =xcb alone both fail; wayland;xcb, xcb;wayland,
+# and even plain offscreen all succeed — a Qt/Quickshell platform-plugin
+# quirk specific to a single-entry QT_QPA_PLATFORM, not a real display
+# problem). Overriding it back to the shell's own multi-platform default
+# (Assets/Hyprland/modules/env.lua) here, right before the one command that
+# needs it, fixes discovery without touching xdph's own env for its actual
+# GUI fallback picker.
+export QT_QPA_PLATFORM="wayland;xcb"
+
 readonly SHELL_CONFIG="hydra-shell"
 readonly WAIT_SECONDS=300
 

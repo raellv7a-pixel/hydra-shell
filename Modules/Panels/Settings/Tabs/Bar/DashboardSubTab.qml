@@ -376,7 +376,9 @@ ColumnLayout {
         model: [
           { key: "none", name: "Desativado" },
           { key: "bars", name: "Barras Verticais" },
+          { key: "mirror", name: "Barras Espelhadas" },
           { key: "wave", name: "Onda Fluida" },
+          { key: "ribbon", name: "Fita Suave" },
           { key: "shock", name: "Ondas de Choque" },
           { key: "pulse", name: "Pulso Central" },
           { key: "nebula", name: "Nebulosa" },
@@ -407,7 +409,9 @@ ColumnLayout {
           { key: "glow", name: "Brilho Dinâmico" },
           { key: "wavy_fill", name: "Onda Sólida" },
           { key: "blocks", name: "Blocos" },
-          { key: "dots", name: "Pontos" }
+          { key: "dots", name: "Pontos" },
+          { key: "comet", name: "Cometa" },
+          { key: "aurora", name: "Aurora" }
         ]
         onSelected: key => {
           root.cfg.audioSliderEffect = key;
@@ -429,7 +433,9 @@ ColumnLayout {
           { key: "glow", name: "Brilho Dinâmico" },
           { key: "wavy_fill", name: "Onda Sólida" },
           { key: "blocks", name: "Blocos" },
-          { key: "dots", name: "Pontos" }
+          { key: "dots", name: "Pontos" },
+          { key: "comet", name: "Cometa" },
+          { key: "aurora", name: "Aurora" }
         ]
         onSelected: key => {
           root.cfg.microphoneSliderEffect = key;

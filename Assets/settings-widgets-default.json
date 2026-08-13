@@ -34,6 +34,9 @@
       "textColor": "none",
       "applyToAllMonitors": false
     },
+    "Catwalk": {
+      "minimumThreshold": 10
+    },
     "Clock": {
       "clockColor": "none",
       "useCustomFont": false,
@@ -48,6 +51,7 @@
       "customIconPath": "",
       "colorizeDistroLogo": false,
       "colorizeSystemIcon": "none",
+      "colorizeSystemText": "none",
       "enableColorization": false
     },
     "CustomButton": {
@@ -111,6 +115,7 @@
       "icon": "rocket",
       "customIconPath": "",
       "colorizeSystemIcon": "none",
+      "colorizeSystemText": "none",
       "enableColorization": false,
       "iconColor": "none"
     },
@@ -172,6 +177,9 @@
       "showDiskAvailable": false,
       "diskPath": "/"
     },
+    "Tamagotchi": {
+      "showPercentage": false
+    },
     "Taskbar": {
       "onlySameOutput": true,
       "onlyActiveWorkspaces": true,
@@ -208,7 +216,25 @@
     "NoctaliaPerformance": {
       "iconColor": "none"
     },
+    "Nvibrant": {
+      "iconColor": "none",
+      "vibranceValue": 512,
+      "displayIndex": 1
+    },
+    "ObsControl": {
+      "hideWhenInactive": false,
+      "showElapsed": true,
+      "iconColor": "none"
+    },
     "PowerProfile": {
+      "iconColor": "none"
+    },
+    "PrivacyIndicator": {
+      "hideInactive": false
+    },
+    "UsbDriveManager": {
+      "hideWhenEmpty": false,
+      "showBadge": true,
       "iconColor": "none"
     },
     "Workspace": {

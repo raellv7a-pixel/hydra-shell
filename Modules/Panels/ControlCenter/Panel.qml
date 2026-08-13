@@ -1638,7 +1638,7 @@ Item {
 
           QuickActionsCard {
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(332 * root.panelUnit)
+            Layout.preferredHeight: Math.round(368 * root.panelUnit)
           }
 
           RecordingCard {
@@ -2699,20 +2699,51 @@ Item {
   }
 
   component QuickActionsCard: DashboardCard {
+    id: quickActionsCard
     styleKey: "quickActions"
     styleRoot: true
+
+    property int toolsTabIndex: 0
+    readonly property var screenToolkitMain: ScreenToolkitService.mainInstance
+
     ColumnLayout {
       anchors.fill: parent
       anchors.margins: Style.marginL
-      spacing: Style.marginM
+      spacing: Style.marginS
 
       HeaderRow {
         title: root.tr("controls")
         subtitle: root.tr("quick")
       }
 
+      NTabBar {
+        id: quickActionsTabs
+        Layout.fillWidth: true
+        tabHeight: Math.round(28 * root.panelUnit)
+        distributeEvenly: true
+        currentIndex: quickActionsCard.toolsTabIndex
+        onCurrentIndexChanged: quickActionsCard.toolsTabIndex = currentIndex
+
+        NTabButton {
+          text: root.tr("controls")
+          icon: "adjustments-horizontal"
+          pointSize: Style.fontSizeXS
+          tabIndex: 0
+          checked: quickActionsTabs.currentIndex === 0
+        }
+
+        NTabButton {
+          text: root.tr("screenToolsTab")
+          icon: "wand"
+          pointSize: Style.fontSizeXS
+          tabIndex: 1
+          checked: quickActionsTabs.currentIndex === 1
+        }
+      }
+
       GridLayout {
         Layout.fillWidth: true
+        visible: quickActionsCard.toolsTabIndex === 0
         columns: 2
         columnSpacing: Style.marginS
         rowSpacing: Style.marginS
@@ -2810,8 +2841,81 @@ Item {
           onSecondaryTriggered: Settings.data.colorSchemes.darkMode = !Settings.data.colorSchemes.darkMode
         }
       }
+
+      GridLayout {
+        Layout.fillWidth: true
+        visible: quickActionsCard.toolsTabIndex === 1
+        columns: 2
+        columnSpacing: Style.marginS
+        rowSpacing: Style.marginS
+
+        ActionTile {
+          labelText: root.tr("toolColorPicker")
+          detailText: root.tr("openPanel")
+          iconName: "color-picker"
+          onTriggered: ScreenToolkitService.colorPicker()
+        }
+
+        ActionTile {
+          labelText: root.tr("toolPalette")
+          detailText: root.tr("openPanel")
+          iconName: "palette"
+          onTriggered: ScreenToolkitService.palette()
+        }
+
+        ActionTile {
+          labelText: root.tr("toolOcr")
+          detailText: root.tr("openPanel")
+          iconName: "scan"
+          onTriggered: ScreenToolkitService.ocr()
+        }
+
+        ActionTile {
+          labelText: root.tr("toolQr")
+          detailText: root.tr("openPanel")
+          iconName: "qrcode"
+          onTriggered: ScreenToolkitService.qr()
+        }
+
+        ActionTile {
+          labelText: root.tr("toolLens")
+          detailText: root.tr("openPanel")
+          iconName: "world-search"
+          onTriggered: ScreenToolkitService.lens()
+        }
+
+        ActionTile {
+          labelText: root.tr("toolAnnotate")
+          detailText: root.tr("openPanel")
+          iconName: "brush"
+          onTriggered: ScreenToolkitService.annotateFullscreen()
+        }
+
+        ActionTile {
+          labelText: root.tr("toolMeasure")
+          detailText: root.tr("openPanel")
+          iconName: "ruler"
+          onTriggered: ScreenToolkitService.measure()
+        }
+
+        ActionTile {
+          labelText: root.tr("toolPin")
+          detailText: root.tr("openPanel")
+          iconName: "pin"
+          onTriggered: ScreenToolkitService.pin()
+        }
+
+        ActionTile {
+          labelText: root.tr("toolMirror")
+          detailText: (quickActionsCard.screenToolkitMain?.mirrorVisible ?? false) ? root.tr("enabled") : root.tr("openPanel")
+          iconName: "camera"
+          active: quickActionsCard.screenToolkitMain?.mirrorVisible ?? false
+          onTriggered: ScreenToolkitService.mirror()
+        }
+      }
     }
   }
+
 
   component ActionTile: DashboardCard {
     id: actionTile
@@ -4973,24 +5077,56 @@ Item {
           Repeater {
             model: 10
             Item {
+              id: eqBand
               Layout.fillWidth: true
               Layout.fillHeight: true
               readonly property real bandLevel: root.equalizerBandLevel(index, 10)
+              readonly property real barW: Math.max(4, Math.round(7 * root.panelUnit))
+              readonly property color barColor: bandLevel > 0.72 ? Color.mTertiary : (bandLevel > 0.4 ? Color.mSecondary : Color.mPrimary)
+              property real peakLevel: 0
+
+              onBandLevelChanged: eqBand.peakLevel = Math.max(eqBand.peakLevel, eqBand.bandLevel)
+
+              // Peak decays on the shared 50ms effect timer; snaps up instantly, falls slowly (VU-meter behavior)
+              Connections {
+                target: root
+                function onSliderEffectPhaseChanged() {
+                  eqBand.peakLevel = Math.max(eqBand.bandLevel, eqBand.peakLevel - 0.035);
+                }
+              }
 
               Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
-                width: Math.max(4, Math.round(7 * root.panelUnit))
-                height: Math.max(Math.round(6 * root.panelUnit), parent.height * bandLevel)
+                width: eqBand.barW
+                height: Math.max(Math.round(6 * root.panelUnit), parent.height * eqBand.bandLevel)
                 radius: width / 2
-                color: index % 2 === 0 ? Color.mPrimary : Color.mSecondary
+                color: eqBand.barColor
                 opacity: root.musicActive ? 0.86 : 0.42
 
                 Behavior on height {
                   NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
                 }
+                Behavior on color {
+                  ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal }
+                }
                 Behavior on opacity {
                   NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast }
+                }
+              }
+
+              Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: parent.height - Math.max(Math.round(6 * root.panelUnit), parent.height * eqBand.peakLevel) - height
+                width: eqBand.barW
+                height: Math.max(2, Math.round(2 * root.panelUnit))
+                radius: height / 2
+                color: Color.mTertiary
+                visible: root.musicActive && !root.dashboardPerformanceMode
+                opacity: 0.85
+
+                Behavior on y {
+                  NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
                 }
               }
             }
@@ -5276,6 +5412,10 @@ Item {
       height: reactiveSlider.effectCanvasHeight
       antialiasing: true
 
+      // Decaying peak-hold state for the "spectrum" effect (classic VU-meter caps)
+      property var spectrumPeaks: []
+
+
       onPaint: {
         const ctx = getContext("2d");
         ctx.clearRect(0, 0, width, height);
@@ -5352,6 +5492,8 @@ Item {
         if (reactiveSlider.effect === "spectrum") {
           fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, 0.2 + level * 0.12));
           const bands = Math.max(12, Math.min(36, Math.round(activeW / Math.max(4, 6 * root.panelUnit))));
+          if (trackCanvas.spectrumPeaks.length !== bands)
+            trackCanvas.spectrumPeaks = new Array(bands).fill(0);
           const slot = activeW / bands;
           const maxBandH = Math.max(baseH, height - Math.round(3 * root.panelUnit));
           for (let i = 0; i < bands; i++) {
@@ -5366,11 +5508,15 @@ Item {
             roundedRect(x, centerY - bandH / 2, bandW, bandH, bandW / 2);
             ctx.fill();
 
-            if (amp > 0.34) {
+            // Decaying peak-hold cap: snaps up instantly, falls back slowly (classic VU meter)
+            const peak = Math.max(amp, trackCanvas.spectrumPeaks[i] - 0.05);
+            trackCanvas.spectrumPeaks[i] = peak;
+            if (peak > 0.04) {
+              const peakH = root.clamp(baseH + peak * maxBandH * (0.5 + level * 0.38), baseH, maxBandH);
               const capH = Math.max(1.5, 2 * root.panelUnit);
-              ctx.fillStyle = rgba(Color.mSecondary, 0.48 + amp * 0.42);
+              ctx.fillStyle = rgba(peak > 0.7 ? Color.mTertiary : Color.mSecondary, 0.5 + peak * 0.4);
               ctx.beginPath();
-              roundedRect(x, centerY - bandH / 2 - capH, bandW, capH, capH / 2);
+              roundedRect(x, centerY - peakH / 2 - capH, bandW, capH, capH / 2);
               ctx.fill();
             }
           }
@@ -5503,6 +5649,54 @@ Item {
           ctx.lineTo(activeW, centerY + baseH / 2);
           ctx.closePath();
           ctx.fill();
+        } else if (reactiveSlider.effect === "comet") {
+          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(root.m3SurfaceContainerHighest, 0.55));
+          const travel = Math.max(8, activeW);
+          const speed = 0.32 + level * 0.68;
+          const cometX = ((phase * speed) % 1) * travel;
+          const cometR = Math.max(3, effectH * 0.32);
+          const tailLen = Math.max(18, travel * 0.3);
+          const tailStart = Math.max(0, cometX - tailLen);
+          const tailGrad = ctx.createLinearGradient(tailStart, 0, cometX, 0);
+          tailGrad.addColorStop(0, rgba(Color.mSecondary, 0));
+          tailGrad.addColorStop(1, rgba(Color.mSecondary, 0.55 + level * 0.35));
+          ctx.fillStyle = tailGrad;
+          ctx.beginPath();
+          roundedRect(tailStart, centerY - baseH / 2, cometX - tailStart, baseH, baseH / 2);
+          ctx.fill();
+
+          ctx.shadowBlur = 10 + level * 10;
+          ctx.shadowColor = rgba(Color.mPrimary, 0.7);
+          ctx.fillStyle = rgba(Color.mPrimary, 0.95);
+          ctx.beginPath();
+          ctx.arc(cometX, centerY, cometR, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = "transparent";
+        } else if (reactiveSlider.effect === "aurora") {
+          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(root.m3SurfaceContainerHighest, 0.55));
+          function auroraBand(colorC, freq, speedMul, ampScale, alpha) {
+            ctx.beginPath();
+            ctx.moveTo(0, centerY + baseH / 2);
+            const bandStep = Math.max(2, activeW / 48);
+            for (let x = 0; x <= activeW; x += bandStep) {
+              const p = x / Math.max(1, activeW);
+              const amp = sample(p);
+              const wobble = 0.5 + 0.5 * Math.sin(p * Math.PI * freq + phase * speedMul);
+              const y = centerY + baseH / 2 - effectH * (0.15 + amp * 0.5 + level * 0.25) * ampScale * wobble;
+              ctx.lineTo(x, y);
+            }
+            ctx.lineTo(activeW, centerY + baseH / 2);
+            ctx.closePath();
+            const bandGrad = ctx.createLinearGradient(0, centerY - effectH / 2, 0, centerY + baseH / 2);
+            bandGrad.addColorStop(0, rgba(colorC, 0));
+            bandGrad.addColorStop(1, rgba(colorC, alpha));
+            ctx.fillStyle = bandGrad;
+            ctx.fill();
+          }
+          auroraBand(Color.mTertiary, 2.4, 0.6, 1.0, 0.26 + level * 0.2);
+          auroraBand(Color.mSecondary, 3.1, -0.9, 0.75, 0.3 + level * 0.22);
+          auroraBand(Color.mPrimary, 4.0, 1.3, 0.5, 0.38 + level * 0.25);
         } else {
           ctx.lineCap = "round";
           ctx.lineJoin = "round";
@@ -6609,6 +6803,77 @@ Item {
             }
             return;
         }
+
+        if (visualizer.effect === "mirror") {
+            const bars = 28;
+            const gap = Math.max(2, width / 140);
+            const barWidth = Math.max(2, (width - gap * (bars - 1)) / bars);
+            const half = height / 2;
+            for (let i = 0; i < bars; i++) {
+                const sampleIndex = (i / Math.max(1, bars - 1)) * ((visualizer.values?.length ?? 1) - 1);
+                const amp = visualizer.sample(sampleIndex, 0);
+                const level = root.clamp(0.08 + amp * beat, 0.05, 1);
+                const barH = half * level;
+                const x = i * (barWidth + gap);
+                const color = level > 0.75 ? tertiary : (level > 0.45 ? secondary : primary);
+
+                ctx.fillStyle = visualizer.colorToRgba(color, 0.12 + level * 0.4);
+                ctx.beginPath();
+                visualizer.roundedRect(ctx, x, half - barH, barWidth, barH, barWidth / 2);
+                ctx.fill();
+
+                ctx.fillStyle = visualizer.colorToRgba(color, 0.08 + level * 0.28);
+                ctx.beginPath();
+                visualizer.roundedRect(ctx, x, half, barWidth, barH, barWidth / 2);
+                ctx.fill();
+            }
+
+            ctx.strokeStyle = visualizer.colorToRgba(primary, 0.12);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, half);
+            ctx.lineTo(width, half);
+            ctx.stroke();
+            return;
+        }
+
+        if (visualizer.effect === "ribbon") {
+            const centerY = height * 0.55;
+
+            function traceRibbon(colorC, freq, speedMul, ampMul, alpha, lw) {
+                ctx.lineWidth = Math.max(1, lw * root.panelUnit);
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                ctx.strokeStyle = visualizer.colorToRgba(colorC, alpha);
+                ctx.beginPath();
+                const step = Math.max(3, width / 48);
+                let prevX = 0, prevY = centerY;
+                for (let x = 0; x <= width; x += step) {
+                    const p = x / width;
+                    const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
+                    const amp = visualizer.sample(sampleIndex, 0);
+                    const carrier = Math.sin(p * Math.PI * freq + t * speedMul);
+                    const y = centerY - height * (0.05 + amp * ampMul * beat) * carrier;
+                    if (x === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        const midX = (prevX + x) / 2, midY = (prevY + y) / 2;
+                        ctx.quadraticCurveTo(prevX, prevY, midX, midY);
+                    }
+                    prevX = x;
+                    prevY = y;
+                }
+                ctx.lineTo(width, prevY);
+                ctx.stroke();
+            }
+
+            ctx.shadowBlur = visualizer.active ? 10 : 0;
+            ctx.shadowColor = visualizer.colorToRgba(secondary, 0.5);
+            traceRibbon(secondary, 2.6, 0.5, 0.42, visualizer.active ? 0.22 : 0.08, 5);
+            ctx.shadowBlur = 0;
+            traceRibbon(primary, 3.4, 0.9, 0.5, visualizer.active ? 0.55 : 0.18, 2);
+            return;
+        }
         } finally {
           ctx.restore();
         }
@@ -7029,6 +7294,209 @@ Item {
     }
   }
 
+  component TimerPage: Item {
+    id: timerPage
+
+    function parseDuration(value) {
+      const text = String(value || "").trim().toLowerCase();
+      if (text === "")
+        return 0;
+      if (/^\d+$/.test(text))
+        return Math.min(86400, Number(text) * 60);
+      if (text.includes(":")) {
+        const parts = text.split(":").map(part => Number(part));
+        if (parts.some(part => !Number.isFinite(part) || part < 0))
+          return 0;
+        if (parts.length === 2)
+          return Math.min(86400, parts[0] * 60 + parts[1]);
+        if (parts.length === 3)
+          return Math.min(86400, parts[0] * 3600 + parts[1] * 60 + parts[2]);
+        return 0;
+      }
+      let seconds = 0;
+      let matched = false;
+      const pattern = /(\d+)\s*(h|m|s)/g;
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        matched = true;
+        seconds += Number(match[1]) * (match[2] === "h" ? 3600 : match[2] === "m" ? 60 : 1);
+      }
+      return matched ? Math.min(86400, seconds) : 0;
+    }
+
+    function formatDuration(totalSeconds) {
+      const total = Math.max(0, Math.floor(totalSeconds));
+      const hours = Math.floor(total / 3600);
+      const minutes = Math.floor((total % 3600) / 60);
+      const seconds = total % 60;
+      return hours > 0
+          ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+          : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function setCountdown(value) {
+      const seconds = timerPage.parseDuration(value);
+      if (seconds <= 0)
+        return;
+      Time.timerReset();
+      Time.timerStopwatchMode = false;
+      Time.timerRemainingSeconds = seconds;
+      Time.timerTotalSeconds = seconds;
+    }
+
+    ColumnLayout {
+      anchors.fill: parent
+      anchors.margins: Style.marginM
+      spacing: Style.marginS
+
+      NTabBar {
+        id: timerModeTabs
+        Layout.fillWidth: true
+        tabHeight: Math.round(28 * root.panelUnit)
+        distributeEvenly: true
+        enabled: !Time.timerRunning
+        currentIndex: Time.timerStopwatchMode ? 1 : 0
+        onCurrentIndexChanged: {
+          const stopwatch = currentIndex === 1;
+          if (Time.timerStopwatchMode === stopwatch)
+            return;
+          Time.timerReset();
+          Time.timerStopwatchMode = stopwatch;
+          if (!stopwatch)
+            timerPage.setCountdown(durationInput.text);
+        }
+
+        NTabButton {
+          text: root.tr("countdown")
+          icon: "hourglass"
+          pointSize: Style.fontSizeXS
+          tabIndex: 0
+          checked: timerModeTabs.currentIndex === 0
+        }
+
+        NTabButton {
+          text: root.tr("stopwatch")
+          icon: "stopwatch"
+          pointSize: Style.fontSizeXS
+          tabIndex: 1
+          checked: timerModeTabs.currentIndex === 1
+        }
+      }
+
+      NText {
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignHCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: timerPage.formatDuration(Time.timerStopwatchMode ? Time.timerElapsedSeconds : Time.timerRemainingSeconds)
+        pointSize: Style.fontSizeXXL * 1.45
+        font.family: Settings.data.ui.fontFixed
+        font.weight: Style.fontWeightBold
+        color: Time.timerSoundPlaying ? Color.mError : Color.mPrimary
+      }
+
+      Item {
+        Layout.fillWidth: true
+        Layout.preferredHeight: Math.round(5 * root.panelUnit)
+        visible: !Time.timerStopwatchMode && Time.timerTotalSeconds > 0
+
+        Rectangle {
+          anchors.fill: parent
+          radius: height / 2
+          color: Color.mSurfaceVariant
+        }
+
+        Rectangle {
+          anchors.left: parent.left
+          anchors.top: parent.top
+          anchors.bottom: parent.bottom
+          width: parent.width * Math.max(0, Math.min(1, Time.timerRemainingSeconds / Math.max(1, Time.timerTotalSeconds)))
+          radius: height / 2
+          color: Time.timerSoundPlaying ? Color.mError : Color.mPrimary
+        }
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        visible: !Time.timerStopwatchMode && !Time.timerRunning && !Time.timerSoundPlaying
+        spacing: Style.marginS
+
+        NTextInput {
+          id: durationInput
+          Layout.fillWidth: true
+          Layout.minimumWidth: 0
+          text: "25m"
+          placeholderText: root.tr("timerDurationPlaceholder")
+          inputIconName: "clock"
+          showClearButton: false
+          onAccepted: timerPage.setCountdown(text)
+          onEditingFinished: timerPage.setCountdown(text)
+        }
+
+        Repeater {
+          model: [
+            { "label": "5m", "seconds": 300 },
+            { "label": "25m", "seconds": 1500 },
+            { "label": "60m", "seconds": 3600 }
+          ]
+
+          NButton {
+            required property var modelData
+            Layout.preferredHeight: Math.round(34 * root.panelUnit)
+            text: modelData.label
+            outlined: true
+            fontSize: Style.fontSizeXS
+            onClicked: {
+              durationInput.text = modelData.label;
+              timerPage.setCountdown(modelData.seconds + "s");
+            }
+          }
+        }
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignHCenter
+        spacing: Style.marginS
+
+        NButton {
+          Layout.fillWidth: true
+          Layout.preferredHeight: Math.round(36 * root.panelUnit)
+          text: Time.timerSoundPlaying
+                ? root.tr("dismissAlarm")
+                : Time.timerRunning ? root.tr("pause") : root.tr("start")
+          icon: Time.timerSoundPlaying ? "bell-off" : Time.timerRunning ? "player-pause" : "player-play"
+          enabled: Time.timerSoundPlaying || Time.timerStopwatchMode || Time.timerRemainingSeconds > 0
+          onClicked: {
+            if (Time.timerSoundPlaying)
+              Time.timerReset();
+            else if (Time.timerRunning)
+              Time.timerPause();
+            else
+              Time.timerStart();
+          }
+        }
+
+        NButton {
+          Layout.fillWidth: true
+          Layout.preferredHeight: Math.round(36 * root.panelUnit)
+          text: root.tr("reset")
+          icon: "refresh"
+          outlined: true
+          onClicked: {
+            Time.timerReset();
+            if (!Time.timerStopwatchMode)
+              timerPage.setCountdown(durationInput.text);
+          }
+        }
+      }
+    }
+
+    Component.onCompleted: {
+      if (!Time.timerStopwatchMode && Time.timerRemainingSeconds <= 0)
+        timerPage.setCountdown(durationInput.text);
+    }
+  }
+
   component CalendarShell: DashboardCard {
     id: calendarShell
     styleKey: "calendar"
@@ -7075,6 +7543,12 @@ Item {
 
       Item {
         ScreenUsagePage {
+          anchors.fill: parent
+        }
+      }
+
+      Item {
+        TimerPage {
           anchors.fill: parent
         }
       }

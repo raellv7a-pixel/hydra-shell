@@ -17,6 +17,7 @@ Singleton {
                            "Battery": batteryComponent,
                            "Bluetooth": bluetoothComponent,
                            "Brightness": brightnessComponent,
+                           "Catwalk": catwalkComponent,
                            "Clock": clockComponent,
                            "ControlCenter": controlCenterComponent,
                            "CustomButton": customButtonComponent,
@@ -31,13 +32,18 @@ Singleton {
                            "NightLight": nightLightComponent,
                            "NoctaliaPerformance": noctaliaPerformanceComponent,
                            "NotificationHistory": notificationHistoryComponent,
+                           "Nvibrant": nvibrantComponent,
+                           "ObsControl": obsControlComponent,
                            "PowerProfile": powerProfileComponent,
+                           "PrivacyIndicator": privacyIndicatorComponent,
                            "SessionMenu": sessionMenuComponent,
                            "Settings": settingsComponent,
                            "Spacer": spacerComponent,
                            "SystemMonitor": systemMonitorComponent,
+                           "Tamagotchi": tamagotchiComponent,
                            "Taskbar": taskbarComponent,
                            "Tray": trayComponent,
+                           "UsbDriveManager": usbDriveManagerComponent,
                            "Volume": volumeComponent,
                            "VPN": vpnComponent,
                            "WallpaperSelector": wallpaperSelectorComponent,
@@ -50,6 +56,7 @@ Singleton {
                                      "Battery": "WidgetSettings/BatterySettings.qml",
                                      "Bluetooth": "WidgetSettings/BluetoothSettings.qml",
                                      "Brightness": "WidgetSettings/BrightnessSettings.qml",
+                                     "Catwalk": "WidgetSettings/CatwalkSettings.qml",
                                      "Clock": "WidgetSettings/ClockSettings.qml",
                                      "ControlCenter": "WidgetSettings/ControlCenterSettings.qml",
                                      "CustomButton": "WidgetSettings/CustomButtonSettings.qml",
@@ -64,13 +71,18 @@ Singleton {
                                      "NightLight": "WidgetSettings/NightLightSettings.qml",
                                      "NoctaliaPerformance": "WidgetSettings/NoctaliaPerformanceSettings.qml",
                                      "NotificationHistory": "WidgetSettings/NotificationHistorySettings.qml",
+                                     "Nvibrant": "WidgetSettings/NvibrantSettings.qml",
+                                     "ObsControl": "WidgetSettings/ObsControlSettings.qml",
                                      "PowerProfile": "WidgetSettings/PowerProfileSettings.qml",
+                                     "PrivacyIndicator": "WidgetSettings/PrivacyIndicatorSettings.qml",
                                      "SessionMenu": "WidgetSettings/SessionMenuSettings.qml",
                                      "Settings": "WidgetSettings/SettingsSettings.qml",
                                      "Spacer": "WidgetSettings/SpacerSettings.qml",
                                      "SystemMonitor": "WidgetSettings/SystemMonitorSettings.qml",
+                                     "Tamagotchi": "WidgetSettings/TamagotchiSettings.qml",
                                      "Taskbar": "WidgetSettings/TaskbarSettings.qml",
                                      "Tray": "WidgetSettings/TraySettings.qml",
+                                     "UsbDriveManager": "WidgetSettings/UsbDriveManagerSettings.qml",
                                      "Volume": "WidgetSettings/VolumeSettings.qml",
                                      "VPN": "WidgetSettings/VPNSettings.qml",
                                      "WallpaperSelector": "WidgetSettings/WallpaperSelectorSettings.qml",
@@ -111,6 +123,9 @@ Singleton {
                                     "iconColor": "none",
                                     "textColor": "none",
                                     "applyToAllMonitors": false
+                                  },
+                                  "Catwalk": {
+                                    "minimumThreshold": 10
                                   },
                                   "Clock": {
                                     "clockColor": "none",
@@ -288,7 +303,28 @@ Singleton {
                                   "NoctaliaPerformance": {
                                     "iconColor": "none"
                                   },
+                                  "Nvibrant": {
+                                    "iconColor": "none",
+                                    "vibranceValue": 512,
+                                    "displayIndex": 1
+                                  },
+                                  "ObsControl": {
+                                    "hideWhenInactive": false,
+                                    "showElapsed": true,
+                                    "iconColor": "none"
+                                  },
                                   "PowerProfile": {
+                                    "iconColor": "none"
+                                  },
+                                  "PrivacyIndicator": {
+                                    "hideInactive": false
+                                  },
+                                  "Tamagotchi": {
+                                    "showPercentage": false
+                                  },
+                                  "UsbDriveManager": {
+                                    "hideWhenEmpty": false,
+                                    "showBadge": true,
                                     "iconColor": "none"
                                   },
                                   "Workspace": {
@@ -337,6 +373,9 @@ Singleton {
   }
   property Component brightnessComponent: Component {
     Brightness {}
+  }
+  property Component catwalkComponent: Component {
+    Catwalk {}
   }
   property Component clockComponent: Component {
     Clock {}
@@ -410,8 +449,23 @@ Singleton {
   property Component workspaceComponent: Component {
     Workspace {}
   }
+  property Component privacyIndicatorComponent: Component {
+    PrivacyIndicator {}
+  }
   property Component taskbarComponent: Component {
     Taskbar {}
+  }
+  property Component tamagotchiComponent: Component {
+    Tamagotchi {}
+  }
+  property Component nvibrantComponent: Component {
+    Nvibrant {}
+  }
+  property Component obsControlComponent: Component {
+    ObsControl {}
+  }
+  property Component usbDriveManagerComponent: Component {
+    UsbDriveManager {}
   }
   function init() {
     Logger.i("BarWidgetRegistry", "Service started");

@@ -31,10 +31,18 @@ Noctalia Shell is made possible by the incredible work of many open-source proje
 - **[Tabler Icons](https://tabler.io/icons)** - Icon set used throughout the shell
 - **[Riyan Resdian on Noun Project](https://thenounproject.com/creator/yaicon/)** - Plug icon
 
+## Cursor Theme
+- **[rtgiskard/bibata_cursor](https://github.com/rtgiskard/bibata_cursor)** (GPLv3) - Source of the vendored "Modern" cursor SVGs (`Assets/Cursor/Bibata`), recolored live from the shell's palette by `Scripts/python/src/theming/cursor-generate.py`
+- **[Abdulkaiz Khatri (ful1e5)](https://github.com/ful1e5/Bibata_Cursor)** - Original Bibata cursor design
+- **[SakibShahariar/material-bibata-cursor](https://github.com/SakibShahariar/material-bibata-cursor)** - Inspiration for recoloring Bibata through Material Design 3's Container/Primary roles
+
 ## Audio Assets
 - **[Universfield on Pixabay](https://pixabay.com/users/universfield-28281460/)** - Notification sound effect
 - **[DrNI on Freesound](https://freesound.org/people/DrNI/sounds/34562/)** - Timer's alarm sound effect
 - **[Lucas McCallister on Freesound](http://www.freesound.org/samplesViewSingle.php?id=67091)** - Volume change feedback sound effect
+
+## Bundled Plugin Assets
+- **[Noctalia Tamagotchi](https://github.com/noctalia-dev/noctalia-plugins)** (MIT) - Frog sprites and feeding sound vendored in `Assets/Icons/Tamagotchi` and `Assets/Sounds/Tamagotchi`; plugin by Joaquin Righetti and Lucia Bollati, with the Forgy artwork credited to Lucia Bollati.
 
 
 ## Special Thanks

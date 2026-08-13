@@ -94,6 +94,7 @@
     "presentationModePerMonitor": {}
   },
   "general": {
+    "sddmTheme": "",
     "avatarImage": "",
     "dimmerOpacity": 0.2,
     "showScreenCorners": false,
@@ -185,7 +186,7 @@
     "firstDayOfWeek": -1,
     "hideWeatherTimezone": false,
     "hideWeatherCityName": false,
-    "autoLocate": true
+    "autoLocate": false
   },
   "calendar": {
     "cards": [
@@ -262,6 +263,8 @@
     "enableClipboardChips": true,
     "clipboardWatchTextCommand": "wl-paste --type text --watch cliphist store",
     "clipboardWatchImageCommand": "wl-paste --type image --watch cliphist store",
+    "pinnedClipboardIds": [],
+    "clipboardNotes": [],
     "position": "center",
     "pinnedApps": [],
     "hiddenApps": [],
@@ -274,7 +277,7 @@
     "coverPath": "",
     "coverFolder": "",
     "coverHeight": 160,
-    "coverOverlay": 0.40,
+    "coverOverlay": 0.4,
     "coverBlurEnabled": false,
     "showCategories": true,
     "iconMode": "tabler",
@@ -421,6 +424,10 @@
     "position": "center",
     "showHeader": true,
     "showKeybinds": true,
+    "showProfileBadge": true,
+    "showUptimeBadge": true,
+    "coverCardMode": "auto",
+    "coverCardPath": "",
     "largeButtonsStyle": true,
     "largeButtonsLayout": "single-row",
     "powerOptions": [
@@ -505,6 +512,17 @@
     ],
     "monitors": []
   },
+  "showKeys": {
+    "captureEnabled": false,
+    "evtestDevice": "/dev/input/event3",
+    "useCustomColors": false,
+    "pillColor": "",
+    "pillBg": "",
+    "position": "bottom",
+    "marginPx": 60,
+    "hideDelaySec": 2,
+    "disabledScreens": []
+  },
   "audio": {
     "volumeStep": 5,
     "volumeOverdrive": false,
@@ -535,7 +553,8 @@
   },
   "templates": {
     "activeTemplates": [],
-    "enableUserTheming": false
+    "enableUserTheming": false,
+    "cursorSize": 24
   },
   "nightLight": {
     "enabled": false,
@@ -545,6 +564,34 @@
     "dayTemp": "6500",
     "manualSunrise": "06:30",
     "manualSunset": "18:30"
+  },
+  "nvibrant": {
+    "enabled": false,
+    "vibranceValue": 512,
+    "displayIndex": 1
+  },
+  "obsControl": {
+    "manualConfiguration": false,
+    "host": "127.0.0.1",
+    "port": 4455,
+    "password": "",
+    "pollInterval": 1500
+  },
+  "tamagotchi": {
+    "hunger": 100,
+    "happiness": 100,
+    "cleanliness": 100,
+    "energy": 100,
+    "sleeping": false,
+    "lastDecayTimestamp": 0,
+    "difficulty": 50,
+    "volume": 0.5
+  },
+  "usbDriveManager": {
+    "autoMount": false,
+    "showNotifications": true,
+    "fileBrowser": "xdg-open",
+    "terminal": "kitty"
   },
   "hooks": {
     "enabled": false,
@@ -582,5 +629,42 @@
     "gridSnap": false,
     "gridSnapScale": false,
     "monitorWidgets": []
+  },
+  "hyprland": {
+    "rebinds": {},
+    "ownershipAdopted": false,
+    "ownershipDeclined": false,
+    "adoptedModulesVersion": "",
+    "appearance": {
+      "gapsIn": 5,
+      "gapsOut": 10,
+      "borderSize": 2,
+      "layout": "dwindle",
+      "resizeOnBorder": true,
+      "allowTearing": false,
+      "rounding": 10,
+      "roundingPower": 2,
+      "activeOpacity": 1,
+      "inactiveOpacity": 1,
+      "shadowEnabled": true,
+      "shadowRange": 4,
+      "shadowRenderPower": 3,
+      "blurEnabled": true,
+      "blurSize": 8,
+      "blurPasses": 2,
+      "blurXray": false,
+      "animationsEnabled": true
+    },
+    "envVars": [],
+    "autostart": [],
+    "windowRules": [],
+    "layerRules": [],
+    "animCurves": [],
+    "animItems": [],
+    "keybinds": [],
+    "cursor": {
+      "theme": "",
+      "size": 24
+    }
   }
 }

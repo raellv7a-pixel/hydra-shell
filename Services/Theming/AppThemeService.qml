@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import qs.Commons
+import qs.Services.System
 import qs.Services.UI
 
 Singleton {
@@ -85,6 +86,17 @@ Singleton {
   // PUBLIC FUNCTIONS
   function init() {
     Logger.i("AppThemeService", "Service started");
+
+    // Recover users who already enabled the papirusFolders template before
+    // the one-time sudo grant existed (or on a machine where it never ran) —
+    // don't make them re-toggle the setting to get it working.
+    const activeTemplates = Settings.data.templates.activeTemplates || [];
+    for (let i = 0; i < activeTemplates.length; i++) {
+      if (activeTemplates[i].id === "papirusFolders" && activeTemplates[i].enabled) {
+        PapirusFoldersSetupService.ensureConfigured();
+        break;
+      }
+    }
   }
 
   function generate() {

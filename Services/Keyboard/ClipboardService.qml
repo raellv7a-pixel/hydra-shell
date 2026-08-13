@@ -57,6 +57,92 @@ Singleton {
     checkCliphistAvailability();
   }
 
+  function isNoteId(id) {
+    return String(id || "").startsWith("note-");
+  }
+
+  function noteTextById(id) {
+    const idStr = String(id || "");
+    const notes = Settings.data.appLauncher.clipboardNotes || [];
+    for (let i = 0; i < notes.length; ++i) {
+      if (String(notes[i].id) === idStr)
+        return String(notes[i].text || "");
+    }
+    return "";
+  }
+
+  function isPinned(id) {
+    return (Settings.data.appLauncher.pinnedClipboardIds || []).indexOf(String(id)) !== -1;
+  }
+
+  function sortItems(entries) {
+    return entries.sort((a, b) => {
+      const pinDelta = Number(root.isPinned(b.id)) - Number(root.isPinned(a.id));
+      if (pinDelta !== 0)
+        return pinDelta;
+      if (a.isNote !== b.isNote)
+        return a.isNote ? -1 : 1;
+      return 0;
+    });
+  }
+
+  function mergePersistentItems(historyItems) {
+    const notes = Settings.data.appLauncher.clipboardNotes || [];
+    const noteItems = notes.map(note => {
+      const id = String(note.id);
+      const createdAt = Number(note.createdAt || 0);
+      if (createdAt > 0)
+        root.firstSeenById[id] = createdAt;
+      return {
+        "id": id,
+        "preview": String(note.text || ""),
+        "isImage": false,
+        "isNote": true,
+        "mime": "text/plain",
+        "contentType": "note"
+      };
+    });
+    return root.sortItems(noteItems.concat(historyItems));
+  }
+
+  function refreshPersistentItems() {
+    const historyItems = (root.items || []).filter(item => !item.isNote);
+    root.items = root.mergePersistentItems(historyItems);
+    root.revision++;
+    root.listCompleted();
+  }
+
+  function togglePin(id) {
+    const idStr = String(id || "");
+    if (idStr === "")
+      return;
+    const pinned = Array.from(Settings.data.appLauncher.pinnedClipboardIds || []);
+    const index = pinned.indexOf(idStr);
+    if (index === -1)
+      pinned.push(idStr);
+    else
+      pinned.splice(index, 1);
+    Settings.data.appLauncher.pinnedClipboardIds = pinned;
+    root.refreshPersistentItems();
+  }
+
+  function addNote(text) {
+    const trimmed = String(text || "").trim();
+    if (trimmed === "")
+      return "";
+    const now = Date.now();
+    const id = `note-${now}-${Math.floor(Math.random() * 1000000)}`;
+    const notes = Array.from(Settings.data.appLauncher.clipboardNotes || []);
+    notes.unshift({
+                    "id": id,
+                    "text": trimmed,
+                    "createdAt": now / 1000
+                  });
+    Settings.data.appLauncher.clipboardNotes = notes;
+    root.refreshPersistentItems();
+    return id;
+  }
+
   // Check dependency availability
   function checkCliphistAvailability() {
     if (dependencyChecked)
@@ -190,7 +276,7 @@ Singleton {
                                        return true;
                                      });
 
-      items = filtered;
+      items = root.mergePersistentItems(filtered);
       loading = false;
 
       // Try to capture current clipboard and associate with newest item
@@ -234,6 +320,15 @@ Singleton {
     onExited: (exitCode, exitStatus) => {
       revision++;
       Qt.callLater(() => list());
+    }
+  }
+
+  Process {
+    id: wipeProc
+    stdout: StdioCollector {}
+    onExited: (exitCode, exitStatus) => {
+      root.revision++;
+      Qt.callLater(() => root.list());
     }
   }
 
@@ -458,17 +553,24 @@ Singleton {
   }
 
   function copyToClipboard(id) {
-    if (!root.cliphistAvailable) {
+    if (root.isNoteId(id)) {
+      copyProc.command = ["wl-copy", root.noteTextById(id)];
+      copyProc.running = true;
       return;
     }
+    if (!root.cliphistAvailable)
+      return;
     copyProc.command = ["sh", "-c", `cliphist decode ${id} | wl-copy`];
     copyProc.running = true;
   }
 
   function pasteFromClipboard(id, mime) {
-    if (!root.cliphistAvailable) {
+    if (root.isNoteId(id)) {
+      root.pasteText(root.noteTextById(id));
       return;
     }
+    if (!root.cliphistAvailable)
+      return;
     const isImage = mime && mime.startsWith("image/");
     const typeArg = isImage ? ` --type ${mime}` : "";
     const pasteKeys = isImage ? "wtype -M ctrl -k v" : "wtype -M ctrl -M shift v";
@@ -487,13 +589,20 @@ Singleton {
   }
 
   function deleteById(id) {
-    if (!root.cliphistAvailable) {
-      return;
-    }
-    if (deleteProc.running) {
-      return;
-    }
     const idStr = String(id).trim();
+    if (root.isNoteId(idStr)) {
+      const notes = Array.from(Settings.data.appLauncher.clipboardNotes || []);
+      Settings.data.appLauncher.clipboardNotes = notes.filter(note => String(note.id) !== idStr);
+      const pinnedNotes = Array.from(Settings.data.appLauncher.pinnedClipboardIds || []);
+      Settings.data.appLauncher.pinnedClipboardIds = pinnedNotes.filter(pinnedId => pinnedId !== idStr);
+      delete root.firstSeenById[idStr];
+      root.refreshPersistentItems();
+      return;
+    }
+    if (!root.cliphistAvailable || deleteProc.running || !/^\d+$/.test(idStr))
+      return;
+    const pinned = Array.from(Settings.data.appLauncher.pinnedClipboardIds || []);
+    Settings.data.appLauncher.pinnedClipboardIds = pinned.filter(pinnedId => pinnedId !== idStr);
     // Remove from caches
     delete root.contentCache[idStr];
     delete root.imageDataById[idStr];
@@ -505,19 +614,32 @@ Singleton {
   }
 
   function wipeAll() {
-    if (!root.cliphistAvailable) {
+    if (!root.cliphistAvailable || wipeProc.running)
       return;
+
+    const historyItems = (root.items || []).filter(item => !item.isNote);
+    const unpinnedIds = historyItems.map(item => String(item.id))
+                                    .filter(id => /^\d+$/.test(id) && !root.isPinned(id));
+    const pinnedIds = Array.from(Settings.data.appLauncher.pinnedClipboardIds || []);
+
+    // Keep pinned cliphist entries and all author-created notes.
+    if (pinnedIds.length === 0) {
+      wipeProc.command = ["cliphist", "wipe"];
+    } else if (unpinnedIds.length === 0) {
+      wipeProc.command = ["true"];
+    } else {
+      const deletes = unpinnedIds.map(id => `printf '%s\\n' ${id} | cliphist delete`).join(" && ");
+      wipeProc.command = ["sh", "-c", deletes];
     }
-    // Clear caches
-    root.contentCache = {};
-    root.imageDataById = {};
-    root._imageDataInsertOrder = [];
+
+    for (const id of unpinnedIds) {
+      delete root.contentCache[id];
+      delete root.imageDataById[id];
+    }
+    root._imageDataInsertOrder = root._imageDataInsertOrder.filter(id => root.isPinned(id));
     root._latestTextContent = "";
     root._latestTextId = "";
-
-    Quickshell.execDetached(["cliphist", "wipe"]);
-    revision++;
-    Qt.callLater(() => list());
+    wipeProc.running = true;
   }
 
   // Parse image metadata from cliphist preview string

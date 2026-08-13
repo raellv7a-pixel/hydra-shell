@@ -447,6 +447,7 @@ SmartPanel {
 
             // Extracted palette (index 5)
             WallpaperPaletteSheet {
+              screen: root.screen
               wallpaperPath: panelContent.effectivePreviewWallpaperPath
               screenName: panelContent.currentScreenName
             }

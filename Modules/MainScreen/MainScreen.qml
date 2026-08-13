@@ -22,12 +22,15 @@ import qs.Modules.Panels.Launcher
 import qs.Modules.Panels.Media
 import qs.Modules.Panels.Network
 import qs.Modules.Panels.NotificationHistory
+import qs.Modules.Panels.ObsControl
 import qs.Modules.Panels.Plugins
 import qs.Modules.Panels.SessionMenu
 import qs.Modules.Panels.Settings
 import qs.Modules.Panels.SetupWizard
 import qs.Modules.Panels.SystemStats
+import qs.Modules.Panels.Tamagotchi
 import qs.Modules.Panels.Tray
+import qs.Modules.Panels.UsbDriveManager
 import qs.Modules.Panels.Wallpaper
 import qs.Modules.ScreenShare
 import qs.Modules.ScreenToolkit
@@ -431,9 +434,27 @@ PanelWindow {
       screen: root.screen
     }
 
+    ObsControlPanel {
+      id: obsControlPanel
+      objectName: "obsControlPanel-" + (root.screen?.name || "unknown")
+      screen: root.screen
+    }
+
     SystemStatsPanel {
       id: systemStatsPanel
       objectName: "systemStatsPanel-" + (root.screen?.name || "unknown")
+      screen: root.screen
+    }
+
+    TamagotchiPanel {
+      id: tamagotchiPanel
+      objectName: "tamagotchiPanel-" + (root.screen?.name || "unknown")
+      screen: root.screen
+    }
+
+    UsbDriveManagerPanel {
+      id: usbDriveManagerPanel
+      objectName: "usbDriveManagerPanel-" + (root.screen?.name || "unknown")
       screen: root.screen
     }
 

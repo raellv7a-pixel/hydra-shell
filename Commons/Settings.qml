@@ -476,6 +476,9 @@ Singleton {
       property bool enableClipboardChips: true
       property string clipboardWatchTextCommand: "wl-paste --type text --watch cliphist store"
       property string clipboardWatchImageCommand: "wl-paste --type image --watch cliphist store"
+      property list<string> pinnedClipboardIds: []
+      // Persistent author-created notes: [{ id, text, createdAt }]
+      property list<var> clipboardNotes: []
       property string position: "center"  // Position: center, top_left, top_right, bottom_left, bottom_right, bottom_center, top_center
       property list<string> pinnedApps: []
       property list<string> hiddenApps: []
@@ -740,6 +743,20 @@ Singleton {
       property list<string> monitors: [] // holds osd visibility per monitor
     }
 
+    // show keys (evtest-based real-time key display OSD)
+    property JsonObject showKeys: JsonObject {
+      // Off by default: reads raw /dev/input/eventN, a deliberate opt-in security tradeoff (see README).
+      property bool captureEnabled: false
+      property string evtestDevice: "/dev/input/event3"
+      property bool useCustomColors: false
+      property string pillColor: ""
+      property string pillBg: ""
+      property string position: "bottom" // "top", "bottom"
+      property int marginPx: 60
+      property int hideDelaySec: 2
+      property list<string> disabledScreens: []
+    }
+
     // audio
     property JsonObject audio: JsonObject {
       property int volumeStep: 5
@@ -781,6 +798,8 @@ Singleton {
       property list<var> activeTemplates: []
       // Format: [{ "id": "gtk", "enabled": true }, { "id": "qt", "enabled": true }, ...]
       property bool enableUserTheming: false
+      // Xcursor/hyprcursor pixel size for the adaptive "Cursor" template (id "cursor")
+      property int cursorSize: 24
     }
 
     // night light
@@ -792,6 +811,34 @@ Singleton {
       property string dayTemp: "6500"
       property string manualSunrise: "06:30"
       property string manualSunset: "18:30"
+    }
+
+    // NVIDIA digital vibrance (nvibrant)
+    property JsonObject nvibrant: JsonObject {
+      property bool enabled: false
+      property int vibranceValue: 512
+      // stored 1-based (1 = port 0), converted on use
+      property int displayIndex: 1
+    }
+
+    // persistent virtual pet state
+    property JsonObject tamagotchi: JsonObject {
+      property real hunger: 100
+      property real happiness: 100
+      property real cleanliness: 100
+      property real energy: 100
+      property bool sleeping: false
+      property double lastDecayTimestamp: 0
+      property int difficulty: 50
+      property real volume: 0.5
+    }
+
+    // removable USB drive manager
+    property JsonObject usbDriveManager: JsonObject {
+      property bool autoMount: false
+      property bool showNotifications: true
+      property string fileBrowser: "xdg-open"
+      property string terminal: "kitty"
     }
 
     // hooks

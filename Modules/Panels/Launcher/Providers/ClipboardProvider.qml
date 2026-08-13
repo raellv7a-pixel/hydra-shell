@@ -25,7 +25,7 @@ Item {
   readonly property int imageRevision: ClipboardService.revision
 
   // Categories
-  property var availableCategories: Settings.data.appLauncher.enableClipboardChips ? ["All", "Images", "Links", "Files", "Code", "Colors"] : []
+  property var availableCategories: Settings.data.appLauncher.enableClipboardChips ? ["All", "Pinned", "Notes", "Images", "Links", "Files", "Code", "Colors"] : []
   property string selectedCategory: "All"
 
   function selectCategory(cat) {
@@ -39,6 +39,8 @@ Item {
 
   property var categoryIcons: {
     "All": iconMode === "tabler" ? "border-all" : "view-grid",
+    "Pinned": "pin",
+    "Notes": iconMode === "tabler" ? "note" : "note",
     "Images": iconMode === "tabler" ? "photo" : "image",
     "Links": iconMode === "tabler" ? "link" : "insert-link",
     "Files": iconMode === "tabler" ? "file" : "text-x-generic",
@@ -119,6 +121,16 @@ Item {
             }
           },
           {
+            "name": ">clip note",
+            "description": I18n.tr("launcher.providers.clipboard-note-command"),
+            "icon": "note",
+            "isTablerIcon": true,
+            "isImage": false,
+            "onActivate": function () {
+              launcher.setSearchText(">clip note ");
+            }
+          },
+          {
             "name": ">clip clear",
             "description": I18n.tr("launcher.providers.clipboard-clear-description"),
             "icon": iconMode === "tabler" ? "trash" : "user-trash",
@@ -141,6 +153,26 @@ Item {
     lastSearchText = searchText;
     const results = [];
     const query = searchText.slice(5).trim();
+
+    // Author-created notes are persisted independently from cliphist.
+    if (query === "note" || query.startsWith("note ")) {
+      const noteText = query.slice(4).trim();
+      return [{
+                "name": noteText === "" ? I18n.tr("launcher.providers.clipboard-note-empty") : I18n.tr("launcher.providers.clipboard-note-create"),
+                "description": noteText === "" ? I18n.tr("launcher.providers.clipboard-note-command") : noteText,
+                "icon": "note",
+                "isTablerIcon": true,
+                "isImage": false,
+                "onActivate": function () {
+                  if (noteText === "")
+                    return;
+                  ClipboardService.addNote(noteText);
+                  launcher.setSearchText(">clip ");
+                  gotResults = false;
+                  launcher.updateResults();
+                }
+              }];
+    }
 
     // Check if clipboard service is not active
     if (!ClipboardService.active) {
@@ -225,6 +257,7 @@ Item {
     const now = Date.now() / 1000;
 
     const catMap = {
+      "Notes": "note",
       "Images": "image",
       "Links": "link",
       "Files": "file",
@@ -236,7 +269,10 @@ Item {
     items.forEach(function (item) {
       // Category filter
       if (Settings.data.appLauncher.enableClipboardChips && root.selectedCategory !== "All") {
-        if (item.contentType !== catMap[root.selectedCategory]) {
+        if (root.selectedCategory === "Pinned") {
+          if (!ClipboardService.isPinned(item.id))
+            return;
+        } else if (item.contentType !== catMap[root.selectedCategory]) {
           return;
         }
       }
@@ -344,6 +380,8 @@ Item {
       description += ` • ${timeStr}`;
 
     let defaultIcon = iconMode === "tabler" ? "clipboard" : "text-x-generic";
+    if (item.contentType === "note")
+      defaultIcon = "note";
     let colorHex = "";
     if (Settings.data.appLauncher.enableClipboardSmartIcons) {
       if (item.contentType === "link")
@@ -398,6 +436,16 @@ Item {
                    });
     }
 
+    actions.push({
+                   "icon": "pin",
+                   "tooltip": ClipboardService.isPinned(item.clipboardId)
+                              ? I18n.tr("launcher.providers.clipboard-unpin")
+                              : I18n.tr("launcher.providers.clipboard-pin"),
+                   "action": function () {
+                     togglePinItem(item);
+                   }
+                 });
+
     // Delete action
     actions.push({
                    "icon": "trash",
@@ -408,6 +456,19 @@ Item {
                  });
 
     return actions;
+  }
+
+  function canPinItem(item) {
+    return item && !!item.clipboardId;
+  }
+
+  function togglePinItem(item) {
+    if (!canPinItem(item))
+      return;
+    ClipboardService.togglePin(String(item.clipboardId));
+    gotResults = false;
+    if (launcher)
+      launcher.updateResults();
   }
 
   function canDeleteItem(item) {

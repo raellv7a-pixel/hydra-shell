@@ -5,6 +5,7 @@ import Quickshell
 import qs.Commons
 import qs.Services.Compositor
 import qs.Widgets
+import qs.Services.System
 
 ColumnLayout {
   id: root
@@ -98,6 +99,52 @@ ColumnLayout {
     defaultValue: Settings.getDefaultValue("osd.autoHideMs")
     onMoved: value => Settings.data.osd.autoHideMs = value
     text: Math.round(Settings.data.osd.autoHideMs / 1000 * 10) / 10 + "s"
+  }
+
+  NDivider {
+    Layout.fillWidth: true
+  }
+
+  NToggle {
+    label: I18n.tr("panels.osd.show-keys-enabled-label")
+    description: I18n.tr("panels.osd.show-keys-enabled-description")
+    checked: Settings.data.showKeys.captureEnabled
+    defaultValue: Settings.getDefaultValue("showKeys.captureEnabled")
+    onToggled: checked => ShowKeysService.setCaptureEnabled(checked)
+  }
+
+  NTextInput {
+    Layout.fillWidth: true
+    label: I18n.tr("panels.osd.show-keys-device-label")
+    description: I18n.tr("panels.osd.show-keys-device-description")
+    text: Settings.data.showKeys.evtestDevice
+    defaultValue: Settings.getDefaultValue("showKeys.evtestDevice")
+    onEditingFinished: Settings.data.showKeys.evtestDevice = text.trim()
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    label: I18n.tr("panels.osd.show-keys-position-label")
+    model: [
+      { "key": "top", "name": I18n.tr("positions.top-center") },
+      { "key": "bottom", "name": I18n.tr("positions.bottom-center") }
+    ]
+    currentKey: Settings.data.showKeys.position
+    defaultValue: Settings.getDefaultValue("showKeys.position")
+    onSelected: key => Settings.data.showKeys.position = key
+  }
+
+  NValueSlider {
+    Layout.fillWidth: true
+    label: I18n.tr("panels.osd.show-keys-hide-delay-label")
+    from: 1
+    to: 10
+    stepSize: 1
+    showReset: true
+    value: Settings.data.showKeys.hideDelaySec
+    defaultValue: Settings.getDefaultValue("showKeys.hideDelaySec")
+    onMoved: value => Settings.data.showKeys.hideDelaySec = Math.round(value)
+    text: Math.round(Settings.data.showKeys.hideDelaySec) + "s"
   }
 
   NDivider {

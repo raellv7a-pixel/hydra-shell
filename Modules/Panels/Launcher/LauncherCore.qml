@@ -788,6 +788,17 @@ Rectangle {
       }
     }
 
+    // Clipboard pin shortcut. Ctrl avoids stealing plain text input from search.
+    if (event.key === Qt.Key_P && (event.modifiers & Qt.ControlModifier)
+        && selectedIndex >= 0 && results && results[selectedIndex]) {
+      const pinItem = results[selectedIndex];
+      const pinProvider = pinItem.provider || currentProvider;
+      if (pinProvider && pinProvider.canPinItem && pinProvider.canPinItem(pinItem))
+        pinProvider.togglePinItem(pinItem);
+      event.accepted = true;
+      return;
+    }
+
     // Static bindings
     switch (event.key) {
     case Qt.Key_Tab:

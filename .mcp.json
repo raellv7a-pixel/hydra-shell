@@ -4,7 +4,9 @@
       "type": "stdio",
       "command": "prowl-agent",
       "args": [
-        "serve"
+        "serve",
+        "--mcp-surface",
+        "core"
       ]
     }
   }

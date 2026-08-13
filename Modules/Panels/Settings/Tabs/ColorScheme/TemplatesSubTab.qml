@@ -20,6 +20,16 @@ ColumnLayout {
                    });
   }
 
+  // Current mPrimary as "#rrggbb", for the Cursor size control's immediate
+  // regenerate (bypasses the template pipeline's own color source/cache).
+  function primaryHex() {
+    function ch(v) {
+      return Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, "0");
+    }
+    var c = Color.mPrimary;
+    return "#" + ch(c.r) + ch(c.g) + ch(c.b);
+  }
+
   // Build a combined list of all available templates from TemplateRegistry, sorted alphabetically
   readonly property var allTemplates: {
     var templates = [];
@@ -175,6 +185,13 @@ ColumnLayout {
                      "id": templateId,
                      "enabled": true
                    });
+
+      // papirus-folders needs a one-time NOPASSWD sudo grant to recolor
+      // icon folders in the background — see PapirusFoldersSetupService for
+      // why. Idempotent: no-ops (no prompt) once already configured.
+      if (templateId === "papirusFolders") {
+        PapirusFoldersSetupService.ensureConfigured();
+      }
     }
 
     Settings.data.templates.activeTemplates = current;
@@ -295,6 +312,28 @@ ColumnLayout {
     visible: filteredTemplates.length === 0 && searchText.trim() !== ""
     text: I18n.tr("common.no-results")
     color: Color.mOnSurfaceVariant
+  }
+
+  // Cursor size — only meaningful while the adaptive "Cursor" template is
+  // active. Regenerates immediately: a size-only change doesn't touch the
+  // primary-color cache file the template pipeline diffs against, so its
+  // normal "skip unchanged" optimization would otherwise never re-run
+  // cursor-generate.py for a size change alone.
+  NComboBox {
+    visible: root.isTemplateActive("cursor")
+    Layout.fillWidth: true
+    Layout.topMargin: Style.marginM
+    label: I18n.tr("panels.color-scheme.templates-cursor-size-label")
+    description: I18n.tr("panels.color-scheme.templates-cursor-size-description")
+    model: [16, 20, 22, 24, 28, 32, 40, 48, 56, 64].map(s => ({
+                                                             "key": String(s),
+                                                             "name": s + "px"
+                                                           }))
+    currentKey: String(Settings.data.templates.cursorSize)
+    onSelected: key => {
+                  Settings.data.templates.cursorSize = parseInt(key, 10);
+                  Quickshell.execDetached(["python3", TemplateRegistry.cursorGenerateScript, root.primaryHex(), key]);
+                }
   }
 
   NDivider {
