@@ -131,12 +131,18 @@ if ! $SKIP_OPTIONAL; then
 fi
 
 # ── 2. build & install the noctalia-qs engine (binary: qs / quickshell) ────
+# Cloned from raellv7a-pixel/noctalia-qs (our own fork, byte-identical to
+# upstream noctalia-dev/noctalia-qs at the point it was archived on
+# 2026-07-12 — Noctalia v5 dropped Quickshell/QML entirely, so upstream has
+# no reason to un-archive it). Building from our own copy, not upstream's,
+# means this installer keeps working even if the upstream repo is ever
+# deleted outright, not just archived.
 if command -v qs >/dev/null 2>&1 && ! $FORCE_ENGINE; then
   log "qs already on PATH ($(command -v qs)) — skipping engine build (use --force-engine to rebuild)"
 else
-  log "Building noctalia-qs engine from source (no AUR package exists for it)"
+  log "Building noctalia-qs engine from source (archived upstream, no AUR package — building from our own mirror)"
   sudo pacman -S --needed --noconfirm "${ENGINE_BUILD_PACMAN[@]}"
-  git clone --depth 1 https://github.com/noctalia-dev/noctalia-qs.git "$ENGINE_SRC_DIR"
+  git clone --depth 1 https://github.com/raellv7a-pixel/noctalia-qs.git "$ENGINE_SRC_DIR"
   cmake -S "$ENGINE_SRC_DIR" -B "$ENGINE_SRC_DIR/build" -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr/local \

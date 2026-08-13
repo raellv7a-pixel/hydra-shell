@@ -37,18 +37,24 @@ sudo pacman -S --needed \
 
 ## Motor Quickshell (`noctalia-qs`, binário `qs`/`quickshell`)
 
-**Não existe pacote AUR para o `noctalia-qs`.** O único pacote AUR com "noctalia"
-no nome é `noctalia-git`, que é o **Noctalia v5** — uma reescrita nativa C++/Meson
-incompatível com esta shell (que roda em cima do Quickshell/QML, branch `legacy-v4`).
-O caminho correto é compilar do código-fonte, como o próprio `nix/package.nix`
-já faz sob Nix:
+**Não existe pacote AUR para o `noctalia-qs`, e o repositório upstream
+(`noctalia-dev/noctalia-qs`) está arquivado** desde 2026-07-12 — o Noctalia
+v5 abandonou Quickshell/QML por completo, então não há motivo para o time
+reativá-lo. Um repositório arquivado ainda pode ser clonado normalmente, mas
+pode ser apagado a qualquer momento sem aviso. Por isso mantemos nosso
+próprio espelho, `raellv7a-pixel/noctalia-qs` (fork 1:1, verificado
+byte-idêntico ao upstream no momento do arquivamento) — `install.sh` clona
+dele, não do upstream. O único pacote AUR com "noctalia" no nome é
+`noctalia-git`, que é o Noctalia v5 (reescrita nativa C++/Meson,
+incompatível com esta shell, que roda em cima do Quickshell/QML, branch
+`legacy-v4`).
 
 ```bash
 sudo pacman -S --needed \
     cmake ninja pkgconf cli11 vulkan-headers spirv-tools \
     libdrm cpptrace jemalloc wayland wayland-protocols libxcb glib2 pam base-devel
 
-git clone --depth 1 https://github.com/noctalia-dev/noctalia-qs.git
+git clone --depth 1 https://github.com/raellv7a-pixel/noctalia-qs.git
 cmake -S noctalia-qs -B noctalia-qs/build -GNinja \
     -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
 cmake --build noctalia-qs/build
