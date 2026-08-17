@@ -12,7 +12,13 @@
 # Passos:
 #   1. Exige o Lab limpo e em legacy-v4 (nunca decide por você o que commitar).
 #   2. Roda Scripts/dev/qmlfmt.sh (mesmo formatter do pre-commit hook) e falha
-#      se sobrar diff — força formatar e commitar antes de publicar.
+#      se sobrar diff — força formatar e commitar antes de publicar. Pule com
+#      --skip-format só se o `qmlformat` instalado nesta máquina estiver
+#      quebrado (ex.: versão do qt6-declarative com regressão conhecida —
+#      visto com 6.11.1 do repo Arch, que falha silenciosamente, exit 1 sem
+#      stderr, em alguns arquivos, e reformata em massa os demais com um
+#      estilo diferente do commitado). Formate à mão os arquivos tocados
+#      nesse caso; nunca commit um reformat em massa sem revisar o diff.
 #   3. Roda `prowl-agent doctor` no Lab, se disponível (não bloqueia; é um
 #      relatório de saúde do projeto, não um linter estrito).
 #   4. git push do Lab para origin/legacy-v4.
@@ -23,7 +29,7 @@
 #   7. Reinicia o processo `qs -c hydra-shell` (mesmo comando do
 #      Assets/Hyprland/modules/autostart.lua) para a mudança entrar no ar.
 #
-# Uso: Scripts/dev/lab-sync.sh [-y|--yes]
+# Uso: Scripts/dev/lab-sync.sh [-y|--yes] [--skip-format]
 set -euo pipefail
 
 BRANCH="legacy-v4"
@@ -31,9 +37,9 @@ LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ACTIVE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/hydra-shell"
 
 YES=false
+SKIP_FORMAT=false
 for arg in "$@"; do
   case "$arg" in
-    -y|--yes) YES=true ;;
   esac
 done
 
@@ -48,9 +54,13 @@ current_branch="$(git branch --show-current)"
 [ "$current_branch" = "$BRANCH" ] || die "Lab está em '$current_branch', não em '$BRANCH' — troque ou faça merge antes de sincronizar."
 [ -z "$(git status --porcelain)" ] || die "Lab tem mudanças não commitadas — commit ou stash antes de sincronizar."
 
-log "Formatando QML (Lab)"
-./Scripts/dev/qmlfmt.sh
-[ -z "$(git status --porcelain)" ] || die "qmlfmt.sh alterou arquivos — revise e commit a formatação antes de sincronizar."
+if $SKIP_FORMAT; then
+  warn "--skip-format: pulei o Scripts/dev/qmlfmt.sh. Garanta à mão que o que você tocou está formatado."
+else
+  log "Formatando QML (Lab)"
+  ./Scripts/dev/qmlfmt.sh
+  [ -z "$(git status --porcelain)" ] || die "qmlfmt.sh alterou arquivos — revise e commit a formatação antes de sincronizar."
+fi
 
 if command -v prowl-agent >/dev/null 2>&1; then
   log "prowl-agent doctor (Lab)"
