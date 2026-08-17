@@ -1,5 +1,7 @@
 {
   quickshell,
+  cmake,
+  ninja,
   nixfmt,
   statix,
   deadnix,
@@ -14,6 +16,8 @@ mkShellNoCC {
   #it's faster than mkDerivation / mkShell
   packages = [
     quickshell
+    cmake
+    ninja
 
     # nix
     nixfmt # formatter
@@ -30,5 +34,6 @@ mkShellNoCC {
     # CoC
     lefthook # githooks
     kdePackages.qtdeclarative # qmlfmt, qmllint, qmlls and etc; Qt6
+    kdePackages.qtshadertools # qsb shader compiler
   ];
 }

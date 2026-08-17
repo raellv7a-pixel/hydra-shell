@@ -80,8 +80,8 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 - [x] Portar `BlobGroup`, `BlobRect`, `BlobInvertedRect`, material, física e shader para o namespace `Hydra.Visual`.
 - [x] Preservar cabeçalhos GPL e créditos da Caelestia.
 - [x] Criar build CMake mínimo do módulo QML.
-- [ ] Integrar build/instalação em `Scripts/bash/install.sh`.
-- [ ] Integrar o plugin em `flake.nix`/`nix/`.
+- [x] Integrar build/instalação em `Scripts/bash/install.sh`.
+- [x] Integrar o plugin em `flake.nix`/`nix/`.
 - [ ] Criar smoke surface isolada com dois blobs, fusão, raio por canto e deformação.
 
 ### Validação obrigatória
@@ -295,3 +295,5 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 | 2026-08-17 | 0 | 16 PNGs em `~/Pictures/HydraShell-Baseline/2026-08-17/`, superfícies nominadas e DP-1/DP-2 identificados; launcher, central, settings, notificações, Screen Toolkit e OSD inspecionados visualmente | Baseline capturado |
 | 2026-08-17 | 0 | Reprodução mostrou OSD importado sem instância; `OSD {}` restaurado em `shell.qml`; volume IPC renderizou em DP-1 e DP-2 no Lab | Bug funcional de baseline corrigido e verificado |
 | 2026-08-17 | 1 | CMake/Ninja com Qt 6.11.1 compilou `hydra_visual`, plugin QML e shaders; `/usr/lib64/qt6/bin/qml -I /tmp/hydra-visual-build/qml /tmp/HydraVisualImport.qml` encerrou com código 0 | Porte mínimo `Hydra.Visual` compila e importa |
+| 2026-08-17 | 1 | `build-visual-plugin.sh --prefix /tmp/hydra-visual-install` instalou `.so`, `qmldir` e `.qmltypes` com RPATH `$ORIGIN`; import via `QML_IMPORT_PATH` retornou 0; `bash -n` passou | Instalação CachyOS/Lab validada |
+| 2026-08-17 | 1 | `nix/package.nix` passou a compilar/instalar `Hydra.Visual`, exportar `QML_IMPORT_PATH` e declarar GPL-3.0-only; dev shell ganhou CMake/Ninja/ShaderTools | Integração Nix implementada; build Nix não executado porque `nix` não está instalado nesta máquina |

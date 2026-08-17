@@ -28,9 +28,11 @@
 #   5. Clones/updates the hydra-shell repo itself into the path Quickshell's
 #      own convention expects (~/.config/quickshell/hydra-shell, matched by
 #      `qs -c hydra-shell` in Assets/Hyprland/modules/{autostart,binds}.lua).
-#   6. Runs the existing, idempotent Scripts/bash/hyprland-adopt.sh to install
+#   6. Compiles and installs the GPL `Hydra.Visual` native QML module under
+#      ~/.local/lib/qt6/qml.
+#   7. Runs the existing, idempotent Scripts/bash/hyprland-adopt.sh to install
 #      the Hyprland Lua config (backs up whatever was there first).
-#   7. Prints a doctor-style summary: Hyprland version check, and a pass/fail
+#   8. Prints a doctor-style summary: Hyprland version check, and a pass/fail
 #      table of every binary the shell can call, required and optional.
 #
 # Idempotent: safe to re-run. By default it skips rebuilding the qs engine if
@@ -122,6 +124,10 @@ ENGINE_BUILD_PACMAN=(
   libdrm cpptrace jemalloc wayland wayland-protocols libxcb glib2 pam base-devel
 )
 
+PLUGIN_BUILD_PACMAN=(
+  cmake ninja
+)
+
 log "Installing runtime dependencies (pacman)"
 sudo pacman -S --needed --noconfirm "${RUNTIME_PACMAN[@]}"
 
@@ -197,11 +203,16 @@ else
   git clone --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
 fi
 
-# ── 6. adopt the Hyprland config (existing, idempotent, backs up first) ────
+# ── 6. build & install the Hydra.Visual native QML module ───────────────────
+log "Building Hydra.Visual QML module"
+sudo pacman -S --needed --noconfirm "${PLUGIN_BUILD_PACMAN[@]}"
+bash "$INSTALL_DIR/Scripts/dev/build-visual-plugin.sh" --prefix "$HOME/.local"
+
+# ── 7. adopt the Hyprland config (existing, idempotent, backs up first) ────
 log "Installing Hyprland Lua config"
 bash "$INSTALL_DIR/Scripts/bash/hyprland-adopt.sh" "$INSTALL_DIR/Assets/Hyprland"
 
-# ── 6b. launch immediately if already inside a running Hyprland session ────
+# ── 7b. launch immediately if already inside a running Hyprland session ───
 # autostart.lua's exec-once fires on the "hyprland.start" event, which has
 # already happened if we're installing mid-session (e.g. right after a fresh
 # CachyOS+Hyprland install, logged in, running this script by hand) — a
@@ -210,11 +221,11 @@ bash "$INSTALL_DIR/Scripts/bash/hyprland-adopt.sh" "$INSTALL_DIR/Assets/Hyprland
 # está rodando" bar this script is held to.
 if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1 && ! pgrep -x quickshell >/dev/null 2>&1; then
   log "Hyprland already running — starting hydra-shell now"
-  setsid qs -c hydra-shell -d >/dev/null 2>&1 &
+  QML_IMPORT_PATH="$HOME/.local/lib/qt6/qml${QML_IMPORT_PATH:+:$QML_IMPORT_PATH}" setsid qs -c hydra-shell -d >/dev/null 2>&1 &
   disown
 fi
 
-# ── 7. doctor summary ────────────────────────────────────────────────────
+# ── 8. doctor summary ────────────────────────────────────────────────────
 log "Doctor summary"
 
 if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
@@ -235,7 +246,7 @@ check() {
 echo "Required:"
 for b in qs hyprctl grim slurp hyprpicker wl-copy tesseract magick zbarimg curl ffmpeg jq \
          brightnessctl ddcutil wlsunset cliphist wlr-randr playerctl bluetoothctl nmcli \
-         wpctl pkexec powerprofilesctl udisksctl git shelly wf-recorder trans; do
+         wpctl pkexec powerprofilesctl udisksctl git shelly wf-recorder trans cmake ninja; do
   check "$b" "runtime dependency"
 done
 echo "Optional:"

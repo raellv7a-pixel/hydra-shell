@@ -19,7 +19,7 @@ The imported and modified source inventory is:
 - `shaders/blob.frag`, `shaders/blob.vert`
 - the minimal CMake/QML module definition required to build those sources
 
-Hydra-specific modifications currently include the QML module rename from `Caelestia.Blobs` to `Hydra.Visual`, a standalone CMake build, and explicit SPDX attribution on every imported source. Integration with Hydra `MainScreen`/`SmartPanel`, CachyOS/Nix installation and performance-mode controls are tracked separately. Modified source files retain upstream attribution and record that they were modified for Hydra Shell.
+Hydra-specific modifications currently include the QML module rename from `Caelestia.Blobs` to `Hydra.Visual`, standalone CMake build/install rules, CachyOS and Nix packaging, and explicit SPDX attribution on every imported source. Integration with Hydra `MainScreen`/`SmartPanel` and performance-mode controls are tracked separately. Modified source files retain upstream attribution and record that they were modified for Hydra Shell.
 
 No Caelestia branding or nonessential assets are included by this decision. Other Caelestia components or third-party dependencies, including `M3Shapes`, require a separate license audit before incorporation.
 

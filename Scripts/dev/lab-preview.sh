@@ -14,11 +14,14 @@
 set -euo pipefail
 
 LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+QML_MODULE_ROOT="$LAB_DIR/.build/visual-install/lib/qt6/qml"
 
 command -v qs >/dev/null 2>&1 || {
   echo "qs (noctalia-qs) não encontrado no PATH." >&2
   exit 1
 }
+"$LAB_DIR/Scripts/dev/build-visual-plugin.sh"
+export QML_IMPORT_PATH="$QML_MODULE_ROOT${QML_IMPORT_PATH:+:$QML_IMPORT_PATH}"
 
 echo "==> Preview do Lab: $LAB_DIR"
 echo "==> A shell ativa (qs -c hydra-shell), se estiver rodando, continua intacta."

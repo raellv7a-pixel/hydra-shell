@@ -14,10 +14,11 @@
   ],
 
   lib,
-  stdenvNoCC,
+  stdenv,
   # build
+  cmake,
+  ninja,
   qt6,
-  quickshell,
   # runtime deps
   brightnessctl,
   cliphist,
@@ -74,23 +75,39 @@ let
     gobject-introspection
   ];
 in
-stdenvNoCC.mkDerivation {
+stdenv.mkDerivation {
   pname = "noctalia-shell";
   inherit version src;
 
   nativeBuildInputs = [
+    cmake
+    ninja
     qt6.wrapQtAppsHook
   ];
 
   buildInputs = [
     qt6.qtbase
+    qt6.qtdeclarative
     qt6.qtmultimedia
+    qt6.qtshadertools
   ];
 
+  buildPhase = ''
+    runHook preBuild
+    cmake -S plugin -B build/visual-plugin -G Ninja \
+      -DCMAKE_BUILD_TYPE=Release
+    cmake --build build/visual-plugin
+    runHook postBuild
+  '';
+
   installPhase = ''
+    runHook preInstall
     mkdir -p $out/share/noctalia-shell $out/bin
     cp -r . $out/share/noctalia-shell
+    rm -rf $out/share/noctalia-shell/plugin
+    cmake --install build/visual-plugin --prefix "$out"
     ln -s ${quickshell}/bin/qs $out/bin/noctalia-shell
+    runHook postInstall
   '';
 
   preFixup = ''
@@ -99,14 +116,15 @@ stdenvNoCC.mkDerivation {
       --prefix XDG_DATA_DIRS : ${wayland-scanner}/share
       --prefix XDG_DATA_DIRS : ${adw-gtk3}/share
       --set-default QS_CONFIG_PATH "$out/share/noctalia-shell"
+      --prefix QML_IMPORT_PATH : "$out/lib/qt6/qml"
       ${lib.optionalString calendarSupport "--prefix GI_TYPELIB_PATH : ${giTypelibPath}"}
     )
   '';
 
   meta = {
-    description = "A sleek and minimal desktop shell thoughtfully crafted for Wayland, built with Quickshell.";
-    homepage = "https://github.com/noctalia-dev/noctalia-shell";
-    license = lib.licenses.mit;
+    description = "Hydra Shell, a Qt/QML desktop shell for Hyprland";
+    homepage = "https://github.com/raellv7a-pixel/hydra-shell";
+    license = lib.licenses.gpl3Only;
     mainProgram = "noctalia-shell";
   };
 }
