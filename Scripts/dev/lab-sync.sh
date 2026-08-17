@@ -75,11 +75,40 @@ git -C "$ACTIVE_DIR" checkout "$BRANCH"
 git -C "$ACTIVE_DIR" reset --hard "origin/$BRANCH"
 
 log "Reiniciando hydra-shell"
-pkill -f 'qs -c hydra-shell' 2>/dev/null || true
-sleep 0.3
+if pgrep -x qs >/dev/null 2>&1; then
+  pkill -x qs
+  for _ in $(seq 1 20); do
+    pgrep -x qs >/dev/null 2>&1 || break
+    sleep 0.2
+  done
+  pgrep -x qs >/dev/null 2>&1 && { warn "qs não saiu a tempo, forçando"; pkill -9 -x qs; sleep 0.3; }
+fi
+
+# O --no-duplicate padrão do qs decide se já há instância rodando checando o
+# PID gravado em $XDG_RUNTIME_DIR/quickshell/by-pid/<pid>; um lock deixado
+# por um processo morto sem limpeza (crash, SIGKILL) pode fazer o próximo
+# `qs -c hydra-shell -d` recusar a subir, ou pior, subir uma segunda
+# instância disputando os mesmos arquivos de settings/estado. Remove só as
+# entradas cujo PID está comprovadamente morto antes de relançar.
+QS_BYPID_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/quickshell/by-pid"
+if [ -d "$QS_BYPID_DIR" ]; then
+  for pidlink in "$QS_BYPID_DIR"/*; do
+    [ -e "$pidlink" ] || continue
+    pid="$(basename "$pidlink")"
+    if ! kill -0 "$pid" 2>/dev/null; then
+      rm -rf "$(readlink -f "$pidlink")" "$pidlink"
+    fi
+  done
+fi
+
 if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
   command -v qs >/dev/null 2>&1 && qs -c hydra-shell -d
-  log "hydra-shell reiniciada."
+  sleep 0.5
+  if pgrep -x qs >/dev/null 2>&1; then
+    log "hydra-shell reiniciada (PID $(pgrep -x qs | tr '\n' ' '))."
+  else
+    warn "qs -c hydra-shell -d rodou mas nenhum processo ficou de pé — confira \$XDG_RUNTIME_DIR/quickshell/by-id/*/log.log"
+  fi
 else
   warn "Hyprland não detectado nesta sessão — inicie manualmente com: qs -c hydra-shell -d"
 fi
