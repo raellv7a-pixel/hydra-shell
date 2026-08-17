@@ -9,7 +9,7 @@ Source reference used for the port:
 - License: GPL-3.0-only; see the root `LICENSE` file.
 - Upstream subsystem: `plugin/src/Caelestia/Blobs/`
 
-The intended imported/modified source inventory is:
+The imported and modified source inventory is:
 
 - `blobgroup.cpp`, `blobgroup.hpp`
 - `blobshape.cpp`, `blobshape.hpp`
@@ -19,7 +19,7 @@ The intended imported/modified source inventory is:
 - `shaders/blob.frag`, `shaders/blob.vert`
 - the minimal CMake/QML module definition required to build those sources
 
-Hydra-specific modifications will include namespace/module changes, integration with the Hydra `MainScreen`/`SmartPanel` architecture, build/install integration for CachyOS and Nix, and performance-mode controls. Modified source files must retain their upstream copyright/license notices and record that they were modified for Hydra Shell.
+Hydra-specific modifications currently include the QML module rename from `Caelestia.Blobs` to `Hydra.Visual`, a standalone CMake build, and explicit SPDX attribution on every imported source. Integration with Hydra `MainScreen`/`SmartPanel`, CachyOS/Nix installation and performance-mode controls are tracked separately. Modified source files retain upstream attribution and record that they were modified for Hydra Shell.
 
 No Caelestia branding or nonessential assets are included by this decision. Other Caelestia components or third-party dependencies, including `M3Shapes`, require a separate license audit before incorporation.
 

@@ -76,10 +76,10 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 
 ### Checklist
 
-- [ ] Auditar dependências e compatibilidade do plugin Caelestia com `noctalia-qs 0.0.12`.
-- [ ] Portar `BlobGroup`, `BlobRect`, `BlobInvertedRect`, material, física e shader para o namespace `Hydra.Visual`.
-- [ ] Preservar cabeçalhos GPL e créditos da Caelestia.
-- [ ] Criar build CMake mínimo do módulo QML.
+- [x] Auditar dependências e compatibilidade do plugin Caelestia com `noctalia-qs 0.0.12`.
+- [x] Portar `BlobGroup`, `BlobRect`, `BlobInvertedRect`, material, física e shader para o namespace `Hydra.Visual`.
+- [x] Preservar cabeçalhos GPL e créditos da Caelestia.
+- [x] Criar build CMake mínimo do módulo QML.
 - [ ] Integrar build/instalação em `Scripts/bash/install.sh`.
 - [ ] Integrar o plugin em `flake.nix`/`nix/`.
 - [ ] Criar smoke surface isolada com dois blobs, fusão, raio por canto e deformação.
@@ -294,3 +294,4 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 | 2026-08-17 | 0 | `LICENSE` atualizado para GPL-3.0-only; MIT do Noctalia preservada em `LICENSES/Noctalia-MIT.txt`; inventário exato do porte em `LICENSES/Caelestia-Blob-Port.md` | Licenciamento e atribuição fechados |
 | 2026-08-17 | 0 | 16 PNGs em `~/Pictures/HydraShell-Baseline/2026-08-17/`, superfícies nominadas e DP-1/DP-2 identificados; launcher, central, settings, notificações, Screen Toolkit e OSD inspecionados visualmente | Baseline capturado |
 | 2026-08-17 | 0 | Reprodução mostrou OSD importado sem instância; `OSD {}` restaurado em `shell.qml`; volume IPC renderizou em DP-1 e DP-2 no Lab | Bug funcional de baseline corrigido e verificado |
+| 2026-08-17 | 1 | CMake/Ninja com Qt 6.11.1 compilou `hydra_visual`, plugin QML e shaders; `/usr/lib64/qt6/bin/qml -I /tmp/hydra-visual-build/qml /tmp/HydraVisualImport.qml` encerrou com código 0 | Porte mínimo `Hydra.Visual` compila e importa |
