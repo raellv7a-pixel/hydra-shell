@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
+import qs.Widgets
 
 Item {
   id: root
@@ -31,6 +32,8 @@ Item {
 
   // Internal properties
   property bool hovered: false
+  readonly property bool pressed: mouseArea.pressed
+
   readonly property color contentColor: {
     if (!root.enabled) {
       return Color.mOnSurfaceVariant;
@@ -44,11 +47,15 @@ Item {
     return root.textColor;
   }
 
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: root.text !== "" ? root.text : root.icon
+
   // Dimensions - include margin so border renders cleanly at fractional scales
   implicitWidth: bg.implicitWidth + 2 * Style.borderS
   implicitHeight: bg.implicitHeight + 2 * Style.borderS
 
-  opacity: enabled ? 1.0 : 0.6
+  opacity: Style.opacityFull
 
   Rectangle {
     id: bg
@@ -58,12 +65,11 @@ Item {
     implicitWidth: contentRow.implicitWidth + (root.fontSize * 2)
     implicitHeight: contentRow.implicitHeight + (root.fontSize)
 
-    radius: root.buttonRadius
+    radius: morph.radius
+    scale: morph.scale
     color: {
       if (!root.enabled)
-        return root.outlined ? "transparent" : Qt.lighter(Color.mSurfaceVariant, 1.2);
-      if (root.hovered)
-        return root.hoverColor;
+        return root.outlined ? "transparent" : Qt.alpha(Color.mOnSurface, Style.disabledContainerOpacity);
       return root.outlined ? "transparent" : root.backgroundColor;
     }
 
@@ -78,18 +84,39 @@ Item {
 
     Behavior on color {
       enabled: !Color.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCubic
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
 
     Behavior on border.color {
       enabled: !Color.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCubic
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
+    }
+
+    NShapeMorph {
+      id: morph
+
+      enabled: root.enabled
+      hovered: root.hovered
+      pressed: root.pressed
+      restingRadius: root.buttonRadius
+      hoverRadius: Math.min(root.buttonRadius, Style.radiusControlChecked)
+      pressedRadius: Math.min(root.buttonRadius, Style.radiusControlPressed)
+    }
+
+    NStateLayer {
+      id: stateLayer
+
+      anchors.fill: parent
+      radius: bg.radius
+      enabled: root.enabled
+      hovered: root.hovered
+      pressed: root.pressed
+      focused: root.activeFocus
+      stateColor: root.hoverColor
     }
 
     // Content
@@ -111,9 +138,8 @@ Item {
 
         Behavior on color {
           enabled: !Color.isTransitioning
-          ColorAnimation {
-            duration: Style.animationFast
-            easing.type: Easing.OutCubic
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
           }
         }
       }
@@ -129,12 +155,16 @@ Item {
 
         Behavior on color {
           enabled: !Color.isTransitioning
-          ColorAnimation {
-            duration: Style.animationFast
-            easing.type: Easing.OutCubic
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
           }
         }
       }
+    }
+
+    NFocusRing {
+      focusVisible: root.activeFocus
+      targetRadius: bg.radius
     }
 
     // Mouse interaction
@@ -161,14 +191,21 @@ Item {
         }
       }
       onPressed: mouse => {
-                   if (root.tooltipText && (!Array.isArray(root.tooltipText) || root.tooltipText.length > 0)) {
-                     TooltipService.hide();
-                   }
+                   if (root.tooltipText && (!Array.isArray(root.tooltipText) || root.tooltipText.length > 0))
+                   TooltipService.hide();
+                   if (!root.enabled)
+                   return;
+                   root.forceActiveFocus();
+                   stateLayer.rippleAt(mouse.x, mouse.y);
+                 }
+      onClicked: mouse => {
+                   if (!root.enabled)
+                   return;
                    if (mouse.button === Qt.LeftButton) {
                      root.clicked();
-                   } else if (mouse.button == Qt.RightButton) {
+                   } else if (mouse.button === Qt.RightButton) {
                      root.rightClicked();
-                   } else if (mouse.button == Qt.MiddleButton) {
+                   } else if (mouse.button === Qt.MiddleButton) {
                      root.middleClicked();
                    }
                  }
@@ -181,4 +218,17 @@ Item {
       }
     }
   }
+
+  Keys.onReturnPressed: event => {
+                          if (!root.enabled)
+                          return;
+                          root.clicked();
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         if (!root.enabled)
+                         return;
+                         root.clicked();
+                         event.accepted = true;
+                       }
 }

@@ -8,7 +8,7 @@ import qs.Commons
 Item {
   id: root
 
-  property color color: Color.mSurfaceVariant
+  property color color: Color.mSurfaceContainer
   property bool forceOpaque: false
   property alias radius: bg.radius
   property alias border: bg.border
@@ -22,7 +22,7 @@ Item {
   Rectangle {
     id: bg
     anchors.fill: parent
-    radius: Style.radiusM
+    radius: Style.radiusCard
     border.color: Style.boxBorderColor
     border.width: Style.borderS
     color: {

@@ -115,6 +115,8 @@ Singleton {
   readonly property real opacityHeavy: 0.75
   readonly property real opacityAlmost: 0.95
   readonly property real opacityFull: 1.0
+  readonly property real disabledContentOpacity: 0.38
+  readonly property real disabledContainerOpacity: 0.12
 
   readonly property real effectivePanelOpacity: PowerProfileService.noctaliaPerformanceMode ? 1.0 : Color.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity)
   readonly property real effectiveBarOpacity: PowerProfileService.noctaliaPerformanceMode ? 1.0 : Settings.data.bar.backgroundOpacity

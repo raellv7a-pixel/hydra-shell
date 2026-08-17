@@ -9,7 +9,7 @@ Text {
   property bool richTextEnabled: false
   property bool markdownTextEnabled: false
   property string family: Settings.data.ui.fontDefault
-  property real pointSize: Style.fontSizeM
+  property real pointSize: Style.fontSizeBodyMedium
   property bool applyUiScale: true
   property real fontScale: {
     const fontScale = (root.family === Settings.data.ui.fontDefault ? Settings.data.ui.fontDefaultScale : Settings.data.ui.fontFixedScale);
@@ -20,7 +20,7 @@ Text {
   }
   property var features: ({})
 
-  opacity: enabled ? 1.0 : 0.6
+  opacity: enabled ? Style.opacityFull : Style.disabledContentOpacity
   font.family: root.family
   font.weight: Style.fontWeightMedium
   font.pointSize: Math.max(1, root.pointSize * fontScale)

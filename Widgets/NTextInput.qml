@@ -31,7 +31,7 @@ ColumnLayout {
   signal editingFinished
   signal accepted
 
-  opacity: enabled ? 1.0 : 0.3
+  opacity: Style.opacityFull
   spacing: Style.marginS
 
   readonly property bool isValueChanged: (defaultValue !== undefined) && (text !== defaultValue)
@@ -66,15 +66,38 @@ ColumnLayout {
     background: Rectangle {
       id: frame
 
-      radius: root.radius
-      color: Color.mSurfaceContainerHigh
-      border.color: input.activeFocus ? Color.mPrimary : Color.mOutline
-      border.width: input.activeFocus ? Style.borderM : Style.borderS
+      radius: frameMorph.radius
+      scale: frameMorph.scale
+      color: root.enabled ? Color.mSurfaceContainerHigh : Qt.alpha(Color.mOnSurface, Style.disabledContainerOpacity)
+      border.color: Color.mOutline
+      border.width: Style.borderS
 
-      Behavior on border.color {
-        ColorAnimation {
-          duration: Style.animationFast
-        }
+      NShapeMorph {
+        id: frameMorph
+
+        enabled: root.enabled
+        hovered: frameControl.hovered
+        focused: input.activeFocus
+        restingRadius: root.radius
+        hoverRadius: Math.min(root.radius, Style.radiusControlChecked)
+        pressedRadius: Math.min(root.radius, Style.radiusControlPressed)
+      }
+
+      NStateLayer {
+        id: inputStateLayer
+
+        anchors.fill: parent
+        radius: frame.radius
+        enabled: root.enabled
+        hovered: frameControl.hovered
+        focused: input.activeFocus
+        stateColor: Color.mPrimary
+        rippleEnabled: !root.readOnly
+      }
+
+      NFocusRing {
+        focusVisible: input.activeFocus
+        targetRadius: frame.radius
       }
     }
 
@@ -93,6 +116,8 @@ ColumnLayout {
                      mouse.accepted = true;
                      // Focus the input and position cursor
                      input.forceActiveFocus();
+                     const position = backgroundCapture.mapToItem(frame, mouse.x, mouse.y);
+                     inputStateLayer.rippleAt(position.x, position.y);
                      var inputPos = mapToItem(inputContainer, mouse.x, mouse.y);
                      if (inputPos.x >= 0 && inputPos.x <= inputContainer.width) {
                        var textPos = inputPos.x - Style.marginM;

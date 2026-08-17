@@ -14,10 +14,9 @@ ColumnLayout {
   property color iconColor: Color.mOnSurface
   property bool showIndicator: false
   property string indicatorTooltip: ""
-  property real labelSize: Style.fontSizeL
+  property real labelSize: Style.fontSizeTitleSmall
 
-  opacity: enabled ? 1.0 : 0.6
-  spacing: Style.marginXXS
+  spacing: Style.spaceXXS
   visible: root.label != "" || root.description != ""
 
   Layout.fillWidth: true
@@ -61,7 +60,7 @@ ColumnLayout {
     visible: root.description !== ""
     Layout.fillWidth: true
     text: root.description
-    pointSize: Style.fontSizeS
+    pointSize: Style.fontSizeBodySmall
     color: root.descriptionColor
     wrapMode: Text.WordWrap
     textFormat: Text.StyledText

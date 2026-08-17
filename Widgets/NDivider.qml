@@ -4,23 +4,27 @@ import Quickshell.Widgets
 import qs.Commons
 
 Rectangle {
-  property bool vertical: false
+  id: root
 
-  width: vertical ? Style.borderS : parent.width
-  height: vertical ? parent.height : Style.borderS
+  property bool vertical: false
+  property real thickness: Style.borderS
+  property color dividerColor: Color.mOutline
+
+  width: root.vertical ? root.thickness : parent.width
+  height: root.vertical ? parent.height : root.thickness
   gradient: Gradient {
-    orientation: vertical ? Gradient.Vertical : Gradient.Horizontal
+    orientation: root.vertical ? Gradient.Vertical : Gradient.Horizontal
     GradientStop {
       position: 0.0
       color: "transparent"
     }
     GradientStop {
       position: 0.1
-      color: Color.mOutline
+      color: root.dividerColor
     }
     GradientStop {
       position: 0.9
-      color: Color.mOutline
+      color: root.dividerColor
     }
     GradientStop {
       position: 1.0
