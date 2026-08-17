@@ -13,7 +13,9 @@ ColumnLayout {
 
   signal settingsChanged(var settings)
 
-  property bool valueShowPercentage: widgetData.showPercentage !== undefined ? widgetData.showPercentage : widgetMetadata.showPercentage
+  property bool valueShowPercentage: widgetData.showPercentage !== undefined
+    ? widgetData.showPercentage
+    : widgetMetadata.showPercentage
 
   function saveSettings() {
     const settings = Object.assign({}, widgetData || {});

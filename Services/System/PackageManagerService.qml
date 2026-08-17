@@ -57,8 +57,8 @@ Singleton {
 
     Logger.d("PackageManager", `Running: ${command.join(" ")} (elevator: ${elevatorLabel})`);
     operationProcess.exec({
-                            command: command
-                          });
+      command: command
+    });
     return true;
   }
 

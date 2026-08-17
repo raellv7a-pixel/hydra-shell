@@ -2,8 +2,8 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Io
+import Quickshell.Hyprland
 import qs.Commons
 
 // Estado do seletor de compartilhamento de tela.
@@ -71,8 +71,8 @@ Singleton {
     }
 
     listReader.exec({
-                      "command": ["cat", String(listFile || "/dev/null")]
-                    });
+      "command": ["cat", String(listFile || "/dev/null")]
+    });
 
     captureScreens();
     resolveRequestingApp();
@@ -157,12 +157,12 @@ Singleton {
       if (handle.length > 0 && /^[0-9]+$/.test(handle)) {
         const address = decimalToAddress(addrDec);
         result.push({
-                      "handle": handle,
-                      "appClass": appClass,
-                      "title": title,
-                      "address": address,
-                      "toplevel": findToplevel(address, appClass, title)
-                    });
+          "handle": handle,
+          "appClass": appClass,
+          "title": title,
+          "address": address,
+          "toplevel": findToplevel(address, appClass, title)
+        });
       }
 
       rolling = rolling.substring(endSep + 5);
@@ -224,8 +224,8 @@ Singleton {
       return;
 
     snapshotProc.exec({
-                        "command": ["sh", "-c", commands.join("; ") + "; true"]
-                      });
+      "command": ["sh", "-c", commands.join("; ") + "; true"]
+    });
   }
 
   Process {
@@ -263,8 +263,8 @@ Singleton {
       return;
 
     senderResolver.exec({
-                          "command": ["sh", "-c", "pid=$(busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus " + "GetConnectionUnixProcessID s " + shellQuote(root.lastSender) + " 2>/dev/null | awk '{print $2}'); " + "[ -n \"$pid\" ] && cat /proc/$pid/comm 2>/dev/null || true"]
-                        });
+      "command": ["sh", "-c", "pid=$(busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus " + "GetConnectionUnixProcessID s " + shellQuote(root.lastSender) + " 2>/dev/null | awk '{print $2}'); " + "[ -n \"$pid\" ] && cat /proc/$pid/comm 2>/dev/null || true"]
+    });
   }
 
   Process {
@@ -273,7 +273,7 @@ Singleton {
       onStreamFinished: {
         const comm = String(this.text).trim();
         if (comm === "")
-        return;
+          return;
 
         const entry = (typeof ThemeIcons !== 'undefined') ? ThemeIcons.findAppEntry(comm) : null;
         root.requestingAppName = entry ? entry.name : comm;

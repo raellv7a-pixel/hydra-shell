@@ -370,30 +370,30 @@ Item {
 
     // Emit keyPressed signal for custom key handling
     Keys.onPressed: event => {
-      if (keyNavigationEnabled) {
-        root.keyPressed(event);
-      }
-    }
+                      if (keyNavigationEnabled) {
+                        root.keyPressed(event);
+                      }
+                    }
 
     WheelHandler {
       enabled: root.wheelScrollMultiplier !== 1.0
       acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
       onWheel: event => {
-        // Content fits entirely (e.g. a grid sized to its own item
-        // count via Layout.preferredHeight, or one embedded inside
-        // a taller scrollable page): there is nothing here to
-        // scroll, so let the event fall through to whatever
-        // Flickable/ScrollView actually owns the page — otherwise
-        // mouse wheel silently does nothing the moment the cursor
-        // is over the grid's bounds.
-        if (!root.contentOverflows) {
-          event.accepted = false;
-          return;
-        }
-        const delta = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.angleDelta.y / 2;
-        root.applyWheelScroll(delta);
-        event.accepted = true;
-      }
+                 // Content fits entirely (e.g. a grid sized to its own item
+                 // count via Layout.preferredHeight, or one embedded inside
+                 // a taller scrollable page): there is nothing here to
+                 // scroll, so let the event fall through to whatever
+                 // Flickable/ScrollView actually owns the page — otherwise
+                 // mouse wheel silently does nothing the moment the cursor
+                 // is over the grid's bounds.
+                 if (!root.contentOverflows) {
+                   event.accepted = false;
+                   return;
+                 }
+                 const delta = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.angleDelta.y / 2;
+                 root.applyWheelScroll(delta);
+                 event.accepted = true;
+               }
     }
 
     ScrollBar.vertical: ScrollBar {

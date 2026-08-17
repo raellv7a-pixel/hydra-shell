@@ -1,10 +1,10 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "backends/HyprlandBackend.js" as HyprlandBackend
-import "backends/SwayBackend.js" as SwayBackend
 import qs.Commons
 import qs.Services.Compositor
+import "backends/SwayBackend.js" as SwayBackend
+import "backends/HyprlandBackend.js" as HyprlandBackend
 
 Item {
   id: root
@@ -101,6 +101,8 @@ Item {
     }
   }
 
+
+
   function resolveBackendId() {
     var preferred = cfg.backend ?? defaults.backend ?? "auto";
     if (preferred !== "auto") {
@@ -154,42 +156,29 @@ Item {
   // ---
 
   function backendBuildFetchCommand() {
-    if (backendId === "sway")
-      return SwayBackend.buildFetchCommand(cfg, defaults);
-    if (backendId === "hyprland")
-      return HyprlandBackend.buildFetchCommand(cfg, defaults);
+    if (backendId === "sway") return SwayBackend.buildFetchCommand(cfg, defaults);
+    if (backendId === "hyprland") return HyprlandBackend.buildFetchCommand(cfg, defaults);
     return null;
   }
 
   function backendParseOutputs(rawText) {
-    if (backendId === "sway")
-      return SwayBackend.parseOutputs(rawText);
-    if (backendId === "hyprland")
-      return HyprlandBackend.parseOutputs(rawText);
-    return {
-      "error": pluginApi?.tr("errors.unsupportedBackend")
-    };
+    if (backendId === "sway") return SwayBackend.parseOutputs(rawText);
+    if (backendId === "hyprland") return HyprlandBackend.parseOutputs(rawText);
+    return { "error": pluginApi?.tr("errors.unsupportedBackend") };
   }
 
   function backendBuildApplyCommand() {
-    if (backendId === "sway")
-      return SwayBackend.buildApplyCommand(draftOutputs, cfg, defaults);
-    if (backendId === "hyprland")
-      return HyprlandBackend.buildApplyCommand(draftOutputs, cfg, defaults);
-    return {
-      "error": pluginApi?.tr("errors.unsupportedBackend")
-    };
+    if (backendId === "sway") return SwayBackend.buildApplyCommand(draftOutputs, cfg, defaults);
+    if (backendId === "hyprland") return HyprlandBackend.buildApplyCommand(draftOutputs, cfg, defaults);
+    return { "error": pluginApi?.tr("errors.unsupportedBackend") };
   }
 
   function backendBuildConfigFileContent() {
-    if (backendId === "sway")
-      return SwayBackend.buildConfigFileContent(draftOutputs);
-    if (backendId === "hyprland")
-      return HyprlandBackend.buildConfigFileContent(draftOutputs);
-    return {
-      "error": pluginApi?.tr("errors.unsupportedBackend")
-    };
+    if (backendId === "sway") return SwayBackend.buildConfigFileContent(draftOutputs);
+    if (backendId === "hyprland") return HyprlandBackend.buildConfigFileContent(draftOutputs);
+    return { "error": pluginApi?.tr("errors.unsupportedBackend") };
   }
+
 
   readonly property bool snapToGridEnabled: cfg.snapToGrid ?? defaults.snapToGrid ?? true
 
@@ -215,8 +204,8 @@ Item {
     draftOutputs = cloneValue(result.outputs);
     errorText = "";
     statusText = pluginApi?.tr("status.ready", {
-                                 "count": draftOutputs.length
-                               });
+      "count": draftOutputs.length
+    });
 
     if (!selectedOutputId || findOutputIndex(selectedOutputId) === -1) {
       selectedOutputId = draftOutputs.length > 0 ? draftOutputs[0].outputId : "";
@@ -349,14 +338,9 @@ Item {
   function getConfigurationScript() {
     var result = backendBuildConfigFileContent();
     if (result.error) {
-      return {
-        "error": result.error
-      };
+      return { "error": result.error };
     }
-    return {
-      "content": result.content,
-      "backend": backendId
-    };
+    return { "content": result.content, "backend": backendId };
   }
 
   function applyLayout() {

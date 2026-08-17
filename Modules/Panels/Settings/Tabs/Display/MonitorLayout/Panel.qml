@@ -1,6 +1,6 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell
 import qs.Commons
 import qs.Widgets
@@ -29,6 +29,8 @@ Item {
   property string editScale: ""
 
   anchors.fill: parent
+
+
 
   function computeSceneBounds(list) {
     if (!list || list.length === 0) {
@@ -176,9 +178,9 @@ Item {
       var hz = Number(modes[index].refresh || 0).toFixed(2).replace(/\.00$/, "");
       var compactLabel = modes[index].width + "x" + modes[index].height + (hz === "0" ? "" : "@" + hz);
       model.push({
-                   "key": modes[index].id,
-                   "name": compactLabel
-                 });
+        "key": modes[index].id,
+        "name": compactLabel
+      });
     }
     return model;
   }
@@ -658,6 +660,7 @@ Item {
                     pointSize: Style.fontSizeS
                     color: Color.mOnSurfaceVariant
                   }
+
                 }
               }
 
@@ -772,11 +775,9 @@ Item {
 
                     NText {
                       text: {
-                        if (!mainInstance)
-                          return "";
+                        if (!mainInstance) return "";
                         var cfg = mainInstance.getConfigurationScript();
-                        if (cfg.error)
-                          return cfg.error;
+                        if (cfg.error) return cfg.error;
                         return cfg.content || "";
                       }
                       pointSize: Style.fontSizeS

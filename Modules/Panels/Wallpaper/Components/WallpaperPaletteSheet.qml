@@ -22,70 +22,22 @@ Item {
   property var originalColors: null
 
   readonly property var colorRoles: [
-    {
-      key: "mPrimary",
-      labelKey: "primary"
-    },
-    {
-      key: "mOnPrimary",
-      labelKey: "on-primary"
-    },
-    {
-      key: "mSecondary",
-      labelKey: "secondary"
-    },
-    {
-      key: "mOnSecondary",
-      labelKey: "on-secondary"
-    },
-    {
-      key: "mTertiary",
-      labelKey: "tertiary"
-    },
-    {
-      key: "mOnTertiary",
-      labelKey: "on-tertiary"
-    },
-    {
-      key: "mError",
-      labelKey: "error"
-    },
-    {
-      key: "mOnError",
-      labelKey: "on-error"
-    },
-    {
-      key: "mSurface",
-      labelKey: "surface"
-    },
-    {
-      key: "mOnSurface",
-      labelKey: "on-surface"
-    },
-    {
-      key: "mSurfaceVariant",
-      labelKey: "surface-variant"
-    },
-    {
-      key: "mOnSurfaceVariant",
-      labelKey: "on-surface-variant"
-    },
-    {
-      key: "mOutline",
-      labelKey: "outline"
-    },
-    {
-      key: "mShadow",
-      labelKey: "shadow"
-    },
-    {
-      key: "mHover",
-      labelKey: "hover"
-    },
-    {
-      key: "mOnHover",
-      labelKey: "on-hover"
-    }
+    { key: "mPrimary", labelKey: "primary" },
+    { key: "mOnPrimary", labelKey: "on-primary" },
+    { key: "mSecondary", labelKey: "secondary" },
+    { key: "mOnSecondary", labelKey: "on-secondary" },
+    { key: "mTertiary", labelKey: "tertiary" },
+    { key: "mOnTertiary", labelKey: "on-tertiary" },
+    { key: "mError", labelKey: "error" },
+    { key: "mOnError", labelKey: "on-error" },
+    { key: "mSurface", labelKey: "surface" },
+    { key: "mOnSurface", labelKey: "on-surface" },
+    { key: "mSurfaceVariant", labelKey: "surface-variant" },
+    { key: "mOnSurfaceVariant", labelKey: "on-surface-variant" },
+    { key: "mOutline", labelKey: "outline" },
+    { key: "mShadow", labelKey: "shadow" },
+    { key: "mHover", labelKey: "hover" },
+    { key: "mOnHover", labelKey: "on-hover" }
   ]
 
   Component.onCompleted: seedEditor()
@@ -122,10 +74,7 @@ Item {
 
   function fallbackScheme() {
     const colors = activeColors();
-    return {
-      dark: colors,
-      light: clone(colors)
-    };
+    return { dark: colors, light: clone(colors) };
   }
 
   function seedEditor() {
@@ -167,10 +116,7 @@ Item {
       return;
     const hex = editingScheme[editingVariant][key].toUpperCase();
     Quickshell.execDetached(["wl-copy", hex]);
-    ToastService.showNotice(I18n.tr("wallpaper.palette.title"), I18n.tr("wallpaper.palette.copied", {
-                                                                          "label": label,
-                                                                          "color": hex
-                                                                        }), "copy", 2500);
+    ToastService.showNotice(I18n.tr("wallpaper.palette.title"), I18n.tr("wallpaper.palette.copied", { "label": label, "color": hex }), "copy", 2500);
   }
 
   function startPreview() {
@@ -217,23 +163,15 @@ Item {
     const yellow = colorAt(55);
     return {
       normal: {
-        black: surface.toString().toUpperCase(),
-        red: Qt.color(variant.mError).toString().toUpperCase(),
-        green: green,
-        yellow: yellow,
-        blue: Qt.color(variant.mPrimary).toString().toUpperCase(),
-        magenta: Qt.color(variant.mSecondary).toString().toUpperCase(),
-        cyan: Qt.color(variant.mTertiary).toString().toUpperCase(),
+        black: surface.toString().toUpperCase(), red: Qt.color(variant.mError).toString().toUpperCase(),
+        green: green, yellow: yellow, blue: Qt.color(variant.mPrimary).toString().toUpperCase(),
+        magenta: Qt.color(variant.mSecondary).toString().toUpperCase(), cyan: Qt.color(variant.mTertiary).toString().toUpperCase(),
         white: Qt.color(variant.mOnSurface).toString().toUpperCase()
       },
       bright: {
-        black: Qt.color(variant.mSurfaceVariant).toString().toUpperCase(),
-        red: brighten(variant.mError),
-        green: brighten(green),
-        yellow: brighten(yellow),
-        blue: brighten(variant.mPrimary),
-        magenta: brighten(variant.mSecondary),
-        cyan: brighten(variant.mTertiary),
+        black: Qt.color(variant.mSurfaceVariant).toString().toUpperCase(), red: brighten(variant.mError),
+        green: brighten(green), yellow: brighten(yellow), blue: brighten(variant.mPrimary),
+        magenta: brighten(variant.mSecondary), cyan: brighten(variant.mTertiary),
         white: isDark ? "#FFFFFF" : brighten(variant.mOnSurface)
       },
       foreground: Qt.color(variant.mOnSurface).toString().toUpperCase(),
@@ -253,10 +191,7 @@ Item {
     const light = clone(editingScheme.light);
     dark.terminal = terminalColors(dark);
     light.terminal = terminalColors(light);
-    const queued = ColorSchemeService.saveNamedScheme(name, {
-                                                        dark: dark,
-                                                        light: light
-                                                      });
+    const queued = ColorSchemeService.saveNamedScheme(name, { dark: dark, light: light });
     saving = queued;
     if (!queued)
       ToastService.showError(I18n.tr("wallpaper.palette.title"), I18n.tr("wallpaper.palette.save-error"));
@@ -268,10 +203,7 @@ Item {
     onLoaded: {
       try {
         const data = JSON.parse(text());
-        root.editingScheme = data && data.dark && data.light ? {
-                                                                 dark: root.clone(data.dark),
-                                                                 light: root.clone(data.light)
-                                                               } : root.fallbackScheme();
+        root.editingScheme = data && data.dark && data.light ? { dark: root.clone(data.dark), light: root.clone(data.light) } : root.fallbackScheme();
       } catch (error) {
         root.editingScheme = root.fallbackScheme();
         ToastService.showError(I18n.tr("wallpaper.palette.title"), I18n.tr("wallpaper.palette.load-error"));
@@ -295,9 +227,7 @@ Item {
       Settings.data.colorSchemes.predefinedScheme = name;
       ColorSchemeService.applyScheme(path);
       ColorSchemeService.loadColorSchemes();
-      ToastService.showNotice(I18n.tr("wallpaper.palette.title"), I18n.tr("wallpaper.palette.saved", {
-                                                                            "name": name
-                                                                          }), "device-floppy", 3000);
+      ToastService.showNotice(I18n.tr("wallpaper.palette.title"), I18n.tr("wallpaper.palette.saved", { "name": name }), "device-floppy", 3000);
     }
   }
 
@@ -353,9 +283,7 @@ Item {
           }
         }
 
-        NDivider {
-          Layout.fillWidth: true
-        }
+        NDivider { Layout.fillWidth: true }
 
         RowLayout {
           Layout.fillWidth: true
@@ -482,9 +410,7 @@ Item {
           Layout.fillWidth: true
         }
 
-        NDivider {
-          Layout.fillWidth: true
-        }
+        NDivider { Layout.fillWidth: true }
 
         NTextInput {
           id: schemeNameInput
@@ -545,9 +471,7 @@ Item {
           }
         }
 
-        Item {
-          Layout.fillHeight: true
-        }
+        Item { Layout.fillHeight: true }
 
         NText {
           text: I18n.tr("wallpaper.palette.terminal-note")

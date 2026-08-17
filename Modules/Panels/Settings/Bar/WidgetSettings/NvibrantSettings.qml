@@ -31,9 +31,9 @@ ColumnLayout {
     label: I18n.tr("common.select-icon-color")
     currentKey: valueIconColor
     onSelected: key => {
-      valueIconColor = key;
-      saveSettings();
-    }
+                  valueIconColor = key;
+                  saveSettings();
+                }
     defaultValue: widgetMetadata.iconColor
   }
 
@@ -54,9 +54,9 @@ ColumnLayout {
     value: root.valueVibranceValue
     defaultValue: widgetMetadata.vibranceValue
     onMoved: value => {
-      root.valueVibranceValue = Math.round(value);
-      root.saveSettings();
-    }
+               root.valueVibranceValue = Math.round(value);
+               root.saveSettings();
+             }
     text: String(root.valueVibranceValue)
   }
 

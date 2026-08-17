@@ -84,7 +84,7 @@ Singleton {
         updated["pt"] = data;
         root.translations = updated;
         Logger.d("ControlCenterService", "Loaded PT translations");
-      } catch (e) {
+      } catch(e) {
         Logger.e("ControlCenterService", "Failed to parse PT translations:", e);
       }
     }
@@ -101,7 +101,7 @@ Singleton {
         updated["en"] = data;
         root.translations = updated;
         Logger.d("ControlCenterService", "Loaded EN translations");
-      } catch (e) {
+      } catch(e) {
         Logger.e("ControlCenterService", "Failed to parse EN translations:", e);
       }
     }
@@ -117,13 +117,12 @@ Singleton {
         if (parsed && typeof parsed === "object") {
           root.settings = Object.assign({}, root.settings, parsed);
         }
-      } catch (e) {}
+      } catch(e) {}
     }
   }
 
   function tr(key, interp) {
-    if (!key)
-      return "";
+    if (!key) return "";
     var lang = (typeof I18n !== "undefined" && I18n.langCode) ? I18n.langCode : "pt";
     var dict = root.translations[lang] || root.translations["pt"] || root.translations["en"] || {};
 
@@ -152,8 +151,7 @@ Singleton {
       }
     }
 
-    if (typeof curr !== "string")
-      curr = key;
+    if (typeof curr !== "string") curr = key;
 
     if (interp && typeof interp === "object") {
       for (var k in interp) {
@@ -169,7 +167,7 @@ Singleton {
       var file = Settings.configDir + "control-center.json";
       var dataStr = JSON.stringify(root.settings, null, 2);
       Quickshell.execDetached(["bash", "-c", "cat << 'EOF' > " + file + "\n" + dataStr + "\nEOF"]);
-    } catch (e) {
+    } catch(e) {
       Logger.e("ControlCenterService", "Failed to save settings:", e);
     }
   }
@@ -178,13 +176,7 @@ Singleton {
   readonly property var provider: QtObject {
     property var mainInstance: root.mainInstance
     property var pluginSettings: root.settings
-    property var manifest: ({
-                              "name": "Control Center",
-                              "id": "control-center",
-                              "metadata": {
-                                "defaultSettings": root.settings
-                              }
-                            })
+    property var manifest: ({ "name": "Control Center", "id": "control-center", "metadata": { "defaultSettings": root.settings } })
     property var panelOpenScreen: PanelService.findScreenForPanels()
 
     function tr(key, interp) {
@@ -194,29 +186,25 @@ Singleton {
       root.saveSettings();
     }
     function closePanel(screen) {
-      if (screen)
-        PanelService.closePanel(screen);
+      if (screen) PanelService.closePanel(screen);
     }
     function openPanel(screen) {
       var sc = screen || PanelService.findScreenForPanels();
       if (sc) {
         var p = PanelService.getPanel("controlCenterPanel", sc);
-        if (p)
-          p.open();
+        if (p) p.open();
       }
     }
     function togglePanel(screen) {
       var sc = screen || PanelService.findScreenForPanels();
       if (sc) {
         var p = PanelService.getPanel("controlCenterPanel", sc);
-        if (p)
-          p.toggle();
+        if (p) p.toggle();
       }
     }
     function withCurrentScreen(cb) {
       var sc = PanelService.findScreenForPanels();
-      if (sc && cb)
-        cb(sc);
+      if (sc && cb) cb(sc);
     }
   }
 
@@ -225,8 +213,7 @@ Singleton {
     var sc = PanelService.findScreenForPanels();
     if (sc) {
       var p = PanelService.getPanel("controlCenterPanel", sc);
-      if (p)
-        p.toggle();
+      if (p) p.toggle();
     }
   }
 
@@ -234,8 +221,7 @@ Singleton {
     var sc = PanelService.findScreenForPanels();
     if (sc) {
       var p = PanelService.getPanel("controlCenterPanel", sc);
-      if (p)
-        p.open();
+      if (p) p.open();
     }
   }
 
@@ -243,8 +229,7 @@ Singleton {
     var sc = PanelService.findScreenForPanels();
     if (sc) {
       var p = PanelService.getPanel("controlCenterPanel", sc);
-      if (p)
-        p.close();
+      if (p) p.close();
     }
   }
 }

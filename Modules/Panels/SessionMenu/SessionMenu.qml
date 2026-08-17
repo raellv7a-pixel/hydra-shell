@@ -110,8 +110,7 @@ SmartPanel {
       return Settings.preprocessPath(Settings.data.general.avatarImage);
     }
     var wp = WallpaperService.getWallpaper(screen?.name ?? "");
-    if (wp && !WallpaperService.isSolidColorPath(wp))
-      return wp;
+    if (wp && !WallpaperService.isSolidColorPath(wp)) return wp;
     return WallpaperService.defaultWallpaper || "";
   }
 
@@ -171,14 +170,14 @@ SmartPanel {
       if (settingOption.enabled && actionMetadata[settingOption.action]) {
         var metadata = actionMetadata[settingOption.action];
         options.push({
-                       "action": settingOption.action,
-                       "icon": metadata.icon,
-                       "title": metadata.title,
-                       "isShutdown": metadata.isShutdown,
-                       "countdownEnabled": settingOption.countdownEnabled !== undefined ? settingOption.countdownEnabled : true,
-                       "command": settingOption.command || "",
-                       "keybind": settingOption.keybind || ""
-                     });
+          "action": settingOption.action,
+          "icon": metadata.icon,
+          "title": metadata.title,
+          "isShutdown": metadata.isShutdown,
+          "countdownEnabled": settingOption.countdownEnabled !== undefined ? settingOption.countdownEnabled : true,
+          "command": settingOption.command || "",
+          "keybind": settingOption.keybind || ""
+        });
       }
     }
     return options;
@@ -302,8 +301,7 @@ SmartPanel {
   }
 
   function navigateGrid(direction) {
-    if (powerOptions.length === 0)
-      return;
+    if (powerOptions.length === 0) return;
 
     const grid = getGridInfo();
     let newRow = grid.currentRow >= 0 ? grid.currentRow : 0;
@@ -346,13 +344,11 @@ SmartPanel {
   }
 
   function selectFirst() {
-    if (powerOptions.length > 0)
-      selectedIndex = 0;
+    if (powerOptions.length > 0) selectedIndex = 0;
   }
 
   function selectLast() {
-    if (powerOptions.length > 0)
-      selectedIndex = powerOptions.length - 1;
+    if (powerOptions.length > 0) selectedIndex = powerOptions.length - 1;
   }
 
   function activate() {
@@ -365,21 +361,11 @@ SmartPanel {
     return Keybinds.checkKey(event, settingName, Settings);
   }
 
-  function handleUp() {
-    navigateGrid("up");
-  }
-  function handleDown() {
-    navigateGrid("down");
-  }
-  function handleLeft() {
-    navigateGrid("left");
-  }
-  function handleRight() {
-    navigateGrid("right");
-  }
-  function handleEnter() {
-    activate();
-  }
+  function handleUp() { navigateGrid("up"); }
+  function handleDown() { navigateGrid("down"); }
+  function handleLeft() { navigateGrid("left"); }
+  function handleRight() { navigateGrid("right"); }
+  function handleEnter() { activate(); }
 
   function handleEscape() {
     if (timerActive) {
@@ -389,46 +375,24 @@ SmartPanel {
     }
   }
 
-  function onEscapePressed() {
-    handleEscape();
-  }
-  function onTabPressed() {
-    selectNextWrapped();
-  }
-  function onBackTabPressed() {
-    selectPreviousWrapped();
-  }
-  function onLeftPressed() {
-    handleLeft();
-  }
-  function onRightPressed() {
-    handleRight();
-  }
-  function onUpPressed() {
-    handleUp();
-  }
-  function onDownPressed() {
-    handleDown();
-  }
-  function onEnterPressed() {
-    handleEnter();
-  }
-  function onHomePressed() {
-    selectFirst();
-  }
-  function onEndPressed() {
-    selectLast();
-  }
+  function onEscapePressed() { handleEscape(); }
+  function onTabPressed() { selectNextWrapped(); }
+  function onBackTabPressed() { selectPreviousWrapped(); }
+  function onLeftPressed() { handleLeft(); }
+  function onRightPressed() { handleRight(); }
+  function onUpPressed() { handleUp(); }
+  function onDownPressed() { handleDown(); }
+  function onEnterPressed() { handleEnter(); }
+  function onHomePressed() { selectFirst(); }
+  function onEndPressed() { selectLast(); }
 
   function checkKeybind(event) {
-    if (powerOptions.length === 0)
-      return false;
+    if (powerOptions.length === 0) return false;
     if (event.key === Qt.Key_Control || event.key === Qt.Key_Shift || event.key === Qt.Key_Alt || event.key === Qt.Key_Meta) {
       return false;
     }
     const pressedKeybind = Keybinds.getKeybindString(event);
-    if (!pressedKeybind)
-      return false;
+    if (!pressedKeybind) return false;
 
     for (var i = 0; i < powerOptions.length; i++) {
       if (powerOptions[i].keybind === pressedKeybind) {
@@ -468,40 +432,13 @@ SmartPanel {
     }
 
     Keys.onPressed: event => {
-      if (root.checkKeybind(event)) {
-        event.accepted = true;
-        return;
-      }
-      if (checkKey(event, 'up')) {
-        handleUp();
-        event.accepted = true;
-        return;
-      }
-      if (checkKey(event, 'down')) {
-        handleDown();
-        event.accepted = true;
-        return;
-      }
-      if (checkKey(event, 'left')) {
-        handleLeft();
-        event.accepted = true;
-        return;
-      }
-      if (checkKey(event, 'right')) {
-        handleRight();
-        event.accepted = true;
-        return;
-      }
-      if (checkKey(event, 'enter')) {
-        handleEnter();
-        event.accepted = true;
-        return;
-      }
-      if (checkKey(event, 'escape')) {
-        handleEscape();
-        event.accepted = true;
-        return;
-      }
+      if (root.checkKeybind(event)) { event.accepted = true; return; }
+      if (checkKey(event, 'up')) { handleUp(); event.accepted = true; return; }
+      if (checkKey(event, 'down')) { handleDown(); event.accepted = true; return; }
+      if (checkKey(event, 'left')) { handleLeft(); event.accepted = true; return; }
+      if (checkKey(event, 'right')) { handleRight(); event.accepted = true; return; }
+      if (checkKey(event, 'enter')) { handleEnter(); event.accepted = true; return; }
+      if (checkKey(event, 'escape')) { handleEscape(); event.accepted = true; return; }
       if (event.key === Qt.Key_Up || event.key === Qt.Key_Down || event.key === Qt.Key_Left || event.key === Qt.Key_Right || event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Escape) {
         event.accepted = true;
         return;
@@ -511,8 +448,7 @@ SmartPanel {
     HoverHandler {
       id: globalHoverHandler
       onPointChanged: {
-        if (!root.mouseTrackingReady)
-          return;
+        if (!root.mouseTrackingReady) return;
         if (!root.globalMouseInitialized) {
           root.globalLastMouseX = point.position.x;
           root.globalLastMouseY = point.position.y;
@@ -596,9 +532,7 @@ SmartPanel {
               }
             }
 
-            Item {
-              Layout.fillHeight: true
-            }
+            Item { Layout.fillHeight: true }
 
             // Uptime Box (Bottom)
             Rectangle {
@@ -619,9 +553,7 @@ SmartPanel {
                 }
 
                 NText {
-                  text: I18n.tr("system.uptime", {
-                                  "uptime": root.uptimeText
-                                })
+                  text: I18n.tr("system.uptime", { "uptime": root.uptimeText })
                   pointSize: Style.fontSizeS
                   color: Color.mOnSurface
                   font.weight: Style.fontWeightMedium
@@ -682,23 +614,16 @@ SmartPanel {
     readonly property bool activeFocusOrHover: isSelected || effectiveHover
     readonly property bool destructiveState: isShutdown && (pending || activeFocusOrHover)
     readonly property color containerColor: {
-      if (destructiveState)
-        return Color.blend(Color.mSurfaceContainerHigh, Color.mError, 0.24);
-      if (pending)
-        return Color.mPrimaryContainer;
-      if (mouseArea.pressed)
-        return Color.mPrimaryContainer;
-      if (activeFocusOrHover)
-        return Color.mSecondaryContainer;
+      if (destructiveState) return Color.blend(Color.mSurfaceContainerHigh, Color.mError, 0.24);
+      if (pending) return Color.mPrimaryContainer;
+      if (mouseArea.pressed) return Color.mPrimaryContainer;
+      if (activeFocusOrHover) return Color.mSecondaryContainer;
       return Color.mSurfaceContainerHigh;
     }
     readonly property color contentColor: {
-      if (destructiveState)
-        return Color.mError;
-      if (pending || mouseArea.pressed)
-        return Color.mOnPrimaryContainer;
-      if (activeFocusOrHover)
-        return Color.mOnSecondaryContainer;
+      if (destructiveState) return Color.mError;
+      if (pending || mouseArea.pressed) return Color.mOnPrimaryContainer;
+      if (activeFocusOrHover) return Color.mOnSecondaryContainer;
       return Color.mOnSurface;
     }
 
@@ -749,9 +674,7 @@ SmartPanel {
         color: buttonRoot.isShutdown ? Color.mError : buttonRoot.contentColor
 
         Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
+          ColorAnimation { duration: Style.animationFast }
         }
       }
 
@@ -765,9 +688,7 @@ SmartPanel {
         maximumLineCount: 1
 
         Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
+          ColorAnimation { duration: Style.animationFast }
         }
       }
     }

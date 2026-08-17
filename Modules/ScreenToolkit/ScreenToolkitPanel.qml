@@ -4,10 +4,10 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Modules.MainScreen
-import qs.Modules.ScreenToolkit as ST
 import qs.Services.System
 import qs.Services.UI
 import qs.Widgets
+import qs.Modules.ScreenToolkit as ST
 
 SmartPanel {
   id: root

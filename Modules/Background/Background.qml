@@ -1,5 +1,5 @@
-import QtMultimedia
 import QtQuick
+import QtMultimedia
 import Quickshell
 import Quickshell.Wayland
 import qs.Commons
@@ -249,8 +249,7 @@ Variants {
       }
 
       function isVideoPath(p) {
-        if (!p)
-          return false;
+        if (!p) return false;
         var s = p.toString().toLowerCase();
         return s.endsWith(".webm") || s.endsWith(".mp4") || s.endsWith(".mkv") || s.endsWith(".mov");
       }
@@ -272,9 +271,7 @@ Variants {
             source: root.activeVideoSource
             loops: MediaPlayer.Infinite
             videoOutput: bgVideoOutput
-            audioOutput: AudioOutput {
-              muted: true
-            }
+            audioOutput: AudioOutput { muted: true }
             onSourceChanged: {
               if (source !== "") {
                 play();
@@ -300,13 +297,10 @@ Variants {
             anchors.fill: parent
             fillMode: {
               switch (root.fillMode) {
-              case 1:
-                return VideoOutput.PreserveAspectFit;
-              case 2:
-                return VideoOutput.Stretch;
-              case 0:
-              default:
-                return VideoOutput.PreserveAspectCrop;
+                case 1: return VideoOutput.PreserveAspectFit;
+                case 2: return VideoOutput.Stretch;
+                case 0:
+                default: return VideoOutput.PreserveAspectCrop;
               }
             }
           }
@@ -565,12 +559,12 @@ Variants {
           // Now clear nextWallpaper after currentWallpaper has the new source
           // Force complete cleanup to free texture memory
           Qt.callLater(() => {
-            nextWallpaper.source = "";
-            isSolid2 = false;
-            Qt.callLater(() => {
-              currentWallpaper.asynchronous = true;
-            });
-          });
+                         nextWallpaper.source = "";
+                         isSolid2 = false;
+                         Qt.callLater(() => {
+                                        currentWallpaper.asynchronous = true;
+                                      });
+                       });
         }
       }
 
@@ -745,8 +739,8 @@ Variants {
         currentWallpaper.source = "";
 
         Qt.callLater(() => {
-          currentWallpaper.source = source;
-        });
+                       currentWallpaper.source = source;
+                     });
       }
 
       // ------------------------------------------------------
@@ -785,14 +779,14 @@ Variants {
 
           // Now clear nextWallpaper after current has the new source
           Qt.callLater(() => {
-            nextWallpaper.source = "";
-            isSolid2 = false;
+                         nextWallpaper.source = "";
+                         isSolid2 = false;
 
-            // Now set the next wallpaper after a brief delay
-            Qt.callLater(() => {
-              _startTransitionTo(source, isSolidSource);
-            });
-          });
+                         // Now set the next wallpaper after a brief delay
+                         Qt.callLater(() => {
+                                        _startTransitionTo(source, isSolidSource);
+                                      });
+                       });
           return;
         }
 

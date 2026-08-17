@@ -102,7 +102,9 @@ SmartPanel {
             }
             NText {
               Layout.fillWidth: true
-              text: ObsControlService.connected ? I18n.tr("bar.obs-control.authenticated") : I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`)
+              text: ObsControlService.connected
+                    ? I18n.tr("bar.obs-control.authenticated")
+                    : I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`)
               wrapMode: Text.WordWrap
               color: Color.mOnSurfaceVariant
             }
@@ -193,13 +195,13 @@ SmartPanel {
     }
 
     function formatDuration(milliseconds) {
-      const seconds = Math.floor(Math.max(0, milliseconds) / 1000);
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const remainder = seconds % 60;
-      const minuteText = String(minutes).padStart(2, "0");
-      const secondText = String(remainder).padStart(2, "0");
-      return hours > 0 ? `${hours}:${minuteText}:${secondText}` : `${minuteText}:${secondText}`;
+      const seconds = Math.floor(Math.max(0, milliseconds) / 1000)
+      const hours = Math.floor(seconds / 3600)
+      const minutes = Math.floor((seconds % 3600) / 60)
+      const remainder = seconds % 60
+      const minuteText = String(minutes).padStart(2, "0")
+      const secondText = String(remainder).padStart(2, "0")
+      return hours > 0 ? `${hours}:${minuteText}:${secondText}` : `${minuteText}:${secondText}`
     }
   }
 }

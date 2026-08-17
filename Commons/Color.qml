@@ -95,7 +95,10 @@ Singleton {
 
   function blend(base, accent, amount) {
     const ratio = Math.max(0, Math.min(1, Number(amount || 0)));
-    return Qt.rgba(base.r + (accent.r - base.r) * ratio, base.g + (accent.g - base.g) * ratio, base.b + (accent.b - base.b) * ratio, base.a + (accent.a - base.a) * ratio);
+    return Qt.rgba(base.r + (accent.r - base.r) * ratio,
+                   base.g + (accent.g - base.g) * ratio,
+                   base.b + (accent.b - base.b) * ratio,
+                   base.a + (accent.a - base.a) * ratio);
   }
 
   // --- Color transition animations ---

@@ -91,8 +91,8 @@ NIconButton {
         Settings.data.nvibrant.enabled = root.pendingEnabled;
       } else {
         ToastService.showError(I18n.tr("bar.nvibrant.apply-failed-title"), I18n.tr("bar.nvibrant.apply-failed-description", {
-                                                                                     "code": exitCode
-                                                                                   }));
+                                                                                   "code": exitCode
+                                                                                 }));
       }
     }
   }
@@ -114,15 +114,15 @@ NIconButton {
     ]
 
     onTriggered: action => {
-      contextMenu.close();
-      PanelService.closeContextMenu(screen);
+                   contextMenu.close();
+                   PanelService.closeContextMenu(screen);
 
-      if (action === "toggle") {
-        root.toggle();
-      } else if (action === "widget-settings") {
-        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-      }
-    }
+                   if (action === "toggle") {
+                     root.toggle();
+                   } else if (action === "widget-settings") {
+                     BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+                   }
+                 }
   }
 
   onRightClicked: {

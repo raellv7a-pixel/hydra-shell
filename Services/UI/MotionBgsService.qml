@@ -57,15 +57,15 @@ Singleton {
 
       command: {
         switch (stage) {
-          case "mkdir":
+        case "mkdir":
           return ["mkdir", "-p", "--", destinationDirectory];
-          case "download":
+        case "download":
           return ["curl", "--fail", "--location", "--silent", "--show-error", "--retry", "2", "--retry-delay", "1", "--connect-timeout", "15", "--max-time", "300", "--user-agent", root.userAgent, "--referer", root.baseUrl + "/", "--output", temporaryPath, url];
-          case "validate":
+        case "validate":
           return ["file", "--brief", "--mime-type", "--", temporaryPath];
-          case "commit":
+        case "commit":
           return ["mv", "--force", "--", temporaryPath, finalPath];
-          default:
+        default:
           return [];
         }
       }
@@ -259,10 +259,10 @@ Singleton {
   function _runDownloadStage(process, stage) {
     process.stage = stage;
     Qt.callLater(() => {
-      if (process) {
-        process.running = true;
-      }
-    });
+                   if (process) {
+                     process.running = true;
+                   }
+                 });
   }
 
   function _finishDownload(process, success, error) {
@@ -280,32 +280,32 @@ Singleton {
     // Leave the Process.onExited stack before destroying the dynamic object.
     // Start consumers only on the following event-loop turn, after teardown.
     Qt.callLater(() => {
-      if (process) {
-        process.destroy();
-      }
-      Qt.callLater(() => {
-        if (success) {
-          videoDownloaded(id, finalPath);
-        } else {
-          videoDownloadFailed(id, error);
-        }
+                   if (process) {
+                     process.destroy();
+                   }
+                   Qt.callLater(() => {
+                                  if (success) {
+                                    videoDownloaded(id, finalPath);
+                                  } else {
+                                    videoDownloadFailed(id, error);
+                                  }
 
-        for (let index = 0; index < callbacks.length; index++) {
-          try {
-            callbacks[index](success ? finalPath : "");
-          } catch (callbackError) {
-            Logger.e("MotionBGS", "Download callback failed:", callbackError);
-          }
-        }
-      });
-    });
+                                  for (let index = 0; index < callbacks.length; index++) {
+                                    try {
+                                      callbacks[index](success ? finalPath : "");
+                                    } catch (callbackError) {
+                                      Logger.e("MotionBGS", "Download callback failed:", callbackError);
+                                    }
+                                  }
+                                });
+                 });
   }
 
   function _destroyProcessLater(process) {
     Qt.callLater(() => {
-      if (process) {
-        process.destroy();
-      }
-    });
+                   if (process) {
+                     process.destroy();
+                   }
+                 });
   }
 }

@@ -507,98 +507,29 @@ Singleton {
         }
       ],
       "colorsToCompare": [
-        {
-          "name": "black",
-          "color": "#4f4f4f"
-        },
-        {
-          "name": "blue",
-          "color": "#5294e2"
-        },
-        {
-          "name": "bluegrey",
-          "color": "#607d8b"
-        },
-        {
-          "name": "brown",
-          "color": "#ae8e6c"
-        },
-        {
-          "name": "carmine",
-          "color": "#a30002"
-        },
-        {
-          "name": "cyan",
-          "color": "#00bcd4"
-        },
-        {
-          "name": "darkcyan",
-          "color": "#45abb7"
-        },
-        {
-          "name": "deeporange",
-          "color": "#eb6637"
-        },
-        {
-          "name": "green",
-          "color": "#87b158"
-        },
-        {
-          "name": "grey",
-          "color": "#8e8e8e"
-        },
-        {
-          "name": "indigo",
-          "color": "#5c6bc0"
-        },
-        {
-          "name": "magenta",
-          "color": "#ca71df"
-        },
-        {
-          "name": "nordic",
-          "color": "#81a1c1"
-        },
-        {
-          "name": "orange",
-          "color": "#ee923a"
-        },
-        {
-          "name": "palebrown",
-          "color": "#d1bfae"
-        },
-        {
-          "name": "paleorange",
-          "color": "#eeca8f"
-        },
-        {
-          "name": "pink",
-          "color": "#f06292"
-        },
-        {
-          "name": "red",
-          "color": "#e25252"
-        },
-        {
-          "name": "teal",
-          "color": "#16a085"
-        },
-        {
-          "name": "violet",
-          "color": "#7e57c2"
-        },
-        {
-          "name": "white",
-          "color": "#e4e4e4"
-        },
-        {
-          "name": "yaru",
-          "color": "#676767"
-        },
-        {
-          "name": "yellow",
-          "color": "#f9bd30"
-        }
+        { "name": "black", "color": "#4f4f4f" },
+        { "name": "blue", "color": "#5294e2" },
+        { "name": "bluegrey", "color": "#607d8b" },
+        { "name": "brown", "color": "#ae8e6c" },
+        { "name": "carmine", "color": "#a30002" },
+        { "name": "cyan", "color": "#00bcd4" },
+        { "name": "darkcyan", "color": "#45abb7" },
+        { "name": "deeporange", "color": "#eb6637" },
+        { "name": "green", "color": "#87b158" },
+        { "name": "grey", "color": "#8e8e8e" },
+        { "name": "indigo", "color": "#5c6bc0" },
+        { "name": "magenta", "color": "#ca71df" },
+        { "name": "nordic", "color": "#81a1c1" },
+        { "name": "orange", "color": "#ee923a" },
+        { "name": "palebrown", "color": "#d1bfae" },
+        { "name": "paleorange", "color": "#eeca8f" },
+        { "name": "pink", "color": "#f06292" },
+        { "name": "red", "color": "#e25252" },
+        { "name": "teal", "color": "#16a085" },
+        { "name": "violet", "color": "#7e57c2" },
+        { "name": "white", "color": "#e4e4e4" },
+        { "name": "yaru", "color": "#676767" },
+        { "name": "yellow", "color": "#f9bd30" }
       ],
       "compareTo": "{{ colors.primary.default.hex }}",
       "postProcess": () => "nohup sudo -n papirus-folders -C {{ closest_color }} -u > /dev/null 2>&1 &"
@@ -650,12 +581,12 @@ Singleton {
     var discordApp = applications.find(app => app.id === "discord");
     if (discordApp && discordApp.clients) {
       discordApp.clients.forEach(client => {
-        clients.push({
-                       "name": client.name,
-                       "configPath": client.path,
-                       "themePath": `${client.path}/themes/noctalia.theme.css`
-                     });
-      });
+                                   clients.push({
+                                                  "name": client.name,
+                                                  "configPath": client.path,
+                                                  "themePath": `${client.path}/themes/noctalia.theme.css`
+                                                });
+                                 });
     }
     return clients;
   }
@@ -675,22 +606,22 @@ Singleton {
     var codeApp = applications.find(app => app.id === "code");
     if (codeApp && codeApp.clients) {
       codeApp.clients.forEach(client => {
-        // Extract base config directory from theme path
-        var themePath = client.path;
-        var baseConfigDir = "";
-        if (client.name === "code") {
-          // For VSCode: ~/.vscode/extensions/... -> ~/.vscode
-          baseConfigDir = "~/.vscode";
-        } else if (client.name === "codium") {
-          // For VSCodium: ~/.vscode-oss/extensions/... -> ~/.vscode-oss
-          baseConfigDir = "~/.vscode-oss";
-        }
-        clients.push({
-                       "name": client.name,
-                       "configPath": baseConfigDir,
-                       "themePath": "" // resolved dynamically via resolvedCodeClientPaths()
-                     });
-      });
+                                // Extract base config directory from theme path
+                                var themePath = client.path;
+                                var baseConfigDir = "";
+                                if (client.name === "code") {
+                                  // For VSCode: ~/.vscode/extensions/... -> ~/.vscode
+                                  baseConfigDir = "~/.vscode";
+                                } else if (client.name === "codium") {
+                                  // For VSCodium: ~/.vscode-oss/extensions/... -> ~/.vscode-oss
+                                  baseConfigDir = "~/.vscode-oss";
+                                }
+                                clients.push({
+                                               "name": client.name,
+                                               "configPath": baseConfigDir,
+                                               "themePath": "" // resolved dynamically via resolvedCodeClientPaths()
+                                             });
+                              });
     }
     return clients;
   }
@@ -705,7 +636,7 @@ Singleton {
       onRead: data => {
         var line = data.trim();
         if (line)
-          codeResolverProcess.paths.push(line);
+        codeResolverProcess.paths.push(line);
       }
     }
     onExited: {
@@ -722,7 +653,7 @@ Singleton {
       onRead: data => {
         var line = data.trim();
         if (line)
-          codiumResolverProcess.paths.push(line);
+        codiumResolverProcess.paths.push(line);
       }
     }
     onExited: {

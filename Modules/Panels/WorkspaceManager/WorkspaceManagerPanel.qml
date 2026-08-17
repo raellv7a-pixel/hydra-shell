@@ -34,8 +34,13 @@ PanelWindow {
   readonly property string barPosition: Settings.getBarPositionForScreen(screen?.name) || "top"
   readonly property real barThickness: Style.getBarHeightForScreen(screen?.name)
   readonly property real frameThickness: Settings.data.bar.frameThickness || 8
-  readonly property var normalWorkspaces: Hyprland.workspaces.values.filter(workspace => !workspace.name.startsWith("special:") && workspace.monitor?.name === root.screen?.name).sort((left, right) => left.id - right.id)
-  readonly property var specialWorkspaces: Hyprland.workspaces.values.filter(workspace => workspace.name.startsWith("special:")).sort((left, right) => left.id - right.id)
+  readonly property var normalWorkspaces: Hyprland.workspaces.values
+      .filter(workspace => !workspace.name.startsWith("special:")
+              && workspace.monitor?.name === root.screen?.name)
+      .sort((left, right) => left.id - right.id)
+  readonly property var specialWorkspaces: Hyprland.workspaces.values
+      .filter(workspace => workspace.name.startsWith("special:"))
+      .sort((left, right) => left.id - right.id)
 
   property bool showingSettings: false
   property bool closing: false
@@ -99,22 +104,19 @@ PanelWindow {
   }
 
   function switchWorkspace(workspaceId, workspaceName) {
-    const useName = workspaceName && (workspaceName.startsWith("special:") || String(workspaceName) !== String(workspaceId));
-    CompositorService.switchToWorkspace(useName ? {
-                                                    "name": workspaceName
-                                                  } : {
-                                          "idx": workspaceId
-                                        });
+    const useName = workspaceName && (workspaceName.startsWith("special:")
+                                      || String(workspaceName) !== String(workspaceId));
+    CompositorService.switchToWorkspace(useName ? { "name": workspaceName }
+                                                : { "idx": workspaceId });
     requestClose();
   }
 
   function moveWindowToWs(address, workspaceId, workspaceName) {
-    const useName = workspaceName && (workspaceName.startsWith("special:") || String(workspaceName) !== String(workspaceId));
-    CompositorService.moveWindowToWorkspace(address, useName ? {
-                                                                 "name": workspaceName
-                                                               } : {
-                                              "idx": workspaceId
-                                            });
+    const useName = workspaceName && (workspaceName.startsWith("special:")
+                                      || String(workspaceName) !== String(workspaceId));
+    CompositorService.moveWindowToWorkspace(address,
+                                            useName ? { "name": workspaceName }
+                                                    : { "idx": workspaceId });
   }
 
   function closeWindow(toplevel, address) {
@@ -132,17 +134,13 @@ PanelWindow {
   }
 
   function toggleWorkspacePrivacy(workspaceId, workspaceName, enabled) {
-    CompositorService.setWorkspacePrivate(workspaceName ? {
-                                                            "name": workspaceName,
-                                                            "idx": workspaceId
-                                                          } : {
-                                            "idx": workspaceId
-                                          }, enabled);
+    CompositorService.setWorkspacePrivate(workspaceName
+                                          ? { "name": workspaceName, "idx": workspaceId }
+                                          : { "idx": workspaceId }, enabled);
   }
 
   function toggleWindowSelection(address) {
-    if (!address)
-      return;
+    if (!address) return;
     const current = Array.from(selectedWindowAddresses || []);
     const idx = current.indexOf(address);
     if (idx !== -1)
@@ -198,13 +196,13 @@ PanelWindow {
   function isWindowPrivate(address, fallback) {
     const addr = String(address || "");
     const normalized = addr.startsWith("0x") ? addr : `0x${addr}`;
-    return privateWindowOverrides[normalized] !== undefined ? privateWindowOverrides[normalized] : fallback;
+    return privateWindowOverrides[normalized] !== undefined
+        ? privateWindowOverrides[normalized] : fallback;
   }
 
   function batchAddTagSelected(tagName) {
     const cleanTag = String(tagName || "").trim();
-    if (!cleanTag)
-      return;
+    if (!cleanTag) return;
     const addrs = Array.from(selectedWindowAddresses || []);
     for (let i = 0; i < addrs.length; i++) {
       const addr = addrs[i].startsWith("0x") ? addrs[i] : `0x${addrs[i]}`;
@@ -231,16 +229,18 @@ PanelWindow {
       const cls = String(ipc?.class || ipc?.initialClass || "").toLowerCase();
       const wsName = String(tl?.workspace?.name || tl?.workspace?.id || "").toLowerCase();
       const tags = Array.from(ipc?.tags || []).join(" ").toLowerCase();
-      if (title.includes(searchQuery) || cls.includes(searchQuery) || wsName.includes(searchQuery) || tags.includes(searchQuery)) {
+      if (title.includes(searchQuery) || cls.includes(searchQuery)
+          || wsName.includes(searchQuery) || tags.includes(searchQuery)) {
         results.push({
-                       "addr": ipc?.address,
-                       "title": ipc?.title || cls || "Window",
-                       "class": cls,
-                       "tags": tags,
-                       "workspaceId": tl?.workspace?.id,
-                       "workspaceName": tl?.workspace?.name || String(tl?.workspace?.id || ""),
-                       "isPrivate": root.isWorkspacePrivate(tl?.workspace?.id, tl?.workspace?.name) || ipc?.no_screen_share === true
-                     });
+          "addr": ipc?.address,
+          "title": ipc?.title || cls || "Window",
+          "class": cls,
+          "tags": tags,
+          "workspaceId": tl?.workspace?.id,
+          "workspaceName": tl?.workspace?.name || String(tl?.workspace?.id || ""),
+          "isPrivate": root.isWorkspacePrivate(tl?.workspace?.id, tl?.workspace?.name)
+                       || ipc?.no_screen_share === true
+        });
       }
     }
     return results;
@@ -282,9 +282,7 @@ PanelWindow {
     if (HyprlandService.createSpecialWorkspace) {
       HyprlandService.createSpecialWorkspace(cleanName, newWorkspacePrivate, specialLaunchCommand);
     } else {
-      const workspace = {
-        "name": "special:" + cleanName
-      };
+      const workspace = { "name": "special:" + cleanName };
       if (newWorkspacePrivate)
         CompositorService.setWorkspacePrivate(workspace, true);
       CompositorService.switchToWorkspace(workspace);
@@ -380,7 +378,8 @@ PanelWindow {
           return Math.min(root.width * 0.46, 820 * Style.uiScaleRatio);
         return Math.min(root.width - 2 * Style.margin2L, 940 * Style.uiScaleRatio);
       }
-      height: Math.min(root.height - root.barThickness - 3 * Style.marginL, 620 * Style.uiScaleRatio)
+      height: Math.min(root.height - root.barThickness - 3 * Style.marginL,
+                       620 * Style.uiScaleRatio)
       x: {
         if (root.floatingMode)
           return Math.round((root.width - width) / 2);
@@ -421,7 +420,8 @@ PanelWindow {
           y: {
             if (root.floatingMode || root.framedBar || root.barPosition === "left" || root.barPosition === "right")
               return 0;
-            return (root.barPosition === "bottom" ? 1 : -1) * (1 - root.revealProgress) * panel.height;
+            return (root.barPosition === "bottom" ? 1 : -1)
+                * (1 - root.revealProgress) * panel.height;
           }
         },
         Translate {
@@ -518,7 +518,9 @@ PanelWindow {
             }
             NText {
               Layout.fillWidth: true
-              text: root.showingSettings ? qsTr("Layout, previews and workspace privacy") : qsTr("Hold a window to move · 'o' grid mode · 'g' game mode · 'p' privacy")
+              text: root.showingSettings
+                    ? qsTr("Layout, previews and workspace privacy")
+                    : qsTr("Hold a window to move · 'o' grid mode · 'g' game mode · 'p' privacy")
               pointSize: Style.fontSizeS
               color: Color.mOnSurfaceVariant
             }
@@ -627,9 +629,7 @@ PanelWindow {
               color: Color.mOnPrimaryContainer || Color.mOnPrimary
             }
 
-            Item {
-              Layout.fillWidth: true
-            }
+            Item { Layout.fillWidth: true }
 
             NButton {
               text: qsTr("Move here")
@@ -673,9 +673,7 @@ PanelWindow {
           }
         }
 
-        NDivider {
-          Layout.fillWidth: true
-        }
+        NDivider { Layout.fillWidth: true }
 
         StackLayout {
           Layout.fillWidth: true
@@ -730,12 +728,8 @@ PanelWindow {
                 Layout.fillWidth: true
                 overview: root
                 title: qsTr("Workspaces")
-                workspaces: root.normalWorkspaces.length ? root.normalWorkspaces : [
-                                                             {
-                                                               "id": 1,
-                                                               "name": "1"
-                                                             }
-                                                           ]
+                workspaces: root.normalWorkspaces.length
+                            ? root.normalWorkspaces : [{ "id": 1, "name": "1" }]
                 livePreviews: root.cfg.livePreviews && !root.gameMode
               }
               WorkspaceCarousel {
@@ -746,9 +740,7 @@ PanelWindow {
                 special: true
                 livePreviews: root.cfg.livePreviews && !root.gameMode
               }
-              Item {
-                Layout.fillHeight: true
-              }
+              Item { Layout.fillHeight: true }
             }
           }
 
@@ -817,9 +809,7 @@ PanelWindow {
                 onToggled: checked => root.cfg.dimBackground = checked
               }
 
-              NDivider {
-                Layout.fillWidth: true
-              }
+              NDivider { Layout.fillWidth: true }
 
               NText {
                 text: qsTr("Create a special workspace")
@@ -856,9 +846,7 @@ PanelWindow {
                 onClicked: root.createSpecialWorkspace()
               }
 
-              NDivider {
-                Layout.fillWidth: true
-              }
+              NDivider { Layout.fillWidth: true }
 
               NText {
                 text: qsTr("Batch Tag Actions")
@@ -994,7 +982,11 @@ PanelWindow {
         NText {
           Layout.fillWidth: true
           horizontalAlignment: Text.AlignHCenter
-          text: root.dragging ? qsTr("Scroll to navigate · release over a workspace to move the window") : (root.selectedWindowAddresses.length > 0 ? qsTr("Use batch bar above to move, close or protect selected windows") : qsTr("Hold window to move · Shift/Ctrl+Click multi-select · Esc to close"))
+          text: root.dragging
+                ? qsTr("Scroll to navigate · release over a workspace to move the window")
+                : (root.selectedWindowAddresses.length > 0
+                   ? qsTr("Use batch bar above to move, close or protect selected windows")
+                   : qsTr("Hold window to move · Shift/Ctrl+Click multi-select · Esc to close"))
           pointSize: Style.fontSizeXS
           color: root.dragging ? Color.mPrimary : Color.mOnSurfaceVariant
         }

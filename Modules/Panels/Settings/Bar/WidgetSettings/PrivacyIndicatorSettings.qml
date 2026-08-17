@@ -27,9 +27,9 @@ ColumnLayout {
     description: I18n.tr("bar.privacy-indicator.hide-inactive-description")
     checked: root.valueHideInactive
     onToggled: checked => {
-      valueHideInactive = checked;
-      saveSettings();
-    }
+                 valueHideInactive = checked;
+                 saveSettings();
+               }
     defaultValue: widgetMetadata.hideInactive
   }
 }

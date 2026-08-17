@@ -23,18 +23,18 @@ Singleton {
   readonly property real lowestNeed: Math.min(hunger, happiness, cleanliness, energy)
   readonly property string petState: {
     if (sleeping)
-    return "sleeping";
+      return "sleeping";
     const sad = happiness < 30;
     const tired = energy < 30;
     const hungry = hunger < 20;
     if (sad && tired && hungry)
-    return "angry";
+      return "angry";
     if (hungry)
-    return "hungry";
+      return "hungry";
     if (sad)
-    return "sad";
+      return "sad";
     if (tired)
-    return "tired";
+      return "tired";
     return "idle";
   }
 
@@ -63,7 +63,9 @@ Singleton {
 
     const now = Date.now();
     const storedTimestamp = Number(state.lastDecayTimestamp);
-    lastDecayTimestamp = Number.isFinite(storedTimestamp) && storedTimestamp > 0 && storedTimestamp <= now ? storedTimestamp : now;
+    lastDecayTimestamp = Number.isFinite(storedTimestamp) && storedTimestamp > 0 && storedTimestamp <= now
+      ? storedTimestamp
+      : now;
     initialized = true;
 
     const elapsedTicks = Math.floor((now - lastDecayTimestamp) / decayIntervalMs);
@@ -95,7 +97,9 @@ Singleton {
       return false;
 
     const configuredDifficulty = Number(Settings.data.tamagotchi.difficulty);
-    const difficulty = Number.isFinite(configuredDifficulty) ? Math.max(0, Math.min(100, configuredDifficulty)) : 50;
+    const difficulty = Number.isFinite(configuredDifficulty)
+      ? Math.max(0, Math.min(100, configuredDifficulty))
+      : 50;
     const factor = 0.3 + difficulty / 100 * 1.7;
     if (sleeping) {
       energy = clampNeed(energy + 3.5 * count);
@@ -244,6 +248,6 @@ Singleton {
 
   Component.onCompleted: {
     if (Settings.isLoaded)
-    initializeFromSettings();
+      initializeFromSettings();
   }
 }

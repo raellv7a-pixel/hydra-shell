@@ -99,10 +99,8 @@ Rectangle {
         Layout.fillHeight: true
 
         Component.onCompleted: Qt.callLater(root._updateIndicator)
-        onXChanged: if (checked)
-                      Qt.callLater(root._updateIndicator)
-        onWidthChanged: if (checked)
-                          Qt.callLater(root._updateIndicator)
+        onXChanged: if (checked) Qt.callLater(root._updateIndicator)
+        onWidthChanged: if (checked) Qt.callLater(root._updateIndicator)
 
         HoverHandler {
           id: hoverHandler

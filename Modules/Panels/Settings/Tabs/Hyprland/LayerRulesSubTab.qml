@@ -15,42 +15,15 @@ ColumnLayout {
 
   readonly property var valueActions: ["ignore_alpha", "order", "above_lock", "animation"]
   readonly property var actionOptions: [
-    {
-      "key": "blur",
-      "name": "Desfoque"
-    },
-    {
-      "key": "no_anim",
-      "name": "Sem animação"
-    },
-    {
-      "key": "dim_around",
-      "name": "Escurecer o restante da tela"
-    },
-    {
-      "key": "xray",
-      "name": "X-ray (desfoca só o wallpaper)"
-    },
-    {
-      "key": "no_screen_share",
-      "name": "Ocultar de compartilhamento de tela"
-    },
-    {
-      "key": "ignore_alpha",
-      "name": "Ignorar transparência abaixo de (valor: 0.0–1.0)"
-    },
-    {
-      "key": "order",
-      "name": "Ordem de renderização (valor: número)"
-    },
-    {
-      "key": "above_lock",
-      "name": "Acima da tela de bloqueio (valor: 0, 1 ou 2)"
-    },
-    {
-      "key": "animation",
-      "name": "Estilo de animação (valor: slide/popin/fade/none)"
-    }
+    { "key": "blur", "name": "Desfoque" },
+    { "key": "no_anim", "name": "Sem animação" },
+    { "key": "dim_around", "name": "Escurecer o restante da tela" },
+    { "key": "xray", "name": "X-ray (desfoca só o wallpaper)" },
+    { "key": "no_screen_share", "name": "Ocultar de compartilhamento de tela" },
+    { "key": "ignore_alpha", "name": "Ignorar transparência abaixo de (valor: 0.0–1.0)" },
+    { "key": "order", "name": "Ordem de renderização (valor: número)" },
+    { "key": "above_lock", "name": "Acima da tela de bloqueio (valor: 0, 1 ou 2)" },
+    { "key": "animation", "name": "Estilo de animação (valor: slide/popin/fade/none)" }
   ]
 
   function set(index, field, value) {
@@ -68,12 +41,7 @@ ColumnLayout {
 
   function add() {
     var arr = (HyprlandDraftStore.val("layerRules") || []).slice();
-    arr.push({
-               "name": "layer-" + (arr.length + 1),
-               "namespace": "",
-               "action": "blur",
-               "value": ""
-             });
+    arr.push({ "name": "layer-" + (arr.length + 1), "namespace": "", "action": "blur", "value": "" });
     HyprlandDraftStore.edit("layerRules", arr);
   }
 

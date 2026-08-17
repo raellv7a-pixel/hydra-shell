@@ -1,5 +1,5 @@
-import QtMultimedia
 import QtQuick
+import QtMultimedia
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
@@ -124,471 +124,386 @@ Item {
       border.width: Style.borderS
       clip: true
 
-      // Live Video Preview Loader
-      Loader {
+    // Live Video Preview Loader
+    Loader {
+      anchors.fill: parent
+      active: root.isVideoPath && root.wallpaperPath !== ""
+      visible: active
+
+      sourceComponent: Item {
         anchors.fill: parent
-        active: root.isVideoPath && root.wallpaperPath !== ""
-        visible: active
 
-        sourceComponent: Item {
-          anchors.fill: parent
-
-          MediaPlayer {
-            id: previewVideoPlayer
-            source: root.activeVideoSource
-            loops: MediaPlayer.Infinite
-            videoOutput: previewVideoOutput
-            audioOutput: AudioOutput {
-              muted: true
+        MediaPlayer {
+          id: previewVideoPlayer
+          source: root.activeVideoSource
+          loops: MediaPlayer.Infinite
+          videoOutput: previewVideoOutput
+          audioOutput: AudioOutput { muted: true }
+          onSourceChanged: {
+            if (source !== "") {
+              play();
+            } else {
+              stop();
             }
-            onSourceChanged: {
-              if (source !== "") {
-                play();
-              } else {
-                stop();
-              }
-            }
-            onMediaStatusChanged: {
-              if (mediaStatus === MediaPlayer.BufferedMedia || mediaStatus === MediaPlayer.LoadedMedia) {
-                play();
-              }
-            }
-            Component.onCompleted: play()
-            Component.onDestruction: stop()
           }
+          onMediaStatusChanged: {
+            if (mediaStatus === MediaPlayer.BufferedMedia || mediaStatus === MediaPlayer.LoadedMedia) {
+              play();
+            }
+          }
+          Component.onCompleted: play()
+          Component.onDestruction: stop()
+        }
 
-          VideoOutput {
-            id: previewVideoOutput
-            anchors.fill: parent
-            fillMode: {
-              switch (root.currentFillMode) {
-              case "fit":
-                return VideoOutput.PreserveAspectFit;
-              case "stretch":
-                return VideoOutput.Stretch;
+        VideoOutput {
+          id: previewVideoOutput
+          anchors.fill: parent
+          fillMode: {
+            switch (root.currentFillMode) {
+              case "fit": return VideoOutput.PreserveAspectFit;
+              case "stretch": return VideoOutput.Stretch;
               case "crop":
-              default:
-                return VideoOutput.PreserveAspectCrop;
-              }
+              default: return VideoOutput.PreserveAspectCrop;
             }
           }
         }
       }
+    }
 
-      // Wallpaper Background Image
-      Image {
-        id: bgImage
-        anchors.fill: parent
-        source: !root.isVideoPath && root.wallpaperPath !== "" ? (root.wallpaperPath.startsWith("/") ? "file://" + root.wallpaperPath : root.wallpaperPath) : ""
-        fillMode: {
-          switch (root.currentFillMode) {
-          case "fit":
-            return Image.PreserveAspectFit;
-          case "stretch":
-            return Image.Stretch;
-          case "repeat":
-            return Image.Tile;
+    // Wallpaper Background Image
+    Image {
+      id: bgImage
+      anchors.fill: parent
+      source: !root.isVideoPath && root.wallpaperPath !== "" ? (root.wallpaperPath.startsWith("/") ? "file://" + root.wallpaperPath : root.wallpaperPath) : ""
+      fillMode: {
+        switch (root.currentFillMode) {
+          case "fit": return Image.PreserveAspectFit;
+          case "stretch": return Image.Stretch;
+          case "repeat": return Image.Tile;
           case "crop":
-          default:
-            return Image.PreserveAspectCrop;
-          }
-        }
-        horizontalAlignment: Image.AlignHCenter
-        verticalAlignment: Image.AlignVCenter
-        smooth: true
-        asynchronous: true
-
-        // Fallback placeholder if empty or loading
-        Rectangle {
-          anchors.fill: parent
-          visible: bgImage.status !== Image.Ready
-          color: Color.mSurfaceContainer
-          NText {
-            anchors.centerIn: parent
-            text: I18n.tr("wallpaper.panel.preview-empty")
-            color: Color.mOnSurfaceVariant
-          }
+          default: return Image.PreserveAspectCrop;
         }
       }
+      horizontalAlignment: Image.AlignHCenter
+      verticalAlignment: Image.AlignVCenter
+      smooth: true
+      asynchronous: true
 
-      // Mock Desktop Shell Overlay
-      Item {
-        id: shellOverlay
+      // Fallback placeholder if empty or loading
+      Rectangle {
         anchors.fill: parent
+        visible: bgImage.status !== Image.Ready
+        color: Color.mSurfaceContainer
+        NText {
+          anchors.centerIn: parent
+          text: I18n.tr("wallpaper.panel.preview-empty")
+          color: Color.mOnSurfaceVariant
+        }
+      }
+    }
 
-        // Mirrors the user's actual bar config (position + which widgets are
-        // enabled per section) instead of a fixed fake layout. "left"/"right"
-        // (vertical bar) positions fall back to the top horizontal mock — a full
-        // vertical-bar mockup would need its own geometry, out of scope here.
-        readonly property string barPosition: Settings.getBarPositionForScreen(root.screenName)
-        readonly property bool barAtBottom: barPosition === "bottom"
-        readonly property var barWidgetSections: Settings.getBarWidgetsForScreen(root.screenName) || ({
+    // Mock Desktop Shell Overlay
+    Item {
+      id: shellOverlay
+      anchors.fill: parent
+
+      // Mirrors the user's actual bar config (position + which widgets are
+      // enabled per section) instead of a fixed fake layout. "left"/"right"
+      // (vertical bar) positions fall back to the top horizontal mock — a full
+      // vertical-bar mockup would need its own geometry, out of scope here.
+      readonly property string barPosition: Settings.getBarPositionForScreen(root.screenName)
+      readonly property bool barAtBottom: barPosition === "bottom"
+      readonly property var barWidgetSections: Settings.getBarWidgetsForScreen(root.screenName) || ({
                                                                                                         "left": [],
                                                                                                         "center": [],
                                                                                                         "right": []
                                                                                                       })
 
-        function barIconFor(widgetId) {
-          switch (widgetId) {
-          case "Clock":
-            return "clock";
-          case "Battery":
-            return "battery-charging";
-          case "Volume":
-          case "MediaMini":
-            return "volume";
-          case "Brightness":
-            return "brightness";
-          case "Tray":
-            return "apps";
-          case "NotificationHistory":
-            return "bell";
-          case "Network":
-          case "VPN":
-            return "wifi";
-          case "Bluetooth":
-            return "bluetooth";
-          case "ControlCenter":
-            return "settings";
-          case "Launcher":
-            return "grid-dots";
-          default:
-            return "app-window";
-          }
+      function barIconFor(widgetId) {
+        switch (widgetId) {
+        case "Clock":
+          return "clock";
+        case "Battery":
+          return "battery-charging";
+        case "Volume":
+        case "MediaMini":
+          return "volume";
+        case "Brightness":
+          return "brightness";
+        case "Tray":
+          return "apps";
+        case "NotificationHistory":
+          return "bell";
+        case "Network":
+        case "VPN":
+          return "wifi";
+        case "Bluetooth":
+          return "bluetooth";
+        case "ControlCenter":
+          return "settings";
+        case "Launcher":
+          return "grid-dots";
+        default:
+          return "app-window";
         }
+      }
 
-        // 1. Bar Simulation (top or bottom, per the real bar config)
-        Rectangle {
-          id: mockBar
-          anchors.top: shellOverlay.barAtBottom ? undefined : parent.top
-          anchors.bottom: shellOverlay.barAtBottom ? parent.bottom : undefined
-          anchors.left: parent.left
-          anchors.right: parent.right
-          height: 32
-          color: Qt.alpha(root.previewDarkMode ? "#14161f" : "#f5f5fa", 0.78)
-          border.color: Qt.alpha(root.paletteColor("mPrimary"), 0.25)
-          border.width: 1
+      // 1. Bar Simulation (top or bottom, per the real bar config)
+      Rectangle {
+        id: mockBar
+        anchors.top: shellOverlay.barAtBottom ? undefined : parent.top
+        anchors.bottom: shellOverlay.barAtBottom ? parent.bottom : undefined
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 32
+        color: Qt.alpha(root.previewDarkMode ? "#14161f" : "#f5f5fa", 0.78)
+        border.color: Qt.alpha(root.paletteColor("mPrimary"), 0.25)
+        border.width: 1
 
-          RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: Style.marginM
-            anchors.rightMargin: Style.marginM
+        RowLayout {
+          anchors.fill: parent
+          anchors.leftMargin: Style.marginM
+          anchors.rightMargin: Style.marginM
 
-            // Left section
-            Row {
-              spacing: Style.marginS
-              Layout.alignment: Qt.AlignVCenter
-              Repeater {
-                model: shellOverlay.barWidgetSections.left
-                NIcon {
-                  required property var modelData
-                  icon: shellOverlay.barIconFor(modelData.id)
-                  pointSize: Style.fontSizeS
-                  color: root.paletteColor("mPrimary")
-                }
+          // Left section
+          Row {
+            spacing: Style.marginS
+            Layout.alignment: Qt.AlignVCenter
+            Repeater {
+              model: shellOverlay.barWidgetSections.left
+              NIcon {
+                required property var modelData
+                icon: shellOverlay.barIconFor(modelData.id)
+                pointSize: Style.fontSizeS
+                color: root.paletteColor("mPrimary")
               }
             }
+          }
 
-            Item {
-              Layout.fillWidth: true
-            }
+          Item { Layout.fillWidth: true }
 
-            // Center section — special-cased workspace pills when present, icons otherwise
-            Row {
-              spacing: 6
-              Layout.alignment: Qt.AlignVCenter
-              Repeater {
-                model: shellOverlay.barWidgetSections.center
-                Loader {
-                  required property var modelData
-                  sourceComponent: modelData.id === "Workspace" ? workspacePillsComponent : centerIconComponent
+          // Center section — special-cased workspace pills when present, icons otherwise
+          Row {
+            spacing: 6
+            Layout.alignment: Qt.AlignVCenter
+            Repeater {
+              model: shellOverlay.barWidgetSections.center
+              Loader {
+                required property var modelData
+                sourceComponent: modelData.id === "Workspace" ? workspacePillsComponent : centerIconComponent
 
-                  Component {
-                    id: workspacePillsComponent
-                    Row {
-                      spacing: 6
-                      Repeater {
-                        model: 4
-                        Rectangle {
-                          width: index === 0 ? 22 : 10
-                          height: 10
-                          radius: 5
-                          color: index === 0 ? root.paletteColor("mPrimary") : Qt.alpha(root.paletteColor("mOnSurface"), 0.3)
-                        }
+                Component {
+                  id: workspacePillsComponent
+                  Row {
+                    spacing: 6
+                    Repeater {
+                      model: 4
+                      Rectangle {
+                        width: index === 0 ? 22 : 10
+                        height: 10
+                        radius: 5
+                        color: index === 0 ? root.paletteColor("mPrimary") : Qt.alpha(root.paletteColor("mOnSurface"), 0.3)
                       }
                     }
                   }
-                  Component {
-                    id: centerIconComponent
-                    NText {
-                      text: "14:30"
-                      pointSize: Style.fontSizeS
-                      font.weight: Style.fontWeightBold
-                      color: root.previewDarkMode ? "#ffffff" : "#1a1a2e"
-                    }
-                  }
                 }
-              }
-            }
-
-            Item {
-              Layout.fillWidth: true
-            }
-
-            // Right section
-            Row {
-              spacing: Style.marginS
-              Layout.alignment: Qt.AlignVCenter
-              Repeater {
-                model: shellOverlay.barWidgetSections.right
-                NIcon {
-                  required property var modelData
-                  icon: shellOverlay.barIconFor(modelData.id)
-                  pointSize: Style.fontSizeS
-                  color: root.paletteColor("mPrimary")
-                }
-              }
-            }
-          }
-        }
-
-        // 2. Mock Floating Window 1 (Code Editor / App)
-        Rectangle {
-          id: mockWindow1
-          width: Math.min(parent.width * 0.48, 380)
-          height: Math.min(parent.height * 0.55, 260)
-          x: Style.marginXL
-          y: mockBar.height + Style.marginL
-          color: Qt.alpha(root.previewDarkMode ? "#181a24" : "#ffffff", 0.92)
-          radius: Style.radiusS
-          border.color: Qt.alpha(root.paletteColor("mPrimary"), 0.4)
-          border.width: 1
-
-          ColumnLayout {
-            anchors.fill: parent
-            spacing: 0
-
-            // Titlebar
-            Rectangle {
-              Layout.fillWidth: true
-              height: 28
-              color: Qt.alpha(root.paletteColor("mPrimary"), 0.12)
-              radius: Style.radiusS
-
-              RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-
-                Row {
-                  spacing: 5
-                  Rectangle {
-                    width: 9
-                    height: 9
-                    radius: 4.5
-                    color: "#ff5f56"
-                  }
-                  Rectangle {
-                    width: 9
-                    height: 9
-                    radius: 4.5
-                    color: "#ffbd2e"
-                  }
-                  Rectangle {
-                    width: 9
-                    height: 9
-                    radius: 4.5
-                    color: "#27c93f"
-                  }
-                }
-
-                NText {
-                  text: "Hydra Shell - Editor"
-                  pointSize: Style.fontSizeXS
-                  color: root.paletteColor("mOnSurface")
-                  Layout.fillWidth: true
-                  horizontalAlignment: Text.AlignHCenter
-                }
-              }
-            }
-
-            // Window Content Mockup
-            Item {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-
-              Column {
-                anchors.fill: parent
-                anchors.margins: 10
-                spacing: 6
-
-                Row {
-                  spacing: 8
+                Component {
+                  id: centerIconComponent
                   NText {
-                    text: "1"
-                    pointSize: Style.fontSizeXS
-                    color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4)
-                  }
-                  NText {
-                    text: "import Quickshell"
-                    pointSize: Style.fontSizeXS
-                    color: root.paletteColor("mPrimary")
+                    text: "14:30"
+                    pointSize: Style.fontSizeS
                     font.weight: Style.fontWeightBold
-                  }
-                }
-                Row {
-                  spacing: 8
-                  NText {
-                    text: "2"
-                    pointSize: Style.fontSizeXS
-                    color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4)
-                  }
-                  NText {
-                    text: "import qs.Services.Theming"
-                    pointSize: Style.fontSizeXS
-                    color: root.paletteColor("mSecondary")
-                  }
-                }
-                Row {
-                  spacing: 8
-                  NText {
-                    text: "3"
-                    pointSize: Style.fontSizeXS
-                    color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4)
-                  }
-                  NText {
-                    text: "WallpaperPanel {"
-                    pointSize: Style.fontSizeXS
-                    color: root.paletteColor("mOnSurface")
-                  }
-                }
-                Row {
-                  spacing: 8
-                  NText {
-                    text: "4"
-                    pointSize: Style.fontSizeXS
-                    color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4)
-                  }
-                  NText {
-                    text: "  themeColors: extracted"
-                    pointSize: Style.fontSizeXS
-                    color: root.paletteColor("mPrimary")
-                  }
-                }
-                Row {
-                  spacing: 8
-                  NText {
-                    text: "5"
-                    pointSize: Style.fontSizeXS
-                    color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4)
-                  }
-                  NText {
-                    text: "}"
-                    pointSize: Style.fontSizeXS
-                    color: root.paletteColor("mOnSurface")
+                    color: root.previewDarkMode ? "#ffffff" : "#1a1a2e"
                   }
                 }
               }
             }
           }
-        }
 
-        // 3. Mock Floating Window 2 (Terminal / Pywal Preview)
-        Rectangle {
-          id: mockWindow2
-          width: Math.min(parent.width * 0.42, 340)
-          height: Math.min(parent.height * 0.48, 220)
-          anchors.right: parent.right
-          anchors.rightMargin: Style.marginXL
-          anchors.bottom: parent.bottom
-          anchors.bottomMargin: Style.marginL
-          color: Qt.alpha(root.previewDarkMode ? "#0f111a" : "#fafafa", 0.95)
-          radius: Style.radiusS
-          border.color: Qt.alpha(root.paletteColor("mSecondary"), 0.35)
-          border.width: 1
+          Item { Layout.fillWidth: true }
 
-          ColumnLayout {
-            anchors.fill: parent
-            spacing: 0
-
-            // Titlebar
-            Rectangle {
-              Layout.fillWidth: true
-              height: 28
-              color: Qt.alpha(root.paletteColor("mSecondary"), 0.12)
-              radius: Style.radiusS
-
-              RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-
-                Row {
-                  spacing: 5
-                  Rectangle {
-                    width: 9
-                    height: 9
-                    radius: 4.5
-                    color: "#ff5f56"
-                  }
-                  Rectangle {
-                    width: 9
-                    height: 9
-                    radius: 4.5
-                    color: "#ffbd2e"
-                  }
-                  Rectangle {
-                    width: 9
-                    height: 9
-                    radius: 4.5
-                    color: "#27c93f"
-                  }
-                }
-
-                NText {
-                  text: "terminal - neofetch"
-                  pointSize: Style.fontSizeXS
-                  color: root.paletteColor("mOnSurface")
-                  Layout.fillWidth: true
-                  horizontalAlignment: Text.AlignHCenter
-                }
+          // Right section
+          Row {
+            spacing: Style.marginS
+            Layout.alignment: Qt.AlignVCenter
+            Repeater {
+              model: shellOverlay.barWidgetSections.right
+              NIcon {
+                required property var modelData
+                icon: shellOverlay.barIconFor(modelData.id)
+                pointSize: Style.fontSizeS
+                color: root.paletteColor("mPrimary")
               }
             }
+          }
+        }
+      }
 
-            // Terminal Content
-            Item {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
+      // 2. Mock Floating Window 1 (Code Editor / App)
+      Rectangle {
+        id: mockWindow1
+        width: Math.min(parent.width * 0.48, 380)
+        height: Math.min(parent.height * 0.55, 260)
+        x: Style.marginXL
+        y: mockBar.height + Style.marginL
+        color: Qt.alpha(root.previewDarkMode ? "#181a24" : "#ffffff", 0.92)
+        radius: Style.radiusS
+        border.color: Qt.alpha(root.paletteColor("mPrimary"), 0.4)
+        border.width: 1
 
-              Column {
-                anchors.fill: parent
-                anchors.margins: 10
-                spacing: 6
+        ColumnLayout {
+          anchors.fill: parent
+          spacing: 0
 
-                NText {
-                  text: "raell@hydra-pc ~ $"
-                  pointSize: Style.fontSizeXS
-                  color: root.paletteColor("mPrimary")
-                  font.weight: Style.fontWeightBold
-                }
+          // Titlebar
+          Rectangle {
+            Layout.fillWidth: true
+            height: 28
+            color: Qt.alpha(root.paletteColor("mPrimary"), 0.12)
+            radius: Style.radiusS
 
-                NText {
-                  text: "OS: Arch Linux x86_64\nWM: Hyprland (Wayland)\nShell: Hydra Shell v1.3.6"
-                  pointSize: Style.fontSizeXS
-                  color: root.paletteColor("mOnSurfaceVariant")
-                }
+            RowLayout {
+              anchors.fill: parent
+              anchors.leftMargin: 8
+              anchors.rightMargin: 8
 
-                Row {
-                  spacing: 4
-                  Repeater {
-                    model: [root.paletteColor("mPrimary"), root.paletteColor("mSecondary"), "#e74c3c", "#f1c40f", "#2ecc71", "#9b59b6", "#3498db"]
-                    Rectangle {
-                      required property var modelData
-                      width: 18
-                      height: 12
-                      radius: 2
-                      color: modelData
-                    }
+              Row {
+                spacing: 5
+                Rectangle { width: 9; height: 9; radius: 4.5; color: "#ff5f56" }
+                Rectangle { width: 9; height: 9; radius: 4.5; color: "#ffbd2e" }
+                Rectangle { width: 9; height: 9; radius: 4.5; color: "#27c93f" }
+              }
+
+              NText {
+                text: "Hydra Shell - Editor"
+                pointSize: Style.fontSizeXS
+                color: root.paletteColor("mOnSurface")
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+              }
+            }
+          }
+
+          // Window Content Mockup
+          Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            Column {
+              anchors.fill: parent
+              anchors.margins: 10
+              spacing: 6
+
+              Row {
+                spacing: 8
+                NText { text: "1"; pointSize: Style.fontSizeXS; color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4) }
+                NText { text: "import Quickshell"; pointSize: Style.fontSizeXS; color: root.paletteColor("mPrimary"); font.weight: Style.fontWeightBold }
+              }
+              Row {
+                spacing: 8
+                NText { text: "2"; pointSize: Style.fontSizeXS; color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4) }
+                NText { text: "import qs.Services.Theming"; pointSize: Style.fontSizeXS; color: root.paletteColor("mSecondary") }
+              }
+              Row {
+                spacing: 8
+                NText { text: "3"; pointSize: Style.fontSizeXS; color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4) }
+                NText { text: "WallpaperPanel {"; pointSize: Style.fontSizeXS; color: root.paletteColor("mOnSurface") }
+              }
+              Row {
+                spacing: 8
+                NText { text: "4"; pointSize: Style.fontSizeXS; color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4) }
+                NText { text: "  themeColors: extracted"; pointSize: Style.fontSizeXS; color: root.paletteColor("mPrimary") }
+              }
+              Row {
+                spacing: 8
+                NText { text: "5"; pointSize: Style.fontSizeXS; color: Qt.alpha(root.paletteColor("mOnSurface"), 0.4) }
+                NText { text: "}"; pointSize: Style.fontSizeXS; color: root.paletteColor("mOnSurface") }
+              }
+            }
+          }
+        }
+      }
+
+      // 3. Mock Floating Window 2 (Terminal / Pywal Preview)
+      Rectangle {
+        id: mockWindow2
+        width: Math.min(parent.width * 0.42, 340)
+        height: Math.min(parent.height * 0.48, 220)
+        anchors.right: parent.right
+        anchors.rightMargin: Style.marginXL
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Style.marginL
+        color: Qt.alpha(root.previewDarkMode ? "#0f111a" : "#fafafa", 0.95)
+        radius: Style.radiusS
+        border.color: Qt.alpha(root.paletteColor("mSecondary"), 0.35)
+        border.width: 1
+
+        ColumnLayout {
+          anchors.fill: parent
+          spacing: 0
+
+          // Titlebar
+          Rectangle {
+            Layout.fillWidth: true
+            height: 28
+            color: Qt.alpha(root.paletteColor("mSecondary"), 0.12)
+            radius: Style.radiusS
+
+            RowLayout {
+              anchors.fill: parent
+              anchors.leftMargin: 8
+              anchors.rightMargin: 8
+
+              Row {
+                spacing: 5
+                Rectangle { width: 9; height: 9; radius: 4.5; color: "#ff5f56" }
+                Rectangle { width: 9; height: 9; radius: 4.5; color: "#ffbd2e" }
+                Rectangle { width: 9; height: 9; radius: 4.5; color: "#27c93f" }
+              }
+
+              NText {
+                text: "terminal - neofetch"
+                pointSize: Style.fontSizeXS
+                color: root.paletteColor("mOnSurface")
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+              }
+            }
+          }
+
+          // Terminal Content
+          Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            Column {
+              anchors.fill: parent
+              anchors.margins: 10
+              spacing: 6
+
+              NText {
+                text: "raell@hydra-pc ~ $"
+                pointSize: Style.fontSizeXS
+                color: root.paletteColor("mPrimary")
+                font.weight: Style.fontWeightBold
+              }
+
+              NText {
+                text: "OS: Arch Linux x86_64\nWM: Hyprland (Wayland)\nShell: Hydra Shell v1.3.6"
+                pointSize: Style.fontSizeXS
+                color: root.paletteColor("mOnSurfaceVariant")
+              }
+
+              Row {
+                spacing: 4
+                Repeater {
+                  model: [root.paletteColor("mPrimary"), root.paletteColor("mSecondary"), "#e74c3c", "#f1c40f", "#2ecc71", "#9b59b6", "#3498db"]
+                  Rectangle {
+                    required property var modelData
+                    width: 18
+                    height: 12
+                    radius: 2
+                    color: modelData
                   }
                 }
               }
@@ -598,4 +513,5 @@ Item {
       }
     }
   }
+}
 }

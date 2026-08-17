@@ -17,26 +17,26 @@ ColumnLayout {
   property string valueIconColor: widgetData.iconColor ?? widgetMetadata.iconColor ?? "none"
 
   readonly property var connectionConfig: Settings.data.obsControl ?? ({
-                                                                         manualConfiguration: false,
-                                                                         host: "127.0.0.1",
-                                                                         port: 4455,
-                                                                         password: "",
-                                                                         pollInterval: 1500
-                                                                       })
+    manualConfiguration: false,
+    host: "127.0.0.1",
+    port: 4455,
+    password: "",
+    pollInterval: 1500
+  })
 
   signal settingsChanged(var settings)
 
   function saveWidgetSettings() {
-    const settings = Object.assign({}, widgetData || {});
-    settings.hideWhenInactive = valueHideWhenInactive;
-    settings.showElapsed = valueShowElapsed;
-    settings.iconColor = valueIconColor;
-    settingsChanged(settings);
+    const settings = Object.assign({}, widgetData || {})
+    settings.hideWhenInactive = valueHideWhenInactive
+    settings.showElapsed = valueShowElapsed
+    settings.iconColor = valueIconColor
+    settingsChanged(settings)
   }
 
   function updateConnectionSetting(key, value) {
     if (Settings.data.obsControl)
-      Settings.data.obsControl[key] = value;
+      Settings.data.obsControl[key] = value
   }
 
   NText {
@@ -79,11 +79,11 @@ ColumnLayout {
     inputMethodHints: Qt.ImhDigitsOnly
     defaultValue: "4455"
     onEditingFinished: {
-      const value = Number(text);
+      const value = Number(text)
       if (value > 0 && value <= 65535 && Math.floor(value) === value)
-        root.updateConnectionSetting("port", value);
+        root.updateConnectionSetting("port", value)
       else
-        text = String(root.connectionConfig.port);
+        text = String(root.connectionConfig.port)
     }
   }
 
@@ -139,8 +139,8 @@ ColumnLayout {
     checked: root.valueHideWhenInactive
     defaultValue: widgetMetadata.hideWhenInactive
     onToggled: checked => {
-      root.valueHideWhenInactive = checked;
-      root.saveWidgetSettings();
+      root.valueHideWhenInactive = checked
+      root.saveWidgetSettings()
     }
   }
 
@@ -151,8 +151,8 @@ ColumnLayout {
     checked: root.valueShowElapsed
     defaultValue: widgetMetadata.showElapsed
     onToggled: checked => {
-      root.valueShowElapsed = checked;
-      root.saveWidgetSettings();
+      root.valueShowElapsed = checked
+      root.saveWidgetSettings()
     }
   }
 
@@ -162,8 +162,8 @@ ColumnLayout {
     currentKey: root.valueIconColor
     defaultValue: widgetMetadata.iconColor
     onSelected: key => {
-      root.valueIconColor = key;
-      root.saveWidgetSettings();
+      root.valueIconColor = key
+      root.saveWidgetSettings()
     }
   }
 }

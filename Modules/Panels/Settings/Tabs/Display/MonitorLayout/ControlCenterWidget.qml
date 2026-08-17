@@ -3,15 +3,15 @@ import Quickshell
 import qs.Widgets
 
 NIconButton {
-  property ShellScreen screen
-  property var pluginApi: null
+    property ShellScreen screen
+    property var pluginApi: null
 
-  icon: "device-desktop"
-  tooltipText: pluginApi?.tr("widget.tooltip")
+    icon: "device-desktop"
+    tooltipText: pluginApi?.tr("widget.tooltip")
 
-  onClicked: {
-    if (pluginApi) {
-      pluginApi.togglePanel(screen);
+    onClicked: {
+        if (pluginApi) {
+            pluginApi.togglePanel(screen);
+        }
     }
-  }
 }

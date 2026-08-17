@@ -132,14 +132,14 @@ Singleton {
 
   function _settingsToggle(tabId, subTabId) {
     root.screenDetector.withCurrentScreen(screen => {
-      SettingsPanelService.toggle(tabId, subTabId, screen);
-    });
+                                            SettingsPanelService.toggle(tabId, subTabId, screen);
+                                          });
   }
 
   function _settingsOpen(tabId, subTabId) {
     root.screenDetector.withCurrentScreen(screen => {
-      SettingsPanelService.openToTab(tabId, subTabId, screen);
-    });
+                                            SettingsPanelService.openToTab(tabId, subTabId, screen);
+                                          });
   }
 
   IpcHandler {
@@ -168,9 +168,9 @@ Singleton {
     target: "calendar"
     function toggle() {
       root.screenDetector.withCurrentScreen(screen => {
-        var clockPanel = PanelService.getPanel("clockPanel", screen);
-        clockPanel?.toggle(null, "Clock");
-      });
+                                              var clockPanel = PanelService.getPanel("clockPanel", screen);
+                                              clockPanel?.toggle(null, "Clock");
+                                            });
     }
   }
 
@@ -179,9 +179,9 @@ Singleton {
     function toggleHistory() {
       // Will attempt to open the panel next to the bar button if any.
       root.screenDetector.withCurrentScreen(screen => {
-        var notificationHistoryPanel = PanelService.getPanel("notificationHistoryPanel", screen);
-        notificationHistoryPanel.toggle(null, "NotificationHistory");
-      });
+                                              var notificationHistoryPanel = PanelService.getPanel("notificationHistoryPanel", screen);
+                                              notificationHistoryPanel.toggle(null, "NotificationHistory");
+                                            });
     }
     function toggleDND() {
       NotificationService.doNotDisturb = !NotificationService.doNotDisturb;
@@ -320,90 +320,90 @@ Singleton {
     target: "launcher"
     function toggle() {
       root.screenDetector.withCurrentScreen(screen => {
-        var searchText = PanelService.getLauncherSearchText(screen);
-        var isInAppMode = !searchText.startsWith(">");
-        if (!PanelService.isLauncherOpen(screen)) {
-          // Closed -> open in app mode
-          PanelService.openLauncherWithSearch(screen, "");
-        } else if (isInAppMode) {
-          // Already in app mode -> close
-          PanelService.closeLauncher(screen);
-        } else {
-          // In another mode -> switch to app mode
-          PanelService.setLauncherSearchText(screen, "");
-        }
-      }, Settings.data.appLauncher.overviewLayer);
+                                              var searchText = PanelService.getLauncherSearchText(screen);
+                                              var isInAppMode = !searchText.startsWith(">");
+                                              if (!PanelService.isLauncherOpen(screen)) {
+                                                // Closed -> open in app mode
+                                                PanelService.openLauncherWithSearch(screen, "");
+                                              } else if (isInAppMode) {
+                                                // Already in app mode -> close
+                                                PanelService.closeLauncher(screen);
+                                              } else {
+                                                // In another mode -> switch to app mode
+                                                PanelService.setLauncherSearchText(screen, "");
+                                              }
+                                            }, Settings.data.appLauncher.overviewLayer);
     }
     function clipboard() {
       root.screenDetector.withCurrentScreen(screen => {
-        var searchText = PanelService.getLauncherSearchText(screen);
-        var isInClipMode = searchText.startsWith(">clip");
-        if (!PanelService.isLauncherOpen(screen)) {
-          // Closed -> open in clipboard mode
-          PanelService.openLauncherWithSearch(screen, ">clip ");
-        } else if (isInClipMode) {
-          // Already in clipboard mode -> close
-          PanelService.closeLauncher(screen);
-        } else {
-          // In another mode -> switch to clipboard mode
-          PanelService.setLauncherSearchText(screen, ">clip ");
-        }
-      }, Settings.data.appLauncher.overviewLayer);
+                                              var searchText = PanelService.getLauncherSearchText(screen);
+                                              var isInClipMode = searchText.startsWith(">clip");
+                                              if (!PanelService.isLauncherOpen(screen)) {
+                                                // Closed -> open in clipboard mode
+                                                PanelService.openLauncherWithSearch(screen, ">clip ");
+                                              } else if (isInClipMode) {
+                                                // Already in clipboard mode -> close
+                                                PanelService.closeLauncher(screen);
+                                              } else {
+                                                // In another mode -> switch to clipboard mode
+                                                PanelService.setLauncherSearchText(screen, ">clip ");
+                                              }
+                                            }, Settings.data.appLauncher.overviewLayer);
     }
     function command() {
       root.screenDetector.withCurrentScreen(screen => {
-        var searchText = PanelService.getLauncherSearchText(screen);
-        var isInCmdMode = searchText.startsWith(">cmd");
-        if (!PanelService.isLauncherOpen(screen)) {
-          PanelService.openLauncherWithSearch(screen, ">cmd ");
-        } else if (isInCmdMode) {
-          PanelService.closeLauncher(screen);
-        } else {
-          PanelService.setLauncherSearchText(screen, ">cmd ");
-        }
-      }, Settings.data.appLauncher.overviewLayer);
+                                              var searchText = PanelService.getLauncherSearchText(screen);
+                                              var isInCmdMode = searchText.startsWith(">cmd");
+                                              if (!PanelService.isLauncherOpen(screen)) {
+                                                PanelService.openLauncherWithSearch(screen, ">cmd ");
+                                              } else if (isInCmdMode) {
+                                                PanelService.closeLauncher(screen);
+                                              } else {
+                                                PanelService.setLauncherSearchText(screen, ">cmd ");
+                                              }
+                                            }, Settings.data.appLauncher.overviewLayer);
     }
     function emoji() {
       root.screenDetector.withCurrentScreen(screen => {
-        var searchText = PanelService.getLauncherSearchText(screen);
-        var isInEmojiMode = searchText.startsWith(">emoji");
-        if (!PanelService.isLauncherOpen(screen)) {
-          // Closed -> open in emoji mode
-          PanelService.openLauncherWithSearch(screen, ">emoji ");
-        } else if (isInEmojiMode) {
-          // Already in emoji mode -> close
-          PanelService.closeLauncher(screen);
-        } else {
-          // In another mode -> switch to emoji mode
-          PanelService.setLauncherSearchText(screen, ">emoji ");
-        }
-      }, Settings.data.appLauncher.overviewLayer);
+                                              var searchText = PanelService.getLauncherSearchText(screen);
+                                              var isInEmojiMode = searchText.startsWith(">emoji");
+                                              if (!PanelService.isLauncherOpen(screen)) {
+                                                // Closed -> open in emoji mode
+                                                PanelService.openLauncherWithSearch(screen, ">emoji ");
+                                              } else if (isInEmojiMode) {
+                                                // Already in emoji mode -> close
+                                                PanelService.closeLauncher(screen);
+                                              } else {
+                                                // In another mode -> switch to emoji mode
+                                                PanelService.setLauncherSearchText(screen, ">emoji ");
+                                              }
+                                            }, Settings.data.appLauncher.overviewLayer);
     }
     function windows() {
       root.screenDetector.withCurrentScreen(screen => {
-        var searchText = PanelService.getLauncherSearchText(screen);
-        var isInWindowsMode = searchText.startsWith(">win");
-        if (!PanelService.isLauncherOpen(screen)) {
-          PanelService.openLauncherWithSearch(screen, ">win ");
-        } else if (isInWindowsMode) {
-          PanelService.closeLauncher(screen);
-        } else {
-          PanelService.setLauncherSearchText(screen, ">win ");
-        }
-      }, Settings.data.appLauncher.overviewLayer);
+                                              var searchText = PanelService.getLauncherSearchText(screen);
+                                              var isInWindowsMode = searchText.startsWith(">win");
+                                              if (!PanelService.isLauncherOpen(screen)) {
+                                                PanelService.openLauncherWithSearch(screen, ">win ");
+                                              } else if (isInWindowsMode) {
+                                                PanelService.closeLauncher(screen);
+                                              } else {
+                                                PanelService.setLauncherSearchText(screen, ">win ");
+                                              }
+                                            }, Settings.data.appLauncher.overviewLayer);
     }
     function settings() {
       root.screenDetector.withCurrentScreen(screen => {
-        var searchText = PanelService.getLauncherSearchText(screen);
-        var isInSettingsMode = searchText.startsWith(">settings");
-        if (!PanelService.isLauncherOpen(screen)) {
-          PanelService.openLauncherWithSearch(screen, ">settings ");
-        } else if (isInSettingsMode) {
-          PanelService.closeLauncher(screen);
-        } else {
-          PanelService.setLauncherSearchText(screen, ">settings ");
-        }
-      }, Settings.data.appLauncher.overviewLayer);
+                                              var searchText = PanelService.getLauncherSearchText(screen);
+                                              var isInSettingsMode = searchText.startsWith(">settings");
+                                              if (!PanelService.isLauncherOpen(screen)) {
+                                                PanelService.openLauncherWithSearch(screen, ">settings ");
+                                              } else if (isInSettingsMode) {
+                                                PanelService.closeLauncher(screen);
+                                              } else {
+                                                PanelService.setLauncherSearchText(screen, ">settings ");
+                                              }
+                                            }, Settings.data.appLauncher.overviewLayer);
     }
   }
 
@@ -531,21 +531,21 @@ Singleton {
     }
     function togglePanel() {
       root.screenDetector.withCurrentScreen(screen => {
-        var panel = PanelService.getPanel("audioPanel", screen);
-        panel?.toggle(null, "Volume");
-      });
+                                              var panel = PanelService.getPanel("audioPanel", screen);
+                                              panel?.toggle(null, "Volume");
+                                            });
     }
     function openPanel() {
       root.screenDetector.withCurrentScreen(screen => {
-        var panel = PanelService.getPanel("audioPanel", screen);
-        panel?.open(null, "Volume");
-      });
+                                              var panel = PanelService.getPanel("audioPanel", screen);
+                                              panel?.open(null, "Volume");
+                                            });
     }
     function closePanel() {
       root.screenDetector.withCurrentScreen(screen => {
-        var panel = PanelService.getPanel("audioPanel", screen);
-        panel?.close(null, "Volume");
-      });
+                                              var panel = PanelService.getPanel("audioPanel", screen);
+                                              panel?.close(null, "Volume");
+                                            });
     }
   }
 
@@ -553,10 +553,10 @@ Singleton {
     target: "sessionMenu"
     function toggle() {
       root.screenDetector.withCurrentScreen(screen => {
-        var sessionMenuPanel = PanelService.getPanel("sessionMenuPanel", screen);
-        // Session Menu is never open near the bar
-        sessionMenuPanel?.toggle();
-      });
+                                              var sessionMenuPanel = PanelService.getPanel("sessionMenuPanel", screen);
+                                              // Session Menu is never open near the bar
+                                              sessionMenuPanel?.toggle();
+                                            });
     }
 
     function lock() {
@@ -577,14 +577,14 @@ Singleton {
     target: "controlCenter"
     function toggle() {
       root.screenDetector.withCurrentScreen(screen => {
-        var controlCenterPanel = PanelService.getPanel("controlCenterPanel", screen);
-        if (Settings.data.controlCenter.position === "close_to_bar_button") {
-          // Will attempt to open the panel next to the bar button if any.
-          controlCenterPanel?.toggle(null, "ControlCenter");
-        } else {
-          controlCenterPanel?.toggle();
-        }
-      });
+                                              var controlCenterPanel = PanelService.getPanel("controlCenterPanel", screen);
+                                              if (Settings.data.controlCenter.position === "close_to_bar_button") {
+                                                // Will attempt to open the panel next to the bar button if any.
+                                                controlCenterPanel?.toggle(null, "ControlCenter");
+                                              } else {
+                                                controlCenterPanel?.toggle();
+                                              }
+                                            });
     }
   }
 
@@ -625,12 +625,9 @@ Singleton {
       const normalizedState = (state || "toggle").trim().toLowerCase();
       if (normalizedState !== "on" && normalizedState !== "off" && normalizedState !== "toggle")
         return "invalid-state";
-      const enabled = normalizedState === "on" ? true : (normalizedState === "off" ? false : !currentlyPrivate);
-      const workspaceRef = /^\d+$/.test(key) ? {
-                                                 "idx": parseInt(key)
-                                               } : {
-        "name": key
-      };
+      const enabled = normalizedState === "on" ? true
+                                                : (normalizedState === "off" ? false : !currentlyPrivate);
+      const workspaceRef = /^\d+$/.test(key) ? { "idx": parseInt(key) } : { "name": key };
       CompositorService.setWorkspacePrivate(workspaceRef, enabled);
       return enabled ? "private" : "public";
     }
@@ -680,9 +677,9 @@ Singleton {
     function toggle() {
       if (Settings.data.wallpaper.enabled) {
         root.screenDetector.withCurrentScreen(screen => {
-          var wallpaperPanel = PanelService.getPanel("wallpaperPanel", screen);
-          wallpaperPanel?.toggle();
-        });
+                                                var wallpaperPanel = PanelService.getPanel("wallpaperPanel", screen);
+                                                wallpaperPanel?.toggle();
+                                              });
       }
     }
 
@@ -750,9 +747,9 @@ Singleton {
     target: "network"
     function togglePanel() {
       root.screenDetector.withCurrentScreen(screen => {
-        var networkPanel = PanelService.getPanel("networkPanel", screen);
-        networkPanel?.toggle(null, "Network");
-      });
+                                              var networkPanel = PanelService.getPanel("networkPanel", screen);
+                                              networkPanel?.toggle(null, "Network");
+                                            });
     }
   }
 
@@ -769,9 +766,9 @@ Singleton {
     }
     function togglePanel() {
       root.screenDetector.withCurrentScreen(screen => {
-        var bluetoothPanel = PanelService.getPanel("bluetoothPanel", screen);
-        bluetoothPanel?.toggle(null, "Bluetooth");
-      });
+                                              var bluetoothPanel = PanelService.getPanel("bluetoothPanel", screen);
+                                              bluetoothPanel?.toggle(null, "Bluetooth");
+                                            });
     }
     function toggleAutoConnect() {
       Settings.data.network.bluetoothAutoConnect = !Settings.data.network.bluetoothAutoConnect;
@@ -801,9 +798,9 @@ Singleton {
     target: "battery"
     function togglePanel() {
       root.screenDetector.withCurrentScreen(screen => {
-        var batteryPanel = PanelService.getPanel("batteryPanel", screen);
-        batteryPanel?.toggle(null, "Battery");
-      });
+                                              var batteryPanel = PanelService.getPanel("batteryPanel", screen);
+                                              batteryPanel?.toggle(null, "Battery");
+                                            });
     }
   }
 
@@ -849,9 +846,9 @@ Singleton {
 
     function toggle() {
       root.screenDetector.withCurrentScreen(screen => {
-        var panel = PanelService.getPanel("mediaPlayerPanel", screen);
-        panel?.toggle(null, "MediaMini");
-      });
+                                              var panel = PanelService.getPanel("mediaPlayerPanel", screen);
+                                              panel?.toggle(null, "MediaMini");
+                                            });
     }
 
     function playPause() {
@@ -948,9 +945,9 @@ Singleton {
     target: "systemMonitor"
     function toggle() {
       root.screenDetector.withCurrentScreen(screen => {
-        var panel = PanelService.getPanel("systemStatsPanel", screen);
-        panel?.toggle(null, "SystemMonitor");
-      });
+                                              var panel = PanelService.getPanel("systemStatsPanel", screen);
+                                              panel?.toggle(null, "SystemMonitor");
+                                            });
     }
   }
 
@@ -967,8 +964,8 @@ Singleton {
         return;
       }
       root.screenDetector.withCurrentScreen(screen => {
-        BarService.openPluginSettings(screen, manifest);
-      });
+                                              BarService.openPluginSettings(screen, manifest);
+                                            });
     }
 
     function openPanel(key: string) {
@@ -982,8 +979,8 @@ Singleton {
         return;
       }
       root.screenDetector.withCurrentScreen(screen => {
-        PluginService.openPluginPanel(key, screen, null);
-      });
+                                              PluginService.openPluginPanel(key, screen, null);
+                                            });
     }
 
     function closePanel(key: string) {
@@ -997,11 +994,11 @@ Singleton {
         return;
       }
       root.screenDetector.withCurrentScreen(screen => {
-        var api = PluginService.getPluginAPI(key);
-        if (api) {
-          api.closePanel(screen);
-        }
-      });
+                                              var api = PluginService.getPluginAPI(key);
+                                              if (api) {
+                                                api.closePanel(screen);
+                                              }
+                                            });
     }
 
     function togglePanel(key: string) {
@@ -1015,66 +1012,31 @@ Singleton {
         return;
       }
       root.screenDetector.withCurrentScreen(screen => {
-        PluginService.togglePluginPanel(key, screen, null);
-      });
+                                              PluginService.togglePluginPanel(key, screen, null);
+                                            });
     }
   }
 
   IpcHandler {
     target: "screenToolkit"
-    function toggle() {
-      ScreenToolkitService.toggle();
-    }
-    function mirror() {
-      ScreenToolkitService.mirror();
-    }
-    function measure() {
-      ScreenToolkitService.measure();
-    }
-    function colorPicker() {
-      ScreenToolkitService.colorPicker();
-    }
-    function annotate() {
-      ScreenToolkitService.annotate();
-    }
-    function annotateFullscreen() {
-      ScreenToolkitService.annotateFullscreen();
-    }
-    function annotateWindow() {
-      ScreenToolkitService.annotateWindow();
-    }
-    function pin() {
-      ScreenToolkitService.pin();
-    }
-    function pinImage() {
-      ScreenToolkitService.pinImage();
-    }
-    function ocr() {
-      ScreenToolkitService.ocr();
-    }
-    function qr() {
-      ScreenToolkitService.qr();
-    }
-    function palette() {
-      ScreenToolkitService.palette();
-    }
-    function lens() {
-      ScreenToolkitService.lens();
-    }
-    function record() {
-      ScreenToolkitService.record("gif");
-    }
-    function recordMp4() {
-      ScreenToolkitService.recordMp4();
-    }
-    function recordFullscreen() {
-      ScreenToolkitService.recordFullscreen("gif");
-    }
-    function recordFullscreenMp4() {
-      ScreenToolkitService.recordFullscreenMp4();
-    }
-    function recordStop() {
-      ScreenToolkitService.recordStop();
-    }
+    function toggle()              { ScreenToolkitService.toggle(); }
+    function mirror()              { ScreenToolkitService.mirror(); }
+    function measure()             { ScreenToolkitService.measure(); }
+    function colorPicker()         { ScreenToolkitService.colorPicker(); }
+    function annotate()            { ScreenToolkitService.annotate(); }
+    function annotateFullscreen()  { ScreenToolkitService.annotateFullscreen(); }
+    function annotateWindow()      { ScreenToolkitService.annotateWindow(); }
+    function pin()                 { ScreenToolkitService.pin(); }
+    function pinImage()            { ScreenToolkitService.pinImage(); }
+    function ocr()                 { ScreenToolkitService.ocr(); }
+    function qr()                  { ScreenToolkitService.qr(); }
+    function palette()             { ScreenToolkitService.palette(); }
+    function lens()                { ScreenToolkitService.lens(); }
+    function record()              { ScreenToolkitService.record("gif"); }
+    function recordMp4()           { ScreenToolkitService.recordMp4(); }
+    function recordFullscreen()    { ScreenToolkitService.recordFullscreen("gif"); }
+    function recordFullscreenMp4() { ScreenToolkitService.recordFullscreenMp4(); }
+    function recordStop()          { ScreenToolkitService.recordStop(); }
   }
+
 }

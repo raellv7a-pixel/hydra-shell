@@ -34,9 +34,9 @@ ColumnLayout {
     value: root.valueMinimumThreshold
     defaultValue: widgetMetadata.minimumThreshold
     onMoved: value => {
-      root.valueMinimumThreshold = Math.round(value);
-      saveSettings();
-    }
+               root.valueMinimumThreshold = Math.round(value);
+               saveSettings();
+             }
     text: Math.round(root.valueMinimumThreshold) + "%"
   }
 }

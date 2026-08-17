@@ -30,10 +30,7 @@ ColumnLayout {
 
   function add() {
     var arr = (HyprlandDraftStore.val("envVars") || []).slice();
-    arr.push({
-               "name": "",
-               "value": ""
-             });
+    arr.push({ "name": "", "value": "" });
     HyprlandDraftStore.edit("envVars", arr);
   }
 

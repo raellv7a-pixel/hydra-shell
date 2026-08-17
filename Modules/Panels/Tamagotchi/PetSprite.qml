@@ -7,21 +7,17 @@ Item {
 
   property real spriteSize: 96
   readonly property bool sheetSprite: TamagotchiService.petState !== "sleeping"
-  readonly property int frameIndex: TamagotchiService.isDirty ? (TamagotchiService.eating ? 3 : 2) : (TamagotchiService.eating ? 1 : 0)
+  readonly property int frameIndex: TamagotchiService.isDirty
+    ? (TamagotchiService.eating ? 3 : 2)
+    : (TamagotchiService.eating ? 1 : 0)
   readonly property string spriteFile: {
     switch (TamagotchiService.petState) {
-    case "angry":
-      return "sapo_angry.png";
-    case "hungry":
-      return "sapo_hungry.png";
-    case "sad":
-      return "sapo_sad.png";
-    case "sleeping":
-      return "sapo_sleeping.png";
-    case "tired":
-      return "sapo_tired.png";
-    default:
-      return "sapo_idle.png";
+    case "angry": return "sapo_angry.png";
+    case "hungry": return "sapo_hungry.png";
+    case "sad": return "sapo_sad.png";
+    case "sleeping": return "sapo_sleeping.png";
+    case "tired": return "sapo_tired.png";
+    default: return "sapo_idle.png";
     }
   }
   readonly property url assetDirectory: Qt.resolvedUrl(Quickshell.shellDir + "/Assets/Icons/Tamagotchi/")

@@ -24,8 +24,7 @@ SmartPanel {
 
   // App identity resolved from the requesting action (icon, common name, description)
   readonly property string appIconPath: {
-    if (typeof ThemeIcons === 'undefined' || !root.flow)
-      return "";
+    if (typeof ThemeIcons === 'undefined' || !root.flow) return "";
     const fallback = root.flow.iconName || "shield-lock";
     return root.appEntry ? ThemeIcons.iconFromName(root.appEntry.icon, fallback) : ThemeIcons.iconFromName(fallback, "shield-lock");
   }
@@ -33,8 +32,7 @@ SmartPanel {
   readonly property string appDescription: root.resolvedMessage || (root.flow ? root.flow.message : "")
 
   function prettifyActionId(actionId) {
-    if (!actionId)
-      return "Autenticação Requerida";
+    if (!actionId) return "Autenticação Requerida";
     var parts = actionId.split(".");
     var segment = parts.length > 2 ? parts[2] : parts[parts.length - 1];
     segment = segment.replace(/[-_]/g, " ").trim();
@@ -99,7 +97,10 @@ SmartPanel {
     target: flow
     function onFailedChanged() {
       if (flow && flow.failed) {
-        ToastService.showError("Autenticação Falhou", "A senha digitada está incorreta. Tente novamente.");
+        ToastService.showError(
+          "Autenticação Falhou",
+          "A senha digitada está incorreta. Tente novamente."
+        );
       }
     }
   }
@@ -116,10 +117,8 @@ SmartPanel {
     running: false
 
     stdout: StdioCollector {
-      onStreamFinished: function () {
-        var args = this.text.split(String.fromCharCode(0)).filter(function (s) {
-          return s.length > 0;
-        });
+      onStreamFinished: function() {
+        var args = this.text.split(String.fromCharCode(0)).filter(function(s) { return s.length > 0; });
         if (args.length > 0 && root.transientMatch) {
           var resolvedCmd = args.join(' ');
           var isCommand = args.length > 1 || args[0].includes('/');
@@ -133,8 +132,7 @@ SmartPanel {
   }
 
   function resolveTransientServiceName(message) {
-    if (!message)
-      return;
+    if (!message) return;
     var match = message.match(/run-p?(\d+)-[^.]+\.service/);
     if (!match) {
       root.resolvedMessage = message;
@@ -165,46 +163,11 @@ SmartPanel {
         running: root.flow && root.flow.failed && PolkitService.errorShake
         loops: 1
 
-        NumberAnimation {
-          target: shakeTranslate
-          property: "x"
-          from: 0
-          to: -10
-          duration: 50
-          easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-          target: shakeTranslate
-          property: "x"
-          from: -10
-          to: 10
-          duration: 50
-          easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-          target: shakeTranslate
-          property: "x"
-          from: 10
-          to: -10
-          duration: 50
-          easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-          target: shakeTranslate
-          property: "x"
-          from: -10
-          to: 10
-          duration: 50
-          easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-          target: shakeTranslate
-          property: "x"
-          from: 10
-          to: 0
-          duration: 50
-          easing.type: Easing.InOutQuad
-        }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: 0; to: -10; duration: 50; easing.type: Easing.InOutQuad }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: -10; to: 10; duration: 50; easing.type: Easing.InOutQuad }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: 10; to: -10; duration: 50; easing.type: Easing.InOutQuad }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: -10; to: 10; duration: 50; easing.type: Easing.InOutQuad }
+        NumberAnimation { target: shakeTranslate; property: "x"; from: 10; to: 0; duration: 50; easing.type: Easing.InOutQuad }
       }
 
       ColumnLayout {
@@ -306,9 +269,7 @@ SmartPanel {
           Layout.topMargin: Style.marginS
           spacing: Style.marginM
 
-          Item {
-            Layout.fillWidth: true
-          } // Spacer
+          Item { Layout.fillWidth: true } // Spacer
 
           NButton {
             text: "Cancelar"

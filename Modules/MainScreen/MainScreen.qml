@@ -32,9 +32,9 @@ import qs.Modules.Panels.Tamagotchi
 import qs.Modules.Panels.Tray
 import qs.Modules.Panels.UsbDriveManager
 import qs.Modules.Panels.Wallpaper
-import qs.Modules.Polkit
 import qs.Modules.ScreenShare
 import qs.Modules.ScreenToolkit
+import qs.Modules.Polkit
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI
@@ -314,10 +314,10 @@ PanelWindow {
       enabled: root.isAnyPanelOpen && !PanelService.modalOpen
       acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
       onClicked: mouse => {
-        if (PanelService.openedPanel) {
-          PanelService.openedPanel.close();
-        }
-      }
+                   if (PanelService.openedPanel) {
+                     PanelService.openedPanel.close();
+                   }
+                 }
       z: 0 // Behind panels and bar
     }
 

@@ -1311,8 +1311,8 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         z: -1 // Behind content, but on the panel background
         onClicked: mouse => {
-          mouse.accepted = true; // Accept and ignore - prevents propagation to background
-        }
+                     mouse.accepted = true; // Accept and ignore - prevents propagation to background
+                   }
       }
     }
 
@@ -1347,8 +1347,8 @@ Item {
           // Make panel visible, now only the intended dimension will animate
           root.isPanelVisible = true;
 
-          root.sizeAnimationComplete = true;
-          opacityTrigger.start();
+            root.sizeAnimationComplete = true;
+            opacityTrigger.start();
 
           // Start open watchdog timer (skip when animations disabled - everything completes synchronously)
           if (!root.animationsDisabled) {

@@ -68,9 +68,9 @@ SmartPanel {
             NText {
               Layout.fillWidth: true
               text: I18n.tr("usb-drive-manager.panel.summary", {
-                              "count": UsbDriveService.devices.length,
-                              "mounted": UsbDriveService.mountedCount
-                            })
+                               "count": UsbDriveService.devices.length,
+                               "mounted": UsbDriveService.mountedCount
+                             })
               pointSize: Style.fontSizeXS
               color: Color.mOnSurfaceVariant
             }
@@ -132,9 +132,7 @@ SmartPanel {
 
             NText {
               Layout.fillWidth: true
-              text: I18n.tr("usb-drive-manager.errors.dependencies-description", {
-                              "programs": UsbDriveService.missingDependencies.join(", ")
-                            })
+              text: I18n.tr("usb-drive-manager.errors.dependencies-description", { "programs": UsbDriveService.missingDependencies.join(", ") })
               pointSize: Style.fontSizeXS
               color: Color.mOnErrorContainer
               wrapMode: Text.Wrap

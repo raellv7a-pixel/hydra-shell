@@ -132,96 +132,97 @@ ColumnLayout {
     visible: root.settingsTab === 0
     spacing: Style.marginM
 
-    NText {
-      text: pluginApi?.tr("settings.panelBehavior")
-      pointSize: Style.fontSizeM
-      font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
-    }
+  NText {
+    text: pluginApi?.tr("settings.panelBehavior")
+    pointSize: Style.fontSizeM
+    font.weight: Style.fontWeightBold
+    color: Color.mOnSurface
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.panelDetached")
-      description: pluginApi?.tr("settings.panelDetachedDesc")
-      checked: root.editPanelDetached
-      onToggled: checked => root.editPanelDetached = checked
-      defaultValue: defaults.panelDetached ?? true
-    }
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.panelDetached")
+    description: pluginApi?.tr("settings.panelDetachedDesc")
+    checked: root.editPanelDetached
+    onToggled: checked => root.editPanelDetached = checked
+    defaultValue: defaults.panelDetached ?? true
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      visible: !root.editPanelDetached
-      label: pluginApi?.tr("settings.followBarEdge")
-      description: pluginApi?.tr("settings.followBarEdgeDesc")
-      checked: root.editFollowBarEdge
-      onToggled: checked => root.editFollowBarEdge = checked
-      defaultValue: defaults.followBarEdge ?? true
-    }
+  NToggle {
+    Layout.fillWidth: true
+    visible: !root.editPanelDetached
+    label: pluginApi?.tr("settings.followBarEdge")
+    description: pluginApi?.tr("settings.followBarEdgeDesc")
+    checked: root.editFollowBarEdge
+    onToggled: checked => root.editFollowBarEdge = checked
+    defaultValue: defaults.followBarEdge ?? true
+  }
 
-    NComboBox {
-      Layout.fillWidth: true
-      visible: root.editPanelDetached || !root.editFollowBarEdge
-      label: pluginApi?.tr("settings.panelPosition")
-      description: pluginApi?.tr("settings.panelPositionDesc")
-      model: [
-        {
-          "key": "left",
-          "name": pluginApi?.tr("settings.panelPositionLeft")
-        },
-        {
-          "key": "center",
-          "name": pluginApi?.tr("settings.panelPositionCenter")
-        },
-        {
-          "key": "right",
-          "name": pluginApi?.tr("settings.panelPositionRight")
-        },
-        {
-          "key": "top",
-          "name": pluginApi?.tr("settings.panelPositionTop")
-        },
-        {
-          "key": "bottom",
-          "name": pluginApi?.tr("settings.panelPositionBottom")
-        }
-      ]
-      currentKey: root.editPanelPosition
-      onSelected: key => root.editPanelPosition = key
-      defaultValue: defaults.panelPosition ?? "center"
-    }
-
-    ColumnLayout {
-      Layout.fillWidth: true
-      spacing: Style.marginS
-
-      NLabel {
-        label: pluginApi?.tr("settings.panelWidth") + ": " + root.editPanelWidth + "px"
-        description: pluginApi?.tr("settings.panelWidthDesc")
+  NComboBox {
+    Layout.fillWidth: true
+    visible: root.editPanelDetached || !root.editFollowBarEdge
+    label: pluginApi?.tr("settings.panelPosition")
+    description: pluginApi?.tr("settings.panelPositionDesc")
+    model: [
+      {
+        "key": "left",
+        "name": pluginApi?.tr("settings.panelPositionLeft")
+      },
+      {
+        "key": "center",
+        "name": pluginApi?.tr("settings.panelPositionCenter")
+      },
+      {
+        "key": "right",
+        "name": pluginApi?.tr("settings.panelPositionRight")
+      },
+      {
+        "key": "top",
+        "name": pluginApi?.tr("settings.panelPositionTop")
+      },
+      {
+        "key": "bottom",
+        "name": pluginApi?.tr("settings.panelPositionBottom")
       }
+    ]
+    currentKey: root.editPanelPosition
+    onSelected: key => root.editPanelPosition = key
+    defaultValue: defaults.panelPosition ?? "center"
+  }
 
-      NSlider {
-        Layout.fillWidth: true
-        from: 760
-        to: 1320
-        stepSize: 10
-        value: root.editPanelWidth
-        onMoved: root.editPanelWidth = Math.round(value)
-      }
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
 
-      NLabel {
-        label: pluginApi?.tr("settings.panelHeight") + ": " + root.editPanelHeight + "px"
-        description: pluginApi?.tr("settings.panelHeightDesc")
-      }
-
-      NSlider {
-        Layout.fillWidth: true
-        from: 560
-        to: 860
-        stepSize: 10
-        value: root.editPanelHeight
-        onMoved: root.editPanelHeight = Math.round(value)
-      }
+    NLabel {
+      label: pluginApi?.tr("settings.panelWidth") + ": " + root.editPanelWidth + "px"
+      description: pluginApi?.tr("settings.panelWidthDesc")
     }
+
+    NSlider {
+      Layout.fillWidth: true
+      from: 760
+      to: 1320
+      stepSize: 10
+      value: root.editPanelWidth
+      onMoved: root.editPanelWidth = Math.round(value)
+    }
+
+    NLabel {
+      label: pluginApi?.tr("settings.panelHeight") + ": " + root.editPanelHeight + "px"
+      description: pluginApi?.tr("settings.panelHeightDesc")
+    }
+
+    NSlider {
+      Layout.fillWidth: true
+      from: 560
+      to: 860
+      stepSize: 10
+      value: root.editPanelHeight
+      onMoved: root.editPanelHeight = Math.round(value)
+    }
+  }
+
   }
 
   ColumnLayout {
@@ -229,446 +230,360 @@ ColumnLayout {
     visible: root.settingsTab === 1
     spacing: Style.marginM
 
-    NText {
-      text: pluginApi?.tr("settings.appearance")
-      pointSize: Style.fontSizeM
-      font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
+  NText {
+    text: pluginApi?.tr("settings.appearance")
+    pointSize: Style.fontSizeM
+    font.weight: Style.fontWeightBold
+    color: Color.mOnSurface
+  }
+
+  NTextInputButton {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.avatarPath")
+    description: pluginApi?.tr("settings.avatarPathDesc")
+    placeholderText: "~/Pictures/profile.gif"
+    text: root.editAvatarPath
+    buttonIcon: "photo"
+    buttonTooltip: pluginApi?.tr("settings.chooseImageFile")
+    onInputTextChanged: text => root.editAvatarPath = text
+    onButtonClicked: root.openImagePicker("avatar")
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.showProfileWallpaper")
+    description: pluginApi?.tr("settings.showProfileWallpaperDesc")
+    checked: root.editShowProfileWallpaper
+    onToggled: checked => {
+                 root.editShowProfileWallpaper = checked;
+                 if (!checked)
+                   root.editProfileCoverMode = "none";
+                 else if (root.editProfileCoverMode === "none")
+                   root.editProfileCoverMode = "auto";
+               }
+    defaultValue: defaults.showProfileWallpaper ?? true
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.profileCoverMode")
+    description: pluginApi?.tr("settings.profileCoverModeDesc")
+    model: [
+      { "key": "auto", "name": pluginApi?.tr("settings.profileCoverModeAuto") },
+      { "key": "custom", "name": pluginApi?.tr("settings.profileCoverModeCustom") },
+      { "key": "random", "name": pluginApi?.tr("settings.profileCoverModeRandom") },
+      { "key": "none", "name": pluginApi?.tr("settings.profileCoverModeNone") }
+    ]
+    currentKey: root.editProfileCoverMode
+    onSelected: key => {
+                  root.editProfileCoverMode = key;
+                  root.editShowProfileWallpaper = key !== "none";
+                }
+    defaultValue: defaults.profileCoverMode ?? "auto"
+  }
+
+  NTextInputButton {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode === "custom"
+    label: pluginApi?.tr("settings.profileCoverPath")
+    description: pluginApi?.tr("settings.profileCoverPathDesc")
+    placeholderText: "~/Pictures/cover.gif"
+    text: root.editProfileCoverPath
+    buttonIcon: "photo"
+    buttonTooltip: pluginApi?.tr("settings.chooseImageFile")
+    onInputTextChanged: text => root.editProfileCoverPath = text
+    onButtonClicked: root.openImagePicker("cover")
+  }
+
+  NTextInputButton {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode === "random"
+    label: pluginApi?.tr("settings.profileCoverFolder")
+    description: pluginApi?.tr("settings.profileCoverFolderDesc")
+    placeholderText: "~/Pictures/Wallpapers"
+    text: root.editProfileCoverFolder
+    buttonIcon: "folder"
+    buttonTooltip: pluginApi?.tr("settings.chooseFolder")
+    onInputTextChanged: text => root.editProfileCoverFolder = text
+    onButtonClicked: root.openImagePicker("coverFolder")
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none"
+    label: pluginApi?.tr("settings.profileCoverOverlayEnabled")
+    description: pluginApi?.tr("settings.profileCoverOverlayEnabledDesc")
+    checked: root.editProfileCoverOverlayEnabled
+    onToggled: checked => root.editProfileCoverOverlayEnabled = checked
+    defaultValue: defaults.profileCoverOverlayEnabled ?? true
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none" && root.editProfileCoverOverlayEnabled
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.profileCoverOverlay") + ": " + Math.round(root.editProfileCoverOverlay * 100) + "%"
+      description: pluginApi?.tr("settings.profileCoverOverlayDesc")
     }
 
-    NTextInputButton {
+    NSlider {
       Layout.fillWidth: true
-      label: pluginApi?.tr("settings.avatarPath")
-      description: pluginApi?.tr("settings.avatarPathDesc")
-      placeholderText: "~/Pictures/profile.gif"
-      text: root.editAvatarPath
-      buttonIcon: "photo"
-      buttonTooltip: pluginApi?.tr("settings.chooseImageFile")
-      onInputTextChanged: text => root.editAvatarPath = text
-      onButtonClicked: root.openImagePicker("avatar")
+      from: 0
+      to: 0.82
+      stepSize: 0.01
+      value: root.editProfileCoverOverlay
+      onMoved: root.editProfileCoverOverlay = value
+    }
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none"
+    label: pluginApi?.tr("settings.profileCoverBlurEnabled")
+    description: pluginApi?.tr("settings.profileCoverBlurEnabledDesc")
+    checked: root.editProfileCoverBlurEnabled
+    onToggled: checked => root.editProfileCoverBlurEnabled = checked
+    defaultValue: defaults.profileCoverBlurEnabled ?? false
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBlurEnabled
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.profileCoverBlur") + ": " + Math.round(root.editProfileCoverBlur * 100) + "%"
+      description: pluginApi?.tr("settings.profileCoverBlurDesc")
     }
 
-    NToggle {
+    NSlider {
       Layout.fillWidth: true
-      label: pluginApi?.tr("settings.showProfileWallpaper")
-      description: pluginApi?.tr("settings.showProfileWallpaperDesc")
-      checked: root.editShowProfileWallpaper
-      onToggled: checked => {
-        root.editShowProfileWallpaper = checked;
-        if (!checked)
-          root.editProfileCoverMode = "none";
-        else if (root.editProfileCoverMode === "none")
-          root.editProfileCoverMode = "auto";
-      }
-      defaultValue: defaults.showProfileWallpaper ?? true
+      from: 0
+      to: 1
+      stepSize: 0.01
+      value: root.editProfileCoverBlur
+      onMoved: root.editProfileCoverBlur = value
+    }
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none"
+    label: pluginApi?.tr("settings.profileCoverBorder")
+    description: pluginApi?.tr("settings.profileCoverBorderDesc")
+    checked: root.editProfileCoverBorder
+    onToggled: checked => root.editProfileCoverBorder = checked
+    defaultValue: defaults.profileCoverBorder ?? true
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.profileCoverBorderWidth") + ": " + root.editProfileCoverBorderWidth.toFixed(1) + "px"
+      description: pluginApi?.tr("settings.profileCoverBorderWidthDesc")
     }
 
-    NComboBox {
+    NSlider {
       Layout.fillWidth: true
-      label: pluginApi?.tr("settings.profileCoverMode")
-      description: pluginApi?.tr("settings.profileCoverModeDesc")
-      model: [
-        {
-          "key": "auto",
-          "name": pluginApi?.tr("settings.profileCoverModeAuto")
-        },
-        {
-          "key": "custom",
-          "name": pluginApi?.tr("settings.profileCoverModeCustom")
-        },
-        {
-          "key": "random",
-          "name": pluginApi?.tr("settings.profileCoverModeRandom")
-        },
-        {
-          "key": "none",
-          "name": pluginApi?.tr("settings.profileCoverModeNone")
-        }
-      ]
-      currentKey: root.editProfileCoverMode
-      onSelected: key => {
-        root.editProfileCoverMode = key;
-        root.editShowProfileWallpaper = key !== "none";
-      }
-      defaultValue: defaults.profileCoverMode ?? "auto"
+      from: 1
+      to: 8
+      stepSize: 0.5
+      value: root.editProfileCoverBorderWidth
+      onMoved: root.editProfileCoverBorderWidth = value
+    }
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder
+    label: pluginApi?.tr("settings.profileCoverBorderColorMode")
+    description: pluginApi?.tr("settings.profileCoverBorderColorModeDesc")
+    model: [
+      { "key": "auto", "name": pluginApi?.tr("settings.profileCoverBorderAutoColors") },
+      { "key": "custom", "name": pluginApi?.tr("settings.profileCoverBorderCustomColors") }
+    ]
+    currentKey: root.editProfileCoverBorderColorMode
+    onSelected: key => root.editProfileCoverBorderColorMode = key
+    defaultValue: defaults.profileCoverBorderColorMode ?? "auto"
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder && root.editProfileCoverBorderColorMode === "custom"
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.profileCoverBorderColorCount") + ": " + root.editProfileCoverBorderColorCount
+      description: pluginApi?.tr("settings.profileCoverBorderColorCountDesc")
     }
 
-    NTextInputButton {
+    NSlider {
       Layout.fillWidth: true
-      visible: root.editProfileCoverMode === "custom"
-      label: pluginApi?.tr("settings.profileCoverPath")
-      description: pluginApi?.tr("settings.profileCoverPathDesc")
-      placeholderText: "~/Pictures/cover.gif"
-      text: root.editProfileCoverPath
-      buttonIcon: "photo"
-      buttonTooltip: pluginApi?.tr("settings.chooseImageFile")
-      onInputTextChanged: text => root.editProfileCoverPath = text
-      onButtonClicked: root.openImagePicker("cover")
+      from: 3
+      to: 5
+      stepSize: 1
+      value: root.editProfileCoverBorderColorCount
+      onMoved: root.editProfileCoverBorderColorCount = Math.round(value)
     }
 
-    NTextInputButton {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode === "random"
-      label: pluginApi?.tr("settings.profileCoverFolder")
-      description: pluginApi?.tr("settings.profileCoverFolderDesc")
-      placeholderText: "~/Pictures/Wallpapers"
-      text: root.editProfileCoverFolder
-      buttonIcon: "folder"
-      buttonTooltip: pluginApi?.tr("settings.chooseFolder")
-      onInputTextChanged: text => root.editProfileCoverFolder = text
-      onButtonClicked: root.openImagePicker("coverFolder")
-    }
-
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none"
-      label: pluginApi?.tr("settings.profileCoverOverlayEnabled")
-      description: pluginApi?.tr("settings.profileCoverOverlayEnabledDesc")
-      checked: root.editProfileCoverOverlayEnabled
-      onToggled: checked => root.editProfileCoverOverlayEnabled = checked
-      defaultValue: defaults.profileCoverOverlayEnabled ?? true
-    }
-
-    ColumnLayout {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none" && root.editProfileCoverOverlayEnabled
-      spacing: Style.marginS
-
-      NLabel {
-        label: pluginApi?.tr("settings.profileCoverOverlay") + ": " + Math.round(root.editProfileCoverOverlay * 100) + "%"
-        description: pluginApi?.tr("settings.profileCoverOverlayDesc")
-      }
-
-      NSlider {
-        Layout.fillWidth: true
-        from: 0
-        to: 0.82
-        stepSize: 0.01
-        value: root.editProfileCoverOverlay
-        onMoved: root.editProfileCoverOverlay = value
-      }
-    }
-
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none"
-      label: pluginApi?.tr("settings.profileCoverBlurEnabled")
-      description: pluginApi?.tr("settings.profileCoverBlurEnabledDesc")
-      checked: root.editProfileCoverBlurEnabled
-      onToggled: checked => root.editProfileCoverBlurEnabled = checked
-      defaultValue: defaults.profileCoverBlurEnabled ?? false
-    }
-
-    ColumnLayout {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBlurEnabled
-      spacing: Style.marginS
-
-      NLabel {
-        label: pluginApi?.tr("settings.profileCoverBlur") + ": " + Math.round(root.editProfileCoverBlur * 100) + "%"
-        description: pluginApi?.tr("settings.profileCoverBlurDesc")
-      }
-
-      NSlider {
-        Layout.fillWidth: true
-        from: 0
-        to: 1
-        stepSize: 0.01
-        value: root.editProfileCoverBlur
-        onMoved: root.editProfileCoverBlur = value
-      }
-    }
-
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none"
-      label: pluginApi?.tr("settings.profileCoverBorder")
-      description: pluginApi?.tr("settings.profileCoverBorderDesc")
-      checked: root.editProfileCoverBorder
-      onToggled: checked => root.editProfileCoverBorder = checked
-      defaultValue: defaults.profileCoverBorder ?? true
-    }
-
-    ColumnLayout {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder
-      spacing: Style.marginS
-
-      NLabel {
-        label: pluginApi?.tr("settings.profileCoverBorderWidth") + ": " + root.editProfileCoverBorderWidth.toFixed(1) + "px"
-        description: pluginApi?.tr("settings.profileCoverBorderWidthDesc")
-      }
-
-      NSlider {
-        Layout.fillWidth: true
-        from: 1
-        to: 8
-        stepSize: 0.5
-        value: root.editProfileCoverBorderWidth
-        onMoved: root.editProfileCoverBorderWidth = value
-      }
-    }
-
-    NComboBox {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder
-      label: pluginApi?.tr("settings.profileCoverBorderColorMode")
-      description: pluginApi?.tr("settings.profileCoverBorderColorModeDesc")
-      model: [
-        {
-          "key": "auto",
-          "name": pluginApi?.tr("settings.profileCoverBorderAutoColors")
-        },
-        {
-          "key": "custom",
-          "name": pluginApi?.tr("settings.profileCoverBorderCustomColors")
-        }
-      ]
-      currentKey: root.editProfileCoverBorderColorMode
-      onSelected: key => root.editProfileCoverBorderColorMode = key
-      defaultValue: defaults.profileCoverBorderColorMode ?? "auto"
-    }
-
-    ColumnLayout {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder && root.editProfileCoverBorderColorMode === "custom"
-      spacing: Style.marginS
-
-      NLabel {
-        label: pluginApi?.tr("settings.profileCoverBorderColorCount") + ": " + root.editProfileCoverBorderColorCount
-        description: pluginApi?.tr("settings.profileCoverBorderColorCountDesc")
-      }
-
-      NSlider {
-        Layout.fillWidth: true
-        from: 3
-        to: 5
-        stepSize: 1
-        value: root.editProfileCoverBorderColorCount
-        onMoved: root.editProfileCoverBorderColorCount = Math.round(value)
-      }
-
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        NColorPicker {
-          Layout.fillWidth: true
-          selectedColor: root.editProfileCoverBorderColor1
-          onColorSelected: color => root.editProfileCoverBorderColor1 = color
-        }
-        NColorPicker {
-          Layout.fillWidth: true
-          selectedColor: root.editProfileCoverBorderColor2
-          onColorSelected: color => root.editProfileCoverBorderColor2 = color
-        }
-        NColorPicker {
-          Layout.fillWidth: true
-          selectedColor: root.editProfileCoverBorderColor3
-          onColorSelected: color => root.editProfileCoverBorderColor3 = color
-        }
-      }
-
-      RowLayout {
-        Layout.fillWidth: true
-        visible: root.editProfileCoverBorderColorCount > 3
-        spacing: Style.marginS
-
-        NColorPicker {
-          Layout.fillWidth: true
-          selectedColor: root.editProfileCoverBorderColor4
-          onColorSelected: color => root.editProfileCoverBorderColor4 = color
-        }
-        NColorPicker {
-          Layout.fillWidth: true
-          visible: root.editProfileCoverBorderColorCount > 4
-          selectedColor: root.editProfileCoverBorderColor5
-          onColorSelected: color => root.editProfileCoverBorderColor5 = color
-        }
-      }
-    }
-
-    NComboBox {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder
-      label: pluginApi?.tr("settings.profileCoverBorderAnimation")
-      description: pluginApi?.tr("settings.profileCoverBorderAnimationDesc")
-      model: [
-        {
-          "key": "static",
-          "name": pluginApi?.tr("settings.profileCoverBorderStatic")
-        },
-        {
-          "key": "fade",
-          "name": pluginApi?.tr("settings.profileCoverBorderFade")
-        },
-        {
-          "key": "flow",
-          "name": pluginApi?.tr("settings.profileCoverBorderFlow")
-        },
-        {
-          "key": "flowEase",
-          "name": pluginApi?.tr("settings.profileCoverBorderFlowEase")
-        },
-        {
-          "key": "spark",
-          "name": pluginApi?.tr("settings.profileCoverBorderSpark")
-        },
-        {
-          "key": "pulse",
-          "name": pluginApi?.tr("settings.profileCoverBorderPulse")
-        },
-        {
-          "key": "chase",
-          "name": pluginApi?.tr("settings.profileCoverBorderChase")
-        },
-        {
-          "key": "comet",
-          "name": pluginApi?.tr("settings.profileCoverBorderComet")
-        },
-        {
-          "key": "neon",
-          "name": pluginApi?.tr("settings.profileCoverBorderNeon")
-        },
-        {
-          "key": "corners",
-          "name": pluginApi?.tr("settings.profileCoverBorderCorners")
-        },
-        {
-          "key": "orbitDots",
-          "name": pluginApi?.tr("settings.profileCoverBorderOrbitDots")
-        },
-        {
-          "key": "scan",
-          "name": pluginApi?.tr("settings.profileCoverBorderScan")
-        },
-        {
-          "key": "profileAurora",
-          "name": pluginApi?.tr("settings.profileCoverBorderAurora")
-        },
-        {
-          "key": "profileHalo",
-          "name": pluginApi?.tr("settings.profileCoverBorderHalo")
-        },
-        {
-          "key": "profileHeartbeat",
-          "name": pluginApi?.tr("settings.profileCoverBorderHeartbeat")
-        },
-        {
-          "key": "profileSpotlight",
-          "name": pluginApi?.tr("settings.profileCoverBorderSpotlight")
-        },
-        {
-          "key": "reactivePulse",
-          "name": pluginApi?.tr("settings.profileCoverBorderReactivePulse")
-        },
-        {
-          "key": "reactiveFlow",
-          "name": pluginApi?.tr("settings.profileCoverBorderReactiveFlow")
-        },
-        {
-          "key": "reactiveSpark",
-          "name": pluginApi?.tr("settings.profileCoverBorderReactiveSpark")
-        }
-      ]
-      currentKey: root.editProfileCoverBorderAnimation
-      onSelected: key => root.editProfileCoverBorderAnimation = key
-      defaultValue: defaults.profileCoverBorderAnimation ?? "static"
-    }
-
-    ColumnLayout {
-      Layout.fillWidth: true
-      visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder && root.editProfileCoverBorderAnimation !== "static"
-      spacing: Style.marginS
-
-      NLabel {
-        label: pluginApi?.tr("settings.profileCoverBorderSpeed") + ": " + root.editProfileCoverBorderSpeed.toFixed(2) + "x"
-        description: pluginApi?.tr("settings.profileCoverBorderSpeedDesc")
-      }
-
-      NSlider {
-        Layout.fillWidth: true
-        from: 0.15
-        to: 3
-        stepSize: 0.05
-        value: root.editProfileCoverBorderSpeed
-        onMoved: root.editProfileCoverBorderSpeed = value
-      }
-    }
-
-    NComboBox {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.profileCardShape")
-      description: pluginApi?.tr("settings.profileCardShapeDesc")
-      model: [
-        {
-          "key": "rounded",
-          "name": pluginApi?.tr("settings.profileCardShapeRounded")
-        },
-        {
-          "key": "soft",
-          "name": pluginApi?.tr("settings.profileCardShapeSoft")
-        },
-        {
-          "key": "pill",
-          "name": pluginApi?.tr("settings.profileCardShapePill")
-        },
-        {
-          "key": "sharp",
-          "name": pluginApi?.tr("settings.profileCardShapeSharp")
-        }
-      ]
-      currentKey: root.editProfileCardShape
-      onSelected: key => root.editProfileCardShape = key
-      defaultValue: defaults.profileCardShape ?? "rounded"
-    }
-
-    NComboBox {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.avatarShape")
-      description: pluginApi?.tr("settings.avatarShapeDesc")
-      model: [
-        {
-          "key": "circle",
-          "name": pluginApi?.tr("settings.avatarShapeCircle")
-        },
-        {
-          "key": "rounded",
-          "name": pluginApi?.tr("settings.avatarShapeRounded")
-        }
-      ]
-      currentKey: root.editAvatarShape
-      onSelected: key => root.editAvatarShape = key
-      defaultValue: defaults.avatarShape ?? "circle"
-    }
-
-    ColumnLayout {
+    RowLayout {
       Layout.fillWidth: true
       spacing: Style.marginS
 
-      NLabel {
-        label: pluginApi?.tr("settings.panelScale") + ": " + Math.round(root.editPanelScale * 100) + "%"
-        description: pluginApi?.tr("settings.panelScaleDesc")
-      }
-
-      NSlider {
+      NColorPicker {
         Layout.fillWidth: true
-        from: 0.75
-        to: 1.25
-        stepSize: 0.01
-        value: root.editPanelScale
-        onMoved: root.editPanelScale = value
+        selectedColor: root.editProfileCoverBorderColor1
+        onColorSelected: color => root.editProfileCoverBorderColor1 = color
+      }
+      NColorPicker {
+        Layout.fillWidth: true
+        selectedColor: root.editProfileCoverBorderColor2
+        onColorSelected: color => root.editProfileCoverBorderColor2 = color
+      }
+      NColorPicker {
+        Layout.fillWidth: true
+        selectedColor: root.editProfileCoverBorderColor3
+        onColorSelected: color => root.editProfileCoverBorderColor3 = color
       }
     }
 
-    NTextInput {
+    RowLayout {
       Layout.fillWidth: true
-      label: pluginApi?.tr("settings.iconName")
-      description: pluginApi?.tr("settings.iconNameDesc")
-      placeholderText: "layout-dashboard"
-      text: root.editIconName
-      onTextChanged: root.editIconName = text
+      visible: root.editProfileCoverBorderColorCount > 3
+      spacing: Style.marginS
+
+      NColorPicker {
+        Layout.fillWidth: true
+        selectedColor: root.editProfileCoverBorderColor4
+        onColorSelected: color => root.editProfileCoverBorderColor4 = color
+      }
+      NColorPicker {
+        Layout.fillWidth: true
+        visible: root.editProfileCoverBorderColorCount > 4
+        selectedColor: root.editProfileCoverBorderColor5
+        onColorSelected: color => root.editProfileCoverBorderColor5 = color
+      }
     }
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder
+    label: pluginApi?.tr("settings.profileCoverBorderAnimation")
+    description: pluginApi?.tr("settings.profileCoverBorderAnimationDesc")
+    model: [
+      { "key": "static", "name": pluginApi?.tr("settings.profileCoverBorderStatic") },
+      { "key": "fade", "name": pluginApi?.tr("settings.profileCoverBorderFade") },
+      { "key": "flow", "name": pluginApi?.tr("settings.profileCoverBorderFlow") },
+      { "key": "flowEase", "name": pluginApi?.tr("settings.profileCoverBorderFlowEase") },
+      { "key": "spark", "name": pluginApi?.tr("settings.profileCoverBorderSpark") },
+      { "key": "pulse", "name": pluginApi?.tr("settings.profileCoverBorderPulse") },
+      { "key": "chase", "name": pluginApi?.tr("settings.profileCoverBorderChase") },
+      { "key": "comet", "name": pluginApi?.tr("settings.profileCoverBorderComet") },
+      { "key": "neon", "name": pluginApi?.tr("settings.profileCoverBorderNeon") },
+      { "key": "corners", "name": pluginApi?.tr("settings.profileCoverBorderCorners") },
+      { "key": "orbitDots", "name": pluginApi?.tr("settings.profileCoverBorderOrbitDots") },
+      { "key": "scan", "name": pluginApi?.tr("settings.profileCoverBorderScan") },
+      { "key": "profileAurora", "name": pluginApi?.tr("settings.profileCoverBorderAurora") },
+      { "key": "profileHalo", "name": pluginApi?.tr("settings.profileCoverBorderHalo") },
+      { "key": "profileHeartbeat", "name": pluginApi?.tr("settings.profileCoverBorderHeartbeat") },
+      { "key": "profileSpotlight", "name": pluginApi?.tr("settings.profileCoverBorderSpotlight") },
+      { "key": "reactivePulse", "name": pluginApi?.tr("settings.profileCoverBorderReactivePulse") },
+      { "key": "reactiveFlow", "name": pluginApi?.tr("settings.profileCoverBorderReactiveFlow") },
+      { "key": "reactiveSpark", "name": pluginApi?.tr("settings.profileCoverBorderReactiveSpark") }
+    ]
+    currentKey: root.editProfileCoverBorderAnimation
+    onSelected: key => root.editProfileCoverBorderAnimation = key
+    defaultValue: defaults.profileCoverBorderAnimation ?? "static"
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    visible: root.editProfileCoverMode !== "none" && root.editProfileCoverBorder && root.editProfileCoverBorderAnimation !== "static"
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.profileCoverBorderSpeed") + ": " + root.editProfileCoverBorderSpeed.toFixed(2) + "x"
+      description: pluginApi?.tr("settings.profileCoverBorderSpeedDesc")
+    }
+
+    NSlider {
+      Layout.fillWidth: true
+      from: 0.15
+      to: 3
+      stepSize: 0.05
+      value: root.editProfileCoverBorderSpeed
+      onMoved: root.editProfileCoverBorderSpeed = value
+    }
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.profileCardShape")
+    description: pluginApi?.tr("settings.profileCardShapeDesc")
+    model: [
+      { "key": "rounded", "name": pluginApi?.tr("settings.profileCardShapeRounded") },
+      { "key": "soft", "name": pluginApi?.tr("settings.profileCardShapeSoft") },
+      { "key": "pill", "name": pluginApi?.tr("settings.profileCardShapePill") },
+      { "key": "sharp", "name": pluginApi?.tr("settings.profileCardShapeSharp") }
+    ]
+    currentKey: root.editProfileCardShape
+    onSelected: key => root.editProfileCardShape = key
+    defaultValue: defaults.profileCardShape ?? "rounded"
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.avatarShape")
+    description: pluginApi?.tr("settings.avatarShapeDesc")
+    model: [
+      {
+        "key": "circle",
+        "name": pluginApi?.tr("settings.avatarShapeCircle")
+      },
+      {
+        "key": "rounded",
+        "name": pluginApi?.tr("settings.avatarShapeRounded")
+      }
+    ]
+    currentKey: root.editAvatarShape
+    onSelected: key => root.editAvatarShape = key
+    defaultValue: defaults.avatarShape ?? "circle"
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+
+    NLabel {
+      label: pluginApi?.tr("settings.panelScale") + ": " + Math.round(root.editPanelScale * 100) + "%"
+      description: pluginApi?.tr("settings.panelScaleDesc")
+    }
+
+    NSlider {
+      Layout.fillWidth: true
+      from: 0.75
+      to: 1.25
+      stepSize: 0.01
+      value: root.editPanelScale
+      onMoved: root.editPanelScale = value
+    }
+  }
+
+  NTextInput {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.iconName")
+    description: pluginApi?.tr("settings.iconNameDesc")
+    placeholderText: "layout-dashboard"
+    text: root.editIconName
+    onTextChanged: root.editIconName = text
+  }
+
   }
 
   ColumnLayout {
@@ -676,255 +591,256 @@ ColumnLayout {
     visible: root.settingsTab === 2
     spacing: Style.marginM
 
-    NText {
-      text: pluginApi?.tr("settings.musicReactivity")
-      pointSize: Style.fontSizeM
-      font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
-    }
+  NText {
+    text: pluginApi?.tr("settings.musicReactivity")
+    pointSize: Style.fontSizeM
+    font.weight: Style.fontWeightBold
+    color: Color.mOnSurface
+  }
 
-    NLabel {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.dashboardMusicEffects")
-      description: pluginApi?.tr("settings.dashboardMusicEffectsDesc")
-    }
+  NLabel {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.dashboardMusicEffects")
+    description: pluginApi?.tr("settings.dashboardMusicEffectsDesc")
+  }
 
-    NText {
-      text: pluginApi?.tr("settings.dashboardPerformanceMode")
-      pointSize: Style.fontSizeM
-      font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
-    }
+  NText {
+    text: pluginApi?.tr("settings.dashboardPerformanceMode")
+    pointSize: Style.fontSizeM
+    font.weight: Style.fontWeightBold
+    color: Color.mOnSurface
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.followNoctaliaPerformanceMode")
-      description: pluginApi?.tr("settings.followNoctaliaPerformanceModeDesc")
-      checked: root.editFollowNoctaliaPerformanceMode
-      onToggled: checked => root.editFollowNoctaliaPerformanceMode = checked
-      defaultValue: defaults.followNoctaliaPerformanceMode ?? true
-    }
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.followNoctaliaPerformanceMode")
+    description: pluginApi?.tr("settings.followNoctaliaPerformanceModeDesc")
+    checked: root.editFollowNoctaliaPerformanceMode
+    onToggled: checked => root.editFollowNoctaliaPerformanceMode = checked
+    defaultValue: defaults.followNoctaliaPerformanceMode ?? true
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.powerSaverPerformanceMode")
-      description: pluginApi?.tr("settings.powerSaverPerformanceModeDesc")
-      checked: root.editPowerSaverPerformanceMode
-      onToggled: checked => root.editPowerSaverPerformanceMode = checked
-      defaultValue: defaults.powerSaverPerformanceMode ?? true
-    }
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.powerSaverPerformanceMode")
+    description: pluginApi?.tr("settings.powerSaverPerformanceModeDesc")
+    checked: root.editPowerSaverPerformanceMode
+    onToggled: checked => root.editPowerSaverPerformanceMode = checked
+    defaultValue: defaults.powerSaverPerformanceMode ?? true
+  }
 
-    NComboBox {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.mediaVisualizerEffect")
-      description: pluginApi?.tr("settings.mediaVisualizerEffectDesc")
-      model: [
-        {
-          "key": "none",
-          "name": pluginApi?.tr("settings.visualizerNone")
-        },
-        {
-          "key": "bars",
-          "name": pluginApi?.tr("settings.visualizerBars")
-        },
-        {
-          "key": "wave",
-          "name": pluginApi?.tr("settings.visualizerWave")
-        },
-        {
-          "key": "shock",
-          "name": pluginApi?.tr("settings.visualizerShock")
-        },
-        {
-          "key": "pulse",
-          "name": pluginApi?.tr("settings.visualizerPulse")
-        },
-        {
-          "key": "nebula",
-          "name": pluginApi?.tr("settings.visualizerNebula")
-        },
-        {
-          "key": "aurora",
-          "name": pluginApi?.tr("settings.visualizerAurora")
-        },
-        {
-          "key": "constellation",
-          "name": pluginApi?.tr("settings.visualizerConstellation")
-        },
-        {
-          "key": "radar",
-          "name": pluginApi?.tr("settings.visualizerRadar")
-        }
-      ]
-      currentKey: root.editMediaVisualizerEffect
-      onSelected: key => root.editMediaVisualizerEffect = key
-      defaultValue: defaults.mediaVisualizerEffect ?? "bars"
-    }
+  NComboBox {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.mediaVisualizerEffect")
+    description: pluginApi?.tr("settings.mediaVisualizerEffectDesc")
+    model: [
+      {
+        "key": "none",
+        "name": pluginApi?.tr("settings.visualizerNone")
+      },
+      {
+        "key": "bars",
+        "name": pluginApi?.tr("settings.visualizerBars")
+      },
+      {
+        "key": "wave",
+        "name": pluginApi?.tr("settings.visualizerWave")
+      },
+      {
+        "key": "shock",
+        "name": pluginApi?.tr("settings.visualizerShock")
+      },
+      {
+        "key": "pulse",
+        "name": pluginApi?.tr("settings.visualizerPulse")
+      },
+      {
+        "key": "nebula",
+        "name": pluginApi?.tr("settings.visualizerNebula")
+      },
+      {
+        "key": "aurora",
+        "name": pluginApi?.tr("settings.visualizerAurora")
+      },
+      {
+        "key": "constellation",
+        "name": pluginApi?.tr("settings.visualizerConstellation")
+      },
+      {
+        "key": "radar",
+        "name": pluginApi?.tr("settings.visualizerRadar")
+      }
+    ]
+    currentKey: root.editMediaVisualizerEffect
+    onSelected: key => root.editMediaVisualizerEffect = key
+    defaultValue: defaults.mediaVisualizerEffect ?? "bars"
+  }
 
-    NComboBox {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.audioSliderEffect")
-      description: pluginApi?.tr("settings.audioSliderEffectDesc")
-      model: [
-        {
-          "key": "none",
-          "name": pluginApi?.tr("settings.sliderEffectNone")
-        },
-        {
-          "key": "wave",
-          "name": pluginApi?.tr("settings.sliderEffectWave")
-        },
-        {
-          "key": "zigzag",
-          "name": pluginApi?.tr("settings.sliderEffectZigzag")
-        },
-        {
-          "key": "pulse",
-          "name": pluginApi?.tr("settings.sliderEffectPulse")
-        },
-        {
-          "key": "bars",
-          "name": pluginApi?.tr("settings.sliderEffectBars")
-        },
-        {
-          "key": "spectrum",
-          "name": pluginApi?.tr("settings.sliderEffectSpectrum")
-        },
-        {
-          "key": "filament",
-          "name": pluginApi?.tr("settings.sliderEffectFilament")
-        },
-        {
-          "key": "ripple",
-          "name": pluginApi?.tr("settings.sliderEffectRipple")
-        },
-        {
-          "key": "glow",
-          "name": pluginApi?.tr("settings.sliderEffectGlow")
-        },
-        {
-          "key": "wavy_fill",
-          "name": pluginApi?.tr("settings.sliderEffectWavyFill")
-        },
-        {
-          "key": "blocks",
-          "name": pluginApi?.tr("settings.sliderEffectBlocks")
-        },
-        {
-          "key": "dots",
-          "name": pluginApi?.tr("settings.sliderEffectDots")
-        }
-      ]
-      currentKey: root.editAudioSliderEffect
-      onSelected: key => root.editAudioSliderEffect = key
-      defaultValue: defaults.audioSliderEffect ?? "wave"
-    }
+  NComboBox {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.audioSliderEffect")
+    description: pluginApi?.tr("settings.audioSliderEffectDesc")
+    model: [
+      {
+        "key": "none",
+        "name": pluginApi?.tr("settings.sliderEffectNone")
+      },
+      {
+        "key": "wave",
+        "name": pluginApi?.tr("settings.sliderEffectWave")
+      },
+      {
+        "key": "zigzag",
+        "name": pluginApi?.tr("settings.sliderEffectZigzag")
+      },
+      {
+        "key": "pulse",
+        "name": pluginApi?.tr("settings.sliderEffectPulse")
+      },
+      {
+        "key": "bars",
+        "name": pluginApi?.tr("settings.sliderEffectBars")
+      },
+      {
+        "key": "spectrum",
+        "name": pluginApi?.tr("settings.sliderEffectSpectrum")
+      },
+      {
+        "key": "filament",
+        "name": pluginApi?.tr("settings.sliderEffectFilament")
+      },
+      {
+        "key": "ripple",
+        "name": pluginApi?.tr("settings.sliderEffectRipple")
+      },
+      {
+        "key": "glow",
+        "name": pluginApi?.tr("settings.sliderEffectGlow")
+      },
+      {
+        "key": "wavy_fill",
+        "name": pluginApi?.tr("settings.sliderEffectWavyFill")
+      },
+      {
+        "key": "blocks",
+        "name": pluginApi?.tr("settings.sliderEffectBlocks")
+      },
+      {
+        "key": "dots",
+        "name": pluginApi?.tr("settings.sliderEffectDots")
+      }
+    ]
+    currentKey: root.editAudioSliderEffect
+    onSelected: key => root.editAudioSliderEffect = key
+    defaultValue: defaults.audioSliderEffect ?? "wave"
+  }
 
-    NComboBox {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.microphoneSliderEffect")
-      description: pluginApi?.tr("settings.microphoneSliderEffectDesc")
-      model: [
-        {
-          "key": "none",
-          "name": pluginApi?.tr("settings.sliderEffectNone")
-        },
-        {
-          "key": "wave",
-          "name": pluginApi?.tr("settings.sliderEffectWave")
-        },
-        {
-          "key": "zigzag",
-          "name": pluginApi?.tr("settings.sliderEffectZigzag")
-        },
-        {
-          "key": "pulse",
-          "name": pluginApi?.tr("settings.sliderEffectPulse")
-        },
-        {
-          "key": "bars",
-          "name": pluginApi?.tr("settings.sliderEffectBars")
-        },
-        {
-          "key": "glow",
-          "name": pluginApi?.tr("settings.sliderEffectGlow")
-        },
-        {
-          "key": "wavy_fill",
-          "name": pluginApi?.tr("settings.sliderEffectWavyFill")
-        },
-        {
-          "key": "blocks",
-          "name": pluginApi?.tr("settings.sliderEffectBlocks")
-        },
-        {
-          "key": "dots",
-          "name": pluginApi?.tr("settings.sliderEffectDots")
-        }
-      ]
-      currentKey: root.editMicrophoneSliderEffect
-      onSelected: key => root.editMicrophoneSliderEffect = key
-      defaultValue: defaults.microphoneSliderEffect ?? "pulse"
-    }
+  NComboBox {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.microphoneSliderEffect")
+    description: pluginApi?.tr("settings.microphoneSliderEffectDesc")
+    model: [
+      {
+        "key": "none",
+        "name": pluginApi?.tr("settings.sliderEffectNone")
+      },
+      {
+        "key": "wave",
+        "name": pluginApi?.tr("settings.sliderEffectWave")
+      },
+      {
+        "key": "zigzag",
+        "name": pluginApi?.tr("settings.sliderEffectZigzag")
+      },
+      {
+        "key": "pulse",
+        "name": pluginApi?.tr("settings.sliderEffectPulse")
+      },
+      {
+        "key": "bars",
+        "name": pluginApi?.tr("settings.sliderEffectBars")
+      },
+      {
+        "key": "glow",
+        "name": pluginApi?.tr("settings.sliderEffectGlow")
+      },
+      {
+        "key": "wavy_fill",
+        "name": pluginApi?.tr("settings.sliderEffectWavyFill")
+      },
+      {
+        "key": "blocks",
+        "name": pluginApi?.tr("settings.sliderEffectBlocks")
+      },
+      {
+        "key": "dots",
+        "name": pluginApi?.tr("settings.sliderEffectDots")
+      }
+    ]
+    currentKey: root.editMicrophoneSliderEffect
+    onSelected: key => root.editMicrophoneSliderEffect = key
+    defaultValue: defaults.microphoneSliderEffect ?? "pulse"
+  }
 
-    NComboBox {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.avatarMusicEffect")
-      description: pluginApi?.tr("settings.avatarMusicEffectDesc")
-      model: [
-        {
-          "key": "none",
-          "name": pluginApi?.tr("settings.avatarEffectNone")
-        },
-        {
-          "key": "ring",
-          "name": pluginApi?.tr("settings.avatarEffectRing")
-        },
-        {
-          "key": "morph",
-          "name": pluginApi?.tr("settings.avatarEffectMorph")
-        },
-        {
-          "key": "both",
-          "name": pluginApi?.tr("settings.avatarEffectBoth")
-        },
-        {
-          "key": "glow",
-          "name": pluginApi?.tr("settings.avatarEffectGlow")
-        },
-        {
-          "key": "orbit",
-          "name": pluginApi?.tr("settings.avatarEffectOrbit")
-        },
-        {
-          "key": "studio",
-          "name": pluginApi?.tr("settings.avatarEffectStudio")
-        }
-      ]
-      currentKey: root.editAvatarMusicEffect
-      onSelected: key => root.editAvatarMusicEffect = key
-      defaultValue: defaults.avatarMusicEffect ?? "ring"
-    }
+  NComboBox {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.avatarMusicEffect")
+    description: pluginApi?.tr("settings.avatarMusicEffectDesc")
+    model: [
+      {
+        "key": "none",
+        "name": pluginApi?.tr("settings.avatarEffectNone")
+      },
+      {
+        "key": "ring",
+        "name": pluginApi?.tr("settings.avatarEffectRing")
+      },
+      {
+        "key": "morph",
+        "name": pluginApi?.tr("settings.avatarEffectMorph")
+      },
+      {
+        "key": "both",
+        "name": pluginApi?.tr("settings.avatarEffectBoth")
+      },
+      {
+        "key": "glow",
+        "name": pluginApi?.tr("settings.avatarEffectGlow")
+      },
+      {
+        "key": "orbit",
+        "name": pluginApi?.tr("settings.avatarEffectOrbit")
+      },
+      {
+        "key": "studio",
+        "name": pluginApi?.tr("settings.avatarEffectStudio")
+      }
+    ]
+    currentKey: root.editAvatarMusicEffect
+    onSelected: key => root.editAvatarMusicEffect = key
+    defaultValue: defaults.avatarMusicEffect ?? "ring"
+  }
 
-    NTextInputButton {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.profileDanceGifPath")
-      description: pluginApi?.tr("settings.profileDanceGifPathDesc")
-      placeholderText: "~/Pictures/dance.gif"
-      text: root.editProfileDanceGifPath
-      buttonIcon: "photo"
-      buttonTooltip: pluginApi?.tr("settings.chooseImageFile")
-      onInputTextChanged: text => root.editProfileDanceGifPath = text
-      onButtonClicked: root.openImagePicker("dance")
-    }
+  NTextInputButton {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.profileDanceGifPath")
+    description: pluginApi?.tr("settings.profileDanceGifPathDesc")
+    placeholderText: "~/Pictures/dance.gif"
+    text: root.editProfileDanceGifPath
+    buttonIcon: "photo"
+    buttonTooltip: pluginApi?.tr("settings.chooseImageFile")
+    onInputTextChanged: text => root.editProfileDanceGifPath = text
+    onButtonClicked: root.openImagePicker("dance")
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.showProfileDanceGif")
-      checked: root.editShowProfileDanceGif
-      onToggled: checked => root.editShowProfileDanceGif = checked
-      defaultValue: defaults.showProfileDanceGif ?? true
-    }
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.showProfileDanceGif")
+    checked: root.editShowProfileDanceGif
+    onToggled: checked => root.editShowProfileDanceGif = checked
+    defaultValue: defaults.showProfileDanceGif ?? true
+  }
+
   }
 
   ColumnLayout {
@@ -932,179 +848,180 @@ ColumnLayout {
     visible: root.settingsTab === 3
     spacing: Style.marginM
 
+  NLabel {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.barMediaWidget")
+    description: pluginApi?.tr("settings.barMediaWidgetDesc")
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.showBarMediaInfo")
+    description: pluginApi?.tr("settings.showBarMediaInfoDesc")
+    checked: root.editShowBarMediaInfo
+    onToggled: checked => root.editShowBarMediaInfo = checked
+    defaultValue: defaults.showBarMediaInfo ?? true
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    label: pluginApi?.tr("settings.barMediaShowWhenPaused")
+    description: pluginApi?.tr("settings.barMediaShowWhenPausedDesc")
+    checked: root.editBarMediaShowWhenPaused
+    onToggled: checked => root.editBarMediaShowWhenPaused = checked
+    defaultValue: defaults.barMediaShowWhenPaused ?? false
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    label: pluginApi?.tr("settings.barMediaShowAlbumArt")
+    description: pluginApi?.tr("settings.barMediaShowAlbumArtDesc")
+    checked: root.editBarMediaShowAlbumArt
+    onToggled: checked => root.editBarMediaShowAlbumArt = checked
+    defaultValue: defaults.barMediaShowAlbumArt ?? true
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    label: pluginApi?.tr("settings.barMediaShowProgressRing")
+    description: pluginApi?.tr("settings.barMediaShowProgressRingDesc")
+    checked: root.editBarMediaShowProgressRing
+    onToggled: checked => root.editBarMediaShowProgressRing = checked
+    defaultValue: defaults.barMediaShowProgressRing ?? true
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    label: pluginApi?.tr("settings.barMediaShowVisualizer")
+    description: pluginApi?.tr("settings.barMediaShowVisualizerDesc")
+    checked: root.editBarMediaShowVisualizer
+    onToggled: checked => root.editBarMediaShowVisualizer = checked
+    defaultValue: defaults.barMediaShowVisualizer ?? true
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo && root.editBarMediaShowVisualizer
+    label: pluginApi?.tr("settings.barMediaVisualizerType")
+    description: pluginApi?.tr("settings.barMediaVisualizerTypeDesc")
+    model: [
+      {
+        "key": "linear",
+        "name": pluginApi?.tr("settings.barVisualizerLinear")
+      },
+      {
+        "key": "mirrored",
+        "name": pluginApi?.tr("settings.barVisualizerMirrored")
+      },
+      {
+        "key": "wave",
+        "name": pluginApi?.tr("settings.barVisualizerWave")
+      }
+    ]
+    currentKey: root.editBarMediaVisualizerType
+    onSelected: key => root.editBarMediaVisualizerType = key
+    defaultValue: defaults.barMediaVisualizerType ?? "linear"
+  }
+
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    label: pluginApi?.tr("settings.barMediaShowArtistFirst")
+    description: pluginApi?.tr("settings.barMediaShowArtistFirstDesc")
+    checked: root.editBarMediaShowArtistFirst
+    onToggled: checked => root.editBarMediaShowArtistFirst = checked
+    defaultValue: defaults.barMediaShowArtistFirst ?? true
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    label: pluginApi?.tr("settings.barMediaLayout")
+    description: pluginApi?.tr("settings.barMediaLayoutDesc")
+    model: [
+      {
+        "key": "auto",
+        "name": pluginApi?.tr("settings.barMediaLayoutAuto")
+      },
+      {
+        "key": "media-left",
+        "name": pluginApi?.tr("settings.barMediaLayoutLeft")
+      },
+      {
+        "key": "media-right",
+        "name": pluginApi?.tr("settings.barMediaLayoutRight")
+      }
+    ]
+    currentKey: root.editBarMediaLayout
+    onSelected: key => root.editBarMediaLayout = key
+    defaultValue: defaults.barMediaLayout ?? "auto"
+  }
+
+  NComboBox {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    label: pluginApi?.tr("settings.barMediaScrollingMode")
+    description: pluginApi?.tr("settings.barMediaScrollingModeDesc")
+    model: [
+      {
+        "key": "always",
+        "name": pluginApi?.tr("settings.scrollingAlways")
+      },
+      {
+        "key": "hover",
+        "name": pluginApi?.tr("settings.scrollingHover")
+      },
+      {
+        "key": "never",
+        "name": pluginApi?.tr("settings.scrollingNever")
+      }
+    ]
+    currentKey: root.editBarMediaScrollingMode
+    onSelected: key => root.editBarMediaScrollingMode = key
+    defaultValue: defaults.barMediaScrollingMode ?? "hover"
+  }
+
+  ColumnLayout {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    spacing: Style.marginS
+
     NLabel {
+      label: pluginApi?.tr("settings.barMediaMaxWidth") + ": " + root.editBarMediaMaxWidth + "px"
+      description: pluginApi?.tr("settings.barMediaMaxWidthDesc")
+    }
+
+    NSlider {
       Layout.fillWidth: true
-      label: pluginApi?.tr("settings.barMediaWidget")
-      description: pluginApi?.tr("settings.barMediaWidgetDesc")
+      from: 90
+      to: 260
+      stepSize: 5
+      value: root.editBarMediaMaxWidth
+      onMoved: root.editBarMediaMaxWidth = Math.round(value)
     }
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.showBarMediaInfo")
-      description: pluginApi?.tr("settings.showBarMediaInfoDesc")
-      checked: root.editShowBarMediaInfo
-      onToggled: checked => root.editShowBarMediaInfo = checked
-      defaultValue: defaults.showBarMediaInfo ?? true
-    }
+  NToggle {
+    Layout.fillWidth: true
+    visible: root.editShowBarMediaInfo
+    label: pluginApi?.tr("settings.barMediaUseFixedWidth")
+    description: pluginApi?.tr("settings.barMediaUseFixedWidthDesc")
+    checked: root.editBarMediaUseFixedWidth
+    onToggled: checked => root.editBarMediaUseFixedWidth = checked
+    defaultValue: defaults.barMediaUseFixedWidth ?? false
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      label: pluginApi?.tr("settings.barMediaShowWhenPaused")
-      description: pluginApi?.tr("settings.barMediaShowWhenPausedDesc")
-      checked: root.editBarMediaShowWhenPaused
-      onToggled: checked => root.editBarMediaShowWhenPaused = checked
-      defaultValue: defaults.barMediaShowWhenPaused ?? false
-    }
+  NColorChoice {
+    visible: root.editShowBarMediaInfo
+    currentKey: root.editBarMediaTextColor
+    onSelected: key => root.editBarMediaTextColor = key
+    defaultValue: defaults.barMediaTextColor ?? "none"
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      label: pluginApi?.tr("settings.barMediaShowAlbumArt")
-      description: pluginApi?.tr("settings.barMediaShowAlbumArtDesc")
-      checked: root.editBarMediaShowAlbumArt
-      onToggled: checked => root.editBarMediaShowAlbumArt = checked
-      defaultValue: defaults.barMediaShowAlbumArt ?? true
-    }
-
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      label: pluginApi?.tr("settings.barMediaShowProgressRing")
-      description: pluginApi?.tr("settings.barMediaShowProgressRingDesc")
-      checked: root.editBarMediaShowProgressRing
-      onToggled: checked => root.editBarMediaShowProgressRing = checked
-      defaultValue: defaults.barMediaShowProgressRing ?? true
-    }
-
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      label: pluginApi?.tr("settings.barMediaShowVisualizer")
-      description: pluginApi?.tr("settings.barMediaShowVisualizerDesc")
-      checked: root.editBarMediaShowVisualizer
-      onToggled: checked => root.editBarMediaShowVisualizer = checked
-      defaultValue: defaults.barMediaShowVisualizer ?? true
-    }
-
-    NComboBox {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo && root.editBarMediaShowVisualizer
-      label: pluginApi?.tr("settings.barMediaVisualizerType")
-      description: pluginApi?.tr("settings.barMediaVisualizerTypeDesc")
-      model: [
-        {
-          "key": "linear",
-          "name": pluginApi?.tr("settings.barVisualizerLinear")
-        },
-        {
-          "key": "mirrored",
-          "name": pluginApi?.tr("settings.barVisualizerMirrored")
-        },
-        {
-          "key": "wave",
-          "name": pluginApi?.tr("settings.barVisualizerWave")
-        }
-      ]
-      currentKey: root.editBarMediaVisualizerType
-      onSelected: key => root.editBarMediaVisualizerType = key
-      defaultValue: defaults.barMediaVisualizerType ?? "linear"
-    }
-
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      label: pluginApi?.tr("settings.barMediaShowArtistFirst")
-      description: pluginApi?.tr("settings.barMediaShowArtistFirstDesc")
-      checked: root.editBarMediaShowArtistFirst
-      onToggled: checked => root.editBarMediaShowArtistFirst = checked
-      defaultValue: defaults.barMediaShowArtistFirst ?? true
-    }
-
-    NComboBox {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      label: pluginApi?.tr("settings.barMediaLayout")
-      description: pluginApi?.tr("settings.barMediaLayoutDesc")
-      model: [
-        {
-          "key": "auto",
-          "name": pluginApi?.tr("settings.barMediaLayoutAuto")
-        },
-        {
-          "key": "media-left",
-          "name": pluginApi?.tr("settings.barMediaLayoutLeft")
-        },
-        {
-          "key": "media-right",
-          "name": pluginApi?.tr("settings.barMediaLayoutRight")
-        }
-      ]
-      currentKey: root.editBarMediaLayout
-      onSelected: key => root.editBarMediaLayout = key
-      defaultValue: defaults.barMediaLayout ?? "auto"
-    }
-
-    NComboBox {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      label: pluginApi?.tr("settings.barMediaScrollingMode")
-      description: pluginApi?.tr("settings.barMediaScrollingModeDesc")
-      model: [
-        {
-          "key": "always",
-          "name": pluginApi?.tr("settings.scrollingAlways")
-        },
-        {
-          "key": "hover",
-          "name": pluginApi?.tr("settings.scrollingHover")
-        },
-        {
-          "key": "never",
-          "name": pluginApi?.tr("settings.scrollingNever")
-        }
-      ]
-      currentKey: root.editBarMediaScrollingMode
-      onSelected: key => root.editBarMediaScrollingMode = key
-      defaultValue: defaults.barMediaScrollingMode ?? "hover"
-    }
-
-    ColumnLayout {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      spacing: Style.marginS
-
-      NLabel {
-        label: pluginApi?.tr("settings.barMediaMaxWidth") + ": " + root.editBarMediaMaxWidth + "px"
-        description: pluginApi?.tr("settings.barMediaMaxWidthDesc")
-      }
-
-      NSlider {
-        Layout.fillWidth: true
-        from: 90
-        to: 260
-        stepSize: 5
-        value: root.editBarMediaMaxWidth
-        onMoved: root.editBarMediaMaxWidth = Math.round(value)
-      }
-    }
-
-    NToggle {
-      Layout.fillWidth: true
-      visible: root.editShowBarMediaInfo
-      label: pluginApi?.tr("settings.barMediaUseFixedWidth")
-      description: pluginApi?.tr("settings.barMediaUseFixedWidthDesc")
-      checked: root.editBarMediaUseFixedWidth
-      onToggled: checked => root.editBarMediaUseFixedWidth = checked
-      defaultValue: defaults.barMediaUseFixedWidth ?? false
-    }
-
-    NColorChoice {
-      visible: root.editShowBarMediaInfo
-      currentKey: root.editBarMediaTextColor
-      onSelected: key => root.editBarMediaTextColor = key
-      defaultValue: defaults.barMediaTextColor ?? "none"
-    }
   }
 
   ColumnLayout {
@@ -1112,40 +1029,40 @@ ColumnLayout {
     visible: root.settingsTab === 4
     spacing: Style.marginM
 
-    NText {
-      text: pluginApi?.tr("settings.sections")
-      pointSize: Style.fontSizeM
-      font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
-    }
+  NText {
+    text: pluginApi?.tr("settings.sections")
+    pointSize: Style.fontSizeM
+    font.weight: Style.fontWeightBold
+    color: Color.mOnSurface
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.showNotifications")
-      checked: root.editShowNotifications
-      onToggled: checked => root.editShowNotifications = checked
-    }
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.showNotifications")
+    checked: root.editShowNotifications
+    onToggled: checked => root.editShowNotifications = checked
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.showMedia")
-      checked: root.editShowMedia
-      onToggled: checked => root.editShowMedia = checked
-    }
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.showMedia")
+    checked: root.editShowMedia
+    onToggled: checked => root.editShowMedia = checked
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.showCalendar")
-      checked: root.editShowCalendar
-      onToggled: checked => root.editShowCalendar = checked
-    }
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.showCalendar")
+    checked: root.editShowCalendar
+    onToggled: checked => root.editShowCalendar = checked
+  }
 
-    NToggle {
-      Layout.fillWidth: true
-      label: pluginApi?.tr("settings.showRecordingCard")
-      checked: root.editShowRecordingCard
-      onToggled: checked => root.editShowRecordingCard = checked
-    }
+  NToggle {
+    Layout.fillWidth: true
+    label: pluginApi?.tr("settings.showRecordingCard")
+    checked: root.editShowRecordingCard
+    onToggled: checked => root.editShowRecordingCard = checked
+  }
   }
 
   ColumnLayout {
@@ -1171,50 +1088,17 @@ ColumnLayout {
       label: pluginApi?.tr("settings.componentStyleTarget")
       description: pluginApi?.tr("settings.componentStyleTargetDesc")
       model: [
-        {
-          "key": "__global",
-          "name": pluginApi?.tr("settings.componentAll")
-        },
-        {
-          "key": "profile",
-          "name": pluginApi?.tr("settings.componentProfile")
-        },
-        {
-          "key": "quickActions",
-          "name": pluginApi?.tr("settings.componentQuickActions")
-        },
-        {
-          "key": "recording",
-          "name": pluginApi?.tr("settings.componentRecording")
-        },
-        {
-          "key": "performance",
-          "name": pluginApi?.tr("settings.componentPerformance")
-        },
-        {
-          "key": "systemControls",
-          "name": pluginApi?.tr("settings.componentSystemControls")
-        },
-        {
-          "key": "notifications",
-          "name": pluginApi?.tr("settings.componentNotifications")
-        },
-        {
-          "key": "media",
-          "name": pluginApi?.tr("settings.componentMedia")
-        },
-        {
-          "key": "calendar",
-          "name": pluginApi?.tr("settings.componentCalendar")
-        },
-        {
-          "key": "screenUsage",
-          "name": pluginApi?.tr("settings.componentScreenUsage")
-        },
-        {
-          "key": "barWidget",
-          "name": pluginApi?.tr("settings.componentBarWidget")
-        }
+        { "key": "__global", "name": pluginApi?.tr("settings.componentAll") },
+        { "key": "profile", "name": pluginApi?.tr("settings.componentProfile") },
+        { "key": "quickActions", "name": pluginApi?.tr("settings.componentQuickActions") },
+        { "key": "recording", "name": pluginApi?.tr("settings.componentRecording") },
+        { "key": "performance", "name": pluginApi?.tr("settings.componentPerformance") },
+        { "key": "systemControls", "name": pluginApi?.tr("settings.componentSystemControls") },
+        { "key": "notifications", "name": pluginApi?.tr("settings.componentNotifications") },
+        { "key": "media", "name": pluginApi?.tr("settings.componentMedia") },
+        { "key": "calendar", "name": pluginApi?.tr("settings.componentCalendar") },
+        { "key": "screenUsage", "name": pluginApi?.tr("settings.componentScreenUsage") },
+        { "key": "barWidget", "name": pluginApi?.tr("settings.componentBarWidget") }
       ]
       currentKey: root.editComponentStyleTarget
       onSelected: key => root.editComponentStyleTarget = key
@@ -1386,18 +1270,9 @@ ColumnLayout {
       label: pluginApi?.tr("settings.componentBorderScope")
       description: pluginApi?.tr("settings.componentBorderScopeDesc")
       model: [
-        {
-          "key": "all",
-          "name": pluginApi?.tr("settings.componentBorderScopeAll")
-        },
-        {
-          "key": "container",
-          "name": pluginApi?.tr("settings.componentBorderScopeContainer")
-        },
-        {
-          "key": "children",
-          "name": pluginApi?.tr("settings.componentBorderScopeChildren")
-        }
+        { "key": "all", "name": pluginApi?.tr("settings.componentBorderScopeAll") },
+        { "key": "container", "name": pluginApi?.tr("settings.componentBorderScopeContainer") },
+        { "key": "children", "name": pluginApi?.tr("settings.componentBorderScopeChildren") }
       ]
       currentKey: String(root.componentStyleValue("borderScope", "all"))
       onSelected: key => root.setComponentStyleValue("borderScope", key)
@@ -1410,14 +1285,8 @@ ColumnLayout {
       label: pluginApi?.tr("settings.componentBorderColorMode")
       description: pluginApi?.tr("settings.componentBorderColorModeDesc")
       model: [
-        {
-          "key": "auto",
-          "name": pluginApi?.tr("settings.profileCoverBorderAutoColors")
-        },
-        {
-          "key": "custom",
-          "name": pluginApi?.tr("settings.profileCoverBorderCustomColors")
-        }
+        { "key": "auto", "name": pluginApi?.tr("settings.profileCoverBorderAutoColors") },
+        { "key": "custom", "name": pluginApi?.tr("settings.profileCoverBorderCustomColors") }
       ]
       currentKey: String(root.componentStyleValue("borderColorMode", "auto"))
       onSelected: key => root.setComponentStyleValue("borderColorMode", key)
@@ -1489,66 +1358,21 @@ ColumnLayout {
       label: pluginApi?.tr("settings.componentBorderAnimation")
       description: pluginApi?.tr("settings.componentBorderAnimationDesc")
       model: [
-        {
-          "key": "static",
-          "name": pluginApi?.tr("settings.profileCoverBorderStatic")
-        },
-        {
-          "key": "fade",
-          "name": pluginApi?.tr("settings.profileCoverBorderFade")
-        },
-        {
-          "key": "flow",
-          "name": pluginApi?.tr("settings.profileCoverBorderFlow")
-        },
-        {
-          "key": "flowEase",
-          "name": pluginApi?.tr("settings.profileCoverBorderFlowEase")
-        },
-        {
-          "key": "spark",
-          "name": pluginApi?.tr("settings.profileCoverBorderSpark")
-        },
-        {
-          "key": "pulse",
-          "name": pluginApi?.tr("settings.profileCoverBorderPulse")
-        },
-        {
-          "key": "chase",
-          "name": pluginApi?.tr("settings.profileCoverBorderChase")
-        },
-        {
-          "key": "comet",
-          "name": pluginApi?.tr("settings.profileCoverBorderComet")
-        },
-        {
-          "key": "neon",
-          "name": pluginApi?.tr("settings.profileCoverBorderNeon")
-        },
-        {
-          "key": "corners",
-          "name": pluginApi?.tr("settings.profileCoverBorderCorners")
-        },
-        {
-          "key": "orbitDots",
-          "name": pluginApi?.tr("settings.profileCoverBorderOrbitDots")
-        },
-        {
-          "key": "scan",
-          "name": pluginApi?.tr("settings.profileCoverBorderScan")
-        },
-        {
-          "key": "reactivePulse",
-          "name": pluginApi?.tr("settings.profileCoverBorderReactivePulse")
-        },
-        {
-          "key": "reactiveFlow",
-          "name": pluginApi?.tr("settings.profileCoverBorderReactiveFlow")
-        },
-        {
-          "key": "reactiveSpark",
-          "name": pluginApi?.tr("settings.profileCoverBorderReactiveSpark")
-        }
+        { "key": "static", "name": pluginApi?.tr("settings.profileCoverBorderStatic") },
+        { "key": "fade", "name": pluginApi?.tr("settings.profileCoverBorderFade") },
+        { "key": "flow", "name": pluginApi?.tr("settings.profileCoverBorderFlow") },
+        { "key": "flowEase", "name": pluginApi?.tr("settings.profileCoverBorderFlowEase") },
+        { "key": "spark", "name": pluginApi?.tr("settings.profileCoverBorderSpark") },
+        { "key": "pulse", "name": pluginApi?.tr("settings.profileCoverBorderPulse") },
+        { "key": "chase", "name": pluginApi?.tr("settings.profileCoverBorderChase") },
+        { "key": "comet", "name": pluginApi?.tr("settings.profileCoverBorderComet") },
+        { "key": "neon", "name": pluginApi?.tr("settings.profileCoverBorderNeon") },
+        { "key": "corners", "name": pluginApi?.tr("settings.profileCoverBorderCorners") },
+        { "key": "orbitDots", "name": pluginApi?.tr("settings.profileCoverBorderOrbitDots") },
+        { "key": "scan", "name": pluginApi?.tr("settings.profileCoverBorderScan") },
+        { "key": "reactivePulse", "name": pluginApi?.tr("settings.profileCoverBorderReactivePulse") },
+        { "key": "reactiveFlow", "name": pluginApi?.tr("settings.profileCoverBorderReactiveFlow") },
+        { "key": "reactiveSpark", "name": pluginApi?.tr("settings.profileCoverBorderReactiveSpark") }
       ]
       currentKey: String(root.componentStyleValue("borderAnimation", "static"))
       onSelected: key => root.setComponentStyleValue("borderAnimation", key)
@@ -1591,7 +1415,18 @@ ColumnLayout {
   }
 
   function componentStyleTargetKeys() {
-    return ["profile", "quickActions", "recording", "performance", "systemControls", "notifications", "media", "calendar", "screenUsage", "barWidget"];
+    return [
+      "profile",
+      "quickActions",
+      "recording",
+      "performance",
+      "systemControls",
+      "notifications",
+      "media",
+      "calendar",
+      "screenUsage",
+      "barWidget"
+    ];
   }
 
   function setComponentStyleValue(field, value) {

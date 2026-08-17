@@ -3,8 +3,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import "../../Helpers/HyprlandLuaGen.js" as HyprlandLuaGen
 import qs.Commons
+import "../../Helpers/HyprlandLuaGen.js" as HyprlandLuaGen
 
 // Writes ~/.config/hypr/hydra-shell/{settings,rebinds}.lua from
 // Settings.data.hyprland via the pure generator in Helpers/HyprlandLuaGen.js.

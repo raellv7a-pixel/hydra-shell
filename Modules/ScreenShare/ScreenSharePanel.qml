@@ -1,11 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import "Components"
 import qs.Commons
 import qs.Modules.MainScreen
 import qs.Services.System
 import qs.Widgets
+import "Components"
 
 // Seletor de compartilhamento de tela.
 //
@@ -31,6 +31,7 @@ SmartPanel {
     root.cancelSelection();
   }
 
+
   // --- estado da seleção --------------------------------------------------------
 
   property int activeTab: 0
@@ -47,11 +48,11 @@ SmartPanel {
     for (var i = 0; i < Quickshell.screens.length; i++) {
       const s = Quickshell.screens[i];
       list.push({
-                  "name": s.name,
-                  "width": s.width,
-                  "height": s.height,
-                  "thumbnail": version > 0 ? ScreenShareService.snapshotPath(s.name) : ""
-                });
+        "name": s.name,
+        "width": s.width,
+        "height": s.height,
+        "thumbnail": version > 0 ? ScreenShareService.snapshotPath(s.name) : ""
+      });
     }
     return list;
   }
@@ -138,8 +139,8 @@ SmartPanel {
             NText {
               Layout.fillWidth: true
               text: ScreenShareService.requestingAppName !== "" ? I18n.tr("screen-share.subtitle-app", {
-                                                                            "app": ScreenShareService.requestingAppName
-                                                                          }) : I18n.tr("screen-share.subtitle-generic")
+                                                                           "app": ScreenShareService.requestingAppName
+                                                                         }) : I18n.tr("screen-share.subtitle-generic")
               pointSize: Style.fontSizeS
               color: Color.mOnSurfaceVariant
               elide: Text.ElideRight

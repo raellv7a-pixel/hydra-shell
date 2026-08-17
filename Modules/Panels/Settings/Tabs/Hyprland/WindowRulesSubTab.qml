@@ -16,82 +16,25 @@ ColumnLayout {
 
   readonly property var valueActions: ["move", "workspace", "opacity", "rounding", "size", "monitor", "tag"]
   readonly property var actionOptions: [
-    {
-      "key": "float",
-      "name": "Flutuar"
-    },
-    {
-      "key": "tile",
-      "name": "Encaixar (tile)"
-    },
-    {
-      "key": "pin",
-      "name": "Fixar sobre outras janelas"
-    },
-    {
-      "key": "center",
-      "name": "Centralizar"
-    },
-    {
-      "key": "fullscreen",
-      "name": "Tela cheia"
-    },
-    {
-      "key": "maximize",
-      "name": "Maximizar"
-    },
-    {
-      "key": "no_focus",
-      "name": "Nunca focar"
-    },
-    {
-      "key": "no_screen_share",
-      "name": "Ocultar de compartilhamento de tela"
-    },
-    {
-      "key": "opaque",
-      "name": "Forçar opaca"
-    },
-    {
-      "key": "no_blur",
-      "name": "Sem desfoque"
-    },
-    {
-      "key": "no_shadow",
-      "name": "Sem sombra"
-    },
-    {
-      "key": "no_anim",
-      "name": "Sem animação"
-    },
-    {
-      "key": "idle_inhibit",
-      "name": "Impedir suspensão enquanto aberta"
-    },
-    {
-      "key": "move",
-      "name": "Mover para posição (valor: \"X Y\")"
-    },
-    {
-      "key": "size",
-      "name": "Redimensionar (valor: \"L A\")"
-    },
-    {
-      "key": "workspace",
-      "name": "Enviar para workspace (valor: nome/número)"
-    },
-    {
-      "key": "opacity",
-      "name": "Opacidade fixa (valor: 0.0–1.0)"
-    },
-    {
-      "key": "rounding",
-      "name": "Raio de canto (valor: px)"
-    },
-    {
-      "key": "monitor",
-      "name": "Monitor fixo (valor: nome)"
-    }
+    { "key": "float", "name": "Flutuar" },
+    { "key": "tile", "name": "Encaixar (tile)" },
+    { "key": "pin", "name": "Fixar sobre outras janelas" },
+    { "key": "center", "name": "Centralizar" },
+    { "key": "fullscreen", "name": "Tela cheia" },
+    { "key": "maximize", "name": "Maximizar" },
+    { "key": "no_focus", "name": "Nunca focar" },
+    { "key": "no_screen_share", "name": "Ocultar de compartilhamento de tela" },
+    { "key": "opaque", "name": "Forçar opaca" },
+    { "key": "no_blur", "name": "Sem desfoque" },
+    { "key": "no_shadow", "name": "Sem sombra" },
+    { "key": "no_anim", "name": "Sem animação" },
+    { "key": "idle_inhibit", "name": "Impedir suspensão enquanto aberta" },
+    { "key": "move", "name": "Mover para posição (valor: \"X Y\")" },
+    { "key": "size", "name": "Redimensionar (valor: \"L A\")" },
+    { "key": "workspace", "name": "Enviar para workspace (valor: nome/número)" },
+    { "key": "opacity", "name": "Opacidade fixa (valor: 0.0–1.0)" },
+    { "key": "rounding", "name": "Raio de canto (valor: px)" },
+    { "key": "monitor", "name": "Monitor fixo (valor: nome)" }
   ]
 
   function set(index, field, value) {
@@ -114,14 +57,7 @@ ColumnLayout {
 
   function add() {
     var arr = (HyprlandDraftStore.val("windowRules") || []).slice();
-    arr.push({
-               "name": "regra-" + (arr.length + 1),
-               "match": {
-                 "class": ""
-               },
-               "action": "float",
-               "value": ""
-             });
+    arr.push({ "name": "regra-" + (arr.length + 1), "match": { "class": "" }, "action": "float", "value": "" });
     HyprlandDraftStore.edit("windowRules", arr);
   }
 

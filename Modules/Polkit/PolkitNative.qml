@@ -6,22 +6,22 @@ import qs.Services.System
 import qs.Services.UI
 
 Item {
-  id: root
+    id: root
 
-  PolkitAgent {
-    id: agent
-
-    onIsActiveChanged: {
-      var screen = PanelService.findScreenForPanels();
-      var panel = PanelService.getPanel("polkitPanel", screen);
-      if (panel) {
-        panel.flow = agent.flow;
-        if (agent.isActive && (PolkitService.enabled ?? true)) {
-          panel.open();
-        } else {
-          panel.close();
+    PolkitAgent {
+        id: agent
+        
+        onIsActiveChanged: {
+            var screen = PanelService.findScreenForPanels();
+            var panel = PanelService.getPanel("polkitPanel", screen);
+            if (panel) {
+                panel.flow = agent.flow;
+                if (agent.isActive && (PolkitService.enabled ?? true)) {
+                    panel.open();
+                } else {
+                    panel.close();
+                }
+            }
         }
-      }
     }
-  }
 }

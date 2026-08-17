@@ -18,12 +18,16 @@ Item {
   property bool isPrivate: false
   property bool inViewport: true
 
-  readonly property var activeMonitor: overview?.screen ? Hyprland.monitors.values.find(monitor => monitor.name === overview.screen.name) : null
-  readonly property bool active: !isSpecial && activeMonitor && (activeMonitor.activeWorkspace?.id === wsId || activeMonitor.activeWorkspace?.name === wsName)
+  readonly property var activeMonitor: overview?.screen
+      ? Hyprland.monitors.values.find(monitor => monitor.name === overview.screen.name)
+      : null
+  readonly property bool active: !isSpecial && activeMonitor
+      && (activeMonitor.activeWorkspace?.id === wsId || activeMonitor.activeWorkspace?.name === wsName)
   readonly property bool isDropTarget: overview?.dragging && dropArea.containsDrag
   readonly property bool borderOnlyPrivacy: Settings.data.workspaceManager.borderOnlyPrivacy || false
   readonly property string layoutName: {
-    const workspace = (Hyprland.workspaces.values || []).find(ws => ws.id === cell.wsId || ws.name === cell.wsName);
+    const workspace = (Hyprland.workspaces.values || []).find(ws => ws.id === cell.wsId
+                                                                   || ws.name === cell.wsName);
     return workspace?.lastIpcObject?.tiledLayout || workspace?.tiledLayout || "dwindle";
   }
 
@@ -55,9 +59,9 @@ Item {
       if (cls && !seen[cls]) {
         seen[cls] = true;
         icons.push({
-                     "class": cls,
-                     "icon": ThemeIcons.iconForAppId(cls, "application-x-executable")
-                   });
+          "class": cls,
+          "icon": ThemeIcons.iconForAppId(cls, "application-x-executable")
+        });
         if (icons.length >= 4)
           break;
       }
@@ -75,20 +79,16 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: Style.radiusL
-    color: cell.active ? Qt.alpha(Color.mPrimary, 0.18) : (cell.isDropTarget ? Qt.alpha(Color.mSecondary, 0.28) : Color.mSurfaceContainer)
+    color: cell.active ? Qt.alpha(Color.mPrimary, 0.18)
+                       : (cell.isDropTarget ? Qt.alpha(Color.mSecondary, 0.28)
+                                            : Color.mSurfaceContainer)
     border.width: cell.active || cell.isDropTarget || cell.isUrgent ? Style.borderM : Style.borderS
-    border.color: cell.isUrgent ? Color.mError : (cell.active ? Color.mPrimary : (cell.isDropTarget ? Color.mSecondary : Qt.alpha(Color.mOutline, 0.72)))
+    border.color: cell.isUrgent ? Color.mError
+                                : (cell.active ? Color.mPrimary
+                                               : (cell.isDropTarget ? Color.mSecondary : Qt.alpha(Color.mOutline, 0.72)))
 
-    Behavior on color {
-      ColorAnimation {
-        duration: Style.animationFast
-      }
-    }
-    Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationFast
-      }
-    }
+    Behavior on color { ColorAnimation { duration: Style.animationFast } }
+    Behavior on border.color { ColorAnimation { duration: Style.animationFast } }
 
     MouseArea {
       id: cellMouseArea
@@ -136,7 +136,8 @@ Item {
         for (let index = 0; index < toplevels.length; index++) {
           const toplevel = toplevels[index];
           const ipc = toplevel?.lastIpcObject;
-          const wsMatch = cell.isSpecial ? (toplevel?.workspace?.name === cell.wsName) : (toplevel?.workspace?.id === cell.wsId);
+          const wsMatch = cell.isSpecial ? (toplevel?.workspace?.name === cell.wsName)
+                                         : (toplevel?.workspace?.id === cell.wsId);
           if (!wsMatch)
             continue;
           if (!ipc?.at || !ipc?.size || ipc.mapped === false)
@@ -175,126 +176,126 @@ Item {
         const offsetY = (aspect - contentHeight * scale) / (2 * aspect);
 
         return windows.map(window => ({
-          "addr": window.addr,
-          "tl": window.tl,
-          "title": window.title,
-          "appId": window.appId,
-          "workspaceId": window.workspaceId,
-          "workspaceName": window.workspaceName,
-          "grouped": window.grouped,
-          "fx": offsetX + (window.x - minX) * scale,
-          "fy": offsetY + (window.y - minY) * scale / aspect,
-          "fw": window.width * scale,
-          "fh": window.height * scale / aspect
-        }));
+                                       "addr": window.addr,
+                                       "tl": window.tl,
+                                       "title": window.title,
+                                       "appId": window.appId,
+                                       "workspaceId": window.workspaceId,
+                                       "workspaceName": window.workspaceName,
+                                       "grouped": window.grouped,
+                                       "fx": offsetX + (window.x - minX) * scale,
+                                       "fy": offsetY + (window.y - minY) * scale / aspect,
+                                       "fw": window.width * scale,
+                                       "fh": window.height * scale / aspect
+                                     }));
       }
 
-        Column {
+      Column {
         anchors.centerIn: parent
         width: parent.width - 2 * Style.marginM
         spacing: Style.marginXS
         visible: cell.isPrivate || previewArea.windowGeometry.length === 0
 
         NIcon {
-        anchors.horizontalCenter: parent.horizontalCenter
-        icon: cell.isPrivate ? "shield-lock" : "apps"
-        pointSize: Style.fontSizeL
-        color: cell.isPrivate ? Color.mPrimary : Color.mOnSurfaceVariant
-      }
+          anchors.horizontalCenter: parent.horizontalCenter
+          icon: cell.isPrivate ? "shield-lock" : "apps"
+          pointSize: Style.fontSizeL
+          color: cell.isPrivate ? Color.mPrimary : Color.mOnSurfaceVariant
+        }
         NText {
-        width: parent.width
-        horizontalAlignment: Text.AlignHCenter
-        text: cell.isPrivate ? qsTr("Private workspace") : qsTr("Empty workspace")
-        pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
-      }
+          width: parent.width
+          horizontalAlignment: Text.AlignHCenter
+          text: cell.isPrivate ? qsTr("Private workspace") : qsTr("Empty workspace")
+          pointSize: Style.fontSizeS
+          color: Color.mOnSurfaceVariant
+        }
         NText {
-        width: parent.width
-        horizontalAlignment: Text.AlignHCenter
-        text: cell.borderOnlyPrivacy ? qsTr("Border-only privacy active") : qsTr("Previews are hidden while privacy is enabled")
-        pointSize: Style.fontSizeXS
-        color: Color.mOnSurfaceVariant
-        visible: cell.isPrivate
-      }
+          width: parent.width
+          horizontalAlignment: Text.AlignHCenter
+          text: cell.borderOnlyPrivacy ? qsTr("Border-only privacy active") : qsTr("Previews are hidden while privacy is enabled")
+          pointSize: Style.fontSizeXS
+          color: Color.mOnSurfaceVariant
+          visible: cell.isPrivate
+        }
       }
 
-        Repeater {
+      Repeater {
         model: (cell.isPrivate || !cell.inViewport) ? [] : previewArea.windowGeometry
         delegate: WorkspaceWindowPreview {
-        required property var modelData
-        windowData: modelData
-        overview: cell.overview
-        livePreviews: cell.livePreviews
-        active: cell.inViewport
-        x: modelData.fx * parent.width
-        y: modelData.fy * parent.height
-        width: Math.max(32 * Style.uiScaleRatio, modelData.fw * parent.width)
-        height: Math.max(24 * Style.uiScaleRatio, modelData.fh * parent.height)
+          required property var modelData
+          windowData: modelData
+          overview: cell.overview
+          livePreviews: cell.livePreviews
+          active: cell.inViewport
+          x: modelData.fx * parent.width
+          y: modelData.fy * parent.height
+          width: Math.max(32 * Style.uiScaleRatio, modelData.fw * parent.width)
+          height: Math.max(24 * Style.uiScaleRatio, modelData.fh * parent.height)
+        }
       }
-      }
-      }
+    }
 
-        RowLayout {
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: Style.marginM
-        spacing: Style.marginS
-        z: 5
+    RowLayout {
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.margins: Style.marginM
+      spacing: Style.marginS
+      z: 5
 
-        Rectangle {
+      Rectangle {
         width: workspaceLabel.implicitWidth + 2 * Style.marginM
         height: workspaceLabel.implicitHeight + Style.marginS
         radius: height / 2
         color: cell.active ? Color.mPrimary : Qt.alpha(Color.mSurface, 0.9)
 
         NText {
-        id: workspaceLabel
-        anchors.centerIn: parent
-        text: cell.isSpecial ? cell.wsName.replace("special:", "") : cell.wsName
-        pointSize: Style.fontSizeM
-        font.weight: Style.fontWeightBold
-        color: cell.active ? Color.mOnPrimary : Color.mOnSurface
-      }
+          id: workspaceLabel
+          anchors.centerIn: parent
+          text: cell.isSpecial ? cell.wsName.replace("special:", "") : cell.wsName
+          pointSize: Style.fontSizeM
+          font.weight: Style.fontWeightBold
+          color: cell.active ? Color.mOnPrimary : Color.mOnSurface
+        }
       }
 
-        Row {
+      Row {
         spacing: 3
         Layout.alignment: Qt.AlignVCenter
         visible: cell.appIcons.length > 0 && !cell.isPrivate
 
         Repeater {
-        model: cell.appIcons
-        delegate: Image {
-        width: 16 * Style.uiScaleRatio
-        height: 16 * Style.uiScaleRatio
-        source: modelData.icon.startsWith("file://") || modelData.icon.startsWith("/") ? (modelData.icon.startsWith("/") ? "file://" + modelData.icon : modelData.icon) : ""
-        fillMode: Image.PreserveAspectFit
-        smooth: true
+          model: cell.appIcons
+          delegate: Image {
+            width: 16 * Style.uiScaleRatio
+            height: 16 * Style.uiScaleRatio
+            source: modelData.icon.startsWith("file://") || modelData.icon.startsWith("/")
+                    ? (modelData.icon.startsWith("/") ? "file://" + modelData.icon : modelData.icon)
+                    : ""
+            fillMode: Image.PreserveAspectFit
+            smooth: true
 
-        NIcon {
-        anchors.centerIn: parent
-        visible: !parent.source || parent.status !== Image.Ready
-        icon: "apps"
-        pointSize: Style.fontSizeXS
-        color: Color.mOnSurfaceVariant
-      }
-      }
-      }
+            NIcon {
+              anchors.centerIn: parent
+              visible: !parent.source || parent.status !== Image.Ready
+              icon: "apps"
+              pointSize: Style.fontSizeXS
+              color: Color.mOnSurfaceVariant
+            }
+          }
+        }
 
         NText {
-        anchors.verticalCenter: parent.verticalCenter
-        text: `(${previewArea.windowGeometry.length})`
-        pointSize: Style.fontSizeXS
-        color: Color.mOnSurfaceVariant
-      }
-      }
-
-        Item {
-        Layout.fillWidth: true
+          anchors.verticalCenter: parent.verticalCenter
+          text: `(${previewArea.windowGeometry.length})`
+          pointSize: Style.fontSizeXS
+          color: Color.mOnSurfaceVariant
+        }
       }
 
-        Rectangle {
+      Item { Layout.fillWidth: true }
+
+      Rectangle {
         visible: cell.isUrgent
         width: urgentText.implicitWidth + Style.marginM
         height: 20 * Style.uiScaleRatio
@@ -302,16 +303,16 @@ Item {
         color: Color.mError
 
         NText {
-        id: urgentText
-        anchors.centerIn: parent
-        text: "🔔 Urgent"
-        pointSize: Style.fontSizeXS
-        color: Color.mOnError
-        font.weight: Style.fontWeightBold
-      }
+          id: urgentText
+          anchors.centerIn: parent
+          text: "🔔 Urgent"
+          pointSize: Style.fontSizeXS
+          color: Color.mOnError
+          font.weight: Style.fontWeightBold
+        }
       }
 
-        Rectangle {
+      Rectangle {
         visible: cell.isScreenshareActive
         width: shareText.implicitWidth + Style.marginM
         height: 20 * Style.uiScaleRatio
@@ -319,15 +320,15 @@ Item {
         color: Qt.alpha(Color.mError, 0.85)
 
         NText {
-        id: shareText
-        anchors.centerIn: parent
-        text: "🔴 Sharing"
-        pointSize: Style.fontSizeXS
-        color: Color.mOnError
-      }
+          id: shareText
+          anchors.centerIn: parent
+          text: "🔴 Sharing"
+          pointSize: Style.fontSizeXS
+          color: Color.mOnError
+        }
       }
 
-        Rectangle {
+      Rectangle {
         width: layoutText.implicitWidth + Style.marginM
         height: 20 * Style.uiScaleRatio
         radius: height / 2
@@ -336,122 +337,103 @@ Item {
         border.color: Qt.alpha(Color.mOutline, 0.5)
 
         NText {
-        id: layoutText
-        anchors.centerIn: parent
-        text: cell.layoutName
-        pointSize: Style.fontSizeXS
-        color: Color.mOnSurface
-      }
+          id: layoutText
+          anchors.centerIn: parent
+          text: cell.layoutName
+          pointSize: Style.fontSizeXS
+          color: Color.mOnSurface
+        }
 
         MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-        if (CompositorService.backend?.cycleWorkspaceLayout)
-        CompositorService.backend.cycleWorkspaceLayout(cell.wsName || cell.wsId);
-      }
-      }
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+          onClicked: {
+            if (CompositorService.backend?.cycleWorkspaceLayout)
+              CompositorService.backend.cycleWorkspaceLayout(cell.wsName || cell.wsId);
+          }
+        }
       }
 
-        NIconButton {
+      NIconButton {
         icon: cell.isPrivate ? "shield-lock" : "shield"
         baseSize: Style.baseWidgetSize * 0.72
         colorBg: cell.isPrivate ? Qt.alpha(Color.mPrimary, 0.2) : Qt.alpha(Color.mSurface, 0.86)
         colorFg: cell.isPrivate ? Color.mPrimary : Color.mOnSurfaceVariant
-        tooltipText: cell.isPrivate ? qsTr("Disable workspace privacy") : qsTr("Make workspace private")
+        tooltipText: cell.isPrivate ? qsTr("Disable workspace privacy")
+                                        : qsTr("Make workspace private")
         onClicked: cell.overview?.toggleWorkspacePrivacy(cell.wsId, cell.wsName, !cell.isPrivate)
       }
-      }
+    }
 
-        Rectangle {
-        anchors.fill: parent
-        radius: Style.radiusL
-        color: Qt.alpha(Color.mSurfaceContainerHighest, 0.92)
-        border.width: Style.borderM
-        border.color: cell.isPrivate ? Color.mError : Color.mPrimary
-        visible: cell.isDropTarget
-        z: 10
+    Rectangle {
+      anchors.fill: parent
+      radius: Style.radiusL
+      color: Qt.alpha(Color.mSurfaceContainerHighest, 0.92)
+      border.width: Style.borderM
+      border.color: cell.isPrivate ? Color.mError : Color.mPrimary
+      visible: cell.isDropTarget
+      z: 10
 
-        Column {
+      Column {
         anchors.centerIn: parent
         spacing: Style.marginS
 
         NIcon {
-        anchors.horizontalCenter: parent.horizontalCenter
-        icon: cell.isPrivate ? "shield-alert" : "arrow-down-to-arc"
-        pointSize: Style.fontSizeXL
-        color: cell.isPrivate ? Color.mError : Color.mPrimary
-      }
+          anchors.horizontalCenter: parent.horizontalCenter
+          icon: cell.isPrivate ? "shield-alert" : "arrow-down-to-arc"
+          pointSize: Style.fontSizeXL
+          color: cell.isPrivate ? Color.mError : Color.mPrimary
+        }
         NText {
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: qsTr("Move to workspace %1").arg(cell.isSpecial ? cell.wsName : cell.wsId)
-        pointSize: Style.fontSizeM
-        font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
-      }
+          anchors.horizontalCenter: parent.horizontalCenter
+          text: qsTr("Move to workspace %1").arg(cell.isSpecial ? cell.wsName : cell.wsId)
+          pointSize: Style.fontSizeM
+          font.weight: Style.fontWeightBold
+          color: Color.mOnSurface
+        }
         NText {
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: qsTr("Destination is private — window preview will be hidden")
-        pointSize: Style.fontSizeXS
-        color: Color.mError
-        visible: cell.isPrivate
+          anchors.horizontalCenter: parent.horizontalCenter
+          text: qsTr("Destination is private — window preview will be hidden")
+          pointSize: Style.fontSizeXS
+          color: Color.mError
+          visible: cell.isPrivate
+        }
       }
-      }
-      }
+    }
 
-        DropArea {
-        id: dropArea
-        anchors.fill: parent
-        onDropped: {
+    DropArea {
+      id: dropArea
+      anchors.fill: parent
+      onDropped: {
         if (cell.overview?.dragAddr)
-        cell.overview.moveWindowToWs(cell.overview.dragAddr, cell.wsId, cell.wsName);
+          cell.overview.moveWindowToWs(cell.overview.dragAddr, cell.wsId, cell.wsName);
       }
-      }
+    }
 
-        NContextMenu {
-        id: cellContextMenu
-        parent: Overlay.overlay
-        model: [
-        {
-        "label": cell.isPrivate ? qsTr("Disable privacy") : qsTr("Make private"),
-        "action": "privacy",
-        "icon": cell.isPrivate ? "shield-off" : "shield-lock"
-      },
-        {
-        "label": qsTr("Cycle layout"),
-        "action": "layout",
-        "icon": "layout"
-      },
-        {
-        "label": qsTr("Move earlier"),
-        "action": "order_up",
-        "icon": "arrow-left"
-      },
-        {
-        "label": qsTr("Move later"),
-        "action": "order_down",
-        "icon": "arrow-right"
-      },
-        {
-        "label": qsTr("Close all windows"),
-        "action": "close_all",
-        "icon": "trash"
-      }
-        ]
-        onTriggered: action => {
+    NContextMenu {
+      id: cellContextMenu
+      parent: Overlay.overlay
+      model: [
+        { "label": cell.isPrivate ? qsTr("Disable privacy") : qsTr("Make private"), "action": "privacy", "icon": cell.isPrivate ? "shield-off" : "shield-lock" },
+        { "label": qsTr("Cycle layout"), "action": "layout", "icon": "layout" },
+        { "label": qsTr("Move earlier"), "action": "order_up", "icon": "arrow-left" },
+        { "label": qsTr("Move later"), "action": "order_down", "icon": "arrow-right" },
+        { "label": qsTr("Close all windows"), "action": "close_all", "icon": "trash" }
+      ]
+      onTriggered: action => {
         if (action === "privacy") {
-        cell.overview?.toggleWorkspacePrivacy(cell.wsId, cell.wsName, !cell.isPrivate);
-      } else if (action === "layout") {
-        if (CompositorService.backend?.cycleWorkspaceLayout)
-        CompositorService.backend.cycleWorkspaceLayout(cell.wsName || cell.wsId);
-      } else if (action === "order_up") {
-        cell.overview?.moveWorkspaceOrder(cell.wsId, -1);
-      } else if (action === "order_down") {
-        cell.overview?.moveWorkspaceOrder(cell.wsId, 1);
-      } else if (action === "close_all") {
-        cell.closeAllWindows();
+          cell.overview?.toggleWorkspacePrivacy(cell.wsId, cell.wsName, !cell.isPrivate);
+        } else if (action === "layout") {
+          if (CompositorService.backend?.cycleWorkspaceLayout)
+            CompositorService.backend.cycleWorkspaceLayout(cell.wsName || cell.wsId);
+        } else if (action === "order_up") {
+          cell.overview?.moveWorkspaceOrder(cell.wsId, -1);
+        } else if (action === "order_down") {
+          cell.overview?.moveWorkspaceOrder(cell.wsId, 1);
+        } else if (action === "close_all") {
+          cell.closeAllWindows();
+        }
       }
-      }
-      }
-      }
-      }
+    }
+  }
+}

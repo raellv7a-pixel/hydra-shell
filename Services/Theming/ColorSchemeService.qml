@@ -173,7 +173,11 @@ Singleton {
     const directory = downloadedSchemesDirectory + "/" + normalizedName;
     pendingSchemeName = normalizedName;
     pendingSchemePath = directory + "/" + normalizedName + ".json";
-    schemeSaveProcess.command = ["python3", "-c", "import json,os,sys; data=json.loads(sys.argv[1]); os.makedirs(sys.argv[2],exist_ok=True); tmp=sys.argv[3]+'.tmp'; open(tmp,'w',encoding='utf-8').write(json.dumps(data,indent=2)+'\\n'); os.replace(tmp,sys.argv[3])", JSON.stringify(scheme), directory, pendingSchemePath];
+    schemeSaveProcess.command = [
+      "python3", "-c",
+      "import json,os,sys; data=json.loads(sys.argv[1]); os.makedirs(sys.argv[2],exist_ok=True); tmp=sys.argv[3]+'.tmp'; open(tmp,'w',encoding='utf-8').write(json.dumps(data,indent=2)+'\\n'); os.replace(tmp,sys.argv[3])",
+      JSON.stringify(scheme), directory, pendingSchemePath
+    ];
     schemeSaveProcess.running = true;
     return true;
   }
@@ -184,7 +188,7 @@ Singleton {
     stdout: StdioCollector {}
     stderr: StdioCollector {}
 
-    onExited: function (exitCode) {
+    onExited: function(exitCode) {
       const name = root.pendingSchemeName;
       const path = root.pendingSchemePath;
       const error = stderr.text.trim();

@@ -1,5 +1,5 @@
-import QtMultimedia
 import QtQuick
+import QtMultimedia
 import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
@@ -66,13 +66,13 @@ Item {
 
     ToastService.showNotice(providerName, I18n.tr("wallpaper.live-video.downloading"), "download", 2500);
     providerService.downloadVideo(item, path => {
-      root.applyingVideoId = "";
-      if (path === "" || !WallpaperService.isApplyIntentCurrent(applyTicket)) {
-        return;
-      }
-      WallpaperService.changeWallpaper(path, targetScreen, appearance);
-      ToastService.showNotice(root.providerName, I18n.tr("wallpaper.live-video.applied"), "check", 3000);
-    });
+                                    root.applyingVideoId = "";
+                                    if (path === "" || !WallpaperService.isApplyIntentCurrent(applyTicket)) {
+                                      return;
+                                    }
+                                    WallpaperService.changeWallpaper(path, targetScreen, appearance);
+                                    ToastService.showNotice(root.providerName, I18n.tr("wallpaper.live-video.applied"), "check", 3000);
+                                  });
   }
 
   ColumnLayout {
@@ -86,9 +86,7 @@ Item {
       NTextInput {
         id: searchInput
         inputIconName: "search"
-        placeholderText: I18n.tr("wallpaper.live-video.search-placeholder", {
-                                   source: root.providerName
-                                 })
+        placeholderText: I18n.tr("wallpaper.live-video.search-placeholder", { source: root.providerName })
         Layout.fillWidth: true
         onEditingFinished: root.providerService.search(text, 1)
       }
@@ -108,9 +106,7 @@ Item {
       }
 
       NText {
-        text: I18n.tr("wallpaper.live-video.page", {
-                        page: root.providerService.currentPage
-                      })
+        text: I18n.tr("wallpaper.live-video.page", { page: root.providerService.currentPage })
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
       }
@@ -261,9 +257,7 @@ Item {
                         source: delegateRoot.modelData.video || ""
                         loops: MediaPlayer.Infinite
                         videoOutput: hoverVideoOutput
-                        audioOutput: AudioOutput {
-                          muted: true
-                        }
+                        audioOutput: AudioOutput { muted: true }
                         Component.onCompleted: play()
                         Component.onDestruction: stop()
                       }
@@ -287,9 +281,7 @@ Item {
                   color: cardMouse.containsMouse ? Color.mSecondaryContainer : Color.mPrimaryContainer
 
                   Behavior on width {
-                    NumberAnimation {
-                      duration: Style.animationFast
-                    }
+                    NumberAnimation { duration: Style.animationFast }
                   }
 
                   NText {

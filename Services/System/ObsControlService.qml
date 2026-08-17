@@ -47,101 +47,104 @@ Singleton {
   readonly property string websocketUrl: configurationAvailable ? `ws://${host}:${port}` : ""
   readonly property bool connected: transportReady && authenticated
   readonly property bool anyOutputActive: recording || streaming || replayBuffer
-  readonly property string effectiveState: dependencyMissing ? "dependency-missing" : configurationMissing ? "configuration-missing" : connectionState
+  readonly property string effectiveState: dependencyMissing ? "dependency-missing"
+                                                    : configurationMissing ? "configuration-missing"
+                                                    : connectionState
 
   function resetOutputs() {
-    recording = false;
-    streaming = false;
-    replayBuffer = false;
-    recordDurationMs = 0;
-    streamDurationMs = 0;
-    displayRecordDurationMs = 0;
-    displayStreamDurationMs = 0;
+    recording = false
+    streaming = false
+    replayBuffer = false
+    recordDurationMs = 0
+    streamDurationMs = 0
+    displayRecordDurationMs = 0
+    displayStreamDurationMs = 0
   }
 
   function updateTransportCredentials() {
     if (!transportLoader.item)
-      return;
-    const changed = String(transportLoader.item.url) !== websocketUrl || transportLoader.item.password !== password;
+      return
+    const changed = String(transportLoader.item.url) !== websocketUrl || transportLoader.item.password !== password
     if (changed)
-      transportLoader.item.disconnectFromServer();
-    transportLoader.item.url = websocketUrl;
-    transportLoader.item.password = password;
+      transportLoader.item.disconnectFromServer()
+    transportLoader.item.url = websocketUrl
+    transportLoader.item.password = password
   }
 
   function reloadConfiguration() {
     if (!manualConfiguration)
-      websocketConfigFile.reload();
-    updateTransportCredentials();
-    authenticated = false;
-    pollBusy = false;
-    resetOutputs();
+      websocketConfigFile.reload()
+    updateTransportCredentials()
+    authenticated = false
+    pollBusy = false
+    resetOutputs()
     if (!configurationAvailable) {
-      connectionState = "configuration-missing";
-      return;
+      connectionState = "configuration-missing"
+      return
     }
-    connectionState = "disconnected";
-    Qt.callLater(refresh);
+    connectionState = "disconnected"
+    Qt.callLater(refresh)
   }
 
   function loadAutomaticConfiguration() {
     try {
-      const parsed = JSON.parse(websocketConfigFile.text());
-      const configuredPort = Number(parsed?.server_port ?? defaultPort);
-      const validPort = configuredPort > 0 && configuredPort <= 65535 && Math.floor(configuredPort) === configuredPort;
-      filePort = validPort ? configuredPort : defaultPort;
-      filePassword = String(parsed?.server_password ?? "");
-      fileConfigAvailable = parsed?.server_enabled === true && validPort;
+      const parsed = JSON.parse(websocketConfigFile.text())
+      const configuredPort = Number(parsed?.server_port ?? defaultPort)
+      const validPort = configuredPort > 0 && configuredPort <= 65535 && Math.floor(configuredPort) === configuredPort
+      filePort = validPort ? configuredPort : defaultPort
+      filePassword = String(parsed?.server_password ?? "")
+      fileConfigAvailable = parsed?.server_enabled === true && validPort
       if (!fileConfigAvailable)
-        lastError = "OBS WebSocket is disabled or its port is invalid.";
+        lastError = "OBS WebSocket is disabled or its port is invalid."
       else
-        lastError = "";
+        lastError = ""
     } catch (error) {
-      fileConfigAvailable = false;
-      filePort = defaultPort;
-      filePassword = "";
-      lastError = "OBS WebSocket configuration could not be read.";
+      fileConfigAvailable = false
+      filePort = defaultPort
+      filePassword = ""
+      lastError = "OBS WebSocket configuration could not be read."
     }
-    updateTransportCredentials();
+    updateTransportCredentials()
     if (!manualConfiguration)
-      Qt.callLater(refresh);
+      Qt.callLater(refresh)
   }
 
   function failConnection(message) {
-    pollBusy = false;
-    authenticated = false;
-    connectionState = "connection-error";
-    lastError = String(message || "Failed to connect or authenticate with OBS WebSocket.");
-    resetOutputs();
+    pollBusy = false
+    authenticated = false
+    connectionState = "connection-error"
+    lastError = String(message || "Failed to connect or authenticate with OBS WebSocket.")
+    resetOutputs()
   }
 
   function request(type, data, onSuccess, onFailure) {
     if (!transportReady || !configurationAvailable || !transportLoader.item) {
       if (onFailure)
-        onFailure(dependencyMissing ? "Qt WebSockets support is not installed." : "OBS WebSocket configuration is missing.");
-      return;
+        onFailure(dependencyMissing ? "Qt WebSockets support is not installed." : "OBS WebSocket configuration is missing.")
+      return
     }
-    updateTransportCredentials();
-    transportLoader.item.request(type, data ?? ({}), onSuccess, onFailure);
+    updateTransportCredentials()
+    transportLoader.item.request(type, data ?? ({}), onSuccess, onFailure)
   }
 
   function refresh() {
     if (dependencyMissing) {
-      connectionState = "dependency-missing";
-      lastError = "Qt WebSockets support is not installed.";
-      return;
+      connectionState = "dependency-missing"
+      lastError = "Qt WebSockets support is not installed."
+      return
     }
     if (!configurationAvailable) {
-      connectionState = "configuration-missing";
+      connectionState = "configuration-missing"
       if (!manualConfiguration)
-        websocketConfigFile.reload();
-      return;
+        websocketConfigFile.reload()
+      return
     }
     if (!transportReady || pollBusy)
-      return;
-    pollBusy = true;
+      return
+
+    pollBusy = true
     if (!authenticated)
-      connectionState = "connecting";
+      connectionState = "connecting"
 
     const status = {
       recording: false,
@@ -149,124 +152,121 @@ Singleton {
       replayBuffer: false,
       recordDurationMs: 0,
       streamDurationMs: 0
-    };
-    let remaining = 3;
-    let failed = false;
+    }
+    let remaining = 3
+    let failed = false
 
     function complete() {
-      --remaining;
+      --remaining
       if (remaining !== 0 || failed)
-        return;
-      root.pollBusy = false;
-      root.authenticated = true;
-      root.connectionState = "authenticated";
-      root.lastError = "";
-      root.recording = status.recording;
-      root.streaming = status.streaming;
-      root.replayBuffer = status.replayBuffer;
-      root.recordDurationMs = status.recordDurationMs;
-      root.streamDurationMs = status.streamDurationMs;
-      root.displayRecordDurationMs = status.recording ? status.recordDurationMs : 0;
-      root.displayStreamDurationMs = status.streaming ? status.streamDurationMs : 0;
+        return
+      root.pollBusy = false
+      root.authenticated = true
+      root.connectionState = "authenticated"
+      root.lastError = ""
+      root.recording = status.recording
+      root.streaming = status.streaming
+      root.replayBuffer = status.replayBuffer
+      root.recordDurationMs = status.recordDurationMs
+      root.streamDurationMs = status.streamDurationMs
+      root.displayRecordDurationMs = status.recording ? status.recordDurationMs : 0
+      root.displayStreamDurationMs = status.streaming ? status.streamDurationMs : 0
     }
 
     function fail(message) {
       if (failed)
-        return;
-      failed = true;
-      root.failConnection(message);
+        return
+      failed = true
+      root.failConnection(message)
     }
 
     request("GetRecordStatus", {}, response => {
-      status.recording = response?.outputActive ?? false;
-      status.recordDurationMs = Math.max(0, Number(response?.outputDuration ?? 0));
-      complete();
-    }, fail);
+      status.recording = response?.outputActive ?? false
+      status.recordDurationMs = Math.max(0, Number(response?.outputDuration ?? 0))
+      complete()
+    }, fail)
     request("GetStreamStatus", {}, response => {
-      status.streaming = response?.outputActive ?? false;
-      status.streamDurationMs = Math.max(0, Number(response?.outputDuration ?? 0));
-      complete();
-    }, fail);
+      status.streaming = response?.outputActive ?? false
+      status.streamDurationMs = Math.max(0, Number(response?.outputDuration ?? 0))
+      complete()
+    }, fail)
     request("GetReplayBufferStatus", {}, response => {
-      status.replayBuffer = response?.outputActive ?? false;
-      complete();
+      status.replayBuffer = response?.outputActive ?? false
+      complete()
     }, message => {
       if (String(message).toLowerCase().includes("replay buffer is not available")) {
-        status.replayBuffer = false;
-        complete();
+        status.replayBuffer = false
+        complete()
       } else {
-        fail(message);
+        fail(message)
       }
-    });
+    })
   }
 
   function performOutputAction(requestType, successCallback) {
     if (actionBusy)
-      return;
+      return
     if (!connected) {
-      ToastService.showError(I18n.tr("bar.obs-control.error-title"), I18n.tr(`bar.obs-control.state-${effectiveState}`));
-      refresh();
-      return;
+      ToastService.showError(I18n.tr("bar.obs-control.error-title"), I18n.tr(`bar.obs-control.state-${effectiveState}`))
+      refresh()
+      return
     }
-    actionBusy = true;
+    actionBusy = true
     request(requestType, {}, () => {
       if (successCallback)
-        successCallback();
-      actionBusy = false;
-      actionRefreshTimer.restart();
+        successCallback()
+      actionBusy = false
+      actionRefreshTimer.restart()
     }, message => {
-      actionBusy = false;
-      lastError = String(message);
-      ToastService.showError(I18n.tr("bar.obs-control.error-title"), lastError);
-    });
+      actionBusy = false
+      lastError = String(message)
+      ToastService.showError(I18n.tr("bar.obs-control.error-title"), lastError)
+    })
   }
 
   function toggleRecord() {
-    performOutputAction(recording ? "StopRecord" : "StartRecord", () => recording = !recording);
+    performOutputAction(recording ? "StopRecord" : "StartRecord", () => recording = !recording)
   }
 
   function toggleStream() {
-    performOutputAction(streaming ? "StopStream" : "StartStream", () => streaming = !streaming);
+    performOutputAction(streaming ? "StopStream" : "StartStream", () => streaming = !streaming)
   }
 
   function toggleReplay() {
-    performOutputAction(replayBuffer ? "StopReplayBuffer" : "StartReplayBuffer", () => replayBuffer = !replayBuffer);
+    performOutputAction(replayBuffer ? "StopReplayBuffer" : "StartReplayBuffer", () => replayBuffer = !replayBuffer)
   }
 
   function saveReplay() {
-    performOutputAction("SaveReplayBuffer", () => ToastService.showNotice(I18n.tr("bar.obs-control.replay-saved"), "", "", 2500));
+    performOutputAction("SaveReplayBuffer", () => ToastService.showNotice(I18n.tr("bar.obs-control.replay-saved"), "", "", 2500))
   }
 
   function applyOutputEvent(eventType, eventData) {
     if (eventType === "RecordStateChanged") {
-      recording = eventData?.outputActive ?? false;
+      recording = eventData?.outputActive ?? false
       if (!recording) {
-        recordDurationMs = 0;
-        displayRecordDurationMs = 0;
+        recordDurationMs = 0
+        displayRecordDurationMs = 0
       }
     } else if (eventType === "StreamStateChanged") {
-      streaming = eventData?.outputActive ?? false;
+      streaming = eventData?.outputActive ?? false
       if (!streaming) {
-        streamDurationMs = 0;
-        displayStreamDurationMs = 0;
+        streamDurationMs = 0
+        displayStreamDurationMs = 0
       }
     } else if (eventType === "ReplayBufferStateChanged") {
-      replayBuffer = eventData?.outputActive ?? false;
+      replayBuffer = eventData?.outputActive ?? false
     }
-    actionRefreshTimer.restart();
+    actionRefreshTimer.restart()
   }
 
   onManualConfigurationChanged: reloadConfiguration()
-  onManualHostChanged: if (manualConfiguration)
-  reloadConfiguration()
-  onManualPortChanged: if (manualConfiguration)
-  reloadConfiguration()
-  onManualPasswordChanged: if (manualConfiguration)
-  reloadConfiguration()
+  onManualHostChanged: if (manualConfiguration) reloadConfiguration()
+  onManualPortChanged: if (manualConfiguration) reloadConfiguration()
+  onManualPasswordChanged: if (manualConfiguration) reloadConfiguration()
 
   Component.onCompleted: {
-    websocketConfigFile.reload();
-    Qt.callLater(refresh);
+    websocketConfigFile.reload()
+    Qt.callLater(refresh)
   }
 
   Loader {
@@ -274,13 +274,13 @@ Singleton {
     active: true
     source: Qt.resolvedUrl("ObsWebSocketTransport.qml")
     onStatusChanged: {
-      root.updateTransportCredentials();
+      root.updateTransportCredentials()
       if (status === Loader.Error) {
-        root.connectionState = "dependency-missing";
-        root.lastError = "Qt WebSockets support is not installed.";
-        root.resetOutputs();
+        root.connectionState = "dependency-missing"
+        root.lastError = "Qt WebSockets support is not installed."
+        root.resetOutputs()
       } else if (status === Loader.Ready) {
-        Qt.callLater(root.refresh);
+        Qt.callLater(root.refresh)
       }
     }
   }
@@ -290,18 +290,18 @@ Singleton {
     ignoreUnknownSignals: true
 
     function onAuthenticated() {
-      root.authenticated = true;
-      root.connectionState = "authenticated";
-      root.lastError = "";
+      root.authenticated = true
+      root.connectionState = "authenticated"
+      root.lastError = ""
     }
     function onConnectionFailed(message) {
-      root.failConnection(message);
+      root.failConnection(message)
     }
     function onConnectionClosed(message) {
-      root.failConnection(message);
+      root.failConnection(message)
     }
     function onEventReceived(eventType, eventData) {
-      root.applyOutputEvent(eventType, eventData);
+      root.applyOutputEvent(eventType, eventData)
     }
   }
 
@@ -310,14 +310,14 @@ Singleton {
     path: root.configPath
     watchChanges: true
     onLoaded: root.loadAutomaticConfiguration()
-    onLoadFailed: function () {
-      root.fileConfigAvailable = false;
-      root.filePort = root.defaultPort;
-      root.filePassword = "";
+    onLoadFailed: function() {
+      root.fileConfigAvailable = false
+      root.filePort = root.defaultPort
+      root.filePassword = ""
       if (!root.manualConfiguration) {
-        root.connectionState = "configuration-missing";
-        root.lastError = "OBS WebSocket configuration file was not found.";
-        root.resetOutputs();
+        root.connectionState = "configuration-missing"
+        root.lastError = "OBS WebSocket configuration file was not found."
+        root.resetOutputs()
       }
     }
   }
@@ -327,8 +327,7 @@ Singleton {
     interval: root.pollInterval
     running: root.transportReady && root.configurationAvailable
     repeat: true
-    onTriggered: if (!root.actionBusy)
-    root.refresh()
+    onTriggered: if (!root.actionBusy) root.refresh()
   }
 
   Timer {
@@ -344,28 +343,18 @@ Singleton {
     repeat: true
     onTriggered: {
       if (root.recording)
-      root.displayRecordDurationMs += 1000;
+        root.displayRecordDurationMs += 1000
       if (root.streaming)
-      root.displayStreamDurationMs += 1000;
+        root.displayStreamDurationMs += 1000
     }
   }
 
   IpcHandler {
     target: "obsControl"
-    function refresh() {
-      root.refresh();
-    }
-    function toggleRecord() {
-      root.toggleRecord();
-    }
-    function toggleStream() {
-      root.toggleStream();
-    }
-    function toggleReplay() {
-      root.toggleReplay();
-    }
-    function saveReplay() {
-      root.saveReplay();
-    }
+    function refresh() { root.refresh() }
+    function toggleRecord() { root.toggleRecord() }
+    function toggleStream() { root.toggleStream() }
+    function toggleReplay() { root.toggleReplay() }
+    function saveReplay() { root.saveReplay() }
   }
 }

@@ -55,9 +55,9 @@ Singleton {
       const t = installedThemes[i];
       const existing = bySlug[t.slug] || {};
       bySlug[t.slug] = Object.assign({}, existing, t, {
-                                       "installed": true,
-                                       "preview_url": t.preview_url || existing.preview_url || ""
-                                     });
+                                        "installed": true,
+                                        "preview_url": t.preview_url || existing.preview_url || ""
+                                      });
     }
     return Object.values(bySlug).sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -78,8 +78,8 @@ Singleton {
     installingSlug = slug;
     Logger.i("LockThemeService", "Installing theme:", slug);
     installProcess.exec({
-                          "command": ["python", scriptPath, "install", slug]
-                        });
+      "command": ["python", scriptPath, "install", slug]
+    });
   }
 
   function applyTheme(slug, path) {
@@ -92,8 +92,8 @@ Singleton {
     }
     Logger.i("LockThemeService", "Applying SDDM theme globally via pkexec:", slug);
     applyProcess.exec({
-                        "command": [privilegeElevator, "bash", applyScriptPath, path]
-                      });
+      "command": [privilegeElevator, "bash", applyScriptPath, path]
+    });
   }
 
   Process {

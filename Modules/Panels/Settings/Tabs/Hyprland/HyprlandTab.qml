@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "."
 import qs.Commons
 import qs.Services.Compositor
 import qs.Widgets
+import "."
 
 // Hyprland tab (PLANO_INTEGRACAO_HYPRMOD.md §5) — gated to Hyprland via
 // CompositorService.isHyprland, same pattern used ~15x elsewhere in the

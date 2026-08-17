@@ -57,16 +57,16 @@ Item {
       Hyprland.refreshWorkspaces();
       Hyprland.refreshToplevels();
       Qt.callLater(() => {
-        safeUpdateWorkspaces();
-        safeUpdateWindows();
-        queryDisplayScales();
-        queryKeyboardLayout();
-        // Detect Hyprland dispatch syntax once during startup
-        detectDispatchMode();
-        reapplyWorkspacePrivacy();
-        if (Settings.data.workspaceManager.gameMode)
-          applyGameMode(true);
-      });
+                     safeUpdateWorkspaces();
+                     safeUpdateWindows();
+                     queryDisplayScales();
+                      queryKeyboardLayout();
+                      // Detect Hyprland dispatch syntax once during startup
+                      detectDispatchMode();
+                      reapplyWorkspacePrivacy();
+                      if (Settings.data.workspaceManager.gameMode)
+                        applyGameMode(true);
+                   });
       initialized = true;
       Logger.i("HyprlandService", "Service started");
     } catch (e) {
@@ -448,21 +448,21 @@ Item {
 
   function toSortedWindowList(windowList) {
     return windowList.sort((a, b) => {
-      // Sort by workspace first (just in case they are mixed)
-      if (a.workspaceId !== b.workspaceId) {
-        return a.workspaceId - b.workspaceId;
-      }
-      // Then sort by X position (left to right)
-      if (a.x !== b.x) {
-        return a.x - b.x;
-      }
-      // Then sort by Y position (top to bottom)
-      if (a.y !== b.y) {
-        return a.y - b.y;
-      }
-      // Fallback to Window ID mapping
-      return a.id.localeCompare(b.id);
-    });
+                             // Sort by workspace first (just in case they are mixed)
+                             if (a.workspaceId !== b.workspaceId) {
+                               return a.workspaceId - b.workspaceId;
+                             }
+                             // Then sort by X position (left to right)
+                             if (a.x !== b.x) {
+                               return a.x - b.x;
+                             }
+                             // Then sort by Y position (top to bottom)
+                             if (a.y !== b.y) {
+                               return a.y - b.y;
+                             }
+                             // Fallback to Window ID mapping
+                             return a.id.localeCompare(b.id);
+                           });
   }
 
   function getAppTitle(toplevel) {
@@ -720,7 +720,8 @@ Item {
     if (!normalizedAddress)
       return;
     const selector = `address:${normalizedAddress}`;
-    dispatchCommand("focuswindow", selector, `hl.dsp.focus({ window = "${luaQuote(selector)}" })`);
+    dispatchCommand("focuswindow", selector,
+                    `hl.dsp.focus({ window = "${luaQuote(selector)}" })`);
   }
 
   function closeWindow(window) {
@@ -743,10 +744,13 @@ Item {
       const normalizedAddress = normalizeWindowAddress(address);
       const addressSelector = `address:${normalizedAddress}`;
       const workspaceName = workspace.name ? String(workspace.name) : "";
-      const workspaceTarget = workspaceName ? (workspaceName.startsWith("special:") ? workspaceName : `name:${workspaceName}`) : String(workspace.idx);
+      const workspaceTarget = workspaceName
+          ? (workspaceName.startsWith("special:") ? workspaceName : `name:${workspaceName}`)
+          : String(workspace.idx);
       const luaWorkspace = workspaceName ? `"${luaQuote(workspaceTarget)}"` : String(workspace.idx);
 
-      dispatchCommand("movetoworkspacesilent", `${workspaceTarget},${addressSelector}`, `hl.dsp.window.move({ workspace = ${luaWorkspace}, window = "${luaQuote(addressSelector)}" })`);
+      dispatchCommand("movetoworkspacesilent", `${workspaceTarget},${addressSelector}`,
+                      `hl.dsp.window.move({ workspace = ${luaWorkspace}, window = "${luaQuote(addressSelector)}" })`);
       Hyprland.refreshToplevels();
       Hyprland.refreshWorkspaces();
     } catch (e) {
@@ -760,7 +764,8 @@ Item {
         return;
       const normalizedAddress = normalizeWindowAddress(address);
       const addressSelector = `address:${normalizedAddress}`;
-      dispatchCommand("killwindow", addressSelector, `hl.dsp.window.close({ window = "${luaQuote(addressSelector)}" })`);
+      dispatchCommand("killwindow", addressSelector,
+                      `hl.dsp.window.close({ window = "${luaQuote(addressSelector)}" })`);
       Hyprland.refreshToplevels();
       Hyprland.refreshWorkspaces();
     } catch (e) {
@@ -825,7 +830,8 @@ Item {
       if (!ipc?.address || ipc.workspace?.name !== workspaceKey)
         continue;
       const address = String(ipc.address).startsWith("0x") ? String(ipc.address) : `0x${ipc.address}`;
-      Quickshell.execDetached(["hyprctl", "setprop", `address:${address}`, "no_screen_share", enabled ? "1" : "unset"]);
+      Quickshell.execDetached(["hyprctl", "setprop", `address:${address}`,
+                              "no_screen_share", enabled ? "1" : "unset"]);
     }
   }
 
@@ -919,21 +925,19 @@ Item {
     if (list.length > 1) {
       const target = list[1];
       if (/^\d+$/.test(target))
-        switchToWorkspace({
-                            "idx": parseInt(target)
-                          });
+        switchToWorkspace({ "idx": parseInt(target) });
       else
-        switchToWorkspace({
-                            "name": target
-                          });
+        switchToWorkspace({ "name": target });
     }
   }
 
   function cycleWorkspaceLayout(workspaceKey) {
     const layouts = ["dwindle", "master", "scrolling"];
     const key = String(workspaceKey || "");
-    const workspace = (Hyprland.workspaces.values || []).find(ws => String(ws.name) === key || String(ws.id) === key);
-    const current = workspace?.lastIpcObject?.tiledLayout || workspace?.tiledLayout || "dwindle";
+    const workspace = (Hyprland.workspaces.values || []).find(ws => String(ws.name) === key
+                                                                      || String(ws.id) === key);
+    const current = workspace?.lastIpcObject?.tiledLayout
+        || workspace?.tiledLayout || "dwindle";
     const nextIdx = (layouts.indexOf(current) + 1) % layouts.length;
     const nextLayout = layouts[nextIdx];
     currentLayout = nextLayout;
@@ -956,7 +960,8 @@ Item {
   // of fix applied to MonitorService/HyprlandBackend.js.
   function applyGameMode(enabled) {
     if (enabled) {
-      Quickshell.execDetached(["hyprctl", "eval", " hl.config({ animations = { enabled = false }, decoration = { blur = { enabled = false } }, general = { gaps_in = 0, gaps_out = 0 } })"]);
+      Quickshell.execDetached(["hyprctl", "eval",
+                               " hl.config({ animations = { enabled = false }, decoration = { blur = { enabled = false } }, general = { gaps_in = 0, gaps_out = 0 } })"]);
     } else {
       Quickshell.execDetached(["hyprctl", "reload"]);
     }
@@ -973,9 +978,7 @@ Item {
     if (!cleanName)
       return;
     const wsName = "special:" + cleanName;
-    const workspace = {
-      "name": wsName
-    };
+    const workspace = { "name": wsName };
     if (isPrivate)
       setWorkspacePrivate(workspace, true);
     if (launchCmd && launchCmd.trim()) {

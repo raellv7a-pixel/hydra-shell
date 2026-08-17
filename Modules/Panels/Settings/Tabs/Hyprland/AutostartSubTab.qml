@@ -1,7 +1,7 @@
 import QtQuick
+import Quickshell
 import QtQuick.Controls
 import QtQuick.Layouts
-import Quickshell
 import qs.Commons
 import qs.Services.Compositor
 import qs.Widgets
@@ -30,10 +30,7 @@ ColumnLayout {
 
   function addCommand(command) {
     var arr = (HyprlandDraftStore.val("autostart") || []).slice();
-    arr.push({
-               "command": command || "",
-               "enabled": true
-             });
+    arr.push({ "command": command || "", "enabled": true });
     HyprlandDraftStore.edit("autostart", arr);
   }
 
@@ -79,20 +76,12 @@ ColumnLayout {
       if (seen[key])
         continue;
       seen[key] = true;
-      rows.push({
-                  "key": key,
-                  "name": app.name || key,
-                  "command": root.shellQuoteArgs(app.command)
-                });
+      rows.push({ "key": key, "name": app.name || key, "command": root.shellQuoteArgs(app.command) });
     }
-    rows.sort(function (a, b) {
-      return a.name.localeCompare(b.name);
-    });
+    rows.sort(function (a, b) { return a.name.localeCompare(b.name); });
     for (var j = 0; j < rows.length; j++)
       installedApps.append(rows[j]);
-    Logger.i("AutostartSubTab", "TEMP-DEBUG installed apps loaded:", installedApps.count, "first 5:", rows.slice(0, 5).map(function (r) {
-      return r.name + " => " + r.command;
-    }).join(" | "));
+    Logger.i("AutostartSubTab", "TEMP-DEBUG installed apps loaded:", installedApps.count, "first 5:", rows.slice(0, 5).map(function(r) { return r.name + " => " + r.command; }).join(" | "));
   }
 
   function commandForAppKey(key) {
