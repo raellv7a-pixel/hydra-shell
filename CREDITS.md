@@ -11,6 +11,9 @@ Noctalia Shell is made possible by the incredible work of many open-source proje
 
 - **[Quickshell](https://github.com/outfoxxed/quickshell)** - The Qt/QML-based Wayland shell framework that powers Noctalia
 
+### Visual engine
+- **[Caelestia Shell](https://github.com/caelestia-dots/shell)** (GPLv3) - Source of the Blob SDF rendering and velocity-driven deformation subsystem being adapted for Hydra Shell. The exact source inventory and modifications are tracked in [`LICENSES/Caelestia-Blob-Port.md`](LICENSES/Caelestia-Blob-Port.md).
+
 ## Runtime Dependencies
 
 ### System Integration
@@ -51,6 +54,6 @@ Noctalia Shell is made possible by the incredible work of many open-source proje
 - All the contributors and users who have helped make Noctalia better
 
 ## License
-Noctalia Shell is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+The combined Hydra Shell work is distributed under GPL-3.0-only. See [LICENSE](LICENSE).
 
-Each dependency listed above is governed by its own respective license. Please refer to their individual projects for licensing information.
+Noctalia-origin code retains its original MIT grant in [`LICENSES/Noctalia-MIT.txt`](LICENSES/Noctalia-MIT.txt). The Caelestia Blob port remains GPLv3 and is documented in [`LICENSES/Caelestia-Blob-Port.md`](LICENSES/Caelestia-Blob-Port.md). Each dependency listed above is governed by its respective license.

@@ -35,8 +35,8 @@ O instalador resolve todas as dependências (ver [`DEPENDENCIES.md`](./DEPENDENC
 
 ## Créditos
 
-Este projeto é um fork do [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell) (MIT), construído sobre [Quickshell](https://quickshell.org). Ver [`CREDITS.md`](./CREDITS.md) para a lista completa de dependências e atribuições de terceiros.
+Este projeto é um fork do [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell) (MIT), construído sobre [Quickshell](https://quickshell.org), e incorpora o motor visual Blob da [Caelestia Shell](https://github.com/caelestia-dots/shell) (GPLv3). Ver [`CREDITS.md`](./CREDITS.md) e [`LICENSES/`](./LICENSES/) para atribuições e termos dos componentes de origem.
 
 ## Licença
 
-MIT — ver [LICENSE](./LICENSE).
+GPL-3.0-only — ver [LICENSE](./LICENSE). O código herdado do Noctalia conserva seus termos MIT em [`LICENSES/Noctalia-MIT.txt`](./LICENSES/Noctalia-MIT.txt); o escopo e a atribuição do porte Caelestia estão em [`LICENSES/Caelestia-Blob-Port.md`](./LICENSES/Caelestia-Blob-Port.md).
