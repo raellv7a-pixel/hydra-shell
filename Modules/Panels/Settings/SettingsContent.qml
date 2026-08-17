@@ -21,11 +21,11 @@ import qs.Modules.Panels.Settings.Tabs.Notifications
 import qs.Modules.Panels.Settings.Tabs.Osd
 import qs.Modules.Panels.Settings.Tabs.Plugins
 import qs.Modules.Panels.Settings.Tabs.Region
+import qs.Modules.Panels.Settings.Tabs.Security
 import qs.Modules.Panels.Settings.Tabs.SessionMenu
 import qs.Modules.Panels.Settings.Tabs.SystemMonitor
 import qs.Modules.Panels.Settings.Tabs.UserInterface
 import qs.Modules.Panels.Settings.Tabs.Wallpaper
-import qs.Modules.Panels.Settings.Tabs.Security
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.System

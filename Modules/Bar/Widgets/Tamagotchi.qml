@@ -26,18 +26,16 @@ Item {
     return {};
   }
 
-  readonly property bool showPercentage: widgetSettings.showPercentage !== undefined
-    ? widgetSettings.showPercentage
-    : widgetMetadata.showPercentage
+  readonly property bool showPercentage: widgetSettings.showPercentage !== undefined ? widgetSettings.showPercentage : widgetMetadata.showPercentage
   readonly property string barPosition: Settings.getBarPositionForScreen(screenName)
   readonly property bool barIsVertical: barPosition === "left" || barPosition === "right"
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property int roundedNeed: Math.round(TamagotchiService.lowestNeed)
   readonly property string stateLabel: I18n.tr("tamagotchi.states." + TamagotchiService.petState)
   readonly property string tooltipText: I18n.tr("tamagotchi.bar.tooltip", {
-                                                 "state": stateLabel,
-                                                 "need": roundedNeed
-                                               })
+                                                  "state": stateLabel,
+                                                  "need": roundedNeed
+                                                })
 
   implicitWidth: barIsVertical ? capsuleHeight : visualRow.implicitWidth + Style.margin2S
   implicitHeight: capsuleHeight
@@ -46,11 +44,11 @@ Item {
   Accessible.name: tooltipText
 
   Keys.onPressed: event => {
-    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
-      root.togglePanel();
-      event.accepted = true;
-    }
-  }
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                      root.togglePanel();
+                      event.accepted = true;
+                    }
+                  }
 
   function togglePanel() {
     const panel = PanelService.getPanel("tamagotchiPanel", screen);
@@ -80,15 +78,15 @@ Item {
     ]
 
     onTriggered: action => {
-      contextMenu.close();
-      PanelService.closeContextMenu(screen);
-      if (action === "open")
-        root.togglePanel();
-      else if (action === "rest")
-        TamagotchiService.rest();
-      else if (action === "widget-settings")
-        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-    }
+                   contextMenu.close();
+                   PanelService.closeContextMenu(screen);
+                   if (action === "open")
+                   root.togglePanel();
+                   else if (action === "rest")
+                   TamagotchiService.rest();
+                   else if (action === "widget-settings")
+                   BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+                 }
   }
 
   Rectangle {
@@ -130,11 +128,11 @@ Item {
     onEntered: TooltipService.show(root, root.tooltipText, BarService.getTooltipDirection(root.screenName))
     onExited: TooltipService.hide()
     onClicked: mouse => {
-      TooltipService.hide();
-      if (mouse.button === Qt.RightButton)
-        PanelService.showContextMenu(contextMenu, root, screen);
-      else
-        root.togglePanel();
-    }
+                 TooltipService.hide();
+                 if (mouse.button === Qt.RightButton)
+                 PanelService.showContextMenu(contextMenu, root, screen);
+                 else
+                 root.togglePanel();
+               }
   }
 }

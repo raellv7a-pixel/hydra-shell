@@ -474,9 +474,7 @@ Singleton {
   }
 
   function setWorkspacePrivate(workspace, enabled) {
-    return backend && backend.setWorkspacePrivate
-        ? backend.setWorkspacePrivate(workspace, enabled)
-        : false;
+    return backend && backend.setWorkspacePrivate ? backend.setWorkspacePrivate(workspace, enabled) : false;
   }
 
   // Spawn command

@@ -269,9 +269,9 @@ NBox {
         model: WallpaperService.fillModeModel
         currentKey: mockPreview.currentFillMode
         onSelected: key => {
-          mockPreview.currentFillMode = key;
-          Settings.data.wallpaper.fillMode = key;
-        }
+                      mockPreview.currentFillMode = key;
+                      Settings.data.wallpaper.fillMode = key;
+                    }
       }
 
       NIconButton {

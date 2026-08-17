@@ -11,7 +11,7 @@ ColumnLayout {
   Layout.fillWidth: true
   spacing: Style.marginS
 
-  signal searchRequested()
+  signal searchRequested
 
   RowLayout {
     Layout.fillWidth: true
@@ -22,12 +22,30 @@ ColumnLayout {
       Layout.preferredWidth: 160 * Style.uiScaleRatio
       Layout.fillWidth: true
       model: [
-        { "key": "relevance", "name": I18n.tr("wallpaper.panel.sorting-relevance") },
-        { "key": "date_added", "name": I18n.tr("wallpaper.panel.sorting-date-added") },
-        { "key": "random", "name": I18n.tr("common.random") },
-        { "key": "views", "name": I18n.tr("wallpaper.panel.sorting-views") },
-        { "key": "favorites", "name": I18n.tr("wallpaper.panel.sorting-favorites") },
-        { "key": "toplist", "name": I18n.tr("wallpaper.panel.sorting-toplist") }
+        {
+          "key": "relevance",
+          "name": I18n.tr("wallpaper.panel.sorting-relevance")
+        },
+        {
+          "key": "date_added",
+          "name": I18n.tr("wallpaper.panel.sorting-date-added")
+        },
+        {
+          "key": "random",
+          "name": I18n.tr("common.random")
+        },
+        {
+          "key": "views",
+          "name": I18n.tr("wallpaper.panel.sorting-views")
+        },
+        {
+          "key": "favorites",
+          "name": I18n.tr("wallpaper.panel.sorting-favorites")
+        },
+        {
+          "key": "toplist",
+          "name": I18n.tr("wallpaper.panel.sorting-toplist")
+        }
       ]
       currentKey: Settings.data.wallpaper.wallhavenSorting || "relevance"
 
@@ -53,13 +71,34 @@ ColumnLayout {
       visible: quickSortCombo.currentKey === "toplist"
       Layout.preferredWidth: 120 * Style.uiScaleRatio
       model: [
-        { "key": "1d", "name": I18n.tr("wallpaper.panel.range-1d") },
-        { "key": "3d", "name": I18n.tr("wallpaper.panel.range-3d") },
-        { "key": "1w", "name": I18n.tr("wallpaper.panel.range-1w") },
-        { "key": "1M", "name": I18n.tr("wallpaper.panel.range-1m") },
-        { "key": "3M", "name": I18n.tr("wallpaper.panel.range-3m") },
-        { "key": "6M", "name": I18n.tr("wallpaper.panel.range-6m") },
-        { "key": "1y", "name": I18n.tr("wallpaper.panel.range-1y") }
+        {
+          "key": "1d",
+          "name": I18n.tr("wallpaper.panel.range-1d")
+        },
+        {
+          "key": "3d",
+          "name": I18n.tr("wallpaper.panel.range-3d")
+        },
+        {
+          "key": "1w",
+          "name": I18n.tr("wallpaper.panel.range-1w")
+        },
+        {
+          "key": "1M",
+          "name": I18n.tr("wallpaper.panel.range-1m")
+        },
+        {
+          "key": "3M",
+          "name": I18n.tr("wallpaper.panel.range-3m")
+        },
+        {
+          "key": "6M",
+          "name": I18n.tr("wallpaper.panel.range-6m")
+        },
+        {
+          "key": "1y",
+          "name": I18n.tr("wallpaper.panel.range-1y")
+        }
       ]
       currentKey: Settings.data.wallpaper.wallhavenTopRange || "1M"
 
@@ -84,8 +123,14 @@ ColumnLayout {
       id: quickOrderCombo
       Layout.preferredWidth: 124 * Style.uiScaleRatio
       model: [
-        { "key": "desc", "name": I18n.tr("wallpaper.panel.order-desc") },
-        { "key": "asc", "name": I18n.tr("wallpaper.panel.order-asc") }
+        {
+          "key": "desc",
+          "name": I18n.tr("wallpaper.panel.order-desc")
+        },
+        {
+          "key": "asc",
+          "name": I18n.tr("wallpaper.panel.order-asc")
+        }
       ]
       currentKey: Settings.data.wallpaper.wallhavenOrder || "desc"
 

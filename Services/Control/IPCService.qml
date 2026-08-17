@@ -600,13 +600,13 @@ Singleton {
     target: "workspaces"
     function toggle() {
       root.screenDetector.withCurrentScreen(screen => {
-        PanelService.toggleWorkspaceManager(screen);
-      });
+                                              PanelService.toggleWorkspaceManager(screen);
+                                            });
     }
     function open() {
       root.screenDetector.withCurrentScreen(screen => {
-        PanelService.openWorkspaceManager(screen);
-      });
+                                              PanelService.openWorkspaceManager(screen);
+                                            });
     }
     function close() {
       PanelService.closeWorkspaceManager();
@@ -625,9 +625,12 @@ Singleton {
       const normalizedState = (state || "toggle").trim().toLowerCase();
       if (normalizedState !== "on" && normalizedState !== "off" && normalizedState !== "toggle")
         return "invalid-state";
-      const enabled = normalizedState === "on" ? true
-                                                : (normalizedState === "off" ? false : !currentlyPrivate);
-      const workspaceRef = /^\d+$/.test(key) ? { "idx": parseInt(key) } : { "name": key };
+      const enabled = normalizedState === "on" ? true : (normalizedState === "off" ? false : !currentlyPrivate);
+      const workspaceRef = /^\d+$/.test(key) ? {
+                                                 "idx": parseInt(key)
+                                               } : {
+        "name": key
+      };
       CompositorService.setWorkspacePrivate(workspaceRef, enabled);
       return enabled ? "private" : "public";
     }
@@ -635,19 +638,19 @@ Singleton {
       const act = (action || "toggle").trim().toLowerCase();
       if (act === "open") {
         root.screenDetector.withCurrentScreen(screen => {
-          PanelService.openWorkspaceManager(screen, true);
-        });
+                                                PanelService.openWorkspaceManager(screen, true);
+                                              });
         return "opened";
       } else if (act === "close") {
         PanelService.closeWorkspaceManager();
         return "closed";
       } else {
         root.screenDetector.withCurrentScreen(screen => {
-          if (PanelService.workspaceManagerOpen)
-            PanelService.closeWorkspaceManager();
-          else
-            PanelService.openWorkspaceManager(screen, true);
-        });
+                                                if (PanelService.workspaceManagerOpen)
+                                                PanelService.closeWorkspaceManager();
+                                                else
+                                                PanelService.openWorkspaceManager(screen, true);
+                                              });
         return PanelService.workspaceManagerOpen ? "opened" : "closed";
       }
     }
@@ -1019,24 +1022,59 @@ Singleton {
 
   IpcHandler {
     target: "screenToolkit"
-    function toggle()              { ScreenToolkitService.toggle(); }
-    function mirror()              { ScreenToolkitService.mirror(); }
-    function measure()             { ScreenToolkitService.measure(); }
-    function colorPicker()         { ScreenToolkitService.colorPicker(); }
-    function annotate()            { ScreenToolkitService.annotate(); }
-    function annotateFullscreen()  { ScreenToolkitService.annotateFullscreen(); }
-    function annotateWindow()      { ScreenToolkitService.annotateWindow(); }
-    function pin()                 { ScreenToolkitService.pin(); }
-    function pinImage()            { ScreenToolkitService.pinImage(); }
-    function ocr()                 { ScreenToolkitService.ocr(); }
-    function qr()                  { ScreenToolkitService.qr(); }
-    function palette()             { ScreenToolkitService.palette(); }
-    function lens()                { ScreenToolkitService.lens(); }
-    function record()              { ScreenToolkitService.record("gif"); }
-    function recordMp4()           { ScreenToolkitService.recordMp4(); }
-    function recordFullscreen()    { ScreenToolkitService.recordFullscreen("gif"); }
-    function recordFullscreenMp4() { ScreenToolkitService.recordFullscreenMp4(); }
-    function recordStop()          { ScreenToolkitService.recordStop(); }
+    function toggle() {
+      ScreenToolkitService.toggle();
+    }
+    function mirror() {
+      ScreenToolkitService.mirror();
+    }
+    function measure() {
+      ScreenToolkitService.measure();
+    }
+    function colorPicker() {
+      ScreenToolkitService.colorPicker();
+    }
+    function annotate() {
+      ScreenToolkitService.annotate();
+    }
+    function annotateFullscreen() {
+      ScreenToolkitService.annotateFullscreen();
+    }
+    function annotateWindow() {
+      ScreenToolkitService.annotateWindow();
+    }
+    function pin() {
+      ScreenToolkitService.pin();
+    }
+    function pinImage() {
+      ScreenToolkitService.pinImage();
+    }
+    function ocr() {
+      ScreenToolkitService.ocr();
+    }
+    function qr() {
+      ScreenToolkitService.qr();
+    }
+    function palette() {
+      ScreenToolkitService.palette();
+    }
+    function lens() {
+      ScreenToolkitService.lens();
+    }
+    function record() {
+      ScreenToolkitService.record("gif");
+    }
+    function recordMp4() {
+      ScreenToolkitService.recordMp4();
+    }
+    function recordFullscreen() {
+      ScreenToolkitService.recordFullscreen("gif");
+    }
+    function recordFullscreenMp4() {
+      ScreenToolkitService.recordFullscreenMp4();
+    }
+    function recordStop() {
+      ScreenToolkitService.recordStop();
+    }
   }
-
 }

@@ -157,21 +157,23 @@ Item {
     // Author-created notes are persisted independently from cliphist.
     if (query === "note" || query.startsWith("note ")) {
       const noteText = query.slice(4).trim();
-      return [{
-                "name": noteText === "" ? I18n.tr("launcher.providers.clipboard-note-empty") : I18n.tr("launcher.providers.clipboard-note-create"),
-                "description": noteText === "" ? I18n.tr("launcher.providers.clipboard-note-command") : noteText,
-                "icon": "note",
-                "isTablerIcon": true,
-                "isImage": false,
-                "onActivate": function () {
-                  if (noteText === "")
-                    return;
-                  ClipboardService.addNote(noteText);
-                  launcher.setSearchText(">clip ");
-                  gotResults = false;
-                  launcher.updateResults();
-                }
-              }];
+      return [
+            {
+              "name": noteText === "" ? I18n.tr("launcher.providers.clipboard-note-empty") : I18n.tr("launcher.providers.clipboard-note-create"),
+              "description": noteText === "" ? I18n.tr("launcher.providers.clipboard-note-command") : noteText,
+              "icon": "note",
+              "isTablerIcon": true,
+              "isImage": false,
+              "onActivate": function () {
+                if (noteText === "")
+                  return;
+                ClipboardService.addNote(noteText);
+                launcher.setSearchText(">clip ");
+                gotResults = false;
+                launcher.updateResults();
+              }
+            }
+          ];
     }
 
     // Check if clipboard service is not active
@@ -438,9 +440,7 @@ Item {
 
     actions.push({
                    "icon": "pin",
-                   "tooltip": ClipboardService.isPinned(item.clipboardId)
-                              ? I18n.tr("launcher.providers.clipboard-unpin")
-                              : I18n.tr("launcher.providers.clipboard-pin"),
+                   "tooltip": ClipboardService.isPinned(item.clipboardId) ? I18n.tr("launcher.providers.clipboard-unpin") : I18n.tr("launcher.providers.clipboard-pin"),
                    "action": function () {
                      togglePinItem(item);
                    }

@@ -119,9 +119,9 @@ Rectangle {
   }
 
   Keys.onEscapePressed: event => {
-    root._resolve("cancel");
-    event.accepted = true;
-  }
+                          root._resolve("cancel");
+                          event.accepted = true;
+                        }
 
   Timer {
     id: releaseTimer

@@ -1,11 +1,11 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../ScreenToolkit/overlays"
 import qs.Commons
 import qs.Services.Compositor
 import qs.Services.System
 import qs.Services.UI
-import "../ScreenToolkit/overlays"
 
 // Ponto de entrada do seletor de compartilhamento de tela.
 //
@@ -81,10 +81,10 @@ Item {
 
     // RegionSelector usa `pluginApi?.tr(...)`; um shim mantém os textos traduzidos.
     pluginApi: ({
-                 "tr": function (key) {
-                   return I18n.tr("screen-share.region-selector." + key.replace("regionSelector.", ""));
-                 }
-               })
+                  "tr": function (key) {
+                    return I18n.tr("screen-share.region-selector." + key.replace("regionSelector.", ""));
+                  }
+                })
 
     onRegionSelected: function (x, y, w, h, selectedScreen) {
       // O seletor devolve pixels físicos locais à tela; o xdph espera lógicos locais.

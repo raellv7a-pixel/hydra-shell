@@ -77,31 +77,31 @@ Singleton {
 
   function sortItems(entries) {
     return entries.sort((a, b) => {
-      const pinDelta = Number(root.isPinned(b.id)) - Number(root.isPinned(a.id));
-      if (pinDelta !== 0)
-        return pinDelta;
-      if (a.isNote !== b.isNote)
-        return a.isNote ? -1 : 1;
-      return 0;
-    });
+                          const pinDelta = Number(root.isPinned(b.id)) - Number(root.isPinned(a.id));
+                          if (pinDelta !== 0)
+                          return pinDelta;
+                          if (a.isNote !== b.isNote)
+                          return a.isNote ? -1 : 1;
+                          return 0;
+                        });
   }
 
   function mergePersistentItems(historyItems) {
     const notes = Settings.data.appLauncher.clipboardNotes || [];
     const noteItems = notes.map(note => {
-      const id = String(note.id);
-      const createdAt = Number(note.createdAt || 0);
-      if (createdAt > 0)
-        root.firstSeenById[id] = createdAt;
-      return {
-        "id": id,
-        "preview": String(note.text || ""),
-        "isImage": false,
-        "isNote": true,
-        "mime": "text/plain",
-        "contentType": "note"
-      };
-    });
+                                  const id = String(note.id);
+                                  const createdAt = Number(note.createdAt || 0);
+                                  if (createdAt > 0)
+                                  root.firstSeenById[id] = createdAt;
+                                  return {
+                                    "id": id,
+                                    "preview": String(note.text || ""),
+                                    "isImage": false,
+                                    "isNote": true,
+                                    "mime": "text/plain",
+                                    "contentType": "note"
+                                  };
+                                });
     return root.sortItems(noteItems.concat(historyItems));
   }
 
@@ -618,8 +618,7 @@ Singleton {
       return;
 
     const historyItems = (root.items || []).filter(item => !item.isNote);
-    const unpinnedIds = historyItems.map(item => String(item.id))
-                                    .filter(id => /^\d+$/.test(id) && !root.isPinned(id));
+    const unpinnedIds = historyItems.map(item => String(item.id)).filter(id => /^\d+$/.test(id) && !root.isPinned(id));
     const pinnedIds = Array.from(Settings.data.appLauncher.pinnedClipboardIds || []);
 
     // Keep pinned cliphist entries and all author-created notes.

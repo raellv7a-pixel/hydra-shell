@@ -313,11 +313,11 @@ NBox {
         }
 
         Keys.onPressed: event => {
-          if (Keybinds.checkKey(event, 'down', Settings)) {
-            root.focusGridRequested();
-            event.accepted = true;
-          }
-        }
+                          if (Keybinds.checkKey(event, 'down', Settings)) {
+                            root.focusGridRequested();
+                            event.accepted = true;
+                          }
+                        }
 
         Connections {
           target: Settings.data.wallpaper
@@ -361,13 +361,13 @@ NBox {
         minimumWidth: 200 * Style.uiScaleRatio
 
         Component.onCompleted: Qt.callLater(() => {
-          _initialized = true;
-        })
+                                              _initialized = true;
+                                            })
 
         model: Settings.data.colorSchemes.useWallpaperColors ? TemplateProcessor.schemeTypes : ColorSchemeService.schemes.map(s => ({
-          "key": ColorSchemeService.getBasename(s),
-          "name": ColorSchemeService.getBasename(s)
-        }))
+                                                                                                                                      "key": ColorSchemeService.getBasename(s),
+                                                                                                                                      "name": ColorSchemeService.getBasename(s)
+                                                                                                                                    }))
         currentKey: Settings.data.colorSchemes.useWallpaperColors ? Settings.data.colorSchemes.generationMethod : Settings.data.colorSchemes.predefinedScheme
 
         onCurrentKeyChanged: {
@@ -382,17 +382,17 @@ NBox {
         }
 
         onSelected: key => {
-          _userChanging = true;
-          if (Settings.data.colorSchemes.useWallpaperColors) {
-            Settings.data.colorSchemes.generationMethod = key;
-            AppThemeService.generate();
-          } else {
-            ColorSchemeService.setPredefinedScheme(key);
-          }
-          Qt.callLater(() => {
-            _userChanging = false;
-          });
-        }
+                      _userChanging = true;
+                      if (Settings.data.colorSchemes.useWallpaperColors) {
+                        Settings.data.colorSchemes.generationMethod = key;
+                        AppThemeService.generate();
+                      } else {
+                        ColorSchemeService.setPredefinedScheme(key);
+                      }
+                      Qt.callLater(() => {
+                                     _userChanging = false;
+                                   });
+                    }
 
         SequentialAnimation {
           id: schemeGlowAnimation
@@ -437,9 +437,9 @@ NBox {
         ]
         currentKey: Settings.data.wallpaper.wallpaperSource || "local"
         onSelected: key => {
-          Settings.data.wallpaper.wallpaperSource = key;
-          Settings.data.wallpaper.useWallhaven = (key === "wallhaven");
-        }
+                      Settings.data.wallpaper.wallpaperSource = key;
+                      Settings.data.wallpaper.useWallhaven = (key === "wallhaven");
+                    }
       }
 
       NIconButton {

@@ -286,13 +286,7 @@ Item {
   }
 
   function customProfileBorderColors() {
-    const source = [
-      root.profileCoverBorderColor1,
-      root.profileCoverBorderColor2,
-      root.profileCoverBorderColor3,
-      root.profileCoverBorderColor4,
-      root.profileCoverBorderColor5
-    ];
+    const source = [root.profileCoverBorderColor1, root.profileCoverBorderColor2, root.profileCoverBorderColor3, root.profileCoverBorderColor4, root.profileCoverBorderColor5];
     const count = root.clamp(root.profileCoverBorderColorCount, 3, 5);
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -347,19 +341,7 @@ Item {
       }
     }
 
-    const borderFields = [
-      "borderWidth",
-      "borderScope",
-      "borderColorMode",
-      "borderColorCount",
-      "borderColor1",
-      "borderColor2",
-      "borderColor3",
-      "borderColor4",
-      "borderColor5",
-      "borderAnimation",
-      "borderSpeed"
-    ];
+    const borderFields = ["borderWidth", "borderScope", "borderColorMode", "borderColorCount", "borderColor1", "borderColor2", "borderColor3", "borderColor4", "borderColor5", "borderAnimation", "borderSpeed"];
     if (source.borderEnabled === true) {
       target.borderEnabled = true;
       for (let i = 0; i < borderFields.length; i++) {
@@ -471,13 +453,7 @@ Item {
     if (String(style.borderColorMode || "auto") !== "custom")
       return [Color.mPrimary, Color.mSecondary, Color.mTertiary, Color.mError];
 
-    const source = [
-      style.borderColor1,
-      style.borderColor2,
-      style.borderColor3,
-      style.borderColor4,
-      style.borderColor5
-    ];
+    const source = [style.borderColor1, style.borderColor2, style.borderColor3, style.borderColor4, style.borderColor5];
     const count = root.clamp(Number(style.borderColorCount || 3), 3, 5);
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -706,9 +682,11 @@ Item {
     try {
       var dir = root.screenUsageDirPath;
       var file = root.screenUsageFilePath;
-      var dataStr = JSON.stringify({ "days": root.screenUsageDays }, null, 2);
+      var dataStr = JSON.stringify({
+                                     "days": root.screenUsageDays
+                                   }, null, 2);
       Quickshell.execDetached(["bash", "-c", "mkdir -p " + dir + " && cat << 'EOF' > " + file + "\n" + dataStr + "\nEOF"]);
-    } catch(e) {
+    } catch (e) {
       Logger.e("ControlCenterPanel", "Failed to save screen usage:", e);
     }
   }
@@ -865,17 +843,17 @@ Item {
     const useful = all.filter(path => {
                                 const size = Number(SystemStatService.diskSizeGb[path] || 0);
                                 if (size > 0 && size < 2)
-                                  return false;
+                                return false;
                                 if (path === "/" || path === "/home")
-                                  return true;
+                                return true;
                                 if (path.startsWith("/run/media/") || path.startsWith("/media/") || path.startsWith("/mnt/"))
-                                  return true;
+                                return true;
                                 if (path === "/boot" || path.startsWith("/boot/") || path === "/efi" || path.startsWith("/efi/"))
-                                  return false;
+                                return false;
                                 if (path === "/tmp" || path.startsWith("/tmp/") || path === "/var/tmp" || path.startsWith("/var/tmp/"))
-                                  return false;
+                                return false;
                                 if (path.startsWith("/run") || path.startsWith("/dev") || path.startsWith("/proc") || path.startsWith("/sys"))
-                                  return false;
+                                return false;
 
                                 const parts = path.split("/").filter(part => part.length > 0);
                                 const reservedTopLevel = ["bin", "etc", "nix", "opt", "root", "srv", "usr", "var"];
@@ -885,13 +863,13 @@ Item {
     const preferred = Settings.data.controlCenter.diskPath || "/";
     paths.sort((a, b) => {
                  if (a === preferred)
-                   return -1;
+                 return -1;
                  if (b === preferred)
-                   return 1;
+                 return 1;
                  if (a === "/")
-                   return -1;
+                 return -1;
                  if (b === "/")
-                   return 1;
+                 return 1;
                  return a.localeCompare(b);
                });
     return paths;
@@ -1032,12 +1010,12 @@ Item {
     const rows = (root.processUsageRows || []).filter(row => Number(row[metric] || 0) > 0.01).slice();
     rows.sort((left, right) => Number(right[metric] || 0) - Number(left[metric] || 0));
     return rows.slice(0, 4).map(row => {
-      const rankedRow = Object.assign({}, row);
-      const metadata = root.processAppMetadata(rankedRow.processName);
-      rankedRow.displayName = metadata.displayName;
-      rankedRow.icon = metadata.icon;
-      return rankedRow;
-    });
+                                  const rankedRow = Object.assign({}, row);
+                                  const metadata = root.processAppMetadata(rankedRow.processName);
+                                  rankedRow.displayName = metadata.displayName;
+                                  rankedRow.icon = metadata.icon;
+                                  return rankedRow;
+                                });
   }
 
   function processUsageValue(row, metric) {
@@ -1259,7 +1237,9 @@ Item {
 
   function refreshEasyEffects() {
     if (!easyEffectsStateProcess.running)
-      easyEffectsStateProcess.exec({ command: root.easyEffectsRunningCheckCommand });
+      easyEffectsStateProcess.exec({
+                                     command: root.easyEffectsRunningCheckCommand
+                                   });
   }
 
   function applyEasyEffectsPreset(preset) {
@@ -1369,7 +1349,9 @@ Item {
     triggeredOnStart: true
     onTriggered: {
       if (!recordStatusProcess.running)
-        recordStatusProcess.exec({ command: ["bash", root.captureScriptPath, "status"] });
+        recordStatusProcess.exec({
+                                   command: ["bash", root.captureScriptPath, "status"]
+                                 });
     }
   }
 
@@ -1377,27 +1359,27 @@ Item {
     id: recordStatusProcess
     stdout: StdioCollector {}
     onExited: code => {
-      if (code !== 0)
-        return;
+                if (code !== 0)
+                return;
 
-      const text = String(stdout.text || "").trim();
-      const parts = text.split("|");
-      const state = parts[0] || "";
-      const outputPath = parts[1] || "";
-      const format = parts[2] || "";
-      const changed = state !== root.lastRecordStatus || outputPath !== root.lastRecordOutputPath;
+                const text = String(stdout.text || "").trim();
+                const parts = text.split("|");
+                const state = parts[0] || "";
+                const outputPath = parts[1] || "";
+                const format = parts[2] || "";
+                const changed = state !== root.lastRecordStatus || outputPath !== root.lastRecordOutputPath;
 
-      if (changed && state === "done") {
-        root.showCaptureNotice(root.tr("captureSaved"), outputPath, format === "mp4" ? "video" : "movie");
-      } else if (changed && state === "failed") {
-        root.showCaptureError(root.tr("captureFailed"));
-      }
+                if (changed && state === "done") {
+                  root.showCaptureNotice(root.tr("captureSaved"), outputPath, format === "mp4" ? "video" : "movie");
+                } else if (changed && state === "failed") {
+                  root.showCaptureError(root.tr("captureFailed"));
+                }
 
-      root.toolkitRecordState = (state === "recording" || state === "converting") ? state : "";
-      root.lastRecordStatus = state;
-      root.lastRecordOutputPath = outputPath;
-      root.lastRecordFormat = format;
-    }
+                root.toolkitRecordState = (state === "recording" || state === "converting") ? state : "";
+                root.lastRecordStatus = state;
+                root.lastRecordOutputPath = outputPath;
+                root.lastRecordFormat = format;
+              }
   }
 
   Timer {
@@ -1465,29 +1447,25 @@ Item {
 
   Process {
     id: processUsageProcess
-    command: [
-      "bash",
-      Quickshell.shellDir + "/Modules/Panels/ControlCenter/scripts/process-usage.sh",
-      SystemStatService.gpuType === "nvidia" && Settings.data.systemMonitor.enableDgpuMonitoring ? "nvidia" : "none"
-    ]
+    command: ["bash", Quickshell.shellDir + "/Modules/Panels/ControlCenter/scripts/process-usage.sh", SystemStatService.gpuType === "nvidia" && Settings.data.systemMonitor.enableDgpuMonitoring ? "nvidia" : "none"]
     running: false
     stdout: StdioCollector {}
     onExited: code => {
-      if (code === 0)
-        root.parseProcessUsage(stdout.text);
-    }
+                if (code === 0)
+                root.parseProcessUsage(stdout.text);
+              }
   }
 
   Process {
     id: randomCoverProcess
     stdout: StdioCollector {}
     onExited: code => {
-      if (code !== 0) {
-        root.randomProfileCoverPath = "";
-        return;
-      }
-      root.randomProfileCoverPath = String(stdout.text || "").trim();
-    }
+                if (code !== 0) {
+                  root.randomProfileCoverPath = "";
+                  return;
+                }
+                root.randomProfileCoverPath = String(stdout.text || "").trim();
+              }
   }
 
   Timer {
@@ -1500,20 +1478,24 @@ Item {
   Process {
     id: easyEffectsStateProcess
     onExited: code => {
-      root.easyEffectsAvailable = code === 0;
-      if (code !== 0) {
-        root.easyEffectsPresets = [];
-        root.activeEasyEffectsPreset = "";
-        root.easyEffectsStatus = root.tr("easyEffectsInactive");
-        return;
-      }
+                root.easyEffectsAvailable = code === 0;
+                if (code !== 0) {
+                  root.easyEffectsPresets = [];
+                  root.activeEasyEffectsPreset = "";
+                  root.easyEffectsStatus = root.tr("easyEffectsInactive");
+                  return;
+                }
 
-      root.easyEffectsStatus = "";
-      if (!easyEffectsPresetsProcess.running)
-        easyEffectsPresetsProcess.exec({ command: ["easyeffects", "--presets"] });
-      if (!easyEffectsActiveProcess.running)
-        easyEffectsActiveProcess.exec({ command: ["easyeffects", "--last-loaded-preset", "output"] });
-    }
+                root.easyEffectsStatus = "";
+                if (!easyEffectsPresetsProcess.running)
+                easyEffectsPresetsProcess.exec({
+                                                 command: ["easyeffects", "--presets"]
+                                               });
+                if (!easyEffectsActiveProcess.running)
+                easyEffectsActiveProcess.exec({
+                                                command: ["easyeffects", "--last-loaded-preset", "output"]
+                                              });
+              }
   }
 
   Process {
@@ -1521,15 +1503,15 @@ Item {
     stdout: StdioCollector {}
     stderr: StdioCollector {}
     onExited: code => {
-      root.easyEffectsAvailable = code === 0;
-      if (code !== 0) {
-        root.easyEffectsStatus = root.tr("easyEffectsUnavailable");
-        return;
-      }
+                root.easyEffectsAvailable = code === 0;
+                if (code !== 0) {
+                  root.easyEffectsStatus = root.tr("easyEffectsUnavailable");
+                  return;
+                }
 
-      root.easyEffectsPresets = root.parseEasyEffectsPresets(stdout.text);
-      root.easyEffectsStatus = root.easyEffectsPresets.length > 0 ? "" : root.tr("easyEffectsNoPresets");
-    }
+                root.easyEffectsPresets = root.parseEasyEffectsPresets(stdout.text);
+                root.easyEffectsStatus = root.easyEffectsPresets.length > 0 ? "" : root.tr("easyEffectsNoPresets");
+              }
   }
 
   Process {
@@ -1537,10 +1519,10 @@ Item {
     stdout: StdioCollector {}
     stderr: StdioCollector {}
     onExited: code => {
-      if (code !== 0)
-        return;
-      root.activeEasyEffectsPreset = root.parseEasyEffectsActivePreset(stdout.text);
-    }
+                if (code !== 0)
+                return;
+                root.activeEasyEffectsPreset = root.parseEasyEffectsActivePreset(stdout.text);
+              }
   }
 
   Process {
@@ -1548,9 +1530,9 @@ Item {
     running: false
     command: ["bash", "-c", "mkdir -p '" + root.screenUsageDirPath + "' && if [ ! -f '" + root.screenUsageFilePath + "' ]; then printf '{\"days\":{}}' > '" + root.screenUsageFilePath + "'; fi"]
     onExited: code => {
-      if (code === 0)
-        screenUsageFileView.reload();
-    }
+                if (code === 0)
+                screenUsageFileView.reload();
+              }
   }
 
   FileView {
@@ -1563,12 +1545,12 @@ Item {
         if (parsed && parsed.days) {
           root.screenUsageDays = parsed.days;
         }
-      } catch(e) {}
+      } catch (e) {}
     }
     onLoadFailed: error => {
-      if (!screenUsageInitProcess.running)
-        screenUsageInitProcess.running = true;
-    }
+                    if (!screenUsageInitProcess.running)
+                    screenUsageInitProcess.running = true;
+                  }
   }
 
   Timer {
@@ -1647,7 +1629,10 @@ Item {
             Layout.preferredHeight: Math.round((root.toolkitRecording ? 194 : 164) * root.panelUnit)
 
             Behavior on Layout.preferredHeight {
-              NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+              NumberAnimation {
+                duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+                easing.type: Easing.OutCubic
+              }
             }
           }
         }
@@ -1674,7 +1659,9 @@ Item {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: Component { PerformanceDetailsCard {} }
+            sourceComponent: Component {
+              PerformanceDetailsCard {}
+            }
           }
 
           Loader {
@@ -1682,7 +1669,9 @@ Item {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: Component { AudioDetailsCard {} }
+            sourceComponent: Component {
+              AudioDetailsCard {}
+            }
           }
         }
 
@@ -1714,7 +1703,9 @@ Item {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: Component { MediaDetailsCard {} }
+            sourceComponent: Component {
+              MediaDetailsCard {}
+            }
           }
 
           Loader {
@@ -1722,7 +1713,9 @@ Item {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: Component { NotificationsDetailsCard {} }
+            sourceComponent: Component {
+              NotificationsDetailsCard {}
+            }
           }
 
           Loader {
@@ -1730,7 +1723,9 @@ Item {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: Component { WeatherDetailsCard {} }
+            sourceComponent: Component {
+              WeatherDetailsCard {}
+            }
           }
 
           Loader {
@@ -1738,7 +1733,9 @@ Item {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: Component { CalendarDetailsCard {} }
+            sourceComponent: Component {
+              CalendarDetailsCard {}
+            }
           }
 
           Loader {
@@ -1746,7 +1743,9 @@ Item {
             visible: active
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: Component { ScreenUsageDetailsCard {} }
+            sourceComponent: Component {
+              ScreenUsageDetailsCard {}
+            }
           }
         }
       }
@@ -1759,10 +1758,10 @@ Item {
     initialPath: Quickshell.env("HOME") || "/home"
     nameFilters: ["*.gif", "*.png", "*.jpg", "*.jpeg", "*.webp"]
     onAccepted: paths => {
-      if (paths && paths.length > 0) {
-        root.updateAvatar(paths[0]);
-      }
-    }
+                  if (paths && paths.length > 0) {
+                    root.updateAvatar(paths[0]);
+                  }
+                }
   }
 
   component DashboardCard: NBox {
@@ -1890,35 +1889,67 @@ Item {
       let d = ((t % 1) + 1) % 1 * perimeter;
 
       if (d < top)
-        return { x: x + r + d, y: y, angle: 0 };
+        return {
+          x: x + r + d,
+          y: y,
+          angle: 0
+        };
       d -= top;
       if (d < arc) {
         const a = -Math.PI / 2 + d / arc * Math.PI / 2;
-        return { x: x + w - r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+        return {
+          x: x + w - r + Math.cos(a) * r,
+          y: y + r + Math.sin(a) * r,
+          angle: a + Math.PI / 2
+        };
       }
       d -= arc;
       if (d < side)
-        return { x: x + w, y: y + r + d, angle: Math.PI / 2 };
+        return {
+          x: x + w,
+          y: y + r + d,
+          angle: Math.PI / 2
+        };
       d -= side;
       if (d < arc) {
         const a = d / arc * Math.PI / 2;
-        return { x: x + w - r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+        return {
+          x: x + w - r + Math.cos(a) * r,
+          y: y + h - r + Math.sin(a) * r,
+          angle: a + Math.PI / 2
+        };
       }
       d -= arc;
       if (d < top)
-        return { x: x + w - r - d, y: y + h, angle: Math.PI };
+        return {
+          x: x + w - r - d,
+          y: y + h,
+          angle: Math.PI
+        };
       d -= top;
       if (d < arc) {
         const a = Math.PI / 2 + d / arc * Math.PI / 2;
-        return { x: x + r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+        return {
+          x: x + r + Math.cos(a) * r,
+          y: y + h - r + Math.sin(a) * r,
+          angle: a + Math.PI / 2
+        };
       }
       d -= arc;
       if (d < side)
-        return { x: x, y: y + h - r - d, angle: -Math.PI / 2 };
+        return {
+          x: x,
+          y: y + h - r - d,
+          angle: -Math.PI / 2
+        };
 
       d -= side;
       const a = Math.PI + d / arc * Math.PI / 2;
-      return { x: x + r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+      return {
+        x: x + r + Math.cos(a) * r,
+        y: y + r + Math.sin(a) * r,
+        angle: a + Math.PI / 2
+      };
     }
 
     function drawSpark(ctx, t, size, color, alpha, inset, radius) {
@@ -2083,7 +2114,10 @@ Item {
       border.color: root.componentAccent(submoduleButton.styleKey)
 
       Behavior on color {
-        ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+        ColorAnimation {
+          duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+          easing.type: Easing.OutCubic
+        }
       }
 
       RowLayout {
@@ -2268,35 +2302,67 @@ Item {
         let d = ((t % 1) + 1) % 1 * perimeter;
 
         if (d < top)
-          return { x: x + r + d, y: y, angle: 0 };
+          return {
+            x: x + r + d,
+            y: y,
+            angle: 0
+          };
         d -= top;
         if (d < arc) {
           const a = -Math.PI / 2 + d / arc * Math.PI / 2;
-          return { x: x + w - r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + w - r + Math.cos(a) * r,
+            y: y + r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < side)
-          return { x: x + w, y: y + r + d, angle: Math.PI / 2 };
+          return {
+            x: x + w,
+            y: y + r + d,
+            angle: Math.PI / 2
+          };
         d -= side;
         if (d < arc) {
           const a = d / arc * Math.PI / 2;
-          return { x: x + w - r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + w - r + Math.cos(a) * r,
+            y: y + h - r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < top)
-          return { x: x + w - r - d, y: y + h, angle: Math.PI };
+          return {
+            x: x + w - r - d,
+            y: y + h,
+            angle: Math.PI
+          };
         d -= top;
         if (d < arc) {
           const a = Math.PI / 2 + d / arc * Math.PI / 2;
-          return { x: x + r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + r + Math.cos(a) * r,
+            y: y + h - r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < side)
-          return { x: x, y: y + h - r - d, angle: -Math.PI / 2 };
+          return {
+            x: x,
+            y: y + h - r - d,
+            angle: -Math.PI / 2
+          };
 
         d -= side;
         const a = Math.PI + d / arc * Math.PI / 2;
-        return { x: x + r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+        return {
+          x: x + r + Math.cos(a) * r,
+          y: y + r + Math.sin(a) * r,
+          angle: a + Math.PI / 2
+        };
       }
 
       function drawSpark(ctx, t, size, color, alpha, inset, radius) {
@@ -2457,8 +2523,16 @@ Item {
       SequentialAnimation on scale {
         running: !root.dashboardPerformanceMode && (root.profileCoverBorderAnimation === "pulse" || root.profileCoverBorderAnimation === "reactivePulse" || root.profileCoverBorderAnimation === "profileHeartbeat")
         loops: Animation.Infinite
-        NumberAnimation { to: root.profileCoverBorderAnimation === "profileHeartbeat" ? 1.018 : 1.012; duration: root.profileCoverBorderAnimation === "profileHeartbeat" ? 340 : 760; easing.type: Easing.OutCubic }
-        NumberAnimation { to: 1.0; duration: root.profileCoverBorderAnimation === "profileHeartbeat" ? 620 : 820; easing.type: Easing.InOutSine }
+        NumberAnimation {
+          to: root.profileCoverBorderAnimation === "profileHeartbeat" ? 1.018 : 1.012
+          duration: root.profileCoverBorderAnimation === "profileHeartbeat" ? 340 : 760
+          easing.type: Easing.OutCubic
+        }
+        NumberAnimation {
+          to: 1.0
+          duration: root.profileCoverBorderAnimation === "profileHeartbeat" ? 620 : 820
+          easing.type: Easing.InOutSine
+        }
       }
     }
 
@@ -2500,12 +2574,23 @@ Item {
             SequentialAnimation on scale {
               running: avatarStage.glowEffect
               loops: Animation.Infinite
-              NumberAnimation { to: 1.08; duration: 900; easing.type: Easing.InOutSine }
-              NumberAnimation { to: 0.96; duration: 820; easing.type: Easing.InOutSine }
+              NumberAnimation {
+                to: 1.08
+                duration: 900
+                easing.type: Easing.InOutSine
+              }
+              NumberAnimation {
+                to: 0.96
+                duration: 820
+                easing.type: Easing.InOutSine
+              }
             }
 
             Behavior on opacity {
-              NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+              NumberAnimation {
+                duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+                easing.type: Easing.OutCubic
+              }
             }
           }
 
@@ -2522,8 +2607,16 @@ Item {
             SequentialAnimation on scale {
               running: avatarStage.ringEffect
               loops: Animation.Infinite
-              NumberAnimation { to: 1.08; duration: 420; easing.type: Easing.OutCubic }
-              NumberAnimation { to: 1.0; duration: 520; easing.type: Easing.InOutSine }
+              NumberAnimation {
+                to: 1.08
+                duration: 420
+                easing.type: Easing.OutCubic
+              }
+              NumberAnimation {
+                to: 1.0
+                duration: 520
+                easing.type: Easing.InOutSine
+              }
             }
           }
 
@@ -2540,8 +2633,16 @@ Item {
             SequentialAnimation on scale {
               running: avatarStage.ringEffect
               loops: Animation.Infinite
-              NumberAnimation { to: 1.12; duration: 640; easing.type: Easing.OutCubic }
-              NumberAnimation { to: 0.98; duration: 500; easing.type: Easing.InOutSine }
+              NumberAnimation {
+                to: 1.12
+                duration: 640
+                easing.type: Easing.OutCubic
+              }
+              NumberAnimation {
+                to: 0.98
+                duration: 500
+                easing.type: Easing.InOutSine
+              }
             }
           }
 
@@ -2595,16 +2696,52 @@ Item {
               running: avatarStage.morphEffect
               loops: Animation.Infinite
               ParallelAnimation {
-                NumberAnimation { target: avatarWarpScale; property: "xScale"; to: 1.05; duration: 260; easing.type: Easing.InOutSine }
-                NumberAnimation { target: avatarWarpScale; property: "yScale"; to: 0.96; duration: 260; easing.type: Easing.InOutSine }
+                NumberAnimation {
+                  target: avatarWarpScale
+                  property: "xScale"
+                  to: 1.05
+                  duration: 260
+                  easing.type: Easing.InOutSine
+                }
+                NumberAnimation {
+                  target: avatarWarpScale
+                  property: "yScale"
+                  to: 0.96
+                  duration: 260
+                  easing.type: Easing.InOutSine
+                }
               }
               ParallelAnimation {
-                NumberAnimation { target: avatarWarpScale; property: "xScale"; to: 0.98; duration: 300; easing.type: Easing.InOutSine }
-                NumberAnimation { target: avatarWarpScale; property: "yScale"; to: 1.04; duration: 300; easing.type: Easing.InOutSine }
+                NumberAnimation {
+                  target: avatarWarpScale
+                  property: "xScale"
+                  to: 0.98
+                  duration: 300
+                  easing.type: Easing.InOutSine
+                }
+                NumberAnimation {
+                  target: avatarWarpScale
+                  property: "yScale"
+                  to: 1.04
+                  duration: 300
+                  easing.type: Easing.InOutSine
+                }
               }
               ParallelAnimation {
-                NumberAnimation { target: avatarWarpScale; property: "xScale"; to: 1.0; duration: 260; easing.type: Easing.InOutSine }
-                NumberAnimation { target: avatarWarpScale; property: "yScale"; to: 1.0; duration: 260; easing.type: Easing.InOutSine }
+                NumberAnimation {
+                  target: avatarWarpScale
+                  property: "xScale"
+                  to: 1.0
+                  duration: 260
+                  easing.type: Easing.InOutSine
+                }
+                NumberAnimation {
+                  target: avatarWarpScale
+                  property: "yScale"
+                  to: 1.0
+                  duration: 260
+                  easing.type: Easing.InOutSine
+                }
               }
             }
 
@@ -2916,7 +3053,6 @@ Item {
     }
   }
 
-
   component ActionTile: DashboardCard {
     id: actionTile
 
@@ -2947,11 +3083,17 @@ Item {
     Accessible.description: detailText
 
     Behavior on color {
-      ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+      ColorAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+        easing.type: Easing.OutCubic
+      }
     }
 
     Behavior on border.color {
-      ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+      ColorAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+        easing.type: Easing.OutCubic
+      }
     }
 
     Behavior on scale {
@@ -3039,14 +3181,14 @@ Item {
 
     TapHandler {
       id: actionTap
-      onTapped: (eventPoint) => {
-        if (secBtn.visible) {
-          const pt = secBtn.mapFromItem(actionTile, eventPoint.position);
-          if (pt.x >= 0 && pt.x <= secBtn.width && pt.y >= 0 && pt.y <= secBtn.height)
-            return;
-        }
-        parent.triggered();
-      }
+      onTapped: eventPoint => {
+                  if (secBtn.visible) {
+                    const pt = secBtn.mapFromItem(actionTile, eventPoint.position);
+                    if (pt.x >= 0 && pt.x <= secBtn.width && pt.y >= 0 && pt.y <= secBtn.height)
+                    return;
+                  }
+                  parent.triggered();
+                }
     }
 
     Keys.onReturnPressed: actionTile.triggered()
@@ -3131,7 +3273,6 @@ Item {
           destructive: true
           onTriggered: root.stopDashboardRecording()
         }
-
       }
     }
   }
@@ -3160,7 +3301,10 @@ Item {
     Accessible.name: labelText
 
     Behavior on border.color {
-      ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+      ColorAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+        easing.type: Easing.OutCubic
+      }
     }
 
     Behavior on scale {
@@ -3314,7 +3458,6 @@ Item {
         }
       }
     }
-
   }
 
   component PerformanceDetailsCard: DashboardCard {
@@ -3537,7 +3680,9 @@ Item {
         }
 
         if (sourceIndex < 0)
-          processModel.insert(targetIndex, { "usage": rows[targetIndex] });
+          processModel.insert(targetIndex, {
+                                "usage": rows[targetIndex]
+                              });
         else if (sourceIndex !== targetIndex)
           processModel.move(sourceIndex, targetIndex, 1);
 
@@ -3552,8 +3697,12 @@ Item {
 
     Connections {
       target: root
-      function onProcessUsageRowsChanged() { processUsageCard.refreshModel(); }
-      function onProcessUsageMetricChanged() { processUsageCard.refreshModel(); }
+      function onProcessUsageRowsChanged() {
+        processUsageCard.refreshModel();
+      }
+      function onProcessUsageMetricChanged() {
+        processUsageCard.refreshModel();
+      }
     }
 
     ListModel {
@@ -3655,11 +3804,17 @@ Item {
           readonly property real metricRatio: root.clamp(metricValue / processUsageCard.highestValue, 0, 1)
 
           Behavior on color {
-            ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+            ColorAnimation {
+              duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+              easing.type: Easing.OutCubic
+            }
           }
 
           Behavior on scale {
-            ScaleAnimator { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+            ScaleAnimator {
+              duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+              easing.type: Easing.OutCubic
+            }
           }
 
           HoverHandler {
@@ -3754,7 +3909,9 @@ Item {
         Layout.fillHeight: true
         spacing: Style.marginS
 
-        Item { Layout.fillWidth: true }
+        Item {
+          Layout.fillWidth: true
+        }
 
         NIcon {
           icon: root.processUsageMetric === "gpu" ? "device-desktop-off" : "hourglass-empty"
@@ -3768,7 +3925,9 @@ Item {
           pointSize: Style.fontSizeS
         }
 
-        Item { Layout.fillWidth: true }
+        Item {
+          Layout.fillWidth: true
+        }
       }
     }
   }
@@ -3817,7 +3976,10 @@ Item {
         color: index === pageDots.currentIndex ? Color.mPrimary : Qt.alpha(Color.mOnSurfaceVariant, 0.36)
 
         Behavior on width {
-          NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+          NumberAnimation {
+            duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+            easing.type: Easing.OutCubic
+          }
         }
 
         MouseArea {
@@ -3960,14 +4122,26 @@ Item {
             opacity: 0.12
             gradient: Gradient {
               orientation: Gradient.Horizontal
-              GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0) }
-              GradientStop { position: 0.55; color: Qt.rgba(1, 1, 1, 0.16) }
-              GradientStop { position: 1.0; color: Qt.rgba(1, 1, 1, 0) }
+              GradientStop {
+                position: 0.0
+                color: Qt.rgba(1, 1, 1, 0)
+              }
+              GradientStop {
+                position: 0.55
+                color: Qt.rgba(1, 1, 1, 0.16)
+              }
+              GradientStop {
+                position: 1.0
+                color: Qt.rgba(1, 1, 1, 0)
+              }
             }
           }
 
           Behavior on width {
-            NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+            NumberAnimation {
+              duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+              easing.type: Easing.OutCubic
+            }
           }
         }
 
@@ -3982,7 +4156,10 @@ Item {
           opacity: 0.78
 
           Behavior on x {
-            NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+            NumberAnimation {
+              duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+              easing.type: Easing.OutCubic
+            }
           }
         }
       }
@@ -4023,9 +4200,9 @@ Item {
       acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
       onWheel: event => {
                  if (event.angleDelta.y > 0)
-                   diskPager.previous();
+                 diskPager.previous();
                  else if (event.angleDelta.y < 0)
-                   diskPager.next();
+                 diskPager.next();
                  event.accepted = diskPager.pageCount > 1;
                }
     }
@@ -4088,7 +4265,10 @@ Item {
           color: SystemStatService.getDiskColor(diskPager.currentPath)
 
           Behavior on width {
-            NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+            NumberAnimation {
+              duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+              easing.type: Easing.OutCubic
+            }
           }
         }
       }
@@ -4435,10 +4615,10 @@ Item {
           currentDeviceKey: root.nodeKey(AudioService.sink)
           onToggleMuted: AudioService.setOutputMuted(!AudioService.muted)
           onDeviceSelected: key => {
-            const node = root.audioNodeByKey(AudioService.sinks, key);
-            if (node)
-              AudioService.setAudioSink(node);
-          }
+                              const node = root.audioNodeByKey(AudioService.sinks, key);
+                              if (node)
+                              AudioService.setAudioSink(node);
+                            }
         }
 
         AudioDeviceTile {
@@ -4451,10 +4631,10 @@ Item {
           currentDeviceKey: root.nodeKey(AudioService.source)
           onToggleMuted: AudioService.setInputMuted(!AudioService.inputMuted)
           onDeviceSelected: key => {
-            const node = root.audioNodeByKey(AudioService.sources, key);
-            if (node)
-              AudioService.setAudioSource(node);
-          }
+                              const node = root.audioNodeByKey(AudioService.sources, key);
+                              if (node)
+                              AudioService.setAudioSource(node);
+                            }
         }
       }
 
@@ -4715,11 +4895,11 @@ Item {
               highlightMoveDuration: Style.animationNormal
               highlightMoveVelocity: -1
 
-              onModelChanged: Qt.callLater(function() {
+              onModelChanged: Qt.callLater(function () {
                 if (lyricsList.currentIndex >= 0)
-                  lyricsList.positionViewAtIndex(lyricsList.currentIndex, ListView.Center)
+                  lyricsList.positionViewAtIndex(lyricsList.currentIndex, ListView.Center);
                 else
-                  lyricsList.positionViewAtBeginning()
+                  lyricsList.positionViewAtBeginning();
               })
 
               header: Item {
@@ -4748,11 +4928,15 @@ Item {
                 transformOrigin: Item.Center
 
                 Behavior on color {
-                  ColorAnimation { duration: Style.animationFast }
+                  ColorAnimation {
+                    duration: Style.animationFast
+                  }
                 }
 
                 Behavior on opacity {
-                  NumberAnimation { duration: Style.animationFast }
+                  NumberAnimation {
+                    duration: Style.animationFast
+                  }
                 }
 
                 Behavior on scale {
@@ -4834,7 +5018,9 @@ Item {
                     anchors.margins: Style.marginL
                     spacing: Style.marginM
 
-                    Item { Layout.fillHeight: true }
+                    Item {
+                      Layout.fillHeight: true
+                    }
 
                     NImageRounded {
                       Layout.alignment: Qt.AlignHCenter
@@ -4850,13 +5036,23 @@ Item {
                       SequentialAnimation on scale {
                         id: page2CoverBounce
                         running: false
-                        NumberAnimation { to: 1.04; duration: 150; easing.type: Easing.OutCubic }
-                        NumberAnimation { to: 1.0; duration: 300; easing.type: Easing.OutBounce }
+                        NumberAnimation {
+                          to: 1.04
+                          duration: 150
+                          easing.type: Easing.OutCubic
+                        }
+                        NumberAnimation {
+                          to: 1.0
+                          duration: 300
+                          easing.type: Easing.OutBounce
+                        }
                       }
 
                       Connections {
                         target: MediaService
-                        function onTrackTitleChanged() { page2CoverBounce.restart() }
+                        function onTrackTitleChanged() {
+                          page2CoverBounce.restart();
+                        }
                       }
                     }
 
@@ -4884,7 +5080,9 @@ Item {
                       }
                     }
 
-                    Item { Layout.fillHeight: true }
+                    Item {
+                      Layout.fillHeight: true
+                    }
 
                     ColumnLayout {
                       Layout.fillWidth: true
@@ -4909,7 +5107,9 @@ Item {
                           pointSize: Style.fontSizeXS
                           font.family: Settings.data.ui.fontFixed
                         }
-                        Item { Layout.fillWidth: true }
+                        Item {
+                          Layout.fillWidth: true
+                        }
                         NText {
                           text: MediaService.lengthString || "0:00"
                           color: Color.mOnSurfaceVariant
@@ -4949,7 +5149,9 @@ Item {
                       }
                     }
 
-                    Item { Layout.preferredHeight: Style.marginS }
+                    Item {
+                      Layout.preferredHeight: Style.marginS
+                    }
                   }
                 }
 
@@ -5009,10 +5211,17 @@ Item {
               radius: height / 2
               color: mediaSwipeView.currentIndex === index ? Color.mPrimary : Color.mSurfaceVariant
               Behavior on width {
-                NumberAnimation { duration: 300; easing.type: Easing.OutElastic; easing.amplitude: 2.0; easing.period: 1.5 }
+                NumberAnimation {
+                  duration: 300
+                  easing.type: Easing.OutElastic
+                  easing.amplitude: 2.0
+                  easing.period: 1.5
+                }
               }
               Behavior on color {
-                ColorAnimation { duration: 300 }
+                ColorAnimation {
+                  duration: 300
+                }
               }
             }
           }
@@ -5105,13 +5314,20 @@ Item {
                 opacity: root.musicActive ? 0.86 : 0.42
 
                 Behavior on height {
-                  NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                  NumberAnimation {
+                    duration: 90
+                    easing.type: Easing.OutCubic
+                  }
                 }
                 Behavior on color {
-                  ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal }
+                  ColorAnimation {
+                    duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+                  }
                 }
                 Behavior on opacity {
-                  NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast }
+                  NumberAnimation {
+                    duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+                  }
                 }
               }
 
@@ -5126,7 +5342,10 @@ Item {
                 opacity: 0.85
 
                 Behavior on y {
-                  NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                  NumberAnimation {
+                    duration: 90
+                    easing.type: Easing.OutCubic
+                  }
                 }
               }
             }
@@ -5146,17 +5365,17 @@ Item {
         backgroundColor: Qt.alpha(Color.mSurfaceVariant, 0.5)
         textColor: Color.mOnSurface
         onClicked: {
-          var items = []
+          var items = [];
           for (var i = 0; i < root.easyEffectsPresets.length; i++) {
             items.push({
-              "label": root.easyEffectsPresets[i],
-              "action": root.easyEffectsPresets[i],
-              "icon": root.activeEasyEffectsPreset === root.easyEffectsPresets[i] ? "circle-filled" : "circle",
-              "visible": true
-            })
+                         "label": root.easyEffectsPresets[i],
+                         "action": root.easyEffectsPresets[i],
+                         "icon": root.activeEasyEffectsPreset === root.easyEffectsPresets[i] ? "circle-filled" : "circle",
+                         "visible": true
+                       });
           }
-          presetMenu.model = items
-          presetMenu.openAtItem(presetButton, 0, presetButton.height)
+          presetMenu.model = items;
+          presetMenu.openAtItem(presetButton, 0, presetButton.height);
         }
 
         NContextMenu {
@@ -5415,7 +5634,6 @@ Item {
       // Decaying peak-hold state for the "spectrum" effect (classic VU-meter caps)
       property var spectrumPeaks: []
 
-
       onPaint: {
         const ctx = getContext("2d");
         ctx.clearRect(0, 0, width, height);
@@ -5555,8 +5773,7 @@ Item {
             const progress = (phase * 0.24 + i * 0.25) % 1;
             const radius = (3 + progress * (14 + level * 7)) * root.panelUnit;
             ctx.lineWidth = Math.max(1, (2.2 - progress * 1.2) * root.panelUnit);
-            ctx.strokeStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary,
-                                   (1 - progress) * (0.22 + level * 0.42));
+            ctx.strokeStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary, (1 - progress) * (0.22 + level * 0.42));
             ctx.beginPath();
             ctx.arc(pulseOriginX, centerY, radius, 0, Math.PI * 2);
             ctx.stroke();
@@ -5740,7 +5957,9 @@ Item {
         color: reactiveSlider.enabled ? Color.mPrimary : Color.mOutline
 
         Behavior on color {
-          ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast }
+          ColorAnimation {
+            duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+          }
         }
       }
     }
@@ -6060,15 +6279,24 @@ Item {
     clip: true
 
     Behavior on Layout.preferredHeight {
-      NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+      NumberAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+        easing.type: Easing.OutCubic
+      }
     }
 
     Behavior on color {
-      ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+      ColorAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+        easing.type: Easing.OutCubic
+      }
     }
 
     Behavior on border.color {
-      ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+      ColorAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+        easing.type: Easing.OutCubic
+      }
     }
 
     ColumnLayout {
@@ -6208,22 +6436,28 @@ Item {
   }
 
   component MediaCard: DashboardCard {
+    id: mediaCard
     styleKey: "media"
     styleRoot: true
     detailTransition: true
     detailTransitionDirection: "left"
-    id: mediaCard
 
     color: root.componentColor("media", "background", root.musicActive ? root.m3PrimaryContainer : root.m3SurfaceContainerLow)
     border.color: borderEffectVisible ? Qt.alpha(root.componentAccent("media"), 0.42) : "transparent"
     clip: true
 
     Behavior on color {
-      ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+      ColorAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+        easing.type: Easing.OutCubic
+      }
     }
 
     Behavior on border.color {
-      ColorAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+      ColorAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+        easing.type: Easing.OutCubic
+      }
     }
 
     Rectangle {
@@ -6232,7 +6466,10 @@ Item {
       color: root.componentAccent("media")
       opacity: root.musicActive ? 0.04 : 0
       Behavior on opacity {
-        NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+        NumberAnimation {
+          duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+          easing.type: Easing.OutCubic
+        }
       }
     }
 
@@ -6271,8 +6508,16 @@ Item {
           SequentialAnimation on scale {
             id: coverBounce
             running: false
-            NumberAnimation { to: 1.04; duration: 150; easing.type: Easing.OutCubic }
-            NumberAnimation { to: 1.0; duration: 300; easing.type: Easing.OutBounce }
+            NumberAnimation {
+              to: 1.04
+              duration: 150
+              easing.type: Easing.OutCubic
+            }
+            NumberAnimation {
+              to: 1.0
+              duration: 300
+              easing.type: Easing.OutBounce
+            }
           }
         }
 
@@ -6449,7 +6694,10 @@ Item {
     opacity: active ? 1 : 0.24
 
     Behavior on opacity {
-      NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal; easing.type: Easing.OutCubic }
+      NumberAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+        easing.type: Easing.OutCubic
+      }
     }
 
     onValuesChanged: {
@@ -6484,7 +6732,7 @@ Item {
     }
 
     function colorToRgba(c, alpha) {
-        return "rgba(" + Math.round(c.r * 255) + "," + Math.round(c.g * 255) + "," + Math.round(c.b * 255) + "," + alpha + ")";
+      return "rgba(" + Math.round(c.r * 255) + "," + Math.round(c.g * 255) + "," + Math.round(c.b * 255) + "," + alpha + ")";
     }
 
     function roundedRect(ctx, x, y, w, h, r) {
@@ -6513,252 +6761,260 @@ Item {
 
         ctx.save();
         try {
-        if (visualizer.clipRadius > 0) {
-          ctx.beginPath();
-          visualizer.roundedRect(ctx, 0, 0, width, height, visualizer.clipRadius);
-          ctx.clip();
-        }
-
-        const t = visualizer.phase;
-        const avg = visualizer.average();
-        const beat = visualizer.active ? root.clamp(0.25 + avg * 1.8, 0.25, 1.35) : 0.16;
-
-        const primary = Color.mPrimary;
-        const secondary = Color.mSecondary;
-        const tertiary = Color.mTertiary;
-
-        if (visualizer.effect === "bars") {
-          const bars = 24;
-          const gap = 4;
-          const barWidth = Math.max(2, (width - gap * (bars - 1)) / bars);
-          for (let i = 0; i < bars; i++) {
-            const sampleIndex = (i / Math.max(1, bars - 1)) * ((visualizer.values?.length ?? 1) - 1);
-            const level = root.clamp(0.08 + visualizer.sample(sampleIndex, 0) * beat, 0.06, 0.92);
-            const h = height * level;
-            const x = i * (barWidth + gap);
-            const y = height - h;
-
-            const grad = ctx.createLinearGradient(x, y, x, height);
-            grad.addColorStop(0, visualizer.colorToRgba(primary, 0.08 + level * 0.4));
-            grad.addColorStop(1, visualizer.colorToRgba(secondary, 0.08 + level * 0.2));
-            ctx.fillStyle = grad;
-
+          if (visualizer.clipRadius > 0) {
             ctx.beginPath();
-            visualizer.roundedRect(ctx, x, y, barWidth, h, barWidth / 2);
-            ctx.fill();
-
-            ctx.fillStyle = visualizer.colorToRgba(primary, 0.2 + level * 0.5);
-            ctx.beginPath();
-            ctx.arc(x + barWidth/2, y + barWidth/2, barWidth/2, 0, Math.PI * 2);
-            ctx.fill();
+            visualizer.roundedRect(ctx, 0, 0, width, height, visualizer.clipRadius);
+            ctx.clip();
           }
-          return;
-        }
 
-        if (visualizer.effect === "wave") {
-          ctx.lineWidth = Math.max(1.5, 2.5 * root.panelUnit);
+          const t = visualizer.phase;
+          const avg = visualizer.average();
+          const beat = visualizer.active ? root.clamp(0.25 + avg * 1.8, 0.25, 1.35) : 0.16;
 
-          ctx.strokeStyle = visualizer.colorToRgba(secondary, visualizer.active ? 0.2 : 0.1);
-          ctx.beginPath();
-          for (let x = 0; x <= width; x += 4) {
-            const p = x / width;
-            const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
-            const amp = height * (0.03 + visualizer.sample(sampleIndex, 0) * 0.25 * beat);
-            const y = height * 0.5 + Math.sin(p * Math.PI * 3 + t * 0.8) * amp;
-            if (x === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
+          const primary = Color.mPrimary;
+          const secondary = Color.mSecondary;
+          const tertiary = Color.mTertiary;
 
-          ctx.strokeStyle = visualizer.colorToRgba(primary, visualizer.active ? 0.45 : 0.2);
-          ctx.beginPath();
-          for (let x = 0; x <= width; x += 4) {
-            const p = x / width;
-            const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
-            const amp = height * (0.05 + visualizer.sample(sampleIndex, 0) * 0.36 * beat);
-            const y = height * 0.5 + Math.sin(p * Math.PI * 4 + t) * amp;
-            if (x === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
+          if (visualizer.effect === "bars") {
+            const bars = 24;
+            const gap = 4;
+            const barWidth = Math.max(2, (width - gap * (bars - 1)) / bars);
+            for (let i = 0; i < bars; i++) {
+              const sampleIndex = (i / Math.max(1, bars - 1)) * ((visualizer.values?.length ?? 1) - 1);
+              const level = root.clamp(0.08 + visualizer.sample(sampleIndex, 0) * beat, 0.06, 0.92);
+              const h = height * level;
+              const x = i * (barWidth + gap);
+              const y = height - h;
 
-          ctx.lineTo(width, height);
-          ctx.lineTo(0, height);
-          ctx.closePath();
-          const grad = ctx.createLinearGradient(0, height * 0.5, 0, height);
-          grad.addColorStop(0, visualizer.colorToRgba(primary, 0.1));
-          grad.addColorStop(1, visualizer.colorToRgba(primary, 0.0));
-          ctx.fillStyle = grad;
-          ctx.fill();
+              const grad = ctx.createLinearGradient(x, y, x, height);
+              grad.addColorStop(0, visualizer.colorToRgba(primary, 0.08 + level * 0.4));
+              grad.addColorStop(1, visualizer.colorToRgba(secondary, 0.08 + level * 0.2));
+              ctx.fillStyle = grad;
 
-          return;
-        }
+              ctx.beginPath();
+              visualizer.roundedRect(ctx, x, y, barWidth, h, barWidth / 2);
+              ctx.fill();
 
-        if (visualizer.effect === "shock") {
-          const cx = width * 0.5;
-          const cy = height * 0.5;
-          const maxR = Math.max(width, height) * 0.9;
-
-          for (let i = 0; i < 5; i++) {
-            const progress = (t * (0.06 + avg * 0.16) + i * 0.2) % 1;
-            const radius = 16 + progress * maxR;
-            const colors = [primary, secondary, tertiary];
-            const color = colors[i % 3];
-
-            ctx.lineWidth = Math.max(1, (1.4 + beat * 2 * (1-progress)) * root.panelUnit);
-
-            ctx.strokeStyle = visualizer.colorToRgba(color, (1 - progress) * (visualizer.active ? 0.42 : 0.12));
-            ctx.beginPath();
-            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-            ctx.stroke();
-          }
-          return;
-        }
-
-        if (visualizer.effect === "pulse") {
-          for (let i = 0; i < 38; i++) {
-            const sampleIndex = (i / 37) * ((visualizer.values?.length ?? 1) - 1);
-            const amp = visualizer.sample(sampleIndex, 0);
-            const p = (i * 0.618 + t * 0.03) % 1;
-            const x = width * ((i * 37 % 101) / 100);
-            const y = height * ((Math.sin(i * 7.3 + t) + 1) / 2);
-            const r = 1.2 + 7 * amp * beat;
-
-            const colors = [primary, secondary, tertiary];
-            const color = colors[i % 3];
-
-            if (amp > 0.4 && visualizer.active) {
-                for(let j=0; j<5; j++) {
-                    const jx = width * (((i+j) * 37 % 101) / 100);
-                    const jy = height * ((Math.sin((i+j) * 7.3 + t) + 1) / 2);
-                    const dist = Math.sqrt(Math.pow(x-jx, 2) + Math.pow(y-jy, 2));
-                    if(dist < 50) {
-                        ctx.strokeStyle = visualizer.colorToRgba(color, 0.05 + amp*0.1);
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(x, y);
-                        ctx.lineTo(jx, jy);
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            ctx.fillStyle = visualizer.colorToRgba(color, 0.04 + p * 0.1);
-            ctx.beginPath();
-            ctx.arc(x, y, r * 2.5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = visualizer.colorToRgba(color, 0.2 + p * 0.3);
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-            ctx.fill();
-          }
-          return;
-        }
-
-        if (visualizer.effect === "nebula") {
-           for (let i = 0; i < 6; i++) {
-               const sampleIndex = (i / 5) * ((visualizer.values?.length ?? 1) - 1);
-               const amp = visualizer.sample(sampleIndex, 0.2);
-               const x = width * (0.2 + 0.6 * ((i * 1.618 + t * 0.02) % 1));
-               const y = height * (0.2 + 0.6 * ((i * 2.718 + Math.sin(t * 0.05)) % 1));
-               const r = Math.max(width, height) * 0.3 * (1 + amp * beat * 0.5);
-
-               const colors = [primary, secondary, tertiary];
-               const color = colors[i % 3];
-
-               const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-               grad.addColorStop(0, visualizer.colorToRgba(color, 0.15 + amp * 0.15));
-               grad.addColorStop(1, visualizer.colorToRgba(color, 0));
-
-               ctx.fillStyle = grad;
-               ctx.beginPath();
-               ctx.arc(x, y, r, 0, Math.PI * 2);
-               ctx.fill();
-           }
-           return;
-        }
-
-        if (visualizer.effect === "aurora") {
-            const bands = 3;
-            for(let b=0; b<bands; b++) {
-                const colors = [primary, secondary, tertiary];
-                const color = colors[b % 3];
-
-                ctx.beginPath();
-                ctx.moveTo(0, height);
-
-                for(let x=0; x<=width; x+=10) {
-                    const p = x / width;
-                    const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
-                    const amp = visualizer.sample(sampleIndex, 0);
-
-                    const wave1 = Math.sin(p * Math.PI * 2 + t * 0.5 + b * 2);
-                    const wave2 = Math.sin(p * Math.PI * 4 - t * 0.3 + b);
-                    const y = height * 0.5 + (wave1 * 0.3 + wave2 * 0.2) * height * (1 + amp * beat);
-
-                    ctx.lineTo(x, y);
-                }
-
-                ctx.lineTo(width, height);
-                ctx.closePath();
-
-                const grad = ctx.createLinearGradient(0, 0, 0, height);
-                grad.addColorStop(0, visualizer.colorToRgba(color, 0));
-                grad.addColorStop(0.5, visualizer.colorToRgba(color, 0.1 + b * 0.05 + beat * 0.05));
-                grad.addColorStop(1, visualizer.colorToRgba(color, 0.02));
-
-                ctx.fillStyle = grad;
-                ctx.fill();
+              ctx.fillStyle = visualizer.colorToRgba(primary, 0.2 + level * 0.5);
+              ctx.beginPath();
+              ctx.arc(x + barWidth / 2, y + barWidth / 2, barWidth / 2, 0, Math.PI * 2);
+              ctx.fill();
             }
             return;
-        }
+          }
 
-        if (visualizer.effect === "constellation") {
+          if (visualizer.effect === "wave") {
+            ctx.lineWidth = Math.max(1.5, 2.5 * root.panelUnit);
+
+            ctx.strokeStyle = visualizer.colorToRgba(secondary, visualizer.active ? 0.2 : 0.1);
+            ctx.beginPath();
+            for (let x = 0; x <= width; x += 4) {
+              const p = x / width;
+              const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
+              const amp = height * (0.03 + visualizer.sample(sampleIndex, 0) * 0.25 * beat);
+              const y = height * 0.5 + Math.sin(p * Math.PI * 3 + t * 0.8) * amp;
+              if (x === 0)
+                ctx.moveTo(x, y);
+              else
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            ctx.strokeStyle = visualizer.colorToRgba(primary, visualizer.active ? 0.45 : 0.2);
+            ctx.beginPath();
+            for (let x = 0; x <= width; x += 4) {
+              const p = x / width;
+              const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
+              const amp = height * (0.05 + visualizer.sample(sampleIndex, 0) * 0.36 * beat);
+              const y = height * 0.5 + Math.sin(p * Math.PI * 4 + t) * amp;
+              if (x === 0)
+                ctx.moveTo(x, y);
+              else
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            const grad = ctx.createLinearGradient(0, height * 0.5, 0, height);
+            grad.addColorStop(0, visualizer.colorToRgba(primary, 0.1));
+            grad.addColorStop(1, visualizer.colorToRgba(primary, 0.0));
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            return;
+          }
+
+          if (visualizer.effect === "shock") {
+            const cx = width * 0.5;
+            const cy = height * 0.5;
+            const maxR = Math.max(width, height) * 0.9;
+
+            for (let i = 0; i < 5; i++) {
+              const progress = (t * (0.06 + avg * 0.16) + i * 0.2) % 1;
+              const radius = 16 + progress * maxR;
+              const colors = [primary, secondary, tertiary];
+              const color = colors[i % 3];
+
+              ctx.lineWidth = Math.max(1, (1.4 + beat * 2 * (1 - progress)) * root.panelUnit);
+
+              ctx.strokeStyle = visualizer.colorToRgba(color, (1 - progress) * (visualizer.active ? 0.42 : 0.12));
+              ctx.beginPath();
+              ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+            return;
+          }
+
+          if (visualizer.effect === "pulse") {
+            for (let i = 0; i < 38; i++) {
+              const sampleIndex = (i / 37) * ((visualizer.values?.length ?? 1) - 1);
+              const amp = visualizer.sample(sampleIndex, 0);
+              const p = (i * 0.618 + t * 0.03) % 1;
+              const x = width * ((i * 37 % 101) / 100);
+              const y = height * ((Math.sin(i * 7.3 + t) + 1) / 2);
+              const r = 1.2 + 7 * amp * beat;
+
+              const colors = [primary, secondary, tertiary];
+              const color = colors[i % 3];
+
+              if (amp > 0.4 && visualizer.active) {
+                for (let j = 0; j < 5; j++) {
+                  const jx = width * (((i + j) * 37 % 101) / 100);
+                  const jy = height * ((Math.sin((i + j) * 7.3 + t) + 1) / 2);
+                  const dist = Math.sqrt(Math.pow(x - jx, 2) + Math.pow(y - jy, 2));
+                  if (dist < 50) {
+                    ctx.strokeStyle = visualizer.colorToRgba(color, 0.05 + amp * 0.1);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(jx, jy);
+                    ctx.stroke();
+                  }
+                }
+              }
+
+              ctx.fillStyle = visualizer.colorToRgba(color, 0.04 + p * 0.1);
+              ctx.beginPath();
+              ctx.arc(x, y, r * 2.5, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.fillStyle = visualizer.colorToRgba(color, 0.2 + p * 0.3);
+              ctx.beginPath();
+              ctx.arc(x, y, r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            return;
+          }
+
+          if (visualizer.effect === "nebula") {
+            for (let i = 0; i < 6; i++) {
+              const sampleIndex = (i / 5) * ((visualizer.values?.length ?? 1) - 1);
+              const amp = visualizer.sample(sampleIndex, 0.2);
+              const x = width * (0.2 + 0.6 * ((i * 1.618 + t * 0.02) % 1));
+              const y = height * (0.2 + 0.6 * ((i * 2.718 + Math.sin(t * 0.05)) % 1));
+              const r = Math.max(width, height) * 0.3 * (1 + amp * beat * 0.5);
+
+              const colors = [primary, secondary, tertiary];
+              const color = colors[i % 3];
+
+              const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+              grad.addColorStop(0, visualizer.colorToRgba(color, 0.15 + amp * 0.15));
+              grad.addColorStop(1, visualizer.colorToRgba(color, 0));
+
+              ctx.fillStyle = grad;
+              ctx.beginPath();
+              ctx.arc(x, y, r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            return;
+          }
+
+          if (visualizer.effect === "aurora") {
+            const bands = 3;
+            for (let b = 0; b < bands; b++) {
+              const colors = [primary, secondary, tertiary];
+              const color = colors[b % 3];
+
+              ctx.beginPath();
+              ctx.moveTo(0, height);
+
+              for (let x = 0; x <= width; x += 10) {
+                const p = x / width;
+                const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
+                const amp = visualizer.sample(sampleIndex, 0);
+
+                const wave1 = Math.sin(p * Math.PI * 2 + t * 0.5 + b * 2);
+                const wave2 = Math.sin(p * Math.PI * 4 - t * 0.3 + b);
+                const y = height * 0.5 + (wave1 * 0.3 + wave2 * 0.2) * height * (1 + amp * beat);
+
+                ctx.lineTo(x, y);
+              }
+
+              ctx.lineTo(width, height);
+              ctx.closePath();
+
+              const grad = ctx.createLinearGradient(0, 0, 0, height);
+              grad.addColorStop(0, visualizer.colorToRgba(color, 0));
+              grad.addColorStop(0.5, visualizer.colorToRgba(color, 0.1 + b * 0.05 + beat * 0.05));
+              grad.addColorStop(1, visualizer.colorToRgba(color, 0.02));
+
+              ctx.fillStyle = grad;
+              ctx.fill();
+            }
+            return;
+          }
+
+          if (visualizer.effect === "constellation") {
             const nodes = 30;
             const points = [];
-            for(let i=0; i<nodes; i++) {
-                const px = ((i * 137.5) % 100) / 100 * width;
-                const py = ((i * 93.1) % 100) / 100 * height;
-                points.push({x: px, y: py, i: i});
+            for (let i = 0; i < nodes; i++) {
+              const px = ((i * 137.5) % 100) / 100 * width;
+              const py = ((i * 93.1) % 100) / 100 * height;
+              points.push({
+                            x: px,
+                            y: py,
+                            i: i
+                          });
             }
 
             ctx.lineWidth = 1;
-            for(let i=0; i<nodes; i++) {
-                const p1 = points[i];
-                for(let j=i+1; j<nodes; j++) {
-                    const p2 = points[j];
-                    const dist = Math.sqrt(Math.pow(p1.x-p2.x, 2) + Math.pow(p1.y-p2.y, 2));
-                    if(dist < width * 0.3) {
-                        const sampleIndex = ((i+j) / (nodes*2)) * ((visualizer.values?.length ?? 1) - 1);
-                        const amp = visualizer.sample(sampleIndex, 0);
+            for (let i = 0; i < nodes; i++) {
+              const p1 = points[i];
+              for (let j = i + 1; j < nodes; j++) {
+                const p2 = points[j];
+                const dist = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+                if (dist < width * 0.3) {
+                  const sampleIndex = ((i + j) / (nodes * 2)) * ((visualizer.values?.length ?? 1) - 1);
+                  const amp = visualizer.sample(sampleIndex, 0);
 
-                        if(amp > 0.3) {
-                            ctx.strokeStyle = visualizer.colorToRgba(secondary, (1 - dist/(width*0.3)) * amp * beat * 0.5);
-                            ctx.beginPath();
-                            ctx.moveTo(p1.x, p1.y);
-                            ctx.lineTo(p2.x, p2.y);
-                            ctx.stroke();
-                        }
-                    }
+                  if (amp > 0.3) {
+                    ctx.strokeStyle = visualizer.colorToRgba(secondary, (1 - dist / (width * 0.3)) * amp * beat * 0.5);
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                  }
                 }
+              }
             }
 
-            for(let i=0; i<nodes; i++) {
-                const p = points[i];
-                const sampleIndex = (i / nodes) * ((visualizer.values?.length ?? 1) - 1);
-                const amp = visualizer.sample(sampleIndex, 0);
+            for (let i = 0; i < nodes; i++) {
+              const p = points[i];
+              const sampleIndex = (i / nodes) * ((visualizer.values?.length ?? 1) - 1);
+              const amp = visualizer.sample(sampleIndex, 0);
 
-                const r = 1 + amp * 4 * beat;
-                ctx.fillStyle = visualizer.colorToRgba(primary, 0.3 + amp * 0.7);
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, r, 0, Math.PI*2);
-                ctx.fill();
+              const r = 1 + amp * 4 * beat;
+              ctx.fillStyle = visualizer.colorToRgba(primary, 0.3 + amp * 0.7);
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+              ctx.fill();
             }
             return;
-        }
+          }
 
-        if (visualizer.effect === "radar") {
+          if (visualizer.effect === "radar") {
             const cx = width / 2;
             const cy = height + 10;
             const r = Math.max(width, height);
@@ -6773,59 +7029,59 @@ Item {
             ctx.fillStyle = visualizer.colorToRgba(primary, 0.15);
             ctx.fill();
 
-            for(let i=0; i<30; i++) {
-                const sampleIndex = (i / 30) * ((visualizer.values?.length ?? 1) - 1);
-                const amp = visualizer.sample(sampleIndex, 0);
+            for (let i = 0; i < 30; i++) {
+              const sampleIndex = (i / 30) * ((visualizer.values?.length ?? 1) - 1);
+              const amp = visualizer.sample(sampleIndex, 0);
 
-                if(amp > 0.4) {
-                    const blipAngle = Math.PI + (i / 30) * Math.PI;
-                    const blipDist = amp * r * 0.9;
-                    const bx = cx + Math.cos(blipAngle) * blipDist;
-                    const by = cy + Math.sin(blipAngle) * blipDist;
+              if (amp > 0.4) {
+                const blipAngle = Math.PI + (i / 30) * Math.PI;
+                const blipDist = amp * r * 0.9;
+                const bx = cx + Math.cos(blipAngle) * blipDist;
+                const by = cy + Math.sin(blipAngle) * blipDist;
 
-                    const age = (sweepAngle - blipAngle + Math.PI*2) % (Math.PI*2);
-                    if(age < Math.PI) {
-                        const alpha = Math.max(0, 1 - age/Math.PI);
-                        ctx.fillStyle = visualizer.colorToRgba(tertiary, alpha * beat);
-                        ctx.beginPath();
-                        ctx.arc(bx, by, 3 + amp*3, 0, Math.PI*2);
-                        ctx.fill();
-                    }
+                const age = (sweepAngle - blipAngle + Math.PI * 2) % (Math.PI * 2);
+                if (age < Math.PI) {
+                  const alpha = Math.max(0, 1 - age / Math.PI);
+                  ctx.fillStyle = visualizer.colorToRgba(tertiary, alpha * beat);
+                  ctx.beginPath();
+                  ctx.arc(bx, by, 3 + amp * 3, 0, Math.PI * 2);
+                  ctx.fill();
                 }
+              }
             }
 
             ctx.strokeStyle = visualizer.colorToRgba(primary, 0.1);
             ctx.lineWidth = 1;
-            for(let i=1; i<=3; i++) {
-                ctx.beginPath();
-                ctx.arc(cx, cy, r * (i/3), Math.PI, Math.PI*2);
-                ctx.stroke();
+            for (let i = 1; i <= 3; i++) {
+              ctx.beginPath();
+              ctx.arc(cx, cy, r * (i / 3), Math.PI, Math.PI * 2);
+              ctx.stroke();
             }
             return;
-        }
+          }
 
-        if (visualizer.effect === "mirror") {
+          if (visualizer.effect === "mirror") {
             const bars = 28;
             const gap = Math.max(2, width / 140);
             const barWidth = Math.max(2, (width - gap * (bars - 1)) / bars);
             const half = height / 2;
             for (let i = 0; i < bars; i++) {
-                const sampleIndex = (i / Math.max(1, bars - 1)) * ((visualizer.values?.length ?? 1) - 1);
-                const amp = visualizer.sample(sampleIndex, 0);
-                const level = root.clamp(0.08 + amp * beat, 0.05, 1);
-                const barH = half * level;
-                const x = i * (barWidth + gap);
-                const color = level > 0.75 ? tertiary : (level > 0.45 ? secondary : primary);
+              const sampleIndex = (i / Math.max(1, bars - 1)) * ((visualizer.values?.length ?? 1) - 1);
+              const amp = visualizer.sample(sampleIndex, 0);
+              const level = root.clamp(0.08 + amp * beat, 0.05, 1);
+              const barH = half * level;
+              const x = i * (barWidth + gap);
+              const color = level > 0.75 ? tertiary : (level > 0.45 ? secondary : primary);
 
-                ctx.fillStyle = visualizer.colorToRgba(color, 0.12 + level * 0.4);
-                ctx.beginPath();
-                visualizer.roundedRect(ctx, x, half - barH, barWidth, barH, barWidth / 2);
-                ctx.fill();
+              ctx.fillStyle = visualizer.colorToRgba(color, 0.12 + level * 0.4);
+              ctx.beginPath();
+              visualizer.roundedRect(ctx, x, half - barH, barWidth, barH, barWidth / 2);
+              ctx.fill();
 
-                ctx.fillStyle = visualizer.colorToRgba(color, 0.08 + level * 0.28);
-                ctx.beginPath();
-                visualizer.roundedRect(ctx, x, half, barWidth, barH, barWidth / 2);
-                ctx.fill();
+              ctx.fillStyle = visualizer.colorToRgba(color, 0.08 + level * 0.28);
+              ctx.beginPath();
+              visualizer.roundedRect(ctx, x, half, barWidth, barH, barWidth / 2);
+              ctx.fill();
             }
 
             ctx.strokeStyle = visualizer.colorToRgba(primary, 0.12);
@@ -6835,36 +7091,36 @@ Item {
             ctx.lineTo(width, half);
             ctx.stroke();
             return;
-        }
+          }
 
-        if (visualizer.effect === "ribbon") {
+          if (visualizer.effect === "ribbon") {
             const centerY = height * 0.55;
 
             function traceRibbon(colorC, freq, speedMul, ampMul, alpha, lw) {
-                ctx.lineWidth = Math.max(1, lw * root.panelUnit);
-                ctx.lineCap = "round";
-                ctx.lineJoin = "round";
-                ctx.strokeStyle = visualizer.colorToRgba(colorC, alpha);
-                ctx.beginPath();
-                const step = Math.max(3, width / 48);
-                let prevX = 0, prevY = centerY;
-                for (let x = 0; x <= width; x += step) {
-                    const p = x / width;
-                    const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
-                    const amp = visualizer.sample(sampleIndex, 0);
-                    const carrier = Math.sin(p * Math.PI * freq + t * speedMul);
-                    const y = centerY - height * (0.05 + amp * ampMul * beat) * carrier;
-                    if (x === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        const midX = (prevX + x) / 2, midY = (prevY + y) / 2;
-                        ctx.quadraticCurveTo(prevX, prevY, midX, midY);
-                    }
-                    prevX = x;
-                    prevY = y;
+              ctx.lineWidth = Math.max(1, lw * root.panelUnit);
+              ctx.lineCap = "round";
+              ctx.lineJoin = "round";
+              ctx.strokeStyle = visualizer.colorToRgba(colorC, alpha);
+              ctx.beginPath();
+              const step = Math.max(3, width / 48);
+              let prevX = 0, prevY = centerY;
+              for (let x = 0; x <= width; x += step) {
+                const p = x / width;
+                const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
+                const amp = visualizer.sample(sampleIndex, 0);
+                const carrier = Math.sin(p * Math.PI * freq + t * speedMul);
+                const y = centerY - height * (0.05 + amp * ampMul * beat) * carrier;
+                if (x === 0) {
+                  ctx.moveTo(x, y);
+                } else {
+                  const midX = (prevX + x) / 2, midY = (prevY + y) / 2;
+                  ctx.quadraticCurveTo(prevX, prevY, midX, midY);
                 }
-                ctx.lineTo(width, prevY);
-                ctx.stroke();
+                prevX = x;
+                prevY = y;
+              }
+              ctx.lineTo(width, prevY);
+              ctx.stroke();
             }
 
             ctx.shadowBlur = visualizer.active ? 10 : 0;
@@ -6873,7 +7129,7 @@ Item {
             ctx.shadowBlur = 0;
             traceRibbon(primary, 3.4, 0.9, 0.5, visualizer.active ? 0.55 : 0.18, 2);
             return;
-        }
+          }
         } finally {
           ctx.restore();
         }
@@ -7329,9 +7585,7 @@ Item {
       const hours = Math.floor(total / 3600);
       const minutes = Math.floor((total % 3600) / 60);
       const seconds = total % 60;
-      return hours > 0
-          ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-          : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      return hours > 0 ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}` : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
     }
 
     function setCountdown(value) {
@@ -7434,9 +7688,18 @@ Item {
 
         Repeater {
           model: [
-            { "label": "5m", "seconds": 300 },
-            { "label": "25m", "seconds": 1500 },
-            { "label": "60m", "seconds": 3600 }
+            {
+              "label": "5m",
+              "seconds": 300
+            },
+            {
+              "label": "25m",
+              "seconds": 1500
+            },
+            {
+              "label": "60m",
+              "seconds": 3600
+            }
           ]
 
           NButton {
@@ -7461,9 +7724,7 @@ Item {
         NButton {
           Layout.fillWidth: true
           Layout.preferredHeight: Math.round(36 * root.panelUnit)
-          text: Time.timerSoundPlaying
-                ? root.tr("dismissAlarm")
-                : Time.timerRunning ? root.tr("pause") : root.tr("start")
+          text: Time.timerSoundPlaying ? root.tr("dismissAlarm") : Time.timerRunning ? root.tr("pause") : root.tr("start")
           icon: Time.timerSoundPlaying ? "bell-off" : Time.timerRunning ? "player-pause" : "player-play"
           enabled: Time.timerSoundPlaying || Time.timerStopwatchMode || Time.timerRemainingSeconds > 0
           onClicked: {
@@ -7558,9 +7819,9 @@ Item {
       acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
       onWheel: event => {
                  if (event.angleDelta.y > 0)
-                   calendarSwipe.currentIndex = Math.max(0, calendarSwipe.currentIndex - 1);
+                 calendarSwipe.currentIndex = Math.max(0, calendarSwipe.currentIndex - 1);
                  else if (event.angleDelta.y < 0)
-                   calendarSwipe.currentIndex = Math.min(calendarSwipe.count - 1, calendarSwipe.currentIndex + 1);
+                 calendarSwipe.currentIndex = Math.min(calendarSwipe.count - 1, calendarSwipe.currentIndex + 1);
                  event.accepted = calendarSwipe.count > 1;
                }
     }

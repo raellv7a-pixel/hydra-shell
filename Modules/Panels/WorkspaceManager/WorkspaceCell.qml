@@ -18,16 +18,12 @@ Item {
   property bool isPrivate: false
   property bool inViewport: true
 
-  readonly property var activeMonitor: overview?.screen
-      ? Hyprland.monitors.values.find(monitor => monitor.name === overview.screen.name)
-      : null
-  readonly property bool active: !isSpecial && activeMonitor
-      && (activeMonitor.activeWorkspace?.id === wsId || activeMonitor.activeWorkspace?.name === wsName)
+  readonly property var activeMonitor: overview?.screen ? Hyprland.monitors.values.find(monitor => monitor.name === overview.screen.name) : null
+  readonly property bool active: !isSpecial && activeMonitor && (activeMonitor.activeWorkspace?.id === wsId || activeMonitor.activeWorkspace?.name === wsName)
   readonly property bool isDropTarget: overview?.dragging && dropArea.containsDrag
   readonly property bool borderOnlyPrivacy: Settings.data.workspaceManager.borderOnlyPrivacy || false
   readonly property string layoutName: {
-    const workspace = (Hyprland.workspaces.values || []).find(ws => ws.id === cell.wsId
-                                                                   || ws.name === cell.wsName);
+    const workspace = (Hyprland.workspaces.values || []).find(ws => ws.id === cell.wsId || ws.name === cell.wsName);
     return workspace?.lastIpcObject?.tiledLayout || workspace?.tiledLayout || "dwindle";
   }
 
@@ -59,9 +55,9 @@ Item {
       if (cls && !seen[cls]) {
         seen[cls] = true;
         icons.push({
-          "class": cls,
-          "icon": ThemeIcons.iconForAppId(cls, "application-x-executable")
-        });
+                     "class": cls,
+                     "icon": ThemeIcons.iconForAppId(cls, "application-x-executable")
+                   });
         if (icons.length >= 4)
           break;
       }
@@ -79,16 +75,20 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: Style.radiusL
-    color: cell.active ? Qt.alpha(Color.mPrimary, 0.18)
-                       : (cell.isDropTarget ? Qt.alpha(Color.mSecondary, 0.28)
-                                            : Color.mSurfaceContainer)
+    color: cell.active ? Qt.alpha(Color.mPrimary, 0.18) : (cell.isDropTarget ? Qt.alpha(Color.mSecondary, 0.28) : Color.mSurfaceContainer)
     border.width: cell.active || cell.isDropTarget || cell.isUrgent ? Style.borderM : Style.borderS
-    border.color: cell.isUrgent ? Color.mError
-                                : (cell.active ? Color.mPrimary
-                                               : (cell.isDropTarget ? Color.mSecondary : Qt.alpha(Color.mOutline, 0.72)))
+    border.color: cell.isUrgent ? Color.mError : (cell.active ? Color.mPrimary : (cell.isDropTarget ? Color.mSecondary : Qt.alpha(Color.mOutline, 0.72)))
 
-    Behavior on color { ColorAnimation { duration: Style.animationFast } }
-    Behavior on border.color { ColorAnimation { duration: Style.animationFast } }
+    Behavior on color {
+      ColorAnimation {
+        duration: Style.animationFast
+      }
+    }
+    Behavior on border.color {
+      ColorAnimation {
+        duration: Style.animationFast
+      }
+    }
 
     MouseArea {
       id: cellMouseArea
@@ -136,8 +136,7 @@ Item {
         for (let index = 0; index < toplevels.length; index++) {
           const toplevel = toplevels[index];
           const ipc = toplevel?.lastIpcObject;
-          const wsMatch = cell.isSpecial ? (toplevel?.workspace?.name === cell.wsName)
-                                         : (toplevel?.workspace?.id === cell.wsId);
+          const wsMatch = cell.isSpecial ? (toplevel?.workspace?.name === cell.wsName) : (toplevel?.workspace?.id === cell.wsId);
           if (!wsMatch)
             continue;
           if (!ipc?.at || !ipc?.size || ipc.mapped === false)
@@ -176,18 +175,18 @@ Item {
         const offsetY = (aspect - contentHeight * scale) / (2 * aspect);
 
         return windows.map(window => ({
-                                       "addr": window.addr,
-                                       "tl": window.tl,
-                                       "title": window.title,
-                                       "appId": window.appId,
-                                       "workspaceId": window.workspaceId,
-                                       "workspaceName": window.workspaceName,
-                                       "grouped": window.grouped,
-                                       "fx": offsetX + (window.x - minX) * scale,
-                                       "fy": offsetY + (window.y - minY) * scale / aspect,
-                                       "fw": window.width * scale,
-                                       "fh": window.height * scale / aspect
-                                     }));
+                                        "addr": window.addr,
+                                        "tl": window.tl,
+                                        "title": window.title,
+                                        "appId": window.appId,
+                                        "workspaceId": window.workspaceId,
+                                        "workspaceName": window.workspaceName,
+                                        "grouped": window.grouped,
+                                        "fx": offsetX + (window.x - minX) * scale,
+                                        "fy": offsetY + (window.y - minY) * scale / aspect,
+                                        "fw": window.width * scale,
+                                        "fh": window.height * scale / aspect
+                                      }));
       }
 
       Column {
@@ -269,9 +268,7 @@ Item {
           delegate: Image {
             width: 16 * Style.uiScaleRatio
             height: 16 * Style.uiScaleRatio
-            source: modelData.icon.startsWith("file://") || modelData.icon.startsWith("/")
-                    ? (modelData.icon.startsWith("/") ? "file://" + modelData.icon : modelData.icon)
-                    : ""
+            source: modelData.icon.startsWith("file://") || modelData.icon.startsWith("/") ? (modelData.icon.startsWith("/") ? "file://" + modelData.icon : modelData.icon) : ""
             fillMode: Image.PreserveAspectFit
             smooth: true
 
@@ -293,7 +290,9 @@ Item {
         }
       }
 
-      Item { Layout.fillWidth: true }
+      Item {
+        Layout.fillWidth: true
+      }
 
       Rectangle {
         visible: cell.isUrgent
@@ -359,8 +358,7 @@ Item {
         baseSize: Style.baseWidgetSize * 0.72
         colorBg: cell.isPrivate ? Qt.alpha(Color.mPrimary, 0.2) : Qt.alpha(Color.mSurface, 0.86)
         colorFg: cell.isPrivate ? Color.mPrimary : Color.mOnSurfaceVariant
-        tooltipText: cell.isPrivate ? qsTr("Disable workspace privacy")
-                                        : qsTr("Make workspace private")
+        tooltipText: cell.isPrivate ? qsTr("Disable workspace privacy") : qsTr("Make workspace private")
         onClicked: cell.overview?.toggleWorkspacePrivacy(cell.wsId, cell.wsName, !cell.isPrivate)
       }
     }
@@ -414,26 +412,46 @@ Item {
       id: cellContextMenu
       parent: Overlay.overlay
       model: [
-        { "label": cell.isPrivate ? qsTr("Disable privacy") : qsTr("Make private"), "action": "privacy", "icon": cell.isPrivate ? "shield-off" : "shield-lock" },
-        { "label": qsTr("Cycle layout"), "action": "layout", "icon": "layout" },
-        { "label": qsTr("Move earlier"), "action": "order_up", "icon": "arrow-left" },
-        { "label": qsTr("Move later"), "action": "order_down", "icon": "arrow-right" },
-        { "label": qsTr("Close all windows"), "action": "close_all", "icon": "trash" }
+        {
+          "label": cell.isPrivate ? qsTr("Disable privacy") : qsTr("Make private"),
+          "action": "privacy",
+          "icon": cell.isPrivate ? "shield-off" : "shield-lock"
+        },
+        {
+          "label": qsTr("Cycle layout"),
+          "action": "layout",
+          "icon": "layout"
+        },
+        {
+          "label": qsTr("Move earlier"),
+          "action": "order_up",
+          "icon": "arrow-left"
+        },
+        {
+          "label": qsTr("Move later"),
+          "action": "order_down",
+          "icon": "arrow-right"
+        },
+        {
+          "label": qsTr("Close all windows"),
+          "action": "close_all",
+          "icon": "trash"
+        }
       ]
       onTriggered: action => {
-        if (action === "privacy") {
-          cell.overview?.toggleWorkspacePrivacy(cell.wsId, cell.wsName, !cell.isPrivate);
-        } else if (action === "layout") {
-          if (CompositorService.backend?.cycleWorkspaceLayout)
-            CompositorService.backend.cycleWorkspaceLayout(cell.wsName || cell.wsId);
-        } else if (action === "order_up") {
-          cell.overview?.moveWorkspaceOrder(cell.wsId, -1);
-        } else if (action === "order_down") {
-          cell.overview?.moveWorkspaceOrder(cell.wsId, 1);
-        } else if (action === "close_all") {
-          cell.closeAllWindows();
-        }
-      }
+                     if (action === "privacy") {
+                       cell.overview?.toggleWorkspacePrivacy(cell.wsId, cell.wsName, !cell.isPrivate);
+                     } else if (action === "layout") {
+                       if (CompositorService.backend?.cycleWorkspaceLayout)
+                       CompositorService.backend.cycleWorkspaceLayout(cell.wsName || cell.wsId);
+                     } else if (action === "order_up") {
+                       cell.overview?.moveWorkspaceOrder(cell.wsId, -1);
+                     } else if (action === "order_down") {
+                       cell.overview?.moveWorkspaceOrder(cell.wsId, 1);
+                     } else if (action === "close_all") {
+                       cell.closeAllWindows();
+                     }
+                   }
     }
   }
 }

@@ -64,27 +64,21 @@ Item {
     var parts = [];
 
     if (micActive) {
-      parts.push(micApps.length > 0
-                 ? I18n.tr("tooltips.privacy-indicator-mic", {
-                             "apps": micApps.join(", ")
-                           })
-                 : I18n.tr("tooltips.privacy-indicator-mic-active"));
+      parts.push(micApps.length > 0 ? I18n.tr("tooltips.privacy-indicator-mic", {
+                                                "apps": micApps.join(", ")
+                                              }) : I18n.tr("tooltips.privacy-indicator-mic-active"));
     }
 
     if (camActive) {
-      parts.push(camApps.length > 0
-                 ? I18n.tr("tooltips.privacy-indicator-cam", {
-                             "apps": camApps.join(", ")
-                           })
-                 : I18n.tr("tooltips.privacy-indicator-cam-active"));
+      parts.push(camApps.length > 0 ? I18n.tr("tooltips.privacy-indicator-cam", {
+                                                "apps": camApps.join(", ")
+                                              }) : I18n.tr("tooltips.privacy-indicator-cam-active"));
     }
 
     if (scrActive) {
-      parts.push(scrApps.length > 0
-                 ? I18n.tr("tooltips.privacy-indicator-screen", {
-                             "apps": scrApps.join(", ")
-                           })
-                 : I18n.tr("tooltips.privacy-indicator-screen-active"));
+      parts.push(scrApps.length > 0 ? I18n.tr("tooltips.privacy-indicator-screen", {
+                                                "apps": scrApps.join(", ")
+                                              }) : I18n.tr("tooltips.privacy-indicator-screen-active"));
     }
 
     if (cameraDetectionState === "limited")
@@ -92,9 +86,7 @@ Item {
     else if (cameraDetectionState === "timeout" || cameraDetectionState === "unavailable")
       parts.push(I18n.tr("tooltips.privacy-indicator-camera-unavailable"));
 
-    return parts.length > 0
-        ? parts.join("\n")
-        : I18n.tr("tooltips.privacy-indicator-idle");
+    return parts.length > 0 ? parts.join("\n") : I18n.tr("tooltips.privacy-indicator-idle");
   }
 
   NPopupContextMenu {

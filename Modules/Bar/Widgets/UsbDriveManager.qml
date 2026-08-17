@@ -113,20 +113,20 @@ NIconButton {
     ]
 
     onTriggered: action => {
-      contextMenu.close();
-      PanelService.closeContextMenu(screen);
-      if (action === "open-panel") {
-        UsbDriveService.refreshDevices();
-        PanelService.getPanel("usbDriveManagerPanel", screen)?.toggle(root);
-      } else if (action === "refresh") {
-        UsbDriveService.refreshDevices();
-      } else if (action === "unmount-all") {
-        UsbDriveService.unmountAll();
-      } else if (action === "eject-all") {
-        UsbDriveService.ejectAll();
-      } else if (action === "widget-settings") {
-        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-      }
-    }
+                   contextMenu.close();
+                   PanelService.closeContextMenu(screen);
+                   if (action === "open-panel") {
+                     UsbDriveService.refreshDevices();
+                     PanelService.getPanel("usbDriveManagerPanel", screen)?.toggle(root);
+                   } else if (action === "refresh") {
+                     UsbDriveService.refreshDevices();
+                   } else if (action === "unmount-all") {
+                     UsbDriveService.unmountAll();
+                   } else if (action === "eject-all") {
+                     UsbDriveService.ejectAll();
+                   } else if (action === "widget-settings") {
+                     BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+                   }
+                 }
   }
 }

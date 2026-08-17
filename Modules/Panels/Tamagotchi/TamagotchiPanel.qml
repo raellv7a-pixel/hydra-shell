@@ -1,6 +1,6 @@
+import QtMultimedia
 import QtQuick
 import QtQuick.Layouts
-import QtMultimedia
 import Quickshell
 import qs.Commons
 import qs.Modules.MainScreen
@@ -99,10 +99,26 @@ SmartPanel {
 
         Repeater {
           model: [
-            { "label": I18n.tr("tamagotchi.needs.hunger"), "value": TamagotchiService.hunger, "icon": "tools-kitchen-2" },
-            { "label": I18n.tr("tamagotchi.needs.happiness"), "value": TamagotchiService.happiness, "icon": "mood-smile" },
-            { "label": I18n.tr("tamagotchi.needs.cleanliness"), "value": TamagotchiService.cleanliness, "icon": "sparkles" },
-            { "label": I18n.tr("tamagotchi.needs.energy"), "value": TamagotchiService.energy, "icon": "bolt" }
+            {
+              "label": I18n.tr("tamagotchi.needs.hunger"),
+              "value": TamagotchiService.hunger,
+              "icon": "tools-kitchen-2"
+            },
+            {
+              "label": I18n.tr("tamagotchi.needs.happiness"),
+              "value": TamagotchiService.happiness,
+              "icon": "mood-smile"
+            },
+            {
+              "label": I18n.tr("tamagotchi.needs.cleanliness"),
+              "value": TamagotchiService.cleanliness,
+              "icon": "sparkles"
+            },
+            {
+              "label": I18n.tr("tamagotchi.needs.energy"),
+              "value": TamagotchiService.energy,
+              "icon": "bolt"
+            }
           ]
 
           delegate: ColumnLayout {

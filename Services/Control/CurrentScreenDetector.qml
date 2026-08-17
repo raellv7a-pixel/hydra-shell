@@ -117,19 +117,19 @@ Item {
                     screenDetectorWatchdog.restart();
                   }
 
-                  Timer {
-                    id: screenDetectorWatchdog
-                    running: false
-                    interval: 500
-                    onTriggered: {
-                      if (!root.pendingCallback)
-                        return;
-                      Logger.w("CurrentScreenDetector", "Async screen detection timed out — falling back to findScreenWithBar()");
-                      root.detectedScreen = root.findScreenWithBar();
-                      screenDetectorDebounce.stop();
-                      screenDetectorDebounce.triggered();
+                    Timer {
+                      id: screenDetectorWatchdog
+                      running: false
+                      interval: 500
+                      onTriggered: {
+                        if (!root.pendingCallback)
+                          return;
+                        Logger.w("CurrentScreenDetector", "Async screen detection timed out — falling back to findScreenWithBar()");
+                        root.detectedScreen = root.findScreenWithBar();
+                        screenDetectorDebounce.stop();
+                        screenDetectorDebounce.triggered();
+                      }
                     }
-                  }
 
                     Timer {
                       id: screenDetectorDebounce

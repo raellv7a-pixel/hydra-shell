@@ -73,12 +73,12 @@ NIconButton {
     command: ["sh", "-c", "command -v nvibrant >/dev/null 2>&1"]
 
     onExited: exitCode => {
-      if (exitCode === 0) {
-        applyProcess.running = true;
-      } else {
-        ToastService.showError(I18n.tr("bar.nvibrant.missing-binary-title"), I18n.tr("bar.nvibrant.missing-binary-description"));
-      }
-    }
+                if (exitCode === 0) {
+                  applyProcess.running = true;
+                } else {
+                  ToastService.showError(I18n.tr("bar.nvibrant.missing-binary-title"), I18n.tr("bar.nvibrant.missing-binary-description"));
+                }
+              }
   }
 
   Process {
@@ -87,14 +87,14 @@ NIconButton {
     command: root.buildCommand(root.pendingEnabled ? root.vibranceValue : 0)
 
     onExited: exitCode => {
-      if (exitCode === 0) {
-        Settings.data.nvibrant.enabled = root.pendingEnabled;
-      } else {
-        ToastService.showError(I18n.tr("bar.nvibrant.apply-failed-title"), I18n.tr("bar.nvibrant.apply-failed-description", {
-                                                                                   "code": exitCode
-                                                                                 }));
-      }
-    }
+                if (exitCode === 0) {
+                  Settings.data.nvibrant.enabled = root.pendingEnabled;
+                } else {
+                  ToastService.showError(I18n.tr("bar.nvibrant.apply-failed-title"), I18n.tr("bar.nvibrant.apply-failed-description", {
+                                                                                               "code": exitCode
+                                                                                             }));
+                }
+              }
   }
 
   NPopupContextMenu {

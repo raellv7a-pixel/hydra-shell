@@ -286,10 +286,10 @@ Singleton {
       process.onPhaseCb(stage);
     }
     Qt.callLater(() => {
-      if (process) {
-        process.running = true;
-      }
-    });
+                   if (process) {
+                     process.running = true;
+                   }
+                 });
   }
 
   function _wallpaperDirectory() {

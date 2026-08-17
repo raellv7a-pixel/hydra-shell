@@ -17,35 +17,32 @@ Rectangle {
   property bool privateWindow: true
   property bool dragArmed: false
 
-  readonly property bool isSelected: overview?.selectedWindowAddresses
-      ? overview.selectedWindowAddresses.includes(windowData.addr)
-      : false
+  readonly property bool isSelected: overview?.selectedWindowAddresses ? overview.selectedWindowAddresses.includes(windowData.addr) : false
   readonly property bool isGrouped: windowData.grouped === true
 
   radius: Style.radiusS
-  color: isSelected ? Qt.alpha(Color.mPrimary, 0.25)
-                    : (privateWindow ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh)
+  color: isSelected ? Qt.alpha(Color.mPrimary, 0.25) : (privateWindow ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh)
   border.width: isSelected || dragArmed ? Style.borderM : Style.borderS
-  border.color: isSelected || dragArmed ? Color.mPrimary
-                                        : (windowArea.containsMouse ? Color.mOutline : Qt.alpha(Color.mOutline, 0.64))
+  border.color: isSelected || dragArmed ? Color.mPrimary : (windowArea.containsMouse ? Color.mOutline : Qt.alpha(Color.mOutline, 0.64))
   scale: dragArmed ? 1.035 : 1
 
   Behavior on scale {
-    SpringAnimation { spring: 4.5; damping: 0.42 }
+    SpringAnimation {
+      spring: 4.5
+      damping: 0.42
+    }
   }
 
   Process {
     id: privacyProbe
-    command: ["hyprctl", "-j", "getprop",
-              "address:" + String(root.windowData.addr), "no_screen_share"]
+    command: ["hyprctl", "-j", "getprop", "address:" + String(root.windowData.addr), "no_screen_share"]
     running: root.active
 
     stdout: StdioCollector {
       onStreamFinished: {
         try {
           const result = JSON.parse(this.text.trim());
-          root.privateWindow = root.overview.isWindowPrivate(root.windowData.addr,
-                                                             result.no_screen_share === true);
+          root.privateWindow = root.overview.isWindowPrivate(root.windowData.addr, result.no_screen_share === true);
         } catch (error) {
           root.privateWindow = true;
         }
@@ -126,9 +123,7 @@ Rectangle {
     NText {
       width: parent.width
       horizontalAlignment: Text.AlignHCenter
-      text: root.privateWindow ? qsTr("Private window")
-                               : (!root.privacyKnown ? qsTr("Checking privacy…")
-                                                     : root.windowData.title)
+      text: root.privateWindow ? qsTr("Private window") : (!root.privacyKnown ? qsTr("Checking privacy…") : root.windowData.title)
       pointSize: Style.fontSizeXS
       color: Color.mOnSurfaceVariant
     }
@@ -165,8 +160,7 @@ Rectangle {
     interval: 180
     onTriggered: {
       root.dragArmed = true;
-      root.overview.startDrag(root.windowData.tl, root.windowData.addr,
-                              root.windowData.workspaceId);
+      root.overview.startDrag(root.windowData.tl, root.windowData.addr, root.windowData.workspaceId);
     }
   }
 
@@ -180,18 +174,17 @@ Rectangle {
 
     onPressed: holdTimer.restart()
     onReleased: mouse => {
-      holdTimer.stop();
-      if (root.dragArmed) {
-        dragItem.Drag.drop();
-        Qt.callLater(() => root.overview.endDrag());
-      } else if (mouse.modifiers & Qt.ShiftModifier || mouse.modifiers & Qt.ControlModifier) {
-        root.overview?.toggleWindowSelection(root.windowData.addr);
-      } else {
-        root.overview.switchWorkspace(root.windowData.workspaceId,
-                                      root.windowData.workspaceName);
-      }
-      root.dragArmed = false;
-    }
+                  holdTimer.stop();
+                  if (root.dragArmed) {
+                    dragItem.Drag.drop();
+                    Qt.callLater(() => root.overview.endDrag());
+                  } else if (mouse.modifiers & Qt.ShiftModifier || mouse.modifiers & Qt.ControlModifier) {
+                    root.overview?.toggleWindowSelection(root.windowData.addr);
+                  } else {
+                    root.overview.switchWorkspace(root.windowData.workspaceId, root.windowData.workspaceName);
+                  }
+                  root.dragArmed = false;
+                }
     onCanceled: {
       holdTimer.stop();
       root.dragArmed = false;
@@ -223,9 +216,9 @@ Rectangle {
       hoverEnabled: true
       cursorShape: Qt.PointingHandCursor
       onClicked: mouse => {
-        mouse.accepted = true;
-        root.overview.closeWindow(root.windowData.tl, root.windowData.addr);
-      }
+                   mouse.accepted = true;
+                   root.overview.closeWindow(root.windowData.tl, root.windowData.addr);
+                 }
     }
   }
 }

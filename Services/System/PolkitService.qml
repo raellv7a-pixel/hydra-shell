@@ -14,11 +14,11 @@ Singleton {
   property bool autoFocus: true
 
   readonly property var settings: ({
-    "enabled": root.enabled,
-    "position": root.position,
-    "errorShake": root.errorShake,
-    "autoFocus": root.autoFocus
-  })
+                                     "enabled": root.enabled,
+                                     "position": root.position,
+                                     "errorShake": root.errorShake,
+                                     "autoFocus": root.autoFocus
+                                   })
 
   FileView {
     id: settingsFileView
@@ -28,12 +28,16 @@ Singleton {
       try {
         var parsed = JSON.parse(text());
         if (parsed && typeof parsed === "object") {
-          if (parsed.enabled !== undefined) root.enabled = parsed.enabled;
-          if (parsed.position !== undefined) root.position = parsed.position;
-          if (parsed.errorShake !== undefined) root.errorShake = parsed.errorShake;
-          if (parsed.autoFocus !== undefined) root.autoFocus = parsed.autoFocus;
+          if (parsed.enabled !== undefined)
+          root.enabled = parsed.enabled;
+          if (parsed.position !== undefined)
+          root.position = parsed.position;
+          if (parsed.errorShake !== undefined)
+          root.errorShake = parsed.errorShake;
+          if (parsed.autoFocus !== undefined)
+          root.autoFocus = parsed.autoFocus;
         }
-      } catch(e) {}
+      } catch (e) {}
     }
   }
 
@@ -41,13 +45,13 @@ Singleton {
     try {
       var file = Settings.configDir + "security.json";
       var dataStr = JSON.stringify({
-        "enabled": root.enabled,
-        "position": root.position,
-        "errorShake": root.errorShake,
-        "autoFocus": root.autoFocus
-      }, null, 2);
+                                     "enabled": root.enabled,
+                                     "position": root.position,
+                                     "errorShake": root.errorShake,
+                                     "autoFocus": root.autoFocus
+                                   }, null, 2);
       Quickshell.execDetached(["bash", "-c", "cat << 'EOF' > " + file + "\n" + dataStr + "\nEOF"]);
-    } catch(e) {
+    } catch (e) {
       Logger.e("PolkitService", "Failed to save security settings:", e);
     }
   }

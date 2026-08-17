@@ -255,7 +255,6 @@ Item {
         }
       }
     }
-
   }
 
   MouseArea {

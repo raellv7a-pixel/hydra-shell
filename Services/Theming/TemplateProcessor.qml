@@ -240,8 +240,7 @@ Singleton {
     if (!app.colorsToCompare || !app.compareTo)
       return;
 
-    const candidates = app.colorsToCompare.map(candidate =>
-                                                  `{ name = "${escapeTomlString(candidate.name)}", color = "${escapeTomlString(candidate.color)}" }`);
+    const candidates = app.colorsToCompare.map(candidate => `{ name = "${escapeTomlString(candidate.name)}", color = "${escapeTomlString(candidate.color)}" }`);
     lines.push(`colors_to_compare = [${candidates.join(", ")}]`);
     lines.push(`compare_to = "${escapeTomlString(app.compareTo)}"`);
   }
@@ -345,23 +344,23 @@ Singleton {
   // Only the roles that template actually consumes — the rest of Color.qml's
   // properties are derived locally (blend()) from these, not sourced from Python.
   readonly property var colorKeyMap: ({
-                                         "mPrimary": "primary",
-                                         "mOnPrimary": "on_primary",
-                                         "mSecondary": "secondary",
-                                         "mOnSecondary": "on_secondary",
-                                         "mTertiary": "tertiary",
-                                         "mOnTertiary": "on_tertiary",
-                                         "mError": "error",
-                                         "mOnError": "on_error",
-                                         "mSurface": "surface",
-                                         "mOnSurface": "on_surface",
-                                         "mSurfaceVariant": "surface_container",
-                                         "mOnSurfaceVariant": "on_surface_variant",
-                                         "mOutline": "outline_variant",
-                                         "mShadow": "shadow",
-                                         "mHover": "tertiary",
-                                         "mOnHover": "on_tertiary"
-                                       })
+                                        "mPrimary": "primary",
+                                        "mOnPrimary": "on_primary",
+                                        "mSecondary": "secondary",
+                                        "mOnSecondary": "on_secondary",
+                                        "mTertiary": "tertiary",
+                                        "mOnTertiary": "on_tertiary",
+                                        "mError": "error",
+                                        "mOnError": "on_error",
+                                        "mSurface": "surface",
+                                        "mOnSurface": "on_surface",
+                                        "mSurfaceVariant": "surface_container",
+                                        "mOnSurfaceVariant": "on_surface_variant",
+                                        "mOutline": "outline_variant",
+                                        "mShadow": "shadow",
+                                        "mHover": "tertiary",
+                                        "mOnHover": "on_tertiary"
+                                      })
 
   function mapToColorKeys(pythonDict) {
     if (!pythonDict)
@@ -428,8 +427,8 @@ Singleton {
       return;
     }
     const process = previewProcessComponent.createObject(root, {
-                                                             "callback": callback
-                                                           });
+                                                           "callback": callback
+                                                         });
     if (!process) {
       callback(null);
       return;

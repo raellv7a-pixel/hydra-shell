@@ -298,12 +298,12 @@ SmartPanel {
       initialPath: Settings.data.wallpaper.directory || Quickshell.env("HOME") + "/Pictures"
       nameFilters: [I18n.tr("wallpaper.panel.import-filter-media") + " (*.webm *.mp4 *.mkv *.mov *.png *.jpg *.jpeg *.webp)", I18n.tr("wallpaper.panel.import-filter-all") + " (*)"]
       onAccepted: paths => {
-        if (paths.length === 0) {
-          return;
-        }
-        panelContent.applyWallpaper(paths[0]);
-        ToastService.showNotice(I18n.tr("wallpaper.panel.applied-toast-title"), I18n.tr("wallpaper.panel.applied-toast-body"), "check", 3000);
-      }
+                    if (paths.length === 0) {
+                      return;
+                    }
+                    panelContent.applyWallpaper(paths[0]);
+                    ToastService.showNotice(I18n.tr("wallpaper.panel.applied-toast-title"), I18n.tr("wallpaper.panel.applied-toast-body"), "check", 3000);
+                  }
     }
 
     RowLayout {
@@ -342,10 +342,10 @@ SmartPanel {
             settingsPanel.open();
           }
           onWallhavenSettingsRequested: anchorItem => {
-            if (wallhavenSettingsPopup.item) {
-              wallhavenSettingsPopup.item.showAt(anchorItem);
-            }
-          }
+                                          if (wallhavenSettingsPopup.item) {
+                                            wallhavenSettingsPopup.item.showAt(anchorItem);
+                                          }
+                                        }
           onWallhavenQueryChanged: query => wallhavenView.search(query)
           onFocusGridRequested: {
             // Only hand focus over when the grid can actually take it —
@@ -405,10 +405,10 @@ SmartPanel {
                   upscalePrompt: upscalePromptItem
                   // Only the visible screen's gallery may drive the preview.
                   onPreviewRequested: candidate => {
-                    if (modelData?.name === panelContent.currentScreenName) {
-                      panelContent.previewCandidate = candidate;
-                    }
-                  }
+                                        if (modelData?.name === panelContent.currentScreenName) {
+                                          panelContent.previewCandidate = candidate;
+                                        }
+                                      }
                 }
               }
             }

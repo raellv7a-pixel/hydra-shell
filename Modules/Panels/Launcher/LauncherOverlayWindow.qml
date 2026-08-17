@@ -187,7 +187,7 @@ Variants {
         Component.onCompleted: {
           Qt.callLater(() => {
                          if (!windowLoader.closing)
-                           presented = true;
+                         presented = true;
                        });
         }
 

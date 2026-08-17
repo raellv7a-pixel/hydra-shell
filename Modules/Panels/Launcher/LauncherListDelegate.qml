@@ -78,8 +78,18 @@ NBox {
     transformOrigin: Item.Center
     z: 5
 
-    Behavior on scale { ScaleAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic } }
-    Behavior on opacity { OpacityAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic } }
+    Behavior on scale {
+      ScaleAnimator {
+        duration: Style.animationFast
+        easing.type: Easing.OutCubic
+      }
+    }
+    Behavior on opacity {
+      OpacityAnimator {
+        duration: Style.animationFast
+        easing.type: Easing.OutCubic
+      }
+    }
   }
 
   ColumnLayout {
@@ -310,7 +320,6 @@ NBox {
           }
         }
       }
-
     }
   }
 

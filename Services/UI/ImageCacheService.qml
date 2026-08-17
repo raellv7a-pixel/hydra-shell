@@ -30,7 +30,8 @@ Singleton {
   readonly property var imageFilters: imageMagickAvailable ? extendedImageFilters : basicImageFilters
 
   function isVideoPath(filePath) {
-    if (!filePath) return false;
+    if (!filePath)
+      return false;
     const ext = "*." + filePath.toLowerCase().split('.').pop();
     return videoFilters.includes(ext);
   }

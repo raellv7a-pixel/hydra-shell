@@ -216,11 +216,11 @@ Singleton {
 
     // Initialize cache file path
     Qt.callLater(() => {
-      if (typeof Settings !== 'undefined' && Settings.cacheDir) {
-        wallpaperCacheFile = Settings.cacheDir + "wallpapers.json";
-        wallpaperCacheView.path = wallpaperCacheFile;
-      }
-    });
+                   if (typeof Settings !== 'undefined' && Settings.cacheDir) {
+                     wallpaperCacheFile = Settings.cacheDir + "wallpapers.json";
+                     wallpaperCacheView.path = wallpaperCacheFile;
+                   }
+                 });
 
     // Note: isInitialized will be set to true in wallpaperCacheView.onLoaded
     Logger.d("Wallpaper", "Triggering initial wallpaper scan");
@@ -605,8 +605,8 @@ Singleton {
         names.add(Quickshell.screens[i].name);
       }
       names.forEach(name => {
-        _applyIntentGeneration[name] = (_applyIntentGeneration[name] || 0) + 1;
-      });
+                      _applyIntentGeneration[name] = (_applyIntentGeneration[name] || 0) + 1;
+                    });
     }
     var key = _applyIntentKey(screenName);
     _applyIntentGeneration[key] = (_applyIntentGeneration[key] || 0) + 1;

@@ -230,11 +230,11 @@ Item {
         }
 
         onKeyPressed: event => {
-          if (Keybinds.checkKey(event, 'enter', Settings)) {
-            root.activateCurrentIndex();
-            event.accepted = true;
-          }
-        }
+                        if (Keybinds.checkKey(event, 'enter', Settings)) {
+                          root.activateCurrentIndex();
+                          event.accepted = true;
+                        }
+                      }
 
         delegate: WallpaperGridCard {
           id: card

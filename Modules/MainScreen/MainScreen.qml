@@ -32,9 +32,9 @@ import qs.Modules.Panels.Tamagotchi
 import qs.Modules.Panels.Tray
 import qs.Modules.Panels.UsbDriveManager
 import qs.Modules.Panels.Wallpaper
+import qs.Modules.Polkit
 import qs.Modules.ScreenShare
 import qs.Modules.ScreenToolkit
-import qs.Modules.Polkit
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI

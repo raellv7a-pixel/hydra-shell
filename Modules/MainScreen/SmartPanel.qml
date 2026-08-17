@@ -1347,8 +1347,8 @@ Item {
           // Make panel visible, now only the intended dimension will animate
           root.isPanelVisible = true;
 
-            root.sizeAnimationComplete = true;
-            opacityTrigger.start();
+          root.sizeAnimationComplete = true;
+          opacityTrigger.start();
 
           // Start open watchdog timer (skip when animations disabled - everything completes synchronously)
           if (!root.animationsDisabled) {
