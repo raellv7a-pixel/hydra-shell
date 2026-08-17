@@ -68,10 +68,10 @@ Singleton {
 
     // Load changelog state from ShellState
     Qt.callLater(() => {
-                   if (typeof ShellState !== 'undefined' && ShellState.isLoaded) {
-                     loadChangelogState();
-                   }
-                 });
+      if (typeof ShellState !== 'undefined' && ShellState.isLoaded) {
+        loadChangelogState();
+      }
+    });
   }
 
   Connections {

@@ -45,9 +45,9 @@ Item {
     // Restart on the next turn so a path change mid-run doesn't drop the
     // relaunch on the floor.
     Qt.callLater(() => {
-                   statProcess.running = false;
-                   statProcess.running = true;
-                 });
+      statProcess.running = false;
+      statProcess.running = true;
+    });
 
     // Videos can't be decoded by the Image probe; their dimensions stay unknown.
     if (_isVideo(target)) {

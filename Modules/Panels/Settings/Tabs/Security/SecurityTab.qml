@@ -50,15 +50,23 @@ ColumnLayout {
         description: "Escolha onde o prompt de senha de administrador será exibido"
         currentKey: PolkitService.position
         model: [
-          { key: "center", name: "Centralizado no Centro da Tela" },
-          { key: "attached", name: "Acoplado à Barra Superior da Shell" }
+          {
+            key: "center",
+            name: "Centralizado no Centro da Tela"
+          },
+          {
+            key: "attached",
+            name: "Acoplado à Barra Superior da Shell"
+          }
         ]
         onSelected: key => {
           PolkitService.position = key;
         }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Comportamento & Efeitos Visuais"

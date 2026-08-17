@@ -40,6 +40,8 @@ YES=false
 SKIP_FORMAT=false
 for arg in "$@"; do
   case "$arg" in
+    -y|--yes) YES=true ;;
+    --skip-format) SKIP_FORMAT=true ;;
   esac
 done
 

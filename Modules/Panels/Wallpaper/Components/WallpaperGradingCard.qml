@@ -72,85 +72,86 @@ Item {
   function applyPreset(name) {
     activePreset = name;
     switch (name) {
-      case "Cyberpunk":
-        brightnessValue = 0.1;
-        contrastValue = 0.35;
-        saturationValue = 0.6;
-        warmthValue = -0.4;
-        vignetteActive = true;
-        break;
-      case "Vaporwave":
-        brightnessValue = 0.15;
-        contrastValue = 0.2;
-        saturationValue = 0.5;
-        warmthValue = -0.3;
-        vignetteActive = false;
-        break;
-      case "Sunset":
-        brightnessValue = 0.05;
-        contrastValue = 0.25;
-        saturationValue = 0.4;
-        warmthValue = 0.6;
-        vignetteActive = false;
-        break;
-      case "Cinematic":
-        brightnessValue = -0.05;
-        contrastValue = 0.3;
-        saturationValue = -0.15;
-        warmthValue = 0.1;
-        vignetteActive = true;
-        break;
-      case "Emerald":
-        brightnessValue = 0.0;
-        contrastValue = 0.2;
-        saturationValue = 0.3;
-        warmthValue = -0.5;
-        vignetteActive = false;
-        break;
-      case "Vintage":
-        brightnessValue = 0.1;
-        contrastValue = -0.1;
-        saturationValue = -0.3;
-        warmthValue = 0.4;
-        vignetteActive = true;
-        break;
-      case "Monochrome":
-        brightnessValue = 0.0;
-        contrastValue = 0.2;
-        saturationValue = -1.0;
-        warmthValue = 0.0;
-        vignetteActive = false;
-        break;
-      case "Warm Dusk":
-        brightnessValue = 0.08;
-        contrastValue = 0.15;
-        saturationValue = 0.25;
-        warmthValue = 0.5;
-        vignetteActive = false;
-        break;
-      case "Cool Dusk":
-        brightnessValue = -0.08;
-        contrastValue = 0.2;
-        saturationValue = 0.2;
-        warmthValue = -0.5;
-        vignetteActive = true;
-        break;
-      case "Deep Blue":
-        brightnessValue = -0.1;
-        contrastValue = 0.25;
-        saturationValue = 0.35;
-        warmthValue = -0.7;
-        vignetteActive = true;
-        break;
-      case "Original":
-      default:
-        resetGrading();
-        break;
+    case "Cyberpunk":
+      brightnessValue = 0.1;
+      contrastValue = 0.35;
+      saturationValue = 0.6;
+      warmthValue = -0.4;
+      vignetteActive = true;
+      break;
+    case "Vaporwave":
+      brightnessValue = 0.15;
+      contrastValue = 0.2;
+      saturationValue = 0.5;
+      warmthValue = -0.3;
+      vignetteActive = false;
+      break;
+    case "Sunset":
+      brightnessValue = 0.05;
+      contrastValue = 0.25;
+      saturationValue = 0.4;
+      warmthValue = 0.6;
+      vignetteActive = false;
+      break;
+    case "Cinematic":
+      brightnessValue = -0.05;
+      contrastValue = 0.3;
+      saturationValue = -0.15;
+      warmthValue = 0.1;
+      vignetteActive = true;
+      break;
+    case "Emerald":
+      brightnessValue = 0.0;
+      contrastValue = 0.2;
+      saturationValue = 0.3;
+      warmthValue = -0.5;
+      vignetteActive = false;
+      break;
+    case "Vintage":
+      brightnessValue = 0.1;
+      contrastValue = -0.1;
+      saturationValue = -0.3;
+      warmthValue = 0.4;
+      vignetteActive = true;
+      break;
+    case "Monochrome":
+      brightnessValue = 0.0;
+      contrastValue = 0.2;
+      saturationValue = -1.0;
+      warmthValue = 0.0;
+      vignetteActive = false;
+      break;
+    case "Warm Dusk":
+      brightnessValue = 0.08;
+      contrastValue = 0.15;
+      saturationValue = 0.25;
+      warmthValue = 0.5;
+      vignetteActive = false;
+      break;
+    case "Cool Dusk":
+      brightnessValue = -0.08;
+      contrastValue = 0.2;
+      saturationValue = 0.2;
+      warmthValue = -0.5;
+      vignetteActive = true;
+      break;
+    case "Deep Blue":
+      brightnessValue = -0.1;
+      contrastValue = 0.25;
+      saturationValue = 0.35;
+      warmthValue = -0.7;
+      vignetteActive = true;
+      break;
+    case "Original":
+    default:
+      resetGrading();
+      break;
     }
   }
 
   function bakePreview() {
-    if (wallpaperPath === "" || isVideoWallpaper) return;
+    if (wallpaperPath === "" || isVideoWallpaper)
+      return;
     isBaking = true;
 
     var br = Math.round(100 + brightnessValue * 100);
@@ -162,20 +163,16 @@ Item {
 
     var outPath = "/tmp/hydra-graded-preview.png";
 
-    var cmd = "src='" + wallpaperPath.replace(/'/g, "'\\''") + "'; out='" + outPath + "'; " +
-      "args=(-resize '600x600>'); " +
-      "if [ '" + warmthValue + "' != '0' ]; then args+=(-channel R -evaluate multiply " + rmul + " +channel -channel B -evaluate multiply " + bmul + " +channel); fi; " +
-      "args+=(-modulate '" + br + "," + sat + ",100'); " +
-      "if [ '" + ct + "' != '0' ]; then args+=(-brightness-contrast '0x" + ct + "'); fi; " +
-      "if [ '" + (vignetteActive ? 1 : 0) + "' = '1' ]; then args+=(-background black -vignette 0x18); fi; " +
-      "exec magick \"$src\" \"${args[@]}\" \"$out\" 2>/dev/null";
+    var cmd = "src='" + wallpaperPath.replace(/'/g, "'\\''") + "'; out='" + outPath + "'; " + "args=(-resize '600x600>'); " + "if [ '" + warmthValue + "' != '0' ]; then args+=(-channel R -evaluate multiply " + rmul + " +channel -channel B -evaluate multiply " + bmul + " +channel); fi; " + "args+=(-modulate '" + br + "," + sat + ",100'); " + "if [ '" + ct
+        + "' != '0' ]; then args+=(-brightness-contrast '0x" + ct + "'); fi; " + "if [ '" + (vignetteActive ? 1 : 0) + "' = '1' ]; then args+=(-background black -vignette 0x18); fi; " + "exec magick \"$src\" \"${args[@]}\" \"$out\" 2>/dev/null";
 
     bakeProc.command = ["bash", "-c", cmd];
     bakeProc.running = true;
   }
 
   function applyFullGraded() {
-    if (wallpaperPath === "" || isVideoWallpaper) return;
+    if (wallpaperPath === "" || isVideoWallpaper)
+      return;
     isBaking = true;
 
     var br = Math.round(100 + brightnessValue * 100);
@@ -187,13 +184,8 @@ Item {
     var destDir = Quickshell.env("HOME") + "/Pictures/Wallpapers";
     var outPath = destDir + "/hydra-graded-" + Date.now() + ".png";
 
-    var cmd = "mkdir -p '" + destDir + "'; src='" + wallpaperPath.replace(/'/g, "'\\''") + "'; out='" + outPath + "'; " +
-      "args=(); " +
-      "if [ '" + warmthValue + "' != '0' ]; then args+=(-channel R -evaluate multiply " + rmul + " +channel -channel B -evaluate multiply " + bmul + " +channel); fi; " +
-      "args+=(-modulate '" + br + "," + sat + ",100'); " +
-      "if [ '" + ct + "' != '0' ]; then args+=(-brightness-contrast '0x" + ct + "'); fi; " +
-      "if [ '" + (vignetteActive ? 1 : 0) + "' = '1' ]; then args+=(-background black -vignette 0x18); fi; " +
-      "exec magick \"$src\" \"${args[@]}\" \"$out\" 2>/dev/null";
+    var cmd = "mkdir -p '" + destDir + "'; src='" + wallpaperPath.replace(/'/g, "'\\''") + "'; out='" + outPath + "'; " + "args=(); " + "if [ '" + warmthValue + "' != '0' ]; then args+=(-channel R -evaluate multiply " + rmul + " +channel -channel B -evaluate multiply " + bmul + " +channel); fi; " + "args+=(-modulate '" + br + "," + sat + ",100'); "
+        + "if [ '" + ct + "' != '0' ]; then args+=(-brightness-contrast '0x" + ct + "'); fi; " + "if [ '" + (vignetteActive ? 1 : 0) + "' = '1' ]; then args+=(-background black -vignette 0x18); fi; " + "exec magick \"$src\" \"${args[@]}\" \"$out\" 2>/dev/null";
 
     applyProc.targetOutPath = outPath;
     applyProc.command = ["bash", "-c", cmd];
@@ -316,7 +308,9 @@ Item {
           }
         }
 
-        NDivider { Layout.fillWidth: true }
+        NDivider {
+          Layout.fillWidth: true
+        }
 
         NText {
           text: "Presets de Estilo (Filtros de Cor)"
@@ -347,7 +341,9 @@ Item {
           }
         }
 
-        NDivider { Layout.fillWidth: true }
+        NDivider {
+          Layout.fillWidth: true
+        }
 
         NText {
           text: "Ajustes Finos"
@@ -364,7 +360,12 @@ Item {
           // Brightness Slider
           RowLayout {
             Layout.fillWidth: true
-            NText { text: "Brilho"; pointSize: Style.fontSizeS; color: Color.mOnSurface; Layout.preferredWidth: 80 }
+            NText {
+              text: "Brilho"
+              pointSize: Style.fontSizeS
+              color: Color.mOnSurface
+              Layout.preferredWidth: 80
+            }
             Slider {
               Layout.fillWidth: true
               from: -1.0
@@ -372,13 +373,23 @@ Item {
               value: root.brightnessValue
               onValueChanged: root.brightnessValue = value
             }
-            NText { text: Math.round(root.brightnessValue * 100) + "%"; pointSize: Style.fontSizeS; color: Color.mPrimary; Layout.preferredWidth: 40 }
+            NText {
+              text: Math.round(root.brightnessValue * 100) + "%"
+              pointSize: Style.fontSizeS
+              color: Color.mPrimary
+              Layout.preferredWidth: 40
+            }
           }
 
           // Contrast Slider
           RowLayout {
             Layout.fillWidth: true
-            NText { text: "Contraste"; pointSize: Style.fontSizeS; color: Color.mOnSurface; Layout.preferredWidth: 80 }
+            NText {
+              text: "Contraste"
+              pointSize: Style.fontSizeS
+              color: Color.mOnSurface
+              Layout.preferredWidth: 80
+            }
             Slider {
               Layout.fillWidth: true
               from: -1.0
@@ -386,13 +397,23 @@ Item {
               value: root.contrastValue
               onValueChanged: root.contrastValue = value
             }
-            NText { text: Math.round(root.contrastValue * 100) + "%"; pointSize: Style.fontSizeS; color: Color.mPrimary; Layout.preferredWidth: 40 }
+            NText {
+              text: Math.round(root.contrastValue * 100) + "%"
+              pointSize: Style.fontSizeS
+              color: Color.mPrimary
+              Layout.preferredWidth: 40
+            }
           }
 
           // Saturation Slider
           RowLayout {
             Layout.fillWidth: true
-            NText { text: "Saturação"; pointSize: Style.fontSizeS; color: Color.mOnSurface; Layout.preferredWidth: 80 }
+            NText {
+              text: "Saturação"
+              pointSize: Style.fontSizeS
+              color: Color.mOnSurface
+              Layout.preferredWidth: 80
+            }
             Slider {
               Layout.fillWidth: true
               from: -1.0
@@ -400,13 +421,23 @@ Item {
               value: root.saturationValue
               onValueChanged: root.saturationValue = value
             }
-            NText { text: Math.round(root.saturationValue * 100) + "%"; pointSize: Style.fontSizeS; color: Color.mPrimary; Layout.preferredWidth: 40 }
+            NText {
+              text: Math.round(root.saturationValue * 100) + "%"
+              pointSize: Style.fontSizeS
+              color: Color.mPrimary
+              Layout.preferredWidth: 40
+            }
           }
 
           // Warmth Slider
           RowLayout {
             Layout.fillWidth: true
-            NText { text: "Temperatura"; pointSize: Style.fontSizeS; color: Color.mOnSurface; Layout.preferredWidth: 80 }
+            NText {
+              text: "Temperatura"
+              pointSize: Style.fontSizeS
+              color: Color.mOnSurface
+              Layout.preferredWidth: 80
+            }
             Slider {
               Layout.fillWidth: true
               from: -1.0
@@ -414,11 +445,18 @@ Item {
               value: root.warmthValue
               onValueChanged: root.warmthValue = value
             }
-            NText { text: Math.round(root.warmthValue * 100) + "%"; pointSize: Style.fontSizeS; color: Color.mPrimary; Layout.preferredWidth: 40 }
+            NText {
+              text: Math.round(root.warmthValue * 100) + "%"
+              pointSize: Style.fontSizeS
+              color: Color.mPrimary
+              Layout.preferredWidth: 40
+            }
           }
         }
 
-        Item { Layout.fillHeight: true }
+        Item {
+          Layout.fillHeight: true
+        }
 
         NButton {
           Layout.fillWidth: true

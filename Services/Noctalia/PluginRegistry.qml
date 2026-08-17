@@ -373,9 +373,9 @@ Singleton {
     adapter.sources = root.pluginSources;
 
     Qt.callLater(() => {
-                   pluginsFileView.writeAdapter();
-                   Logger.d("PluginRegistry", "Plugin states saved");
-                 });
+      pluginsFileView.writeAdapter();
+      Logger.d("PluginRegistry", "Plugin states saved");
+    });
   }
 
   // Enable/disable a plugin

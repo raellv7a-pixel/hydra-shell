@@ -18,8 +18,8 @@ Item {
       }
 
       root.pluginApi.withCurrentScreen(screen => {
-                                         root.pluginApi.togglePanel(screen);
-                                       });
+        root.pluginApi.togglePanel(screen);
+      });
     }
   }
 }

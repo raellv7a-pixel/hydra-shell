@@ -3,10 +3,10 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import "../../../../../Helpers/HyprlandBindsParser.js" as HyprlandBindsParser
 import qs.Commons
 import qs.Services.Compositor
 import qs.Widgets
-import "../../../../../Helpers/HyprlandBindsParser.js" as HyprlandBindsParser
 
 // Full-parity Atalhos sub-tab (PLANO_INTEGRACAO_HYPRMOD.md §5/§7.4):
 // - legend of every *described* shipped bind, read live via `hyprctl binds
@@ -79,7 +79,11 @@ ColumnLayout {
 
   function addKeybind() {
     var arr = (HyprlandDraftStore.val("keybinds") || []).slice();
-    arr.push({ "combo": "", "command": "", "description": "" });
+    arr.push({
+               "combo": "",
+               "command": "",
+               "description": ""
+             });
     HyprlandDraftStore.edit("keybinds", arr);
   }
 

@@ -26,18 +26,16 @@ Item {
     return {};
   }
 
-  readonly property bool showPercentage: widgetSettings.showPercentage !== undefined
-    ? widgetSettings.showPercentage
-    : widgetMetadata.showPercentage
+  readonly property bool showPercentage: widgetSettings.showPercentage !== undefined ? widgetSettings.showPercentage : widgetMetadata.showPercentage
   readonly property string barPosition: Settings.getBarPositionForScreen(screenName)
   readonly property bool barIsVertical: barPosition === "left" || barPosition === "right"
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property int roundedNeed: Math.round(TamagotchiService.lowestNeed)
   readonly property string stateLabel: I18n.tr("tamagotchi.states." + TamagotchiService.petState)
   readonly property string tooltipText: I18n.tr("tamagotchi.bar.tooltip", {
-                                                 "state": stateLabel,
-                                                 "need": roundedNeed
-                                               })
+                                                  "state": stateLabel,
+                                                  "need": roundedNeed
+                                                })
 
   implicitWidth: barIsVertical ? capsuleHeight : visualRow.implicitWidth + Style.margin2S
   implicitHeight: capsuleHeight

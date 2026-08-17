@@ -101,19 +101,7 @@ Item {
       }
     }
 
-    const borderFields = [
-      "borderWidth",
-      "borderScope",
-      "borderColorMode",
-      "borderColorCount",
-      "borderColor1",
-      "borderColor2",
-      "borderColor3",
-      "borderColor4",
-      "borderColor5",
-      "borderAnimation",
-      "borderSpeed"
-    ];
+    const borderFields = ["borderWidth", "borderScope", "borderColorMode", "borderColorCount", "borderColor1", "borderColor2", "borderColor3", "borderColor4", "borderColor5", "borderAnimation", "borderSpeed"];
     if (source.borderEnabled === true) {
       target.borderEnabled = true;
       for (let i = 0; i < borderFields.length; i++) {
@@ -156,13 +144,7 @@ Item {
     if (!style || String(style.borderColorMode || "auto") !== "custom")
       return [Color.mPrimary, Color.mSecondary, Color.mTertiary, Color.mError];
 
-    const source = [
-      style.borderColor1,
-      style.borderColor2,
-      style.borderColor3,
-      style.borderColor4,
-      style.borderColor5
-    ];
+    const source = [style.borderColor1, style.borderColor2, style.borderColor3, style.borderColor4, style.borderColor5];
     const count = Math.max(3, Math.min(5, Number(style.borderColorCount || 3)));
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -358,35 +340,67 @@ Item {
         let d = ((t % 1) + 1) % 1 * perimeter;
 
         if (d < top)
-          return { x: x + r + d, y: y, angle: 0 };
+          return {
+            x: x + r + d,
+            y: y,
+            angle: 0
+          };
         d -= top;
         if (d < arc) {
           const a = -Math.PI / 2 + d / arc * Math.PI / 2;
-          return { x: x + w - r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + w - r + Math.cos(a) * r,
+            y: y + r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < side)
-          return { x: x + w, y: y + r + d, angle: Math.PI / 2 };
+          return {
+            x: x + w,
+            y: y + r + d,
+            angle: Math.PI / 2
+          };
         d -= side;
         if (d < arc) {
           const a = d / arc * Math.PI / 2;
-          return { x: x + w - r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + w - r + Math.cos(a) * r,
+            y: y + h - r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < top)
-          return { x: x + w - r - d, y: y + h, angle: Math.PI };
+          return {
+            x: x + w - r - d,
+            y: y + h,
+            angle: Math.PI
+          };
         d -= top;
         if (d < arc) {
           const a = Math.PI / 2 + d / arc * Math.PI / 2;
-          return { x: x + r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + r + Math.cos(a) * r,
+            y: y + h - r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < side)
-          return { x: x, y: y + h - r - d, angle: -Math.PI / 2 };
+          return {
+            x: x,
+            y: y + h - r - d,
+            angle: -Math.PI / 2
+          };
 
         d -= side;
         const a = Math.PI + d / arc * Math.PI / 2;
-        return { x: x + r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+        return {
+          x: x + r + Math.cos(a) * r,
+          y: y + r + Math.sin(a) * r,
+          angle: a + Math.PI / 2
+        };
       }
 
       function drawSpark(ctx, t, size, color, alpha, inset, radius) {
@@ -700,7 +714,10 @@ Item {
     z: 30
 
     Behavior on opacity {
-      NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+      NumberAnimation {
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+        easing.type: Easing.OutCubic
+      }
     }
 
     HoverHandler {

@@ -33,12 +33,7 @@ Singleton {
 
   // A broker-only V4L2 owner cannot be attributed to an application. Report
   // that limitation without claiming the camera is active.
-  readonly property string cameraDetectionState: cameraProbeResult === "ready"
-                                                  && cameraBrokerOwnsDevice
-                                                  && !cameraPipewireState.active
-                                                  && directCameraApps.length === 0
-                                                ? "limited"
-                                                : cameraProbeResult
+  readonly property string cameraDetectionState: cameraProbeResult === "ready" && cameraBrokerOwnsDevice && !cameraPipewireState.active && directCameraApps.length === 0 ? "limited" : cameraProbeResult
 
   Component.onCompleted: refreshPipewireGraph()
 
@@ -74,45 +69,40 @@ Singleton {
     id: cameraDetectionProcess
 
     running: false
-    command: [
-      "timeout",
-      "2s",
-      "sh",
-      "-c",
-      "count=0; for sysdev in /sys/class/video4linux/video*; do [ -r \"$sysdev/name\" ] || continue; IFS= read -r name < \"$sysdev/name\" || continue; case \"$name\" in *Metadata*|*metadata*) continue ;; esac; dev=\"/dev/${sysdev##*/}\"; find /proc/[0-9]*/fd -maxdepth 1 -type l -lname \"$dev\" -print 2>/dev/null | while IFS=/ read -r _ proc pid rest; do [ -r \"/proc/$pid/comm\" ] && cat \"/proc/$pid/comm\"; done; count=$((count + 1)); [ \"$count\" -ge 8 ] && break; done; exit 0"
-    ]
+    command: ["timeout", "2s", "sh", "-c",
+      "count=0; for sysdev in /sys/class/video4linux/video*; do [ -r \"$sysdev/name\" ] || continue; IFS= read -r name < \"$sysdev/name\" || continue; case \"$name\" in *Metadata*|*metadata*) continue ;; esac; dev=\"/dev/${sysdev##*/}\"; find /proc/[0-9]*/fd -maxdepth 1 -type l -lname \"$dev\" -print 2>/dev/null | while IFS=/ read -r _ proc pid rest; do [ -r \"/proc/$pid/comm\" ] && cat \"/proc/$pid/comm\"; done; count=$((count + 1)); [ \"$count\" -ge 8 ] && break; done; exit 0"]
 
     stdout: StdioCollector {
       id: cameraOutput
     }
 
     onExited: exitCode => {
-                if (exitCode !== 0) {
-                  root.directCameraApps = [];
-                  root.cameraBrokerOwnsDevice = false;
-                  root.cameraProbeResult = exitCode === 124 ? "timeout" : "unavailable";
-                  return;
-                }
+      if (exitCode !== 0) {
+        root.directCameraApps = [];
+        root.cameraBrokerOwnsDevice = false;
+        root.cameraProbeResult = exitCode === 124 ? "timeout" : "unavailable";
+        return;
+      }
 
-                const names = String(cameraOutput.text || "").split("\n");
-                const uniqueNames = [];
-                var brokerDetected = false;
-                for (var i = 0; i < names.length; i++) {
-                  const name = names[i].trim();
-                  if (!name)
-                    continue;
-                  if (isCameraBroker(name)) {
-                    brokerDetected = true;
-                    continue;
-                  }
-                  appendUnique(uniqueNames, name);
-                }
-                uniqueNames.sort();
-                root.directCameraApps = uniqueNames;
-                root.cameraBrokerOwnsDevice = brokerDetected;
+      const names = String(cameraOutput.text || "").split("\n");
+      const uniqueNames = [];
+      var brokerDetected = false;
+      for (var i = 0; i < names.length; i++) {
+        const name = names[i].trim();
+        if (!name)
+          continue;
+        if (isCameraBroker(name)) {
+          brokerDetected = true;
+          continue;
+        }
+        appendUnique(uniqueNames, name);
+      }
+      uniqueNames.sort();
+      root.directCameraApps = uniqueNames;
+      root.cameraBrokerOwnsDevice = brokerDetected;
 
-                root.cameraProbeResult = "ready";
-              }
+      root.cameraProbeResult = "ready";
+    }
   }
 
   // PipeWire changes propagate through model/property bindings above. Only the
@@ -125,7 +115,7 @@ Singleton {
     triggeredOnStart: true
     onTriggered: {
       if (!cameraDetectionProcess.running)
-        cameraDetectionProcess.running = true;
+      cameraDetectionProcess.running = true;
     }
   }
 
@@ -184,19 +174,12 @@ Singleton {
 
   function isCameraBroker(name) {
     const normalized = String(name || "").toLowerCase();
-    return normalized === "pipewire"
-        || normalized === "pipewire-pulse"
-        || normalized === "wireplumber";
+    return normalized === "pipewire" || normalized === "pipewire-pulse" || normalized === "wireplumber";
   }
 
   function getAppName(node) {
     const properties = node.properties || {};
-    return properties["application.name"]
-        || properties["application.process.binary"]
-        || node.nickname
-        || node.description
-        || node.name
-        || "";
+    return properties["application.name"] || properties["application.process.binary"] || node.nickname || node.description || node.name || "";
   }
 
   function computeMicrophoneState(nodes, links) {
@@ -235,8 +218,7 @@ Singleton {
     const mediaClass = String(node.type || properties["media.class"] || "");
     const deviceApi = String(properties["device.api"] || "").toLowerCase();
     const devicePath = String(properties["api.v4l2.path"] || "");
-    return mediaClass.indexOf("Video/Source") !== -1
-        && (deviceApi === "v4l2" || devicePath.indexOf("/dev/video") === 0);
+    return mediaClass.indexOf("Video/Source") !== -1 && (deviceApi === "v4l2" || devicePath.indexOf("/dev/video") === 0);
   }
 
   function computeCameraPipewireState(nodes, links) {
@@ -292,13 +274,7 @@ Singleton {
     if (mediaRole === "screen" || mediaRole === "screen-capture" || mediaRole === "screencast")
       return true;
 
-    const identity = [
-      properties["media.name"],
-      properties["node.name"],
-      node.name,
-      node.nickname,
-      node.description
-    ].filter(value => value !== undefined && value !== null).join(" ").toLowerCase();
+    const identity = [properties["media.name"], properties["node.name"], node.name, node.nickname, node.description].filter(value => value !== undefined && value !== null).join(" ").toLowerCase();
 
     return /(^|[ ._/-])(xdph-streaming|screencast|screen[- ]?cast|screen[- ]?capture|desktop[- ]?capture|monitor[- ]?capture|window[- ]?capture|game[- ]?capture|wayland[- ]?capture|gsr-default)([ ._/-]|$)/.test(identity);
   }

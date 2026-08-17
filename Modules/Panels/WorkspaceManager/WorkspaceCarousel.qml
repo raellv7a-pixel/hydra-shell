@@ -23,7 +23,13 @@ ColumnLayout {
 
   readonly property var carouselModel: {
     if (special && Settings.data.workspaceManager.hideSpecials) {
-      return [{ "isAddAction": true, "id": 0, "name": "" }];
+      return [
+            {
+              "isAddAction": true,
+              "id": 0,
+              "name": ""
+            }
+          ];
     }
 
     let list = Array.from(workspaces || []);
@@ -35,8 +41,10 @@ ColumnLayout {
       list.sort((a, b) => {
         const pinA = pinnedSpecials.includes(a.name);
         const pinB = pinnedSpecials.includes(b.name);
-        if (pinA && !pinB) return -1;
-        if (!pinA && pinB) return 1;
+        if (pinA && !pinB)
+          return -1;
+        if (!pinA && pinB)
+          return 1;
         return (a.id || 0) - (b.id || 0);
       });
     } else if (customOrder.length > 0) {
@@ -45,15 +53,22 @@ ColumnLayout {
         const keyB = String(b.id);
         const idxA = customOrder.indexOf(keyA);
         const idxB = customOrder.indexOf(keyB);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
+        if (idxA !== -1 && idxB !== -1)
+          return idxA - idxB;
+        if (idxA !== -1)
+          return -1;
+        if (idxB !== -1)
+          return 1;
         return (a.id || 0) - (b.id || 0);
       });
     }
 
     if (special)
-      list.push({ "isAddAction": true, "id": 0, "name": "" });
+      list.push({
+                  "isAddAction": true,
+                  "id": 0,
+                  "name": ""
+                });
 
     return list;
   }
@@ -76,7 +91,8 @@ ColumnLayout {
   }
 
   function togglePinSpecial(wsName) {
-    if (!wsName) return;
+    if (!wsName)
+      return;
     const current = Array.from(Settings.data.workspaceManager.pinnedSpecials || []);
     const idx = current.indexOf(wsName);
     if (idx !== -1) {
@@ -180,11 +196,8 @@ ColumnLayout {
                 overview: root.overview
                 isSpecial: root.special
                 livePreviews: root.livePreviews
-                isPrivate: root.overview.isWorkspacePrivate(delegateRoot.modelData.id,
-                                                            delegateRoot.modelData.name)
-                inViewport: delegateRoot.x + delegateRoot.width >= carouselList.contentX - 50
-                            && delegateRoot.x <= carouselList.contentX + carouselList.width + 50
-                            && !root.overview.overviewGrid
+                isPrivate: root.overview.isWorkspacePrivate(delegateRoot.modelData.id, delegateRoot.modelData.name)
+                inViewport: delegateRoot.x + delegateRoot.width >= carouselList.contentX - 50 && delegateRoot.x <= carouselList.contentX + carouselList.width + 50 && !root.overview.overviewGrid
               }
 
               NIconButton {
@@ -261,7 +274,11 @@ ColumnLayout {
       width: Style.marginM
       color: Color.mSurface
       opacity: carouselList.contentX > 1 ? 0.72 : 0
-      Behavior on opacity { NumberAnimation { duration: Style.animationFast } }
+      Behavior on opacity {
+        NumberAnimation {
+          duration: Style.animationFast
+        }
+      }
     }
     Rectangle {
       anchors.right: parent.right
@@ -270,7 +287,11 @@ ColumnLayout {
       width: Style.marginM
       color: Color.mSurface
       opacity: carouselList.contentX < carouselList.contentWidth - carouselList.width - 1 ? 0.72 : 0
-      Behavior on opacity { NumberAnimation { duration: Style.animationFast } }
+      Behavior on opacity {
+        NumberAnimation {
+          duration: Style.animationFast
+        }
+      }
     }
   }
 }

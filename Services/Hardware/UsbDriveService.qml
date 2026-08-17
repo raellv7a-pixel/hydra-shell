@@ -24,7 +24,7 @@ Singleton {
     var count = 0;
     for (var i = 0; i < devices.length; ++i) {
       if (devices[i].isMounted)
-        ++count;
+      ++count;
     }
     return count;
   }
@@ -170,14 +170,22 @@ Singleton {
     var device = _deviceByPath(path);
     if (!device || device.isMounted)
       return;
-    _enqueueAction({ "type": "mount", "path": path, "label": label || device.label || path });
+    _enqueueAction({
+                     "type": "mount",
+                     "path": path,
+                     "label": label || device.label || path
+                   });
   }
 
   function unmountDevice(path, label) {
     var device = _deviceByPath(path);
     if (!device || !device.isMounted)
       return;
-    _enqueueAction({ "type": "unmount", "path": path, "label": label || device.label || path });
+    _enqueueAction({
+                     "type": "unmount",
+                     "path": path,
+                     "label": label || device.label || path
+                   });
   }
 
   function ejectDevice(path, parentPath, label) {
@@ -200,7 +208,11 @@ Singleton {
   function unmountAll() {
     for (var i = 0; i < devices.length; ++i) {
       if (devices[i].isMounted)
-        _enqueueAction({ "type": "unmount", "path": devices[i].path, "label": devices[i].label || devices[i].path });
+        _enqueueAction({
+                         "type": "unmount",
+                         "path": devices[i].path,
+                         "label": devices[i].label || devices[i].path
+                       });
     }
   }
 
@@ -272,16 +284,12 @@ Singleton {
       return;
     if (succeeded) {
       if (Settings.data.usbDriveManager.showNotifications) {
-        var key = action.type === "mount" ? "usb-drive-manager.notifications.mounted"
-                : action.type === "unmount" ? "usb-drive-manager.notifications.unmounted"
-                : "usb-drive-manager.notifications.ejected";
+        var key = action.type === "mount" ? "usb-drive-manager.notifications.mounted" : action.type === "unmount" ? "usb-drive-manager.notifications.unmounted" : "usb-drive-manager.notifications.ejected";
         ToastService.showNotice(I18n.tr(key), action.label);
       }
     } else {
       lastError = errorText;
-      var errorKey = action.type === "mount" ? "usb-drive-manager.notifications.mount-failed"
-                   : action.type === "unmount" ? "usb-drive-manager.notifications.unmount-failed"
-                   : "usb-drive-manager.notifications.eject-failed";
+      var errorKey = action.type === "mount" ? "usb-drive-manager.notifications.mount-failed" : action.type === "unmount" ? "usb-drive-manager.notifications.unmount-failed" : "usb-drive-manager.notifications.eject-failed";
       ToastService.showError(I18n.tr(errorKey), errorText || action.label);
     }
     _currentAction = null;
@@ -326,7 +334,9 @@ Singleton {
     stdout: StdioCollector {}
     stderr: StdioCollector {}
     onExited: exitCode => {
-      var missing = String(stdout.text).trim().split(/\s+/).filter(function (name) { return name.length > 0; });
+      var missing = String(stdout.text).trim().split(/\s+/).filter(function (name) {
+        return name.length > 0;
+      });
       root.missingDependencies = missing;
       root.lsblkAvailable = missing.indexOf("lsblk") === -1;
       root.dfAvailable = missing.indexOf("df") === -1;
@@ -390,7 +400,9 @@ Singleton {
         }
         root._enumeratedOnce = true;
       } catch (error) {
-        root.lastError = I18n.tr("usb-drive-manager.errors.invalid-lsblk-data", { "error": String(error) });
+        root.lastError = I18n.tr("usb-drive-manager.errors.invalid-lsblk-data", {
+                                   "error": String(error)
+                                 });
         Logger.e("UsbDriveService", root.lastError);
       }
     }
@@ -437,7 +449,9 @@ Singleton {
       if (exitCode === 0)
         Quickshell.execDetached(root._pendingLaunchCommand);
       else
-        ToastService.showError(I18n.tr("usb-drive-manager.errors.browser-unavailable-title"), I18n.tr("usb-drive-manager.errors.browser-unavailable", { "programs": root._pendingLaunchPrograms }));
+        ToastService.showError(I18n.tr("usb-drive-manager.errors.browser-unavailable-title"), I18n.tr("usb-drive-manager.errors.browser-unavailable", {
+                                                                                                        "programs": root._pendingLaunchPrograms
+                                                                                                      }));
       root._pendingLaunchCommand = [];
       root._pendingLaunchPrograms = "";
     }
@@ -456,7 +470,7 @@ Singleton {
     repeat: false
     onTriggered: {
       if (root.udevadmAvailable && !deviceWatcher.running)
-        deviceWatcher.running = true;
+      deviceWatcher.running = true;
     }
   }
 

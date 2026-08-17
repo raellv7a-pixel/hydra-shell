@@ -20,7 +20,9 @@ ColumnLayout {
   readonly property var leafOptions: ["windows", "windowsIn", "windowsOut", "windowsMove", "fade", "fadeDim", "border", "borderangle", "workspaces", "specialWorkspace", "layers"]
 
   function curveNames() {
-    var names = (HyprlandDraftStore.val("animCurves") || []).map(function (c) { return c.name; });
+    var names = (HyprlandDraftStore.val("animCurves") || []).map(function (c) {
+      return c.name;
+    });
     return names.concat(["default", "linear", "easeOutQuint"]);
   }
 
@@ -39,7 +41,13 @@ ColumnLayout {
 
   function addCurve() {
     var arr = (HyprlandDraftStore.val("animCurves") || []).slice();
-    arr.push({ "name": "custom" + (arr.length + 1), "x0": 0.25, "y0": 0.1, "x1": 0.25, "y1": 1 });
+    arr.push({
+               "name": "custom" + (arr.length + 1),
+               "x0": 0.25,
+               "y0": 0.1,
+               "x1": 0.25,
+               "y1": 1
+             });
     HyprlandDraftStore.edit("animCurves", arr);
   }
 
@@ -58,7 +66,13 @@ ColumnLayout {
 
   function addItem() {
     var arr = (HyprlandDraftStore.val("animItems") || []).slice();
-    arr.push({ "leaf": "windows", "enabled": true, "speed": 4, "bezier": "default", "style": "" });
+    arr.push({
+               "leaf": "windows",
+               "enabled": true,
+               "speed": 4,
+               "bezier": "default",
+               "style": ""
+             });
     HyprlandDraftStore.edit("animItems", arr);
   }
 
@@ -171,7 +185,12 @@ ColumnLayout {
         NComboBox {
           Layout.preferredWidth: 160
           label: "Elemento"
-          model: root.leafOptions.map(function (l) { return { "key": l, "name": l }; })
+          model: root.leafOptions.map(function (l) {
+            return {
+              "key": l,
+              "name": l
+            };
+          })
           currentKey: itemDelegate.modelData.leaf
           onSelected: key => root.setItemField(itemDelegate.index, "leaf", key)
         }
@@ -193,7 +212,12 @@ ColumnLayout {
         NComboBox {
           Layout.preferredWidth: 160
           label: "Curva"
-          model: root.curveNames().map(function (c) { return { "key": c, "name": c }; })
+          model: root.curveNames().map(function (c) {
+            return {
+              "key": c,
+              "name": c
+            };
+          })
           currentKey: itemDelegate.modelData.bezier || "default"
           onSelected: key => root.setItemField(itemDelegate.index, "bezier", key)
         }

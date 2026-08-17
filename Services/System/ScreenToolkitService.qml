@@ -56,7 +56,7 @@ Singleton {
         updated["pt"] = data;
         root.translations = updated;
         Logger.d("ScreenToolkitService", "Loaded PT translations");
-      } catch(e) {
+      } catch (e) {
         Logger.e("ScreenToolkitService", "Failed to parse PT translations:", e);
       }
     }
@@ -73,7 +73,7 @@ Singleton {
         updated["en"] = data;
         root.translations = updated;
         Logger.d("ScreenToolkitService", "Loaded EN translations");
-      } catch(e) {
+      } catch (e) {
         Logger.e("ScreenToolkitService", "Failed to parse EN translations:", e);
       }
     }
@@ -89,12 +89,13 @@ Singleton {
         if (parsed && typeof parsed === "object") {
           root.settings = Object.assign({}, root.settings, parsed);
         }
-      } catch(e) {}
+      } catch (e) {}
     }
   }
 
   function tr(key, interp) {
-    if (!key) return "";
+    if (!key)
+      return "";
     var lang = (typeof I18n !== "undefined" && I18n.langCode) ? I18n.langCode : "pt";
     var dict = root.translations[lang] || root.translations["pt"] || root.translations["en"] || {};
 
@@ -123,7 +124,8 @@ Singleton {
       }
     }
 
-    if (typeof curr !== "string") curr = key;
+    if (typeof curr !== "string")
+      curr = key;
 
     if (interp && typeof interp === "object") {
       for (var k in interp) {
@@ -139,7 +141,7 @@ Singleton {
       var file = Settings.configDir + "screen-toolkit.json";
       var dataStr = JSON.stringify(root.settings, null, 2);
       Quickshell.execDetached(["bash", "-c", "cat << 'EOF' > " + file + "\n" + dataStr + "\nEOF"]);
-    } catch(e) {
+    } catch (e) {
       Logger.e("ScreenToolkitService", "Failed to save settings:", e);
     }
   }
@@ -148,7 +150,10 @@ Singleton {
   readonly property var provider: QtObject {
     property var mainInstance: root.mainInstance
     property var pluginSettings: root.settings
-    property var manifest: ({ "name": "Screen Toolkit", "id": "screen-toolkit" })
+    property var manifest: ({
+                              "name": "Screen Toolkit",
+                              "id": "screen-toolkit"
+                            })
 
     function tr(key, interp) {
       return root.tr(key, interp);
@@ -157,25 +162,29 @@ Singleton {
       root.saveSettings();
     }
     function closePanel(screen) {
-      if (screen) PanelService.closePanel(screen);
+      if (screen)
+        PanelService.closePanel(screen);
     }
     function openPanel(screen) {
       var sc = screen || PanelService.findScreenForPanels();
       if (sc) {
         var p = PanelService.getPanel("screenToolkitPanel", sc);
-        if (p) p.open();
+        if (p)
+          p.open();
       }
     }
     function togglePanel(screen) {
       var sc = screen || PanelService.findScreenForPanels();
       if (sc) {
         var p = PanelService.getPanel("screenToolkitPanel", sc);
-        if (p) p.toggle();
+        if (p)
+          p.toggle();
       }
     }
     function withCurrentScreen(cb) {
       var sc = PanelService.findScreenForPanels();
-      if (sc && cb) cb(sc);
+      if (sc && cb)
+        cb(sc);
     }
   }
 
@@ -184,7 +193,8 @@ Singleton {
     var sc = PanelService.findScreenForPanels();
     if (sc) {
       var p = PanelService.getPanel("screenToolkitPanel", sc);
-      if (p) p.toggle();
+      if (p)
+        p.toggle();
     }
   }
 

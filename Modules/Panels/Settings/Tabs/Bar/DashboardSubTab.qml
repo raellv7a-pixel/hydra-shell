@@ -99,13 +99,34 @@ ColumnLayout {
         description: "Alinhamento padrão da janela da central de controle"
         currentKey: root.cfg.panelPosition ?? "center"
         model: [
-          { key: "center", name: "Centralizado" },
-          { key: "top_left", name: "Superior Esquerdo" },
-          { key: "top_right", name: "Superior Direito" },
-          { key: "bottom_left", name: "Inferior Esquerdo" },
-          { key: "bottom_right", name: "Inferior Direito" },
-          { key: "left", name: "Esquerda" },
-          { key: "right", name: "Direita" }
+          {
+            key: "center",
+            name: "Centralizado"
+          },
+          {
+            key: "top_left",
+            name: "Superior Esquerdo"
+          },
+          {
+            key: "top_right",
+            name: "Superior Direito"
+          },
+          {
+            key: "bottom_left",
+            name: "Inferior Esquerdo"
+          },
+          {
+            key: "bottom_right",
+            name: "Inferior Direito"
+          },
+          {
+            key: "left",
+            name: "Esquerda"
+          },
+          {
+            key: "right",
+            name: "Direita"
+          }
         ]
         onSelected: key => {
           root.cfg.panelPosition = key;
@@ -113,7 +134,9 @@ ColumnLayout {
         }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Dimensões e Escala"
@@ -182,9 +205,18 @@ ColumnLayout {
         label: "Formato da Foto de Perfil"
         currentKey: root.cfg.avatarShape ?? "circle"
         model: [
-          { key: "circle", name: "Círculo" },
-          { key: "rounded", name: "Canto Arredondado" },
-          { key: "square", name: "Quadrado" }
+          {
+            key: "circle",
+            name: "Círculo"
+          },
+          {
+            key: "rounded",
+            name: "Canto Arredondado"
+          },
+          {
+            key: "square",
+            name: "Quadrado"
+          }
         ]
         onSelected: key => {
           root.cfg.avatarShape = key;
@@ -203,7 +235,9 @@ ColumnLayout {
         }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Capa do Banner de Perfil"
@@ -218,10 +252,22 @@ ColumnLayout {
         description: "Origem da imagem exibida no topo do cartão de perfil"
         currentKey: root.cfg.profileCoverMode ?? "auto"
         model: [
-          { key: "auto", name: "Automático (Usa o Papel de Parede Atual)" },
-          { key: "custom", name: "Imagem Personalizada" },
-          { key: "random", name: "Aleatório de uma Pasta" },
-          { key: "none", name: "Desativado (Cor Sólida)" }
+          {
+            key: "auto",
+            name: "Automático (Usa o Papel de Parede Atual)"
+          },
+          {
+            key: "custom",
+            name: "Imagem Personalizada"
+          },
+          {
+            key: "random",
+            name: "Aleatório de uma Pasta"
+          },
+          {
+            key: "none",
+            name: "Desativado (Cor Sólida)"
+          }
         ]
         onSelected: key => {
           root.cfg.profileCoverMode = key;
@@ -326,25 +372,82 @@ ColumnLayout {
         label: "Efeito de Animação da Borda"
         currentKey: root.cfg.profileCoverBorderAnimation ?? "static"
         model: [
-          { key: "static", name: "Estática" },
-          { key: "fade", name: "Alternar cores" },
-          { key: "flow", name: "Cores circulando" },
-          { key: "flowEase", name: "Circular elástico" },
-          { key: "spark", name: "Circular com faíscas" },
-          { key: "pulse", name: "Pulso" },
-          { key: "chase", name: "Traços correndo" },
-          { key: "comet", name: "Cometa" },
-          { key: "neon", name: "Neon pulsante" },
-          { key: "corners", name: "Cantos vivos" },
-          { key: "orbitDots", name: "Pontos orbitais" },
-          { key: "scan", name: "Varredura luminosa" },
-          { key: "profileAurora", name: "Perfil: aurora" },
-          { key: "profileHalo", name: "Perfil: halo interno" },
-          { key: "profileHeartbeat", name: "Perfil: batida cardíaca" },
-          { key: "profileSpotlight", name: "Perfil: reflexo diagonal" },
-          { key: "reactivePulse", name: "Reativa: pulso" },
-          { key: "reactiveFlow", name: "Reativa: circular" },
-          { key: "reactiveSpark", name: "Reativa: faíscas" }
+          {
+            key: "static",
+            name: "Estática"
+          },
+          {
+            key: "fade",
+            name: "Alternar cores"
+          },
+          {
+            key: "flow",
+            name: "Cores circulando"
+          },
+          {
+            key: "flowEase",
+            name: "Circular elástico"
+          },
+          {
+            key: "spark",
+            name: "Circular com faíscas"
+          },
+          {
+            key: "pulse",
+            name: "Pulso"
+          },
+          {
+            key: "chase",
+            name: "Traços correndo"
+          },
+          {
+            key: "comet",
+            name: "Cometa"
+          },
+          {
+            key: "neon",
+            name: "Neon pulsante"
+          },
+          {
+            key: "corners",
+            name: "Cantos vivos"
+          },
+          {
+            key: "orbitDots",
+            name: "Pontos orbitais"
+          },
+          {
+            key: "scan",
+            name: "Varredura luminosa"
+          },
+          {
+            key: "profileAurora",
+            name: "Perfil: aurora"
+          },
+          {
+            key: "profileHalo",
+            name: "Perfil: halo interno"
+          },
+          {
+            key: "profileHeartbeat",
+            name: "Perfil: batida cardíaca"
+          },
+          {
+            key: "profileSpotlight",
+            name: "Perfil: reflexo diagonal"
+          },
+          {
+            key: "reactivePulse",
+            name: "Reativa: pulso"
+          },
+          {
+            key: "reactiveFlow",
+            name: "Reativa: circular"
+          },
+          {
+            key: "reactiveSpark",
+            name: "Reativa: faíscas"
+          }
         ]
         onSelected: key => {
           root.cfg.profileCoverBorderAnimation = key;
@@ -374,17 +477,50 @@ ColumnLayout {
         description: "Estilo visual do espectro ao tocar músicas"
         currentKey: root.cfg.mediaVisualizerEffect ?? "bars"
         model: [
-          { key: "none", name: "Desativado" },
-          { key: "bars", name: "Barras Verticais" },
-          { key: "mirror", name: "Barras Espelhadas" },
-          { key: "wave", name: "Onda Fluida" },
-          { key: "ribbon", name: "Fita Suave" },
-          { key: "shock", name: "Ondas de Choque" },
-          { key: "pulse", name: "Pulso Central" },
-          { key: "nebula", name: "Nebulosa" },
-          { key: "aurora", name: "Aurora" },
-          { key: "constellation", name: "Constelação" },
-          { key: "radar", name: "Radar" }
+          {
+            key: "none",
+            name: "Desativado"
+          },
+          {
+            key: "bars",
+            name: "Barras Verticais"
+          },
+          {
+            key: "mirror",
+            name: "Barras Espelhadas"
+          },
+          {
+            key: "wave",
+            name: "Onda Fluida"
+          },
+          {
+            key: "ribbon",
+            name: "Fita Suave"
+          },
+          {
+            key: "shock",
+            name: "Ondas de Choque"
+          },
+          {
+            key: "pulse",
+            name: "Pulso Central"
+          },
+          {
+            key: "nebula",
+            name: "Nebulosa"
+          },
+          {
+            key: "aurora",
+            name: "Aurora"
+          },
+          {
+            key: "constellation",
+            name: "Constelação"
+          },
+          {
+            key: "radar",
+            name: "Radar"
+          }
         ]
         onSelected: key => {
           root.cfg.mediaVisualizerEffect = key;
@@ -398,20 +534,62 @@ ColumnLayout {
         description: "Efeito animado sobre a barra de volume principal"
         currentKey: root.cfg.audioSliderEffect ?? "wave"
         model: [
-          { key: "none", name: "Padrão" },
-          { key: "wave", name: "Onda Fluida" },
-          { key: "zigzag", name: "Zigzag" },
-          { key: "pulse", name: "Pulsação de Som" },
-          { key: "bars", name: "Barras" },
-          { key: "spectrum", name: "Espectro Aberto" },
-          { key: "filament", name: "Filamento Neon" },
-          { key: "ripple", name: "Ondas de Impacto" },
-          { key: "glow", name: "Brilho Dinâmico" },
-          { key: "wavy_fill", name: "Onda Sólida" },
-          { key: "blocks", name: "Blocos" },
-          { key: "dots", name: "Pontos" },
-          { key: "comet", name: "Cometa" },
-          { key: "aurora", name: "Aurora" }
+          {
+            key: "none",
+            name: "Padrão"
+          },
+          {
+            key: "wave",
+            name: "Onda Fluida"
+          },
+          {
+            key: "zigzag",
+            name: "Zigzag"
+          },
+          {
+            key: "pulse",
+            name: "Pulsação de Som"
+          },
+          {
+            key: "bars",
+            name: "Barras"
+          },
+          {
+            key: "spectrum",
+            name: "Espectro Aberto"
+          },
+          {
+            key: "filament",
+            name: "Filamento Neon"
+          },
+          {
+            key: "ripple",
+            name: "Ondas de Impacto"
+          },
+          {
+            key: "glow",
+            name: "Brilho Dinâmico"
+          },
+          {
+            key: "wavy_fill",
+            name: "Onda Sólida"
+          },
+          {
+            key: "blocks",
+            name: "Blocos"
+          },
+          {
+            key: "dots",
+            name: "Pontos"
+          },
+          {
+            key: "comet",
+            name: "Cometa"
+          },
+          {
+            key: "aurora",
+            name: "Aurora"
+          }
         ]
         onSelected: key => {
           root.cfg.audioSliderEffect = key;
@@ -425,17 +603,50 @@ ColumnLayout {
         description: "Efeito animado para a barra de entrada de áudio"
         currentKey: root.cfg.microphoneSliderEffect ?? "pulse"
         model: [
-          { key: "none", name: "Padrão" },
-          { key: "wave", name: "Onda Fluida" },
-          { key: "zigzag", name: "Zigzag" },
-          { key: "pulse", name: "Pulsação de Voz" },
-          { key: "bars", name: "Barras" },
-          { key: "glow", name: "Brilho Dinâmico" },
-          { key: "wavy_fill", name: "Onda Sólida" },
-          { key: "blocks", name: "Blocos" },
-          { key: "dots", name: "Pontos" },
-          { key: "comet", name: "Cometa" },
-          { key: "aurora", name: "Aurora" }
+          {
+            key: "none",
+            name: "Padrão"
+          },
+          {
+            key: "wave",
+            name: "Onda Fluida"
+          },
+          {
+            key: "zigzag",
+            name: "Zigzag"
+          },
+          {
+            key: "pulse",
+            name: "Pulsação de Voz"
+          },
+          {
+            key: "bars",
+            name: "Barras"
+          },
+          {
+            key: "glow",
+            name: "Brilho Dinâmico"
+          },
+          {
+            key: "wavy_fill",
+            name: "Onda Sólida"
+          },
+          {
+            key: "blocks",
+            name: "Blocos"
+          },
+          {
+            key: "dots",
+            name: "Pontos"
+          },
+          {
+            key: "comet",
+            name: "Cometa"
+          },
+          {
+            key: "aurora",
+            name: "Aurora"
+          }
         ]
         onSelected: key => {
           root.cfg.microphoneSliderEffect = key;
@@ -443,7 +654,9 @@ ColumnLayout {
         }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Desempenho e Energia"
@@ -530,7 +743,9 @@ ColumnLayout {
         }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Mídia na Barra Superior"

@@ -127,7 +127,9 @@ NBox {
         Layout.fillWidth: true
 
         NText {
-          text: root.device.usedBytes > 0 ? I18n.tr("usb-drive-manager.device.used", { "size": UsbDriveService.formatBytes(root.device.usedBytes) }) : I18n.tr("usb-drive-manager.device.usage-loading")
+          text: root.device.usedBytes > 0 ? I18n.tr("usb-drive-manager.device.used", {
+                                                      "size": UsbDriveService.formatBytes(root.device.usedBytes)
+                                                    }) : I18n.tr("usb-drive-manager.device.usage-loading")
           pointSize: Style.fontSizeXXS
           color: Color.mOnSurfaceVariant
         }
@@ -137,7 +139,9 @@ NBox {
         }
 
         NText {
-          text: root.device.freeBytes > 0 ? I18n.tr("usb-drive-manager.device.free", { "size": UsbDriveService.formatBytes(root.device.freeBytes) }) : ""
+          text: root.device.freeBytes > 0 ? I18n.tr("usb-drive-manager.device.free", {
+                                                      "size": UsbDriveService.formatBytes(root.device.freeBytes)
+                                                    }) : ""
           pointSize: Style.fontSizeXXS
           color: Color.mOnSurfaceVariant
         }

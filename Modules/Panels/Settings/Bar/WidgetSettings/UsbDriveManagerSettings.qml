@@ -103,14 +103,38 @@ ColumnLayout {
     label: I18n.tr("usb-drive-manager.settings.file-browser")
     description: I18n.tr("usb-drive-manager.settings.file-browser-description")
     model: [
-      { "key": "xdg-open", "name": "xdg-open" },
-      { "key": "dolphin", "name": "Dolphin" },
-      { "key": "thunar", "name": "Thunar" },
-      { "key": "nautilus", "name": "Nautilus" },
-      { "key": "yazi", "name": "Yazi" },
-      { "key": "ranger", "name": "Ranger" },
-      { "key": "lf", "name": "lf" },
-      { "key": "nnn", "name": "nnn" }
+      {
+        "key": "xdg-open",
+        "name": "xdg-open"
+      },
+      {
+        "key": "dolphin",
+        "name": "Dolphin"
+      },
+      {
+        "key": "thunar",
+        "name": "Thunar"
+      },
+      {
+        "key": "nautilus",
+        "name": "Nautilus"
+      },
+      {
+        "key": "yazi",
+        "name": "Yazi"
+      },
+      {
+        "key": "ranger",
+        "name": "Ranger"
+      },
+      {
+        "key": "lf",
+        "name": "lf"
+      },
+      {
+        "key": "nnn",
+        "name": "nnn"
+      }
     ]
     currentKey: Settings.data.usbDriveManager.fileBrowser
     defaultValue: "xdg-open"
@@ -122,13 +146,34 @@ ColumnLayout {
     label: I18n.tr("usb-drive-manager.settings.terminal")
     description: I18n.tr("usb-drive-manager.settings.terminal-description")
     model: [
-      { "key": "kitty", "name": "Kitty" },
-      { "key": "foot", "name": "foot" },
-      { "key": "alacritty", "name": "Alacritty" },
-      { "key": "wezterm", "name": "WezTerm" },
-      { "key": "ghostty", "name": "Ghostty" },
-      { "key": "ptyxis", "name": "Ptyxis" },
-      { "key": "gnome-terminal", "name": "GNOME Terminal" }
+      {
+        "key": "kitty",
+        "name": "Kitty"
+      },
+      {
+        "key": "foot",
+        "name": "foot"
+      },
+      {
+        "key": "alacritty",
+        "name": "Alacritty"
+      },
+      {
+        "key": "wezterm",
+        "name": "WezTerm"
+      },
+      {
+        "key": "ghostty",
+        "name": "Ghostty"
+      },
+      {
+        "key": "ptyxis",
+        "name": "Ptyxis"
+      },
+      {
+        "key": "gnome-terminal",
+        "name": "GNOME Terminal"
+      }
     ]
     currentKey: Settings.data.usbDriveManager.terminal
     defaultValue: "kitty"
@@ -141,11 +186,9 @@ ColumnLayout {
 
   NText {
     Layout.fillWidth: true
-    text: !UsbDriveService.dependenciesChecked
-          ? I18n.tr("usb-drive-manager.settings.checking-dependencies")
-          : UsbDriveService.missingDependencies.length === 0
-            ? I18n.tr("usb-drive-manager.settings.dependencies-ready")
-            : I18n.tr("usb-drive-manager.settings.dependencies-missing", { "programs": UsbDriveService.missingDependencies.join(", ") })
+    text: !UsbDriveService.dependenciesChecked ? I18n.tr("usb-drive-manager.settings.checking-dependencies") : UsbDriveService.missingDependencies.length === 0 ? I18n.tr("usb-drive-manager.settings.dependencies-ready") : I18n.tr("usb-drive-manager.settings.dependencies-missing", {
+                                                                                                                                                                                                                                       "programs": UsbDriveService.missingDependencies.join(", ")
+                                                                                                                                                                                                                                     })
     pointSize: Style.fontSizeXS
     color: UsbDriveService.dependenciesChecked && UsbDriveService.missingDependencies.length > 0 ? Color.mError : Color.mOnSurfaceVariant
     wrapMode: Text.Wrap

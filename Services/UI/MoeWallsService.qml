@@ -19,13 +19,8 @@ Singleton {
   signal videoDownloaded(string videoId, string localPath)
   signal videoDownloadFailed(string videoId, string error)
 
-  readonly property string searchScript: [
-    "bash", "-c",
-    "query=\"$1\"; page=\"${2:-1}\"; " +
-    "mw=\"https://moewalls.com/wp-json/wp/v2/posts?per_page=24&page=${page}&_embed=1\"; " +
-    "if [ -n \"$query\" ]; then mw=\"$mw&search=$(printf '%s' \"$query\" | jq -sRr @uri)\"; fi; " +
-    "curl -fsSL -A 'Mozilla/5.0' \"$mw\" 2>/dev/null | jq -c '.[]? | (._embedded[\"wp:featuredmedia\"][0].source_url // \"\") as $thumb | ($thumb | sub(\"/uploads/(?<y>[0-9]{4})/[0-9]{2}/(?<b>[^/]+)-thumb\\\\.(jpe?g|png)\"; \"/uploads/preview/\\(.y)/\\(.b)-preview.webm\")) as $vid | {id: (.id|tostring), thumb: $thumb, video: $vid, dl: $vid, name: (.title.rendered | gsub(\" Live Wallpaper$\"; \"\"))}' 2>/dev/null"
-  ].join(" ")
+  readonly property string searchScript: ["bash", "-c", "query=\"$1\"; page=\"${2:-1}\"; " + "mw=\"https://moewalls.com/wp-json/wp/v2/posts?per_page=24&page=${page}&_embed=1\"; " + "if [ -n \"$query\" ]; then mw=\"$mw&search=$(printf '%s' \"$query\" | jq -sRr @uri)\"; fi; " + "curl -fsSL -A 'Mozilla/5.0' \"$mw\" 2>/dev/null | jq -c '.[]? | (._embedded[\"wp:featuredmedia\"][0].source_url // \"\") as $thumb | ($thumb | sub(\"/uploads/(?<y>[0-9]{4})/[0-9]{2}/(?<b>[^/]+)-thumb\\\\.(jpe?g|png)\"; \"/uploads/preview/\\(.y)/\\(.b)-preview.webm\")) as $vid | {id: (.id|tostring), thumb: $thumb, video: $vid, dl: $vid, name: (.title.rendered | gsub(\" Live Wallpaper$\"; \"\"))}' 2>/dev/null"].join(
+    " ")
 
   Process {
     id: searchProc
@@ -57,23 +52,23 @@ Singleton {
   }
 
   function search(query, page) {
-    if (fetching) return;
+    if (fetching)
+      return;
     fetching = true;
     currentQuery = query || "";
     currentPage = page || 1;
     lastError = "";
 
-    var cmdStr = "query='" + currentQuery.replace(/'/g, "'\\''") + "'; page='" + currentPage + "'; " +
-      "mw=\"https://moewalls.com/wp-json/wp/v2/posts?per_page=20&page=${page}&_embed=1\"; " +
-      "if [ -n \"$query\" ]; then qenc=$(printf '%s' \"$query\" | jq -sRr @uri); mw=\"https://moewalls.com/wp-json/wp/v2/posts?per_page=20&page=${page}&search=${qenc}&_embed=1\"; fi; " +
-      "curl -fsSL -A 'Mozilla/5.0' \"$mw\" 2>/dev/null | jq -c '.[]? | (._embedded[\"wp:featuredmedia\"][0].source_url // \"\") as $thumb | ($thumb | sub(\"/uploads/(?<y>[0-9]{4})/[0-9]{2}/(?<b>[^/]+)-thumb\\\\.(jpe?g|png)\"; \"/uploads/preview/\\(.y)/\\(.b)-preview.webm\")) as $vid | {id: (.id|tostring), thumb: $thumb, video: $vid, dl: $vid, name: (.title.rendered | gsub(\" Live Wallpaper$\"; \"\"))}' 2>/dev/null";
+    var cmdStr = "query='" + currentQuery.replace(/'/g, "'\\''") + "'; page='" + currentPage + "'; " + "mw=\"https://moewalls.com/wp-json/wp/v2/posts?per_page=20&page=${page}&_embed=1\"; " + "if [ -n \"$query\" ]; then qenc=$(printf '%s' \"$query\" | jq -sRr @uri); mw=\"https://moewalls.com/wp-json/wp/v2/posts?per_page=20&page=${page}&search=${qenc}&_embed=1\"; fi; "
+        + "curl -fsSL -A 'Mozilla/5.0' \"$mw\" 2>/dev/null | jq -c '.[]? | (._embedded[\"wp:featuredmedia\"][0].source_url // \"\") as $thumb | ($thumb | sub(\"/uploads/(?<y>[0-9]{4})/[0-9]{2}/(?<b>[^/]+)-thumb\\\\.(jpe?g|png)\"; \"/uploads/preview/\\(.y)/\\(.b)-preview.webm\")) as $vid | {id: (.id|tostring), thumb: $thumb, video: $vid, dl: $vid, name: (.title.rendered | gsub(\" Live Wallpaper$\"; \"\"))}' 2>/dev/null";
 
     searchProc.command = ["bash", "-c", cmdStr];
     searchProc.running = true;
   }
 
   function downloadVideo(item, callback) {
-    if (!item || !item.dl) return;
+    if (!item || !item.dl)
+      return;
     var destDir = Quickshell.env("HOME") + "/Pictures/livewalls";
     var filename = "moewalls-" + item.id + ".webm";
     var outPath = destDir + "/" + filename;
@@ -88,12 +83,14 @@ Singleton {
 
     var dlCmdStr = "mkdir -p '" + destDir + "' && curl -fsSL -A 'Mozilla/5.0' '" + item.dl.replace(/'/g, "'\\''") + "' -o '" + outPath + "' && [ -s '" + outPath + "' ] && echo '" + outPath + "'";
     dlProc.command = ["bash", "-c", dlCmdStr];
-    dlProc.exited.connect(function(code) {
+    dlProc.exited.connect(function (code) {
       if (code === 0 && dlProc.stdout.text.trim().length > 0) {
-        if (callback) callback(outPath);
+        if (callback)
+          callback(outPath);
         root.videoDownloaded(item.id, outPath);
       } else {
-        if (callback) callback("");
+        if (callback)
+          callback("");
         root.videoDownloadFailed(item.id, I18n.tr("wallpaper.live-video.download-failed"));
       }
       dlProc.destroy();

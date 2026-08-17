@@ -133,12 +133,16 @@ Rectangle {
   readonly property int coverBannerHeight: hasCoverBanner ? Math.round((Settings.data.appLauncher.coverHeight || 160) * Style.uiScaleRatio) : 0
 
   readonly property string profileWallpaperPath: {
-    if (coverMode === "none") return "";
-    if (coverMode === "custom") return Settings.data.appLauncher.coverPath !== "" ? Settings.preprocessPath(Settings.data.appLauncher.coverPath) : "";
-    if (coverMode === "random") return randomCoverPath !== "" ? Settings.preprocessPath(randomCoverPath) : "";
+    if (coverMode === "none")
+      return "";
+    if (coverMode === "custom")
+      return Settings.data.appLauncher.coverPath !== "" ? Settings.preprocessPath(Settings.data.appLauncher.coverPath) : "";
+    if (coverMode === "random")
+      return randomCoverPath !== "" ? Settings.preprocessPath(randomCoverPath) : "";
     // "auto" mode — use the current wallpaper
     var wp = WallpaperService.getWallpaper(screen?.name ?? "");
-    if (wp && !WallpaperService.isSolidColorPath(wp)) return wp;
+    if (wp && !WallpaperService.isSolidColorPath(wp))
+      return wp;
     return WallpaperService.defaultWallpaper || "";
   }
 
@@ -160,8 +164,8 @@ Rectangle {
       return;
     }
     randomCoverProcess.exec({
-      command: ["bash", "-c", "dir=$1; find \"$dir\" -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \\) 2>/dev/null | shuf -n 1", "raell-launcher", Settings.preprocessPath(Settings.data.appLauncher.coverFolder)]
-    });
+                              command: ["bash", "-c", "dir=$1; find \"$dir\" -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \\) 2>/dev/null | shuf -n 1", "raell-launcher", Settings.preprocessPath(Settings.data.appLauncher.coverFolder)]
+                            });
   }
 
   readonly property int targetGridColumns: {
@@ -234,13 +238,13 @@ Rectangle {
     focusSearchInput();
 
     Qt.callLater(() => {
-                   syncPluginProviders();
-                   for (let provider of providers) {
-                     if (provider.onOpened)
-                     provider.onOpened();
-                   }
-                   updateResults();
-                 });
+      syncPluginProviders();
+      for (let provider of providers) {
+        if (provider.onOpened)
+          provider.onOpened();
+      }
+      updateResults();
+    });
   }
 
   function onClosed() {
@@ -385,7 +389,6 @@ Rectangle {
       root.refreshAppPanelActions();
     }
   }
-
 
   function applyCategorySelection(tabIndex, categories) {
     const categoryList = categories || providerCategories;
@@ -533,22 +536,22 @@ Rectangle {
         const boostByUsage = Settings.data.appLauncher.sortByMostUsed;
 
         allResults.sort((a, b) => {
-                          let sa = a._score !== undefined ? a._score : 0;
-                          let sb = b._score !== undefined ? b._score : 0;
+          let sa = a._score !== undefined ? a._score : 0;
+          let sb = b._score !== undefined ? b._score : 0;
 
-                          // Boost scores for frequently used items from tracked providers
-                          // _score is normalized 0–1, so boost is scaled to nudge, not overwhelm
-                          if (boostByUsage) {
-                            if (a.provider && a.provider.trackUsage && a.usageKey) {
-                              sa += 0.1 * Math.log2(1 + ShellState.getLauncherUsageCount(a.usageKey));
-                            }
-                            if (b.provider && b.provider.trackUsage && b.usageKey) {
-                              sb += 0.1 * Math.log2(1 + ShellState.getLauncherUsageCount(b.usageKey));
-                            }
-                          }
+          // Boost scores for frequently used items from tracked providers
+          // _score is normalized 0–1, so boost is scaled to nudge, not overwhelm
+          if (boostByUsage) {
+            if (a.provider && a.provider.trackUsage && a.usageKey) {
+              sa += 0.1 * Math.log2(1 + ShellState.getLauncherUsageCount(a.usageKey));
+            }
+            if (b.provider && b.provider.trackUsage && b.usageKey) {
+              sb += 0.1 * Math.log2(1 + ShellState.getLauncherUsageCount(b.usageKey));
+            }
+          }
 
-                          return sb - sa;
-                        });
+          return sb - sa;
+        });
       }
       results = allResults;
     }
@@ -650,8 +653,8 @@ Rectangle {
           item.onAutoPaste();
         closeImmediately();
         Qt.callLater(() => {
-                       ClipboardService.pasteText(item.autoPasteText);
-                     });
+          ClipboardService.pasteText(item.autoPasteText);
+        });
         return;
       }
 
@@ -789,8 +792,7 @@ Rectangle {
     }
 
     // Clipboard pin shortcut. Ctrl avoids stealing plain text input from search.
-    if (event.key === Qt.Key_P && (event.modifiers & Qt.ControlModifier)
-        && selectedIndex >= 0 && results && results[selectedIndex]) {
+    if (event.key === Qt.Key_P && (event.modifiers & Qt.ControlModifier) && selectedIndex >= 0 && results && results[selectedIndex]) {
       const pinItem = results[selectedIndex];
       const pinProvider = pinItem.provider || currentProvider;
       if (pinProvider && pinProvider.canPinItem && pinProvider.canPinItem(pinItem))
@@ -1020,9 +1022,18 @@ Rectangle {
           // Gradient-style overlay: stronger at bottom for text legibility
           gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.4) }
-            GradientStop { position: 0.6; color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.7) }
-            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40) }
+            GradientStop {
+              position: 0.0
+              color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.4)
+            }
+            GradientStop {
+              position: 0.6
+              color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.7)
+            }
+            GradientStop {
+              position: 1.0
+              color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40)
+            }
           }
           radius: Style.radiusL
         }
@@ -1034,8 +1045,14 @@ Rectangle {
           radius: Style.radiusL
           gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.10) }
-            GradientStop { position: 0.35; color: Qt.rgba(1, 1, 1, 0.0) }
+            GradientStop {
+              position: 0.0
+              color: Qt.rgba(1, 1, 1, 0.10)
+            }
+            GradientStop {
+              position: 0.35
+              color: Qt.rgba(1, 1, 1, 0.0)
+            }
           }
         }
 
@@ -1053,54 +1070,59 @@ Rectangle {
           anchors.margins: Style.marginL
           spacing: Style.marginS
 
-        Item { Layout.fillHeight: true }
+          Item {
+            Layout.fillHeight: true
+          }
 
-        RowLayout {
-          Layout.fillWidth: true
-          spacing: Style.marginS
-
-          NTextInput {
-            id: bannerSearchInput
+          RowLayout {
             Layout.fillWidth: true
-            radius: Style.iRadiusL
-            inputIconName: "search"
-            text: root.searchText
-            placeholderText: I18n.tr("placeholders.search-launcher")
-            fontSize: Style.fontSizeM
-            onTextChanged: root.searchText = text
+            spacing: Style.marginS
 
-            Component.onCompleted: {
-              if (bannerSearchInput.inputItem) {
-                bannerSearchInput.inputItem.forceActiveFocus();
-                bannerSearchInput.inputItem.Keys.onPressed.connect(function (event) {
-                  root.handleKeyPress(event);
-                });
+            NTextInput {
+              id: bannerSearchInput
+              Layout.fillWidth: true
+              radius: Style.iRadiusL
+              inputIconName: "search"
+              text: root.searchText
+              placeholderText: I18n.tr("placeholders.search-launcher")
+              fontSize: Style.fontSizeM
+              onTextChanged: root.searchText = text
+
+              Component.onCompleted: {
+                if (bannerSearchInput.inputItem) {
+                  bannerSearchInput.inputItem.forceActiveFocus();
+                  bannerSearchInput.inputItem.Keys.onPressed.connect(function (event) {
+                    root.handleKeyPress(event);
+                  });
+                }
+              }
+            }
+
+            NIconButton {
+              visible: root.showLayoutToggle
+              icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
+              tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
+              customRadius: Style.iRadiusL
+              colorBg: Color.mSurfaceContainerHigh
+              colorBgHover: Color.mPrimaryContainer
+              colorFg: Color.mOnSurfaceVariant
+              colorFgHover: Color.mOnPrimaryContainer
+              colorBorder: "transparent"
+              colorBorderHover: "transparent"
+              Layout.preferredWidth: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
+              Layout.preferredHeight: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
+              onClicked: {
+                const current = Settings.data.appLauncher.viewMode;
+                if (current === "columns")
+                  Settings.data.appLauncher.viewMode = "grid";
+                else if (current === "grid")
+                  Settings.data.appLauncher.viewMode = "list";
+                else
+                  Settings.data.appLauncher.viewMode = "columns";
               }
             }
           }
-
-          NIconButton {
-            visible: root.showLayoutToggle
-            icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
-            tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
-            customRadius: Style.iRadiusL
-            colorBg: Color.mSurfaceContainerHigh
-            colorBgHover: Color.mPrimaryContainer
-            colorFg: Color.mOnSurfaceVariant
-            colorFgHover: Color.mOnPrimaryContainer
-            colorBorder: "transparent"
-            colorBorderHover: "transparent"
-            Layout.preferredWidth: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
-            Layout.preferredHeight: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
-            onClicked: {
-              const current = Settings.data.appLauncher.viewMode;
-              if (current === "columns") Settings.data.appLauncher.viewMode = "grid";
-              else if (current === "grid") Settings.data.appLauncher.viewMode = "list";
-              else Settings.data.appLauncher.viewMode = "columns";
-            }
-          }
         }
-      }
       } // ends bannerContainer
     } // ends coverBannerHeader
 
@@ -1147,9 +1169,12 @@ Rectangle {
         Layout.preferredHeight: searchInput.height
         onClicked: {
           const current = Settings.data.appLauncher.viewMode;
-          if (current === "columns") Settings.data.appLauncher.viewMode = "grid";
-          else if (current === "grid") Settings.data.appLauncher.viewMode = "list";
-          else Settings.data.appLauncher.viewMode = "columns";
+          if (current === "columns")
+            Settings.data.appLauncher.viewMode = "grid";
+          else if (current === "grid")
+            Settings.data.appLauncher.viewMode = "list";
+          else
+            Settings.data.appLauncher.viewMode = "columns";
         }
       }
     }
@@ -1229,9 +1254,9 @@ Rectangle {
             if (!root.appPanelItem)
               return;
             Qt.callLater(() => {
-                           if (resultsRows)
-                             resultsRows.positionViewAtIndex(resultsRows.selectedRow, ListView.Contain);
-                         });
+              if (resultsRows)
+                resultsRows.positionViewAtIndex(resultsRows.selectedRow, ListView.Contain);
+            });
           }
         }
 
@@ -1339,5 +1364,4 @@ Rectangle {
       }
     }
   }
-
 }

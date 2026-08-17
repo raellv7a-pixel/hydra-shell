@@ -4,8 +4,8 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Services.Compositor
-import qs.Widgets
 import qs.Services.System
+import qs.Widgets
 
 ColumnLayout {
   id: root
@@ -126,8 +126,14 @@ ColumnLayout {
     Layout.fillWidth: true
     label: I18n.tr("panels.osd.show-keys-position-label")
     model: [
-      { "key": "top", "name": I18n.tr("positions.top-center") },
-      { "key": "bottom", "name": I18n.tr("positions.bottom-center") }
+      {
+        "key": "top",
+        "name": I18n.tr("positions.top-center")
+      },
+      {
+        "key": "bottom",
+        "name": I18n.tr("positions.bottom-center")
+      }
     ]
     currentKey: Settings.data.showKeys.position
     defaultValue: Settings.getDefaultValue("showKeys.position")
@@ -176,12 +182,12 @@ ColumnLayout {
       }
       checked: (Settings.data.osd.monitors || []).indexOf(modelData.name) !== -1
       onToggled: checked => {
-                   if (checked) {
-                     Settings.data.osd.monitors = root.addMonitor(Settings.data.osd.monitors, modelData.name);
-                   } else {
-                     Settings.data.osd.monitors = root.removeMonitor(Settings.data.osd.monitors, modelData.name);
-                   }
-                 }
+        if (checked) {
+          Settings.data.osd.monitors = root.addMonitor(Settings.data.osd.monitors, modelData.name);
+        } else {
+          Settings.data.osd.monitors = root.removeMonitor(Settings.data.osd.monitors, modelData.name);
+        }
+      }
     }
   }
 }

@@ -135,11 +135,11 @@ Item {
           }
 
           onStatusChanged: status => {
-                             if (status === Image.Error) {
-                               gridIconLoader.visible = true;
-                               gridImagePreview.visible = false;
-                             }
-                           }
+            if (status === Image.Error) {
+              gridIconLoader.visible = true;
+              gridImagePreview.visible = false;
+            }
+          }
         }
 
         Loader {
@@ -255,7 +255,6 @@ Item {
         }
       }
     }
-
   }
 
   MouseArea {
@@ -271,14 +270,14 @@ Item {
         launcher.selectedIndex = gridEntryContainer.entryIndex;
     }
     onClicked: mouse => {
-                 launcher.selectedIndex = gridEntryContainer.entryIndex;
-                 if (mouse.button === Qt.RightButton) {
-                   launcher.toggleAppPanel(modelData);
-                   mouse.accepted = true;
-                 } else if (mouse.button === Qt.LeftButton) {
-                   launcher.activate();
-                   mouse.accepted = true;
-                 }
-               }
+      launcher.selectedIndex = gridEntryContainer.entryIndex;
+      if (mouse.button === Qt.RightButton) {
+        launcher.toggleAppPanel(modelData);
+        mouse.accepted = true;
+      } else if (mouse.button === Qt.LeftButton) {
+        launcher.activate();
+        mouse.accepted = true;
+      }
+    }
   }
 }

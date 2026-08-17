@@ -62,13 +62,27 @@ Singleton {
         "theme": h.cursor.theme,
         "size": h.cursor.size
       },
-      "envVars": (h.envVars || []).map(function (e) { return Object.assign({}, e); }),
-      "autostart": (h.autostart || []).map(function (e) { return Object.assign({}, e); }),
-      "windowRules": (h.windowRules || []).map(function (e) { return Object.assign({}, e); }),
-      "layerRules": (h.layerRules || []).map(function (e) { return Object.assign({}, e); }),
-      "animCurves": (h.animCurves || []).map(function (e) { return Object.assign({}, e); }),
-      "animItems": (h.animItems || []).map(function (e) { return Object.assign({}, e); }),
-      "keybinds": (h.keybinds || []).map(function (e) { return Object.assign({}, e); }),
+      "envVars": (h.envVars || []).map(function (e) {
+        return Object.assign({}, e);
+      }),
+      "autostart": (h.autostart || []).map(function (e) {
+        return Object.assign({}, e);
+      }),
+      "windowRules": (h.windowRules || []).map(function (e) {
+        return Object.assign({}, e);
+      }),
+      "layerRules": (h.layerRules || []).map(function (e) {
+        return Object.assign({}, e);
+      }),
+      "animCurves": (h.animCurves || []).map(function (e) {
+        return Object.assign({}, e);
+      }),
+      "animItems": (h.animItems || []).map(function (e) {
+        return Object.assign({}, e);
+      }),
+      "keybinds": (h.keybinds || []).map(function (e) {
+        return Object.assign({}, e);
+      }),
       "rebinds": Object.assign({}, h.rebinds || {})
     };
   }
@@ -118,7 +132,9 @@ Singleton {
   }
 
   function _preview() {
-    var snippet = HyprlandLuaWriter.buildSettingsLua({ "appearance": draft.appearance });
+    var snippet = HyprlandLuaWriter.buildSettingsLua({
+                                                       "appearance": draft.appearance
+                                                     });
     // buildSettingsLua's header comment lines are harmless to eval (Lua
     // comments), so the same generator serves both file-writing and preview.
     HyprlandEvalService.evalLua(snippet);

@@ -78,8 +78,18 @@ NBox {
     transformOrigin: Item.Center
     z: 5
 
-    Behavior on scale { ScaleAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic } }
-    Behavior on opacity { OpacityAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic } }
+    Behavior on scale {
+      ScaleAnimator {
+        duration: Style.animationFast
+        easing.type: Easing.OutCubic
+      }
+    }
+    Behavior on opacity {
+      OpacityAnimator {
+        duration: Style.animationFast
+        easing.type: Easing.OutCubic
+      }
+    }
   }
 
   ColumnLayout {
@@ -162,11 +172,11 @@ NBox {
           }
 
           onStatusChanged: status => {
-                             if (status === Image.Error) {
-                               iconLoader.visible = true;
-                               imagePreview.visible = false;
-                             }
-                           }
+            if (status === Image.Error) {
+              iconLoader.visible = true;
+              imagePreview.visible = false;
+            }
+          }
         }
 
         // Color swatch - shown for clipboard color entries
@@ -310,7 +320,6 @@ NBox {
           }
         }
       }
-
     }
   }
 
@@ -327,14 +336,14 @@ NBox {
         launcher.selectedIndex = entry.entryIndex;
     }
     onClicked: mouse => {
-                 launcher.selectedIndex = entry.entryIndex;
-                 if (mouse.button === Qt.RightButton) {
-                   launcher.toggleAppPanel(modelData);
-                   mouse.accepted = true;
-                 } else if (mouse.button === Qt.LeftButton) {
-                   launcher.activate();
-                   mouse.accepted = true;
-                 }
-               }
+      launcher.selectedIndex = entry.entryIndex;
+      if (mouse.button === Qt.RightButton) {
+        launcher.toggleAppPanel(modelData);
+        mouse.accepted = true;
+      } else if (mouse.button === Qt.LeftButton) {
+        launcher.activate();
+        mouse.accepted = true;
+      }
+    }
   }
 }

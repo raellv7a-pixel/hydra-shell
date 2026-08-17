@@ -326,14 +326,14 @@ ColumnLayout {
     label: I18n.tr("panels.color-scheme.templates-cursor-size-label")
     description: I18n.tr("panels.color-scheme.templates-cursor-size-description")
     model: [16, 20, 22, 24, 28, 32, 40, 48, 56, 64].map(s => ({
-                                                             "key": String(s),
-                                                             "name": s + "px"
-                                                           }))
+      "key": String(s),
+      "name": s + "px"
+    }))
     currentKey: String(Settings.data.templates.cursorSize)
     onSelected: key => {
-                  Settings.data.templates.cursorSize = parseInt(key, 10);
-                  Quickshell.execDetached(["python3", TemplateRegistry.cursorGenerateScript, root.primaryHex(), key]);
-                }
+      Settings.data.templates.cursorSize = parseInt(key, 10);
+      Quickshell.execDetached(["python3", TemplateRegistry.cursorGenerateScript, root.primaryHex(), key]);
+    }
   }
 
   NDivider {
@@ -347,11 +347,11 @@ ColumnLayout {
     description: I18n.tr("panels.color-scheme.templates-misc-user-templates-description")
     checked: Settings.data.templates.enableUserTheming
     onToggled: checked => {
-                 Settings.data.templates.enableUserTheming = checked;
-                 if (checked) {
-                   TemplateRegistry.writeUserTemplatesToml();
-                 }
-                 AppThemeService.generate();
-               }
+      Settings.data.templates.enableUserTheming = checked;
+      if (checked) {
+        TemplateRegistry.writeUserTemplatesToml();
+      }
+      AppThemeService.generate();
+    }
   }
 }
