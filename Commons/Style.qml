@@ -23,6 +23,50 @@ Singleton {
   readonly property int fontWeightSemiBold: 600
   readonly property int fontWeightBold: 700
 
+  // Hydra Expressive semantic typography. Existing fontSize* tokens remain
+  // available during migration; new and refactored surfaces use these names.
+  readonly property real fontSizeLabelSmall: 9
+  readonly property real fontSizeLabelMedium: 10
+  readonly property real fontSizeLabelLarge: 11
+  readonly property real fontSizeBodySmall: 11
+  readonly property real fontSizeBodyMedium: 13
+  readonly property real fontSizeBodyLarge: 16
+  readonly property real fontSizeTitleSmall: 14
+  readonly property real fontSizeTitleMedium: 16
+  readonly property real fontSizeTitleLarge: 22
+  readonly property real fontSizeHeadlineSmall: 24
+  readonly property real fontSizeHeadlineMedium: 28
+  readonly property real fontSizeHeadlineLarge: 32
+  readonly property real fontSizeDisplaySmall: 36
+  readonly property real fontSizeDisplayMedium: 45
+  readonly property real fontSizeDisplayLarge: 57
+
+  // Hydra Expressive spatial scale. All geometry follows the existing global
+  // UI scale so per-monitor/device scaling behavior remains unchanged.
+  readonly property int spaceNone: 0
+  readonly property int spaceXXS: Math.round(4 * uiScaleRatio)
+  readonly property int spaceXS: Math.round(8 * uiScaleRatio)
+  readonly property int spaceS: Math.round(12 * uiScaleRatio)
+  readonly property int spaceM: Math.round(16 * uiScaleRatio)
+  readonly property int spaceL: Math.round(20 * uiScaleRatio)
+  readonly property int spaceXL: Math.round(28 * uiScaleRatio)
+  readonly property int spaceXXL: Math.round(32 * uiScaleRatio)
+  readonly property int spaceXXXL: Math.round(48 * uiScaleRatio)
+
+  readonly property int paddingControl: spaceXS
+  readonly property int paddingCard: spaceM
+  readonly property int paddingPanel: spaceL
+
+  // Semantic shape roles. Containers and controls preserve their independent
+  // user-configurable radius ratios.
+  readonly property int radiusPanel: Math.round(28 * Settings.data.general.radiusRatio)
+  readonly property int radiusCard: Math.round(16 * Settings.data.general.radiusRatio)
+  readonly property int radiusPopover: Math.round(20 * Settings.data.general.radiusRatio)
+  readonly property int radiusControl: Math.round(16 * Settings.data.general.iRadiusRatio)
+  readonly property int radiusControlPressed: Math.round(8 * Settings.data.general.iRadiusRatio)
+  readonly property int radiusControlChecked: Math.round(12 * Settings.data.general.iRadiusRatio)
+  readonly property int radiusCapsule: 9999
+
   // Container Radii: major layout sections (sidebars, cards, content panels)
   readonly property int radiusXXXS: Math.round(3 * Settings.data.general.radiusRatio)
   readonly property int radiusXXS: Math.round(4 * Settings.data.general.radiusRatio)
