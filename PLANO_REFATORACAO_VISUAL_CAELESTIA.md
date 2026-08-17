@@ -31,7 +31,7 @@ Regras operacionais:
 | --- | --- | --- |
 | 0. Fundação, licença e baseline | **Finalizado e validado** | Toolchain determinístico, licença registrada, baseline capturado |
 | 1. Plugin visual GPL | **Finalizado e validado** | Plugin Blob carrega, funde e deforma duas superfícies |
-| 2. Design system | **Em trabalho** | Tokens, motion, state layer, foco e elevação centralizados |
+| 2. Design system | **Finalizado e validado** | Tokens, motion, state layer, foco e elevação centralizados |
 | 3. Widgets | **Em espera** | 55 widgets auditados e estados de interação unificados |
 | 4. Superfície global | **Em espera** | MainScreen/SmartPanel usando blobs, fullscreen e input corretos |
 | 5. Barra | **Em espera** | Quatro posições e cinco densidades validadas em dois monitores |
@@ -95,17 +95,17 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 
 ## Fase 2 — Design system
 
-**Estado: Em trabalho**
+**Estado: Finalizado e validado**
 
 ### Checklist
 
-- [ ] Expandir `Commons/Style.qml` com raios, padding, tipografia semântica e elevação.
+- [x] Expandir `Commons/Style.qml` com raios, padding, tipografia semântica e elevação.
 - [x] Adicionar curvas standard, emphasized e expressive spatial/effects.
 - [x] Preservar `animationSpeed`, `animationDisabled`, escala e performance mode.
 - [x] Criar `NAnim`, `NColorAnimation`, `NAnchorAnimation` e `NFadeSwap`.
-- [ ] Criar `NStateLayer`, ripple, shape morph e `NFocusRing`.
-- [ ] Criar `NElevation` e evolução de `NDropShadow`.
-- [ ] Adicionar helpers tonais ao `Commons/Color.qml` sem substituir a geração HCT existente.
+- [x] Criar `NStateLayer`, ripple, shape morph e `NFocusRing`.
+- [x] Criar `NElevation` e evolução de `NDropShadow`.
+- [x] Adicionar helpers tonais ao `Commons/Color.qml` sem substituir a geração HCT existente.
 
 ### Validação obrigatória
 
@@ -301,3 +301,4 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 | 2026-08-17 | 1 | `qmlformat 6.10.3 --check` percorreu 523 QML; Lab completo carregou; após encerrar smoke/Lab, `qs list --all` mostrou apenas a shell ativa PID 14830 | Gate de plugin e limpeza de instâncias aprovado |
 | 2026-08-17 | 2 | `Commons/Style.qml` ganhou escala semântica aditiva de tipografia, espaço/padding e raios expressive; `qmlformat --check` passou e o Lab carregou sem tipo indisponível ou propriedade indefinida | Tokens base integrados sem quebrar 340 consumidores |
 | 2026-08-17 | 2 | Smoke temporário executou `NAnim`, `NColorAnimation`, `NAnchorAnimation` e `NFadeSwap`; frames separados por um ciclo divergiram; probe com configuração isolada retornou `MOTION_KILL_SWITCH false 0 0 0 0 0 0`; `qmlformat --check` percorreu 527 QML e o Lab completo carregou | Motion centralizado validado; curvas com overshoot ficaram restritas a geometria e kill-switch/performance mode compartilham o mesmo corte |
+| 2026-08-17 | 2 | Smoke temporário alternou `NStateLayer`, `NRipple`, `NShapeMorph`, `NFocusRing` e `NElevation`; quatro frames produziram três hashes e inspeção visual confirmou os estados; `qmlformat --check` percorreu 532 QML; o Lab carregou e o OSD real foi acionado pelo IPC após evoluir `NDropShadow` | State, foco, morph, elevação e helpers tonais aprovados; encerramento deixou apenas a shell ativa PID 14830 |

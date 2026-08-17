@@ -126,6 +126,70 @@ Singleton {
   readonly property real shadowHorizontalOffset: Settings.data.general.shadowOffsetX
   readonly property real shadowVerticalOffset: Settings.data.general.shadowOffsetY
 
+  // Interaction state, focus and shape morph
+  readonly property real stateHoverOpacity: 0.08
+  readonly property real stateFocusOpacity: 0.12
+  readonly property real statePressedOpacity: 0.12
+  readonly property real stateDraggedOpacity: 0.16
+  readonly property real stateSelectedOpacity: 0.10
+  readonly property int focusRingWidth: borderM
+  readonly property int focusRingOffset: Math.max(2, spaceXXS / 2)
+  readonly property real morphHoverScale: 1.02
+  readonly property real morphPressedScale: 0.96
+
+  // Elevation levels map to MultiEffect's normalized blur and pixel offset.
+  // Level 0 keeps the legacy NDropShadow values for backwards compatibility.
+  function elevationBlur(level) {
+    switch (Math.max(0, Math.min(5, Math.round(level)))) {
+    case 1:
+      return 0.18;
+    case 2:
+      return 0.30;
+    case 3:
+      return 0.44;
+    case 4:
+      return 0.60;
+    case 5:
+      return 0.78;
+    default:
+      return 0.0;
+    }
+  }
+
+  function elevationOpacity(level) {
+    switch (Math.max(0, Math.min(5, Math.round(level)))) {
+    case 1:
+      return 0.20;
+    case 2:
+      return 0.22;
+    case 3:
+      return 0.24;
+    case 4:
+      return 0.26;
+    case 5:
+      return 0.28;
+    default:
+      return 0.0;
+    }
+  }
+
+  function elevationVerticalOffset(level) {
+    switch (Math.max(0, Math.min(5, Math.round(level)))) {
+    case 1:
+      return 1;
+    case 2:
+      return 2;
+    case 3:
+      return 4;
+    case 4:
+      return 6;
+    case 5:
+      return 8;
+    default:
+      return 0;
+    }
+  }
+
   // Animation duration (ms)
   readonly property int animationFaster: (Settings.data.general.animationDisabled || PowerProfileService.noctaliaPerformanceMode) ? 0 : Math.round(75 / Settings.data.general.animationSpeed)
   readonly property int animationFast: (Settings.data.general.animationDisabled || PowerProfileService.noctaliaPerformanceMode) ? 0 : Math.round(150 / Settings.data.general.animationSpeed)

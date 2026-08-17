@@ -98,6 +98,35 @@ Singleton {
     return Qt.rgba(base.r + (accent.r - base.r) * ratio, base.g + (accent.g - base.g) * ratio, base.b + (accent.b - base.b) * ratio, base.a + (accent.a - base.a) * ratio);
   }
 
+  // Additive tonal helpers over the active dynamic scheme. They deliberately
+  // compose existing HCT-generated roles instead of generating a second palette.
+  function tonal(base, accent, strength = 0.12) {
+    return blend(base, accent, strength);
+  }
+
+  function tonalSurface(accent, strength = 0.12, elevation = 1) {
+    let surface = root.mSurface;
+    switch (Math.max(0, Math.min(4, Math.round(elevation)))) {
+    case 1:
+      surface = root.mSurfaceContainerLow;
+      break;
+    case 2:
+      surface = root.mSurfaceContainer;
+      break;
+    case 3:
+      surface = root.mSurfaceContainerHigh;
+      break;
+    case 4:
+      surface = root.mSurfaceContainerHighest;
+      break;
+    }
+    return tonal(surface, accent, strength);
+  }
+
+  function stateLayer(contentColor, opacity) {
+    return Qt.alpha(contentColor, Math.max(0, Math.min(1, Number(opacity || 0))));
+  }
+
   // --- Color transition animations ---
   Behavior on mPrimary {
     enabled: !root.skipTransition
