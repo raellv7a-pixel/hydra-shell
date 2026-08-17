@@ -133,6 +133,25 @@ Singleton {
   readonly property int animationSlow: (Settings.data.general.animationDisabled || PowerProfileService.noctaliaPerformanceMode) ? 0 : Math.round(450 / Settings.data.general.animationSpeed)
   readonly property int animationSlowest: (Settings.data.general.animationDisabled || PowerProfileService.noctaliaPerformanceMode) ? 0 : Math.round(750 / Settings.data.general.animationSpeed)
 
+  // Material 3 Expressive motion. Spatial curves may overshoot and are only
+  // for geometry; effects curves are bounded for color and opacity.
+  readonly property bool motionEnabled: !(Settings.data.general.animationDisabled || PowerProfileService.noctaliaPerformanceMode)
+  readonly property int motionDurationFastSpatial: motionEnabled ? Math.round(350 / Settings.data.general.animationSpeed) : 0
+  readonly property int motionDurationDefaultSpatial: motionEnabled ? Math.round(500 / Settings.data.general.animationSpeed) : 0
+  readonly property int motionDurationSlowSpatial: motionEnabled ? Math.round(650 / Settings.data.general.animationSpeed) : 0
+  readonly property int motionDurationFastEffects: motionEnabled ? Math.round(150 / Settings.data.general.animationSpeed) : 0
+  readonly property int motionDurationDefaultEffects: motionEnabled ? Math.round(200 / Settings.data.general.animationSpeed) : 0
+  readonly property int motionDurationSlowEffects: motionEnabled ? Math.round(300 / Settings.data.general.animationSpeed) : 0
+
+  readonly property list<real> motionCurveStandardSpatial: [0.2, 0.0, 0.0, 1.0, 1.0, 1.0]
+  readonly property list<real> motionCurveEmphasizedSpatial: [0.38, 1.21, 0.22, 1.0, 1.0, 1.0]
+  readonly property list<real> motionCurveExpressiveFastSpatial: [0.42, 1.67, 0.21, 0.9, 1.0, 1.0]
+  readonly property list<real> motionCurveExpressiveDefaultSpatial: [0.38, 1.21, 0.22, 1.0, 1.0, 1.0]
+  readonly property list<real> motionCurveExpressiveSlowSpatial: [0.39, 1.29, 0.35, 0.98, 1.0, 1.0]
+  readonly property list<real> motionCurveStandardEffects: [0.2, 0.0, 0.0, 1.0, 1.0, 1.0]
+  readonly property list<real> motionCurveEmphasizedEffects: [0.05, 0.7, 0.1, 1.0, 1.0, 1.0]
+  readonly property list<real> motionCurveExpressiveEffects: [0.1, 0.7, 0.1, 1.0, 1.0, 1.0]
+
   // Delays
   readonly property int tooltipDelay: 300
   readonly property int tooltipDelayLong: 1200

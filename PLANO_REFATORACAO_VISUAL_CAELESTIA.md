@@ -100,9 +100,9 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 ### Checklist
 
 - [ ] Expandir `Commons/Style.qml` com raios, padding, tipografia semântica e elevação.
-- [ ] Adicionar curvas standard, emphasized e expressive spatial/effects.
-- [ ] Preservar `animationSpeed`, `animationDisabled`, escala e performance mode.
-- [ ] Criar `NAnim`, `NColorAnimation`, `NAnchorAnimation` e `NFadeSwap`.
+- [x] Adicionar curvas standard, emphasized e expressive spatial/effects.
+- [x] Preservar `animationSpeed`, `animationDisabled`, escala e performance mode.
+- [x] Criar `NAnim`, `NColorAnimation`, `NAnchorAnimation` e `NFadeSwap`.
 - [ ] Criar `NStateLayer`, ripple, shape morph e `NFocusRing`.
 - [ ] Criar `NElevation` e evolução de `NDropShadow`.
 - [ ] Adicionar helpers tonais ao `Commons/Color.qml` sem substituir a geração HCT existente.
@@ -300,3 +300,4 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 | 2026-08-17 | 1 | `plugin/smoke/shell.qml` executado no `noctalia-qs`; `08-blob-separated.png` e `09-blob-merged.png` mostram repouso, raios independentes, fusão contínua e deformação durante movimento | Smoke visual aprovado sem artefatos |
 | 2026-08-17 | 1 | `qmlformat 6.10.3 --check` percorreu 523 QML; Lab completo carregou; após encerrar smoke/Lab, `qs list --all` mostrou apenas a shell ativa PID 14830 | Gate de plugin e limpeza de instâncias aprovado |
 | 2026-08-17 | 2 | `Commons/Style.qml` ganhou escala semântica aditiva de tipografia, espaço/padding e raios expressive; `qmlformat --check` passou e o Lab carregou sem tipo indisponível ou propriedade indefinida | Tokens base integrados sem quebrar 340 consumidores |
+| 2026-08-17 | 2 | Smoke temporário executou `NAnim`, `NColorAnimation`, `NAnchorAnimation` e `NFadeSwap`; frames separados por um ciclo divergiram; probe com configuração isolada retornou `MOTION_KILL_SWITCH false 0 0 0 0 0 0`; `qmlformat --check` percorreu 527 QML e o Lab completo carregou | Motion centralizado validado; curvas com overshoot ficaram restritas a geometria e kill-switch/performance mode compartilham o mesmo corte |
