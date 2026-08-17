@@ -30,8 +30,8 @@ Regras operacionais:
 | Fase | Estado | Gate de conclusão |
 | --- | --- | --- |
 | 0. Fundação, licença e baseline | **Finalizado e validado** | Toolchain determinístico, licença registrada, baseline capturado |
-| 1. Plugin visual GPL | **Em trabalho** | Plugin Blob carrega, funde e deforma duas superfícies |
-| 2. Design system | **Em espera** | Tokens, motion, state layer, foco e elevação centralizados |
+| 1. Plugin visual GPL | **Finalizado e validado** | Plugin Blob carrega, funde e deforma duas superfícies |
+| 2. Design system | **Em trabalho** | Tokens, motion, state layer, foco e elevação centralizados |
 | 3. Widgets | **Em espera** | 55 widgets auditados e estados de interação unificados |
 | 4. Superfície global | **Em espera** | MainScreen/SmartPanel usando blobs, fullscreen e input corretos |
 | 5. Barra | **Em espera** | Quatro posições e cinco densidades validadas em dois monitores |
@@ -72,7 +72,7 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 
 ## Fase 1 — Plugin visual GPL
 
-**Estado: Em trabalho**
+**Estado: Finalizado e validado**
 
 ### Checklist
 
@@ -82,7 +82,7 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 - [x] Criar build CMake mínimo do módulo QML.
 - [x] Integrar build/instalação em `Scripts/bash/install.sh`.
 - [x] Integrar o plugin em `flake.nix`/`nix/`.
-- [ ] Criar smoke surface isolada com dois blobs, fusão, raio por canto e deformação.
+- [x] Criar smoke surface isolada com dois blobs, fusão, raio por canto e deformação.
 
 ### Validação obrigatória
 
@@ -95,7 +95,7 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 
 ## Fase 2 — Design system
 
-**Estado: Em espera**
+**Estado: Em trabalho**
 
 ### Checklist
 
@@ -297,3 +297,5 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 | 2026-08-17 | 1 | CMake/Ninja com Qt 6.11.1 compilou `hydra_visual`, plugin QML e shaders; `/usr/lib64/qt6/bin/qml -I /tmp/hydra-visual-build/qml /tmp/HydraVisualImport.qml` encerrou com código 0 | Porte mínimo `Hydra.Visual` compila e importa |
 | 2026-08-17 | 1 | `build-visual-plugin.sh --prefix /tmp/hydra-visual-install` instalou `.so`, `qmldir` e `.qmltypes` com RPATH `$ORIGIN`; import via `QML_IMPORT_PATH` retornou 0; `bash -n` passou | Instalação CachyOS/Lab validada |
 | 2026-08-17 | 1 | `nix/package.nix` passou a compilar/instalar `Hydra.Visual`, exportar `QML_IMPORT_PATH` e declarar GPL-3.0-only; dev shell ganhou CMake/Ninja/ShaderTools | Integração Nix implementada; build Nix não executado porque `nix` não está instalado nesta máquina |
+| 2026-08-17 | 1 | `plugin/smoke/shell.qml` executado no `noctalia-qs`; `08-blob-separated.png` e `09-blob-merged.png` mostram repouso, raios independentes, fusão contínua e deformação durante movimento | Smoke visual aprovado sem artefatos |
+| 2026-08-17 | 1 | `qmlformat 6.10.3 --check` percorreu 523 QML; Lab completo carregou; após encerrar smoke/Lab, `qs list --all` mostrou apenas a shell ativa PID 14830 | Gate de plugin e limpeza de instâncias aprovado |
