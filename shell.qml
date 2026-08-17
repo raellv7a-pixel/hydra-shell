@@ -153,6 +153,7 @@ ShellRoot {
 
       FadeOverlay {}
       ShowKeysOsd {}
+      OSD {}
 
       // Settings window mode (single window across all monitors)
       SettingsPanelWindow {}
