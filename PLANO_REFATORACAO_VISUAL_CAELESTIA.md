@@ -32,7 +32,7 @@ Regras operacionais:
 | 0. Fundação, licença e baseline | **Finalizado e validado** | Toolchain determinístico, licença registrada, baseline capturado |
 | 1. Plugin visual GPL | **Finalizado e validado** | Plugin Blob carrega, funde e deforma duas superfícies |
 | 2. Design system | **Finalizado e validado** | Tokens, motion, state layer, foco e elevação centralizados |
-| 3. Widgets | **Em espera** | 55 widgets auditados e estados de interação unificados |
+| 3. Widgets | **Em trabalho** | 55 widgets auditados e estados de interação unificados |
 | 4. Superfície global | **Em espera** | MainScreen/SmartPanel usando blobs, fullscreen e input corretos |
 | 5. Barra | **Em espera** | Quatro posições e cinco densidades validadas em dois monitores |
 | 6. Painéis | **Em espera** | Todos os SmartPanel e conteúdos internos revisados |
@@ -118,11 +118,11 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 
 ## Fase 3 — Widgets
 
-**Estado: Em espera**
+**Estado: Em trabalho**
 
 ### Checklist
 
-- [ ] Refatorar `NText`, `NIcon`, `NIconButton`, `NToggle`, `NDivider`, `NButton`, `NComboBox`, `NTextInput`, `NLabel` e `NBox`.
+- [x] Refatorar `NText`, `NIcon`, `NIconButton`, `NToggle`, `NDivider`, `NButton`, `NComboBox`, `NTextInput`, `NLabel` e `NBox`.
 - [ ] Unificar hover, press, focus, disabled e semântica de clique.
 - [ ] Migrar forms: checkbox, radio, sliders, spinbox, color/file/icon pickers e keybind recorder.
 - [ ] Migrar navegação: tabs, listas, grids, scrolls, collapsible, menus e reorder.
@@ -275,13 +275,13 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 
 ## Ponto de retomada global
 
-**Fase ativa:** Fase 0 — Fundação, licença e baseline.
+**Fase ativa:** Fase 3 — Widgets.
 
-**Último trabalho concluído:** ledger persistente criado.
+**Último trabalho concluído:** dez widgets de maior fan-in migrados para tokens semânticos, state layer, morph, focus ring e motion centralizado.
 
-**Próxima ação exata:** criar a branch `visual/caelestia-expressive`, tornar o formatter determinístico/transacional e registrar baseline antes de alterar qualquer QML visual.
+**Próxima ação exata:** migrar a família de forms — checkbox, radio, sliders, spinbox, pickers e gravador de atalhos — reutilizando as mesmas primitivas.
 
-**Bloqueios conhecidos:** `qmlformat 6.11.1` do sistema falha silenciosamente em nove arquivos e reescreve parcialmente centenas de arquivos antes da falha.
+**Bloqueios conhecidos:** nenhum; o formatter reproduzível usa Qt 6.10.3 isolado pelo `Scripts/dev/bootstrap-qt-tools.sh`.
 
 ## Registro de evidências
 
@@ -302,3 +302,5 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 | 2026-08-17 | 2 | `Commons/Style.qml` ganhou escala semântica aditiva de tipografia, espaço/padding e raios expressive; `qmlformat --check` passou e o Lab carregou sem tipo indisponível ou propriedade indefinida | Tokens base integrados sem quebrar 340 consumidores |
 | 2026-08-17 | 2 | Smoke temporário executou `NAnim`, `NColorAnimation`, `NAnchorAnimation` e `NFadeSwap`; frames separados por um ciclo divergiram; probe com configuração isolada retornou `MOTION_KILL_SWITCH false 0 0 0 0 0 0`; `qmlformat --check` percorreu 527 QML e o Lab completo carregou | Motion centralizado validado; curvas com overshoot ficaram restritas a geometria e kill-switch/performance mode compartilham o mesmo corte |
 | 2026-08-17 | 2 | Smoke temporário alternou `NStateLayer`, `NRipple`, `NShapeMorph`, `NFocusRing` e `NElevation`; quatro frames produziram três hashes e inspeção visual confirmou os estados; `qmlformat --check` percorreu 532 QML; o Lab carregou e o OSD real foi acionado pelo IPC após evoluir `NDropShadow` | State, foco, morph, elevação e helpers tonais aprovados; encerramento deixou apenas a shell ativa PID 14830 |
+| 2026-08-17 | 3 | Prowl contou 809 relações de consumo nos dez widgets prioritários; smoke visual carregou todos, Return ativou `NButton`, Tab/Space abriu `NComboBox`, foco contornou controles disabled e clique Wayland alternou `NToggle`; launcher e Settings reais foram inspecionados; `qmlformat --check` percorreu 532 QML | Primeiro corte de widgets aprovado em uso isolado e nas superfícies reais |
+| 2026-08-17 | 3 | Fechar launcher e abrir/fechar Settings reproduziu acessos nulos nos atalhos centralizados; `MainScreen.qml` passou a usar painel estável e optional chaining; nova instância do Lab repetiu a corrida sem `TypeError` | Regressão funcional adjacente corrigida na fonte |
