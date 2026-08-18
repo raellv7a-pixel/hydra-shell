@@ -12,6 +12,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: useGraphicMode
+  Accessible.role: Accessible.Button
+  Accessible.name: tooltipContent
 
   property ShellScreen screen
 
@@ -155,18 +158,27 @@ Item {
     anchors.centerIn: nBattery
     width: root.isBarVertical ? root.capsuleHeight : nBattery.width + Style.margin2S
     height: root.isBarVertical ? nBattery.height + Style.margin2S : root.capsuleHeight
-    radius: Math.min(Style.radiusL, width / 2)
-    color: graphicMouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    radius: Style.radiusCapsule
+    color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
-    Behavior on color {
-      enabled: !Color.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
-      }
+    NStateLayer {
+      id: batteryStateLayer
+
+      anchors.fill: parent
+      hovered: graphicMouseArea.containsMouse
+      pressed: graphicMouseArea.pressed
+      focused: root.activeFocus
+      stateColor: Color.mOnSurface
+      radius: parent.radius
     }
+  }
+
+  NFocusRing {
+    anchors.fill: capsule
+    focusVisible: root.activeFocus && root.useGraphicMode
+    targetRadius: capsule.radius
   }
 
   NBattery {
@@ -182,8 +194,8 @@ Item {
     pluggedIn: root.isPluggedIn
     low: root.isLowBattery
     critical: root.isCriticalBattery
-    baseColor: graphicMouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
-    textColor: graphicMouseArea.containsMouse ? Color.mHover : Color.mSurface
+    baseColor: Color.mOnSurface
+    textColor: Color.mSurface
   }
 
   MouseArea {
@@ -193,6 +205,11 @@ Item {
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     cursorShape: Qt.PointingHandCursor
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(batteryStateLayer, mouse.x, mouse.y);
+                 batteryStateLayer.rippleAt(point.x, point.y);
+               }
     onEntered: {
       if (!getBatteryPanel()?.isPanelOpen && root.tooltipContent) {
         TooltipService.show(root, root.tooltipContent, BarService.getTooltipDirection(root.screen?.name));
@@ -212,6 +229,15 @@ Item {
                  }
                }
   }
+
+  Keys.onReturnPressed: event => {
+                          root.toggleBatteryPanel();
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         root.toggleBatteryPanel();
+                         event.accepted = true;
+                       }
 
   Timer {
     id: tooltipRefreshTimer

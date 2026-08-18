@@ -41,12 +41,14 @@ NIconButton {
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
-  colorBg: Style.capsuleColor
-  colorFg: root.vibranceEnabled ? Color.mPrimary : Color.resolveColorKey(iconColorKey)
+  customRadius: Style.radiusCapsule
+  colorBg: root.vibranceEnabled ? Color.mTertiary : Qt.alpha(Color.mTertiary, 0.16)
+  colorFg: root.vibranceEnabled ? Color.mOnTertiary : Color.resolveColorKey(iconColorKey)
+  colorBgHover: root.vibranceEnabled ? Color.mOnTertiary : Color.mTertiary
+  colorFgHover: colorFg
   onClicked: root.toggle()
 
-  border.color: Style.capsuleBorderColor
+  border.color: Qt.alpha(Color.mTertiary, 0.36)
   border.width: Style.capsuleBorderWidth
 
   function buildCommand(value) {

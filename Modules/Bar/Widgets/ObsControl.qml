@@ -8,6 +8,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: shouldShow
+  Accessible.role: Accessible.Button
+  Accessible.name: tooltipText
 
   property ShellScreen screen
   property string widgetId: ""
@@ -77,11 +80,29 @@ Item {
   }
 
   Rectangle {
+    id: obsCapsule
     anchors.fill: parent
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
-    radius: Style.radiusL
+    color: Style.capsuleColor
+    radius: Style.radiusCapsule
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: obsStateLayer
+
+      anchors.fill: parent
+      hovered: mouseArea.containsMouse
+      pressed: mouseArea.pressed
+      focused: root.activeFocus
+      stateColor: root.accentColor
+      radius: parent.radius
+    }
+  }
+
+  NFocusRing {
+    anchors.fill: obsCapsule
+    focusVisible: root.activeFocus
+    targetRadius: obsCapsule.radius
   }
 
   Item {
@@ -146,7 +167,12 @@ Item {
 
     onEntered: TooltipService.show(root, root.tooltipText, BarService.getTooltipDirection(root.screenName))
     onExited: TooltipService.hide(root)
-    onPressed: TooltipService.hide(root)
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 TooltipService.hide(root);
+                 const point = mapToItem(obsStateLayer, mouse.x, mouse.y);
+                 obsStateLayer.rippleAt(point.x, point.y);
+               }
     onClicked: mouse => {
                  if (mouse.button === Qt.LeftButton) {
                    PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root);
@@ -157,6 +183,15 @@ Item {
                  }
                }
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root);
+                         event.accepted = true;
+                       }
 
   NPopupContextMenu {
     id: contextMenu

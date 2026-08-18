@@ -35,7 +35,7 @@ NIconButton {
   enabled: Settings.data.wallpaper.enabled
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
+  customRadius: Style.radiusCapsule
   icon: "wallpaper-selector"
   tooltipText: {
     if (PanelService.getPanel("wallpaperPanel", screen)?.isPanelOpen) {
@@ -45,9 +45,11 @@ NIconButton {
     }
   }
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
-  colorBg: Style.capsuleColor
+  colorBg: Qt.alpha(Color.mTertiary, 0.16)
   colorFg: Color.resolveColorKey(iconColorKey)
-  border.color: Style.capsuleBorderColor
+  colorBgHover: Color.mTertiary
+  colorFgHover: colorFg
+  border.color: Qt.alpha(Color.mTertiary, 0.36)
   border.width: Style.capsuleBorderWidth
 
   NPopupContextMenu {

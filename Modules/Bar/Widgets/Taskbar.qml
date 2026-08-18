@@ -620,9 +620,9 @@ Item {
   visible: hideMode !== "hidden" || hasWindow
   opacity: ((hideMode !== "hidden" && hideMode !== "transparent") || hasWindow) ? 1.0 : 0.0
   Behavior on opacity {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+    NAnim {
+      duration: Style.motionDurationDefaultEffects
+      motionType: NAnim.StandardEffects
     }
   }
 
@@ -653,7 +653,7 @@ Item {
     width: root.contentWidth
     height: root.contentHeight
     anchors.centerIn: parent
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -685,14 +685,17 @@ Item {
           readonly property bool isFocused: isRunning && modelData.window && modelData.window.isFocused
           readonly property bool isPinnedRunning: isPinned && isRunning && !isFocused
           readonly property bool isHovered: root.hoveredWindowId === modelData.id
+          activeFocusOnTab: true
+          Accessible.role: Accessible.Button
+          Accessible.name: title
 
           readonly property bool shouldShowTitle: root.showTitle && modelData.type !== "pinned"
           readonly property real itemSpacing: Style.marginS
           readonly property real contentWidth: shouldShowTitle ? root.itemSize + itemSpacing + root.titleWidth : root.itemSize
 
           readonly property string title: modelData.title || modelData.appId || "Unknown application"
-          readonly property color titleBgColor: (isHovered || isFocused) ? Color.mHover : Style.capsuleColor
-          readonly property color titleFgColor: (isHovered || isFocused) ? Color.mOnHover : Color.mOnSurface
+          readonly property color titleBgColor: isFocused ? Qt.alpha(Color.mPrimary, 0.20) : "transparent"
+          readonly property color titleFgColor: isFocused ? Color.mPrimary : Color.mOnSurface
 
           Layout.preferredWidth: root.isVerticalBar ? root.barHeight : (root.showTitle ? Math.round(contentWidth + Style.margin2M) : Math.round(contentWidth)) // Add margins for both pinned and running apps
           Layout.preferredHeight: root.isVerticalBar ? root.itemSize : root.barHeight
@@ -703,6 +706,18 @@ Item {
 
           property int modelIndex: index
           objectName: "taskbarAppItem"
+
+          function activateItem() {
+            if (isRunning && modelData.window) {
+              try {
+                CompositorService.focusWindow(modelData.window);
+              } catch (error) {
+                Logger.e("Taskbar", "Failed to activate toplevel: " + error);
+              }
+            } else if (isPinned) {
+              root.launchPinnedApp(modelData.appId);
+            }
+          }
 
           DropArea {
             anchors.fill: parent
@@ -765,15 +780,15 @@ Item {
               y: root.isVerticalBar ? draggableContent.shiftOffset : 0
 
               Behavior on x {
-                NumberAnimation {
-                  duration: Style.animationFast
-                  easing.type: Easing.OutQuad
+                NAnim {
+                  duration: Style.motionDurationFastSpatial
+                  motionType: NAnim.StandardSpatial
                 }
               }
               Behavior on y {
-                NumberAnimation {
-                  duration: Style.animationFast
-                  easing.type: Easing.OutQuad
+                NAnim {
+                  duration: Style.motionDurationFastSpatial
+                  motionType: NAnim.StandardSpatial
                 }
               }
             }
@@ -811,9 +826,23 @@ Item {
             z: dragging ? 1000 : 0
             scale: dragging ? 1.05 : 1.0
             Behavior on scale {
-              NumberAnimation {
-                duration: Style.animationFast
+              NAnim {
+                duration: Style.motionDurationFastSpatial
+                motionType: NAnim.ExpressiveFastSpatial
               }
+            }
+
+            NStateLayer {
+              id: taskbarStateLayer
+
+              anchors.fill: parent
+              hovered: taskbarItem.isHovered
+              pressed: taskbarMouseArea.pressed
+              focused: taskbarItem.activeFocus
+              dragged: draggableContent.dragging
+              selected: taskbarItem.isFocused
+              stateColor: Color.mPrimary
+              radius: Style.radiusCapsule
             }
 
             Rectangle {
@@ -823,12 +852,11 @@ Item {
               width: parent.width
               height: root.capsuleHeight
               color: titleBgColor
-              radius: Style.radiusM
+              radius: Style.radiusCapsule
 
               Behavior on color {
-                ColorAnimation {
-                  duration: Style.animationFast
-                  easing.type: Easing.InOutQuad
+                NColorAnimation {
+                  duration: Style.motionDurationFastEffects
                 }
               }
             }
@@ -875,13 +903,12 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: Style.toOdd(root.itemSize * 0.25)
                     height: 4
-                    color: taskbarItem.isFocused ? Color.mPrimary : (taskbarItem.isHovered ? Color.mHover : "transparent")
+                    color: taskbarItem.isFocused || taskbarItem.isHovered ? Color.mPrimary : "transparent"
                     radius: Math.min(Style.radiusXXS, width / 2)
 
                     Behavior on color {
-                      ColorAnimation {
-                        duration: Style.animationFast
-                        easing.type: Easing.OutCubic
+                      NColorAnimation {
+                        duration: Style.motionDurationFastEffects
                       }
                     }
                   }
@@ -906,6 +933,12 @@ Item {
                 }
               }
             }
+
+            NFocusRing {
+              anchors.fill: parent
+              focusVisible: taskbarItem.activeFocus
+              targetRadius: Style.radiusCapsule
+            }
           }
 
           MouseArea {
@@ -920,10 +953,11 @@ Item {
             drag.axis: root.isVerticalBar ? Drag.YAxis : Drag.XAxis
             preventStealing: true
 
-            onPressed: {
-              // Constrain drag to roughly the taskbar area but allow some freedom
-              // Or just let it be free since we only care about drops
-            }
+            onPressed: mouse => {
+                         taskbarItem.forceActiveFocus();
+                         const point = mapToItem(taskbarStateLayer, mouse.x, mouse.y);
+                         taskbarStateLayer.rippleAt(point.x, point.y);
+                       }
 
             onReleased: {
               if (draggableContent.Drag.active) {
@@ -935,20 +969,9 @@ Item {
                          if (!modelData)
                          return;
                          if (mouse.button === Qt.LeftButton) {
-                           if (isRunning && modelData.window) {
-                             // Running app - focus it
-                             try {
-                               CompositorService.focusWindow(modelData.window);
-                             } catch (error) {
-                               Logger.e("Taskbar", "Failed to activate toplevel: " + error);
-                             }
-                           } else if (isPinned) {
-                             // Pinned app not running - launch it
-                             root.launchPinnedApp(modelData.appId);
-                           }
+                           taskbarItem.activateItem();
                          } else if (mouse.button === Qt.RightButton) {
                            TooltipService.hide();
-                           // Only show context menu for running apps
                            if (isRunning && modelData.window) {
                              root.selectedWindowId = modelData.id;
                              root.selectedAppId = modelData.appId;
@@ -965,6 +988,15 @@ Item {
               TooltipService.hide();
             }
           }
+
+          Keys.onReturnPressed: event => {
+                                  taskbarItem.activateItem();
+                                  event.accepted = true;
+                                }
+          Keys.onSpacePressed: event => {
+                                 taskbarItem.activateItem();
+                                 event.accepted = true;
+                               }
         }
       }
     }

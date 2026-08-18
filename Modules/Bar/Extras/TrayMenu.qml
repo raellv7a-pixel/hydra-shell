@@ -223,9 +223,9 @@ PopupWindow {
     opacity: root.visible ? 1.0 : 0.0
 
     Behavior on opacity {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuad
+      NAnim {
+        duration: Style.motionDurationDefaultEffects
+        motionType: NAnim.StandardEffects
       }
     }
   }
@@ -241,9 +241,9 @@ PopupWindow {
     opacity: root.visible ? 1.0 : 0.0
 
     Behavior on opacity {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuad
+      NAnim {
+        duration: Style.motionDurationDefaultEffects
+        motionType: NAnim.StandardEffects
       }
     }
 
@@ -258,6 +258,9 @@ PopupWindow {
 
         delegate: Rectangle {
           id: entry
+          activeFocusOnTab: !(modelData?.isSeparator ?? false) && (modelData?.enabled ?? true)
+          Accessible.role: Accessible.MenuItem
+          Accessible.name: modelData?.text || ""
           required property var modelData
 
           Layout.preferredWidth: parent.width
@@ -283,9 +286,26 @@ PopupWindow {
           Rectangle {
             id: innerRect
             anchors.fill: parent
-            color: mouseArea.containsMouse ? Color.mHover : "transparent"
-            radius: Style.radiusS
+            color: "transparent"
+            radius: Style.radiusControl
             visible: !(modelData?.isSeparator ?? false)
+
+            NStateLayer {
+              id: trayMenuStateLayer
+
+              anchors.fill: parent
+              hovered: mouseArea.containsMouse
+              pressed: mouseArea.pressed
+              focused: entry.activeFocus
+              stateColor: Color.mPrimary
+              radius: parent.radius
+            }
+
+            NFocusRing {
+              anchors.fill: parent
+              focusVisible: entry.activeFocus
+              targetRadius: parent.radius
+            }
 
             RowLayout {
               anchors.fill: parent
@@ -307,9 +327,9 @@ PopupWindow {
                 readonly property bool isChecked: modelData?.checkState === Qt.Checked || (modelData?.checked ?? false)
 
                 // Color Logic
-                readonly property color activeColor: mouseArea.containsMouse ? Color.mOnHover : Color.mPrimary
-                readonly property color checkMarkColor: mouseArea.containsMouse ? Color.mHover : Color.mOnPrimary
-                readonly property color borderColor: isChecked ? activeColor : (mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface)
+                readonly property color activeColor: Color.mPrimary
+                readonly property color checkMarkColor: Color.mOnPrimary
+                readonly property color borderColor: isChecked ? activeColor : Color.mOnSurface
 
                 // Checkbox Visuals
                 Rectangle {
@@ -323,8 +343,8 @@ PopupWindow {
                   border.width: Style.borderM
 
                   Behavior on border.color {
-                    ColorAnimation {
-                      duration: Style.animationFast
+                    NColorAnimation {
+                      duration: Style.motionDurationFastEffects
                     }
                   }
 
@@ -350,8 +370,8 @@ PopupWindow {
                   border.width: Style.borderM // Slightly thicker for radio look
 
                   Behavior on border.color {
-                    ColorAnimation {
-                      duration: Style.animationFast
+                    NColorAnimation {
+                      duration: Style.motionDurationFastEffects
                     }
                   }
 
@@ -364,8 +384,8 @@ PopupWindow {
                     color: parent.parent.activeColor
 
                     Behavior on color {
-                      ColorAnimation {
-                        duration: Style.animationFast
+                      NColorAnimation {
+                        duration: Style.motionDurationFastEffects
                       }
                     }
                   }
@@ -375,7 +395,7 @@ PopupWindow {
               NText {
                 id: text
                 Layout.fillWidth: true
-                color: (modelData?.enabled ?? true) ? (mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface) : Color.mOnSurfaceVariant
+                color: (modelData?.enabled ?? true) ? Color.mOnSurface : Color.mOnSurfaceVariant
                 text: modelData?.text !== "" ? modelData?.text.replace(/[\n\r]+/g, ' ') : "..."
                 pointSize: Style.fontSizeS
                 verticalAlignment: Text.AlignVCenter
@@ -396,7 +416,7 @@ PopupWindow {
                 applyUiScale: false
                 verticalAlignment: Text.AlignVCenter
                 visible: modelData?.hasChildren ?? false
-                color: (mouseArea.containsMouse ? Color.mOnTertiary : Color.mOnSurface)
+                color: Color.mOnSurface
               }
             }
 
@@ -406,76 +426,79 @@ PopupWindow {
               hoverEnabled: true
               enabled: (modelData?.enabled ?? true) && !(modelData?.isSeparator ?? false) && root.visible
               acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-              onClicked: mouse => {
-                           if (modelData && !modelData.isSeparator) {
-                             if (modelData.hasChildren) {
-                               // Click on items with children toggles submenu
-                               if (entry.subMenu) {
-                                 // Close existing submenu
-                                 entry.subMenu.hideMenu();
-                                 entry.subMenu.destroy();
-                                 entry.subMenu = null;
-                               } else {
-                                 // Close any other open submenus first
-                                 for (var i = 0; i < columnLayout.children.length; i++) {
-                                   const sibling = columnLayout.children[i];
-                                   if (sibling !== entry && sibling.subMenu) {
-                                     sibling.subMenu.hideMenu();
-                                     sibling.subMenu.destroy();
-                                     sibling.subMenu = null;
-                                   }
-                                 }
-
-                                 // Determine submenu opening direction
-                                 let openLeft = false;
-                                 const barPosition = Settings.getBarPositionForScreen(root.screen?.name);
-                                 const globalPos = entry.mapToItem(null, 0, 0);
-
-                                 if (barPosition === "right") {
-                                   openLeft = true;
-                                 } else if (barPosition === "left") {
-                                   openLeft = false;
-                                 } else {
-                                   openLeft = (root.widgetSection === "right");
-                                 }
-
-                                 // Open new submenu
-                                 entry.subMenu = Qt.createComponent("TrayMenu.qml").createObject(root, {
-                                                                                                   "menu": modelData,
-                                                                                                   "isSubMenu": true,
-                                                                                                   "screen": root.screen
-                                                                                                 });
-
-                                 if (entry.subMenu) {
-                                   const overlap = 60;
-                                   entry.subMenu.anchorItem = entry;
-                                   entry.subMenu.anchorX = openLeft ? -overlap : overlap;
-                                   entry.subMenu.anchorY = 0;
-                                   entry.subMenu.visible = true;
-                                   // Force anchor update with new position
-                                   Qt.callLater(() => {
-                                                  entry.subMenu.anchor.updateAnchor();
-                                                });
-                                 }
-                               }
-                             } else {
-                               // Click on regular items triggers them
-                               modelData.triggered();
-                               root.hideMenu();
-
-                               // Close the drawer if it's open
-                               if (root.screen) {
-                                 const panel = PanelService.getPanel("trayDrawerPanel", root.screen);
-                                 if (panel && panel.visible) {
-                                   panel.close();
-                                 }
-                               }
-                             }
-                           }
+              onPressed: mouse => {
+                           entry.forceActiveFocus();
+                           const point = mapToItem(trayMenuStateLayer, mouse.x, mouse.y);
+                           trayMenuStateLayer.rippleAt(point.x, point.y);
                          }
+
+              function triggerMenuItem() {
+                if (modelData && !modelData.isSeparator) {
+                  if (modelData.hasChildren) {
+                    if (entry.subMenu) {
+                      entry.subMenu.hideMenu();
+                      entry.subMenu.destroy();
+                      entry.subMenu = null;
+                    } else {
+                      for (var i = 0; i < columnLayout.children.length; i++) {
+                        const sibling = columnLayout.children[i];
+                        if (sibling !== entry && sibling.subMenu) {
+                          sibling.subMenu.hideMenu();
+                          sibling.subMenu.destroy();
+                          sibling.subMenu = null;
+                        }
+                      }
+
+                      let openLeft = false;
+                      const barPosition = Settings.getBarPositionForScreen(root.screen?.name);
+                      if (barPosition === "right") {
+                        openLeft = true;
+                      } else if (barPosition === "left") {
+                        openLeft = false;
+                      } else {
+                        openLeft = root.widgetSection === "right";
+                      }
+
+                      entry.subMenu = Qt.createComponent("TrayMenu.qml").createObject(root, {
+                                                                                        "menu": modelData,
+                                                                                        "isSubMenu": true,
+                                                                                        "screen": root.screen
+                                                                                      });
+
+                      if (entry.subMenu) {
+                        const overlap = 60;
+                        entry.subMenu.anchorItem = entry;
+                        entry.subMenu.anchorX = openLeft ? -overlap : overlap;
+                        entry.subMenu.anchorY = 0;
+                        entry.subMenu.visible = true;
+                        Qt.callLater(() => entry.subMenu.anchor.updateAnchor());
+                      }
+                    }
+                  } else {
+                    modelData.triggered();
+                    root.hideMenu();
+
+                    if (root.screen) {
+                      const panel = PanelService.getPanel("trayDrawerPanel", root.screen);
+                      if (panel && panel.visible)
+                        panel.close();
+                    }
+                  }
+                }
+              }
+
+              onClicked: triggerMenuItem()
             }
           }
+
+          Keys.onReturnPressed: event => {
+                                  mouseArea.triggerMenuItem();
+                                  event.accepted = true;
+                                }
+          Keys.onSpacePressed: event => {
+                                 mouseArea.triggerMenuItem();
+                                 event.accepted = true;
+                               }
 
           Component.onDestruction: {
             if (subMenu) {
@@ -488,6 +511,10 @@ PopupWindow {
 
       // PIN / UNPIN
       Rectangle {
+        id: pinEntry
+        activeFocusOnTab: visible
+        Accessible.role: Accessible.Button
+        Accessible.name: root.isPinned ? I18n.tr("panels.bar.tray-unpin-application") : I18n.tr("panels.bar.tray-pin-application")
         visible: {
           if (widgetSection === "" || widgetIndex < 0)
             return false;
@@ -501,10 +528,21 @@ PopupWindow {
         }
         Layout.preferredWidth: parent.width
         Layout.preferredHeight: 28
-        color: pinUnpinMouseArea.containsMouse ? Qt.alpha(Color.mPrimary, 0.2) : Qt.alpha(Color.mPrimary, 0.08)
-        radius: Style.radiusS
-        border.color: Qt.alpha(Color.mPrimary, pinUnpinMouseArea.containsMouse ? 0.4 : 0.2)
+        color: Qt.alpha(Color.mPrimary, 0.08)
+        radius: Style.radiusCapsule
+        border.color: Qt.alpha(Color.mPrimary, 0.24)
         border.width: Style.borderS
+
+        NStateLayer {
+          id: pinStateLayer
+
+          anchors.fill: parent
+          hovered: pinUnpinMouseArea.containsMouse
+          pressed: pinUnpinMouseArea.pressed
+          focused: pinEntry.activeFocus
+          stateColor: Color.mPrimary
+          radius: parent.radius
+        }
 
         RowLayout {
           anchors.fill: parent
@@ -530,19 +568,40 @@ PopupWindow {
           }
         }
 
+        NFocusRing {
+          anchors.fill: parent
+          focusVisible: pinEntry.activeFocus
+          targetRadius: parent.radius
+        }
+
+        function togglePinned() {
+          if (root.isPinned)
+            root.removeFromPinned();
+          else
+            root.addToPinned();
+        }
+
         MouseArea {
           id: pinUnpinMouseArea
           anchors.fill: parent
           hoverEnabled: true
+          onPressed: mouse => {
+                       pinEntry.forceActiveFocus();
+                       const point = mapToItem(pinStateLayer, mouse.x, mouse.y);
+                       pinStateLayer.rippleAt(point.x, point.y);
+                     }
 
-          onClicked: {
-            if (root.isPinned) {
-              root.removeFromPinned();
-            } else {
-              root.addToPinned();
-            }
-          }
+          onClicked: pinEntry.togglePinned()
         }
+
+        Keys.onReturnPressed: event => {
+                                pinEntry.togglePinned();
+                                event.accepted = true;
+                              }
+        Keys.onSpacePressed: event => {
+                               pinEntry.togglePinned();
+                               event.accepted = true;
+                             }
       }
     }
   }

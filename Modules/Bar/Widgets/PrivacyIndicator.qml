@@ -9,6 +9,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: buildTooltip()
 
   property ShellScreen screen
   property string widgetId: ""
@@ -116,9 +119,20 @@ Item {
     color: Style.capsuleColor
     width: root.contentWidth
     height: root.contentHeight
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: privacyStateLayer
+
+      anchors.fill: parent
+      hovered: privacyMouseArea.containsMouse
+      pressed: privacyMouseArea.pressed
+      focused: root.activeFocus
+      stateColor: Color.mTertiary
+      radius: parent.radius
+    }
 
     Item {
       id: layout
@@ -155,10 +169,22 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: visualCapsule
+    focusVisible: root.activeFocus
+    targetRadius: visualCapsule.radius
+  }
+
   MouseArea {
+    id: privacyMouseArea
     anchors.fill: parent
     acceptedButtons: Qt.RightButton
     hoverEnabled: true
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(privacyStateLayer, mouse.x, mouse.y);
+                 privacyStateLayer.rippleAt(point.x, point.y);
+               }
 
     onClicked: mouse => {
                  if (mouse.button === Qt.RightButton) {
@@ -174,4 +200,13 @@ Item {
     }
     onExited: TooltipService.hide()
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.showContextMenu(contextMenu, root, screen);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.showContextMenu(contextMenu, root, screen);
+                         event.accepted = true;
+                       }
 }

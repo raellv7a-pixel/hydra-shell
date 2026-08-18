@@ -12,6 +12,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: windowTitle
   Layout.preferredHeight: isVerticalBar ? -1 : Style.getBarHeightForScreen(screenName)
   Layout.preferredWidth: isVerticalBar ? Style.getBarHeightForScreen(screenName) : -1
   Layout.fillHeight: false
@@ -71,23 +74,21 @@ Item {
   visible: (hideMode !== "hidden" || hasFocusedWindow) || opacity > 0
   opacity: ((hideMode !== "hidden" || hasFocusedWindow) && (hideMode !== "transparent" || hasFocusedWindow)) ? 1.0 : 0.0
   Behavior on opacity {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+    NAnim {
+      duration: Style.motionDurationDefaultEffects
+      motionType: NAnim.StandardEffects
     }
   }
 
   Behavior on implicitWidth {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.InOutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
   }
 
   Behavior on implicitHeight {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.InOutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
   }
 
@@ -202,17 +203,27 @@ Item {
     y: isVerticalBar ? 0 : Style.pixelAlignCenter(parent.height, height)
     width: isVerticalBar ? ((!hasFocusedWindow) && hideMode === "hidden" ? 0 : verticalSize) : ((!hasFocusedWindow) && (hideMode === "hidden") ? 0 : dynamicWidth)
     height: isVerticalBar ? ((!hasFocusedWindow) && hideMode === "hidden" ? 0 : verticalSize) : capsuleHeight
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
     // Smooth width transition
     Behavior on width {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.InOutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
+    }
+
+    NStateLayer {
+      id: activeWindowStateLayer
+
+      anchors.fill: parent
+      hovered: mainMouseArea.containsMouse
+      pressed: mainMouseArea.pressed
+      focused: root.activeFocus
+      stateColor: root.textColor
+      radius: parent.radius
     }
 
     Item {
@@ -334,6 +345,12 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: windowActiveRect
+    focusVisible: root.activeFocus
+    targetRadius: windowActiveRect.radius
+  }
+
   // Mouse area for hover detection
   MouseArea {
     id: mainMouseArea
@@ -348,6 +365,11 @@ Item {
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(activeWindowStateLayer, mouse.x, mouse.y);
+                 activeWindowStateLayer.rippleAt(point.x, point.y);
+               }
     onEntered: {
       if ((windowTitle !== "") && isVerticalBar || (scrollingMode === "never")) {
         TooltipService.show(root, windowTitle, BarService.getTooltipDirection(root.screen?.name));
@@ -362,6 +384,15 @@ Item {
                  }
                }
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.showContextMenu(contextMenu, root, screen);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.showContextMenu(contextMenu, root, screen);
+                         event.accepted = true;
+                       }
 
   Connections {
     target: CompositorService

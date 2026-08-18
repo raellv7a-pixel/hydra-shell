@@ -36,10 +36,12 @@ NIconButton {
 
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
-  colorBg: Settings.data.nightLight.enabled ? Color.mPrimary : Style.capsuleColor
-  colorFg: Settings.data.nightLight.enabled ? Color.mOnPrimary : Color.resolveColorKey(iconColorKey)
-  border.color: Style.capsuleBorderColor
+  customRadius: Style.radiusCapsule
+  colorBg: Settings.data.nightLight.enabled ? Color.mTertiary : Qt.alpha(Color.mTertiary, 0.16)
+  colorFg: Settings.data.nightLight.enabled ? Color.mOnTertiary : Color.resolveColorKey(iconColorKey)
+  colorBgHover: Settings.data.nightLight.enabled ? Color.mOnTertiary : Color.mTertiary
+  colorFgHover: colorFg
+  border.color: Qt.alpha(Color.mTertiary, 0.36)
   border.width: Style.capsuleBorderWidth
 
   icon: Settings.data.nightLight.enabled ? (Settings.data.nightLight.forced ? "nightlight-forced" : "nightlight-on") : "nightlight-off"

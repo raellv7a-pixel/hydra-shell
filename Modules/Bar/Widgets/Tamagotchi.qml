@@ -94,10 +94,21 @@ Item {
     anchors.centerIn: parent
     width: root.implicitWidth
     height: root.implicitHeight
-    radius: Math.min(Style.iRadiusL, width / 2)
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    radius: Style.radiusCapsule
+    color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: tamagotchiStateLayer
+
+      anchors.fill: parent
+      hovered: mouseArea.containsMouse
+      pressed: mouseArea.pressed
+      focused: root.activeFocus
+      stateColor: Color.mPrimary
+      radius: parent.radius
+    }
 
     Row {
       id: visualRow
@@ -118,12 +129,23 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: capsule
+    focusVisible: root.activeFocus
+    targetRadius: capsule.radius
+  }
+
   MouseArea {
     id: mouseArea
     anchors.fill: parent
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(tamagotchiStateLayer, mouse.x, mouse.y);
+                 tamagotchiStateLayer.rippleAt(point.x, point.y);
+               }
 
     onEntered: TooltipService.show(root, root.tooltipText, BarService.getTooltipDirection(root.screenName))
     onExited: TooltipService.hide()

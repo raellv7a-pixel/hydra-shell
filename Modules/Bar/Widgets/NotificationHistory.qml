@@ -57,7 +57,7 @@ NIconButton {
 
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
+  customRadius: Style.radiusCapsule
   icon: NotificationService.doNotDisturb ? "bell-off" : "bell"
   tooltipText: {
     if (PanelService.getPanel("notificationHistoryPanel", screen)?.isPanelOpen) {
@@ -67,9 +67,11 @@ NIconButton {
     }
   }
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
-  colorBg: Style.capsuleColor
-  colorFg: Color.resolveColorKey(iconColorKey)
-  border.color: Style.capsuleBorderColor
+  colorBg: NotificationService.doNotDisturb ? Color.mError : Qt.alpha(Color.mTertiary, 0.16)
+  colorFg: NotificationService.doNotDisturb ? Color.mOnError : Color.resolveColorKey(iconColorKey)
+  colorBgHover: NotificationService.doNotDisturb ? Color.mOnError : Color.mTertiary
+  colorFgHover: colorFg
+  border.color: Qt.alpha(NotificationService.doNotDisturb ? Color.mError : Color.mTertiary, 0.36)
   border.width: Style.capsuleBorderWidth
   visible: !((hideWhenZero && NotificationService.historyModel.count === 0) || (hideWhenZeroUnread && count === 0))
   opacity: !((hideWhenZero && NotificationService.historyModel.count === 0) || (hideWhenZeroUnread && count === 0)) ? 1.0 : 0.0
@@ -125,15 +127,9 @@ NIconButton {
     anchors.verticalCenterOffset: -parent.baseSize / 4
     z: 2
     active: showUnreadBadge
-    sourceComponent: Rectangle {
-      id: badge
-      height: 7
-      width: height
-      radius: Style.radiusXS
-      color: root.hovering ? Color.mOnHover : (root.badgeColor || Color.mError)
-      border.color: Color.mSurface
-      border.width: Style.borderS
-      visible: count > 0
+    sourceComponent: NBadge {
+      color: root.badgeColor || Color.mError
+      active: count > 0
     }
   }
 }

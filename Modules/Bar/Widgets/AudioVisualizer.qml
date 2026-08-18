@@ -10,6 +10,9 @@ import qs.Widgets.AudioSpectrum
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: "Visualizador de áudio"
 
   property ShellScreen screen
 
@@ -72,15 +75,13 @@ Item {
   opacity: shouldShow ? 1.0 : 0.0
 
   Behavior on implicitWidth {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.InOutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
   }
   Behavior on implicitHeight {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.InOutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
   }
 
@@ -93,10 +94,21 @@ Item {
     width: root.contentWidth
     height: root.contentHeight
     anchors.centerIn: parent
-    radius: Style.radiusS
+    radius: Style.radiusCapsule
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: visualizerStateLayer
+
+      anchors.fill: parent
+      hovered: mouseArea.containsMouse
+      pressed: mouseArea.pressed
+      focused: root.activeFocus
+      stateColor: root.fillColor
+      radius: parent.radius
+    }
 
     // When visualizer type or playback changes, shouldShow updates automatically
     // The Loader dynamically loads the appropriate visualizer based on settings
@@ -120,6 +132,12 @@ Item {
         }
       }
     }
+  }
+
+  NFocusRing {
+    anchors.fill: background
+    focusVisible: root.activeFocus
+    targetRadius: background.radius
   }
 
   NPopupContextMenu {
@@ -162,6 +180,11 @@ Item {
     cursorShape: Qt.PointingHandCursor
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(visualizerStateLayer, mouse.x, mouse.y);
+                 visualizerStateLayer.rippleAt(point.x, point.y);
+               }
 
     onClicked: mouse => {
                  if (mouse.button === Qt.RightButton) {
@@ -176,6 +199,19 @@ Item {
                  }
                }
   }
+
+  Keys.onReturnPressed: event => {
+                          const types = ["linear", "mirrored", "wave"];
+                          const currentIndex = types.indexOf(currentVisualizerType);
+                          Settings.data.audio.visualizerType = types[(currentIndex + 1) % types.length];
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         const types = ["linear", "mirrored", "wave"];
+                         const currentIndex = types.indexOf(currentVisualizerType);
+                         Settings.data.audio.visualizerType = types[(currentIndex + 1) % types.length];
+                         event.accepted = true;
+                       }
 
   Component {
     id: linearComponent
