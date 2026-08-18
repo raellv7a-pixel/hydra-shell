@@ -156,11 +156,11 @@ Item {
   Column {
     id: contentCol
     width: parent.width
-    spacing: Style.marginS
+    spacing: Style.spaceS
     Rectangle {
       width: parent.width
       height: 160 * Style.uiScaleRatio
-      radius: Style.radiusM
+      radius: Style.radiusCard
       color: Color.mSurfaceVariant
       clip: true
       visible: root.ocrCapturePath !== "" && root.ocrResult !== "" && ocrThumb.status === Image.Ready
@@ -176,7 +176,7 @@ Item {
     Rectangle {
       width: parent.width
       height: 220 * Style.uiScaleRatio
-      radius: Style.radiusM
+      radius: Style.radiusCard
       color: Color.mSurface
       clip: true
       border.color: Style.capsuleBorderColor
@@ -184,7 +184,7 @@ Item {
       Flickable {
         id: ocrFlick
         anchors.fill: parent
-        anchors.margins: Style.marginS
+        anchors.margins: Style.spaceS
         contentHeight: ocrText.implicitHeight
         clip: true
         interactive: ocrText.implicitHeight > ocrFlick.height
@@ -194,7 +194,7 @@ Item {
           text: root.ocrResult
           wrapMode: TextEdit.WordWrap
           color: Color.mOnSurface
-          font.pointSize: Style.fontSizeS
+          font.pointSize: Style.fontSizeLabelMedium
           horizontalAlignment: /[\u0600-\u06FF\u0590-\u05FF]/.test(root.ocrResult) ? TextEdit.AlignRight : TextEdit.AlignLeft
           selectByMouse: true
           selectionColor: Color.mPrimary
@@ -210,20 +210,20 @@ Item {
     }
     Row {
       width: parent.width
-      spacing: Style.marginXS
+      spacing: Style.spaceXS
       Flow {
-        width: parent.width - _ocrClearBtn.width - Style.marginS
-        spacing: Style.marginXS
+        width: parent.width - _ocrClearBtn.width - Style.spaceS
+        spacing: Style.spaceXS
         Rectangle {
           visible: root.ocrType === "url" || root.ocrType === "email"
           height: 26
-          width: _ocrOpenRow.implicitWidth + Style.marginS * 2
-          radius: Style.radiusS
+          width: _ocrOpenRow.implicitWidth + Style.spaceS * 2
+          radius: Style.radiusControl
           color: _ocrOpenMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
           Row {
             id: _ocrOpenRow
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             NIcon {
               icon: root.ocrType === "email" ? "mail" : "external-link"
               color: _ocrOpenMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
@@ -232,7 +232,7 @@ Item {
             NText {
               text: root.ocrType === "email" ? pluginApi?.tr("panel.composeMail") : pluginApi?.tr("panel.openUrl")
               color: _ocrOpenMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
             }
           }
           MouseArea {
@@ -242,16 +242,21 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: root.ocrType === "email" ? Qt.openUrlExternally("mailto:" + root.ocrEmail) : Qt.openUrlExternally(root.ocrUrl)
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: _ocrOpenMA.containsMouse
+            pressed: _ocrOpenMA.pressed
+          }
         }
         Rectangle {
           height: 26
-          width: _ocrSearchRow.implicitWidth + Style.marginS * 2
-          radius: Style.radiusS
+          width: _ocrSearchRow.implicitWidth + Style.spaceS * 2
+          radius: Style.radiusControl
           color: _ocrSearchMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
           Row {
             id: _ocrSearchRow
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             NIcon {
               icon: "search"
               color: _ocrSearchMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
@@ -260,7 +265,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.searchText")
               color: _ocrSearchMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
             }
           }
           MouseArea {
@@ -270,16 +275,21 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: Qt.openUrlExternally(root.searchEngineUrl + encodeURIComponent(root.ocrResult.trim()))
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: _ocrSearchMA.containsMouse
+            pressed: _ocrSearchMA.pressed
+          }
         }
         Rectangle {
           height: 26
-          width: _ocrCopyRow.implicitWidth + Style.marginS * 2
-          radius: Style.radiusS
+          width: _ocrCopyRow.implicitWidth + Style.spaceS * 2
+          radius: Style.radiusControl
           color: _ocrCopyMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
           Row {
             id: _ocrCopyRow
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             NIcon {
               icon: "copy"
               color: _ocrCopyMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
@@ -288,7 +298,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.copy")
               color: _ocrCopyMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
             }
           }
           MouseArea {
@@ -301,20 +311,25 @@ Item {
               ToastService.showNotice(pluginApi?.tr("panel.copyText"));
             }
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: _ocrCopyMA.containsMouse
+            pressed: _ocrCopyMA.pressed
+          }
         }
       }
       Rectangle {
         id: _ocrClearBtn
         height: 26
-        width: _ocrClearRow.implicitWidth + Style.marginM * 2
-        radius: Style.radiusS
+        width: _ocrClearRow.implicitWidth + Style.spaceM * 2
+        radius: Style.radiusControl
         color: _ocrClearMA.containsMouse ? Qt.rgba(Color.mError.r, Color.mError.g, Color.mError.b, 0.15) : Color.mSurfaceVariant
         border.color: Color.mError
         border.width: Style.capsuleBorderWidth
         Row {
           id: _ocrClearRow
           anchors.centerIn: parent
-          spacing: Style.marginXS
+          spacing: Style.spaceXS
           NIcon {
             icon: "trash"
             color: _ocrClearMA.containsMouse ? Color.mError : Color.mOnSurfaceVariant
@@ -323,7 +338,7 @@ Item {
           NText {
             text: pluginApi?.tr("panel.clearResult")
             color: _ocrClearMA.containsMouse ? Color.mError : Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
           }
         }
         MouseArea {
@@ -335,11 +350,17 @@ Item {
           onEntered: TooltipService.show(_ocrClearMA, pluginApi?.tr("panel.clearResult"))
           onExited: TooltipService.hide()
         }
+        NStateLayer {
+          anchors.fill: parent
+          hovered: _ocrClearMA.containsMouse
+          pressed: _ocrClearMA.pressed
+          stateColor: Color.mError
+        }
       }
     }
     Row {
       width: parent.width
-      spacing: Style.marginS
+      spacing: Style.spaceS
       Rectangle {
         width: 32
         height: 1
@@ -355,14 +376,14 @@ Item {
       NText {
         text: pluginApi?.tr("ocr.translateSection")
         color: Color.mOnSurfaceVariant
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
       }
       Rectangle {
         height: 1
         color: Color.mOnSurfaceVariant
         opacity: 0.25
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width - 32 - Style.marginS * 3 - 16 - _transLabel.implicitWidth
+        width: parent.width - 32 - Style.spaceS * 3 - 16 - _transLabel.implicitWidth
       }
       NText {
         id: _transLabel
@@ -375,18 +396,18 @@ Item {
       width: parent.width
       text: pluginApi?.tr("ocr.noTranslateTool")
       color: Color.mOnSurfaceVariant
-      pointSize: Style.fontSizeXS
+      pointSize: Style.fontSizeLabelSmall
       wrapMode: Text.WordWrap
     }
     Column {
       width: parent.width
-      spacing: Style.marginS
+      spacing: Style.spaceS
       visible: root.transAvailable
       Row {
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         NComboBox {
-          width: parent.width - translateBtn.width - Style.marginS
+          width: parent.width - translateBtn.width - Style.spaceS
           label: pluginApi?.tr("panel.translateTo")
           model: root.transLangModel
           currentKey: root.selectedTransLang
@@ -400,7 +421,7 @@ Item {
           id: translateBtn
           height: 34
           width: 34
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: transBtnMa.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
           NIcon {
             anchors.centerIn: parent
@@ -416,12 +437,17 @@ Item {
             onEntered: TooltipService.show(transBtnMa, pluginApi?.tr("panel.translateLabel"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: transBtnMa.containsMouse
+            pressed: transBtnMa.pressed
+          }
         }
       }
       Rectangle {
         width: parent.width
         height: 140 * Style.uiScaleRatio
-        radius: Style.radiusM
+        radius: Style.radiusCard
         color: Color.mSurface
         clip: true
         border.color: Style.capsuleBorderColor
@@ -430,7 +456,7 @@ Item {
         Flickable {
           id: trFlick
           anchors.fill: parent
-          anchors.margins: Style.marginS
+          anchors.margins: Style.spaceS
           contentHeight: trText.implicitHeight
           clip: true
           interactive: trText.implicitHeight > trFlick.height
@@ -439,7 +465,7 @@ Item {
             width: trFlick.width
             text: root.translateResult
             color: Color.mOnSurface
-            font.pointSize: Style.fontSizeS
+            font.pointSize: Style.fontSizeLabelMedium
             wrapMode: TextEdit.WordWrap
             horizontalAlignment: /[\u0600-\u06FF\u0590-\u05FF]/.test(root.translateResult) ? TextEdit.AlignRight : TextEdit.AlignLeft
             selectByMouse: true
@@ -458,7 +484,7 @@ Item {
           color: Color.mOnSurfaceVariant
           anchors.right: parent.right
           anchors.top: parent.top
-          anchors.margins: Style.marginS
+          anchors.margins: Style.spaceS
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor

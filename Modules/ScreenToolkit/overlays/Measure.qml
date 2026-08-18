@@ -169,7 +169,7 @@ Variants {
       color: Qt.rgba(0, 0, 0, 0.45)
       Column {
         anchors.centerIn: parent
-        spacing: Style.marginS
+        spacing: Style.spaceS
         visible: !overlayWin.measuring && !overlayWin.current && overlayWin.pinned.length === 0
         NIcon {
           icon: "ruler"
@@ -181,13 +181,13 @@ Variants {
           text: _tr("measure.hint")
           color: "white"
           font.weight: Font.Bold
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeBodyMedium
           anchors.horizontalCenter: parent.horizontalCenter
         }
         NText {
           text: _tr("measure.subHint")
           color: Qt.rgba(1, 1, 1, 0.5)
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
           anchors.horizontalCenter: parent.horizontalCenter
         }
       }
@@ -358,16 +358,16 @@ Variants {
           ry = ey - height - 16;
         return Math.max(8, ry);
       }
-      width: activeRow.implicitWidth + Style.marginL * 2
-      height: activeRow.implicitHeight + Style.marginM * 2
-      radius: Style.radiusL
+      width: activeRow.implicitWidth + Style.spaceL * 2
+      height: activeRow.implicitHeight + Style.spaceM * 2
+      radius: Style.radiusPopover
       color: Color.mSurface
       border.color: "white"
       border.width: 2
       Row {
         id: activeRow
         anchors.centerIn: parent
-        spacing: Style.marginS
+        spacing: Style.spaceS
         Column {
           spacing: 1
           anchors.verticalCenter: parent.verticalCenter
@@ -375,22 +375,27 @@ Variants {
             text: overlayWin.curDist + " px"
             color: Color.mOnSurface
             font.weight: Font.Bold
-            pointSize: Style.fontSizeM
+            pointSize: Style.fontSizeLabelLarge
             anchors.horizontalCenter: parent.horizontalCenter
           }
           NText {
             text: Math.round(overlayWin.curW) + " × " + Math.round(overlayWin.curH)
             color: Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             anchors.horizontalCenter: parent.horizontalCenter
           }
         }
         Rectangle {
           width: 28
           height: 28
-          radius: Style.radiusS
+          radius: Style.radiusControl
           anchors.verticalCenter: parent.verticalCenter
           color: acopyBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          Behavior on color {
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
+            }
+          }
           NIcon {
             anchors.centerIn: parent
             icon: "copy"
@@ -409,13 +414,24 @@ Variants {
             onEntered: TooltipService.show(acopyBtn, _tr("measure.copyMeasurement"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: acopyBtn.containsMouse
+            pressed: acopyBtn.pressed
+            radius: parent.radius
+          }
         }
         Rectangle {
           width: 28
           height: 28
-          radius: Style.radiusS
+          radius: Style.radiusControl
           anchors.verticalCenter: parent.verticalCenter
           color: ascreenshotBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          Behavior on color {
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
+            }
+          }
           NIcon {
             anchors.centerIn: parent
             icon: "camera"
@@ -431,13 +447,24 @@ Variants {
             onEntered: TooltipService.show(ascreenshotBtn, _tr("measure.screenshot"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: ascreenshotBtn.containsMouse
+            pressed: ascreenshotBtn.pressed
+            radius: parent.radius
+          }
         }
         Rectangle {
           width: 28
           height: 28
-          radius: Style.radiusS
+          radius: Style.radiusControl
           anchors.verticalCenter: parent.verticalCenter
           color: pinBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          Behavior on color {
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
+            }
+          }
           NIcon {
             anchors.centerIn: parent
             icon: "pin"
@@ -456,13 +483,24 @@ Variants {
             onEntered: TooltipService.show(pinBtn, _tr("measure.pin"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: pinBtn.containsMouse
+            pressed: pinBtn.pressed
+            radius: parent.radius
+          }
         }
         Rectangle {
           width: 28
           height: 28
-          radius: Style.radiusS
+          radius: Style.radiusControl
           anchors.verticalCenter: parent.verticalCenter
           color: discardBtn.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurfaceVariant
+          Behavior on color {
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
+            }
+          }
           NIcon {
             anchors.centerIn: parent
             icon: "x"
@@ -481,6 +519,13 @@ Variants {
             }
             onEntered: TooltipService.show(discardBtn, _tr("measure.discard"))
             onExited: TooltipService.hide()
+          }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: discardBtn.containsMouse
+            pressed: discardBtn.pressed
+            stateColor: Color.mError
+            radius: parent.radius
           }
         }
       }
@@ -505,16 +550,16 @@ Variants {
             ry = mdata.y2 - height - 16;
           return Math.max(8, ry);
         }
-        width: pinnedRow.implicitWidth + Style.marginL * 2
-        height: pinnedRow.implicitHeight + Style.marginM * 2
-        radius: Style.radiusL
+        width: pinnedRow.implicitWidth + Style.spaceL * 2
+        height: pinnedRow.implicitHeight + Style.spaceM * 2
+        radius: Style.radiusPopover
         color: Color.mSurface
         border.color: mdata.color
         border.width: 2
         Row {
           id: pinnedRow
           anchors.centerIn: parent
-          spacing: Style.marginS
+          spacing: Style.spaceS
           Rectangle {
             width: 10
             height: 10
@@ -529,22 +574,27 @@ Variants {
               text: mdist + " px"
               color: Color.mOnSurface
               font.weight: Font.Bold
-              pointSize: Style.fontSizeM
+              pointSize: Style.fontSizeLabelLarge
               anchors.horizontalCenter: parent.horizontalCenter
             }
             NText {
               text: Math.round(mw) + " × " + Math.round(mh)
               color: Color.mOnSurfaceVariant
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               anchors.horizontalCenter: parent.horizontalCenter
             }
           }
           Rectangle {
             width: 26
             height: 26
-            radius: Style.radiusS
+            radius: Style.radiusControl
             anchors.verticalCenter: parent.verticalCenter
             color: pcopyBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+            Behavior on color {
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
+              }
+            }
             NIcon {
               anchors.centerIn: parent
               icon: "copy"
@@ -563,13 +613,24 @@ Variants {
               onEntered: TooltipService.show(pcopyBtn, _tr("measure.copy"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: pcopyBtn.containsMouse
+              pressed: pcopyBtn.pressed
+              radius: parent.radius
+            }
           }
           Rectangle {
             width: 26
             height: 26
-            radius: Style.radiusS
+            radius: Style.radiusControl
             anchors.verticalCenter: parent.verticalCenter
             color: pscreenshotBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+            Behavior on color {
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
+              }
+            }
             NIcon {
               anchors.centerIn: parent
               icon: "camera"
@@ -585,13 +646,24 @@ Variants {
               onEntered: TooltipService.show(pscreenshotBtn, _tr("measure.screenshot"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: pscreenshotBtn.containsMouse
+              pressed: pscreenshotBtn.pressed
+              radius: parent.radius
+            }
           }
           Rectangle {
             width: 26
             height: 26
-            radius: Style.radiusS
+            radius: Style.radiusControl
             anchors.verticalCenter: parent.verticalCenter
             color: premoveBtn.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurfaceVariant
+            Behavior on color {
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
+              }
+            }
             NIcon {
               anchors.centerIn: parent
               icon: "x"
@@ -607,6 +679,13 @@ Variants {
               onEntered: TooltipService.show(premoveBtn, _tr("measure.remove"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: premoveBtn.containsMouse
+              pressed: premoveBtn.pressed
+              stateColor: Color.mError
+              radius: parent.radius
+            }
           }
         }
       }
@@ -616,16 +695,21 @@ Variants {
       anchors.bottom: parent.bottom
       anchors.horizontalCenter: parent.horizontalCenter
       anchors.bottomMargin: 32
-      width: clearRow.implicitWidth + Style.marginL * 2
+      width: clearRow.implicitWidth + Style.spaceL * 2
       height: 38
-      radius: Style.radiusM
+      radius: Style.radiusCard
       color: clearAllBtn.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurface
       border.color: Color.mError
       border.width: Style.borderS
+      Behavior on color {
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
+        }
+      }
       Row {
         id: clearRow
         anchors.centerIn: parent
-        spacing: Style.marginS
+        spacing: Style.spaceS
         NIcon {
           icon: "trash"
           color: Color.mError
@@ -634,7 +718,7 @@ Variants {
           text: _tr("measure.clearAll")
           color: Color.mError
           font.weight: Font.Bold
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
         }
       }
       MouseArea {
@@ -643,6 +727,13 @@ Variants {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: overlayWin.clearAll()
+      }
+      NStateLayer {
+        anchors.fill: parent
+        hovered: clearAllBtn.containsMouse
+        pressed: clearAllBtn.pressed
+        stateColor: Color.mError
+        radius: parent.radius
       }
     }
   }

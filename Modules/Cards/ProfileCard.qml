@@ -21,8 +21,8 @@ NBox {
     anchors.right: parent.right
     anchors.top: parent.top
     anchors.bottom: parent.bottom
-    anchors.margins: Style.marginM
-    spacing: Style.marginM
+    anchors.margins: Style.spaceS
+    spacing: Style.spaceS
 
     NImageRounded {
       Layout.preferredWidth: Math.round(Style.baseWidgetSize * 1.25 * Style.uiScaleRatio)
@@ -37,7 +37,7 @@ NBox {
     ColumnLayout {
       Layout.fillWidth: true
       Layout.minimumWidth: 0
-      spacing: Style.marginXXS
+      spacing: Style.spaceXXS
       NText {
         Layout.fillWidth: true
         Layout.minimumWidth: 0
@@ -50,13 +50,13 @@ NBox {
         text: I18n.tr("system.uptime", {
                         "uptime": uptimeText
                       })
-        pointSize: Style.fontSizeS
+        pointSize: Style.fontSizeLabelMedium
         color: Color.mOnSurfaceVariant
       }
     }
 
     RowLayout {
-      spacing: Style.marginS
+      spacing: Style.spaceXS
       Layout.fillWidth: false
       Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
       Item {

@@ -165,64 +165,45 @@ SmartPanel {
         running: root.flow && root.flow.failed && PolkitService.errorShake
         loops: 1
 
-        NumberAnimation {
+        NAnim {
           target: shakeTranslate
           property: "x"
           from: 0
-          to: -10
-          duration: 50
-          easing.type: Easing.InOutQuad
+          to: -8
+          motionType: NAnim.StandardEffects
         }
-        NumberAnimation {
+        NAnim {
           target: shakeTranslate
           property: "x"
-          from: -10
-          to: 10
-          duration: 50
-          easing.type: Easing.InOutQuad
+          from: -8
+          to: 8
+          motionType: NAnim.StandardEffects
         }
-        NumberAnimation {
+        NAnim {
           target: shakeTranslate
           property: "x"
-          from: 10
-          to: -10
-          duration: 50
-          easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-          target: shakeTranslate
-          property: "x"
-          from: -10
-          to: 10
-          duration: 50
-          easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-          target: shakeTranslate
-          property: "x"
-          from: 10
+          from: 8
           to: 0
-          duration: 50
-          easing.type: Easing.InOutQuad
+          motionType: NAnim.StandardEffects
         }
       }
 
       ColumnLayout {
         id: contentLayout
         anchors.fill: parent
-        anchors.margins: Style.marginM
-        spacing: Style.marginM
+        anchors.margins: Style.paddingCard
+        spacing: Style.spaceS
 
         // Header with app icon, common name, description and action-id pill
         ColumnLayout {
           Layout.fillWidth: true
           Layout.alignment: Qt.AlignHCenter
-          spacing: Style.marginXXS
+          spacing: Style.spaceXXS
 
           NImageRounded {
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: Style.fontSizeXXL * 2.6
-            Layout.preferredHeight: Style.fontSizeXXL * 2.6
+            Layout.preferredWidth: Style.fontSizeHeadlineSmall * 2
+            Layout.preferredHeight: Style.fontSizeHeadlineSmall * 2
             imagePath: root.appIconPath
             fallbackIcon: "shield-lock"
             borderWidth: 0
@@ -230,10 +211,10 @@ SmartPanel {
 
           NText {
             Layout.fillWidth: true
-            Layout.topMargin: Style.marginS
+            Layout.topMargin: Style.spaceXS
             text: root.appName
             horizontalAlignment: Text.AlignHCenter
-            pointSize: Style.fontSizeXXL
+            pointSize: Style.fontSizeTitleLarge
             font.weight: Style.fontWeightBold
             color: Color.mOnSurface
             wrapMode: Text.Wrap
@@ -244,25 +225,25 @@ SmartPanel {
             visible: text !== ""
             text: root.appDescription
             horizontalAlignment: Text.AlignHCenter
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
             color: Color.mOnSurfaceVariant
             wrapMode: Text.Wrap
           }
 
           Rectangle {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Style.marginXS
+            Layout.topMargin: Style.spaceXXS
             visible: actionIdLabel.text !== ""
-            radius: height / 2
+            radius: Style.radiusCapsule
             color: Qt.alpha(Color.mPrimary, 0.16)
-            implicitWidth: actionIdLabel.implicitWidth + Style.marginM * 2
-            implicitHeight: actionIdLabel.implicitHeight + Style.marginXS * 2
+            implicitWidth: actionIdLabel.implicitWidth + Style.spaceS * 2
+            implicitHeight: actionIdLabel.implicitHeight + Style.spaceXXS * 2
 
             NText {
               id: actionIdLabel
               anchors.centerIn: parent
               text: root.flow ? root.flow.actionId : ""
-              pointSize: Style.fontSizeXXS
+              pointSize: Style.fontSizeLabelSmall
               font.weight: Style.fontWeightSemiBold
               color: Color.mPrimary
             }
@@ -273,7 +254,7 @@ SmartPanel {
         NText {
           visible: root.flow && root.flow.supplementaryMessage !== ""
           text: root.flow ? root.flow.supplementaryMessage : ""
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
           color: (root.flow && root.flow.supplementaryIsError) ? Color.mError : Color.mOnSurfaceVariant
           wrapMode: Text.Wrap
           Layout.fillWidth: true
@@ -303,8 +284,8 @@ SmartPanel {
         // Action Buttons
         RowLayout {
           Layout.fillWidth: true
-          Layout.topMargin: Style.marginS
-          spacing: Style.marginM
+          Layout.topMargin: Style.spaceXS
+          spacing: Style.spaceS
 
           Item {
             Layout.fillWidth: true

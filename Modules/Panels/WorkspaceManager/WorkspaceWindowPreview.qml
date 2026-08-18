@@ -20,16 +20,15 @@ Rectangle {
   readonly property bool isSelected: overview?.selectedWindowAddresses ? overview.selectedWindowAddresses.includes(windowData.addr) : false
   readonly property bool isGrouped: windowData.grouped === true
 
-  radius: Style.radiusS
+  radius: Style.radiusControl
   color: isSelected ? Qt.alpha(Color.mPrimary, 0.25) : (privateWindow ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh)
   border.width: isSelected || dragArmed ? Style.borderM : Style.borderS
   border.color: isSelected || dragArmed ? Color.mPrimary : (windowArea.containsMouse ? Color.mOutline : Qt.alpha(Color.mOutline, 0.64))
   scale: dragArmed ? 1.035 : 1
 
   Behavior on scale {
-    SpringAnimation {
-      spring: 4.5
-      damping: 0.42
+    NAnim {
+      motionType: NAnim.ExpressiveFastSpatial
     }
   }
 
@@ -73,8 +72,8 @@ Rectangle {
   Row {
     anchors.top: parent.top
     anchors.left: parent.left
-    anchors.margins: Style.marginXS
-    spacing: 3
+    anchors.margins: Style.spaceXXS
+    spacing: Style.spaceXXS
     z: 5
 
     Rectangle {
@@ -87,7 +86,7 @@ Rectangle {
       NIcon {
         anchors.centerIn: parent
         icon: "check"
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: Color.mOnPrimary
       }
     }
@@ -102,7 +101,7 @@ Rectangle {
       NIcon {
         anchors.centerIn: parent
         icon: "folders"
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: Color.mOnSecondary
       }
     }
@@ -110,21 +109,21 @@ Rectangle {
 
   Column {
     anchors.centerIn: parent
-    width: Math.max(0, parent.width - 2 * Style.marginM)
-    spacing: Style.marginXS
+    width: Math.max(0, parent.width - 2 * Style.spaceS)
+    spacing: Style.spaceXXS
     visible: !root.privacyKnown || root.privateWindow || !root.livePreviews
 
     NIcon {
       anchors.horizontalCenter: parent.horizontalCenter
       icon: root.privateWindow ? "shield-lock" : (!root.privacyKnown ? "hourglass" : "window")
-      pointSize: Style.fontSizeL
+      pointSize: Style.fontSizeHeadlineSmall
       color: root.privateWindow ? Color.mPrimary : Color.mOnSurfaceVariant
     }
     NText {
       width: parent.width
       horizontalAlignment: Text.AlignHCenter
       text: root.privateWindow ? qsTr("Private window") : (!root.privacyKnown ? qsTr("Checking privacy…") : root.windowData.title)
-      pointSize: Style.fontSizeXS
+      pointSize: Style.fontSizeLabelSmall
       color: Color.mOnSurfaceVariant
     }
   }
@@ -139,10 +138,10 @@ Rectangle {
 
     NText {
       anchors.fill: parent
-      anchors.leftMargin: Style.marginS
-      anchors.rightMargin: Style.margin2L
+      anchors.leftMargin: Style.spaceXS
+      anchors.rightMargin: Style.spaceXL
       text: root.windowData.title
-      pointSize: Style.fontSizeXS
+      pointSize: Style.fontSizeLabelSmall
     }
   }
 
@@ -164,6 +163,16 @@ Rectangle {
     }
   }
 
+  NStateLayer {
+    anchors.fill: parent
+    z: 2
+    hovered: windowArea.containsMouse
+    pressed: windowArea.pressed
+    selected: root.isSelected
+    dragged: root.dragArmed
+    stateColor: Color.mPrimary
+    radius: Style.radiusControl
+  }
   MouseArea {
     id: windowArea
     anchors.fill: parent
@@ -197,17 +206,17 @@ Rectangle {
     z: 6
     anchors.top: parent.top
     anchors.right: parent.right
-    anchors.margins: Style.marginXS
+    anchors.margins: Style.spaceXXS
     width: 22 * Style.uiScaleRatio
     height: width
-    radius: width / 2
+    radius: Style.radiusCapsule
     color: closeArea.containsMouse ? Color.mError : Qt.alpha(Color.mError, 0.84)
     visible: windowArea.containsMouse || closeArea.containsMouse
 
     NText {
       anchors.centerIn: parent
       text: "×"
-      pointSize: Style.fontSizeS
+      pointSize: Style.fontSizeLabelMedium
       color: Color.mOnError
     }
     MouseArea {

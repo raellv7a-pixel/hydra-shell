@@ -88,48 +88,48 @@ SmartPanel {
 
       ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.marginL
-        spacing: Style.marginM
+        anchors.margins: Style.paddingCard
+        spacing: Style.spaceS
 
         // --- cabeçalho ----------------------------------------------------------
 
         RowLayout {
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           NImageRounded {
-            Layout.preferredWidth: Style.fontSizeXXL * 2
-            Layout.preferredHeight: Style.fontSizeXXL * 2
+            Layout.preferredWidth: Style.fontSizeTitleMedium * 2
+            Layout.preferredHeight: Style.fontSizeTitleMedium * 2
             visible: ScreenShareService.requestingAppIcon !== ""
             imagePath: ScreenShareService.requestingAppIcon
             fallbackIcon: "cast"
-            radius: Style.radiusM
+            radius: Style.radiusCard
             borderWidth: 0
           }
 
           Rectangle {
-            Layout.preferredWidth: Style.fontSizeXXL * 2
-            Layout.preferredHeight: Style.fontSizeXXL * 2
+            Layout.preferredWidth: Style.fontSizeTitleMedium * 2
+            Layout.preferredHeight: Style.fontSizeTitleMedium * 2
             visible: ScreenShareService.requestingAppIcon === ""
-            radius: Style.radiusM
+            radius: Style.radiusCard
             color: Qt.alpha(Color.mPrimary, 0.16)
 
             NIcon {
               anchors.centerIn: parent
               icon: "screen-share"
-              pointSize: Style.fontSizeXXL
+              pointSize: Style.fontSizeTitleMedium
               color: Color.mPrimary
             }
           }
 
           ColumnLayout {
             Layout.fillWidth: true
-            spacing: Style.marginXXS
+            spacing: Style.spaceXXS
 
             NText {
               Layout.fillWidth: true
               text: I18n.tr("screen-share.title")
-              pointSize: Style.fontSizeXL
+              pointSize: Style.fontSizeTitleMedium
               font.weight: Style.fontWeightBold
               color: Color.mOnSurface
               elide: Text.ElideRight
@@ -140,7 +140,7 @@ SmartPanel {
               text: ScreenShareService.requestingAppName !== "" ? I18n.tr("screen-share.subtitle-app", {
                                                                             "app": ScreenShareService.requestingAppName
                                                                           }) : I18n.tr("screen-share.subtitle-generic")
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               color: Color.mOnSurfaceVariant
               elide: Text.ElideRight
             }
@@ -205,7 +205,7 @@ SmartPanel {
 
               ShareSourceCard {
                 anchors.fill: parent
-                anchors.margins: Style.marginXS
+                anchors.margins: Style.spaceXXS
                 title: parent.modelData.name
                 subtitle: parent.modelData.width + " × " + parent.modelData.height
                 emptyIcon: "device-desktop"
@@ -240,7 +240,7 @@ SmartPanel {
 
               ShareSourceCard {
                 anchors.fill: parent
-                anchors.margins: Style.marginXS
+                anchors.margins: Style.spaceXXS
                 title: parent.modelData.title !== "" ? parent.modelData.title : parent.modelData.appClass
                 badgeText: parent.modelData.appClass
                 emptyIcon: "app-window"
@@ -264,18 +264,18 @@ SmartPanel {
           ColumnLayout {
             anchors.centerIn: parent
             visible: root.activeTab === 1 && ScreenShareService.windowSources.length === 0
-            spacing: Style.marginS
+            spacing: Style.spaceXS
 
             NIcon {
               Layout.alignment: Qt.AlignHCenter
               icon: "app-window"
-              pointSize: Style.fontSizeXXXL
+              pointSize: Style.fontSizeHeadlineSmall
               color: Qt.alpha(Color.mOnSurfaceVariant, 0.5)
             }
             NText {
               Layout.alignment: Qt.AlignHCenter
               text: I18n.tr("screen-share.no-windows")
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               color: Color.mOnSurfaceVariant
             }
           }
@@ -285,12 +285,12 @@ SmartPanel {
             anchors.centerIn: parent
             width: Math.min(parent.width, Math.round(420 * Style.uiScaleRatio))
             visible: root.activeTab === 2
-            spacing: Style.marginM
+            spacing: Style.spaceS
 
             NIcon {
               Layout.alignment: Qt.AlignHCenter
               icon: "crop"
-              pointSize: Style.fontSizeXXXL
+              pointSize: Style.fontSizeHeadlineSmall
               color: Color.mPrimary
             }
 
@@ -298,7 +298,7 @@ SmartPanel {
               Layout.fillWidth: true
               text: I18n.tr("screen-share.region-hint")
               horizontalAlignment: Text.AlignHCenter
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               color: Color.mOnSurfaceVariant
               wrapMode: Text.Wrap
             }
@@ -319,19 +319,19 @@ SmartPanel {
         Rectangle {
           Layout.fillWidth: true
           visible: root.selectionType === "screen"
-          radius: Style.radiusS
+          radius: Style.radiusCard
           color: Qt.alpha(Color.mError, 0.12)
-          implicitHeight: warningRow.implicitHeight + Style.marginS * 2
+          implicitHeight: warningRow.implicitHeight + Style.spaceXS * 2
 
           RowLayout {
             id: warningRow
             anchors.fill: parent
-            anchors.margins: Style.marginS
-            spacing: Style.marginS
+            anchors.margins: Style.spaceXS
+            spacing: Style.spaceXS
 
             NIcon {
               icon: "alert-triangle"
-              pointSize: Style.fontSizeM
+              pointSize: Style.fontSizeBodySmall
               color: Color.mError
             }
 
@@ -340,7 +340,7 @@ SmartPanel {
               text: I18n.tr("screen-share.screen-warning", {
                               "screen": root.selectedScreenName
                             })
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               color: Color.mOnSurface
               wrapMode: Text.Wrap
             }
@@ -351,7 +351,7 @@ SmartPanel {
 
         RowLayout {
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           NToggle {
             Layout.fillWidth: true

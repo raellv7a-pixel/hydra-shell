@@ -236,14 +236,15 @@ Item {
         width: btnW
         height: btnH
         Rectangle {
+          id: stopBtnRect
           anchors.fill: parent
-          radius: Style.radiusL
+          radius: Style.radiusCapsule
           color: stopMA.containsMouse ? Color.mError || "#f44336" : Color.mSurface
           border.color: Color.mError || "#f44336"
           border.width: Style.borderM
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginS
+            spacing: Style.spaceS
             Rectangle {
               width: 10
               height: 10
@@ -255,7 +256,7 @@ Item {
               text: root.pluginApi?.tr("record.stop")
               color: stopMA.containsMouse ? "white" : Color.mOnSurface
               font.weight: Font.Bold
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               anchors.verticalCenter: parent.verticalCenter
             }
           }
@@ -265,6 +266,13 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: root.stopRecording()
+          }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: stopMA.containsMouse
+            pressed: stopMA.pressed
+            radius: stopBtnRect.radius
+            stateColor: Color.mOnError
           }
         }
       }
@@ -280,8 +288,9 @@ Item {
         x: hasRoomLeft ? root.uiX - btnC - 8               // left of region
                        : root.uiX + root.regionW + 8       // right of region
         Rectangle {
+          id: compactBtnRect
           anchors.fill: parent
-          radius: Style.radiusL
+          radius: Style.radiusCapsule
           color: stopCMA.containsMouse ? Color.mError || "#f44336" : Color.mSurface
           border.color: Color.mError || "#f44336"
           border.width: Style.borderM
@@ -298,6 +307,13 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: root.stopRecording()
+          }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: stopCMA.containsMouse
+            pressed: stopCMA.pressed
+            radius: compactBtnRect.radius
+            stateColor: Color.mOnError
           }
         }
       }
@@ -320,7 +336,7 @@ Item {
         color: "transparent"
         border.color: Color.mError || "#f44336"
         border.width: Style.borderM
-        radius: Style.radiusS
+        radius: Style.radiusControl
         opacity: 0.85
       }
       Rectangle {
@@ -336,7 +352,7 @@ Item {
         Row {
           id: recBadge
           anchors.centerIn: parent
-          spacing: Style.marginXS
+          spacing: Style.spaceXS
           Rectangle {
             width: 7
             height: 7
@@ -360,7 +376,7 @@ Item {
             text: root.pluginApi?.tr("record.recLabel") + " " + root.formatTime(root._elapsed)
             color: "white"
             font.weight: Font.Bold
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             anchors.verticalCenter: parent.verticalCenter
           }
         }

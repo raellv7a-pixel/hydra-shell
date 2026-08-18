@@ -74,20 +74,29 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    radius: Style.radiusL
+    radius: Style.radiusCard
     color: cell.active ? Qt.alpha(Color.mPrimary, 0.18) : (cell.isDropTarget ? Qt.alpha(Color.mSecondary, 0.28) : Color.mSurfaceContainer)
     border.width: cell.active || cell.isDropTarget || cell.isUrgent ? Style.borderM : Style.borderS
     border.color: cell.isUrgent ? Color.mError : (cell.active ? Color.mPrimary : (cell.isDropTarget ? Color.mSecondary : Qt.alpha(Color.mOutline, 0.72)))
 
     Behavior on color {
-      ColorAnimation {
-        duration: Style.animationFast
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
     Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationFast
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
+    }
+    NStateLayer {
+      anchors.fill: parent
+      hovered: cellMouseArea.containsMouse
+      pressed: cellMouseArea.pressed
+      selected: cell.active
+      dragged: cell.isDropTarget
+      stateColor: Color.mPrimary
+      radius: Style.radiusCard
     }
 
     MouseArea {
@@ -121,8 +130,8 @@ Item {
     Item {
       id: previewArea
       anchors.fill: parent
-      anchors.margins: Style.marginM
-      anchors.topMargin: Style.margin2L + Style.marginS + 4
+      anchors.margins: Style.spaceS
+      anchors.topMargin: Style.spaceXL + Style.spaceXS
       clip: true
 
       readonly property var windowGeometry: {
@@ -191,28 +200,28 @@ Item {
 
       Column {
         anchors.centerIn: parent
-        width: parent.width - 2 * Style.marginM
-        spacing: Style.marginXS
+        width: parent.width - 2 * Style.spaceS
+        spacing: Style.spaceXXS
         visible: cell.isPrivate || previewArea.windowGeometry.length === 0
 
         NIcon {
           anchors.horizontalCenter: parent.horizontalCenter
           icon: cell.isPrivate ? "shield-lock" : "apps"
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeHeadlineSmall
           color: cell.isPrivate ? Color.mPrimary : Color.mOnSurfaceVariant
         }
         NText {
           width: parent.width
           horizontalAlignment: Text.AlignHCenter
           text: cell.isPrivate ? qsTr("Private workspace") : qsTr("Empty workspace")
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeBodyMedium
           color: Color.mOnSurfaceVariant
         }
         NText {
           width: parent.width
           horizontalAlignment: Text.AlignHCenter
           text: cell.borderOnlyPrivacy ? qsTr("Border-only privacy active") : qsTr("Previews are hidden while privacy is enabled")
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
           visible: cell.isPrivate
         }
@@ -238,21 +247,21 @@ Item {
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.margins: Style.marginM
-      spacing: Style.marginS
+      anchors.margins: Style.spaceS
+      spacing: Style.spaceXS
       z: 5
 
       Rectangle {
-        width: workspaceLabel.implicitWidth + 2 * Style.marginM
-        height: workspaceLabel.implicitHeight + Style.marginS
-        radius: height / 2
+        width: workspaceLabel.implicitWidth + 2 * Style.spaceS
+        height: workspaceLabel.implicitHeight + Style.spaceXS
+        radius: Style.radiusCapsule
         color: cell.active ? Color.mPrimary : Qt.alpha(Color.mSurface, 0.9)
 
         NText {
           id: workspaceLabel
           anchors.centerIn: parent
           text: cell.isSpecial ? cell.wsName.replace("special:", "") : cell.wsName
-          pointSize: Style.fontSizeM
+          pointSize: Style.fontSizeTitleSmall
           font.weight: Style.fontWeightBold
           color: cell.active ? Color.mOnPrimary : Color.mOnSurface
         }
@@ -296,16 +305,16 @@ Item {
 
       Rectangle {
         visible: cell.isUrgent
-        width: urgentText.implicitWidth + Style.marginM
+        width: urgentText.implicitWidth + Style.spaceS
         height: 20 * Style.uiScaleRatio
-        radius: height / 2
+        radius: Style.radiusCapsule
         color: Color.mError
 
         NText {
           id: urgentText
           anchors.centerIn: parent
           text: "🔔 Urgent"
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnError
           font.weight: Style.fontWeightBold
         }
@@ -313,24 +322,24 @@ Item {
 
       Rectangle {
         visible: cell.isScreenshareActive
-        width: shareText.implicitWidth + Style.marginM
+        width: shareText.implicitWidth + Style.spaceS
         height: 20 * Style.uiScaleRatio
-        radius: height / 2
+        radius: Style.radiusCapsule
         color: Qt.alpha(Color.mError, 0.85)
 
         NText {
           id: shareText
           anchors.centerIn: parent
           text: "🔴 Sharing"
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnError
         }
       }
 
       Rectangle {
-        width: layoutText.implicitWidth + Style.marginM
+        width: layoutText.implicitWidth + Style.spaceS
         height: 20 * Style.uiScaleRatio
-        radius: height / 2
+        radius: Style.radiusCapsule
         color: Qt.alpha(Color.mSurfaceContainerHigh, 0.9)
         border.width: 1
         border.color: Qt.alpha(Color.mOutline, 0.5)
@@ -339,7 +348,7 @@ Item {
           id: layoutText
           anchors.centerIn: parent
           text: cell.layoutName
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurface
         }
 
@@ -365,7 +374,7 @@ Item {
 
     Rectangle {
       anchors.fill: parent
-      radius: Style.radiusL
+      radius: Style.radiusCard
       color: Qt.alpha(Color.mSurfaceContainerHighest, 0.92)
       border.width: Style.borderM
       border.color: cell.isPrivate ? Color.mError : Color.mPrimary
@@ -374,25 +383,25 @@ Item {
 
       Column {
         anchors.centerIn: parent
-        spacing: Style.marginS
+        spacing: Style.spaceXS
 
         NIcon {
           anchors.horizontalCenter: parent.horizontalCenter
           icon: cell.isPrivate ? "shield-alert" : "arrow-down-to-arc"
-          pointSize: Style.fontSizeXL
+          pointSize: Style.fontSizeTitleLarge
           color: cell.isPrivate ? Color.mError : Color.mPrimary
         }
         NText {
           anchors.horizontalCenter: parent.horizontalCenter
           text: qsTr("Move to workspace %1").arg(cell.isSpecial ? cell.wsName : cell.wsId)
-          pointSize: Style.fontSizeM
+          pointSize: Style.fontSizeTitleSmall
           font.weight: Style.fontWeightBold
           color: Color.mOnSurface
         }
         NText {
           anchors.horizontalCenter: parent.horizontalCenter
           text: qsTr("Destination is private — window preview will be hidden")
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mError
           visible: cell.isPrivate
         }

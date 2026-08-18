@@ -6,7 +6,7 @@ import qs.Widgets
 ColumnLayout {
   id: root
   property var pluginApi: null
-  spacing: Style.marginL
+  spacing: Style.spaceL
 
   property string screenshotPath: ""
   property string videoPath: ""
@@ -100,23 +100,23 @@ ColumnLayout {
 
   NDivider {
     Layout.fillWidth: true
-    Layout.topMargin: Style.marginM
-    Layout.bottomMargin: Style.marginM
+    Layout.topMargin: Style.spaceM
+    Layout.bottomMargin: Style.spaceM
   }
 
   // ── Filename format ───────────────────────────────────────────────────────
   ColumnLayout {
     Layout.fillWidth: true
-    spacing: Style.marginS
+    spacing: Style.spaceS
 
     ColumnLayout {
-      spacing: Style.marginXS
+      spacing: Style.spaceXS
       NLabel {
         label: pluginApi?.tr("settings.filenameFormat")
       }
       NText {
         text: pluginApi?.tr("settings.filenameFormatDesc")
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: Color.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
@@ -125,7 +125,7 @@ ColumnLayout {
 
     Flow {
       Layout.fillWidth: true
-      spacing: Style.marginS
+      spacing: Style.spaceS
       readonly property var tokens: [
         {
           label: pluginApi?.tr("settings.filenameTokens.year"),
@@ -155,29 +155,30 @@ ColumnLayout {
       Repeater {
         model: parent.tokens
         delegate: Rectangle {
+          id: tokenPill
           height: 28
-          width: tokenRow.implicitWidth + Style.marginM * 2
-          radius: Style.radiusM
+          width: tokenRow.implicitWidth + Style.spaceM * 2
+          radius: Style.radiusCapsule
           color: tokenMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
           Behavior on color {
-            ColorAnimation {
-              duration: 120
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
             }
           }
           Row {
             id: tokenRow
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             NText {
               text: modelData.label
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               font.weight: Font.Medium
               color: tokenMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
               anchors.verticalCenter: parent.verticalCenter
             }
             NText {
               text: modelData.value
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               color: tokenMA.containsMouse ? Qt.rgba(1, 1, 1, 0.65) : Color.mOnSurfaceVariant
               anchors.verticalCenter: parent.verticalCenter
             }
@@ -198,6 +199,12 @@ ColumnLayout {
               input.forceActiveFocus();
             }
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: tokenMA.containsMouse
+            pressed: tokenMA.pressed
+            radius: tokenPill.radius
+          }
         }
       }
     }
@@ -215,8 +222,8 @@ ColumnLayout {
 
     Rectangle {
       Layout.fillWidth: true
-      height: previewRow.implicitHeight + Style.marginM * 2
-      radius: Style.radiusM
+      height: previewRow.implicitHeight + Style.spaceM * 2
+      radius: Style.radiusCard
       color: Color.mSurfaceVariant
       opacity: 0.7
       Row {
@@ -225,10 +232,10 @@ ColumnLayout {
           left: parent.left
           right: parent.right
           verticalCenter: parent.verticalCenter
-          leftMargin: Style.marginM
-          rightMargin: Style.marginM
+          leftMargin: Style.spaceM
+          rightMargin: Style.spaceM
         }
-        spacing: Style.marginS
+        spacing: Style.spaceS
         NIcon {
           icon: "file"
           color: Color.mOnSurfaceVariant
@@ -237,11 +244,11 @@ ColumnLayout {
         }
         NText {
           text: root.buildPreview(root.filenameFormat) + ".ext"
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurface
           font.family: "monospace"
           elide: Text.ElideRight
-          width: parent.width - Style.marginM * 2
+          width: parent.width - Style.spaceM * 2
           anchors.verticalCenter: parent.verticalCenter
         }
       }
@@ -250,17 +257,17 @@ ColumnLayout {
 
   NDivider {
     Layout.fillWidth: true
-    Layout.topMargin: Style.marginM
-    Layout.bottomMargin: Style.marginM
+    Layout.topMargin: Style.spaceM
+    Layout.bottomMargin: Style.spaceM
   }
 
   // ── Share ─────────────────────────────────────────────────────────────────
   ColumnLayout {
     Layout.fillWidth: true
-    spacing: Style.marginM
+    spacing: Style.spaceM
 
     RowLayout {
-      spacing: Style.marginS
+      spacing: Style.spaceS
       NIcon {
         icon: "share"
         color: Color.mPrimary
@@ -285,7 +292,7 @@ ColumnLayout {
     // Expiry — only relevant when API key is set
     ColumnLayout {
       Layout.fillWidth: true
-      spacing: Style.marginXS
+      spacing: Style.spaceXS
       opacity: root.x02ApiKey.trim() !== "" ? 1.0 : 0.4
 
       NLabel {
@@ -294,7 +301,7 @@ ColumnLayout {
 
       NText {
         text: pluginApi?.tr("settings.x02ExpiryDesc")
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: Color.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
@@ -302,7 +309,7 @@ ColumnLayout {
 
       Flow {
         Layout.fillWidth: true
-        spacing: Style.marginS
+        spacing: Style.spaceS
 
         readonly property var expiryDefs: [
           {
@@ -330,21 +337,22 @@ ColumnLayout {
         Repeater {
           model: parent.expiryDefs
           delegate: Rectangle {
+            id: expiryPill
             height: 28
-            width: _expLabel.implicitWidth + Style.marginM * 2
-            radius: Style.radiusM
+            width: _expLabel.implicitWidth + Style.spaceM * 2
+            radius: Style.radiusCapsule
             enabled: root.x02ApiKey.trim() !== ""
             color: root.x02Expiry === modelData.id ? Color.mPrimary : (_expMA.containsMouse ? Color.mHover : Color.mSurfaceVariant)
             Behavior on color {
-              ColorAnimation {
-                duration: 120
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
               }
             }
             NText {
               id: _expLabel
               anchors.centerIn: parent
               text: modelData.label
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               font.weight: root.x02Expiry === modelData.id ? Font.Bold : Font.Normal
               color: root.x02Expiry === modelData.id ? Color.mOnPrimary : (_expMA.containsMouse ? Color.mOnHover : Color.mOnSurface)
             }
@@ -358,6 +366,13 @@ ColumnLayout {
                 root.x02Expiry = modelData.id;
                 saveSettings();
               }
+            }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: _expMA.containsMouse
+              pressed: _expMA.pressed
+              selected: root.x02Expiry === modelData.id
+              radius: expiryPill.radius
             }
           }
         }
@@ -378,8 +393,8 @@ ColumnLayout {
 
   NDivider {
     Layout.fillWidth: true
-    Layout.topMargin: Style.marginM
-    Layout.bottomMargin: Style.marginM
+    Layout.topMargin: Style.spaceM
+    Layout.bottomMargin: Style.spaceM
   }
 
   // ── Recording ─────────────────────────────────────────────────────────────
@@ -426,17 +441,17 @@ ColumnLayout {
 
   NDivider {
     Layout.fillWidth: true
-    Layout.topMargin: Style.marginM
-    Layout.bottomMargin: Style.marginM
+    Layout.topMargin: Style.spaceM
+    Layout.bottomMargin: Style.spaceM
   }
 
   // ── OCR ───────────────────────────────────────────────────────────────────
   ColumnLayout {
     Layout.fillWidth: true
-    spacing: Style.marginM
+    spacing: Style.spaceM
 
     RowLayout {
-      spacing: Style.marginS
+      spacing: Style.spaceS
       NIcon {
         icon: "scan"
         color: Color.mPrimary

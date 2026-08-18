@@ -28,23 +28,32 @@ Rectangle {
   signal clicked
   signal activated
 
-  radius: Style.radiusM
-  color: root.selected ? Color.mPrimaryContainer : (hoverHandler.hovered ? Color.mSurfaceContainerHigh : Color.mSurfaceContainerLow)
+  radius: Style.radiusCard
+  color: root.selected ? Color.mPrimaryContainer : Color.mSurfaceContainerLow
   border.width: root.selected ? Style.borderM : Style.borderS
   border.color: root.selected ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.5)
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: root.title
+  Keys.onReturnPressed: event => {
+                          root.activated();
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         root.clicked();
+                         event.accepted = true;
+                       }
 
   Behavior on color {
     enabled: !Color.isTransitioning
-    ColorAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NColorAnimation {
+      motionType: NColorAnimation.Standard
     }
   }
   Behavior on border.color {
     enabled: !Color.isTransitioning
-    ColorAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NColorAnimation {
+      motionType: NColorAnimation.Standard
     }
   }
 
@@ -53,21 +62,22 @@ Rectangle {
   }
 
   TapHandler {
+    id: tapHandler
     onSingleTapped: root.clicked()
     onDoubleTapped: root.activated()
   }
 
   ColumnLayout {
     anchors.fill: parent
-    anchors.margins: Style.marginS
-    spacing: Style.marginS
+    anchors.margins: Style.spaceXS
+    spacing: Style.spaceXS
 
     // --- área da miniatura ----------------------------------------------------
 
     Rectangle {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      radius: Style.radiusXS
+      radius: Style.radiusControl
       color: Color.mSurface
       border.width: Style.borderS
       border.color: Qt.alpha(Color.mOutline, 0.4)
@@ -78,7 +88,7 @@ Rectangle {
         anchors.centerIn: parent
         visible: root.thumbnailPath === "" && root.liveSource === null
         icon: root.emptyIcon
-        pointSize: Style.fontSizeXXXL
+        pointSize: Style.fontSizeHeadlineSmall
         color: Qt.alpha(Color.mOnSurfaceVariant, 0.5)
       }
 
@@ -86,7 +96,7 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: Style.borderS
         visible: root.thumbnailPath !== ""
-        radius: Style.radiusXS
+        radius: Style.radiusControl
         imagePath: root.thumbnailPath
         imageFillMode: Image.PreserveAspectFit
         borderWidth: 0
@@ -109,11 +119,11 @@ Rectangle {
       NImageRounded {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        anchors.margins: Style.marginXS
+        anchors.margins: Style.spaceXXS
         visible: root.appIcon !== ""
-        width: Style.fontSizeXXL * 1.2
-        height: Style.fontSizeXXL * 1.2
-        radius: Style.radiusXS
+        width: Style.fontSizeTitleMedium * 1.2
+        height: Style.fontSizeTitleMedium * 1.2
+        radius: Style.radiusControl
         imagePath: root.appIcon
         borderWidth: 0
       }
@@ -122,9 +132,9 @@ Rectangle {
       Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: Style.marginXS
+        anchors.margins: Style.spaceXXS
         visible: root.selected
-        width: Style.fontSizeXL * 1.4
+        width: Style.fontSizeTitleMedium * 1.4
         height: width
         radius: width / 2
         color: Color.mPrimary
@@ -132,7 +142,7 @@ Rectangle {
         NIcon {
           anchors.centerIn: parent
           icon: "check"
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
           color: Color.mOnPrimary
         }
       }
@@ -143,7 +153,7 @@ Rectangle {
     NText {
       Layout.fillWidth: true
       text: root.title
-      pointSize: Style.fontSizeM
+      pointSize: Style.fontSizeLabelLarge
       font.weight: Style.fontWeightSemiBold
       color: root.selected ? Color.mOnPrimaryContainer : Color.mOnSurface
       elide: Text.ElideRight
@@ -151,13 +161,13 @@ Rectangle {
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: Style.marginXS
+      spacing: Style.spaceXXS
 
       NText {
         Layout.fillWidth: true
         visible: root.subtitle !== ""
         text: root.subtitle
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: Color.mOnSurfaceVariant
         elide: Text.ElideRight
       }
@@ -166,20 +176,34 @@ Rectangle {
       Rectangle {
         Layout.alignment: Qt.AlignVCenter
         visible: root.badgeText !== ""
-        radius: height / 2
+        radius: Style.radiusCapsule
         color: Qt.alpha(Color.mPrimary, 0.16)
-        implicitWidth: badgeLabel.implicitWidth + Style.marginS * 2
-        implicitHeight: badgeLabel.implicitHeight + Style.marginXXS * 2
+        implicitWidth: badgeLabel.implicitWidth + Style.spaceXS * 2
+        implicitHeight: badgeLabel.implicitHeight + Style.spaceXXS * 2
 
         NText {
           id: badgeLabel
           anchors.centerIn: parent
           text: root.badgeText
-          pointSize: Style.fontSizeXXS
+          pointSize: Style.fontSizeLabelSmall
           font.weight: Style.fontWeightSemiBold
           color: Color.mPrimary
         }
       }
     }
+  }
+  NStateLayer {
+    anchors.fill: parent
+    z: 10
+    hovered: hoverHandler.hovered
+    pressed: tapHandler.pressed
+    radius: root.radius
+  }
+
+  NFocusRing {
+    anchors.fill: parent
+    z: 11
+    focusVisible: root.activeFocus
+    targetRadius: root.radius
   }
 }

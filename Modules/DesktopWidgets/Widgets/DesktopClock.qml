@@ -13,7 +13,7 @@ DraggableDesktopWidget {
   readonly property var widgetMetadata: DesktopWidgetRegistry.widgetMetadata["Clock"]
 
   readonly property color clockTextColor: Color.resolveColorKey(clockColor)
-  readonly property real fontSize: Math.round(Style.fontSizeXXXL * 2.5 * widgetScale)
+  readonly property real fontSize: Math.round(Style.fontSizeDisplayLarge * widgetScale)
   readonly property real widgetOpacity: widgetData.opacity !== undefined ? widgetData.opacity : 1.0
   readonly property string clockStyle: widgetData.clockStyle !== undefined ? widgetData.clockStyle : widgetMetadata.clockStyle
   readonly property string clockColor: widgetData.clockColor !== undefined ? widgetData.clockColor : widgetMetadata.clockColor
@@ -21,7 +21,7 @@ DraggableDesktopWidget {
   readonly property string customFont: widgetData.customFont !== undefined ? widgetData.customFont : widgetMetadata.customFont
   readonly property string format: widgetData.format !== undefined ? widgetData.format : widgetMetadata.format
 
-  readonly property real contentPadding: Math.round((clockStyle === "minimal" ? Style.marginL : Style.marginXL) * widgetScale)
+  readonly property real contentPadding: Math.round((clockStyle === "minimal" ? Style.spaceM : Style.spaceL) * widgetScale)
   implicitWidth: contentLoader.item ? Math.round((contentLoader.item.implicitWidth || contentLoader.item.width || 0) + contentPadding * 2) : 0
   implicitHeight: contentLoader.item ? Math.round((contentLoader.item.implicitHeight || contentLoader.item.height || 0) + contentPadding * 2) : 0
   width: implicitWidth
@@ -58,9 +58,9 @@ DraggableDesktopWidget {
           family: root.useCustomFont && root.customFont ? root.customFont : Settings.data.ui.fontDefault
           pointSize: {
             if (model.length == 1) {
-              return Math.round(Style.fontSizeXXL * root.widgetScale);
+              return Math.round(Style.fontSizeDisplaySmall * root.widgetScale);
             } else {
-              return Math.round((index == 0) ? Style.fontSizeXXL * root.widgetScale : Style.fontSizeM * root.widgetScale);
+              return Math.round((index == 0) ? Style.fontSizeDisplaySmall * root.widgetScale : Style.fontSizeTitleMedium * root.widgetScale);
             }
           }
           font.weight: Style.fontWeightBold

@@ -37,7 +37,7 @@ Variants {
     // Keep loader active briefly after last notification to allow animations to complete
     Timer {
       id: delayTimer
-      interval: Style.animationSlow + 200
+      interval: Style.motionDurationSlowSpatial + 200
       repeat: false
     }
 
@@ -104,7 +104,7 @@ Variants {
 
       readonly property bool isCompact: Settings.data.notifications.density === "compact"
       readonly property int notifWidth: Math.round((isCompact ? 320 : 440) * Style.uiScaleRatio)
-      readonly property int shadowPadding: Style.shadowBlurMax + Style.marginL
+      readonly property int shadowPadding: Style.shadowBlurMax + Style.spaceL
 
       // Calculate bar and frame offsets for each edge separately
       readonly property int barOffsetTop: {
@@ -142,13 +142,13 @@ Variants {
       anchors.right: isRight
 
       // Margins for PanelWindow - only apply bar offset for the specific edge where the bar is
-      margins.top: isTop ? barOffsetTop - shadowPadding + Style.marginM : 0
+      margins.top: isTop ? barOffsetTop - shadowPadding + Style.spaceS : 0
       margins.bottom: isBottom ? barOffsetBottom - shadowPadding : 0
-      margins.left: isLeft ? barOffsetLeft - shadowPadding + Style.marginM : 0
-      margins.right: isRight ? barOffsetRight - shadowPadding + Style.marginM : 0
+      margins.left: isLeft ? barOffsetLeft - shadowPadding + Style.spaceS : 0
+      margins.right: isRight ? barOffsetRight - shadowPadding + Style.spaceS : 0
 
       implicitWidth: notifWidth + shadowPadding * 2
-      implicitHeight: notificationStack.implicitHeight + Style.marginL
+      implicitHeight: notificationStack.implicitHeight + Style.spaceL
 
       property var animateConnection: null
 
@@ -196,15 +196,12 @@ Variants {
           horizontalCenter: parent.isCentered ? parent.horizontalCenter : undefined
         }
 
-        spacing: -notifWindow.shadowPadding * 2 + Style.marginM
+        spacing: -notifWindow.shadowPadding * 2 + Style.spaceS
 
         Behavior on implicitHeight {
           enabled: !Settings.data.general.animationDisabled
-          SpringAnimation {
-            spring: 2.0
-            damping: 0.4
-            epsilon: 0.01
-            mass: 0.8
+          NAnim {
+            motionType: NAnim.ExpressiveSlowSpatial
           }
         }
 
@@ -220,11 +217,11 @@ Variants {
             property bool isHovered: false
             property bool isRemoving: false
 
-            readonly property int animationDelay: index * 100
+            readonly property int animationDelay: index * Math.round(Style.motionDurationFastEffects / 2)
             readonly property int slideDistance: 300
 
             Layout.preferredWidth: notifWidth + notifWindow.shadowPadding * 2
-            Layout.preferredHeight: (notifWindow.isCompact ? compactContent.implicitHeight : notificationContent.implicitHeight) + Style.margin2M + notifWindow.shadowPadding * 2
+            Layout.preferredHeight: (notifWindow.isCompact ? compactContent.implicitHeight : notificationContent.implicitHeight) + Style.paddingCard * 2 + notifWindow.shadowPadding * 2
             Layout.maximumHeight: Layout.preferredHeight
 
             // Animation properties
@@ -335,9 +332,9 @@ Variants {
               if (!Settings.data.general.animationDisabled) {
                 if (useVerticalSwipe) {
                   swipeOffset = 0;
-                  swipeOffsetY = swipeOffsetY >= 0 ? cardBackground.height + Style.marginXL : -cardBackground.height - Style.marginXL;
+                  swipeOffsetY = swipeOffsetY >= 0 ? cardBackground.height + Style.spaceXL : -cardBackground.height - Style.spaceXL;
                 } else {
-                  swipeOffset = swipeOffset >= 0 ? cardBackground.width + Style.marginXL : -cardBackground.width - Style.marginXL;
+                  swipeOffset = swipeOffset >= 0 ? cardBackground.width + Style.spaceXL : -cardBackground.width - Style.spaceXL;
                   swipeOffsetY = 0;
                 }
                 scaleValue = 0.8;
@@ -361,7 +358,7 @@ Variants {
 
             Timer {
               id: removalTimer
-              interval: Style.animationSlow
+              interval: Style.motionDurationSlowSpatial
               repeat: false
               onTriggered: {
                 NotificationService.dismissPopup(notificationId);
@@ -376,45 +373,36 @@ Variants {
 
             Behavior on scale {
               enabled: !Settings.data.general.animationDisabled
-              SpringAnimation {
-                spring: 3
-                damping: 0.4
-                epsilon: 0.01
-                mass: 0.8
+              NAnim {
+                motionType: NAnim.ExpressiveDefaultSpatial
               }
             }
 
             Behavior on opacity {
               enabled: !Settings.data.general.animationDisabled
-              NumberAnimation {
-                duration: Style.animationNormal
-                easing.type: Easing.OutCubic
+              NAnim {
+                motionType: NAnim.StandardEffects
               }
             }
 
             Behavior on slideOffset {
               enabled: !Settings.data.general.animationDisabled
-              SpringAnimation {
-                spring: 2.5
-                damping: 0.3
-                epsilon: 0.01
-                mass: 0.6
+              NAnim {
+                motionType: NAnim.ExpressiveSlowSpatial
               }
             }
 
             Behavior on swipeOffset {
               enabled: !Settings.data.general.animationDisabled && !card.isSwiping
-              NumberAnimation {
-                duration: Style.animationFast
-                easing.type: Easing.OutCubic
+              NAnim {
+                motionType: NAnim.ExpressiveFastSpatial
               }
             }
 
             Behavior on swipeOffsetY {
               enabled: !Settings.data.general.animationDisabled && !card.isSwiping
-              NumberAnimation {
-                duration: Style.animationFast
-                easing.type: Easing.OutCubic
+              NAnim {
+                motionType: NAnim.ExpressiveFastSpatial
               }
             }
 
@@ -548,10 +536,10 @@ Variants {
               Rectangle {
                 id: cardBackground
                 anchors.fill: parent
-                radius: Style.radiusL
+                radius: Style.radiusPopover
                 border.color: Qt.alpha(Color.mOutline, Color.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
                 border.width: Style.borderS
-                color: Qt.alpha(Color.mSurface, Color.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
+                color: Qt.alpha(Color.mSurfaceContainerHigh, Color.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
 
                 // Progress bar
                 Rectangle {
@@ -577,17 +565,15 @@ Variants {
 
                     Behavior on width {
                       enabled: !card.isRemoving
-                      NumberAnimation {
-                        duration: 100
-                        easing.type: Easing.Linear
+                      NAnim {
+                        motionType: NAnim.StandardEffects
                       }
                     }
 
                     Behavior on x {
                       enabled: !card.isRemoving
-                      NumberAnimation {
-                        duration: 100
-                        easing.type: Easing.Linear
+                      NAnim {
+                        motionType: NAnim.StandardEffects
                       }
                     }
                   }
@@ -605,22 +591,22 @@ Variants {
                 id: notificationContent
                 visible: !notifWindow.isCompact
                 anchors.fill: cardBackground
-                anchors.margins: Style.marginM
-                spacing: Style.marginM
+                anchors.margins: Style.paddingCard
+                spacing: Style.spaceS
 
                 RowLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginL
-                  Layout.leftMargin: Style.marginM
-                  Layout.rightMargin: Style.marginM
-                  Layout.topMargin: Style.marginM
-                  Layout.bottomMargin: Style.marginM
+                  spacing: Style.spaceS
+                  Layout.leftMargin: Style.spaceNone
+                  Layout.rightMargin: Style.spaceNone
+                  Layout.topMargin: Style.spaceNone
+                  Layout.bottomMargin: Style.spaceNone
 
                   NImageRounded {
                     Layout.preferredWidth: Math.round(40 * Style.uiScaleRatio)
                     Layout.preferredHeight: Math.round(40 * Style.uiScaleRatio)
                     Layout.alignment: Qt.AlignVCenter
-                    radius: Math.min(Style.radiusL, Layout.preferredWidth / 2)
+                    radius: Style.radiusCard
                     imagePath: model.originalImage || ""
                     borderColor: "transparent"
                     borderWidth: 0
@@ -630,24 +616,24 @@ Variants {
 
                   ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: Style.marginS
+                    spacing: Style.spaceXS
 
                     // Header with urgency indicator
                     RowLayout {
                       Layout.fillWidth: true
-                      spacing: Style.marginS
+                      spacing: Style.spaceXS
 
                       Rectangle {
                         Layout.preferredWidth: 6
                         Layout.preferredHeight: 6
                         Layout.alignment: Qt.AlignVCenter
-                        radius: Style.radiusXS
+                        radius: Style.radiusCapsule
                         color: model.urgency === 2 ? Color.mError : model.urgency === 0 ? Color.mOnSurface : Color.mPrimary
                       }
 
                       NText {
                         text: model.appName || "Unknown App"
-                        pointSize: Style.fontSizeXS
+                        pointSize: Style.fontSizeLabelMedium
                         font.weight: Style.fontWeightBold
                         color: Color.mSecondary
                       }
@@ -655,7 +641,7 @@ Variants {
                       NText {
                         textFormat: Text.PlainText
                         text: " " + Time.formatRelativeTime(model.timestamp)
-                        pointSize: Style.fontSizeXXS
+                        pointSize: Style.fontSizeLabelSmall
                         color: Color.mOnSurfaceVariant
                         Layout.alignment: Qt.AlignBottom
                       }
@@ -667,7 +653,7 @@ Variants {
 
                     NText {
                       text: model.summary || I18n.tr("common.no-summary")
-                      pointSize: Style.fontSizeM
+                      pointSize: Style.fontSizeTitleSmall
                       font.weight: Style.fontWeightMedium
                       color: Color.mOnSurface
                       textFormat: Text.StyledText
@@ -676,12 +662,12 @@ Variants {
                       elide: Text.ElideRight
                       visible: text.length > 0
                       Layout.fillWidth: true
-                      Layout.rightMargin: Style.marginM
+                      Layout.rightMargin: Style.spaceM
                     }
 
                     NText {
                       text: model.body || ""
-                      pointSize: Style.fontSizeM
+                      pointSize: Style.fontSizeBodySmall
                       color: Color.mOnSurface
                       textFormat: Text.StyledText
                       wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -690,14 +676,14 @@ Variants {
                       elide: Text.ElideRight
                       visible: text.length > 0
                       Layout.fillWidth: true
-                      Layout.rightMargin: Style.marginXL
+                      Layout.rightMargin: Style.spaceXL
                     }
 
                     // Actions
                     Flow {
                       Layout.fillWidth: true
-                      spacing: Style.marginS
-                      Layout.topMargin: Style.marginM
+                      spacing: Style.spaceXS
+                      Layout.topMargin: Style.spaceS
                       flow: Flow.LeftToRight
 
                       property string parentNotificationId: notificationId
@@ -723,12 +709,12 @@ Variants {
                             }
                             return actionText;
                           }
-                          fontSize: Style.fontSizeS
+                          fontSize: Style.fontSizeLabelMedium
                           backgroundColor: Color.mPrimary
-                          textColor: hovered ? Color.mOnHover : Color.mOnPrimary
-                          hoverColor: Color.mHover
+                          textColor: Color.mOnPrimary
+                          hoverColor: Color.mPrimary
                           outlined: false
-                          implicitHeight: 24
+                          implicitHeight: Math.round(28 * Style.uiScaleRatio)
                           onClicked: {
                             card.runAction(actionData.identifier, false);
                           }
@@ -746,9 +732,9 @@ Variants {
                 tooltipText: I18n.tr("tooltips.dismiss-notification")
                 baseSize: Style.baseWidgetSize * 0.6
                 anchors.top: cardBackground.top
-                anchors.topMargin: Style.marginXL
+                anchors.topMargin: Style.paddingCard
                 anchors.right: cardBackground.right
-                anchors.rightMargin: Style.marginXL
+                anchors.rightMargin: Style.paddingCard
 
                 onClicked: {
                   card.runAction("", true);
@@ -760,14 +746,14 @@ Variants {
                 id: compactContent
                 visible: notifWindow.isCompact
                 anchors.fill: cardBackground
-                anchors.margins: Style.marginM
-                spacing: Style.marginS
+                anchors.margins: Style.spaceS
+                spacing: Style.spaceXS
 
                 NImageRounded {
                   Layout.preferredWidth: Math.round(24 * Style.uiScaleRatio)
                   Layout.preferredHeight: Math.round(24 * Style.uiScaleRatio)
                   Layout.alignment: Qt.AlignVCenter
-                  radius: Style.radiusXS
+                  radius: Style.radiusControl
                   imagePath: model.originalImage || ""
                   borderColor: "transparent"
                   borderWidth: 0
@@ -777,11 +763,11 @@ Variants {
 
                 ColumnLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginXS
+                  spacing: Style.spaceXXS
 
                   NText {
                     text: model.summary || I18n.tr("common.no-summary")
-                    pointSize: Style.fontSizeM
+                    pointSize: Style.fontSizeBodyMedium
                     font.weight: Style.fontWeightMedium
                     color: Color.mOnSurface
                     textFormat: Text.StyledText
@@ -794,7 +780,7 @@ Variants {
                     visible: model.body && model.body.length > 0
                     Layout.fillWidth: true
                     text: model.body || ""
-                    pointSize: Style.fontSizeS
+                    pointSize: Style.fontSizeBodySmall
                     color: Color.mOnSurfaceVariant
                     textFormat: Text.StyledText
                     wrapMode: Text.Wrap

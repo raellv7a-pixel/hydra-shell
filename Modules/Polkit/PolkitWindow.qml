@@ -89,9 +89,9 @@ PanelWindow {
   anchors.left: !isAttached
   anchors.right: !isAttached
 
-  margins.top: isAttached ? (Style.getBarHeightForScreen(screen?.name) + Style.marginM) : 0
+  margins.top: isAttached ? (Style.getBarHeightForScreen(screen?.name) + Style.spaceS) : 0
 
-  readonly property real shadowPadding: Style.shadowBlurMax + Style.marginL
+  readonly property real shadowPadding: Style.shadowBlurMax + Style.spaceM
 
   color: "transparent"
 
@@ -100,8 +100,8 @@ PanelWindow {
     anchors.centerIn: isAttached ? undefined : parent
     anchors.top: isAttached ? parent.top : undefined
     anchors.horizontalCenter: isAttached ? parent.horizontalCenter : undefined
-    width: Math.max(460 * Style.uiScaleRatio, contentLayout.implicitWidth + (Style.marginL * 4)) + shadowPadding * 2
-    height: Math.max(260 * Style.uiScaleRatio, contentLayout.implicitHeight + (Style.marginL * 4)) + shadowPadding * 2
+    width: Math.max(460 * Style.uiScaleRatio, contentLayout.implicitWidth + (Style.paddingPanel * 4)) + shadowPadding * 2
+    height: Math.max(260 * Style.uiScaleRatio, contentLayout.implicitHeight + (Style.paddingPanel * 4)) + shadowPadding * 2
     focus: true
 
     Keys.onPressed: function (event) {
@@ -131,45 +131,45 @@ PanelWindow {
       running: flow && flow.failed && PolkitService.errorShake
       loops: 1
 
-      NumberAnimation {
+      NAnim {
         target: shakeTranslate
         property: "x"
         from: 0
         to: -10
-        duration: 50
-        easing.type: Easing.InOutQuad
+        motionType: NAnim.StandardSpatial
+        duration: Math.round(Style.motionDurationFastSpatial / 7)
       }
-      NumberAnimation {
+      NAnim {
         target: shakeTranslate
         property: "x"
         from: -10
         to: 10
-        duration: 50
-        easing.type: Easing.InOutQuad
+        motionType: NAnim.StandardSpatial
+        duration: Math.round(Style.motionDurationFastSpatial / 7)
       }
-      NumberAnimation {
+      NAnim {
         target: shakeTranslate
         property: "x"
         from: 10
         to: -10
-        duration: 50
-        easing.type: Easing.InOutQuad
+        motionType: NAnim.StandardSpatial
+        duration: Math.round(Style.motionDurationFastSpatial / 7)
       }
-      NumberAnimation {
+      NAnim {
         target: shakeTranslate
         property: "x"
         from: -10
         to: 10
-        duration: 50
-        easing.type: Easing.InOutQuad
+        motionType: NAnim.StandardSpatial
+        duration: Math.round(Style.motionDurationFastSpatial / 7)
       }
-      NumberAnimation {
+      NAnim {
         target: shakeTranslate
         property: "x"
         from: 10
         to: 0
-        duration: 50
-        easing.type: Easing.InOutQuad
+        motionType: NAnim.StandardSpatial
+        duration: Math.round(Style.motionDurationFastSpatial / 7)
       }
     }
 
@@ -185,14 +185,14 @@ PanelWindow {
       id: customBackground
       anchors.fill: parent
       anchors.margins: shadowPadding
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       color: Qt.alpha(Color.mSurface, 0.96)
       border.color: (flow && (flow.failed || flow.supplementaryIsError)) ? Color.mError : Color.mOutline
       border.width: Style.borderS
 
       Behavior on border.color {
-        ColorAnimation {
-          duration: Style.animationFast
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
       }
     }
@@ -200,17 +200,17 @@ PanelWindow {
     ColumnLayout {
       id: contentLayout
       anchors.centerIn: customBackground
-      width: customBackground.width - (Style.marginL * 2)
-      spacing: Style.marginM
+      width: customBackground.width - (Style.paddingPanel * 2)
+      spacing: Style.spaceS
 
       // Header with Icon
       RowLayout {
         Layout.fillWidth: true
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         NImageRounded {
-          Layout.preferredWidth: Style.fontSizeXXL * 2
-          Layout.preferredHeight: Style.fontSizeXXL * 2
+          Layout.preferredWidth: Style.fontSizeDisplaySmall
+          Layout.preferredHeight: Style.fontSizeDisplaySmall
           imagePath: Settings.preprocessPath(Settings.data.general.avatarImage) || ((flow && flow.iconName) ? Quickshell.iconPath(flow.iconName) : "")
           fallbackIcon: "shield-lock"
           borderWidth: 0
@@ -218,11 +218,11 @@ PanelWindow {
 
         ColumnLayout {
           Layout.fillWidth: true
-          spacing: Style.marginXS
+          spacing: Style.spaceXXS
 
           NText {
             text: polkitWindow.resolvedMessage || (flow ? flow.message : "Autenticação Administrativa Requerida")
-            pointSize: Style.fontSizeL
+            pointSize: Style.fontSizeTitleLarge
             font.weight: Style.fontWeightBold
             color: Color.mOnSurface
             wrapMode: Text.Wrap
@@ -231,7 +231,7 @@ PanelWindow {
 
           NText {
             text: flow ? flow.actionId : ""
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             color: Color.mOnSurfaceVariant
             wrapMode: Text.Wrap
             Layout.fillWidth: true
@@ -244,7 +244,7 @@ PanelWindow {
       NText {
         visible: flow && flow.supplementaryMessage !== ""
         text: flow ? flow.supplementaryMessage : ""
-        pointSize: Style.fontSizeS
+        pointSize: Style.fontSizeBodyMedium
         color: (flow && flow.supplementaryIsError) ? Color.mError : Color.mOnSurfaceVariant
         wrapMode: Text.Wrap
         Layout.fillWidth: true
@@ -270,8 +270,8 @@ PanelWindow {
       // Actions
       RowLayout {
         Layout.fillWidth: true
-        Layout.topMargin: Style.marginS
-        spacing: Style.marginM
+        Layout.topMargin: Style.spaceXS
+        spacing: Style.spaceS
 
         Item {
           Layout.fillWidth: true

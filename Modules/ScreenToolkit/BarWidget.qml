@@ -45,8 +45,8 @@ Item {
     anchors {
       top: pill.top
       right: pill.right
-      topMargin: Style.marginXS
-      rightMargin: Style.marginXS
+      topMargin: Style.spaceXS
+      rightMargin: Style.spaceXS
     }
     SequentialAnimation on opacity {
       running: root._isRecording

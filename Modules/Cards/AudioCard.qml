@@ -134,12 +134,12 @@ NBox {
 
   RowLayout {
     anchors.fill: parent
-    anchors.margins: Style.marginM
-    spacing: Style.marginM
+    anchors.margins: Style.spaceS
+    spacing: Style.spaceS
 
     // Output Volume Section
     ColumnLayout {
-      spacing: Style.marginXXS
+      spacing: Style.spaceXXS
       Layout.fillWidth: true
       Layout.preferredWidth: 0
       opacity: AudioService.sink ? 1.0 : 0.5
@@ -148,21 +148,21 @@ NBox {
       // Output Volume Header
       RowLayout {
         Layout.fillWidth: true
-        spacing: Style.marginXS
+        spacing: Style.spaceXXS
 
         NIconButton {
           icon: AudioService.muted ? "volume-off" : "volume-high"
           baseSize: Style.baseWidgetSize * 0.5
           colorFg: AudioService.muted ? Color.mError : Color.mOnSurface
           colorBg: "transparent"
-          colorBgHover: Color.mHover
-          colorFgHover: Color.mOnHover
+          colorBgHover: Color.mSurfaceContainerHigh
+          colorFgHover: Color.mOnSurface
           onClicked: AudioService.setOutputMuted(!AudioService.muted)
         }
 
         NText {
           text: AudioService.sink ? AudioService.sink.description : "No output device"
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -207,7 +207,7 @@ NBox {
 
     // Input Volume Section
     ColumnLayout {
-      spacing: Style.marginXXS
+      spacing: Style.spaceXXS
       Layout.fillWidth: true
       Layout.preferredWidth: 0
       opacity: AudioService.source ? 1.0 : 0.5
@@ -216,21 +216,21 @@ NBox {
       // Input Volume Header
       RowLayout {
         Layout.fillWidth: true
-        spacing: Style.marginXS
+        spacing: Style.spaceXXS
 
         NIconButton {
           icon: AudioService.inputMuted ? "microphone-off" : "microphone"
           baseSize: Style.baseWidgetSize * 0.5
           colorFg: AudioService.inputMuted ? Color.mError : Color.mOnSurface
           colorBg: "transparent"
-          colorBgHover: Color.mHover
-          colorFgHover: Color.mOnHover
+          colorBgHover: Color.mSurfaceContainerHigh
+          colorFgHover: Color.mOnSurface
           onClicked: AudioService.setInputMuted(!AudioService.inputMuted)
         }
 
         NText {
           text: AudioService.source ? AudioService.source.description : "No input device"
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
           elide: Text.ElideRight
           Layout.fillWidth: true

@@ -406,7 +406,7 @@ Variants {
         id: lockKeyTextMetrics
         visible: false
         text: root.getDisplayPercentage()
-        pointSize: Style.fontSizeS
+        pointSize: Style.fontSizeLabelMedium
         family: Settings.data.ui.fontFixed
         elide: Text.ElideNone
         wrapMode: Text.NoWrap
@@ -435,18 +435,18 @@ Variants {
         const textWidth = Math.ceil(lockKeyTextMetrics.contentWidth || 0);
         if (textWidth === 0) {
           // Fallback: estimate based on text length if measurement not ready
-          const fontSize = Style.fontSizeS * Settings.data.ui.fontFixedScale * Style.uiScaleRatio;
+          const fontSize = Style.fontSizeLabelMedium * Settings.data.ui.fontFixedScale * Style.uiScaleRatio;
           const estimatedWidth = text.length * fontSize * 0.6;
-          const iconWidth = Style.fontSizeXL * Style.uiScaleRatio;
-          const margins = Style.margin2L;
-          const spacing = Style.marginM;
-          const bgMargins = Style.margin2M * 1.5;
+          const iconWidth = Style.fontSizeTitleMedium * Style.uiScaleRatio;
+          const margins = Style.paddingCard * 2;
+          const spacing = Style.spaceXS;
+          const bgMargins = Style.paddingCard * 2;
           return Math.max(shortHWidth, Math.round((estimatedWidth + iconWidth + margins + spacing + bgMargins) * 1.1));
         }
-        const iconWidth = Style.fontSizeXL * Style.uiScaleRatio;
-        const margins = Style.margin2L; // Left and right content margins
-        const spacing = Style.marginM; // Spacing between icon and text
-        const bgMargins = Style.margin2M * 1.5; // Background margins
+        const iconWidth = Style.fontSizeTitleMedium * Style.uiScaleRatio;
+        const margins = Style.paddingCard * 2; // Left and right content margins
+        const spacing = Style.spaceXS; // Spacing between icon and text
+        const bgMargins = Style.paddingCard * 2; // Background margins
         const totalWidth = textWidth + iconWidth + margins + spacing + bgMargins;
         // Ensure minimum width and add some buffer
         return Math.max(shortHWidth, Math.round(totalWidth * 1.1));
@@ -464,19 +464,19 @@ Variants {
         }
         // Calculate height: font size * char count + margins + icon space
         // Font size M (11pt) scaled, plus some spacing between chars
-        const fontSize = Style.fontSizeS * Settings.data.ui.fontFixedScale * Style.uiScaleRatio;
+        const fontSize = Style.fontSizeLabelMedium * Settings.data.ui.fontFixedScale * Style.uiScaleRatio;
         const charHeight = fontSize * 1.3; // Add 30% for line height (matches Layout.preferredHeight)
         const textHeight = charCount * charHeight;
-        // Background margins (Style.marginM * 1.5 * 2 for top and bottom)
-        const bgMargins = Style.marginM * 1.5 * 2;
-        // Content margins (Style.margin2L for top and bottom)
-        const contentMargins = Style.margin2L;
-        // Icon size: fontSizeXL scaled, with extra space for icon rendering and padding
-        const iconSize = Style.fontSizeXL * Style.uiScaleRatio * 1.8; // Add 80% for icon rendering and padding
-        // Spacing between text and icon (Style.marginM for lock keys)
-        const textIconSpacing = Style.marginM;
-        // Add extra buffer to ensure everything fits comfortably
-        const buffer = Style.marginL;
+        // Background margins.
+        const bgMargins = Style.spaceS * 2;
+        // Content margins.
+        const contentMargins = Style.paddingCard * 2;
+        // Icon size, including rendering padding.
+        const iconSize = Style.fontSizeTitleMedium * Style.uiScaleRatio * 1.8;
+        // Spacing between text and icon for lock keys.
+        const textIconSpacing = Style.spaceXS;
+        // Add extra buffer to ensure everything fits comfortably.
+        const buffer = Style.spaceM;
         const totalHeight = textHeight + bgMargins + contentMargins + iconSize + textIconSpacing + buffer;
         // Ensure minimum height and add extra padding for safety
         return Math.max(shortVHeight, Math.round(totalHeight * 1.1));
@@ -501,7 +501,7 @@ Variants {
         if (!isAnchored)
           return 0;
 
-        let base = Style.marginM;
+        let base = Style.spaceS;
         if (screenBarPosition === position) {
           const isVertical = position === "top" || position === "bottom";
           const floatExtra = Math.ceil(Settings.data.bar.barType === "floating" ? (isVertical ? Settings.data.bar.marginVertical : Settings.data.bar.marginHorizontal) : 0);
@@ -540,16 +540,14 @@ Variants {
         scale: 0.85
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.InOutQuad
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
 
         Behavior on scale {
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.InOutQuad
+          NAnim {
+            motionType: NAnim.ExpressiveDefaultSpatial
           }
         }
 
@@ -561,7 +559,7 @@ Variants {
 
         Timer {
           id: visibilityTimer
-          interval: Style.animationNormal + 50
+          interval: Style.motionDurationDefaultSpatial + 50
           onTriggered: {
             osdItem.visible = false;
             root.currentOSDType = -1;
@@ -573,9 +571,9 @@ Variants {
         Rectangle {
           id: background
           anchors.fill: parent
-          anchors.margins: Style.marginM * 1.5
-          radius: Style.radiusL
-          color: Qt.alpha(Color.mSurface, Color.adaptiveOpacity(Settings.data.osd.backgroundOpacity) || 1.0)
+          anchors.margins: Style.spaceS
+          radius: Style.radiusPopover
+          color: Qt.alpha(Color.mSurfaceContainerHigh, Color.adaptiveOpacity(Settings.data.osd.backgroundOpacity) || 1.0)
           border.color: Qt.alpha(Color.mOutline, Color.adaptiveOpacity(Settings.data.osd.backgroundOpacity) || 1.0)
           border.width: {
             const bw = Math.max(2, Style.borderM);
@@ -592,7 +590,7 @@ Variants {
         Loader {
           id: contentLoader
           anchors.fill: background
-          anchors.margins: Style.marginM
+          anchors.margins: Style.spaceXS
           active: true
           sourceComponent: panel.verticalMode ? verticalContent : horizontalContent
         }
@@ -601,14 +599,14 @@ Variants {
           id: horizontalContent
           RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: Style.marginL
-            anchors.rightMargin: Style.marginL
-            spacing: Style.marginM
+            anchors.leftMargin: Style.paddingCard
+            anchors.rightMargin: Style.paddingCard
+            spacing: Style.spaceS
 
             TextMetrics {
               id: percentageMetrics
               font.family: Settings.data.ui.fontFixed
-              font.pointSize: Style.fontSizeS * (Settings.data.ui.fontFixedScale * Style.uiScaleRatio)
+              font.pointSize: Style.fontSizeLabelMedium * (Settings.data.ui.fontFixedScale * Style.uiScaleRatio)
               text: "150%"
             }
 
@@ -616,13 +614,12 @@ Variants {
             NIcon {
               icon: root.getIcon()
               color: root.getIconColor()
-              pointSize: Style.fontSizeXL
+              pointSize: Style.fontSizeTitleMedium
               Layout.alignment: Qt.AlignVCenter
 
               Behavior on color {
-                ColorAnimation {
-                  duration: Style.animationNormal
-                  easing.type: Easing.InOutQuad
+                NColorAnimation {
+                  motionType: NColorAnimation.Standard
                 }
               }
             }
@@ -632,7 +629,7 @@ Variants {
               visible: root.currentOSDType === OSD.Type.LockKey
               text: root.getDisplayPercentage()
               color: root.getProgressColor()
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               elide: Text.ElideNone
               Layout.fillWidth: true
               horizontalAlignment: Text.AlignHCenter
@@ -645,7 +642,7 @@ Variants {
               Layout.fillWidth: true
               Layout.alignment: Qt.AlignVCenter
               height: panel.barThickness
-              radius: Math.min(Style.iRadiusL, panel.barThickness / 2)
+              radius: Style.radiusCapsule
               color: Color.mSurfaceVariant
 
               Rectangle {
@@ -657,15 +654,13 @@ Variants {
                 color: root.getProgressColor()
 
                 Behavior on width {
-                  NumberAnimation {
-                    duration: Style.animationNormal
-                    easing.type: Easing.InOutQuad
+                  NAnim {
+                    motionType: NAnim.StandardEffects
                   }
                 }
                 Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationNormal
-                    easing.type: Easing.InOutQuad
+                  NColorAnimation {
+                    motionType: NColorAnimation.Standard
                   }
                 }
               }
@@ -676,7 +671,7 @@ Variants {
               visible: root.currentOSDType !== OSD.Type.LockKey
               text: root.getDisplayPercentage()
               color: Color.mOnSurface
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               family: Settings.data.ui.fontFixed
               Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
               horizontalAlignment: Text.AlignRight
@@ -693,9 +688,9 @@ Variants {
           id: verticalContent
           ColumnLayout {
             anchors.fill: parent
-            anchors.topMargin: Style.marginL
-            anchors.bottomMargin: Style.marginL
-            spacing: root.currentOSDType === OSD.Type.LockKey ? Style.marginM : Style.marginS
+            anchors.topMargin: Style.paddingCard
+            anchors.bottomMargin: Style.paddingCard
+            spacing: root.currentOSDType === OSD.Type.LockKey ? Style.spaceS : Style.spaceXS
             clip: root.currentOSDType !== OSD.Type.LockKey
 
             ColumnLayout {
@@ -739,11 +734,11 @@ Variants {
                 NText {
                   text: modelData || ""
                   color: root.getProgressColor()
-                  pointSize: Style.fontSizeS
+                  pointSize: Style.fontSizeLabelMedium
                   family: Settings.data.ui.fontFixed
                   Layout.fillWidth: true
                   Layout.preferredHeight: {
-                    const fontSize = Style.fontSizeS * Settings.data.ui.fontFixedScale * Style.uiScaleRatio;
+                    const fontSize = Style.fontSizeLabelMedium * Settings.data.ui.fontFixedScale * Style.uiScaleRatio;
                     return Math.round(fontSize * 1.3);
                   }
                   Layout.alignment: Qt.AlignHCenter
@@ -757,7 +752,7 @@ Variants {
               visible: root.currentOSDType !== OSD.Type.LockKey
               text: root.getDisplayPercentage()
               color: Color.mOnSurface
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               family: Settings.data.ui.fontFixed
               Layout.fillWidth: true
               Layout.alignment: Qt.AlignHCenter
@@ -776,7 +771,7 @@ Variants {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 width: panel.barThickness
-                radius: Math.min(Style.iRadiusL, panel.barThickness / 2)
+                radius: Style.radiusCapsule
                 color: Color.mSurfaceVariant
 
                 Rectangle {
@@ -788,15 +783,13 @@ Variants {
                   color: root.getProgressColor()
 
                   Behavior on height {
-                    NumberAnimation {
-                      duration: Style.animationNormal
-                      easing.type: Easing.InOutQuad
+                    NAnim {
+                      motionType: NAnim.StandardEffects
                     }
                   }
                   Behavior on color {
-                    ColorAnimation {
-                      duration: Style.animationNormal
-                      easing.type: Easing.InOutQuad
+                    NColorAnimation {
+                      motionType: NColorAnimation.Standard
                     }
                   }
                 }
@@ -806,15 +799,14 @@ Variants {
             NIcon {
               icon: root.getIcon()
               color: root.getIconColor()
-              pointSize: root.currentOSDType === OSD.Type.LockKey ? Style.fontSizeXL : Style.fontSizeL
+              pointSize: root.currentOSDType === OSD.Type.LockKey ? Style.fontSizeTitleMedium : Style.fontSizeBodyMedium
               Layout.alignment: root.currentOSDType === OSD.Type.LockKey ? Qt.AlignHCenter : (Qt.AlignHCenter | Qt.AlignBottom)
-              Layout.preferredHeight: root.currentOSDType === OSD.Type.LockKey ? (Style.fontSizeXL * Style.uiScaleRatio * 1.5) : -1
-              Layout.minimumHeight: root.currentOSDType === OSD.Type.LockKey ? (Style.fontSizeXL * Style.uiScaleRatio) : 0
+              Layout.preferredHeight: root.currentOSDType === OSD.Type.LockKey ? (Style.fontSizeTitleMedium * Style.uiScaleRatio * 1.5) : -1
+              Layout.minimumHeight: root.currentOSDType === OSD.Type.LockKey ? (Style.fontSizeTitleMedium * Style.uiScaleRatio) : 0
 
               Behavior on color {
-                ColorAnimation {
-                  duration: Style.animationNormal
-                  easing.type: Easing.InOutQuad
+                NColorAnimation {
+                  motionType: NColorAnimation.Standard
                 }
               }
             }

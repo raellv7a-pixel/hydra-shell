@@ -49,17 +49,17 @@ Item {
   Column {
     id: contentCol
     width: parent.width
-    spacing: Style.marginM
+    spacing: Style.spaceM
     Rectangle {
       width: parent.width
       height: 36
-      radius: Style.radiusM
+      radius: Style.radiusCard
       color: pickAgainBtn.containsMouse ? Color.mPrimary : Color.mSurface
       border.color: Color.mPrimary
       border.width: Style.capsuleBorderWidth
       Row {
         anchors.centerIn: parent
-        spacing: Style.marginS
+        spacing: Style.spaceS
         NIcon {
           icon: "color-picker"
           color: pickAgainBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
@@ -67,7 +67,7 @@ Item {
         NText {
           text: pluginApi?.tr("panel.pickAgain")
           color: pickAgainBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
         }
       }
       MouseArea {
@@ -77,18 +77,24 @@ Item {
         cursorShape: Qt.PointingHandCursor
         onClicked: mainInstance?.runColorPicker()
       }
+      NStateLayer {
+        anchors.fill: parent
+        hovered: pickAgainBtn.containsMouse
+        pressed: pickAgainBtn.pressed
+        stateColor: Color.mPrimary
+      }
     }
     Column {
       visible: root.pickedHex !== ""
       width: parent.width
-      spacing: Style.marginM
+      spacing: Style.spaceM
       Row {
         width: parent.width
-        spacing: Style.marginM
+        spacing: Style.spaceM
         Rectangle {
           width: 110
           height: 110
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: Color.mSurfaceVariant
           clip: true
           border.color: Style.capsuleBorderColor
@@ -122,27 +128,29 @@ Item {
             visible: pixelImg.status !== Image.Ready
             text: pluginApi?.tr("panel.loading")
             color: Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
           }
         }
         Column {
-          width: parent.width - 110 - Style.marginM
-          spacing: Style.marginS
+          width: parent.width - 110 - Style.spaceM
+          spacing: Style.spaceS
           Rectangle {
             id: colorSwatch
             width: parent.width
             height: 72
-            radius: Style.radiusM
+            radius: Style.radiusCard
             color: root.pickedHex !== "" ? root.pickedHex : "#888888"
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
             Behavior on color {
-              ColorAnimation {
-                duration: 150
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
               }
             }
             MouseArea {
+              id: colorSwatchMa
               anchors.fill: parent
+              hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               onClicked: {
                 root._copy(root.pickedHex);
@@ -151,13 +159,18 @@ Item {
                                                       }));
               }
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: colorSwatchMa.containsMouse
+              pressed: colorSwatchMa.pressed
+            }
           }
           NText {
             width: parent.width
             text: root.pickedHex.toUpperCase()
             color: Color.mOnSurface
             font.weight: Font.Bold
-            pointSize: Style.fontSizeM
+            pointSize: Style.fontSizeLabelLarge
             horizontalAlignment: Text.AlignHCenter
           }
         }
@@ -184,20 +197,20 @@ Item {
         delegate: Rectangle {
           width: root.width
           height: 36
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: rh.containsMouse ? Color.mHover : Color.mSurface
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.fill: parent
-            anchors.leftMargin: Style.marginS
-            anchors.rightMargin: Style.marginS
-            spacing: Style.marginS
+            anchors.leftMargin: Style.spaceS
+            anchors.rightMargin: Style.spaceS
+            spacing: Style.spaceS
             NText {
               text: modelData.label
               color: Color.mPrimary
               font.weight: Font.Bold
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               width: 36
               height: parent.height
               verticalAlignment: Text.AlignVCenter
@@ -205,7 +218,7 @@ Item {
             NText {
               text: modelData.value || "—"
               color: Color.mOnSurface
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               width: root.width - 90
               height: parent.height
               verticalAlignment: Text.AlignVCenter
@@ -216,7 +229,7 @@ Item {
             icon: "copy"
             color: rh.containsMouse ? Color.mPrimary : Color.mOnSurfaceVariant
             anchors.right: parent.right
-            anchors.rightMargin: Style.marginS
+            anchors.rightMargin: Style.spaceS
             anchors.verticalCenter: parent.verticalCenter
           }
           MouseArea {
@@ -231,21 +244,26 @@ Item {
                                                     }));
             }
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: rh.containsMouse
+            pressed: rh.pressed
+          }
         }
       }
       Column {
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         Rectangle {
           width: parent.width
           height: 36
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: cah.containsMouse ? Color.mSurfaceVariant : Color.mSurface
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginS
+            spacing: Style.spaceS
             NIcon {
               icon: "copy"
               color: cah.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
@@ -253,7 +271,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.copyAll")
               color: cah.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
             }
           }
           MouseArea {
@@ -266,17 +284,22 @@ Item {
               ToastService.showNotice(pluginApi?.tr("panel.allFormatsCopied"));
             }
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: cah.containsMouse
+            pressed: cah.pressed
+          }
         }
         Rectangle {
           width: parent.width
           height: 36
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: clrh.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurface
           border.color: clrh.containsMouse ? Color.mError : Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginS
+            spacing: Style.spaceS
             NIcon {
               icon: "trash"
               color: clrh.containsMouse ? Color.mError : Color.mOnSurfaceVariant
@@ -284,7 +307,7 @@ Item {
             NText {
               text: pluginApi?.tr("panel.clearResult")
               color: clrh.containsMouse ? Color.mError : Color.mOnSurfaceVariant
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
             }
           }
           MouseArea {
@@ -294,12 +317,18 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: root.clear()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: clrh.containsMouse
+            pressed: clrh.pressed
+            stateColor: Color.mError
+          }
         }
       }
     }
     Column {
       width: parent.width
-      spacing: Style.marginS
+      spacing: Style.spaceS
       visible: root.colorHistory.length > 0
 
       Item {
@@ -309,7 +338,7 @@ Item {
         Rectangle {
           anchors.left: parent.left
           anchors.right: historyLabel.left
-          anchors.rightMargin: Style.marginS
+          anchors.rightMargin: Style.spaceS
           anchors.verticalCenter: parent.verticalCenter
           height: 1
           color: Color.mOnSurfaceVariant
@@ -321,14 +350,14 @@ Item {
           anchors.centerIn: parent
           text: pluginApi?.tr("panel.history")
           color: Color.mOnSurfaceVariant
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
         }
 
         Rectangle {
           anchors.left: historyLabel.right
-          anchors.leftMargin: Style.marginS
+          anchors.leftMargin: Style.spaceS
           anchors.right: clearHistoryBtn.left
-          anchors.rightMargin: Style.marginS
+          anchors.rightMargin: Style.spaceS
           anchors.verticalCenter: parent.verticalCenter
           height: 1
           color: Color.mOnSurfaceVariant
@@ -341,7 +370,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           width: 22
           height: 22
-          radius: Style.radiusS
+          radius: Style.radiusControl
           color: hhc.containsMouse ? Color.mError : "transparent"
           NIcon {
             anchors.centerIn: parent
@@ -359,17 +388,23 @@ Item {
               ToastService.showNotice(pluginApi?.tr("panel.historyCleared"));
             }
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: hhc.containsMouse
+            pressed: hhc.pressed
+            stateColor: Color.mError
+          }
         }
       }
       Flow {
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         Repeater {
           model: root.colorHistory
           delegate: Rectangle {
             width: 28
             height: 28
-            radius: Style.radiusS
+            radius: Style.radiusControl
             border.color: hh.containsMouse ? Color.mPrimary : Style.capsuleBorderColor
             border.width: hh.containsMouse ? 2 : Style.capsuleBorderWidth
             Component.onCompleted: color = modelData
@@ -386,6 +421,11 @@ Item {
               }
               onEntered: TooltipService.show(hh, modelData.toUpperCase() + " — " + pluginApi?.tr("panel.clickToCopy"))
               onExited: TooltipService.hide()
+            }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: hh.containsMouse
+              pressed: hh.pressed
             }
           }
         }

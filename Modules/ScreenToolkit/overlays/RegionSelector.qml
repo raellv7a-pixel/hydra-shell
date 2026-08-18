@@ -105,14 +105,13 @@ Item {
       property real fadeOpacity: 0.0
       property real _lastPaintMouseX: -1
       property real _lastPaintMouseY: -1
-      NumberAnimation {
+      NAnim {
         id: fadeIn
         target: win
         property: "fadeOpacity"
         from: 0.0
         to: 1.0
-        duration: 150
-        easing.type: Easing.OutCubic
+        motionType: NAnim.StandardEffects
       }
       onVisibleChanged: {
         if (visible) {
@@ -273,30 +272,30 @@ Item {
         visible: win.selW > 30 && win.selH > 10
         z: 10
         opacity: win.fadeOpacity
-        width: _szText.implicitWidth + Style.marginL
-        height: Style.controlHeightS
-        radius: Style.controlHeightS / 2
+        width: _szText.implicitWidth + Style.spaceL
+        height: _szText.implicitHeight + Style.spaceS
+        radius: Style.radiusCapsule
         color: Qt.rgba(0, 0, 0, 0.85)
         border.color: Qt.rgba(1, 1, 1, 0.2)
         border.width: Style.borderS
         x: Math.max(4, Math.min(win.selX + win.selW / 2 - width / 2, win.width - width - 4))
-        y: win.selY > 48 ? win.selY - height - Style.marginS : win.selY + win.selH + Style.marginS
+        y: win.selY > 48 ? win.selY - height - Style.spaceS : win.selY + win.selH + Style.spaceS
         NText {
           id: _szText
           anchors.centerIn: parent
           font.weight: Font.Bold
           text: Math.round(win.selW * parent.dpr) + " × " + Math.round(win.selH * parent.dpr)
           color: "white"
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
         }
       }
       Rectangle {
         visible: !win.dragging && win.selW < 4
         z: 10
         opacity: win.fadeOpacity
-        width: _coordText.implicitWidth + Style.marginM
-        height: Style.controlHeightXXS
-        radius: Style.radiusS
+        width: _coordText.implicitWidth + Style.spaceM
+        height: _coordText.implicitHeight + Style.spaceXS
+        radius: Style.radiusControl
         color: Qt.rgba(0, 0, 0, 0.75)
         x: {
           var bx = win.mouseX + 20;
@@ -311,20 +310,20 @@ Item {
           anchors.centerIn: parent
           text: Math.round(win.mouseX) + ", " + Math.round(win.mouseY)
           color: Qt.rgba(1, 1, 1, 0.9)
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
         }
       }
       Rectangle {
         anchors {
           bottom: parent.bottom
           horizontalCenter: parent.horizontalCenter
-          bottomMargin: Style.marginXL
+          bottomMargin: Style.spaceXL
         }
         z: 10
         opacity: win.fadeOpacity * 0.9
-        width: _hintRow.implicitWidth + Style.marginXL
-        height: Style.controlHeightS
-        radius: Style.controlHeightS / 2
+        width: _hintRow.implicitWidth + Style.spaceXL
+        height: _hintRow.implicitHeight + Style.spaceS
+        radius: Style.radiusCapsule
         color: Qt.rgba(0, 0, 0, 0.75)
         border.color: Qt.rgba(1, 1, 1, 0.1)
         border.width: Style.borderS
@@ -335,16 +334,16 @@ Item {
           NText {
             text: pluginApi?.tr("regionSelector.drag")
             color: Qt.rgba(1, 1, 1, 0.7)
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             font.weight: Font.Bold
           }
           NText {
             text: pluginApi?.tr("regionSelector.toSelect")
             color: Qt.rgba(1, 1, 1, 0.4)
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
           }
           Item {
-            width: Style.marginL
+            width: Style.spaceL
             height: 1
             visible: !root.isNiri
           }
@@ -356,25 +355,25 @@ Item {
             visible: !root.isNiri
           }
           Item {
-            width: Style.marginL
+            width: Style.spaceL
             height: 1
             visible: !root.isNiri
           }
           NText {
             text: pluginApi?.tr("regionSelector.clickWindow")
             color: Qt.rgba(1, 1, 1, 0.7)
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             font.weight: Font.Bold
             visible: !root.isNiri
           }
           NText {
             text: pluginApi?.tr("regionSelector.toSnap")
             color: Qt.rgba(1, 1, 1, 0.4)
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             visible: !root.isNiri
           }
           Item {
-            width: Style.marginL
+            width: Style.spaceL
             height: 1
           }
           Rectangle {
@@ -384,19 +383,19 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
           }
           Item {
-            width: Style.marginL
+            width: Style.spaceL
             height: 1
           }
           NText {
             text: pluginApi?.tr("regionSelector.esc")
             color: Qt.rgba(1, 1, 1, 0.7)
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             font.weight: Font.Bold
           }
           NText {
             text: pluginApi?.tr("regionSelector.toCancel")
             color: Qt.rgba(1, 1, 1, 0.4)
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
           }
         }
       }

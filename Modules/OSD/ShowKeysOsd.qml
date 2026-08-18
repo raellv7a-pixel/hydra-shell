@@ -21,8 +21,8 @@ Variants {
       id: overlay
 
       screen: modelData
-      implicitWidth: Math.min(screen.width - 40, keyRow.implicitWidth + Style.margin2L)
-      implicitHeight: keyRow.implicitHeight + Style.margin2M
+      implicitWidth: Math.min(screen.width - Style.spaceXXL, keyRow.implicitWidth + Style.paddingCard * 2)
+      implicitHeight: keyRow.implicitHeight + Style.paddingCard * 2
       color: "transparent"
 
       WlrLayershell.layer: WlrLayer.Overlay
@@ -38,7 +38,7 @@ Variants {
 
       Rectangle {
         anchors.fill: parent
-        radius: Style.iRadiusL
+        radius: Style.radiusCapsule
         color: ShowKeysService.pillBg
         border.width: Style.borderS
         border.color: Qt.alpha(ShowKeysService.pillColor, 0.6)
@@ -46,7 +46,7 @@ Variants {
         RowLayout {
           id: keyRow
           anchors.centerIn: parent
-          spacing: Style.marginS
+          spacing: Style.spaceXS
 
           Repeater {
             model: ShowKeysService.keyList
@@ -55,15 +55,15 @@ Variants {
               required property string modelData
 
               Layout.preferredHeight: Math.round(34 * Style.uiScaleRatio)
-              Layout.preferredWidth: keyLabel.implicitWidth + Style.margin2M
-              radius: Style.iRadiusM
+              Layout.preferredWidth: keyLabel.implicitWidth + Style.paddingCard * 2
+              radius: Style.radiusControl
               color: ShowKeysService.pillColor
 
               NText {
                 id: keyLabel
                 anchors.centerIn: parent
                 text: modelData
-                pointSize: Style.fontSizeM
+                pointSize: Style.fontSizeLabelLarge
                 font.family: Settings.data.ui.fontFixed
                 font.weight: Style.fontWeightBold
                 color: Color.mOnPrimary

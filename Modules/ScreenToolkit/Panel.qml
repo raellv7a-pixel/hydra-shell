@@ -14,7 +14,7 @@ Item {
   readonly property var geometryPlaceholder: panelContainer
   readonly property bool allowAttach: true
   property real contentPreferredWidth: 340 * Style.uiScaleRatio
-  property real contentPreferredHeight: mainCol.implicitHeight + Style.marginL * 2
+  property real contentPreferredHeight: mainCol.implicitHeight + Style.spaceL * 2
   anchors.fill: parent
   property bool _settingsLoading: false
   onPluginApiChanged: {
@@ -272,11 +272,11 @@ Item {
         right: parent.right
         top: parent.top
       }
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.spaceL
+      spacing: Style.spaceM
       Row {
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         NIcon {
           icon: "crosshair"
           color: Color.mPrimary
@@ -284,7 +284,7 @@ Item {
         }
         NText {
           text: pluginApi?.tr("panel.title")
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeBodyMedium
           font.weight: Font.Bold
           color: Color.mOnSurface
           anchors.verticalCenter: parent.verticalCenter
@@ -293,9 +293,9 @@ Item {
       Rectangle {
         id: toolBar
         width: parent.width
-        height: toolsCol.implicitHeight + Style.marginM * 2
+        height: toolsCol.implicitHeight + Style.spaceM * 2
         color: Color.mSurfaceVariant
-        radius: Style.radiusL
+        radius: Style.radiusPopover
         focus: true
         Component.onCompleted: forceActiveFocus()
         Keys.onPressed: function (event) {
@@ -322,12 +322,12 @@ Item {
             left: parent.left
             right: parent.right
             verticalCenter: parent.verticalCenter
-            margins: Style.marginM
+            margins: Style.spaceM
           }
-          spacing: Style.marginS
-          readonly property int btnSize: Math.floor((width - Style.marginS * 4) / 5)
+          spacing: Style.spaceS
+          readonly property int btnSize: Math.floor((width - Style.spaceS * 4) / 5)
           Row {
-            spacing: Style.marginS
+            spacing: Style.spaceS
             anchors.horizontalCenter: parent.horizontalCenter
             Repeater {
               model: root.toolDefs.slice(0, 5)
@@ -352,7 +352,7 @@ Item {
             }
           }
           Row {
-            spacing: Style.marginS
+            spacing: Style.spaceS
             anchors.horizontalCenter: parent.horizontalCenter
             Repeater {
               model: root.toolDefs.slice(5, 10)
@@ -382,11 +382,11 @@ Item {
         width: parent.width
         height: 56
         color: Color.mSurfaceVariant
-        radius: Style.radiusL
+        radius: Style.radiusPopover
         visible: root.isRunning
         Row {
           anchors.centerIn: parent
-          spacing: Style.marginM
+          spacing: Style.spaceM
           NIcon {
             icon: "loader"
             color: Color.mPrimary
@@ -409,21 +409,20 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
         height: 38
-        radius: Style.radiusM
+        radius: Style.radiusCard
         color: recPanelStopBtn.containsMouse ? Color.mError : Color.mSurfaceVariant
         Row {
           anchors.centerIn: parent
-          spacing: Style.marginS
+          spacing: Style.spaceS
           Rectangle {
-            width: Style.marginM
-            height: Style.marginM
+            width: Style.spaceM
+            height: Style.spaceM
             radius: Style.radiusXXXS
             color: recPanelStopBtn.containsMouse ? "white" : Color.mError
             anchors.verticalCenter: parent.verticalCenter
@@ -432,7 +431,7 @@ Item {
             text: pluginApi?.tr("record.stop")
             color: recPanelStopBtn.containsMouse ? "white" : Color.mOnSurface
             font.weight: Font.Bold
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
           }
         }
         MouseArea {
@@ -442,24 +441,28 @@ Item {
           cursorShape: Qt.PointingHandCursor
           onClicked: root.mainInstance?.runRecordStop()
         }
+        NStateLayer {
+          anchors.fill: parent
+          hovered: recPanelStopBtn.containsMouse
+          pressed: recPanelStopBtn.pressed
+        }
       }
       Rectangle {
         property bool _shown: root.viewedTool === "record" && root.isConverting
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
         height: 38
-        radius: Style.radiusM
+        radius: Style.radiusCard
         color: Color.mSurfaceVariant
         Row {
           anchors.centerIn: parent
-          spacing: Style.marginS
+          spacing: Style.spaceS
           NIcon {
             icon: "loader"
             color: Color.mOnSurface
@@ -475,7 +478,7 @@ Item {
           NText {
             text: root.recordFormat === "mp4" ? pluginApi?.tr("record.savingMp4") : pluginApi?.tr("record.convertingGif")
             color: Color.mOnSurface
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
             anchors.verticalCenter: parent.verticalCenter
           }
         }
@@ -485,17 +488,16 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         Rectangle {
           width: parent.width
           height: Math.round(parent.width * 9 / 16)
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: Color.mSurfaceVariant
           clip: true
           AnimatedImage {
@@ -518,15 +520,15 @@ Item {
         }
         Row {
           width: parent.width
-          spacing: Style.marginS
+          spacing: Style.spaceS
           Rectangle {
             height: 38
-            radius: Style.radiusM
-            width: parent.width - 44 - Style.marginS
+            radius: Style.radiusCard
+            width: parent.width - 44 - Style.spaceS
             color: recSaveBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
             Row {
               anchors.centerIn: parent
-              spacing: Style.marginS
+              spacing: Style.spaceS
               NIcon {
                 icon: "device-floppy"
                 color: recSaveBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
@@ -536,7 +538,7 @@ Item {
                 text: root.recordFormat === "mp4" ? pluginApi?.tr("record.saveMp4") : pluginApi?.tr("record.saveGif")
                 color: recSaveBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
                 font.weight: Font.Bold
-                pointSize: Style.fontSizeS
+                pointSize: Style.fontSizeLabelMedium
                 anchors.verticalCenter: parent.verticalCenter
               }
             }
@@ -547,11 +549,16 @@ Item {
               cursorShape: Qt.PointingHandCursor
               onClicked: root.mainInstance?.runRecordSave()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: recSaveBtn.containsMouse
+              pressed: recSaveBtn.pressed
+            }
           }
           Rectangle {
             width: 38
             height: 38
-            radius: Style.radiusM
+            radius: Style.radiusCard
             color: recDiscardBtn.containsMouse ? Color.mError : Color.mSurface
             border.color: recDiscardBtn.containsMouse ? Color.mError : Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
@@ -569,6 +576,11 @@ Item {
               onEntered: TooltipService.show(recDiscardBtn, pluginApi?.tr("record.discard"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: recDiscardBtn.containsMouse
+              pressed: recDiscardBtn.pressed
+            }
           }
         }
       }
@@ -577,23 +589,22 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         Rectangle {
-          width: (parent.width - Style.marginS * 2) / 3
+          width: (parent.width - Style.spaceS * 2) / 3
           height: 38
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: annotRegionBtn.containsMouse ? Color.mPrimary : Color.mSurface
           border.color: Color.mPrimary
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             NIcon {
               icon: "crop"
               color: annotRegionBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
@@ -603,7 +614,7 @@ Item {
               text: pluginApi?.tr("annotate.region")
               color: annotRegionBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
               font.weight: Font.Bold
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
             }
           }
           MouseArea {
@@ -615,11 +626,17 @@ Item {
             onEntered: TooltipService.show(annotRegionBtn, pluginApi?.tr("annotate.regionTooltip"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: annotRegionBtn.containsMouse
+            pressed: annotRegionBtn.pressed
+            stateColor: Color.mPrimary
+          }
         }
         Rectangle {
-          width: (parent.width - Style.marginS * 2) / 3
+          width: (parent.width - Style.spaceS * 2) / 3
           height: 38
-          radius: Style.radiusM
+          radius: Style.radiusCard
           enabled: root._isHyprland
           color: !enabled ? Color.mSurfaceVariant : (annotWinBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface)
           border.color: Style.capsuleBorderColor
@@ -627,7 +644,7 @@ Item {
           opacity: enabled ? 1.0 : 0.5
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             NIcon {
               icon: "app-window"
               color: !parent.parent.enabled ? Color.mOnSurfaceVariant : (annotWinBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant)
@@ -637,7 +654,7 @@ Item {
               text: pluginApi?.tr("annotate.window")
               color: !parent.parent.enabled ? Color.mOnSurfaceVariant : (annotWinBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant)
               font.weight: Font.Bold
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
             }
           }
           MouseArea {
@@ -650,17 +667,22 @@ Item {
             onEntered: TooltipService.show(annotWinBtn, parent.enabled ? pluginApi?.tr("annotate.windowTooltip") : pluginApi?.tr("annotate.windowHyprlandOnly"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: annotWinBtn.containsMouse
+            pressed: annotWinBtn.pressed
+          }
         }
         Rectangle {
-          width: (parent.width - Style.marginS * 2) / 3
+          width: (parent.width - Style.spaceS * 2) / 3
           height: 38
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: annotFsBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             NIcon {
               icon: "maximize"
               color: annotFsBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
@@ -670,7 +692,7 @@ Item {
               text: pluginApi?.tr("annotate.fullscreen")
               color: annotFsBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
               font.weight: Font.Bold
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
             }
           }
           MouseArea {
@@ -682,6 +704,11 @@ Item {
             onEntered: TooltipService.show(annotFsBtn, pluginApi?.tr("annotate.fullscreenTooltip"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: annotFsBtn.containsMouse
+            pressed: annotFsBtn.pressed
+          }
         }
       }
       Column {
@@ -689,42 +716,41 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         Row {
           width: parent.width
-          spacing: Style.marginS
+          spacing: Style.spaceS
           visible: root.installedLangs.length > 0
           NText {
             id: langLabel
             text: pluginApi?.tr("panel.lang")
             color: Color.mOnSurface
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
             anchors.verticalCenter: parent.verticalCenter
           }
           Flow {
             visible: root.installedLangs.length <= 4
-            width: parent.width - langLabel.implicitWidth - scanBtnInline.width - Style.marginS * 2
-            spacing: Style.marginXS
+            width: parent.width - langLabel.implicitWidth - scanBtnInline.width - Style.spaceS * 2
+            spacing: Style.spaceXS
             anchors.verticalCenter: parent.verticalCenter
             Repeater {
               model: root.installedLangs
               delegate: Rectangle {
                 height: 24
-                width: chipLangText.implicitWidth + Style.marginM * 2
-                radius: Style.radiusS
+                width: chipLangText.implicitWidth + Style.spaceM * 2
+                radius: Style.radiusControl
                 color: root.selectedOcrLang === modelData ? Color.mPrimary : (chipMA.containsMouse ? Color.mHover : Color.mSurfaceVariant)
                 NText {
                   id: chipLangText
                   anchors.centerIn: parent
                   text: modelData.toUpperCase()
                   color: root.selectedOcrLang === modelData ? Color.mOnPrimary : Color.mOnSurface
-                  pointSize: Style.fontSizeXS
+                  pointSize: Style.fontSizeLabelSmall
                   font.weight: root.selectedOcrLang === modelData ? Font.Bold : Font.Normal
                 }
                 MouseArea {
@@ -734,12 +760,17 @@ Item {
                   cursorShape: Qt.PointingHandCursor
                   onClicked: root.selectedOcrLang = modelData
                 }
+                NStateLayer {
+                  anchors.fill: parent
+                  hovered: chipMA.containsMouse
+                  pressed: chipMA.pressed
+                }
               }
             }
           }
           NComboBox {
             visible: root.installedLangs.length > 4
-            width: parent.width - langLabel.implicitWidth - scanBtnInline.width - Style.marginS * 2
+            width: parent.width - langLabel.implicitWidth - scanBtnInline.width - Style.spaceS * 2
             model: root.ocrLangModel
             currentKey: root.selectedOcrLang
             minimumWidth: 100
@@ -751,8 +782,8 @@ Item {
           Rectangle {
             id: scanBtnInline
             height: 26
-            width: _scanRow.implicitWidth + Style.marginM * 2
-            radius: Style.radiusS
+            width: _scanRow.implicitWidth + Style.spaceM * 2
+            radius: Style.radiusControl
             color: scanBtn.containsMouse ? Color.mPrimary : Color.mSurface
             border.color: Color.mPrimary
             border.width: Style.capsuleBorderWidth
@@ -760,7 +791,7 @@ Item {
             Row {
               id: _scanRow
               anchors.centerIn: parent
-              spacing: Style.marginXS
+              spacing: Style.spaceXS
               NIcon {
                 icon: "scan"
                 color: scanBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
@@ -770,7 +801,7 @@ Item {
                 text: pluginApi?.tr("panel.scan")
                 color: scanBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
                 font.weight: Font.Bold
-                pointSize: Style.fontSizeXS
+                pointSize: Style.fontSizeLabelSmall
               }
             }
             MouseArea {
@@ -780,6 +811,12 @@ Item {
               cursorShape: Qt.PointingHandCursor
               onClicked: root.mainInstance?.runOcr(root.selectedOcrLang)
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: scanBtn.containsMouse
+              pressed: scanBtn.pressed
+              stateColor: Color.mPrimary
+            }
           }
         }
       }
@@ -788,23 +825,22 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         Rectangle {
-          width: (parent.width - Style.marginS) / 2
+          width: (parent.width - Style.spaceS) / 2
           height: 38
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: pinScreenBtn.containsMouse ? Color.mPrimary : Color.mSurface
           border.color: Color.mPrimary
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginS
+            spacing: Style.spaceS
             NIcon {
               icon: "crosshair"
               color: pinScreenBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
@@ -813,7 +849,7 @@ Item {
               text: pluginApi?.tr("panel.pinCapture")
               color: pinScreenBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
               font.weight: Font.Bold
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
             }
           }
           MouseArea {
@@ -825,17 +861,23 @@ Item {
             onEntered: TooltipService.show(pinScreenBtn, pluginApi?.tr("tooltips.pinRegion"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: pinScreenBtn.containsMouse
+            pressed: pinScreenBtn.pressed
+            stateColor: Color.mPrimary
+          }
         }
         Rectangle {
-          width: (parent.width - Style.marginS) / 2
+          width: (parent.width - Style.spaceS) / 2
           height: 38
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: pinFileBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginS
+            spacing: Style.spaceS
             NIcon {
               icon: "folder-open"
               color: pinFileBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
@@ -844,7 +886,7 @@ Item {
               text: pluginApi?.tr("panel.pinFile")
               color: pinFileBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
               font.weight: Font.Bold
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
             }
           }
           MouseArea {
@@ -856,6 +898,11 @@ Item {
             onEntered: TooltipService.show(pinFileBtn, pluginApi?.tr("tooltips.pinImage"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: pinFileBtn.containsMouse
+            pressed: pinFileBtn.pressed
+          }
         }
       }
       Column {
@@ -863,20 +910,19 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
-        spacing: Style.marginS
+        spacing: Style.spaceS
         Flow {
           width: parent.width
-          spacing: Style.marginS
+          spacing: Style.spaceS
           NText {
             text: pluginApi?.tr("panel.format")
             color: Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             height: 26
             verticalAlignment: Text.AlignVCenter
           }
@@ -895,17 +941,17 @@ Item {
             ]
             delegate: Rectangle {
               height: 26
-              width: fmtLabel.implicitWidth + (modelData.hint !== "" ? fmtHint.implicitWidth + Style.marginXS : 0) + Style.marginM * 2 + Style.marginS
-              radius: Style.radiusS
+              width: fmtLabel.implicitWidth + (modelData.hint !== "" ? fmtHint.implicitWidth + Style.spaceXS : 0) + Style.spaceM * 2 + Style.spaceS
+              radius: Style.radiusControl
               color: root.selectedRecordFormat === modelData.id ? Color.mPrimary : (fmtArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
               Row {
                 anchors.centerIn: parent
-                spacing: Style.marginXS
+                spacing: Style.spaceXS
                 NText {
                   id: fmtLabel
                   text: modelData.label
                   color: root.selectedRecordFormat === modelData.id ? Color.mOnPrimary : Color.mOnSurface
-                  pointSize: Style.fontSizeXS
+                  pointSize: Style.fontSizeLabelSmall
                   font.weight: root.selectedRecordFormat === modelData.id ? Font.Bold : Font.Normal
                 }
                 NText {
@@ -913,7 +959,7 @@ Item {
                   visible: modelData.hint !== ""
                   text: modelData.hint
                   color: root.selectedRecordFormat === modelData.id ? Qt.rgba(1, 1, 1, 0.65) : Color.mOnSurfaceVariant
-                  pointSize: Style.fontSizeXS
+                  pointSize: Style.fontSizeLabelSmall
                 }
               }
               MouseArea {
@@ -923,27 +969,32 @@ Item {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: root.selectedRecordFormat = modelData.id
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: fmtArea.containsMouse
+                pressed: fmtArea.pressed
+              }
             }
           }
         }
         Flow {
           width: parent.width
-          spacing: Style.marginS
+          spacing: Style.spaceS
           NText {
             text: pluginApi?.tr("panel.audio")
             color: Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             height: 26
             verticalAlignment: Text.AlignVCenter
           }
           Rectangle {
             height: 26
-            width: audioOutIcon.implicitWidth + audioOutLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
-            radius: Style.radiusS
+            width: audioOutIcon.implicitWidth + audioOutLabel.implicitWidth + Style.spaceM * 2 + Style.spaceS + Style.spaceXS
+            radius: Style.radiusControl
             color: root.recordAudioOutput ? Color.mPrimary : (audioOutArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
             Row {
               anchors.centerIn: parent
-              spacing: Style.marginXS
+              spacing: Style.spaceXS
               NIcon {
                 id: audioOutIcon
                 icon: root.recordAudioOutput ? "volume" : "volume-off"
@@ -954,7 +1005,7 @@ Item {
                 id: audioOutLabel
                 text: pluginApi?.tr("panel.system")
                 color: root.recordAudioOutput ? Color.mOnPrimary : Color.mOnSurface
-                pointSize: Style.fontSizeXS
+                pointSize: Style.fontSizeLabelSmall
                 font.weight: root.recordAudioOutput ? Font.Bold : Font.Normal
               }
             }
@@ -967,15 +1018,20 @@ Item {
               onEntered: TooltipService.show(audioOutArea, pluginApi?.tr("tooltips.systemAudio"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: audioOutArea.containsMouse
+              pressed: audioOutArea.pressed
+            }
           }
           Rectangle {
             height: 26
-            width: micIcon.implicitWidth + micLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
-            radius: Style.radiusS
+            width: micIcon.implicitWidth + micLabel.implicitWidth + Style.spaceM * 2 + Style.spaceS + Style.spaceXS
+            radius: Style.radiusControl
             color: root.recordAudioInput ? Color.mPrimary : (micArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
             Row {
               anchors.centerIn: parent
-              spacing: Style.marginXS
+              spacing: Style.spaceXS
               NIcon {
                 id: micIcon
                 icon: root.recordAudioInput ? "microphone" : "microphone-off"
@@ -986,7 +1042,7 @@ Item {
                 id: micLabel
                 text: pluginApi?.tr("panel.mic")
                 color: root.recordAudioInput ? Color.mOnPrimary : Color.mOnSurface
-                pointSize: Style.fontSizeXS
+                pointSize: Style.fontSizeLabelSmall
                 font.weight: root.recordAudioInput ? Font.Bold : Font.Normal
               }
             }
@@ -999,15 +1055,20 @@ Item {
               onEntered: TooltipService.show(micArea, pluginApi?.tr("tooltips.microphone"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: micArea.containsMouse
+              pressed: micArea.pressed
+            }
           }
           Rectangle {
             height: 26
-            width: cursorIcon.implicitWidth + cursorLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
-            radius: Style.radiusS
+            width: cursorIcon.implicitWidth + cursorLabel.implicitWidth + Style.spaceM * 2 + Style.spaceS + Style.spaceXS
+            radius: Style.radiusControl
             color: root.recordCursor ? Color.mPrimary : (cursorArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
             Row {
               anchors.centerIn: parent
-              spacing: Style.marginXS
+              spacing: Style.spaceXS
               NIcon {
                 id: cursorIcon
                 icon: "pointer"
@@ -1018,7 +1079,7 @@ Item {
                 id: cursorLabel
                 text: pluginApi?.tr("panel.cursor")
                 color: root.recordCursor ? Color.mOnPrimary : Color.mOnSurface
-                pointSize: Style.fontSizeXS
+                pointSize: Style.fontSizeLabelSmall
                 font.weight: root.recordCursor ? Font.Bold : Font.Normal
               }
             }
@@ -1031,21 +1092,26 @@ Item {
               onEntered: TooltipService.show(cursorArea, pluginApi?.tr("tooltips.cursor"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: cursorArea.containsMouse
+              pressed: cursorArea.pressed
+            }
           }
         }
         Row {
           width: parent.width
-          spacing: Style.marginS
+          spacing: Style.spaceS
           Rectangle {
-            width: (parent.width - Style.marginS) / 2
+            width: (parent.width - Style.spaceS) / 2
             height: 38
-            radius: Style.radiusM
+            radius: Style.radiusCard
             color: recRegionBtn.containsMouse ? Color.mPrimary : Color.mSurface
             border.color: Color.mPrimary
             border.width: Style.capsuleBorderWidth
             Row {
               anchors.centerIn: parent
-              spacing: Style.marginXS
+              spacing: Style.spaceXS
               NIcon {
                 icon: "crop"
                 color: recRegionBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
@@ -1055,7 +1121,7 @@ Item {
                 text: pluginApi?.tr("record.region")
                 color: recRegionBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
                 font.weight: Font.Bold
-                pointSize: Style.fontSizeS
+                pointSize: Style.fontSizeLabelMedium
               }
             }
             MouseArea {
@@ -1067,17 +1133,23 @@ Item {
               onEntered: TooltipService.show(recRegionBtn, pluginApi?.tr("tooltips.record"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: recRegionBtn.containsMouse
+              pressed: recRegionBtn.pressed
+              stateColor: Color.mPrimary
+            }
           }
           Rectangle {
-            width: (parent.width - Style.marginS) / 2
+            width: (parent.width - Style.spaceS) / 2
             height: 38
-            radius: Style.radiusM
+            radius: Style.radiusCard
             color: recFsBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
             Row {
               anchors.centerIn: parent
-              spacing: Style.marginXS
+              spacing: Style.spaceXS
               NIcon {
                 icon: "maximize"
                 color: recFsBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
@@ -1087,7 +1159,7 @@ Item {
                 text: pluginApi?.tr("annotate.fullscreen")
                 color: recFsBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
                 font.weight: Font.Bold
-                pointSize: Style.fontSizeS
+                pointSize: Style.fontSizeLabelMedium
               }
             }
             MouseArea {
@@ -1099,6 +1171,11 @@ Item {
               onEntered: TooltipService.show(recFsBtn, pluginApi?.tr("tooltips.recordfs"))
               onExited: TooltipService.hide()
             }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: recFsBtn.containsMouse
+              pressed: recFsBtn.pressed
+            }
           }
         }
       }
@@ -1107,16 +1184,15 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
-        spacing: Style.marginM
+        spacing: Style.spaceM
         Row {
           width: parent.width
-          spacing: Style.marginS
+          spacing: Style.spaceS
           NIcon {
             icon: "camera"
             color: Color.mPrimary
@@ -1126,7 +1202,7 @@ Item {
             text: pluginApi?.tr("mirror.title")
             color: Color.mOnSurface
             font.weight: Font.Bold
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
             anchors.verticalCenter: parent.verticalCenter
           }
         }
@@ -1135,18 +1211,18 @@ Item {
           wrapMode: Text.WordWrap
           text: pluginApi?.tr("mirror.hint")
           color: Color.mOnSurfaceVariant
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
         }
         Rectangle {
           width: parent.width
           height: 38
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: root.mirrorActive ? Color.mError : (mirrorToggleBtn.containsMouse ? Color.mPrimary : Color.mSurface)
           border.color: root.mirrorActive ? Color.mError : Color.mPrimary
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
-            spacing: Style.marginS
+            spacing: Style.spaceS
             NIcon {
               icon: root.mirrorActive ? "camera-off" : "camera"
               color: root.mirrorActive ? Color.mOnError : (mirrorToggleBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary)
@@ -1155,7 +1231,7 @@ Item {
               text: root.mirrorActive ? pluginApi?.tr("mirror.close") : pluginApi?.tr("mirror.open")
               color: root.mirrorActive ? Color.mOnError : (mirrorToggleBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary)
               font.weight: Font.Bold
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
             }
           }
           MouseArea {
@@ -1165,6 +1241,11 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: root.mainInstance?.runMirrorClose()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: mirrorToggleBtn.containsMouse
+            pressed: mirrorToggleBtn.pressed
+          }
         }
       }
       ResultColor {
@@ -1172,9 +1253,8 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
@@ -1186,9 +1266,8 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
@@ -1200,9 +1279,8 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
@@ -1214,9 +1292,8 @@ Item {
         visible: _shown
         opacity: _shown ? 1.0 : 0.0
         Behavior on opacity {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         width: parent.width
@@ -1240,11 +1317,11 @@ Item {
     signal triggered
     Column {
       anchors.centerIn: parent
-      spacing: Style.marginXS
+      spacing: Style.spaceXS
       Rectangle {
         width: Math.min(btn.width - 8, 42)
         height: Math.min(btn.width - 8, 42)
-        radius: Style.radiusM
+        radius: Style.radiusCard
         anchors.horizontalCenter: parent.horizontalCenter
         color: ba.containsMouse ? Color.mHover : Color.mSurface
         border.color: btn._accented ? btn._accentColor : ba.containsMouse ? Color.mOnSurfaceVariant : "transparent"
@@ -1252,9 +1329,8 @@ Item {
         clip: true
         scale: ba.containsMouse && !btn.running ? 1.04 : 1.0
         Behavior on scale {
-          NumberAnimation {
-            duration: 150
-            easing.type: Easing.OutQuint
+          NAnim {
+            motionType: NAnim.ExpressiveFastSpatial
           }
         }
         Rectangle {
@@ -1295,26 +1371,26 @@ Item {
           y: cy - height / 2
           ParallelAnimation {
             id: rippleAnim
-            NumberAnimation {
+            NAnim {
               target: ripple
               property: "width"
               to: 80
               duration: 350
-              easing.type: Easing.OutCubic
+              motionType: NAnim.ExpressiveFastSpatial
             }
-            NumberAnimation {
+            NAnim {
               target: ripple
               property: "height"
               to: 80
               duration: 350
-              easing.type: Easing.OutCubic
+              motionType: NAnim.ExpressiveFastSpatial
             }
-            NumberAnimation {
+            NAnim {
               target: ripple
               property: "opacity"
               to: 0
               duration: 350
-              easing.type: Easing.OutCubic
+              motionType: NAnim.StandardEffects
             }
           }
         }
@@ -1323,8 +1399,8 @@ Item {
           icon: btn.icon
           color: btn._accented ? btn._accentColor : ba.containsMouse ? Color.mOnHover : Color.mOnSurface
           Behavior on color {
-            ColorAnimation {
-              duration: 120
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
             }
           }
         }
@@ -1362,7 +1438,7 @@ Item {
       }
       NText {
         text: btn.label
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: (ba.containsMouse || btn._accented) ? Color.mOnSurface : Color.mOnSurfaceVariant
         font.weight: btn.active ? Font.Bold : Font.Normal
         anchors.horizontalCenter: parent.horizontalCenter
@@ -1371,9 +1447,8 @@ Item {
         elide: Text.ElideRight
         opacity: (ba.containsMouse || btn._accented) ? 1.0 : 0.35
         Behavior on opacity {
-          NumberAnimation {
-            duration: 120
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
       }

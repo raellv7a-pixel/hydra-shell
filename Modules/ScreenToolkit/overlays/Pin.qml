@@ -14,8 +14,8 @@ Item {
   property int _maskVersion: 0
   property bool _dragActive: false
   // Derived from Style so all sizing scales with the user's UI scale/density settings
-  readonly property int _stripBtnSize: Style.baseWidgetSize - Style.marginXS - Style.borderS
-  readonly property int _stripDivH: Style.marginXL
+  readonly property int _stripBtnSize: Style.baseWidgetSize - Style.spaceXS - Style.borderS
+  readonly property int _stripDivH: Style.spaceXL
   ListModel {
     id: pinsModel
   }
@@ -180,15 +180,15 @@ Item {
           Rectangle {
             id: pinCard
             anchors.fill: parent
-            radius: Style.radiusL
+            radius: Style.radiusPanel
             color: "transparent"
             border.color: cardHover.hovered ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(1, 1, 1, 0.07)
             border.width: Style.capsuleBorderWidth
             clip: true
             opacity: pinDelegate.pinOpacity
             Behavior on border.color {
-              ColorAnimation {
-                duration: 120
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
               }
             }
             Image {
@@ -241,7 +241,7 @@ Item {
             }
             Column {
               anchors.centerIn: parent
-              spacing: Style.marginS
+              spacing: Style.spaceS
               visible: pinDelegate.pinImgPath === ""
               NIcon {
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -252,7 +252,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.pluginApi?.tr("pin.noFile")
                 color: Color.mOnSurfaceVariant
-                pointSize: Style.fontSizeXS
+                pointSize: Style.fontSizeLabelSmall
               }
             }
             HoverHandler {
@@ -303,22 +303,22 @@ Item {
               id: controlStrip
               anchors.bottom: parent.bottom
               anchors.horizontalCenter: parent.horizontalCenter
-              anchors.bottomMargin: Style.marginM
-              width: stripRow.implicitWidth + Style.marginM * 2
+              anchors.bottomMargin: Style.spaceM
+              width: stripRow.implicitWidth + Style.spaceM * 2
               height: 36
-              radius: Style.radiusL
+              radius: Style.radiusPopover
               color: Qt.rgba(0, 0, 0, 0.55)
               z: 3
               opacity: (cardHover.hovered || pinDelegate._ctxOpen) ? 1.0 : 0.0
               Behavior on opacity {
-                NumberAnimation {
-                  duration: 150
+                NAnim {
+                  motionType: NAnim.StandardEffects
                 }
               }
               Row {
                 id: stripRow
                 anchors.centerIn: parent
-                spacing: Style.marginS
+                spacing: Style.spaceS
                 NIcon {
                   icon: "brightness-half"
                   color: Qt.rgba(1, 1, 1, 0.7)
@@ -333,7 +333,7 @@ Item {
                     id: opTrack
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width
-                    height: Style.marginXS + Style.marginXXXS
+                    height: Style.spaceXS + Style.spaceXXS
                     radius: Style.radiusXXXS
                     color: Qt.rgba(1, 1, 1, 0.25)
                     Rectangle {
@@ -342,28 +342,35 @@ Item {
                       radius: parent.radius
                       color: "white"
                       Behavior on width {
-                        NumberAnimation {
-                          duration: 50
+                        NAnim {
+                          motionType: NAnim.ExpressiveFastSpatial
                         }
                       }
                     }
                   }
                   Rectangle {
+                    id: opacityKnob
                     anchors.verticalCenter: opTrack.verticalCenter
-                    width: Style.marginL
-                    height: Style.marginL
-                    radius: Math.round(Style.marginL / 2)
+                    width: Style.spaceL
+                    height: Style.spaceL
+                    radius: Math.round(Style.spaceL / 2)
                     color: "white"
                     border.color: Qt.rgba(0, 0, 0, 0.3)
                     border.width: Style.capsuleBorderWidth
                     x: opTrack.width * pinDelegate.pinOpacity - width / 2
                     Behavior on x {
-                      NumberAnimation {
-                        duration: 50
+                      NAnim {
+                        motionType: NAnim.ExpressiveFastSpatial
                       }
+                    }
+                    NStateLayer {
+                      anchors.fill: parent
+                      pressed: opacityMA.pressed
+                      radius: parent.radius
                     }
                   }
                   MouseArea {
+                    id: opacityMA
                     anchors.fill: parent
                     cursorShape: Qt.SizeHorCursor
                     preventStealing: true
@@ -398,6 +405,11 @@ Item {
                   visible: pinDelegate.fileType === "video" || pinDelegate.fileType === "gif"
                   color: playMA.containsMouse ? Qt.rgba(1, 1, 1, 0.2) : "transparent"
                   anchors.verticalCenter: parent.verticalCenter
+                  Behavior on color {
+                    NColorAnimation {
+                      motionType: NColorAnimation.Standard
+                    }
+                  }
                   NIcon {
                     anchors.centerIn: parent
                     scale: 0.8
@@ -422,6 +434,12 @@ Item {
                     onEntered: TooltipService.show(parent, pinDelegate._playing ? root.pluginApi?.tr("pin.pause") : root.pluginApi?.tr("pin.play"))
                     onExited: TooltipService.hide()
                   }
+                  NStateLayer {
+                    anchors.fill: parent
+                    hovered: playMA.containsMouse
+                    pressed: playMA.pressed
+                    radius: parent.radius
+                  }
                 }
                 Rectangle {
                   width: root._stripBtnSize
@@ -430,6 +448,11 @@ Item {
                   visible: pinDelegate.fileType === "video"
                   color: muteMA.containsMouse ? Qt.rgba(1, 1, 1, 0.2) : "transparent"
                   anchors.verticalCenter: parent.verticalCenter
+                  Behavior on color {
+                    NColorAnimation {
+                      motionType: NColorAnimation.Standard
+                    }
+                  }
                   NIcon {
                     anchors.centerIn: parent
                     scale: 0.8
@@ -445,6 +468,12 @@ Item {
                     onClicked: pinDelegate._muted = !pinDelegate._muted
                     onEntered: TooltipService.show(parent, pinDelegate._muted ? root.pluginApi?.tr("pin.unmute") : root.pluginApi?.tr("pin.mute"))
                     onExited: TooltipService.hide()
+                  }
+                  NStateLayer {
+                    anchors.fill: parent
+                    hovered: muteMA.containsMouse
+                    pressed: muteMA.pressed
+                    radius: parent.radius
                   }
                 }
                 Rectangle {
@@ -462,6 +491,11 @@ Item {
                   visible: pinDelegate.fileType !== "video"
                   color: fillMA.containsMouse ? Qt.rgba(1, 1, 1, 0.2) : "transparent"
                   anchors.verticalCenter: parent.verticalCenter
+                  Behavior on color {
+                    NColorAnimation {
+                      motionType: NColorAnimation.Standard
+                    }
+                  }
                   NIcon {
                     anchors.centerIn: parent
                     scale: 0.8
@@ -484,6 +518,12 @@ Item {
                     onEntered: TooltipService.show(parent, pinDelegate.fillMode === "fit" ? root.pluginApi?.tr("pin.fillFit") : pinDelegate.fillMode === "crop" ? root.pluginApi?.tr("pin.fillCrop") : root.pluginApi?.tr("pin.fillStretch"))
                     onExited: TooltipService.hide()
                   }
+                  NStateLayer {
+                    anchors.fill: parent
+                    hovered: fillMA.containsMouse
+                    pressed: fillMA.pressed
+                    radius: parent.radius
+                  }
                 }
                 Rectangle {
                   width: Style.borderS
@@ -499,6 +539,11 @@ Item {
                   radius: root._stripBtnSize / 2
                   color: closeMA.containsMouse ? Qt.rgba(1, 1, 1, 0.2) : "transparent"
                   anchors.verticalCenter: parent.verticalCenter
+                  Behavior on color {
+                    NColorAnimation {
+                      motionType: NColorAnimation.Standard
+                    }
+                  }
                   NIcon {
                     anchors.centerIn: parent
                     scale: 0.8
@@ -514,6 +559,12 @@ Item {
                     onClicked: root.removePin(pinDelegate._myIndex)
                     onEntered: TooltipService.show(parent, root.pluginApi?.tr("pin.close"))
                     onExited: TooltipService.hide()
+                  }
+                  NStateLayer {
+                    anchors.fill: parent
+                    hovered: closeMA.containsMouse
+                    pressed: closeMA.pressed
+                    radius: parent.radius
                   }
                 }
               }
@@ -567,11 +618,11 @@ Item {
               id: menuRect
               x: ctxMenu.openX
               y: ctxMenu.openY
-              implicitWidth: menuCol.implicitWidth + Style.marginS * 2
-              implicitHeight: menuCol.implicitHeight + Style.marginS * 2
+              implicitWidth: menuCol.implicitWidth + Style.spaceS * 2
+              implicitHeight: menuCol.implicitHeight + Style.spaceS * 2
               width: implicitWidth
               height: implicitHeight
-              radius: Style.radiusM
+              radius: Style.radiusCard
               color: Color.mSurface
               border.color: Qt.rgba(1, 1, 1, 0.12)
               border.width: Style.capsuleBorderWidth
@@ -581,9 +632,9 @@ Item {
                   left: parent.left
                   right: parent.right
                   top: parent.top
-                  margins: Style.marginS
+                  margins: Style.spaceS
                 }
-                spacing: Style.marginXS
+                spacing: Style.spaceXS
                 MenuItem {
                   mIcon: "aspect-ratio"
                   mLabel: root.pluginApi?.tr("pin.fillFit")
@@ -694,14 +745,14 @@ Item {
     }
     Rectangle {
       anchors.centerIn: parent
-      width: Style.marginXS * 2
-      height: Style.marginXS * 2
-      radius: Style.marginXXS
+      width: Style.spaceXS * 2
+      height: Style.spaceXS * 2
+      radius: Style.spaceXXS
       color: Qt.rgba(1, 1, 1, 0.9)
       opacity: rc.containsMouse || rc.pressed ? 1.0 : 0.3
       Behavior on opacity {
-        NumberAnimation {
-          duration: 120
+        NAnim {
+          motionType: NAnim.StandardEffects
         }
       }
     }
@@ -713,16 +764,21 @@ Item {
     signal activated
     width: parent.width
     height: 32
-    radius: Style.radiusS
+    radius: Style.radiusControl
     color: miMA.containsMouse && mEnabled ? Color.mHover : "transparent"
     opacity: mEnabled ? 1.0 : 0.38
+    Behavior on color {
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
+      }
+    }
     Row {
       anchors {
         fill: parent
-        leftMargin: Style.marginS
-        rightMargin: Style.marginS
+        leftMargin: Style.spaceS
+        rightMargin: Style.spaceS
       }
-      spacing: Style.marginS
+      spacing: Style.spaceS
       NIcon {
         icon: mIcon
         color: Color.mOnSurface
@@ -732,7 +788,7 @@ Item {
       NText {
         text: mLabel
         color: Color.mOnSurface
-        pointSize: Style.fontSizeS
+        pointSize: Style.fontSizeLabelMedium
         anchors.verticalCenter: parent.verticalCenter
       }
     }
@@ -746,6 +802,13 @@ Item {
         ctxMenu.close();
         parent.activated();
       }
+    }
+    NStateLayer {
+      anchors.fill: parent
+      enabled: mEnabled
+      hovered: miMA.containsMouse
+      pressed: miMA.pressed
+      radius: parent.radius
     }
   }
 } // root

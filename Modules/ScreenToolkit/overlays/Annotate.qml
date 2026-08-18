@@ -575,18 +575,18 @@ Variants {
       id: sharePopover
       visible: overlayWin.isPrimary && overlayWin.showSharePopover
       z: 20
-      radius: Style.radiusL
+      radius: Style.radiusPopover
       color: Color.mSurface
       border.color: Style.capsuleBorderColor
       border.width: Style.capsuleBorderWidth
       height: 44
-      width: overlayWin.isUploading ? (_spLoadRow.implicitWidth + Style.marginM * 2) : overlayWin.uploadFailed ? (_spErrRow.implicitWidth + Style.marginM * 2) : (_spSuccRow.implicitWidth + Style.marginM * 2)
-      x: Math.max(Style.marginS, Math.min(toolbar.x + (toolbar.width - width) / 2, overlayWin.width - width - Style.marginS))
-      y: toolbar.useVertical ? Math.max(Style.marginS, Math.min(toolbar.y + (toolbar.height - height) / 2, overlayWin.height - height - Style.marginS)) : (toolbar.y >= height + Style.marginS ? toolbar.y - height - Style.marginXS : toolbar.y + toolbar.height + Style.marginXS)
+      width: overlayWin.isUploading ? (_spLoadRow.implicitWidth + Style.spaceM * 2) : overlayWin.uploadFailed ? (_spErrRow.implicitWidth + Style.spaceM * 2) : (_spSuccRow.implicitWidth + Style.spaceM * 2)
+      x: Math.max(Style.spaceS, Math.min(toolbar.x + (toolbar.width - width) / 2, overlayWin.width - width - Style.spaceS))
+      y: toolbar.useVertical ? Math.max(Style.spaceS, Math.min(toolbar.y + (toolbar.height - height) / 2, overlayWin.height - height - Style.spaceS)) : (toolbar.y >= height + Style.spaceS ? toolbar.y - height - Style.spaceXS : toolbar.y + toolbar.height + Style.spaceXS)
       Row {
         id: _spLoadRow
         anchors.centerIn: parent
-        spacing: Style.marginS
+        spacing: Style.spaceS
         visible: overlayWin.isUploading
         NIcon {
           icon: "upload"
@@ -596,14 +596,14 @@ Variants {
         NText {
           text: root.mainInstance?.pluginApi?.tr("annotate.sharing")
           color: Color.mOnSurface
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
           anchors.verticalCenter: parent.verticalCenter
         }
       }
       Row {
         id: _spSuccRow
         anchors.centerIn: parent
-        spacing: Style.marginXS
+        spacing: Style.spaceXS
         visible: !overlayWin.isUploading && !overlayWin.uploadFailed && overlayWin.shareUrl !== ""
         NIcon {
           icon: "link"
@@ -613,7 +613,7 @@ Variants {
         NText {
           text: overlayWin.shareUrl
           color: Color.mOnSurface
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           width: Math.min(implicitWidth, 260)
           elide: Text.ElideMiddle
           anchors.verticalCenter: parent.verticalCenter
@@ -621,7 +621,7 @@ Variants {
         Rectangle {
           width: 28
           height: 28
-          radius: Style.radiusS
+          radius: Style.radiusControl
           color: _copyUrlMA.containsMouse ? Color.mHover : "transparent"
           anchors.verticalCenter: parent.verticalCenter
           NIcon {
@@ -644,12 +644,17 @@ Variants {
             onEntered: TooltipService.show(parent, root.mainInstance?.pluginApi?.tr("annotate.sharePopoverCopy"))
             onExited: TooltipService.hide()
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: false
+            pressed: _copyUrlMA.pressed
+          }
         }
       }
       Row {
         id: _spErrRow
         anchors.centerIn: parent
-        spacing: Style.marginS
+        spacing: Style.spaceS
         visible: !overlayWin.isUploading && overlayWin.uploadFailed
         NIcon {
           icon: "alert-circle"
@@ -659,7 +664,7 @@ Variants {
         NText {
           text: root.mainInstance?.pluginApi?.tr("annotate.shareFailed")
           color: Color.mOnSurface
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
           anchors.verticalCenter: parent.verticalCenter
         }
       }
@@ -717,16 +722,16 @@ Variants {
     }
     Rectangle {
       visible: overlayWin.isPrimary && root.zoomScale > 1.0
-      x: overlayWin.localX + root.regionW - width - Style.marginXS
-      y: overlayWin.localY + Style.marginXS
-      width: zoomBadgeRow.implicitWidth + Style.marginS * 2
+      x: overlayWin.localX + root.regionW - width - Style.spaceXS
+      y: overlayWin.localY + Style.spaceXS
+      width: zoomBadgeRow.implicitWidth + Style.spaceS * 2
       height: 22
-      radius: Style.radiusS
+      radius: Style.radiusControl
       color: Color.mPrimary
       Row {
         id: zoomBadgeRow
         anchors.centerIn: parent
-        spacing: Style.marginXS
+        spacing: Style.spaceXS
         NIcon {
           icon: "zoom-in"
           color: Color.mOnPrimary
@@ -736,7 +741,7 @@ Variants {
                                                    scale: Math.round(root.zoomScale)
                                                  })
           color: Color.mOnPrimary
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
         }
       }
     }
@@ -1080,14 +1085,14 @@ Variants {
       readonly property real spaceAbove: overlayWin.localY
       readonly property real spaceRight: overlayWin.width - (overlayWin.localX + root.regionW)
       readonly property bool useVertical: spaceBelow < 56 && spaceAbove < 52
-      width: useVertical ? 56 : (toolbarContent.implicitWidth + Style.marginS * 2)
-      height: useVertical ? (toolbarContent.implicitHeight + Style.marginS * 2) : 52
-      readonly property real _autoX: useVertical ? (spaceRight >= 56 ? Math.min(overlayWin.localX + root.regionW + Style.marginS, overlayWin.width - width - Style.marginS) : Math.max(Style.marginS, overlayWin.localX - width - Style.marginS)) : Math.max(Style.marginS, Math.min(overlayWin.localX + (root.regionW - width) / 2, overlayWin.width - width
-                                                                                                                                                                                                                                                                                     - Style.marginS))
-      readonly property real _autoY: useVertical ? Math.max(Style.marginS, Math.min(overlayWin.localY + (root.regionH - height) / 2, overlayWin.height - height - Style.marginS)) : (spaceBelow >= 56 ? overlayWin.localY + root.regionH + Style.marginS : Math.max(Style.marginS, overlayWin.localY - height - Style.marginS))
+      width: useVertical ? 56 : (toolbarContent.implicitWidth + Style.spaceS * 2)
+      height: useVertical ? (toolbarContent.implicitHeight + Style.spaceS * 2) : 52
+      readonly property real _autoX: useVertical ? (spaceRight >= 56 ? Math.min(overlayWin.localX + root.regionW + Style.spaceS, overlayWin.width - width - Style.spaceS) : Math.max(Style.spaceS, overlayWin.localX - width - Style.spaceS)) : Math.max(Style.spaceS, Math.min(overlayWin.localX + (root.regionW - width) / 2, overlayWin.width - width
+                                                                                                                                                                                                                                                                                - Style.spaceS))
+      readonly property real _autoY: useVertical ? Math.max(Style.spaceS, Math.min(overlayWin.localY + (root.regionH - height) / 2, overlayWin.height - height - Style.spaceS)) : (spaceBelow >= 56 ? overlayWin.localY + root.regionH + Style.spaceS : Math.max(Style.spaceS, overlayWin.localY - height - Style.spaceS))
       x: overlayWin._tbUserX >= 0 ? Math.max(0, Math.min(overlayWin.width - width, overlayWin._tbUserX)) : _autoX
       y: overlayWin._tbUserY >= 0 ? Math.max(0, Math.min(overlayWin.height - height, overlayWin._tbUserY)) : _autoY
-      radius: Style.radiusL
+      radius: Style.radiusPopover
       color: Color.mSurface
       border.color: Style.capsuleBorderColor
       border.width: Style.capsuleBorderWidth
@@ -1237,7 +1242,7 @@ Variants {
       Component {
         id: rowLayout
         Row {
-          spacing: Style.marginXS
+          spacing: Style.spaceXS
           Repeater {
             model: toolbar.toolDefs
             ToolBtn {
@@ -1257,7 +1262,7 @@ Variants {
             anchors.verticalCenter: parent.verticalCenter
             text: root.zoomScale === 1.0 ? "1×" : Math.round(root.zoomScale) + "×"
             color: root.zoomScale > 1.0 ? Color.mPrimary : Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             font.bold: root.zoomScale > 1.0
             width: 22
             horizontalAlignment: Text.AlignHCenter
@@ -1270,17 +1275,17 @@ Variants {
           }
           ToolbarSeparator {}
           Rectangle {
-            width: Style.marginXL
-            height: Style.marginXL
-            radius: Math.round(Style.marginXL / 2)
+            width: Style.spaceXL
+            height: Style.spaceXL
+            radius: Style.radiusCapsule
             anchors.verticalCenter: parent.verticalCenter
             color: overlayWin.drawColor
             border.color: overlayWin.showPopover ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.2)
             border.width: overlayWin.showPopover ? Style.borderM : Style.borderS
             scale: colorBtnH.containsMouse ? 1.1 : 1
             Behavior on scale {
-              NumberAnimation {
-                duration: 80
+              NAnim {
+                motionType: NAnim.ExpressiveFastSpatial
               }
             }
             MouseArea {
@@ -1291,6 +1296,11 @@ Variants {
               onClicked: overlayWin.showPopover = !overlayWin.showPopover
               onEntered: TooltipService.show(parent, root.mainInstance?.pluginApi?.tr("annotate.colorSize"))
               onExited: TooltipService.hide()
+            }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: colorBtnH.containsMouse
+              pressed: colorBtnH.pressed
             }
           }
           ToolbarSeparator {}
@@ -1355,7 +1365,7 @@ Variants {
       Component {
         id: colLayout
         Column {
-          spacing: Style.marginXS
+          spacing: Style.spaceXS
           Repeater {
             model: toolbar.toolDefs
             ToolBtn {
@@ -1375,7 +1385,7 @@ Variants {
             anchors.horizontalCenter: parent.horizontalCenter
             text: root.zoomScale === 1.0 ? "1×" : Math.round(root.zoomScale) + "×"
             color: root.zoomScale > 1.0 ? Color.mPrimary : Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             font.bold: root.zoomScale > 1.0
           }
           ZoomBtn {
@@ -1386,17 +1396,17 @@ Variants {
           }
           ToolbarSeparator {}
           Rectangle {
-            width: Style.marginXL
-            height: Style.marginXL
-            radius: Math.round(Style.marginXL / 2)
+            width: Style.spaceXL
+            height: Style.spaceXL
+            radius: Style.radiusCapsule
             anchors.horizontalCenter: parent.horizontalCenter
             color: overlayWin.drawColor
             border.color: overlayWin.showPopover ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.2)
             border.width: overlayWin.showPopover ? Style.borderM : Style.borderS
             scale: colorBtnV.containsMouse ? 1.1 : 1
             Behavior on scale {
-              NumberAnimation {
-                duration: 80
+              NAnim {
+                motionType: NAnim.ExpressiveFastSpatial
               }
             }
             MouseArea {
@@ -1407,6 +1417,11 @@ Variants {
               onClicked: overlayWin.showPopover = !overlayWin.showPopover
               onEntered: TooltipService.show(parent, root.mainInstance?.pluginApi?.tr("annotate.colorSize"))
               onExited: TooltipService.hide()
+            }
+            NStateLayer {
+              anchors.fill: parent
+              hovered: colorBtnV.containsMouse
+              pressed: colorBtnV.pressed
             }
           }
           ToolbarSeparator {}
@@ -1468,15 +1483,15 @@ Variants {
     Rectangle {
       id: popover
       visible: overlayWin.isPrimary && overlayWin.showPopover
-      radius: Style.radiusL
+      radius: Style.radiusPopover
       color: Color.mSurface
       border.color: Style.capsuleBorderColor
       border.width: Style.capsuleBorderWidth
-      width: toolbar.useVertical ? (popContent.implicitWidth + Style.marginS) : (popContent.implicitWidth + Style.marginM)
-      height: toolbar.useVertical ? (popContent.implicitHeight + Style.marginM) : (popContent.implicitHeight + Style.marginS)
-      readonly property bool _canGoRight: toolbar.x + toolbar.width + width + Style.marginXS <= overlayWin.width
-      x: toolbar.useVertical ? (_canGoRight ? toolbar.x + toolbar.width + Style.marginXS : Math.max(Style.marginS, toolbar.x - width - Style.marginXS)) : Math.max(Style.marginS, Math.min(toolbar.x + (toolbar.width - width) / 2, overlayWin.width - width - Style.marginS))
-      y: toolbar.useVertical ? Math.max(Style.marginS, Math.min(toolbar.y + (toolbar.height - height) / 2, overlayWin.height - height - Style.marginS)) : (toolbar.y >= height + Style.marginS ? toolbar.y - height - Style.marginXS : toolbar.y + toolbar.height + Style.marginXS)
+      width: toolbar.useVertical ? (popContent.implicitWidth + Style.spaceS) : (popContent.implicitWidth + Style.spaceM)
+      height: toolbar.useVertical ? (popContent.implicitHeight + Style.spaceM) : (popContent.implicitHeight + Style.spaceS)
+      readonly property bool _canGoRight: toolbar.x + toolbar.width + width + Style.spaceXS <= overlayWin.width
+      x: toolbar.useVertical ? (_canGoRight ? toolbar.x + toolbar.width + Style.spaceXS : Math.max(Style.spaceS, toolbar.x - width - Style.spaceXS)) : Math.max(Style.spaceS, Math.min(toolbar.x + (toolbar.width - width) / 2, overlayWin.width - width - Style.spaceS))
+      y: toolbar.useVertical ? Math.max(Style.spaceS, Math.min(toolbar.y + (toolbar.height - height) / 2, overlayWin.height - height - Style.spaceS)) : (toolbar.y >= height + Style.spaceS ? toolbar.y - height - Style.spaceXS : toolbar.y + toolbar.height + Style.spaceXS)
       Loader {
         id: popContent
         anchors.centerIn: parent
@@ -1485,20 +1500,20 @@ Variants {
       Component {
         id: popRowComp
         Row {
-          spacing: Style.marginS
+          spacing: Style.spaceS
           Repeater {
             model: toolbar.colorDefs
             delegate: Rectangle {
               width: 20
               height: 20
-              radius: 10
+              radius: Style.radiusCapsule
               color: modelData
               border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.15)
               border.width: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Style.borderM : Style.borderS
               scale: chH.containsMouse ? 1.2 : 1
               Behavior on scale {
-                NumberAnimation {
-                  duration: 80
+                NAnim {
+                  motionType: NAnim.ExpressiveFastSpatial
                 }
               }
               MouseArea {
@@ -1510,6 +1525,11 @@ Variants {
                   overlayWin.drawColor = modelData;
                   overlayWin.showPopover = false;
                 }
+              }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: chH.containsMouse
+                pressed: chH.pressed
               }
             }
           }
@@ -1525,13 +1545,13 @@ Variants {
             delegate: Rectangle {
               width: 28
               height: 24
-              radius: Style.radiusS
+              radius: Style.radiusControl
               color: overlayWin.drawSize === modelData.size ? Color.mPrimaryContainer : (shH.containsMouse ? Color.mHover : "transparent")
               border.color: overlayWin.drawSize === modelData.size ? Color.mPrimary : "transparent"
               border.width: Style.borderS
               Row {
                 anchors.centerIn: parent
-                spacing: Style.marginXS
+                spacing: Style.spaceXS
                 Rectangle {
                   width: modelData.size * 2
                   height: modelData.size * 2
@@ -1541,7 +1561,7 @@ Variants {
                 }
                 NText {
                   text: root.mainInstance?.pluginApi?.tr(modelData.labelKey)
-                  pointSize: Style.fontSizeXS
+                  pointSize: Style.fontSizeLabelSmall
                   color: Color.mOnSurfaceVariant
                   anchors.verticalCenter: parent.verticalCenter
                 }
@@ -1556,6 +1576,11 @@ Variants {
                   overlayWin.showPopover = false;
                 }
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: false
+                pressed: shH.pressed
+              }
             }
           }
         }
@@ -1563,24 +1588,24 @@ Variants {
       Component {
         id: popColComp
         Column {
-          spacing: Style.marginXS
+          spacing: Style.spaceXS
           Repeater {
             model: toolbar.colorDefs
             delegate: Item {
               width: 32
               height: 20
               Rectangle {
-                width: Style.marginXL + Style.marginXXS
-                height: Style.marginXL + Style.marginXXS
-                radius: Math.round((Style.marginXL + Style.marginXXS) / 2)
+                width: Style.spaceXL + Style.spaceXXS
+                height: Style.spaceXL + Style.spaceXXS
+                radius: Style.radiusCapsule
                 anchors.centerIn: parent
                 color: modelData
                 border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.15)
                 border.width: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Style.borderM : Style.borderS
                 scale: chV.containsMouse ? 1.2 : 1
                 Behavior on scale {
-                  NumberAnimation {
-                    duration: 80
+                  NAnim {
+                    motionType: NAnim.ExpressiveFastSpatial
                   }
                 }
                 MouseArea {
@@ -1592,6 +1617,11 @@ Variants {
                     overlayWin.drawColor = modelData;
                     overlayWin.showPopover = false;
                   }
+                }
+                NStateLayer {
+                  anchors.fill: parent
+                  hovered: chV.containsMouse
+                  pressed: chV.pressed
                 }
               }
             }
@@ -1608,13 +1638,13 @@ Variants {
             delegate: Rectangle {
               width: 32
               height: 24
-              radius: Style.radiusS
+              radius: Style.radiusControl
               color: overlayWin.drawSize === modelData.size ? Color.mPrimaryContainer : (shV.containsMouse ? Color.mHover : "transparent")
               border.color: overlayWin.drawSize === modelData.size ? Color.mPrimary : "transparent"
               border.width: Style.borderS
               Row {
                 anchors.centerIn: parent
-                spacing: Style.marginXS
+                spacing: Style.spaceXS
                 Rectangle {
                   width: modelData.size * 2
                   height: modelData.size * 2
@@ -1624,7 +1654,7 @@ Variants {
                 }
                 NText {
                   text: root.mainInstance?.pluginApi?.tr(modelData.labelKey)
-                  pointSize: Style.fontSizeXS
+                  pointSize: Style.fontSizeLabelSmall
                   color: Color.mOnSurfaceVariant
                   anchors.verticalCenter: parent.verticalCenter
                 }
@@ -1638,6 +1668,11 @@ Variants {
                   overlayWin.drawSize = modelData.size;
                   overlayWin.showPopover = false;
                 }
+              }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: false
+                pressed: shV.pressed
               }
             }
           }
@@ -1749,7 +1784,7 @@ Variants {
     property string tip: ""
     width: 34
     height: 34
-    radius: Style.radiusS
+    radius: Style.radiusControl
     opacity: root.zoomScale > 1.0 ? 0.35 : 1.0
     color: overlayWin.tool === toolId ? Color.mPrimary : (tbHover.containsMouse ? Color.mHover : "transparent")
     NIcon {
@@ -1772,6 +1807,11 @@ Variants {
       onEntered: TooltipService.show(parent, tip)
       onExited: TooltipService.hide()
     }
+    NStateLayer {
+      anchors.fill: parent
+      hovered: false
+      pressed: tbHover.pressed
+    }
   }
   component ZoomBtn: Rectangle {
     property string iconName: ""
@@ -1779,7 +1819,7 @@ Variants {
     property bool btnEnabled: true
     width: 28
     height: 34
-    radius: Style.radiusS
+    radius: Style.radiusControl
     color: zbHover.containsMouse ? Color.mHover : "transparent"
     enabled: btnEnabled
     opacity: enabled ? 1.0 : 0.3
@@ -1798,6 +1838,11 @@ Variants {
       onEntered: TooltipService.show(parent, tip)
       onExited: TooltipService.hide()
     }
+    NStateLayer {
+      anchors.fill: parent
+      hovered: false
+      pressed: zbHover.pressed
+    }
   }
   component ActionBtn: Rectangle {
     property string iconName: ""
@@ -1806,7 +1851,7 @@ Variants {
     property bool disabled: false
     width: 34
     height: 34
-    radius: Style.radiusS
+    radius: Style.radiusControl
     opacity: disabled ? 0.3 : 1.0
     color: (!disabled && abHover.containsMouse) ? (danger ? Qt.alpha(Color.mError, 0.15) : Color.mHover) : "transparent"
     signal clicked
@@ -1825,6 +1870,11 @@ Variants {
       onEntered: TooltipService.show(parent, tip)
       onExited: TooltipService.hide()
     }
+    NStateLayer {
+      anchors.fill: parent
+      hovered: false
+      pressed: abHover.pressed
+    }
   }
   component SaveBtn: Rectangle {
     property string iconName: ""
@@ -1832,15 +1882,15 @@ Variants {
     property string tip: ""
     property bool primary: false
     height: 36
-    radius: Style.radiusS
-    width: _sbRow.implicitWidth + Style.marginL
+    radius: Style.radiusControl
+    width: _sbRow.implicitWidth + Style.spaceL
     color: sbHover.containsMouse ? (primary ? Color.mPrimary : Color.mSecondary || Color.mPrimary) : (primary ? Color.mPrimaryContainer || Color.mSurfaceVariant : Color.mSurfaceVariant)
     opacity: overlayWin.isSaving ? 0.5 : 1.0
     signal clicked
     Row {
       id: _sbRow
       anchors.centerIn: parent
-      spacing: Style.marginXS
+      spacing: Style.spaceXS
       NIcon {
         icon: iconName
         color: sbHover.containsMouse ? Color.mOnPrimary : (primary ? Color.mPrimary : Color.mOnSurface)
@@ -1849,7 +1899,7 @@ Variants {
         text: labelText
         color: sbHover.containsMouse ? Color.mOnPrimary : (primary ? Color.mPrimary : Color.mOnSurface)
         font.weight: Font.Bold
-        pointSize: Style.fontSizeS
+        pointSize: Style.fontSizeLabelMedium
       }
     }
     MouseArea {
@@ -1862,23 +1912,28 @@ Variants {
       onEntered: TooltipService.show(parent, tip)
       onExited: TooltipService.hide()
     }
+    NStateLayer {
+      anchors.fill: parent
+      hovered: false
+      pressed: sbHover.pressed
+    }
   }
   component DragBtn: Rectangle {
     property bool isVertical: false
     width: 30
     height: 30
-    radius: Style.radiusS
+    radius: Style.radiusControl
     color: dragMA.containsMouse || dragMA.pressed ? Color.mHover : "transparent"
     Column {
       anchors.centerIn: parent
-      spacing: Style.marginXS
+      spacing: Style.spaceXS
       visible: !parent.isVertical
       Repeater {
         model: 3
         Rectangle {
-          width: Style.marginL
-          height: Style.marginXXS
-          radius: Style.radiusXXXS
+          width: Style.spaceL
+          height: Style.spaceXXS
+          radius: Style.radiusCapsule
           color: Color.mOnSurfaceVariant
           opacity: 0.6
         }
@@ -1886,14 +1941,14 @@ Variants {
     }
     Row {
       anchors.centerIn: parent
-      spacing: Style.marginXS
+      spacing: Style.spaceXS
       visible: parent.isVertical
       Repeater {
         model: 3
         Rectangle {
-          width: Style.marginXXS
-          height: Style.marginL
-          radius: Style.radiusXXXS
+          width: Style.spaceXXS
+          height: Style.spaceL
+          radius: Style.radiusCapsule
           color: Color.mOnSurfaceVariant
           opacity: 0.6
         }
@@ -1920,6 +1975,11 @@ Variants {
                          }
       onEntered: TooltipService.show(parent, root.mainInstance?.pluginApi?.tr("annotate.dragToolbar"))
       onExited: TooltipService.hide()
+    }
+    NStateLayer {
+      anchors.fill: parent
+      hovered: false
+      pressed: dragMA.pressed
     }
   }
 }

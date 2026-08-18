@@ -65,12 +65,12 @@ NBox {
 
   RowLayout {
     anchors.fill: parent
-    anchors.margins: Style.marginM
-    spacing: Style.marginM
+    anchors.margins: Style.spaceS
+    spacing: Style.spaceS
 
     // Brightness Section
     ColumnLayout {
-      spacing: Style.marginXXS
+      spacing: Style.spaceXXS
       Layout.fillWidth: true
       Layout.preferredWidth: 0
       opacity: brightnessMonitor && brightnessMonitor.brightnessControlAvailable ? 1.0 : 0.5
@@ -79,7 +79,7 @@ NBox {
       // Brightness Header
       RowLayout {
         Layout.fillWidth: true
-        spacing: Style.marginXS
+        spacing: Style.spaceXXS
 
         NIconButton {
           icon: {
@@ -93,13 +93,13 @@ NBox {
           baseSize: Style.baseWidgetSize * 0.5
           colorFg: Color.mOnSurface
           colorBg: "transparent"
-          colorBgHover: Color.mHover
-          colorFgHover: Color.mOnHover
+          colorBgHover: Color.mSurfaceContainerHigh
+          colorFgHover: Color.mOnSurface
         }
 
         NText {
           text: brightnessMonitor ? I18n.tr("common.brightness") : "No display"
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -108,7 +108,7 @@ NBox {
 
         NText {
           text: brightnessMonitor ? Math.round(localBrightness * 100) + "%" : "N/A"
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
           opacity: brightnessMonitor && brightnessMonitor.brightnessControlAvailable ? 1.0 : 0.5
         }

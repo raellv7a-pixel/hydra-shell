@@ -31,7 +31,7 @@ Variants {
         closing = false;
         retainedActive = true;
       } else if (retainedActive) {
-        if (PanelService.closedImmediately || Style.animationFast <= 0) {
+        if (PanelService.closedImmediately || Style.motionDurationFastSpatial <= 0) {
           closing = false;
           retainedActive = false;
         } else {
@@ -46,7 +46,7 @@ Variants {
 
     Timer {
       id: closeRetentionTimer
-      interval: Style.animationFast
+      interval: Style.motionDurationFastSpatial
       repeat: false
       onTriggered: {
         windowLoader.retainedActive = false;
@@ -81,7 +81,7 @@ Variants {
           y: Math.round(launcherPanel.y)
           width: Math.round(launcherPanel.width)
           height: Math.round(launcherPanel.height)
-          radius: Style.radiusL
+          radius: Style.radiusPanel
           topLeftCorner: launcherPanel.topLeftCornerState
           topRightCorner: launcherPanel.topRightCornerState
           bottomLeftCorner: launcherPanel.bottomLeftCornerState
@@ -93,14 +93,14 @@ Variants {
           y: Math.round(previewBox.visible ? previewBox.y : 0)
           width: Math.round(previewBox.visible ? previewBox.width : 0)
           height: Math.round(previewBox.visible ? previewBox.height : 0)
-          radius: Style.radiusL
+          radius: Style.radiusPopover
         }
       }
 
       // Positioning logic (respects settings but doesn't attach to bar)
       readonly property string barPosition: Settings.data.bar.position
       readonly property bool barIsVertical: barPosition === "left" || barPosition === "right"
-      readonly property int barThickness: Math.round(Style.barHeight + Style.marginL)
+      readonly property int barThickness: Math.round(Style.barHeight + Style.spaceM)
 
       readonly property string panelPosition: {
         var pos = Settings.data.appLauncher.position;
@@ -135,9 +135,8 @@ Variants {
         opacity: launcherPanel.presented ? 1.0 : 0.0
 
         Behavior on opacity {
-          OpacityAnimator {
-            duration: Style.animationFast
-            easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
 
@@ -157,7 +156,7 @@ Variants {
       // Launcher panel with position-based anchoring
       Item {
         id: launcherPanel
-        width: Math.round(Math.max(parent.width * 0.25, launcherWindow.listPanelWidth + Style.margin2L * 2))
+        width: Math.round(Math.max(parent.width * 0.25, launcherWindow.listPanelWidth + Style.spaceXL * 2))
         height: Math.round(Math.max(parent.height * 0.5, 620 * Style.uiScaleRatio))
         clip: false
         property bool presented: false
@@ -192,16 +191,14 @@ Variants {
         }
 
         Behavior on opacity {
-          OpacityAnimator {
-            duration: Style.animationFast
-            easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
+          NAnim {
+            motionType: NAnim.EmphasizedEffects
           }
         }
 
         Behavior on scale {
-          ScaleAnimator {
-            duration: Style.animationFast
-            easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
+          NAnim {
+            motionType: NAnim.ExpressiveFastSpatial
           }
         }
 
@@ -285,7 +282,7 @@ Variants {
           opacity: launcherPanel.opacity
           layer.enabled: true
 
-          readonly property real radius: Style.radiusL
+          readonly property real radius: Style.radiusPanel
 
           // Panel dimensions (for path calculations)
           readonly property real panelW: launcherPanel.width
@@ -378,7 +375,7 @@ Variants {
         Rectangle {
           anchors.fill: parent
           color: "transparent"
-          radius: Style.radiusL
+          radius: Style.radiusPanel
           border.color: Qt.alpha(Color.mOutline, 0.32)
           border.width: Style.borderS
           visible: !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
@@ -415,32 +412,30 @@ Variants {
         color: Color.mSurfaceContainerLow
         x: {
           if (panelPosition.endsWith("_right"))
-            return launcherPanel.x - launcherWindow.previewPanelWidth - Style.marginM;
-          return launcherPanel.x + launcherPanel.width + Style.marginM;
+            return launcherPanel.x - launcherWindow.previewPanelWidth - Style.spaceS;
+          return launcherPanel.x + launcherPanel.width + Style.spaceS;
         }
         y: {
           var view = launcherCore.resultsView;
           if (!view)
-            return launcherPanel.y + Style.marginL;
+            return launcherPanel.y + Style.spaceM;
           var row = launcherCore.isGridView ? Math.floor(launcherCore.selectedIndex / launcherCore.gridColumns) : launcherCore.selectedIndex;
-          var gridCellSize = Math.floor((launcherWindow.listPanelWidth - Style.margin2XS - ((launcherCore.targetGridColumns - 1) * Style.marginS)) / launcherCore.targetGridColumns);
-          var itemHeight = launcherCore.isGridView ? (gridCellSize + Style.marginXXS) : (launcherCore.entryHeight + (view.spacing || 0));
+          var gridCellSize = Math.floor((launcherWindow.listPanelWidth - Style.spaceXS - ((launcherCore.targetGridColumns - 1) * Style.spaceXS)) / launcherCore.targetGridColumns);
+          var itemHeight = launcherCore.isGridView ? (gridCellSize + Style.spaceXXS) : (launcherCore.entryHeight + (view.spacing || 0));
           var yPos = row * itemHeight - (view.contentY || 0);
           var mapped = view.mapToItem(launcherWindow.contentItem, 0, yPos);
-          return Math.max(launcherPanel.y + Style.marginL, Math.min(mapped.y, launcherPanel.y + launcherPanel.height - previewBox.height - Style.marginL));
+          return Math.max(launcherPanel.y + Style.spaceM, Math.min(mapped.y, launcherPanel.y + launcherPanel.height - previewBox.height - Style.spaceM));
         }
 
         opacity: visible && !windowLoader.closing ? 1.0 : 0.0
         Behavior on opacity {
-          OpacityAnimator {
-            duration: Style.animationFast
-            easing.type: windowLoader.closing ? Easing.InCubic : Easing.OutCubic
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         Behavior on y {
-          NumberAnimation {
-            duration: Style.animationFast
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.ExpressiveFastSpatial
           }
         }
 

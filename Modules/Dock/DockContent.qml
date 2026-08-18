@@ -24,8 +24,8 @@ Item {
   Rectangle {
     id: dockContainer
     // For vertical dock, swap width and height logic
-    width: dockRoot.isVertical ? Math.round(dockRoot.iconSize * 1.5) : Math.min(dockLayout.implicitWidth + Style.marginXL, dockRoot.maxWidth)
-    height: dockRoot.isVertical ? Math.min(dockLayout.implicitHeight + Style.marginXL, dockRoot.maxHeight) : Math.round(dockRoot.iconSize * 1.5)
+    width: dockRoot.isVertical ? Math.round(dockRoot.iconSize * 1.5) : Math.min(dockLayout.implicitWidth + Style.spaceL, dockRoot.maxWidth)
+    height: dockRoot.isVertical ? Math.min(dockLayout.implicitHeight + Style.spaceL, dockRoot.maxHeight) : Math.round(dockRoot.iconSize * 1.5)
     color: Qt.alpha(Color.mSurface, (isAttachedMode ? 0 : Color.adaptiveOpacity(Settings.data.dock.backgroundOpacity)))
 
     // Anchor based on padding to achieve centering shift
@@ -37,7 +37,7 @@ Item {
     anchors.bottom: extraTop > 0 ? parent.bottom : undefined
     anchors.top: extraBottom > 0 ? parent.top : undefined
 
-    radius: Style.radiusL
+    radius: Style.radiusPopover
     border.width: Style.borderS
     border.color: Qt.alpha(Color.mOutline, (isAttachedMode ? 0 : Color.adaptiveOpacity(Settings.data.dock.backgroundOpacity)))
 
@@ -72,8 +72,8 @@ Item {
     Flickable {
       id: dock
       // Use parent dimensions more directly to avoid clipping
-      width: dockRoot.isVertical ? parent.width : Math.min(dockLayout.implicitWidth, parent.width - Style.marginXL)
-      height: !dockRoot.isVertical ? parent.height : Math.min(dockLayout.implicitHeight, parent.height - Style.marginXL)
+      width: dockRoot.isVertical ? parent.width : Math.min(dockLayout.implicitWidth, parent.width - Style.spaceL)
+      height: !dockRoot.isVertical ? parent.height : Math.min(dockLayout.implicitHeight, parent.height - Style.spaceL)
       contentWidth: dockLayout.implicitWidth
       contentHeight: dockLayout.implicitHeight
       anchors.centerIn: parent
@@ -177,8 +177,8 @@ Item {
         id: dockLayout
         columns: dockRoot.isVertical ? 1 : -1
         rows: dockRoot.isVertical ? -1 : 1
-        rowSpacing: Style.marginS
-        columnSpacing: Style.marginS
+        rowSpacing: Style.spaceXS
+        columnSpacing: Style.spaceXS
 
         // Ensure the layout takes its full implicit size
         width: implicitWidth
@@ -189,6 +189,9 @@ Item {
 
           Item {
             id: launcherButton
+            activeFocusOnTab: true
+            Accessible.role: Accessible.Button
+            Accessible.name: I18n.tr("actions.open-launcher")
             anchors.fill: parent
             readonly property string screenName: dockRoot.modelData ? dockRoot.modelData.name : (dockRoot.screen ? dockRoot.screen.name : "")
             readonly property var launcherWidgetSettings: {
@@ -263,6 +266,26 @@ Item {
               return false;
             }
 
+            NStateLayer {
+              id: launcherStateLayer
+              anchors.centerIn: parent
+              width: dockRoot.iconSize
+              height: width
+              hovered: launcherMouseArea.containsMouse
+              pressed: launcherMouseArea.pressed
+              focused: launcherButton.activeFocus
+              stateColor: Color.mPrimary
+              radius: Style.radiusCapsule
+            }
+
+            NFocusRing {
+              anchors.centerIn: parent
+              width: dockRoot.iconSize
+              height: width
+              focusVisible: launcherButton.activeFocus
+              targetRadius: Style.radiusCapsule
+            }
+
             Item {
               id: launcherIconContainer
               width: dockRoot.iconSize
@@ -271,10 +294,8 @@ Item {
 
               scale: launcherMouseArea.containsMouse ? 1.15 : 1.0
               Behavior on scale {
-                NumberAnimation {
-                  duration: Style.animationNormal
-                  easing.type: Easing.OutBack
-                  easing.overshoot: 1.2
+                NAnim {
+                  motionType: NAnim.ExpressiveFastSpatial
                 }
               }
 
@@ -311,6 +332,7 @@ Item {
               cursorShape: Qt.PointingHandCursor
               acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
 
+              onPressed: mouse => launcherStateLayer.rippleAt(mouse.x, mouse.y)
               onEntered: {
                 dockRoot.anyAppHovered = true;
                 TooltipService.show(launcherButton, I18n.tr("actions.open-launcher"), tooltipDirection);
@@ -421,6 +443,9 @@ Item {
             Layout.preferredWidth: dockRoot.isVertical ? dockRoot.iconSize + indicatorMargin * 2 : dockRoot.iconSize
             Layout.preferredHeight: dockRoot.isVertical ? dockRoot.iconSize : dockRoot.iconSize + indicatorMargin * 2
             Layout.alignment: Qt.AlignCenter
+            activeFocusOnTab: true
+            Accessible.role: Accessible.Button
+            Accessible.name: appTitle
 
             property var toplevels: dock.getValidToplevels(modelData)
             property bool isActive: ToplevelManager && ToplevelManager.activeToplevel && toplevels.includes(ToplevelManager.activeToplevel)
@@ -487,6 +512,28 @@ Item {
               }
             }
 
+            NStateLayer {
+              id: appStateLayer
+              anchors.centerIn: parent
+              width: dockRoot.iconSize
+              height: width
+              hovered: appButton.hovered
+              pressed: appMouseArea.pressed
+              focused: appButton.activeFocus
+              dragged: appMouseArea.drag.active
+              selected: appButton.isActive
+              stateColor: Color.mPrimary
+              radius: Style.radiusCapsule
+            }
+
+            NFocusRing {
+              anchors.centerIn: parent
+              width: dockRoot.iconSize
+              height: width
+              focusVisible: appButton.activeFocus
+              targetRadius: Style.radiusCapsule
+            }
+
             // Draggable container for the icon
             Item {
               id: iconContainer
@@ -520,10 +567,8 @@ Item {
               z: (dockRoot.dragSourceIndex === index) ? 1000 : ((dragging ? 1000 : 0))
               scale: dragging ? 1.1 : (appButton.hovered ? 1.15 : 1.0)
               Behavior on scale {
-                NumberAnimation {
-                  duration: Style.animationNormal
-                  easing.type: Easing.OutBack
-                  easing.overshoot: 1.2
+                NAnim {
+                  motionType: NAnim.ExpressiveFastSpatial
                 }
               }
 
@@ -537,12 +582,12 @@ Item {
                     if (dockRoot.dragSourceIndex < dockRoot.dragTargetIndex) {
                       // Dragging Forward: Items between source and target shift Backward
                       if (index > dockRoot.dragSourceIndex && index <= dockRoot.dragTargetIndex) {
-                        return -1 * (dockRoot.isVertical ? dockRoot.iconSize + Style.marginS : dockRoot.iconSize + Style.marginS);
+                        return -1 * (dockRoot.isVertical ? dockRoot.iconSize + Style.spaceXS : dockRoot.iconSize + Style.spaceXS);
                       }
                     } else if (dockRoot.dragSourceIndex > dockRoot.dragTargetIndex) {
                       // Dragging Backward: Items between target and source shift Forward
                       if (index >= dockRoot.dragTargetIndex && index < dockRoot.dragSourceIndex) {
-                        return (dockRoot.isVertical ? dockRoot.iconSize + Style.marginS : dockRoot.iconSize + Style.marginS);
+                        return (dockRoot.isVertical ? dockRoot.iconSize + Style.spaceXS : dockRoot.iconSize + Style.spaceXS);
                       }
                     }
                   }
@@ -555,15 +600,13 @@ Item {
                 y: dockRoot.isVertical ? iconContainer.shiftOffset : 0
 
                 Behavior on x {
-                  NumberAnimation {
-                    duration: Style.animationFast
-                    easing.type: Easing.OutQuad
+                  NAnim {
+                    motionType: NAnim.ExpressiveFastSpatial
                   }
                 }
                 Behavior on y {
-                  NumberAnimation {
-                    duration: Style.animationFast
-                    easing.type: Easing.OutQuad
+                  NAnim {
+                    motionType: NAnim.ExpressiveFastSpatial
                   }
                 }
               }
@@ -593,9 +636,8 @@ Item {
                 }
 
                 Behavior on opacity {
-                  NumberAnimation {
-                    duration: Style.animationFast
-                    easing.type: Easing.OutQuad
+                  NAnim {
+                    motionType: NAnim.StandardEffects
                   }
                 }
               }
@@ -610,9 +652,8 @@ Item {
                 opacity: appButton.isRunning ? 1.0 : 0.6
 
                 Behavior on opacity {
-                  NumberAnimation {
-                    duration: Style.animationFast
-                    easing.type: Easing.OutQuad
+                  NAnim {
+                    motionType: NAnim.StandardEffects
                   }
                 }
               }
@@ -670,14 +711,15 @@ Item {
               drag.target: iconContainer
               drag.axis: (pressedButtons & Qt.LeftButton) ? (dockRoot.isVertical ? Drag.YAxis : Drag.XAxis) : Drag.None
 
-              onPressed: {
-                var p1 = appButton.mapFromItem(dockContainer, 0, 0);
-                var p2 = appButton.mapFromItem(dockContainer, dockContainer.width, dockContainer.height);
-                drag.minimumX = p1.x;
-                drag.maximumX = p2.x - iconContainer.width;
-                drag.minimumY = p1.y;
-                drag.maximumY = p2.y - iconContainer.height;
-              }
+              onPressed: mouse => {
+                           appStateLayer.rippleAt(mouse.x, mouse.y);
+                           var p1 = appButton.mapFromItem(dockContainer, 0, 0);
+                           var p2 = appButton.mapFromItem(dockContainer, dockContainer.width, dockContainer.height);
+                           drag.minimumX = p1.x;
+                           drag.maximumX = p2.x - iconContainer.width;
+                           drag.minimumY = p1.y;
+                           drag.maximumY = p2.y - iconContainer.height;
+                         }
 
               onReleased: {
                 if (iconContainer.Drag.active) {
@@ -779,7 +821,7 @@ Item {
               width: dockRoot.isVertical ? indicatorMargin * 0.6 : dockRoot.iconSize * 0.2
               height: dockRoot.isVertical ? dockRoot.iconSize * 0.2 : indicatorMargin * 0.6
               color: Color.mPrimary
-              radius: Style.radiusXS
+              radius: Style.radiusCapsule
 
               // Anchor to the edge facing the screen center
               anchors.bottom: !dockRoot.isVertical && dockRoot.dockPosition === "bottom" ? parent.bottom : undefined
@@ -817,18 +859,18 @@ Item {
             Component {
               id: groupNumberIndicatorComponent
               Rectangle {
-                radius: Style.radiusS
+                radius: Style.radiusCapsule
                 color: Qt.alpha(Color.mSurface, 0.9)
                 border.color: Qt.alpha(Color.mOutline, 0.7)
                 border.width: Style.borderS
-                width: Math.max(14, numberLabel.implicitWidth + Style.marginXS)
+                width: Math.max(14, numberLabel.implicitWidth + Style.spaceXXS)
                 height: Math.max(10, numberLabel.implicitHeight + 2)
 
                 NText {
                   id: numberLabel
                   anchors.centerIn: parent
                   text: appButton.groupedIndicatorText
-                  pointSize: Style.fontSizeXS
+                  pointSize: Style.fontSizeLabelSmall
                   color: appButton.focusedWindowIndex >= 0 ? Color.mPrimary : Color.mOnSurfaceVariant
                 }
               }

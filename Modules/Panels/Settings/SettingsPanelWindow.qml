@@ -10,7 +10,7 @@ import qs.Widgets
 FloatingWindow {
   id: root
 
-  title: "Noctalia"
+  title: "Hydra Shell"
   // A real toplevel window (FloatingWindow, not layer-shell) — resizing by
   // dragging an edge already works via the compositor, no maximumSize cap
   // and no custom chrome needed for it.
@@ -122,7 +122,7 @@ FloatingWindow {
   Rectangle {
     anchors.fill: parent
     color: Qt.alpha(Color.mSurface, Settings.data.ui.panelBackgroundOpacity)
-    radius: Style.radiusL
+    radius: Style.radiusPanel
 
     SettingsContent {
       id: settingsContent

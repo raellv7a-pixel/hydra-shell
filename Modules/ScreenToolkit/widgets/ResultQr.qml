@@ -58,10 +58,10 @@ Item {
   Column {
     id: contentCol
     width: parent.width
-    spacing: Style.marginM
+    spacing: Style.spaceM
     Row {
       width: parent.width
-      spacing: Style.marginS
+      spacing: Style.spaceS
       NIcon {
         icon: "qrcode"
         color: Color.mPrimary
@@ -71,14 +71,14 @@ Item {
         text: pluginApi?.tr("tools.qr")
         color: Color.mPrimary
         font.weight: Font.Bold
-        pointSize: Style.fontSizeS
+        pointSize: Style.fontSizeLabelMedium
         anchors.verticalCenter: parent.verticalCenter
       }
     }
     Rectangle {
       width: parent.width
       height: Math.min(qrThumb.implicitHeight * (parent.width / Math.max(qrThumb.implicitWidth, 1)), 160 * Style.uiScaleRatio)
-      radius: Style.radiusM
+      radius: Style.radiusCard
       color: "transparent"
       clip: true
       border.color: Style.capsuleBorderColor
@@ -95,33 +95,33 @@ Item {
     }
     Rectangle {
       height: 26
-      width: qrBadge.implicitWidth + Style.marginM * 2
-      radius: Style.radiusS
+      width: qrBadge.implicitWidth + Style.spaceM * 2
+      radius: Style.radiusControl
       color: Qt.alpha(Color.mPrimary, 0.15)
       NText {
         id: qrBadge
         anchors.centerIn: parent
         font.weight: Font.Bold
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: Color.mPrimary
         text: root.qrType === "url" ? "🔗 URL" : root.qrType === "wifi" ? "📶 WiFi" : root.qrType === "contact" ? "👤 Contact" : root.qrType === "email" ? "✉️ Email" : root.qrType === "otp" ? "🔐 OTP" : "📄 Text"
       }
     }
     Column {
       width: parent.width
-      spacing: Style.marginS
+      spacing: Style.spaceS
       visible: root.qrType === "wifi"
       Rectangle {
         width: parent.width
         height: 38
-        radius: Style.radiusM
+        radius: Style.radiusCard
         color: Color.mSurface
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
         Row {
           anchors.fill: parent
-          anchors.margins: Style.marginS
-          spacing: Style.marginS
+          anchors.margins: Style.spaceS
+          spacing: Style.spaceS
           NIcon {
             icon: "wifi"
             color: Color.mPrimary
@@ -130,21 +130,21 @@ Item {
             text: root.qrWifiName || "Unknown"
             color: Color.mOnSurface
             font.weight: Font.Bold
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
           }
         }
       }
       Rectangle {
         width: parent.width
         height: 38
-        radius: Style.radiusM
+        radius: Style.radiusCard
         color: wph.containsMouse ? Color.mHover : Color.mSurface
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
         Row {
           anchors.fill: parent
-          anchors.margins: Style.marginS
-          spacing: Style.marginS
+          anchors.margins: Style.spaceS
+          spacing: Style.spaceS
           NIcon {
             icon: "key"
             color: Color.mOnSurfaceVariant
@@ -152,7 +152,7 @@ Item {
           NText {
             text: root.qrWifiPass ? "••••••••" : pluginApi?.tr("panel.noPassword")
             color: Color.mOnSurfaceVariant
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
           }
           NIcon {
             icon: "copy"
@@ -170,12 +170,17 @@ Item {
             ToastService.showNotice(pluginApi?.tr("panel.passwordCopied"));
           }
         }
+        NStateLayer {
+          anchors.fill: parent
+          hovered: wph.containsMouse
+          pressed: wph.pressed
+        }
       }
     }
     Rectangle {
       width: parent.width
       height: 120 * Style.uiScaleRatio
-      radius: Style.radiusM
+      radius: Style.radiusCard
       color: Color.mSurface
       clip: true
       border.color: Style.capsuleBorderColor
@@ -184,7 +189,7 @@ Item {
       Flickable {
         id: qrFlick
         anchors.fill: parent
-        anchors.margins: Style.marginS
+        anchors.margins: Style.spaceS
         contentHeight: qrText.implicitHeight
         clip: true
         interactive: qrText.implicitHeight > qrFlick.height
@@ -194,7 +199,7 @@ Item {
           text: root.qrResult
           wrapMode: TextEdit.WordWrap
           color: Color.mOnSurface
-          font.pointSize: Style.fontSizeS
+          font.pointSize: Style.fontSizeLabelMedium
           selectByMouse: true
           selectionColor: Color.mPrimary
           selectedTextColor: Color.mOnPrimary
@@ -209,17 +214,17 @@ Item {
     }
     Row {
       width: parent.width
-      spacing: Style.marginS
+      spacing: Style.spaceS
       Rectangle {
         width: parent.width - 46
         height: 38
-        radius: Style.radiusM
+        radius: Style.radiusCard
         color: qah.containsMouse ? Color.mPrimary : Color.mSurface
         border.color: Color.mPrimary
         border.width: Style.capsuleBorderWidth
         Row {
           anchors.centerIn: parent
-          spacing: Style.marginS
+          spacing: Style.spaceS
           NIcon {
             icon: root.qrType === "url" ? "external-link" : root.qrType === "email" ? "mail" : "copy"
             color: qah.containsMouse ? Color.mOnPrimary : Color.mPrimary
@@ -228,7 +233,7 @@ Item {
             text: root.qrType === "url" ? pluginApi?.tr("panel.openUrl") : root.qrType === "email" ? pluginApi?.tr("panel.composeEmail") : pluginApi?.tr("panel.copy")
             color: qah.containsMouse ? Color.mOnPrimary : Color.mPrimary
             font.weight: Font.Bold
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
           }
         }
         MouseArea {
@@ -245,11 +250,17 @@ Item {
             }
           }
         }
+        NStateLayer {
+          anchors.fill: parent
+          hovered: qah.containsMouse
+          pressed: qah.pressed
+          stateColor: Color.mPrimary
+        }
       }
       Rectangle {
         width: 38
         height: 38
-        radius: Style.radiusM
+        radius: Style.radiusCard
         color: qch.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurface
         border.color: qch.containsMouse ? Color.mError : Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
@@ -264,6 +275,12 @@ Item {
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
           onClicked: root.clear()
+        }
+        NStateLayer {
+          anchors.fill: parent
+          hovered: qch.containsMouse
+          pressed: qch.pressed
+          stateColor: Color.mError
         }
       }
     }

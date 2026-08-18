@@ -86,23 +86,20 @@ PopupWindow {
   ParallelAnimation {
     id: showAnimation
 
-    PropertyAnimation {
+    NAnim {
       target: tooltipContainer
       property: "opacity"
       from: 0.0
       to: 1.0
-      duration: root.animationDuration
-      easing.type: Easing.OutCubic
+      motionType: NAnim.StandardEffects
     }
 
-    PropertyAnimation {
+    NAnim {
       target: tooltipContainer
       property: "scale"
       from: root.animationScale
       to: 1.0
-      duration: root.animationDuration
-      easing.type: Easing.OutBack
-      easing.overshoot: 1.2
+      motionType: NAnim.ExpressiveFastSpatial
     }
   }
 
@@ -110,22 +107,22 @@ PopupWindow {
   ParallelAnimation {
     id: hideAnimation
 
-    PropertyAnimation {
+    NAnim {
       target: tooltipContainer
       property: "opacity"
       from: 1.0
       to: 0.0
       duration: root.animationDuration * 0.75 // Slightly faster hide
-      easing.type: Easing.InCubic
+      motionType: NAnim.StandardEffects
     }
 
-    PropertyAnimation {
+    NAnim {
       target: tooltipContainer
       property: "scale"
       from: 1.0
       to: root.animationScale
       duration: root.animationDuration * 0.75
-      easing.type: Easing.InCubic
+      motionType: NAnim.ExpressiveFastSpatial
     }
 
     onFinished: {

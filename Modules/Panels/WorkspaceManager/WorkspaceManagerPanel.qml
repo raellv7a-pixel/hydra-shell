@@ -312,15 +312,14 @@ PanelWindow {
   }
 
   Behavior on revealProgress {
-    NumberAnimation {
-      duration: Settings.data.general.animationDisabled ? 0 : (root.closing ? 210 : 290)
-      easing.type: root.closing ? Easing.InCubic : Easing.OutQuint
+    NAnim {
+      motionType: root.closing ? NAnim.ExpressiveFastSpatial : NAnim.ExpressiveDefaultSpatial
     }
   }
 
   Timer {
     id: closeTimer
-    interval: Settings.data.general.animationDisabled ? 1 : 220
+    interval: Math.max(1, Style.motionDurationFastSpatial + 10)
     onTriggered: PanelService.closeWorkspaceManager()
   }
 
@@ -375,12 +374,12 @@ PanelWindow {
       z: 2
       width: {
         if (root.floatingMode)
-          return Math.min(root.width - 2 * Style.margin2L, 980 * Style.uiScaleRatio);
+          return Math.min(root.width - 2 * Style.spaceXL, 980 * Style.uiScaleRatio);
         if (root.framedBar)
           return Math.min(root.width * 0.46, 820 * Style.uiScaleRatio);
-        return Math.min(root.width - 2 * Style.margin2L, 940 * Style.uiScaleRatio);
+        return Math.min(root.width - 2 * Style.spaceXL, 940 * Style.uiScaleRatio);
       }
-      height: Math.min(root.height - root.barThickness - 3 * Style.marginL, 620 * Style.uiScaleRatio)
+      height: Math.min(root.height - root.barThickness - 3 * Style.spaceM, 620 * Style.uiScaleRatio)
       x: {
         if (root.floatingMode)
           return Math.round((root.width - width) / 2);
@@ -396,12 +395,12 @@ PanelWindow {
         const topInset = root.barPosition === "top" ? root.barThickness : root.frameThickness;
         const bottomInset = root.barPosition === "bottom" ? root.barThickness : root.frameThickness;
         if (root.barPosition === "top" && !root.framedBar)
-          return topInset + Style.marginM;
+          return topInset + Style.spaceS;
         if (root.barPosition === "bottom" && !root.framedBar)
-          return root.height - bottomInset - Style.marginM - height;
+          return root.height - bottomInset - Style.spaceS - height;
         return Math.round(topInset + (root.height - topInset - bottomInset - height) / 2);
       }
-      radius: Style.radiusL * 1.65
+      radius: Style.radiusPanel
       color: Color.mSurface
       border.width: Style.borderS
       border.color: Qt.alpha(Color.mOutline, 0.44)
@@ -458,38 +457,38 @@ PanelWindow {
 
       ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.marginL
-        spacing: Style.marginM
+        anchors.margins: Style.paddingPanel
+        spacing: Style.spaceS
 
         Rectangle {
           Layout.fillWidth: true
           height: 28 * Style.uiScaleRatio
-          radius: Style.radiusS
+          radius: Style.radiusControl
           color: Qt.alpha(Color.mErrorContainer, 0.9)
           visible: root.privateWindowToastInfo !== null
 
           RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.marginS
-            spacing: Style.marginS
+            anchors.margins: Style.spaceXS
+            spacing: Style.spaceXS
 
             NIcon {
               icon: "alert-triangle"
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               color: Color.mOnErrorContainer || Color.mOnError
             }
             NText {
               Layout.fillWidth: true
               text: qsTr("⚠️ Private window '%1' is in public workspace '%2'").arg(root.privateWindowToastInfo?.title || "").arg(root.privateWindowToastInfo?.workspace || "")
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               color: Color.mOnErrorContainer || Color.mOnError
               font.weight: Style.fontWeightBold
             }
             NButton {
               text: qsTr("Protect WS")
               icon: "shield-lock"
-              fontSize: Style.fontSizeXS
-              iconSize: Style.fontSizeS
+              fontSize: Style.fontSizeLabelSmall
+              iconSize: Style.fontSizeLabelMedium
               onClicked: {
                 if (root.privateWindowToastInfo?.workspace)
                   root.toggleWorkspacePrivacy(0, root.privateWindowToastInfo.workspace, true);
@@ -500,11 +499,11 @@ PanelWindow {
 
         RowLayout {
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           NIcon {
             icon: root.showingSettings ? "settings" : (root.overviewGrid ? "layout-grid" : "apps")
-            pointSize: Style.fontSizeXL
+            pointSize: Style.fontSizeTitleLarge
             color: Color.mPrimary
           }
           ColumnLayout {
@@ -513,13 +512,13 @@ PanelWindow {
             NText {
               Layout.fillWidth: true
               text: root.showingSettings ? qsTr("Workspace manager settings") : (root.overviewGrid ? qsTr("Overview mode") : qsTr("Workspace manager"))
-              pointSize: Style.fontSizeXL
+              pointSize: Style.fontSizeTitleLarge
               font.weight: Style.fontWeightBold
             }
             NText {
               Layout.fillWidth: true
               text: root.showingSettings ? qsTr("Layout, previews and workspace privacy") : qsTr("Hold a window to move · 'o' grid mode · 'g' game mode · 'p' privacy")
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeBodySmall
               color: Color.mOnSurfaceVariant
             }
           }
@@ -549,7 +548,7 @@ PanelWindow {
 
         RowLayout {
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: Style.spaceS
           visible: !root.showingSettings
 
           NTextInput {
@@ -566,20 +565,20 @@ PanelWindow {
           }
 
           Row {
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             visible: root.recentWorkspaces.length > 0 && !root.searchQuery
 
             NText {
               anchors.verticalCenter: parent.verticalCenter
               text: qsTr("Recent:")
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               color: Color.mOnSurfaceVariant
             }
 
             Repeater {
               model: root.recentWorkspaces.slice(0, 5)
               delegate: Rectangle {
-                width: recentLabel.implicitWidth + Style.marginM
+                width: recentLabel.implicitWidth + Style.spaceS
                 height: 24 * Style.uiScaleRatio
                 radius: height / 2
                 color: Qt.alpha(Color.mSurfaceContainerHigh, 0.9)
@@ -590,7 +589,7 @@ PanelWindow {
                   id: recentLabel
                   anchors.centerIn: parent
                   text: modelData
-                  pointSize: Style.fontSizeXS
+                  pointSize: Style.fontSizeLabelSmall
                   color: Color.mOnSurface
                 }
                 MouseArea {
@@ -611,18 +610,18 @@ PanelWindow {
         Rectangle {
           Layout.fillWidth: true
           height: 36 * Style.uiScaleRatio
-          radius: Style.radiusM
+          radius: Style.radiusControl
           color: Qt.alpha(Color.mPrimaryContainer || Color.mPrimary, 0.9)
           visible: root.selectedWindowAddresses.length > 0
 
           RowLayout {
             anchors.fill: parent
-            anchors.margins: Style.marginS
-            spacing: Style.marginS
+            anchors.margins: Style.spaceXS
+            spacing: Style.spaceXS
 
             NText {
               text: qsTr("%1 window(s) selected").arg(root.selectedWindowAddresses.length)
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeBodySmall
               font.weight: Style.fontWeightBold
               color: Color.mOnPrimaryContainer || Color.mOnPrimary
             }
@@ -634,8 +633,8 @@ PanelWindow {
             NButton {
               text: qsTr("Move here")
               icon: "arrow-right"
-              fontSize: Style.fontSizeXS
-              iconSize: Style.fontSizeS
+              fontSize: Style.fontSizeLabelSmall
+              iconSize: Style.fontSizeLabelMedium
               onClicked: {
                 const curr = CompositorService.getCurrentWorkspace();
                 if (curr)
@@ -645,29 +644,29 @@ PanelWindow {
             NButton {
               text: qsTr("Close")
               icon: "x"
-              fontSize: Style.fontSizeXS
-              iconSize: Style.fontSizeS
+              fontSize: Style.fontSizeLabelSmall
+              iconSize: Style.fontSizeLabelMedium
               onClicked: root.batchCloseSelected()
             }
             NButton {
               text: qsTr("Float")
               icon: "window"
-              fontSize: Style.fontSizeXS
-              iconSize: Style.fontSizeS
+              fontSize: Style.fontSizeLabelSmall
+              iconSize: Style.fontSizeLabelMedium
               onClicked: root.batchToggleFloatSelected()
             }
             NButton {
               text: qsTr("Private")
               icon: "shield-lock"
-              fontSize: Style.fontSizeXS
-              iconSize: Style.fontSizeS
+              fontSize: Style.fontSizeLabelSmall
+              iconSize: Style.fontSizeLabelMedium
               onClicked: root.batchSetPrivateSelected(true)
             }
             NButton {
               text: qsTr("Clear")
               icon: "x"
-              fontSize: Style.fontSizeXS
-              iconSize: Style.fontSizeS
+              fontSize: Style.fontSizeLabelSmall
+              iconSize: Style.fontSizeLabelMedium
               onClicked: root.clearWindowSelection()
             }
           }
@@ -683,7 +682,7 @@ PanelWindow {
           currentIndex: root.showingSettings ? 1 : (root.searchQuery ? 2 : 0)
 
           ColumnLayout {
-            spacing: Style.marginM
+            spacing: Style.spaceS
             visible: !root.searchQuery
 
             Flickable {
@@ -697,12 +696,12 @@ PanelWindow {
               Flow {
                 id: gridFlow
                 width: parent.width
-                spacing: Style.marginM
+                spacing: Style.spaceS
 
                 Repeater {
                   model: root.normalWorkspaces
                   delegate: Item {
-                    width: Math.round((gridFlow.width - Style.marginM) / 2)
+                    width: Math.round((gridFlow.width - Style.spaceS) / 2)
                     height: Math.round(width * 0.58)
 
                     WorkspaceCell {
@@ -724,7 +723,7 @@ PanelWindow {
               visible: !root.overviewGrid
               Layout.fillWidth: true
               Layout.fillHeight: true
-              spacing: Style.marginM
+              spacing: Style.spaceS
 
               WorkspaceCarousel {
                 Layout.fillWidth: true
@@ -761,16 +760,16 @@ PanelWindow {
             ColumnLayout {
               id: settingsContent
               width: parent.width
-              spacing: Style.marginL
+              spacing: Style.spaceL
 
               NText {
                 text: qsTr("Presentation & Performance")
-                pointSize: Style.fontSizeL
+                pointSize: Style.fontSizeBodyLarge
                 font.weight: Style.fontWeightBold
               }
               RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.marginM
+                spacing: Style.spaceS
                 NButton {
                   Layout.fillWidth: true
                   text: qsTr("Adaptive")
@@ -823,7 +822,7 @@ PanelWindow {
 
               NText {
                 text: qsTr("Create a special workspace")
-                pointSize: Style.fontSizeL
+                pointSize: Style.fontSizeBodyLarge
                 font.weight: Style.fontWeightBold
               }
               NTextInput {
@@ -862,13 +861,13 @@ PanelWindow {
 
               NText {
                 text: qsTr("Batch Tag Actions")
-                pointSize: Style.fontSizeL
+                pointSize: Style.fontSizeBodyLarge
                 font.weight: Style.fontWeightBold
               }
 
               RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.marginM
+                spacing: Style.spaceS
                 NTextInput {
                   id: tagInput
                   Layout.fillWidth: true
@@ -907,11 +906,11 @@ PanelWindow {
             ColumnLayout {
               id: searchResultsCol
               width: parent.width
-              spacing: Style.marginS
+              spacing: Style.spaceXS
 
               NText {
                 text: qsTr("Search Results for '%1'").arg(root.searchQuery)
-                pointSize: Style.fontSizeM
+                pointSize: Style.fontSizeLabelLarge
                 font.weight: Style.fontWeightBold
               }
 
@@ -920,7 +919,7 @@ PanelWindow {
                 delegate: Rectangle {
                   Layout.fillWidth: true
                   height: 48 * Style.uiScaleRatio
-                  radius: Style.radiusM
+                  radius: Style.radiusControl
                   color: itemArea.containsMouse ? Color.mSurfaceContainerHigh : Color.mSurfaceContainer
                   border.width: Style.borderS
                   border.color: itemArea.containsMouse ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.4)
@@ -928,12 +927,12 @@ PanelWindow {
                   RowLayout {
                     z: 1
                     anchors.fill: parent
-                    anchors.margins: Style.marginM
-                    spacing: Style.marginM
+                    anchors.margins: Style.spaceS
+                    spacing: Style.spaceS
 
                     NIcon {
                       icon: modelData.isPrivate ? "shield-lock" : "window"
-                      pointSize: Style.fontSizeM
+                      pointSize: Style.fontSizeLabelLarge
                       color: modelData.isPrivate ? Color.mPrimary : Color.mOnSurfaceVariant
                     }
 
@@ -942,13 +941,13 @@ PanelWindow {
                       spacing: 0
                       NText {
                         text: modelData.isPrivate ? qsTr("Private Window") : modelData.title
-                        pointSize: Style.fontSizeS
+                        pointSize: Style.fontSizeBodySmall
                         font.weight: Style.fontWeightBold
                         elide: Text.ElideRight
                       }
                       NText {
                         text: qsTr("Class: %1 · WS: %2").arg(modelData.class).arg(modelData.workspaceName)
-                        pointSize: Style.fontSizeXS
+                        pointSize: Style.fontSizeLabelSmall
                         color: Color.mOnSurfaceVariant
                       }
                     }
@@ -956,8 +955,8 @@ PanelWindow {
                     NButton {
                       text: qsTr("Focus")
                       icon: "eye"
-                      fontSize: Style.fontSizeXS
-                      iconSize: Style.fontSizeS
+                      fontSize: Style.fontSizeLabelSmall
+                      iconSize: Style.fontSizeLabelMedium
                       onClicked: {
                         root.focusSearchResult(modelData);
                       }
@@ -965,8 +964,8 @@ PanelWindow {
                     NButton {
                       text: qsTr("Move to Current")
                       icon: "arrow-right"
-                      fontSize: Style.fontSizeXS
-                      iconSize: Style.fontSizeS
+                      fontSize: Style.fontSizeLabelSmall
+                      iconSize: Style.fontSizeLabelMedium
                       onClicked: {
                         const curr = CompositorService.getCurrentWorkspace();
                         if (curr)
@@ -995,7 +994,7 @@ PanelWindow {
           Layout.fillWidth: true
           horizontalAlignment: Text.AlignHCenter
           text: root.dragging ? qsTr("Scroll to navigate · release over a workspace to move the window") : (root.selectedWindowAddresses.length > 0 ? qsTr("Use batch bar above to move, close or protect selected windows") : qsTr("Hold window to move · Shift/Ctrl+Click multi-select · Esc to close"))
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: root.dragging ? Color.mPrimary : Color.mOnSurfaceVariant
         }
       }

@@ -61,7 +61,7 @@ Item {
   property int _recElapsed: 0
   property string _recTmpPath: ""
   readonly property int _ctrlBtnSize: Style.baseWidgetSize - Style.borderS
-  readonly property int _ctrlPillH: _ctrlBtnSize + Style.marginS * 2
+  readonly property int _ctrlPillH: _ctrlBtnSize + Style.spaceS * 2
   property var _imgCapture: null
   property var _recorder: null
   function _formatTime(secs) {
@@ -238,7 +238,7 @@ Item {
         y: root.yPos
         width: root.currentWidth
         height: root.currentHeight
-        radius: Style.radiusL
+        radius: Style.radiusPanel
         color: "black"
         clip: true
         Loader {
@@ -316,7 +316,7 @@ Item {
         }
         Column {
           anchors.centerIn: parent
-          spacing: Style.marginS
+          spacing: Style.spaceS
           visible: mediaDevices.videoInputs.length === 0
           NIcon {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -327,12 +327,12 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             text: root.pluginApi?.tr("mirror.noCamera")
             color: "white"
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
           }
         }
         Rectangle {
           anchors.fill: parent
-          radius: Style.radiusL
+          radius: Style.radiusPanel
           color: "transparent"
           border.color: "#FF4444"
           border.width: Style.borderL
@@ -340,13 +340,15 @@ Item {
           SequentialAnimation on opacity {
             running: root._isRecording
             loops: Animation.Infinite
-            NumberAnimation {
+            NAnim {
               to: 0.3
               duration: 600
+              motionType: NAnim.StandardEffects
             }
-            NumberAnimation {
+            NAnim {
               to: 1.0
               duration: 600
+              motionType: NAnim.StandardEffects
             }
           }
         }
@@ -355,33 +357,35 @@ Item {
           anchors {
             top: parent.top
             left: parent.left
-            margins: Style.marginXS * 2
+            margins: Style.spaceXS * 2
           }
-          width: recBadge.implicitWidth + Style.marginM
-          height: Style.marginXL + Style.marginXXS
-          radius: Style.radiusS
+          width: recBadge.implicitWidth + Style.spaceM
+          height: Style.spaceXL + Style.spaceXXS
+          radius: Style.radiusControl
           color: Qt.rgba(0, 0, 0, 0.65)
           z: 5
           Row {
             id: recBadge
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             Rectangle {
-              width: Style.marginXS * 2
-              height: Style.marginXS * 2
-              radius: Style.radiusXXS
+              width: Style.spaceXS * 2
+              height: Style.spaceXS * 2
+              radius: Style.radiusCapsule
               color: "#FF4444"
               anchors.verticalCenter: parent.verticalCenter
               SequentialAnimation on opacity {
                 running: root._isRecording
                 loops: Animation.Infinite
-                NumberAnimation {
+                NAnim {
                   to: 0.15
                   duration: 600
+                  motionType: NAnim.StandardEffects
                 }
-                NumberAnimation {
+                NAnim {
                   to: 1.0
                   duration: 600
+                  motionType: NAnim.StandardEffects
                 }
               }
             }
@@ -391,7 +395,7 @@ Item {
                                        })
               color: "white"
               font.weight: Font.Bold
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               anchors.verticalCenter: parent.verticalCenter
             }
           }
@@ -401,17 +405,17 @@ Item {
           anchors {
             top: parent.top
             left: parent.left
-            margins: Style.marginXS * 2
+            margins: Style.spaceXS * 2
           }
-          width: savingBadge.implicitWidth + Style.marginM
-          height: Style.marginXL + Style.marginXXS
-          radius: Style.radiusS
+          width: savingBadge.implicitWidth + Style.spaceM
+          height: Style.spaceXL + Style.spaceXXS
+          radius: Style.radiusControl
           color: Qt.rgba(0, 0, 0, 0.65)
           z: 5
           Row {
             id: savingBadge
             anchors.centerIn: parent
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             NIcon {
               icon: "device-floppy"
               color: "white"
@@ -419,27 +423,29 @@ Item {
               SequentialAnimation on opacity {
                 running: root._isSaving
                 loops: Animation.Infinite
-                NumberAnimation {
+                NAnim {
                   to: 0.3
                   duration: 500
+                  motionType: NAnim.StandardEffects
                 }
-                NumberAnimation {
+                NAnim {
                   to: 1.0
                   duration: 500
+                  motionType: NAnim.StandardEffects
                 }
               }
             }
             NText {
               text: root.pluginApi?.tr("mirror.saving")
               color: "white"
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               anchors.verticalCenter: parent.verticalCenter
             }
           }
         }
         Rectangle {
           anchors.fill: parent
-          radius: Style.radiusL
+          radius: Style.radiusPanel
           color: Qt.rgba(0, 0, 0, 0.55)
           visible: root._countdownActive
           z: 10
@@ -454,16 +460,17 @@ Item {
             SequentialAnimation on scale {
               running: root._countdownActive
               loops: Animation.Infinite
-              NumberAnimation {
+              NAnim {
                 from: 1.2
                 to: 0.85
                 duration: 900
-                easing.type: Easing.InQuad
+                motionType: NAnim.ExpressiveFastSpatial
               }
-              NumberAnimation {
+              NAnim {
                 from: 0.85
                 to: 1.2
                 duration: 100
+                motionType: NAnim.ExpressiveFastSpatial
               }
             }
           }
@@ -501,28 +508,29 @@ Item {
         Rectangle {
           anchors.bottom: parent.bottom
           anchors.horizontalCenter: parent.horizontalCenter
-          anchors.bottomMargin: Style.marginM
-          width: ctrlRow.implicitWidth + Style.marginM * 2
+          anchors.bottomMargin: Style.spaceM
+          width: ctrlRow.implicitWidth + Style.spaceM * 2
           height: root._ctrlPillH
-          radius: root._ctrlPillH / 2
+          radius: Style.radiusCapsule
           color: Qt.rgba(0, 0, 0, 0.55)
           z: 3
           opacity: (containerHover.hovered && !root._countdownActive && !root._isSaving) ? 1.0 : 0.0
           Behavior on opacity {
-            NumberAnimation {
-              duration: 150
+            NAnim {
+              duration: Style.motionDurationFastEffects
+              motionType: NAnim.StandardEffects
             }
           }
           Row {
             id: ctrlRow
             anchors.centerIn: parent
-            spacing: Style.marginS
+            spacing: Style.spaceS
             Rectangle {
               width: root._ctrlBtnSize
               height: root._ctrlBtnSize
-              radius: root._ctrlBtnSize / 2
+              radius: Style.radiusCapsule
               visible: !root._isRecording
-              color: sqHover.containsMouse ? Qt.rgba(1, 1, 1, 0.2) : "transparent"
+              color: "transparent"
               NIcon {
                 anchors.centerIn: parent
                 icon: root.isSquare ? "arrows-maximize" : "crop"
@@ -542,13 +550,19 @@ Item {
                 onEntered: TooltipService.show(parent, root.isSquare ? root.pluginApi?.tr("tooltips.switchToWide") : root.pluginApi?.tr("tooltips.switchToSquare"))
                 onExited: TooltipService.hide()
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: sqHover.containsMouse
+                pressed: sqHover.pressed
+                stateColor: "white"
+              }
             }
             Rectangle {
               width: root._ctrlBtnSize
               height: root._ctrlBtnSize
-              radius: root._ctrlBtnSize / 2
+              radius: Style.radiusCapsule
               visible: !root._isRecording
-              color: root.isFlipped ? Qt.rgba(1, 1, 1, 0.25) : (flipHover.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent")
+              color: root.isFlipped ? Qt.rgba(1, 1, 1, 0.25) : "transparent"
               NIcon {
                 anchors.centerIn: parent
                 icon: "flip-horizontal"
@@ -563,12 +577,19 @@ Item {
                 onEntered: TooltipService.show(parent, root.isFlipped ? root.pluginApi?.tr("tooltips.unflipCamera") : root.pluginApi?.tr("tooltips.flipCamera"))
                 onExited: TooltipService.hide()
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: flipHover.containsMouse
+                pressed: flipHover.pressed
+                selected: root.isFlipped
+                stateColor: "white"
+              }
             }
             Rectangle {
               width: root._ctrlBtnSize
               height: root._ctrlBtnSize
-              radius: root._ctrlBtnSize / 2
-              color: shotHover.containsMouse ? Qt.rgba(1, 1, 1, 0.25) : "transparent"
+              radius: Style.radiusCapsule
+              color: "transparent"
               NIcon {
                 anchors.centerIn: parent
                 icon: "camera"
@@ -588,15 +609,21 @@ Item {
                 onEntered: TooltipService.show(parent, root.pluginApi?.tr("mirror.takeScreenshot"))
                 onExited: TooltipService.hide()
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: shotHover.containsMouse
+                pressed: shotHover.pressed
+                stateColor: "white"
+              }
             }
             Rectangle {
               width: root._ctrlBtnSize
               height: root._ctrlBtnSize
-              radius: root._ctrlBtnSize / 2
-              color: recHover.containsMouse ? (root._isRecording ? Qt.rgba(1, 0, 0, 0.55) : Qt.rgba(1, 1, 1, 0.25)) : (root._isRecording ? Qt.rgba(1, 0, 0, 0.30) : "transparent")
+              radius: Style.radiusCapsule
+              color: root._isRecording ? Qt.rgba(1, 0, 0, 0.30) : "transparent"
               Behavior on color {
-                ColorAnimation {
-                  duration: 120
+                NColorAnimation {
+                  motionType: NColorAnimation.Standard
                 }
               }
               NIcon {
@@ -618,16 +645,24 @@ Item {
                 onEntered: TooltipService.show(parent, root._isRecording ? root.pluginApi?.tr("mirror.stopRecord") : root.pluginApi?.tr("mirror.startRecord"))
                 onExited: TooltipService.hide()
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: recHover.containsMouse
+                pressed: recHover.pressed
+                selected: root._isRecording
+                stateColor: "white"
+              }
             }
             Rectangle {
               width: root._ctrlBtnSize
               height: root._ctrlBtnSize
-              radius: root._ctrlBtnSize / 2
-              color: root._audioEnabled ? Qt.rgba(1, 1, 1, 0.25) : (micHover.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent")
+              radius: Style.radiusCapsule
+              color: root._audioEnabled ? Qt.rgba(1, 1, 1, 0.25) : "transparent"
               opacity: root._isRecording ? 0.4 : 1.0
               Behavior on opacity {
-                NumberAnimation {
-                  duration: 120
+                NAnim {
+                  duration: Style.motionDurationFastEffects
+                  motionType: NAnim.StandardEffects
                 }
               }
               NIcon {
@@ -645,13 +680,20 @@ Item {
                 onEntered: TooltipService.show(parent, root._audioEnabled ? root.pluginApi?.tr("mirror.micDisable") : root.pluginApi?.tr("mirror.micEnable"))
                 onExited: TooltipService.hide()
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: micHover.containsMouse
+                pressed: micHover.pressed
+                selected: root._audioEnabled
+                stateColor: "white"
+              }
             }
             Rectangle {
               width: root._ctrlBtnSize
               height: root._ctrlBtnSize
-              radius: root._ctrlBtnSize / 2
+              radius: Style.radiusCapsule
               visible: !root._isRecording
-              color: root._pinOnShot ? Qt.rgba(1, 1, 1, 0.25) : (pinToggleMA.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : "transparent")
+              color: root._pinOnShot ? Qt.rgba(1, 1, 1, 0.25) : "transparent"
               NIcon {
                 anchors.centerIn: parent
                 icon: root._pinOnShot ? "pin" : "pinned-off"
@@ -666,13 +708,20 @@ Item {
                 onEntered: TooltipService.show(parent, root._pinOnShot ? root.pluginApi?.tr("mirror.pinDisable") : root.pluginApi?.tr("mirror.pinEnable"))
                 onExited: TooltipService.hide()
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: pinToggleMA.containsMouse
+                pressed: pinToggleMA.pressed
+                selected: root._pinOnShot
+                stateColor: "white"
+              }
             }
             Rectangle {
               width: root._ctrlBtnSize
               height: root._ctrlBtnSize
-              radius: root._ctrlBtnSize / 2
+              radius: Style.radiusCapsule
               visible: mediaDevices.videoInputs.length > 1 && !root._isRecording
-              color: camHover.containsMouse ? Qt.rgba(1, 1, 1, 0.2) : "transparent"
+              color: "transparent"
               NIcon {
                 anchors.centerIn: parent
                 icon: "camera-rotate"
@@ -687,13 +736,19 @@ Item {
                 onEntered: TooltipService.show(parent, root.pluginApi?.tr("tooltips.switchCamera"))
                 onExited: TooltipService.hide()
               }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: camHover.containsMouse
+                pressed: camHover.pressed
+                stateColor: "white"
+              }
             }
             Rectangle {
               width: root._ctrlBtnSize
               height: root._ctrlBtnSize
-              radius: root._ctrlBtnSize / 2
+              radius: Style.radiusCapsule
               visible: !root._isRecording
-              color: closeHover.containsMouse ? Qt.rgba(1, 1, 1, 0.2) : "transparent"
+              color: "transparent"
               NIcon {
                 anchors.centerIn: parent
                 icon: "x"
@@ -707,6 +762,12 @@ Item {
                 onClicked: root.hide()
                 onEntered: TooltipService.show(parent, root.pluginApi?.tr("mirror.close"))
                 onExited: TooltipService.hide()
+              }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: closeHover.containsMouse
+                pressed: closeHover.pressed
+                stateColor: "white"
               }
             }
           }
@@ -791,14 +852,15 @@ Item {
                        }
     Rectangle {
       anchors.centerIn: parent
-      width: Style.marginXS * 2
-      height: Style.marginXS * 2
-      radius: Style.radiusXXS
+      width: Style.spaceXS * 2
+      height: Style.spaceXS * 2
+      radius: Style.radiusCapsule
       color: Color.mPrimary
       opacity: parent.containsMouse || parent.pressed ? 1.0 : 0.4
       Behavior on opacity {
-        NumberAnimation {
-          duration: 120
+        NAnim {
+          duration: Style.motionDurationFastEffects
+          motionType: NAnim.StandardEffects
         }
       }
     }

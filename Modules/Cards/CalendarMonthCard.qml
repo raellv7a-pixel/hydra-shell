@@ -12,7 +12,7 @@ import qs.Widgets
 NBox {
   id: root
   Layout.fillWidth: true
-  implicitHeight: calendarContent.implicitHeight + Style.margin2M
+  implicitHeight: calendarContent.implicitHeight + Style.spaceS * 2
 
   // Internal state - independent from header
   readonly property var now: Time.now
@@ -86,21 +86,21 @@ NBox {
   ColumnLayout {
     id: calendarContent
     anchors.fill: parent
-    anchors.margins: Style.marginM
-    spacing: Style.marginS
+    anchors.margins: Style.spaceS
+    spacing: Style.spaceXS
 
     // Navigation row
     RowLayout {
       Layout.fillWidth: true
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       Item {
-        Layout.preferredWidth: Style.marginS
+        Layout.preferredWidth: Style.spaceXS
       }
 
       NText {
         text: I18n.locale.monthName(root.calendarMonth, Locale.LongFormat).toUpperCase() + " " + root.calendarYear
-        pointSize: Style.fontSizeM
+        pointSize: Style.fontSizeLabelLarge
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
       }
@@ -150,7 +150,7 @@ NBox {
           model: 7
           Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: Style.fontSizeS * 2
+            Layout.preferredHeight: Style.fontSizeLabelSmall * 2
 
             NText {
               anchors.centerIn: parent
@@ -160,7 +160,7 @@ NBox {
                 return dayName.substring(0, 2).toUpperCase();
               }
               color: Color.mPrimary
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelSmall
               font.weight: Style.fontWeightBold
               horizontalAlignment: Text.AlignHCenter
             }
@@ -223,7 +223,7 @@ NBox {
         visible: Settings.data.location.showWeekNumberInCalendar
         Layout.preferredWidth: visible ? Style.baseWidgetSize * 0.7 : 0
         Layout.alignment: Qt.AlignTop
-        spacing: Style.marginXXS
+        spacing: Style.spaceXXS
 
         property var weekNumbers: {
           if (!grid.daysModel || grid.daysModel.length === 0)
@@ -259,7 +259,7 @@ NBox {
             NText {
               anchors.centerIn: parent
               color: Qt.alpha(Color.mPrimary, 0.7)
-              pointSize: Style.fontSizeXXS
+              pointSize: Style.fontSizeLabelSmall
               text: modelData
             }
           }
@@ -271,8 +271,8 @@ NBox {
         id: grid
         Layout.fillWidth: true
         columns: 7
-        columnSpacing: Style.marginXXS
-        rowSpacing: Style.marginXXS
+        columnSpacing: Style.spaceXXS
+        rowSpacing: Style.spaceXXS
 
         property int month: root.calendarMonth
         property int year: root.calendarYear
@@ -341,7 +341,7 @@ NBox {
               width: Style.baseWidgetSize * 0.9
               height: Style.baseWidgetSize * 0.9
               anchors.centerIn: parent
-              radius: Style.radiusM
+              radius: Style.radiusControl
               color: modelData.today ? Color.mSecondary : "transparent"
 
               NText {
@@ -355,7 +355,7 @@ NBox {
                   return Color.mOnSurfaceVariant;
                 }
                 opacity: modelData.currentMonth ? 1.0 : 0.4
-                pointSize: Style.fontSizeM
+                pointSize: Style.fontSizeLabelLarge
                 font.weight: modelData.today ? Style.fontWeightBold : Style.fontWeightMedium
               }
 
@@ -365,7 +365,7 @@ NBox {
                 spacing: 2
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: Style.marginXS
+                anchors.bottomMargin: Style.spaceXXS
 
                 Repeater {
                   model: parent.parent.parent.parent.parent.getEventsForDate(modelData.year, modelData.month, modelData.day)
@@ -373,7 +373,7 @@ NBox {
                   Rectangle {
                     width: 4
                     height: width
-                    radius: Style.radiusXXS
+                    radius: Style.radiusCapsule
                     color: parent.parent.parent.parent.parent.getEventColor(modelData, modelData.today)
                   }
                 }
@@ -416,8 +416,8 @@ NBox {
               }
 
               Behavior on color {
-                ColorAnimation {
-                  duration: Style.animationFast
+                NColorAnimation {
+                  motionType: NColorAnimation.Standard
                 }
               }
             }
