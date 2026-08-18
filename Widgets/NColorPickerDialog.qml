@@ -101,7 +101,7 @@ Popup {
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: 80
-      radius: Style.radiusContent
+      radius: Style.radiusControl
       color: root.selectedColor
       border.color: Color.mOutline
       border.width: Style.borderS

@@ -4937,7 +4937,7 @@ Item {
                 text: modelData || "· · ·"
                 color: activeLine ? Color.mPrimary : Color.mOnSurfaceVariant
                 pointSize: activeLine ? Style.fontSizeL : Style.fontSizeM
-                font.weight: activeLine ? Style.fontWeightBold : Style.fontWeightNormal
+                font.weight: activeLine ? Style.fontWeightBold : Style.fontWeightRegular
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
                 opacity: LyricsService.isLoading ? 0.5 : (activeLine || !LyricsService.hasSyncedLyrics ? 1.0 : 0.58)

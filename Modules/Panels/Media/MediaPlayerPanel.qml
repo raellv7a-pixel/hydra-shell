@@ -191,9 +191,9 @@ SmartPanel {
 
               background: Rectangle {
                 color: Color.mSurfaceContainerHigh
-                border.color: Color.mOutlineVariant
+                border.color: Color.mOutline
                 border.width: Style.borderS
-                radius: Style.radiusMenu
+                radius: Style.radiusPopover
               }
 
               contentItem: ColumnLayout {

@@ -431,7 +431,7 @@ NBox {
 
       Rectangle {
         anchors.fill: parent
-        radius: Style.radiusContent
+        radius: Style.radiusControl
         color: Color.tonal(Color.mSurfaceContainerHighest, Color.mSecondary, Style.stateSelectedOpacity)
         border.color: Color.mSecondary
         border.width: Style.borderM

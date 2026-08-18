@@ -15,7 +15,7 @@ Rectangle {
   color: Color.mSurfaceContainerLow
   border.color: Color.mOutline
   border.width: Style.borderS
-  radius: Style.radiusContent
+  radius: Style.radiusControl
 
   ColumnLayout {
     id: column

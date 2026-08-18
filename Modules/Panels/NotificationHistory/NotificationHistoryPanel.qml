@@ -703,7 +703,7 @@ SmartPanel {
                         if (notificationDelegate.isFocused)
                           return Color.mPrimary;
                         if (Settings.data.ui.boxBorderEnabled)
-                          return Qt.alpha(Color.mOutlineVariant, Style.opacityHeavy);
+                          return Qt.alpha(Color.mOutline, Style.opacityHeavy);
                         return "transparent";
                       }
                       border.width: notificationDelegate.isFocused ? Style.borderM : Style.borderS

@@ -55,10 +55,10 @@ ColumnLayout {
       pressed: headerArea.pressed
       focused: headerContainer.activeFocus
       selected: root.expanded
-      restingRadius: Style.radiusContent
+      restingRadius: Style.radiusControl
       hoverRadius: Style.radiusControlChecked
       pressedRadius: Style.radiusControlPressed
-      selectedRadius: Style.radiusContent
+      selectedRadius: Style.radiusControl
     }
 
     NStateLayer {
@@ -181,7 +181,7 @@ ColumnLayout {
 
     visible: root.expanded || opacity > 0
     color: Color.mSurfaceContainerLow
-    radius: Style.radiusContent
+    radius: Style.radiusControl
     border.color: Color.mOutline
     border.width: Style.borderS
 

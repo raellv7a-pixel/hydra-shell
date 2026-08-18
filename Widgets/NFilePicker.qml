@@ -280,7 +280,7 @@ Popup {
         Layout.fillWidth: true
         Layout.preferredHeight: 45
         color: Color.mSurfaceContainer
-        radius: Style.radiusContent
+        radius: Style.radiusControl
         border.color: Color.mOutline
         border.width: Style.borderS
 
@@ -407,7 +407,7 @@ Popup {
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: Color.mSurfaceContainerLow
-        radius: Style.radiusContent
+        radius: Style.radiusControl
         border.color: Color.mOutline
         border.width: Style.borderS
 
@@ -514,7 +514,7 @@ Popup {
               pressed: mouseArea.pressed
               focused: gridItem.activeFocus
               selected: gridItem.isSelected
-              restingRadius: Style.radiusContent
+              restingRadius: Style.radiusControl
               hoverRadius: Style.radiusControlChecked
               pressedRadius: Style.radiusControlPressed
               selectedRadius: Style.radiusControlChecked
