@@ -1,5 +1,6 @@
 {
   version ? "dirty",
+  m3shapes,
   extraPackages ? [ ],
   runtimeDeps ? [
     brightnessctl
@@ -95,7 +96,8 @@ stdenv.mkDerivation {
   buildPhase = ''
     runHook preBuild
     cmake -S plugin -B build/visual-plugin -G Ninja \
-      -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_BUILD_TYPE=Release \
+      -DFETCHCONTENT_SOURCE_DIR_M3SHAPES_EXTERNAL=${m3shapes}
     cmake --build build/visual-plugin
     runHook postBuild
   '';

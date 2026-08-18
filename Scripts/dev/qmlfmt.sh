@@ -64,7 +64,7 @@ all_files=()
 for target in "${targets[@]}"; do
   if [ -d "$target" ]; then
     while IFS= read -r -d '' file; do all_files+=("$file"); done \
-      < <(find "$target" -name "*.qml" -type f -print0)
+      < <(find "$target" \( -name ".build" -o -name ".git" -o -name "node_modules" \) -prune -o -name "*.qml" -type f -print0)
   elif [ -f "$target" ] && [[ "$target" == *.qml ]]; then
     all_files+=("$target")
   else

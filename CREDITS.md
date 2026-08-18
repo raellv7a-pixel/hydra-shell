@@ -13,6 +13,7 @@ Noctalia Shell is made possible by the incredible work of many open-source proje
 
 ### Visual engine
 - **[Caelestia Shell](https://github.com/caelestia-dots/shell)** (GPLv3) - Source of the Blob SDF rendering and velocity-driven deformation subsystem being adapted for Hydra Shell. The exact source inventory and modifications are tracked in [`LICENSES/Caelestia-Blob-Port.md`](LICENSES/Caelestia-Blob-Port.md).
+- **[M3Shapes](https://github.com/soramanew/m3shapes)** (Apache-2.0) - Qt/QML port of Android's `androidx.graphics.shapes` providing the Material 3 shape catalog and morph animation used by Hydra's expressive loading indicators and signature motion. Vendored unmodified at build time; audit and integration scope tracked in [`LICENSES/M3Shapes-Attribution.md`](LICENSES/M3Shapes-Attribution.md).
 
 ## Runtime Dependencies
 
@@ -56,4 +57,4 @@ Noctalia Shell is made possible by the incredible work of many open-source proje
 ## License
 The combined Hydra Shell work is distributed under GPL-3.0-only. See [LICENSE](LICENSE).
 
-Noctalia-origin code retains its original MIT grant in [`LICENSES/Noctalia-MIT.txt`](LICENSES/Noctalia-MIT.txt). The Caelestia Blob port remains GPLv3 and is documented in [`LICENSES/Caelestia-Blob-Port.md`](LICENSES/Caelestia-Blob-Port.md). Each dependency listed above is governed by its respective license.
+Noctalia-origin code retains its original MIT grant in [`LICENSES/Noctalia-MIT.txt`](LICENSES/Noctalia-MIT.txt). The Caelestia Blob port remains GPLv3 and is documented in [`LICENSES/Caelestia-Blob-Port.md`](LICENSES/Caelestia-Blob-Port.md). M3Shapes remains Apache-2.0 and is documented in [`LICENSES/M3Shapes-Attribution.md`](LICENSES/M3Shapes-Attribution.md). Each dependency listed above is governed by its respective license.

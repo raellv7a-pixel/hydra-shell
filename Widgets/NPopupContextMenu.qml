@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
+import qs.Widgets
 
 // Simple context menu PopupWindow (similar to TrayMenu)
 // Designed to be rendered inside a PopupMenuWindow for click-outside-to-close
@@ -199,6 +200,20 @@ PopupWindow {
     Qt.callLater(calculateWidth);
   }
 
+  // "Sprout" entrance: the popup grows from the edge nearest the bar
+  // instead of just fading in place, so it visually emerges from its
+  // anchor. NAnim durations already collapse to 0 when motion/performance
+  // mode disables animation, so no extra guard is needed here.
+  readonly property int sproutOrigin: {
+    if (root.barPosition === "bottom")
+      return Item.Bottom;
+    if (root.barPosition === "left")
+      return Item.Left;
+    if (root.barPosition === "right")
+      return Item.Right;
+    return Item.Top;
+  }
+
   Item {
     anchors.fill: parent
     focus: true
@@ -208,16 +223,24 @@ PopupWindow {
   Rectangle {
     id: menuBackground
     anchors.fill: parent
-    color: Color.mSurface
+    color: Color.mSurfaceContainerHigh
     border.color: Color.mOutline
     border.width: Style.borderS
-    radius: Style.radiusM
+    radius: Style.radiusPopover
     opacity: root.visible ? 1.0 : 0.0
+    transformOrigin: root.sproutOrigin
+    scale: root.visible ? 1.0 : 0.85
 
     Behavior on opacity {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuad
+      NAnim {
+        duration: Style.motionDurationDefaultEffects
+        motionType: NAnim.StandardEffects
+      }
+    }
+
+    Behavior on scale {
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
   }
@@ -229,11 +252,19 @@ PopupWindow {
     contentHeight: columnLayout.implicitHeight
     interactive: true
     opacity: root.visible ? 1.0 : 0.0
+    transformOrigin: root.sproutOrigin
+    scale: root.visible ? 1.0 : 0.85
 
     Behavior on opacity {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuad
+      NAnim {
+        duration: Style.motionDurationDefaultEffects
+        motionType: NAnim.StandardEffects
+      }
+    }
+
+    Behavior on scale {
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 
@@ -254,19 +285,34 @@ PopupWindow {
           Layout.preferredHeight: modelData.visible !== false ? root.itemHeight : 0
           visible: modelData.visible !== false
           color: "transparent"
+          radius: menuMorph.radius
+          scale: menuMorph.scale
+          opacity: modelData.enabled !== false ? Style.opacityFull : Style.disabledContentOpacity
+          activeFocusOnTab: modelData.enabled !== false
+          Accessible.role: Accessible.ListItem
+          Accessible.name: modelData.label || modelData.text || ""
 
-          Rectangle {
+          NShapeMorph {
+            id: menuMorph
+
+            enabled: modelData.enabled !== false
+            hovered: mouseArea.containsMouse
+            pressed: mouseArea.pressed
+            focused: menuItem.activeFocus
+            restingRadius: Style.radiusControl
+            hoverRadius: Style.radiusControlChecked
+            pressedRadius: Style.radiusControlPressed
+          }
+
+          NStateLayer {
             id: innerRect
             anchors.fill: parent
-            color: mouseArea.containsMouse ? Color.mHover : "transparent"
-            radius: Style.radiusS
-            opacity: modelData.enabled !== false ? 1.0 : 0.5
-
-            Behavior on color {
-              ColorAnimation {
-                duration: Style.animationFast
-              }
-            }
+            radius: menuItem.radius
+            enabled: modelData.enabled !== false
+            hovered: mouseArea.containsMouse
+            pressed: mouseArea.pressed
+            focused: menuItem.activeFocus
+            stateColor: Color.mPrimary
 
             RowLayout {
               anchors.fill: parent
@@ -279,28 +325,15 @@ PopupWindow {
                 icon: modelData.icon || ""
                 pointSize: Style.fontSizeS
                 applyUiScale: false
-                color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
-                verticalAlignment: Text.AlignVCenter
-
-                Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationFast
-                  }
-                }
+                color: Color.mOnSurface
               }
 
               NText {
                 text: modelData.label || modelData.text || ""
                 pointSize: Style.fontSizeS
-                color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                color: Color.mOnSurface
                 verticalAlignment: Text.AlignVCenter
                 Layout.fillWidth: true
-
-                Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationFast
-                  }
-                }
               }
             }
 
@@ -310,6 +343,10 @@ PopupWindow {
               hoverEnabled: true
               enabled: (modelData.enabled !== false) && root.visible
               cursorShape: Qt.PointingHandCursor
+              onPressed: mouse => {
+                           menuItem.forceActiveFocus();
+                           innerRect.rippleAt(mouse.x, mouse.y);
+                         }
 
               onClicked: {
                 if (menuItem.modelData.enabled !== false) {
@@ -318,7 +355,23 @@ PopupWindow {
                 }
               }
             }
+            NFocusRing {
+              focusVisible: menuItem.activeFocus
+              targetRadius: menuItem.radius
+            }
           }
+          Keys.onReturnPressed: event => {
+                                  if (menuItem.modelData.enabled !== false) {
+                                    root.triggered(menuItem.modelData.action || menuItem.modelData.key || menuItem.index.toString(), menuItem.modelData);
+                                    event.accepted = true;
+                                  }
+                                }
+          Keys.onSpacePressed: event => {
+                                 if (menuItem.modelData.enabled !== false) {
+                                   root.triggered(menuItem.modelData.action || menuItem.modelData.key || menuItem.index.toString(), menuItem.modelData);
+                                   event.accepted = true;
+                                 }
+                               }
         }
       }
     }

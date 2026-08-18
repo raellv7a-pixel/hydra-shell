@@ -53,7 +53,7 @@ RowLayout {
     Layout.margins: Style.borderS
     implicitWidth: Math.round(root.baseSize * .85) * 2
     implicitHeight: Math.round(root.baseSize * .5) * 2
-    radius: Math.min(Style.iRadiusL, height / 2)
+    radius: height / 2
     scale: morph.scale
     color: root.checked ? Color.mPrimary : Color.mSurfaceContainerHighest
     border.color: root.checked ? "transparent" : Color.mOutline
@@ -99,17 +99,26 @@ RowLayout {
     Rectangle {
       implicitWidth: Math.round(root.baseSize * 0.4) * 2
       implicitHeight: Math.round(root.baseSize * 0.4) * 2
-      radius: Math.min(Style.iRadiusL, height / 2)
+      radius: height / 2
       color: root.checked ? Color.mOnPrimary : Color.mOnSurfaceVariant
       border.color: "transparent"
       border.width: 0
       anchors.verticalCenter: parent.verticalCenter
       anchors.verticalCenterOffset: 0
       x: root.checked ? switcher.width - width - 3 : 3
+      scale: root.pressed ? 1.18 : 1.0
 
       Behavior on x {
         NAnim {
           motionType: NAnim.ExpressiveFastSpatial
+        }
+      }
+
+      Behavior on scale {
+        enabled: Style.motionEnabled
+        SpringAnimation {
+          spring: 5.2
+          damping: 0.4
         }
       }
     }

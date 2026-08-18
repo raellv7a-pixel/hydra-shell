@@ -21,6 +21,6 @@ The imported and modified source inventory is:
 
 Hydra-specific modifications currently include the QML module rename from `Caelestia.Blobs` to `Hydra.Visual`, standalone CMake build/install rules, CachyOS and Nix packaging, and explicit SPDX attribution on every imported source. Integration with Hydra `MainScreen`/`SmartPanel` and performance-mode controls are tracked separately. Modified source files retain upstream attribution and record that they were modified for Hydra Shell.
 
-No Caelestia branding or nonessential assets are included by this decision. Other Caelestia components or third-party dependencies, including `M3Shapes`, require a separate license audit before incorporation.
+No Caelestia branding or nonessential assets are included by this decision. `M3Shapes` was audited separately and cleared for incorporation; see [`M3Shapes-Attribution.md`](./M3Shapes-Attribution.md).
 
 The combined Hydra Shell work is distributed under GPL-3.0-only. Code inherited from Noctalia remains available under its original MIT terms as recorded in `Noctalia-MIT.txt`; the combined distribution is governed by GPLv3.
