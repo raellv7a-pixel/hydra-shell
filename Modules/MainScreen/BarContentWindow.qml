@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Modules.Bar
 import qs.Services.UI
+import qs.Widgets
 
 /**
 * BarContentWindow - Separate transparent PanelWindow for bar content

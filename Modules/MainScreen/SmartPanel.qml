@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.Commons
+import qs.Modules.MainScreen.Backgrounds
 import qs.Services.UI
 import qs.Widgets
 
@@ -1025,15 +1026,7 @@ Item {
         if (!root.barShouldShow) {
           // Only check edge touching, not bar touching
           var edgeInverted = panelContent.allowAttach && (panelContent.touchingLeftEdge || panelContent.touchingTopEdge);
-          if (edgeInverted) {
-            if (panelContent.touchingLeftEdge && panelContent.touchingTopEdge)
-              return 0; // Both edges: no inversion (normal rounded corner)
-            if (panelContent.touchingLeftEdge)
-              return 2; // Left edge: vertical inversion
-            if (panelContent.touchingTopEdge)
-              return 1; // Top edge: horizontal inversion
-          }
-          return 0;
+          return edgeInverted ? ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingLeftEdge, panelContent.touchingTopEdge) : 0;
         }
 
         var barTouchInverted = panelContent.touchingTopBar || panelContent.touchingLeftBar;
@@ -1041,13 +1034,8 @@ Item {
         var edgeInverted = panelContent.allowAttach && (panelContent.touchingLeftEdge || panelContent.touchingTopEdge);
 
         if (barTouchInverted || edgeInverted) {
-          // Determine inversion direction based on which edge is touched
-          if (panelContent.touchingLeftEdge && panelContent.touchingTopEdge)
-            return 0; // Both edges: no inversion (normal rounded corner)
-          if (panelContent.touchingLeftEdge)
-            return 2; // Left edge: vertical inversion
-          if (panelContent.touchingTopEdge)
-            return 1; // Top edge: horizontal inversion
+          if (edgeInverted)
+            return ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingLeftEdge, panelContent.touchingTopEdge);
           return root.barIsVertical ? 2 : 1;
         }
         return 0;
@@ -1058,15 +1046,7 @@ Item {
         if (!root.barShouldShow) {
           // Only check edge touching, not bar touching
           var edgeInverted = panelContent.allowAttach && (panelContent.touchingRightEdge || panelContent.touchingTopEdge);
-          if (edgeInverted) {
-            if (panelContent.touchingRightEdge && panelContent.touchingTopEdge)
-              return 0; // Both edges: no inversion (normal rounded corner)
-            if (panelContent.touchingRightEdge)
-              return 2; // Right edge: vertical inversion
-            if (panelContent.touchingTopEdge)
-              return 1; // Top edge: horizontal inversion
-          }
-          return 0;
+          return edgeInverted ? ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingRightEdge, panelContent.touchingTopEdge) : 0;
         }
 
         var barTouchInverted = panelContent.touchingTopBar || panelContent.touchingRightBar;
@@ -1074,13 +1054,8 @@ Item {
         var edgeInverted = panelContent.allowAttach && (panelContent.touchingRightEdge || panelContent.touchingTopEdge);
 
         if (barTouchInverted || edgeInverted) {
-          // Determine inversion direction based on which edge is touched
-          if (panelContent.touchingRightEdge && panelContent.touchingTopEdge)
-            return 0; // Both edges: no inversion (normal rounded corner)
-          if (panelContent.touchingRightEdge)
-            return 2; // Right edge: vertical inversion
-          if (panelContent.touchingTopEdge)
-            return 1; // Top edge: horizontal inversion
+          if (edgeInverted)
+            return ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingRightEdge, panelContent.touchingTopEdge);
           return root.barIsVertical ? 2 : 1;
         }
         return 0;
@@ -1091,15 +1066,7 @@ Item {
         if (!root.barShouldShow) {
           // Only check edge touching, not bar touching
           var edgeInverted = panelContent.allowAttach && (panelContent.touchingLeftEdge || panelContent.touchingBottomEdge);
-          if (edgeInverted) {
-            if (panelContent.touchingLeftEdge && panelContent.touchingBottomEdge)
-              return 0; // Both edges: no inversion (normal rounded corner)
-            if (panelContent.touchingLeftEdge)
-              return 2; // Left edge: vertical inversion
-            if (panelContent.touchingBottomEdge)
-              return 1; // Bottom edge: horizontal inversion
-          }
-          return 0;
+          return edgeInverted ? ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingLeftEdge, panelContent.touchingBottomEdge) : 0;
         }
 
         var barTouchInverted = panelContent.touchingBottomBar || panelContent.touchingLeftBar;
@@ -1107,13 +1074,8 @@ Item {
         var edgeInverted = panelContent.allowAttach && (panelContent.touchingLeftEdge || panelContent.touchingBottomEdge);
 
         if (barTouchInverted || edgeInverted) {
-          // Determine inversion direction based on which edge is touched
-          if (panelContent.touchingLeftEdge && panelContent.touchingBottomEdge)
-            return 0; // Both edges: no inversion (normal rounded corner)
-          if (panelContent.touchingLeftEdge)
-            return 2; // Left edge: vertical inversion
-          if (panelContent.touchingBottomEdge)
-            return 1; // Bottom edge: horizontal inversion
+          if (edgeInverted)
+            return ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingLeftEdge, panelContent.touchingBottomEdge);
           return root.barIsVertical ? 2 : 1;
         }
         return 0;
@@ -1124,15 +1086,7 @@ Item {
         if (!root.barShouldShow) {
           // Only check edge touching, not bar touching
           var edgeInverted = panelContent.allowAttach && (panelContent.touchingRightEdge || panelContent.touchingBottomEdge);
-          if (edgeInverted) {
-            if (panelContent.touchingRightEdge && panelContent.touchingBottomEdge)
-              return 0; // Both edges: no inversion (normal rounded corner)
-            if (panelContent.touchingRightEdge)
-              return 2; // Right edge: vertical inversion
-            if (panelContent.touchingBottomEdge)
-              return 1; // Bottom edge: horizontal inversion
-          }
-          return 0;
+          return edgeInverted ? ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingRightEdge, panelContent.touchingBottomEdge) : 0;
         }
 
         var barTouchInverted = panelContent.touchingBottomBar || panelContent.touchingRightBar;
@@ -1140,13 +1094,8 @@ Item {
         var edgeInverted = panelContent.allowAttach && (panelContent.touchingRightEdge || panelContent.touchingBottomEdge);
 
         if (barTouchInverted || edgeInverted) {
-          // Determine inversion direction based on which edge is touched
-          if (panelContent.touchingRightEdge && panelContent.touchingBottomEdge)
-            return 0; // Both edges: no inversion (normal rounded corner)
-          if (panelContent.touchingRightEdge)
-            return 2; // Right edge: vertical inversion
-          if (panelContent.touchingBottomEdge)
-            return 1; // Bottom edge: horizontal inversion
+          if (edgeInverted)
+            return ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingRightEdge, panelContent.touchingBottomEdge);
           return root.barIsVertical ? 2 : 1;
         }
         return 0;

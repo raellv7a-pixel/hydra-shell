@@ -233,42 +233,10 @@ Variants {
 
         // Corner states based on edge touching
         // State 0: Normal rounded, State 1: Horizontal inversion, State 2: Vertical inversion
-        readonly property int topLeftCornerState: {
-          if (touchingLeft && touchingTop)
-            return 0;
-          if (touchingLeft)
-            return 2;
-          if (touchingTop)
-            return 1;
-          return 0;
-        }
-        readonly property int topRightCornerState: {
-          if (touchingRight && touchingTop)
-            return 0;
-          if (touchingRight)
-            return 2;
-          if (touchingTop)
-            return 1;
-          return 0;
-        }
-        readonly property int bottomLeftCornerState: {
-          if (touchingLeft && touchingBottom)
-            return 0;
-          if (touchingLeft)
-            return 2;
-          if (touchingBottom)
-            return 1;
-          return 0;
-        }
-        readonly property int bottomRightCornerState: {
-          if (touchingRight && touchingBottom)
-            return 0;
-          if (touchingRight)
-            return 2;
-          if (touchingBottom)
-            return 1;
-          return 0;
-        }
+        readonly property int topLeftCornerState: ShapeCornerHelper.cornerStateFromEdges(touchingLeft, touchingTop)
+        readonly property int topRightCornerState: ShapeCornerHelper.cornerStateFromEdges(touchingRight, touchingTop)
+        readonly property int bottomLeftCornerState: ShapeCornerHelper.cornerStateFromEdges(touchingLeft, touchingBottom)
+        readonly property int bottomRightCornerState: ShapeCornerHelper.cornerStateFromEdges(touchingRight, touchingBottom)
 
         // Background with inverted corners - extends beyond panel for inverted corners
         Shape {
@@ -288,25 +256,18 @@ Variants {
           readonly property real panelW: launcherPanel.width
           readonly property real panelH: launcherPanel.height
 
-          // Helper functions for corner rendering
-          function getMultX(state) {
-            return state === 1 ? -1 : 1;
-          }
-          function getMultY(state) {
-            return state === 2 ? -1 : 1;
-          }
-          function getArcDir(multX, multY) {
-            return ((multX < 0) !== (multY < 0)) ? PathArc.Counterclockwise : PathArc.Clockwise;
-          }
+          // Corner multipliers/arc direction come from the shared ShapeCornerHelper
+          // singleton (Modules/MainScreen/Backgrounds/ShapeCornerHelper.qml), which
+          // also backs SmartPanel's corner-state calculation.
 
-          readonly property real tlMultX: getMultX(launcherPanel.topLeftCornerState)
-          readonly property real tlMultY: getMultY(launcherPanel.topLeftCornerState)
-          readonly property real trMultX: getMultX(launcherPanel.topRightCornerState)
-          readonly property real trMultY: getMultY(launcherPanel.topRightCornerState)
-          readonly property real blMultX: getMultX(launcherPanel.bottomLeftCornerState)
-          readonly property real blMultY: getMultY(launcherPanel.bottomLeftCornerState)
-          readonly property real brMultX: getMultX(launcherPanel.bottomRightCornerState)
-          readonly property real brMultY: getMultY(launcherPanel.bottomRightCornerState)
+          readonly property real tlMultX: ShapeCornerHelper.getMultX(launcherPanel.topLeftCornerState)
+          readonly property real tlMultY: ShapeCornerHelper.getMultY(launcherPanel.topLeftCornerState)
+          readonly property real trMultX: ShapeCornerHelper.getMultX(launcherPanel.topRightCornerState)
+          readonly property real trMultY: ShapeCornerHelper.getMultY(launcherPanel.topRightCornerState)
+          readonly property real blMultX: ShapeCornerHelper.getMultX(launcherPanel.bottomLeftCornerState)
+          readonly property real blMultY: ShapeCornerHelper.getMultY(launcherPanel.bottomLeftCornerState)
+          readonly property real brMultX: ShapeCornerHelper.getMultX(launcherPanel.bottomRightCornerState)
+          readonly property real brMultY: ShapeCornerHelper.getMultY(launcherPanel.bottomRightCornerState)
 
           ShapePath {
             strokeWidth: -1
@@ -327,7 +288,7 @@ Variants {
               relativeY: panelShape.radius * panelShape.trMultY
               radiusX: panelShape.radius
               radiusY: panelShape.radius
-              direction: panelShape.getArcDir(panelShape.trMultX, panelShape.trMultY)
+              direction: ShapeCornerHelper.getArcDirection(panelShape.trMultX, panelShape.trMultY)
             }
             // Right edge
             PathLine {
@@ -340,7 +301,7 @@ Variants {
               relativeY: panelShape.radius * panelShape.brMultY
               radiusX: panelShape.radius
               radiusY: panelShape.radius
-              direction: panelShape.getArcDir(panelShape.brMultX, panelShape.brMultY)
+              direction: ShapeCornerHelper.getArcDirection(panelShape.brMultX, panelShape.brMultY)
             }
             // Bottom edge
             PathLine {
@@ -353,7 +314,7 @@ Variants {
               relativeY: -panelShape.radius * panelShape.blMultY
               radiusX: panelShape.radius
               radiusY: panelShape.radius
-              direction: panelShape.getArcDir(panelShape.blMultX, panelShape.blMultY)
+              direction: ShapeCornerHelper.getArcDirection(panelShape.blMultX, panelShape.blMultY)
             }
             // Left edge
             PathLine {
@@ -366,7 +327,7 @@ Variants {
               relativeY: -panelShape.radius * panelShape.tlMultY
               radiusX: panelShape.radius
               radiusY: panelShape.radius
-              direction: panelShape.getArcDir(panelShape.tlMultX, panelShape.tlMultY)
+              direction: ShapeCornerHelper.getArcDirection(panelShape.tlMultX, panelShape.tlMultY)
             }
           }
         }

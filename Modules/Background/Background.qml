@@ -6,6 +6,7 @@ import qs.Commons
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI
+import qs.Widgets
 
 Variants {
   id: backgroundVariants

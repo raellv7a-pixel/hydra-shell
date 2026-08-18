@@ -38,6 +38,7 @@ import qs.Modules.ScreenToolkit
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI
+import qs.Widgets
 
 /**
 * MainScreen - Single PanelWindow per screen that manages all panels and the bar
