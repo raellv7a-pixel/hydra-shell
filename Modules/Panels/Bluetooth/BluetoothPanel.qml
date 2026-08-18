@@ -22,33 +22,36 @@ SmartPanel {
     id: panelContent
     color: "transparent"
 
-    property real contentPreferredHeight: Math.min(root.preferredHeight, mainColumn.implicitHeight + Style.margin2L)
+    property real contentPreferredHeight: Math.min(root.preferredHeight, mainColumn.implicitHeight + Style.paddingCard * 2)
 
     ColumnLayout {
       id: mainColumn
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       // Header
       NBox {
         Layout.fillWidth: true
-        Layout.preferredHeight: headerRow.implicitHeight + Style.margin2M
-
+        implicitHeight: headerRow.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
         RowLayout {
           id: headerRow
           anchors.fill: parent
-          anchors.margins: Style.marginM
-
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
           NIcon {
             icon: BluetoothService.enabled ? "bluetooth" : "bluetooth-off"
-            pointSize: Style.fontSizeXXL
-            color: BluetoothService.enabled ? Color.mPrimary : Color.mOnSurfaceVariant
+            pointSize: Style.fontSizeHeadlineSmall
+            color: Color.mPrimary
           }
 
-          NLabel {
-            label: I18n.tr("common.bluetooth")
+          NText {
+            text: I18n.tr("common.bluetooth")
             Layout.fillWidth: true
+            pointSize: Style.fontSizeTitleMedium
+            font.weight: Style.fontWeightBold
+            color: Color.mOnSurface
           }
 
           NToggle {
@@ -97,20 +100,21 @@ SmartPanel {
         ColumnLayout {
           id: devicesList
           width: bluetoothScrollView.availableWidth
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           // Adapter not available of disabled
           NBox {
             id: disabledBox
             visible: !BluetoothService.enabled
             Layout.fillWidth: true
-            Layout.preferredHeight: disabledColumn.implicitHeight + Style.margin2M
+            Layout.preferredHeight: disabledColumn.implicitHeight + Style.paddingCard * 2
+            radius: Style.radiusCard
 
             ColumnLayout {
               id: disabledColumn
               anchors.fill: parent
-              anchors.margins: Style.marginM
-              spacing: Style.marginL
+              anchors.margins: Style.paddingCard
+              spacing: Style.spaceM
 
               Item {
                 Layout.fillHeight: true
@@ -125,14 +129,14 @@ SmartPanel {
 
               NText {
                 text: I18n.tr("bluetooth.panel.disabled")
-                pointSize: Style.fontSizeL
+                pointSize: Style.fontSizeTitleSmall
                 color: Color.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignHCenter
               }
 
               NText {
                 text: I18n.tr("bluetooth.panel.enable-message")
-                pointSize: Style.fontSizeS
+                pointSize: Style.fontSizeBodySmall
                 color: Color.mOnSurfaceVariant
                 horizontalAlignment: Text.AlignHCenter
                 Layout.fillWidth: true
@@ -155,13 +159,14 @@ SmartPanel {
               return (btSource.pairedDevices.length === 0 && btSource.connectedDevices.length === 0);
             }
             Layout.fillWidth: true
-            Layout.preferredHeight: emptyColumn.implicitHeight + Style.margin2M
+            Layout.preferredHeight: emptyColumn.implicitHeight + Style.paddingCard * 2
+            radius: Style.radiusCard
 
             ColumnLayout {
               id: emptyColumn
               anchors.fill: parent
-              anchors.margins: Style.marginM
-              spacing: Style.marginL
+              anchors.margins: Style.paddingCard
+              spacing: Style.spaceM
 
               Item {
                 Layout.fillHeight: true
@@ -176,7 +181,7 @@ SmartPanel {
 
               NText {
                 text: I18n.tr("bluetooth.panel.no-devices")
-                pointSize: Style.fontSizeL
+                pointSize: Style.fontSizeTitleSmall
                 color: Color.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignHCenter
               }

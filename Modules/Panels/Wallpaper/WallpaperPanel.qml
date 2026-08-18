@@ -308,8 +308,8 @@ SmartPanel {
 
     RowLayout {
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginL
+      anchors.margins: Style.paddingCard
+      spacing: Style.paddingCard
 
       // LEFT COLUMN: header + active source view (roughly 62% of the width)
       ColumnLayout {
@@ -317,7 +317,7 @@ SmartPanel {
         Layout.fillHeight: true
         Layout.preferredWidth: root.width * 0.62
         Layout.minimumWidth: 380 * Style.uiScaleRatio
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         WallpaperPanelHeader {
           id: header
@@ -361,13 +361,13 @@ SmartPanel {
           Layout.fillWidth: true
           Layout.fillHeight: true
           color: Color.mSurfaceContainerLow
-          radius: Style.radiusL
+          radius: Style.radiusCard
 
           StackLayout {
             id: contentStack
 
             anchors.fill: parent
-            anchors.margins: Style.marginL
+            anchors.margins: Style.paddingCard
 
             currentIndex: {
               if (header.mainTabIndex === 1) {

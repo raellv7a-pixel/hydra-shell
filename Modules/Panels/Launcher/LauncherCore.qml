@@ -927,9 +927,8 @@ Rectangle {
   opacity: resultsReady ? 1.0 : 0.0
 
   Behavior on opacity {
-    OpacityAnimator {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.StandardEffects
     }
   }
 
@@ -961,9 +960,9 @@ Rectangle {
 
   ColumnLayout {
     anchors.fill: parent
-    anchors.topMargin: Style.marginM
-    anchors.bottomMargin: Style.marginM
-    spacing: Style.marginS
+    anchors.topMargin: Style.paddingCard
+    anchors.bottomMargin: Style.paddingCard
+    spacing: Style.spaceS
 
     // Header Cover Banner (when coverMode !== "none")
     Item {
@@ -971,14 +970,13 @@ Rectangle {
       visible: root.hasCoverBanner
       Layout.fillWidth: true
       Layout.preferredHeight: root.coverBannerHeight
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
+      Layout.leftMargin: Style.paddingCard
+      Layout.rightMargin: Style.paddingCard
       Layout.topMargin: 0
       clip: false
 
       // Two-layer elevation: a wide ambient halo plus a tight contact shadow.
-      // Both stay well inside the panel's side margins so they never bleed past
-      // the launcher edges (Style.marginM on each side, blurMax is 22px).
+      // The shadows stay inside the panel padding and never bleed past the launcher edge.
       NDropShadow {
         anchors.fill: bannerContainer
         source: bannerContainer
@@ -1004,7 +1002,7 @@ Rectangle {
       Rectangle {
         id: bannerContainer
         anchors.fill: parent
-        radius: Style.radiusL
+        radius: Style.radiusCard
         color: Color.mSurfaceContainerLow
         border.color: "transparent"
         border.width: 0
@@ -1014,7 +1012,7 @@ Rectangle {
           anchors.fill: parent
           imagePath: root.profileWallpaperPath
           imageFillMode: Image.PreserveAspectCrop
-          radius: Style.radiusL
+          radius: Style.radiusCard
         }
 
         Rectangle {
@@ -1035,14 +1033,14 @@ Rectangle {
               color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40)
             }
           }
-          radius: Style.radiusL
+          radius: Style.radiusCard
         }
 
         // Rim light: reads as a lit top edge, which is what actually sells the
         // floating look now that the shadow no longer carries it alone.
         Rectangle {
           anchors.fill: parent
-          radius: Style.radiusL
+          radius: Style.radiusCard
           gradient: Gradient {
             orientation: Gradient.Vertical
             GradientStop {
@@ -1059,7 +1057,7 @@ Rectangle {
         // Hairline outline so the banner keeps a crisp edge against the panel
         Rectangle {
           anchors.fill: parent
-          radius: Style.radiusL
+          radius: Style.radiusCard
           color: "transparent"
           border.width: Style.borderS
           border.color: Qt.rgba(1, 1, 1, 0.14)
@@ -1067,8 +1065,8 @@ Rectangle {
 
         ColumnLayout {
           anchors.fill: parent
-          anchors.margins: Style.marginL
-          spacing: Style.marginS
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
 
           Item {
             Layout.fillHeight: true
@@ -1081,11 +1079,11 @@ Rectangle {
             NTextInput {
               id: bannerSearchInput
               Layout.fillWidth: true
-              radius: Style.iRadiusL
+              radius: Style.radiusCapsule
               inputIconName: "search"
               text: root.searchText
               placeholderText: I18n.tr("placeholders.search-launcher")
-              fontSize: Style.fontSizeM
+              fontSize: Style.fontSizeBodyMedium
               onTextChanged: root.searchText = text
 
               Component.onCompleted: {
@@ -1102,7 +1100,7 @@ Rectangle {
               visible: root.showLayoutToggle
               icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
               tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
-              customRadius: Style.iRadiusL
+              customRadius: Style.radiusControl
               colorBg: Color.mSurfaceContainerHigh
               colorBgHover: Color.mPrimaryContainer
               colorFg: Color.mOnSurfaceVariant
@@ -1130,18 +1128,18 @@ Rectangle {
     RowLayout {
       visible: !root.hasCoverBanner
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
-      spacing: Style.marginS
+      Layout.leftMargin: Style.paddingCard
+      Layout.rightMargin: Style.paddingCard
+      spacing: Style.spaceS
 
       NTextInput {
         id: searchInput
         Layout.fillWidth: true
-        radius: Style.iRadiusL
+        radius: Style.radiusCapsule
         inputIconName: "search"
         text: root.searchText
         placeholderText: I18n.tr("placeholders.search-launcher")
-        fontSize: Style.fontSizeM
+        fontSize: Style.fontSizeBodyMedium
         onTextChanged: root.searchText = text
 
         Component.onCompleted: {
@@ -1158,7 +1156,7 @@ Rectangle {
         visible: root.showLayoutToggle
         icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
         tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
-        customRadius: Style.iRadiusL
+        customRadius: Style.radiusControl
         colorBg: Color.mSurfaceContainerHigh
         colorBgHover: Color.mPrimaryContainer
         colorFg: Color.mOnSurfaceVariant
@@ -1184,8 +1182,8 @@ Rectangle {
       id: categoryTabs
       visible: root.showProviderCategories
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
+      Layout.leftMargin: Style.paddingCard
+      Layout.rightMargin: Style.paddingCard
 
       categories: root.providerCategories
       currentIndex: visible && root.providerCategories.length > 0 ? root.providerCategories.indexOf(root.currentProvider.selectedCategory) : 0
@@ -1198,8 +1196,8 @@ Rectangle {
     NSlideSwapView {
       id: resultsSwapView
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
+      Layout.leftMargin: Style.paddingCard
+      Layout.rightMargin: Style.paddingCard
       Layout.fillHeight: true
       animationsEnabled: !root.animationsDisabled
       sourceComponent: root.isSingleView ? singleViewComponent : rowsViewComponent

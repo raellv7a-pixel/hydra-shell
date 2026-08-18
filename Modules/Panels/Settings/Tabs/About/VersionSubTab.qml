@@ -19,12 +19,11 @@ ColumnLayout {
       tabAppearAnim.start();
   }
 
-  NumberAnimation on opacity {
+  NAnim on opacity {
     id: tabAppearAnim
     from: 0
     to: 1
-    duration: Style.animationSlowest
-    easing.type: Easing.OutCubic
+    motionType: NAnim.ExpressiveSlowSpatial
     running: false
   }
 
@@ -338,9 +337,8 @@ ColumnLayout {
       rotation: Settings.isDebug ? 180 : 0
 
       Behavior on rotation {
-        NumberAnimation {
-          duration: Style.animationSlowest
-          easing.type: Easing.OutBack
+        NAnim {
+          motionType: NAnim.EmphasizedSpatial
         }
       }
 

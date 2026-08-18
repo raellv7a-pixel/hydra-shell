@@ -1595,23 +1595,23 @@ Item {
     Flickable {
       id: contentFlick
       anchors.fill: parent
-      contentWidth: Math.max(width, dashboardLayout.implicitWidth + Style.margin2L)
-      contentHeight: Math.max(height, dashboardLayout.implicitHeight + Style.margin2L)
+      contentWidth: Math.max(width, dashboardLayout.implicitWidth + Style.paddingCard * 2)
+      contentHeight: Math.max(height, dashboardLayout.implicitHeight + Style.paddingCard * 2)
       boundsBehavior: Flickable.StopAtBounds
       clip: true
 
       RowLayout {
         id: dashboardLayout
-        x: Style.marginL
-        y: Style.marginL
-        width: Math.max(contentFlick.width - Style.margin2L, implicitWidth)
-        height: Math.max(contentFlick.height - Style.margin2L, implicitHeight)
-        spacing: Style.marginL
+        x: Style.paddingCard
+        y: Style.paddingCard
+        width: Math.max(contentFlick.width - Style.paddingCard * 2, implicitWidth)
+        height: Math.max(contentFlick.height - Style.paddingCard * 2, implicitHeight)
+        spacing: Style.spaceS
 
         ColumnLayout {
           Layout.preferredWidth: Math.round(300 * root.panelUnit)
           Layout.fillHeight: true
-          spacing: Style.marginL
+          spacing: Style.spaceS
 
           ProfileCard {
             Layout.fillWidth: true
@@ -1629,9 +1629,8 @@ Item {
             Layout.preferredHeight: Math.round((root.toolkitRecording ? 194 : 164) * root.panelUnit)
 
             Behavior on Layout.preferredHeight {
-              NumberAnimation {
-                duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-                easing.type: Easing.OutCubic
+              NAnim {
+                motionType: NAnim.ExpressiveDefaultSpatial
               }
             }
           }
@@ -1640,7 +1639,7 @@ Item {
         ColumnLayout {
           Layout.preferredWidth: Math.round(386 * root.panelUnit)
           Layout.fillHeight: true
-          spacing: Style.marginL
+          spacing: Style.spaceS
 
           PerformanceCard {
             visible: !root.centerDetailOpen
@@ -1678,7 +1677,7 @@ Item {
         ColumnLayout {
           Layout.preferredWidth: Math.round(392 * root.panelUnit)
           Layout.fillHeight: true
-          spacing: Style.marginL
+          spacing: Style.spaceS
 
           NotificationsCard {
             visible: !root.rightDetailOpen && (root.cfg.showNotifications ?? root.defaults.showNotifications ?? true)
@@ -1775,7 +1774,7 @@ Item {
     readonly property bool borderEffectVisible: root.componentBorderVisible(styleKey, styleRoot)
 
     color: styleKey !== "" ? root.componentBackground(styleKey) : root.m3SurfaceContainer
-    radius: styleRoot ? Style.radiusL : Style.radiusM
+    radius: styleRoot ? Style.radiusCard : Style.radiusControlChecked
     border.color: borderEffectVisible ? Qt.alpha(root.componentAccent(styleKey), 0.42) : (styleRoot ? "transparent" : Qt.alpha(Color.mOutline, 0.10))
     border.width: borderEffectVisible ? Math.max(1, Style.borderS) : Style.borderS
 
@@ -1796,29 +1795,28 @@ Item {
     ParallelAnimation {
       id: detailEnterAnimation
 
-      OpacityAnimator {
+      NAnim {
         target: dashboardCard
+        property: "opacity"
         from: 0
         to: 1
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
+        motionType: NAnim.StandardEffects
       }
 
-      ScaleAnimator {
+      NAnim {
         target: dashboardCard
+        property: "scale"
         from: 0.985
         to: 1
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
 
-      NumberAnimation {
+      NAnim {
         target: dashboardCard
         property: "detailOffset"
         from: dashboardCard.detailTransitionDirection === "left" ? -Math.round(22 * root.panelUnit) : Math.round(22 * root.panelUnit)
         to: 0
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
     }
 
@@ -2114,9 +2112,9 @@ Item {
       border.color: root.componentAccent(submoduleButton.styleKey)
 
       Behavior on color {
-        ColorAnimation {
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
           duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-          easing.type: Easing.OutCubic
         }
       }
 
@@ -2150,9 +2148,9 @@ Item {
     }
 
     Behavior on scale {
-      ScaleAnimator {
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
         duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: submoduleTap.pressed ? Easing.OutCubic : Easing.OutBack
       }
     }
 
@@ -2523,15 +2521,15 @@ Item {
       SequentialAnimation on scale {
         running: !root.dashboardPerformanceMode && (root.profileCoverBorderAnimation === "pulse" || root.profileCoverBorderAnimation === "reactivePulse" || root.profileCoverBorderAnimation === "profileHeartbeat")
         loops: Animation.Infinite
-        NumberAnimation {
+        NAnim {
           to: root.profileCoverBorderAnimation === "profileHeartbeat" ? 1.018 : 1.012
           duration: root.profileCoverBorderAnimation === "profileHeartbeat" ? 340 : 760
-          easing.type: Easing.OutCubic
+          motionType: NAnim.ExpressiveFastSpatial
         }
-        NumberAnimation {
+        NAnim {
           to: 1.0
           duration: root.profileCoverBorderAnimation === "profileHeartbeat" ? 620 : 820
-          easing.type: Easing.InOutSine
+          motionType: NAnim.StandardSpatial
         }
       }
     }
@@ -2574,22 +2572,22 @@ Item {
             SequentialAnimation on scale {
               running: avatarStage.glowEffect
               loops: Animation.Infinite
-              NumberAnimation {
+              NAnim {
                 to: 1.08
                 duration: 900
-                easing.type: Easing.InOutSine
+                motionType: NAnim.StandardSpatial
               }
-              NumberAnimation {
+              NAnim {
                 to: 0.96
                 duration: 820
-                easing.type: Easing.InOutSine
+                motionType: NAnim.StandardSpatial
               }
             }
 
             Behavior on opacity {
-              NumberAnimation {
+              NAnim {
+                motionType: NAnim.StandardEffects
                 duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-                easing.type: Easing.OutCubic
               }
             }
           }
@@ -2607,15 +2605,15 @@ Item {
             SequentialAnimation on scale {
               running: avatarStage.ringEffect
               loops: Animation.Infinite
-              NumberAnimation {
+              NAnim {
                 to: 1.08
                 duration: 420
-                easing.type: Easing.OutCubic
+                motionType: NAnim.ExpressiveFastSpatial
               }
-              NumberAnimation {
+              NAnim {
                 to: 1.0
                 duration: 520
-                easing.type: Easing.InOutSine
+                motionType: NAnim.StandardSpatial
               }
             }
           }
@@ -2633,15 +2631,15 @@ Item {
             SequentialAnimation on scale {
               running: avatarStage.ringEffect
               loops: Animation.Infinite
-              NumberAnimation {
+              NAnim {
                 to: 1.12
                 duration: 640
-                easing.type: Easing.OutCubic
+                motionType: NAnim.ExpressiveFastSpatial
               }
-              NumberAnimation {
+              NAnim {
                 to: 0.98
                 duration: 500
-                easing.type: Easing.InOutSine
+                motionType: NAnim.StandardSpatial
               }
             }
           }
@@ -2696,51 +2694,51 @@ Item {
               running: avatarStage.morphEffect
               loops: Animation.Infinite
               ParallelAnimation {
-                NumberAnimation {
+                NAnim {
                   target: avatarWarpScale
                   property: "xScale"
                   to: 1.05
                   duration: 260
-                  easing.type: Easing.InOutSine
+                  motionType: NAnim.StandardSpatial
                 }
-                NumberAnimation {
+                NAnim {
                   target: avatarWarpScale
                   property: "yScale"
                   to: 0.96
                   duration: 260
-                  easing.type: Easing.InOutSine
+                  motionType: NAnim.StandardSpatial
                 }
               }
               ParallelAnimation {
-                NumberAnimation {
+                NAnim {
                   target: avatarWarpScale
                   property: "xScale"
                   to: 0.98
                   duration: 300
-                  easing.type: Easing.InOutSine
+                  motionType: NAnim.StandardSpatial
                 }
-                NumberAnimation {
+                NAnim {
                   target: avatarWarpScale
                   property: "yScale"
                   to: 1.04
                   duration: 300
-                  easing.type: Easing.InOutSine
+                  motionType: NAnim.StandardSpatial
                 }
               }
               ParallelAnimation {
-                NumberAnimation {
+                NAnim {
                   target: avatarWarpScale
                   property: "xScale"
                   to: 1.0
                   duration: 260
-                  easing.type: Easing.InOutSine
+                  motionType: NAnim.StandardSpatial
                 }
-                NumberAnimation {
+                NAnim {
                   target: avatarWarpScale
                   property: "yScale"
                   to: 1.0
                   duration: 260
-                  easing.type: Easing.InOutSine
+                  motionType: NAnim.StandardSpatial
                 }
               }
             }
@@ -3072,10 +3070,10 @@ Item {
     Layout.fillWidth: true
     Layout.preferredHeight: Math.round(64 * root.panelUnit)
     color: active ? root.m3PrimaryContainer : root.componentColor(styleKey, "buttonBackground", root.m3SurfaceContainerHigh)
-    radius: Style.iRadiusL
-    border.color: activeFocus ? root.componentAccent(styleKey) : "transparent"
-    border.width: activeFocus ? Style.borderM : 0
-    scale: actionTap.pressed ? 0.975 : (hoverHandler.hovered || activeFocus ? 1.012 : 1)
+    radius: actionTap.pressed ? Style.radiusControlPressed : (active ? Style.radiusControlChecked : Style.radiusControl)
+    border.color: "transparent"
+    border.width: 0
+    scale: actionTap.pressed ? Style.morphPressedScale : 1
     transformOrigin: Item.Center
     activeFocusOnTab: true
     Accessible.role: Accessible.Button
@@ -3083,24 +3081,37 @@ Item {
     Accessible.description: detailText
 
     Behavior on color {
-      ColorAnimation {
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
 
-    Behavior on border.color {
-      ColorAnimation {
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
+    Behavior on radius {
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 
     Behavior on scale {
-      ScaleAnimator {
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: actionTap.pressed ? Easing.OutCubic : Easing.OutBack
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
+    }
+
+    NStateLayer {
+      id: actionStateLayer
+      anchors.fill: parent
+      hovered: hoverHandler.hovered
+      pressed: actionTap.pressed
+      focused: actionTile.activeFocus
+      radius: actionTile.radius
+      stateColor: active ? root.componentButtonText(actionTile.styleKey) : root.componentText(actionTile.styleKey, false)
+    }
+
+    NFocusRing {
+      focusVisible: actionTile.activeFocus
+      targetRadius: actionTile.radius
+      ringColor: root.componentAccent(actionTile.styleKey)
     }
 
     HoverHandler {
@@ -3117,23 +3128,22 @@ Item {
 
     ColumnLayout {
       anchors.fill: parent
-      anchors.margins: Style.marginM
-      spacing: Style.marginXS
+      anchors.margins: Style.paddingControl
+      spacing: Style.spaceXS
 
       RowLayout {
         Layout.fillWidth: true
-        spacing: Style.marginS
+        spacing: Style.spaceS
 
         NIcon {
           icon: iconName
           color: active ? root.componentAccent(actionTile.styleKey) : root.componentText(actionTile.styleKey, false)
-          pointSize: Style.fontSizeXL
+          pointSize: Style.fontSizeBodyLarge
           scale: active ? 1.08 : 1
 
           Behavior on scale {
-            ScaleAnimator {
-              duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-              easing.type: Easing.OutBack
+            NAnim {
+              motionType: NAnim.ExpressiveFastSpatial
             }
           }
         }
@@ -3142,7 +3152,7 @@ Item {
           Layout.fillWidth: true
           text: labelText
           color: root.componentText(actionTile.styleKey, true)
-          pointSize: Style.fontSizeM
+          pointSize: Style.fontSizeBodySmall
           font.weight: Style.fontWeightSemiBold
           elide: Text.ElideRight
         }
@@ -3152,12 +3162,12 @@ Item {
         Layout.fillWidth: true
         opacity: 1
         enabled: true
-        spacing: Style.marginS
+        spacing: Style.spaceS
 
         NText {
           Layout.fillWidth: true
           text: detailText
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelMedium
           color: root.componentText(actionTile.styleKey, false)
           elide: Text.ElideRight
         }
@@ -3182,6 +3192,7 @@ Item {
     TapHandler {
       id: actionTap
       onTapped: eventPoint => {
+                  actionStateLayer.rippleAt(eventPoint.position.x, eventPoint.position.y);
                   if (secBtn.visible) {
                     const pt = secBtn.mapFromItem(actionTile, eventPoint.position);
                     if (pt.x >= 0 && pt.x <= secBtn.width && pt.y >= 0 && pt.y <= secBtn.height)
@@ -3191,8 +3202,14 @@ Item {
                 }
     }
 
-    Keys.onReturnPressed: actionTile.triggered()
-    Keys.onSpacePressed: actionTile.triggered()
+    Keys.onReturnPressed: event => {
+                            actionTile.triggered();
+                            event.accepted = true;
+                          }
+    Keys.onSpacePressed: event => {
+                           actionTile.triggered();
+                           event.accepted = true;
+                         }
   }
 
   component RecordingCard: DashboardCard {
@@ -3301,16 +3318,16 @@ Item {
     Accessible.name: labelText
 
     Behavior on border.color {
-      ColorAnimation {
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
         duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: Easing.OutCubic
       }
     }
 
     Behavior on scale {
-      ScaleAnimator {
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
         duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: mouseArea.pressed ? Easing.OutCubic : Easing.OutBack
       }
     }
 
@@ -3804,16 +3821,16 @@ Item {
           readonly property real metricRatio: root.clamp(metricValue / processUsageCard.highestValue, 0, 1)
 
           Behavior on color {
-            ColorAnimation {
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
               duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-              easing.type: Easing.OutCubic
             }
           }
 
           Behavior on scale {
-            ScaleAnimator {
+            NAnim {
+              motionType: NAnim.ExpressiveFastSpatial
               duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-              easing.type: Easing.OutCubic
             }
           }
 
@@ -3883,9 +3900,9 @@ Item {
                   color: Color.mPrimary
 
                   Behavior on width {
-                    NumberAnimation {
+                    NAnim {
+                      motionType: NAnim.ExpressiveDefaultSpatial
                       duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-                      easing.type: Easing.OutCubic
                     }
                   }
                 }
@@ -3895,10 +3912,10 @@ Item {
         }
 
         displaced: Transition {
-          NumberAnimation {
+          NAnim {
             properties: "y"
+            motionType: NAnim.ExpressiveDefaultSpatial
             duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-            easing.type: Easing.OutCubic
           }
         }
       }
@@ -3976,9 +3993,9 @@ Item {
         color: index === pageDots.currentIndex ? Color.mPrimary : Qt.alpha(Color.mOnSurfaceVariant, 0.36)
 
         Behavior on width {
-          NumberAnimation {
+          NAnim {
+            motionType: NAnim.ExpressiveFastSpatial
             duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-            easing.type: Easing.OutCubic
           }
         }
 
@@ -4138,9 +4155,9 @@ Item {
           }
 
           Behavior on width {
-            NumberAnimation {
+            NAnim {
+              motionType: NAnim.ExpressiveDefaultSpatial
               duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-              easing.type: Easing.OutCubic
             }
           }
         }
@@ -4156,9 +4173,9 @@ Item {
           opacity: 0.78
 
           Behavior on x {
-            NumberAnimation {
+            NAnim {
+              motionType: NAnim.ExpressiveDefaultSpatial
               duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-              easing.type: Easing.OutCubic
             }
           }
         }
@@ -4265,9 +4282,9 @@ Item {
           color: SystemStatService.getDiskColor(diskPager.currentPath)
 
           Behavior on width {
-            NumberAnimation {
+            NAnim {
+              motionType: NAnim.ExpressiveDefaultSpatial
               duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-              easing.type: Easing.OutCubic
             }
           }
         }
@@ -4940,9 +4957,8 @@ Item {
                 }
 
                 Behavior on scale {
-                  ScaleAnimator {
-                    duration: Style.animationNormal
-                    easing.type: Easing.OutCubic
+                  NAnim {
+                    motionType: NAnim.ExpressiveDefaultSpatial
                   }
                 }
               }
@@ -5036,15 +5052,15 @@ Item {
                       SequentialAnimation on scale {
                         id: page2CoverBounce
                         running: false
-                        NumberAnimation {
+                        NAnim {
                           to: 1.04
                           duration: 150
-                          easing.type: Easing.OutCubic
+                          motionType: NAnim.ExpressiveFastSpatial
                         }
-                        NumberAnimation {
+                        NAnim {
                           to: 1.0
                           duration: 300
-                          easing.type: Easing.OutBounce
+                          motionType: NAnim.EmphasizedSpatial
                         }
                       }
 
@@ -5211,11 +5227,9 @@ Item {
               radius: height / 2
               color: mediaSwipeView.currentIndex === index ? Color.mPrimary : Color.mSurfaceVariant
               Behavior on width {
-                NumberAnimation {
+                NAnim {
+                  motionType: NAnim.EmphasizedSpatial
                   duration: 300
-                  easing.type: Easing.OutElastic
-                  easing.amplitude: 2.0
-                  easing.period: 1.5
                 }
               }
               Behavior on color {
@@ -5314,9 +5328,9 @@ Item {
                 opacity: root.musicActive ? 0.86 : 0.42
 
                 Behavior on height {
-                  NumberAnimation {
+                  NAnim {
+                    motionType: NAnim.ExpressiveFastSpatial
                     duration: 90
-                    easing.type: Easing.OutCubic
                   }
                 }
                 Behavior on color {
@@ -5342,9 +5356,9 @@ Item {
                 opacity: 0.85
 
                 Behavior on y {
-                  NumberAnimation {
+                  NAnim {
+                    motionType: NAnim.ExpressiveFastSpatial
                     duration: 90
-                    easing.type: Easing.OutCubic
                   }
                 }
               }
@@ -6279,23 +6293,23 @@ Item {
     clip: true
 
     Behavior on Layout.preferredHeight {
-      NumberAnimation {
+      NAnim {
+        motionType: NAnim.ExpressiveDefaultSpatial
         duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
       }
     }
 
     Behavior on color {
-      ColorAnimation {
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
         duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: Easing.OutCubic
       }
     }
 
     Behavior on border.color {
-      ColorAnimation {
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
         duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: Easing.OutCubic
       }
     }
 
@@ -6447,16 +6461,16 @@ Item {
     clip: true
 
     Behavior on color {
-      ColorAnimation {
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
         duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
       }
     }
 
     Behavior on border.color {
-      ColorAnimation {
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
         duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
       }
     }
 
@@ -6466,9 +6480,9 @@ Item {
       color: root.componentAccent("media")
       opacity: root.musicActive ? 0.04 : 0
       Behavior on opacity {
-        NumberAnimation {
+        NAnim {
+          motionType: NAnim.StandardEffects
           duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-          easing.type: Easing.OutCubic
         }
       }
     }
@@ -6508,15 +6522,15 @@ Item {
           SequentialAnimation on scale {
             id: coverBounce
             running: false
-            NumberAnimation {
+            NAnim {
               to: 1.04
               duration: 150
-              easing.type: Easing.OutCubic
+              motionType: NAnim.ExpressiveFastSpatial
             }
-            NumberAnimation {
+            NAnim {
               to: 1.0
               duration: 300
-              easing.type: Easing.OutBounce
+              motionType: NAnim.EmphasizedSpatial
             }
           }
         }
@@ -6694,9 +6708,9 @@ Item {
     opacity: active ? 1 : 0.24
 
     Behavior on opacity {
-      NumberAnimation {
+      NAnim {
+        motionType: NAnim.StandardEffects
         duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
       }
     }
 

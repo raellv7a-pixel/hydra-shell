@@ -54,7 +54,7 @@ Item {
       return;
     }
     WallpaperUpscaleService.probeImageResolution(target, function (width, height) {
-      if (generation !== root._generation) {
+      if (!root || generation !== root._generation) {
         return;
       }
       root.pixelWidth = width;

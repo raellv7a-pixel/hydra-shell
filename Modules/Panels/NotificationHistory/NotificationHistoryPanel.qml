@@ -229,11 +229,11 @@ SmartPanel {
 
         // Check if above visible area
         if (itemY < currentContentY) {
-          flickable.contentY = Math.max(0, itemY - Style.marginM);
+          flickable.contentY = Math.max(0, itemY - Style.spaceS);
         } else
           // Check if below visible area
           if (itemY + itemHeight > currentContentY + viewHeight) {
-            flickable.contentY = (itemY + itemHeight) - viewHeight + Style.marginM;
+            flickable.contentY = (itemY + itemHeight) - viewHeight + Style.spaceS;
           }
       }
     }
@@ -241,13 +241,13 @@ SmartPanel {
     // Calculate content height based on header + tabs (if visible) + content
     property real calculatedHeight: {
       if (NotificationService.historyModel.count === 0) {
-        return headerBox.implicitHeight + scrollView.implicitHeight + Style.margin2L + Style.marginM;
+        return headerBox.implicitHeight + scrollView.implicitHeight + Style.paddingCard * 2 + Style.spaceS;
       }
-      return headerBox.implicitHeight + scrollView.implicitHeight + Style.margin2L + Style.marginM;
+      return headerBox.implicitHeight + scrollView.implicitHeight + Style.paddingCard * 2 + Style.spaceS;
     }
     property real contentPreferredHeight: Math.min(root.preferredHeight, Math.ceil(calculatedHeight))
 
-    property real layoutWidth: Math.max(1, root.preferredWidth - Style.margin2L)
+    property real layoutWidth: Math.max(1, root.preferredWidth - Style.paddingCard * 2)
 
     // State (lazy-loaded with panelContent)
     property var rangeCounts: [0, 0, 0, 0]
@@ -375,32 +375,33 @@ SmartPanel {
     ColumnLayout {
       id: mainColumn
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       // Header section
       NBox {
         id: headerBox
         Layout.fillWidth: true
-        implicitHeight: header.implicitHeight + Style.margin2M
+        implicitHeight: header.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
 
         ColumnLayout {
           id: header
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginM
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
 
           RowLayout {
             id: headerRow
             NIcon {
               icon: "bell"
-              pointSize: Style.fontSizeXXL
+              pointSize: Style.fontSizeHeadlineSmall
               color: Color.mPrimary
             }
 
             NText {
               text: I18n.tr("common.notifications")
-              pointSize: Style.fontSizeL
+              pointSize: Style.fontSizeTitleMedium
               font.weight: Style.fontWeightBold
               color: Color.mOnSurface
               Layout.fillWidth: true
@@ -449,7 +450,7 @@ SmartPanel {
             visible: NotificationService.historyModel.count > 0 && panelContent.groupByDate
             currentIndex: panelContent.currentRange
             tabHeight: Style.toOdd(Style.baseWidgetSize * 0.8)
-            spacing: Style.marginXS
+            spacing: Style.spaceXS
             distributeEvenly: true
 
             NTabButton {
@@ -457,7 +458,7 @@ SmartPanel {
               text: I18n.tr("launcher.categories.all") + " (" + panelContent.countForRange(0) + ")"
               checked: tabsBox.currentIndex === 0
               onClicked: panelContent.currentRange = 0
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelLarge
             }
 
             NTabButton {
@@ -465,7 +466,7 @@ SmartPanel {
               text: I18n.tr("notifications.range.today") + " (" + panelContent.countForRange(1) + ")"
               checked: tabsBox.currentIndex === 1
               onClicked: panelContent.currentRange = 1
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelLarge
             }
 
             NTabButton {
@@ -473,7 +474,7 @@ SmartPanel {
               text: I18n.tr("notifications.range.yesterday") + " (" + panelContent.countForRange(2) + ")"
               checked: tabsBox.currentIndex === 2
               onClicked: panelContent.currentRange = 2
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelLarge
             }
 
             NTabButton {
@@ -481,7 +482,7 @@ SmartPanel {
               text: I18n.tr("notifications.range.earlier") + " (" + panelContent.countForRange(3) + ")"
               checked: tabsBox.currentIndex === 3
               onClicked: panelContent.currentRange = 3
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelLarge
             }
           }
         }
@@ -505,19 +506,20 @@ SmartPanel {
 
           ColumnLayout {
             width: panelContent.layoutWidth
-            spacing: Style.marginM
+            spacing: Style.spaceS
 
             // Empty state when no notifications
             NBox {
               visible: !panelContent.hasNotificationsInCurrentRange()
               Layout.fillWidth: true
-              Layout.preferredHeight: emptyState.implicitHeight + Style.marginXL
+              Layout.preferredHeight: emptyState.implicitHeight + Style.paddingCard * 2
+              radius: Style.radiusCard
 
               ColumnLayout {
                 id: emptyState
                 anchors.fill: parent
-                anchors.margins: Style.marginM
-                spacing: Style.marginM
+                anchors.margins: Style.paddingCard
+                spacing: Style.spaceS
 
                 Item {
                   Layout.fillHeight: true
@@ -532,7 +534,7 @@ SmartPanel {
 
                 NText {
                   text: I18n.tr("notifications.panel.no-notifications")
-                  pointSize: (NotificationService.historyModel.count === 0) ? Style.fontSizeL : Style.fontSizeM
+                  pointSize: (NotificationService.historyModel.count === 0) ? Style.fontSizeTitleSmall : Style.fontSizeBodyMedium
                   color: Color.mOnSurfaceVariant
                   Layout.alignment: Qt.AlignHCenter
                 }
@@ -540,7 +542,7 @@ SmartPanel {
                 NText {
                   visible: NotificationService.historyModel.count === 0
                   text: I18n.tr("notifications.panel.description")
-                  pointSize: Style.fontSizeS
+                  pointSize: Style.fontSizeBodySmall
                   color: Color.mOnSurfaceVariant
                   horizontalAlignment: Text.AlignHCenter
                   Layout.fillWidth: true
@@ -562,7 +564,7 @@ SmartPanel {
               Column {
                 id: notificationColumn
                 width: panelContent.layoutWidth
-                spacing: Style.marginM
+                spacing: Style.spaceS
 
                 Repeater {
                   model: NotificationService.historyModel
@@ -571,7 +573,7 @@ SmartPanel {
                     id: notificationDelegate
                     width: parent.width
                     visible: panelContent.isInCurrentRange(model.timestamp)
-                    height: visible && !isRemoving ? contentColumn.height + Style.margin2M : 0
+                    height: visible && !isRemoving ? contentColumn.height + Style.paddingCard * 2 : 0
 
                     property int listIndex: index
                     property string notificationId: model.id
@@ -586,10 +588,10 @@ SmartPanel {
                     property string pendingLink: ""
                     readonly property real swipeStartThreshold: Math.round(16 * Style.uiScaleRatio)
                     readonly property real swipeDismissThreshold: Math.max(110, width * 0.3)
-                    readonly property int removeAnimationDuration: Style.animationNormal
+                    readonly property int removeAnimationDuration: Style.motionDurationDefaultEffects
                     readonly property int notificationTextFormat: (Settings.data.notifications.enableMarkdown && notificationDelegate.isExpanded) ? Text.MarkdownText : Text.StyledText
                     readonly property real actionButtonSize: Style.baseWidgetSize * 0.7
-                    readonly property real buttonClusterWidth: notificationDelegate.actionButtonSize * 2 + Style.marginXS
+                    readonly property real buttonClusterWidth: notificationDelegate.actionButtonSize * 2 + Style.spaceXS
                     readonly property real iconSize: Math.round(40 * Style.uiScaleRatio)
 
                     function isSafeLink(link) {
@@ -648,7 +650,7 @@ SmartPanel {
                         return;
                       }
 
-                      swipeOffset = swipeOffset >= 0 ? width + Style.marginL : -width - Style.marginL;
+                      swipeOffset = swipeOffset >= 0 ? width + Style.spaceM : -width - Style.spaceM;
                       opacity = 0;
                       removeTimer.restart();
                     }
@@ -662,33 +664,29 @@ SmartPanel {
 
                     Behavior on swipeOffset {
                       enabled: !Settings.data.general.animationDisabled && !notificationDelegate.isSwiping
-                      NumberAnimation {
-                        duration: notificationDelegate.removeAnimationDuration
-                        easing.type: Easing.OutCubic
+                      NAnim {
+                        motionType: NAnim.StandardEffects
                       }
                     }
 
                     Behavior on opacity {
                       enabled: !Settings.data.general.animationDisabled && notificationDelegate.isRemoving
-                      NumberAnimation {
-                        duration: notificationDelegate.removeAnimationDuration
-                        easing.type: Easing.OutCubic
+                      NAnim {
+                        motionType: NAnim.StandardEffects
                       }
                     }
 
                     Behavior on height {
                       enabled: !Settings.data.general.animationDisabled && notificationDelegate.isRemoving
-                      NumberAnimation {
-                        duration: notificationDelegate.removeAnimationDuration
-                        easing.type: Easing.OutCubic
+                      NAnim {
+                        motionType: NAnim.StandardEffects
                       }
                     }
 
                     Behavior on y {
                       enabled: !Settings.data.general.animationDisabled && notificationDelegate.isRemoving
-                      NumberAnimation {
-                        duration: notificationDelegate.removeAnimationDuration
-                        easing.type: Easing.OutCubic
+                      NAnim {
+                        motionType: NAnim.StandardEffects
                       }
                     }
 
@@ -699,34 +697,50 @@ SmartPanel {
 
                     Rectangle {
                       anchors.fill: parent
-                      radius: Style.radiusM
-                      color: Color.mSurfaceVariant
+                      radius: Style.radiusCard
+                      color: Color.mSurfaceContainer
                       border.color: {
                         if (notificationDelegate.isFocused)
                           return Color.mPrimary;
                         if (Settings.data.ui.boxBorderEnabled)
-                          return Qt.alpha(Color.mOutline, Style.opacityHeavy);
+                          return Qt.alpha(Color.mOutlineVariant, Style.opacityHeavy);
                         return "transparent";
                       }
                       border.width: notificationDelegate.isFocused ? Style.borderM : Style.borderS
 
                       Behavior on color {
                         enabled: !Settings.data.general.animationDisabled
-                        ColorAnimation {
-                          duration: Style.animationFast
+                        NColorAnimation {
+                          motionType: NColorAnimation.Standard
                         }
                       }
+                    }
+
+                    NStateLayer {
+                      id: notificationStateLayer
+                      anchors.fill: parent
+                      hovered: historyInteractionArea.containsMouse
+                      pressed: historyInteractionArea.pressed
+                      focused: notificationDelegate.isFocused
+                      radius: Style.radiusCard
+                      stateColor: Color.mOnSurface
+                    }
+
+                    NFocusRing {
+                      focusVisible: notificationDelegate.isFocused
+                      targetRadius: Style.radiusCard
                     }
 
                     // Click to expand/collapse
                     MouseArea {
                       id: historyInteractionArea
                       anchors.fill: parent
-                      anchors.rightMargin: notificationDelegate.buttonClusterWidth + Style.marginM
+                      anchors.rightMargin: notificationDelegate.buttonClusterWidth + Style.spaceS
                       enabled: !notificationDelegate.isRemoving
                       hoverEnabled: true
                       cursorShape: Qt.ArrowCursor
                       onPressed: mouse => {
+                                   notificationStateLayer.rippleAt(mouse.x, mouse.y);
                                    panelContent.focusIndex = index;
                                    panelContent.actionIndex = -1;
 
@@ -840,19 +854,19 @@ SmartPanel {
                       anchors.left: parent.left
                       anchors.right: parent.right
                       anchors.top: parent.top
-                      anchors.margins: Style.marginM
-                      spacing: Style.marginM
+                      anchors.margins: Style.paddingCard
+                      spacing: Style.spaceS
 
                       Row {
                         width: parent.width
-                        spacing: Style.marginM
+                        spacing: Style.spaceS
 
                         // Icon
                         NImageRounded {
                           anchors.verticalCenter: notificationDelegate.isExpanded ? undefined : parent.verticalCenter
                           width: notificationDelegate.iconSize
                           height: notificationDelegate.iconSize
-                          radius: Math.min(Style.radiusL, width / 2)
+                          radius: Style.radiusControl
                           imagePath: model.cachedImage || model.originalImage || ""
                           borderColor: "transparent"
                           borderWidth: 0
@@ -862,13 +876,13 @@ SmartPanel {
 
                         // Content
                         Column {
-                          width: parent.width - notificationDelegate.iconSize - notificationDelegate.buttonClusterWidth - Style.margin2M
-                          spacing: Style.marginXS
+                          width: parent.width - notificationDelegate.iconSize - notificationDelegate.buttonClusterWidth - Style.paddingCard * 2
+                          spacing: Style.spaceXS
 
                           // Header row with app name and timestamp
                           Row {
                             width: parent.width
-                            spacing: Style.marginS
+                            spacing: Style.spaceS
 
                             // Urgency indicator
                             Rectangle {
@@ -889,7 +903,7 @@ SmartPanel {
 
                             NText {
                               text: model.appName || "Unknown App"
-                              pointSize: Style.fontSizeXS
+                              pointSize: Style.fontSizeLabelLarge
                               font.weight: Style.fontWeightBold
                               color: Color.mSecondary
                             }
@@ -897,7 +911,7 @@ SmartPanel {
                             NText {
                               textFormat: Text.PlainText
                               text: " " + Time.formatRelativeTime(model.timestamp)
-                              pointSize: Style.fontSizeXXS
+                              pointSize: Style.fontSizeLabelSmall
                               color: Color.mOnSurfaceVariant
                               anchors.bottom: parent.bottom
                             }
@@ -908,7 +922,7 @@ SmartPanel {
                             id: summaryText
                             width: parent.width
                             text: (Settings.data.notifications.enableMarkdown && notificationDelegate.isExpanded) ? (model.summaryMarkdown || I18n.tr("common.no-summary")) : (model.summary || I18n.tr("common.no-summary"))
-                            pointSize: Style.fontSizeM
+                            pointSize: Style.fontSizeBodyMedium
                             color: Color.mOnSurface
                             textFormat: notificationDelegate.notificationTextFormat
                             wrapMode: Text.Wrap
@@ -921,7 +935,7 @@ SmartPanel {
                             id: bodyText
                             width: parent.width
                             text: (Settings.data.notifications.enableMarkdown && notificationDelegate.isExpanded) ? (model.bodyMarkdown || "") : (model.body || "")
-                            pointSize: Style.fontSizeS
+                            pointSize: Style.fontSizeBodySmall
                             color: Color.mOnSurfaceVariant
                             textFormat: notificationDelegate.notificationTextFormat
                             wrapMode: Text.Wrap
@@ -933,7 +947,7 @@ SmartPanel {
                           // Actions Flow
                           Flow {
                             width: parent.width
-                            spacing: Style.marginS
+                            spacing: Style.spaceS
                             visible: notificationDelegate.actionsList.length > 0
 
                             Repeater {
@@ -941,7 +955,7 @@ SmartPanel {
 
                               delegate: NButton {
                                 text: modelData.text
-                                fontSize: Style.fontSizeS
+                                fontSize: Style.fontSizeBodySmall
 
                                 readonly property bool actionNavActive: notificationDelegate.isFocused && panelContent.actionIndex !== -1
                                 readonly property bool isSelected: actionNavActive && panelContent.actionIndex === index
@@ -975,7 +989,7 @@ SmartPanel {
 
                           Row {
                             anchors.right: parent.right
-                            spacing: Style.marginXS
+                            spacing: Style.spaceXS
 
                             NIconButton {
                               id: expandButton

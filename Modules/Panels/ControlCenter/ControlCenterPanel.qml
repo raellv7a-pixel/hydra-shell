@@ -44,24 +44,18 @@ SmartPanel {
           return Item.Top;
         if (root.resolvedPanelPosition === "bottom")
           return Item.Bottom;
-        if (root.resolvedPanelPosition === "left")
-          return Item.Left;
-        if (root.resolvedPanelPosition === "right")
-          return Item.Right;
         return Item.Center;
       }
 
       Behavior on opacity {
-        OpacityAnimator {
-          duration: root.animationsDisabled ? 0 : Style.animationFast
-          easing.type: contentContainer.presented ? Easing.OutCubic : Easing.InCubic
+        NAnim {
+          motionType: NAnim.StandardEffects
         }
       }
 
       Behavior on scale {
-        ScaleAnimator {
-          duration: root.animationsDisabled ? 0 : Style.animationFast
-          easing.type: contentContainer.presented ? Easing.OutCubic : Easing.InCubic
+        NAnim {
+          motionType: NAnim.ExpressiveFastSpatial
         }
       }
 

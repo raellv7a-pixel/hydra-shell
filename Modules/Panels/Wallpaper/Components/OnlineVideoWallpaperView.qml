@@ -77,11 +77,11 @@ Item {
 
   ColumnLayout {
     anchors.fill: parent
-    spacing: Style.marginM
+    spacing: Style.spaceS
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: Style.marginM
+      spacing: Style.spaceS
 
       NTextInput {
         id: searchInput
@@ -127,7 +127,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       color: Color.mSurfaceContainerLow
-      radius: Style.radiusL
+      radius: Style.radiusCard
 
       NBusyIndicator {
         anchors.centerIn: parent
@@ -138,13 +138,13 @@ Item {
 
       ColumnLayout {
         anchors.centerIn: parent
-        width: Math.min(parent.width - Style.margin2L, 460 * Style.uiScaleRatio)
+        width: Math.min(parent.width - Style.paddingCard * 2, 460 * Style.uiScaleRatio)
         visible: !root.providerService.fetching && root.resultCount === 0
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         NIcon {
           icon: root.providerService.lastError ? "alert-circle" : "video"
-          pointSize: Style.fontSizeXXL
+          pointSize: Style.fontSizeTitleLarge
           color: root.providerService.lastError ? Color.mError : Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignHCenter
         }
@@ -161,7 +161,7 @@ Item {
       GridView {
         id: videoGrid
         anchors.fill: parent
-        anchors.margins: Style.marginM
+        anchors.margins: Style.spaceS
         cellWidth: Math.floor(width / Math.max(2, Math.floor(width / (220 * Style.uiScaleRatio))))
         cellHeight: Math.floor(cellWidth * 0.65) + 30 * Style.uiScaleRatio
         clip: true
@@ -184,9 +184,9 @@ Item {
 
           NBox {
             anchors.fill: parent
-            anchors.margins: Style.marginS
+            anchors.margins: Style.spaceXS
             color: cardMouse.containsMouse ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
-            radius: Style.radiusL
+            radius: Style.radiusCard
             clip: true
 
             MouseArea {
@@ -221,7 +221,7 @@ Item {
                   anchors.centerIn: parent
                   visible: thumbnail.status === Image.Loading || thumbnail.status === Image.Error
                   icon: thumbnail.status === Image.Error ? "alert-circle" : "image"
-                  pointSize: Style.fontSizeXL
+                  pointSize: Style.fontSizeTitleMedium
                   color: Color.mOnSurfaceVariant
                 }
 
@@ -280,22 +280,22 @@ Item {
                 Rectangle {
                   anchors.top: parent.top
                   anchors.right: parent.right
-                  anchors.margins: Style.marginS
+                  anchors.margins: Style.spaceXS
                   height: 20 * Style.uiScaleRatio
                   width: cardMouse.containsMouse ? 108 * Style.uiScaleRatio : 48 * Style.uiScaleRatio
                   radius: height / 2
                   color: cardMouse.containsMouse ? Color.mSecondaryContainer : Color.mPrimaryContainer
 
                   Behavior on width {
-                    NumberAnimation {
-                      duration: Style.animationFast
+                    NAnim {
+                      motionType: NAnim.ExpressiveFastSpatial
                     }
                   }
 
                   NText {
                     anchors.centerIn: parent
                     text: cardMouse.containsMouse ? I18n.tr("wallpaper.live-video.motion-badge") : I18n.tr("wallpaper.live-video.live-badge")
-                    pointSize: Style.fontSizeXS
+                    pointSize: Style.fontSizeLabelSmall
                     font.weight: Style.fontWeightBold
                     color: cardMouse.containsMouse ? Color.mOnSecondaryContainer : Color.mOnPrimaryContainer
                   }
@@ -309,12 +309,12 @@ Item {
 
                 RowLayout {
                   anchors.fill: parent
-                  anchors.leftMargin: Style.marginS
-                  anchors.rightMargin: Style.marginS
+                  anchors.leftMargin: Style.spaceXS
+                  anchors.rightMargin: Style.spaceXS
 
                   NText {
                     text: delegateRoot.modelData.name || I18n.tr("wallpaper.live-video.unnamed")
-                    pointSize: Style.fontSizeXS
+                    pointSize: Style.fontSizeLabelSmall
                     font.weight: Style.fontWeightBold
                     color: Color.mOnSurface
                     elide: Text.ElideRight
@@ -324,7 +324,7 @@ Item {
                   NText {
                     visible: !!delegateRoot.modelData.resolution
                     text: delegateRoot.modelData.resolution || ""
-                    pointSize: Style.fontSizeXS
+                    pointSize: Style.fontSizeLabelSmall
                     color: Color.mOnSurfaceVariant
                   }
 

@@ -19,11 +19,11 @@ Rectangle {
   property var nameFor: null // function(category) -> display name
   signal categorySelected(int index)
 
-  readonly property bool animationsEnabled: !Settings.data.general.animationDisabled
+  readonly property bool animationsEnabled: Style.motionEnabled
 
   implicitHeight: Style.baseWidgetSize
   color: Color.mSurfaceContainerHigh
-  radius: Style.iRadiusL
+  radius: Style.radiusCapsule
 
   function _updateIndicator() {
     if (root.currentIndex < 0 || root.currentIndex >= repeater.count) {
@@ -41,12 +41,7 @@ Rectangle {
 
   onCurrentIndexChanged: Qt.callLater(_updateIndicator)
   onWidthChanged: Qt.callLater(_updateIndicator)
-  Component.onCompleted: {
-    Logger.w("DEBUGCATTABS", "completed w=" + width + " h=" + height + " visible=" + visible + " categories=" + JSON.stringify(categories));
-    Qt.callLater(_updateIndicator);
-  }
-  onVisibleChanged: Logger.w("DEBUGCATTABS", "visible=" + visible + " w=" + width + " h=" + height)
-  onHeightChanged: Logger.w("DEBUGCATTABS", "height=" + height)
+  Component.onCompleted: Qt.callLater(_updateIndicator)
 
   Rectangle {
     id: indicator
@@ -59,21 +54,19 @@ Rectangle {
     height: tabRow.height
     x: indicatorX
     width: indicatorWidth
-    radius: height / 2
+    radius: Style.radiusCapsule
     color: Color.mSecondaryContainer
 
     Behavior on x {
       enabled: root.animationsEnabled && indicator.ready
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
     Behavior on width {
       enabled: root.animationsEnabled && indicator.ready
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
   }
@@ -81,7 +74,7 @@ Rectangle {
   RowLayout {
     id: tabRow
     anchors.fill: parent
-    spacing: Style.marginXS
+    spacing: Style.spaceXS
 
     Repeater {
       id: repeater
@@ -93,11 +86,24 @@ Rectangle {
         required property int index
 
         readonly property bool checked: root.currentIndex === index
+        readonly property real radius: Style.radiusCapsule
         property bool hovered: false
 
         Layout.fillWidth: true
         Layout.fillHeight: true
+        activeFocusOnTab: true
+        Accessible.role: Accessible.PageTab
+        Accessible.name: root.nameFor ? root.nameFor(modelData) : String(modelData)
+        Accessible.selected: checked
 
+        Keys.onReturnPressed: event => {
+                                root.categorySelected(tabItem.index);
+                                event.accepted = true;
+                              }
+        Keys.onSpacePressed: event => {
+                               root.categorySelected(tabItem.index);
+                               event.accepted = true;
+                             }
         Component.onCompleted: Qt.callLater(root._updateIndicator)
         onXChanged: if (checked)
                       Qt.callLater(root._updateIndicator)
@@ -118,39 +124,41 @@ Rectangle {
           }
         }
 
-        Rectangle {
+        NStateLayer {
+          id: tabStateLayer
           anchors.fill: parent
-          radius: height / 2
-          color: (!tabItem.checked && tabItem.hovered) ? Color.mSurfaceContainerHighest : "transparent"
-
-          Behavior on color {
-            enabled: !Color.isTransitioning
-            ColorAnimation {
-              duration: Style.animationFast
-              easing.type: Easing.OutCubic
-            }
-          }
+          hovered: tabItem.hovered
+          pressed: tabMouseArea.pressed
+          focused: tabItem.activeFocus
+          radius: tabItem.radius
+          stateColor: Color.mOnSurface
         }
 
         NIcon {
           anchors.centerIn: parent
           icon: root.iconFor ? (root.iconFor(tabItem.modelData) || "star") : "star"
-          pointSize: Style.fontSizeM * 1.2
-          color: tabItem.checked ? Color.mOnSecondaryContainer : Color.mOnSurface
+          pointSize: Style.fontSizeBodyLarge
+          color: tabItem.checked ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
 
           Behavior on color {
             enabled: !Color.isTransitioning
-            ColorAnimation {
-              duration: Style.animationFast
-              easing.type: Easing.OutCubic
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
             }
           }
         }
 
+        NFocusRing {
+          focusVisible: tabItem.activeFocus
+          targetRadius: tabItem.radius
+        }
+
         MouseArea {
+          id: tabMouseArea
           anchors.fill: parent
           hoverEnabled: false
           cursorShape: Qt.PointingHandCursor
+          onPressed: mouse => tabStateLayer.rippleAt(mouse.x, mouse.y)
           onClicked: root.categorySelected(tabItem.index)
         }
 

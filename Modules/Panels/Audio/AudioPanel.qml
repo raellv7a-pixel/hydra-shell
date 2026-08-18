@@ -152,35 +152,36 @@ SmartPanel {
     readonly property var appStreams: AudioService.appStreams
 
     // Use implicitHeight from content + margins to avoid binding loops
-    property real contentPreferredHeight: mainColumn.implicitHeight + Style.margin2L
+    property real contentPreferredHeight: mainColumn.implicitHeight + Style.paddingCard * 2
 
     ColumnLayout {
       id: mainColumn
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       // HEADER
       NBox {
         Layout.fillWidth: true
-        implicitHeight: header.implicitHeight + Style.margin2M
+        implicitHeight: header.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
 
         ColumnLayout {
           id: header
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginM
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
 
           RowLayout {
             NIcon {
               icon: "settings-audio"
-              pointSize: Style.fontSizeXXL
+              pointSize: Style.fontSizeHeadlineSmall
               color: Color.mPrimary
             }
 
             NText {
               text: I18n.tr("panels.audio.title")
-              pointSize: Style.fontSizeL
+              pointSize: Style.fontSizeTitleMedium
               font.weight: Style.fontWeightBold
               color: Color.mOnSurface
               Layout.fillWidth: true
@@ -199,7 +200,7 @@ SmartPanel {
           NTabBar {
             id: tabBar
             Layout.fillWidth: true
-            margins: Style.marginS
+            margins: Style.spaceS
             currentIndex: panelContent.currentTabIndex
             distributeEvenly: true
             onCurrentIndexChanged: panelContent.currentTabIndex = currentIndex
@@ -235,35 +236,36 @@ SmartPanel {
           gradientColor: Color.mSurface
 
           ColumnLayout {
-            spacing: Style.marginM
+            spacing: Style.spaceS
             width: volumeScrollView.availableWidth
 
             // Output Volume
             NBox {
               Layout.fillWidth: true
-              Layout.preferredHeight: outputVolumeColumn.implicitHeight + Style.margin2M
+              Layout.preferredHeight: outputVolumeColumn.implicitHeight + Style.paddingCard * 2
+              radius: Style.radiusCard
 
               ColumnLayout {
                 id: outputVolumeColumn
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: Style.marginM
-                spacing: Style.marginM
+                anchors.margins: Style.paddingCard
+                spacing: Style.spaceS
 
                 RowLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginXS
+                  spacing: Style.spaceXS
 
                   NText {
                     text: I18n.tr("common.output")
-                    pointSize: Style.fontSizeM
+                    pointSize: Style.fontSizeBodySmall
                     color: Color.mPrimary
                   }
 
                   NText {
                     text: AudioService.sink ? (" - " + (AudioService.sink.description || AudioService.sink.name || "")) : ""
-                    pointSize: Style.fontSizeS
+                    pointSize: Style.fontSizeLabelLarge
                     color: Color.mOnSurfaceVariant
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -272,7 +274,7 @@ SmartPanel {
 
                 RowLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginM
+                  spacing: Style.spaceS
 
                   NValueSlider {
                     id: outputVolumeSlider
@@ -292,7 +294,7 @@ SmartPanel {
 
                   NText {
                     text: Math.round((panelContent.outputVolumeGuard ? localOutputVolume : AudioService.volume) * 100) + "%"
-                    pointSize: Style.fontSizeM
+                    pointSize: Style.fontSizeBodySmall
                     family: Settings.data.ui.fontFixed
                     color: Color.mOnSurface
                     opacity: enabled ? 1.0 : 0.6
@@ -317,29 +319,30 @@ SmartPanel {
             // Input Volume
             NBox {
               Layout.fillWidth: true
-              Layout.preferredHeight: inputVolumeColumn.implicitHeight + Style.margin2M
+              Layout.preferredHeight: inputVolumeColumn.implicitHeight + Style.paddingCard * 2
+              radius: Style.radiusCard
 
               ColumnLayout {
                 id: inputVolumeColumn
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: Style.marginM
-                spacing: Style.marginM
+                anchors.margins: Style.paddingCard
+                spacing: Style.spaceS
 
                 RowLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginXS
+                  spacing: Style.spaceXS
 
                   NText {
                     text: I18n.tr("common.input")
-                    pointSize: Style.fontSizeM
+                    pointSize: Style.fontSizeBodySmall
                     color: Color.mPrimary
                   }
 
                   NText {
                     text: AudioService.source ? (" - " + (AudioService.source.description || AudioService.source.name || "")) : ""
-                    pointSize: Style.fontSizeS
+                    pointSize: Style.fontSizeLabelLarge
                     color: Color.mOnSurfaceVariant
                     elide: Text.ElideRight
                     Layout.fillWidth: true
@@ -348,7 +351,7 @@ SmartPanel {
 
                 RowLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginM
+                  spacing: Style.spaceS
 
                   NValueSlider {
                     id: inputVolumeSlider
@@ -368,7 +371,7 @@ SmartPanel {
 
                   NText {
                     text: Math.round((panelContent.inputVolumeGuard ? localInputVolume : AudioService.inputVolume) * 100) + "%"
-                    pointSize: Style.fontSizeM
+                    pointSize: Style.fontSizeBodySmall
                     family: Settings.data.ui.fontFixed
                     color: Color.mOnSurface
                     opacity: enabled ? 1.0 : 0.6
@@ -403,7 +406,7 @@ SmartPanel {
                 id: appBox
                 required property PwNode modelData
                 Layout.fillWidth: true
-                Layout.preferredHeight: appRow.implicitHeight + Style.margin2M
+                Layout.preferredHeight: appRow.implicitHeight + Style.paddingCard * 2
                 visible: !isCaptureStream
 
                 // Track individual node to ensure properties are bound
@@ -623,8 +626,8 @@ SmartPanel {
                 RowLayout {
                   id: appRow
                   anchors.fill: parent
-                  anchors.margins: Style.marginM
-                  spacing: Style.marginM
+                  anchors.margins: Style.paddingCard
+                  spacing: Style.spaceS
 
                   // App Icon
                   IconImage {
@@ -639,7 +642,7 @@ SmartPanel {
                     NIcon {
                       anchors.fill: parent
                       icon: "apps"
-                      pointSize: Style.fontSizeXL
+                      pointSize: Style.fontSizeBodyLarge
                       color: Color.mPrimary
                       visible: appIconImage.status === Image.Error || appIconImage.status === Image.Null || appBox.appIcon === ""
                     }
@@ -648,11 +651,11 @@ SmartPanel {
                   // App Name and Volume Slider
                   ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: Style.marginXS
+                    spacing: Style.spaceXS
 
                     NText {
                       text: appBox.appName || "Unknown App"
-                      pointSize: Style.fontSizeM
+                      pointSize: Style.fontSizeBodySmall
                       color: Color.mOnSurface
                       elide: Text.ElideRight
                       Layout.fillWidth: true
@@ -661,7 +664,7 @@ SmartPanel {
                     NText {
                       visible: appBox.appStreamTitle !== ""
                       text: appBox.appStreamTitle
-                      pointSize: Style.fontSizeS
+                      pointSize: Style.fontSizeLabelLarge
                       color: Color.mOnSurfaceVariant
                       elide: Text.ElideRight
                       wrapMode: Text.NoWrap
@@ -671,7 +674,7 @@ SmartPanel {
 
                     RowLayout {
                       Layout.fillWidth: true
-                      spacing: Style.marginM
+                      spacing: Style.spaceS
 
                       NValueSlider {
                         Layout.fillWidth: true
@@ -691,7 +694,7 @@ SmartPanel {
 
                       NText {
                         text: Math.round((appBox.appVolume !== undefined ? appBox.appVolume : 0.0) * 100) + "%"
-                        pointSize: Style.fontSizeM
+                        pointSize: Style.fontSizeBodySmall
                         family: Settings.data.ui.fontFixed
                         color: Color.mOnSurface
                         opacity: enabled ? 1.0 : 0.6
@@ -725,11 +728,11 @@ SmartPanel {
             NText {
               visible: panelContent.appStreams.length === 0
               text: I18n.tr("panels.audio.panel-applications-empty")
-              pointSize: Style.fontSizeM
+              pointSize: Style.fontSizeBodySmall
               color: Color.mOnSurfaceVariant
               horizontalAlignment: Text.AlignHCenter
               Layout.fillWidth: true
-              Layout.topMargin: Style.marginXL
+              Layout.topMargin: Style.spaceL
             }
           }
         }
@@ -745,7 +748,7 @@ SmartPanel {
 
           // AudioService Devices
           ColumnLayout {
-            spacing: Style.marginM
+            spacing: Style.spaceS
             width: devicesScrollView.availableWidth
 
             // -------------------------------
@@ -756,19 +759,20 @@ SmartPanel {
 
             NBox {
               Layout.fillWidth: true
-              Layout.preferredHeight: outputColumn.implicitHeight + Style.margin2M
+              Layout.preferredHeight: outputColumn.implicitHeight + Style.paddingCard * 2
+              radius: Style.radiusCard
 
               ColumnLayout {
                 id: outputColumn
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: Style.marginM
-                spacing: Style.marginS
+                anchors.margins: Style.paddingCard
+                spacing: Style.spaceS
 
                 NText {
                   text: I18n.tr("panels.audio.devices-output-device-label")
-                  pointSize: Style.fontSizeL
+                  pointSize: Style.fontSizeTitleSmall
                   color: Color.mPrimary
                 }
 
@@ -777,7 +781,7 @@ SmartPanel {
                   NRadioButton {
                     ButtonGroup.group: sinks
                     required property PwNode modelData
-                    pointSize: Style.fontSizeS
+                    pointSize: Style.fontSizeBodySmall
                     text: modelData.description
                     checked: AudioService.sink?.id === modelData.id
                     onClicked: {
@@ -798,7 +802,8 @@ SmartPanel {
 
             NBox {
               Layout.fillWidth: true
-              Layout.preferredHeight: inputColumn.implicitHeight + Style.margin2M
+              Layout.preferredHeight: inputColumn.implicitHeight + Style.paddingCard * 2
+              radius: Style.radiusCard
 
               ColumnLayout {
                 id: inputColumn
@@ -806,12 +811,12 @@ SmartPanel {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                anchors.margins: Style.marginM
-                spacing: Style.marginS
+                anchors.margins: Style.paddingCard
+                spacing: Style.spaceS
 
                 NText {
                   text: I18n.tr("panels.audio.devices-input-device-label")
-                  pointSize: Style.fontSizeL
+                  pointSize: Style.fontSizeTitleSmall
                   color: Color.mPrimary
                 }
 
@@ -820,7 +825,7 @@ SmartPanel {
                   NRadioButton {
                     ButtonGroup.group: sources
                     required property PwNode modelData
-                    pointSize: Style.fontSizeS
+                    pointSize: Style.fontSizeBodySmall
                     text: modelData.description
                     checked: AudioService.source?.id === modelData.id
                     onClicked: AudioService.setAudioSource(modelData)

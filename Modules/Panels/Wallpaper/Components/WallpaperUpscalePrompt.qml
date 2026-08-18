@@ -134,9 +134,8 @@ Rectangle {
   }
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Settings.data.general.animationDisabled ? 0 : Style.animationFast
-      easing.type: root.opacity > 0 ? Easing.OutCubic : Easing.InCubic
+    NAnim {
+      motionType: NAnim.StandardEffects
     }
   }
 
@@ -150,9 +149,9 @@ Rectangle {
   NBox {
     anchors.centerIn: parent
     width: Math.min(parent.width * 0.62, 520 * Style.uiScaleRatio)
-    implicitHeight: contentCol.implicitHeight + Style.margin2L
+    implicitHeight: contentCol.implicitHeight + Style.paddingCard * 2
     color: Color.mSurfaceContainerHigh
-    radius: Style.radiusL
+    radius: Style.radiusCard
 
     MouseArea {
       // Absorb clicks on the card itself so they don't reach the backdrop MouseArea.
@@ -162,28 +161,28 @@ Rectangle {
     ColumnLayout {
       id: contentCol
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       // ---- choice state ----
       ColumnLayout {
         visible: root.state === "choice"
         Layout.fillWidth: true
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         RowLayout {
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           NIcon {
             icon: "alert-triangle"
-            pointSize: Style.fontSizeXL
+            pointSize: Style.fontSizeTitleMedium
             color: Color.mSecondary
           }
 
           ColumnLayout {
             Layout.fillWidth: true
-            spacing: Style.marginXXS
+            spacing: Style.spaceXXS
 
             NText {
               text: I18n.tr("wallpaper.upscale.warning-title")
@@ -195,7 +194,7 @@ Rectangle {
               Layout.fillWidth: true
               wrapMode: Text.WordWrap
               color: Color.mOnSurfaceVariant
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               text: I18n.tr("wallpaper.upscale.warning-body", {
                               candidate: root.candidateWidth + "×" + root.candidateHeight,
                               target: root._targetPixelSize.width + "×" + root._targetPixelSize.height
@@ -206,7 +205,7 @@ Rectangle {
 
         RowLayout {
           Layout.fillWidth: true
-          spacing: Style.marginS
+          spacing: Style.spaceXS
 
           Item {
             Layout.fillWidth: true
@@ -243,11 +242,11 @@ Rectangle {
       ColumnLayout {
         visible: root.state === "obtaining"
         Layout.fillWidth: true
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         RowLayout {
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           NBusyIndicator {
             running: root.state === "obtaining"
@@ -267,11 +266,11 @@ Rectangle {
       ColumnLayout {
         visible: root.state === "installing"
         Layout.fillWidth: true
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         RowLayout {
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           NBusyIndicator {
             running: root.state === "installing"
@@ -291,11 +290,11 @@ Rectangle {
       ColumnLayout {
         visible: root.state === "processing"
         Layout.fillWidth: true
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         RowLayout {
           Layout.alignment: Qt.AlignHCenter
-          spacing: Style.marginL
+          spacing: Style.paddingCard
 
           Repeater {
             model: root.phaseModel
@@ -305,7 +304,7 @@ Rectangle {
               required property int index
               readonly property int currentPhaseIndex: root.phaseOrder.indexOf(root.currentUpscalePhase)
 
-              spacing: Style.marginXXS
+              spacing: Style.spaceXXS
 
               Rectangle {
                 Layout.alignment: Qt.AlignHCenter
@@ -315,8 +314,8 @@ Rectangle {
                 color: index <= currentPhaseIndex ? Color.mPrimary : Color.mSurfaceVariant
 
                 Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationNormal
+                  NColorAnimation {
+                    motionType: NColorAnimation.Standard
                   }
                 }
 

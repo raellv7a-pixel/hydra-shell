@@ -862,16 +862,14 @@ Popup {
             }
 
             Behavior on color {
-              ColorAnimation {
-                duration: Style.animationFast
-                easing.type: Easing.InOutCubic
+              NColorAnimation {
+                duration: Style.motionDurationFastEffects
               }
             }
 
             Behavior on border.color {
-              ColorAnimation {
-                duration: Style.animationFast
-                easing.type: Easing.InOutCubic
+              NColorAnimation {
+                duration: Style.motionDurationFastEffects
               }
             }
 
@@ -914,9 +912,8 @@ Popup {
                   Layout.alignment: Qt.AlignVCenter
 
                   Behavior on color {
-                    ColorAnimation {
-                      duration: Style.animationFast
-                      easing.type: Easing.InOutCubic
+                    NColorAnimation {
+                      duration: Style.motionDurationFastEffects
                     }
                   }
                 }

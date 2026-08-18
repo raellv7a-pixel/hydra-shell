@@ -218,9 +218,9 @@ Item {
   }
 
   Behavior on implicitWidth {
-    NumberAnimation {
+    NAnim {
+      motionType: NAnim.StandardSpatial
       duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-      easing.type: Easing.InOutCubic
     }
   }
 
@@ -246,9 +246,9 @@ Item {
     clip: true
 
     Behavior on width {
-      NumberAnimation {
+      NAnim {
+        motionType: NAnim.StandardSpatial
         duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.InOutCubic
       }
     }
 
@@ -714,9 +714,9 @@ Item {
     z: 30
 
     Behavior on opacity {
-      NumberAnimation {
+      NAnim {
+        motionType: NAnim.StandardEffects
         duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: Easing.OutCubic
       }
     }
 

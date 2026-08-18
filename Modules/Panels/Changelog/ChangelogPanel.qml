@@ -18,8 +18,8 @@ SmartPanel {
 
   panelContent: Rectangle {
     id: panelContent
-    color: Color.mSurfaceVariant
-    radius: Style.radiusM
+    color: Color.mSurface
+    radius: Style.radiusPanel
     border.color: Color.mOutline
     border.width: Style.borderS
 
@@ -40,28 +40,28 @@ SmartPanel {
 
     ColumnLayout {
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       RowLayout {
         Layout.fillWidth: true
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         NIcon {
           icon: "sparkles"
           color: Color.mPrimary
-          pointSize: Style.fontSizeXXL
+          pointSize: Style.fontSizeTitleMedium
         }
 
         ColumnLayout {
           Layout.fillWidth: true
-          spacing: Style.marginXS
+          spacing: Style.spaceXXS
 
           NText {
             text: I18n.tr("changelog.panel.title", {
                             "version": currentVersion || UpdateService.currentVersion
                           })
-            pointSize: Style.fontSizeXL
+            pointSize: Style.fontSizeTitleMedium
             font.weight: Style.fontWeightBold
             color: Color.mPrimary
             wrapMode: Text.WordWrap
@@ -93,14 +93,14 @@ SmartPanel {
         clip: true
         Layout.fillWidth: true
         color: Qt.alpha(Color.mPrimary, 0.08)
-        radius: Style.radiusS
+        radius: Style.radiusCard
         border.color: Color.mPrimary
         border.width: Style.borderS
 
         RowLayout {
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginS
+          anchors.margins: Style.spaceS
+          spacing: Style.spaceXS
 
           NText {
             text: hasPreviousVersion ? previousVersion : I18n.tr("changelog.panel.version-new-user")
@@ -135,7 +135,7 @@ SmartPanel {
 
         ColumnLayout {
           width: changelogScrollView.availableWidth
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           NText {
             visible: UpdateService.fetchError !== ""
@@ -165,7 +165,7 @@ SmartPanel {
 
       RowLayout {
         Layout.fillWidth: true
-        spacing: Style.marginS
+        spacing: Style.spaceXS
 
         NButton {
           Layout.fillWidth: true

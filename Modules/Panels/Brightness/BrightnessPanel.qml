@@ -18,7 +18,7 @@ SmartPanel {
 
   panelContent: Item {
     id: panelContent
-    property real contentPreferredHeight: mainColumn.implicitHeight + Style.margin2L
+    property real contentPreferredHeight: mainColumn.implicitHeight + Style.paddingCard * 2
 
     property var brightnessWidgetInstance: BarService.lookupWidget("Brightness", screen ? screen.name : null)
     readonly property var brightnessWidgetSettings: brightnessWidgetInstance ? brightnessWidgetInstance.widgetSettings : null
@@ -99,29 +99,30 @@ SmartPanel {
     ColumnLayout {
       id: mainColumn
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       // HEADER
       NBox {
         Layout.fillWidth: true
-        implicitHeight: headerRow.implicitHeight + Style.margin2M
+        implicitHeight: headerRow.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
 
         RowLayout {
           id: headerRow
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginM
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
 
           NIcon {
             icon: "settings-display"
-            pointSize: Style.fontSizeXXL
+            pointSize: Style.fontSizeHeadlineSmall
             color: Color.mPrimary
           }
 
           NText {
             text: I18n.tr("panels.display.title")
-            pointSize: Style.fontSizeL
+            pointSize: Style.fontSizeTitleMedium
             font.weight: Style.fontWeightBold
             color: Color.mOnSurface
             Layout.fillWidth: true
@@ -150,21 +151,22 @@ SmartPanel {
 
         // AudioService Devices
         ColumnLayout {
-          spacing: Style.marginM
+          spacing: Style.spaceS
           width: brightnessScrollView.availableWidth
 
           NBox {
             Layout.fillWidth: true
             visible: panelContent.globalBrightnessCapableMonitors > 1 && panelContent.resolveWidgetSetting("applyToAllMonitors", false)
-            implicitHeight: globalBrightnessContent.implicitHeight + (Style.marginXL)
+            implicitHeight: globalBrightnessContent.implicitHeight + Style.paddingCard * 2
+            radius: Style.radiusCard
 
             ColumnLayout {
               id: globalBrightnessContent
               anchors.left: parent.left
               anchors.right: parent.right
               anchors.top: parent.top
-              anchors.margins: Style.marginM
-              spacing: Style.marginS
+              anchors.margins: Style.paddingCard
+              spacing: Style.spaceS
 
               NLabel {
                 label: I18n.tr("panels.display.monitors-global-brightness-label")
@@ -173,11 +175,11 @@ SmartPanel {
 
               RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.marginS
+                spacing: Style.spaceS
 
                 NIcon {
                   icon: panelContent.getIcon(panelContent.globalBrightness)
-                  pointSize: Style.fontSizeXL
+                  pointSize: Style.fontSizeBodyLarge
                   color: Color.mOnSurface
                 }
 
@@ -215,12 +217,14 @@ SmartPanel {
             model: Quickshell.screens || []
             delegate: NBox {
               Layout.fillWidth: true
-              Layout.preferredHeight: outputColumn.implicitHeight + Style.margin2M
+              Layout.preferredHeight: outputColumn.implicitHeight + Style.paddingCard * 2
+              radius: Style.radiusCard
 
               property var brightnessMonitor: BrightnessService.getMonitorForScreen(modelData)
               readonly property real compositorScale: {
-                const info = CompositorService.displayScales[modelData.name];
-                return (info && info.scale) ? info.scale : 1.0;
+                const monitorName = modelData?.name || "";
+                const monitorInfo = CompositorService.displayScales[monitorName];
+                return monitorInfo?.scale || 1.0;
               }
 
               ColumnLayout {
@@ -228,8 +232,8 @@ SmartPanel {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: Style.marginM
-                spacing: Style.marginS
+                anchors.margins: Style.paddingCard
+                spacing: Style.spaceS
 
                 NLabel {
                   label: modelData.name || "Unknown"
@@ -247,10 +251,10 @@ SmartPanel {
                 RowLayout {
 
                   Layout.fillWidth: true
-                  spacing: Style.marginS
+                  spacing: Style.spaceS
                   NIcon {
                     icon: getIcon(brightnessMonitor ? brightnessMonitor.brightness : 0)
-                    pointSize: Style.fontSizeXL
+                    pointSize: Style.fontSizeBodyLarge
                     color: Color.mOnSurface
                   }
 

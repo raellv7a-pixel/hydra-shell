@@ -90,8 +90,8 @@ Item {
 
   ColumnLayout {
     anchors.fill: parent
-    anchors.margins: Style.marginXS
-    spacing: Style.marginXS
+    anchors.margins: Style.spaceXXS
+    spacing: Style.spaceXXS
 
     Item {
       id: imageContainer
@@ -108,7 +108,7 @@ Item {
         }
         height: card.imageHeight
         color: Color.mSurfaceContainerHigh
-        radius: Style.radiusL
+        radius: Style.radiusCard
         visible: card.isDirectory
         border.color: card.isCurrent ? Color.mPrimary : "transparent"
         border.width: card.isCurrent ? Style.borderL : 0
@@ -116,7 +116,7 @@ Item {
         NIcon {
           anchors.centerIn: parent
           icon: "folder"
-          pointSize: Style.fontSizeXXXL
+          pointSize: Style.fontSizeHeadlineSmall
           color: Color.mPrimary
         }
       }
@@ -132,7 +132,7 @@ Item {
         height: card.imageHeight
         visible: !card.isDirectory
         imagePath: card._cachedSource
-        radius: Style.radiusL
+        radius: Style.radiusCard
         borderColor: (card.isSelected || card.isCurrent) ? Color.mPrimary : "transparent"
         borderWidth: (card.isSelected || card.isCurrent) ? Style.borderL : 0
         imageFillMode: Image.PreserveAspectCrop
@@ -147,13 +147,13 @@ Item {
         }
         height: card.imageHeight
         color: Color.mSurfaceContainerHigh
-        radius: Style.radiusL
+        radius: Style.radiusCard
         visible: !card.isDirectory && (thumbnail.status === Image.Loading || thumbnail.status === Image.Error || card._cachedSource === "")
 
         NIcon {
           anchors.centerIn: parent
           icon: thumbnail.status === Image.Error ? "alert-circle" : "image"
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeTitleSmall
           color: Color.mOnSurfaceVariant
         }
       }
@@ -172,7 +172,7 @@ Item {
         anchors {
           top: parent.top
           right: parent.right
-          margins: Style.marginS
+          margins: Style.spaceXS
         }
         width: Math.round(Style.baseWidgetSize * 0.7)
         height: width
@@ -184,7 +184,7 @@ Item {
         NIcon {
           anchors.centerIn: parent
           icon: "check"
-          pointSize: Style.fontSizeM
+          pointSize: Style.fontSizeBodySmall
           color: Color.mOnPrimaryContainer
         }
       }
@@ -196,7 +196,7 @@ Item {
         anchors {
           top: parent.top
           left: parent.left
-          margins: Style.marginS
+          margins: Style.spaceXS
         }
         width: Math.round(Style.baseWidgetSize * 0.7)
         height: width
@@ -212,20 +212,20 @@ Item {
         opacity: (card.isFavorited || starHoverHandler.hovered) ? 1.0 : 0.7
 
         Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
           }
         }
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
 
         NIcon {
           anchors.centerIn: parent
           icon: card.isFavorited ? "star-filled" : "star"
-          pointSize: Style.fontSizeM
+          pointSize: Style.fontSizeBodySmall
           color: {
             if (card.isFavorited) {
               return starHoverHandler.hovered ? Color.mOnPrimaryContainer : Color.mOnSecondaryContainer;
@@ -253,7 +253,7 @@ Item {
         anchors {
           bottom: thumbnail.bottom
           horizontalCenter: parent.horizontalCenter
-          bottomMargin: Style.marginS
+          bottomMargin: Style.spaceXS
         }
         z: 10
         implicitWidth: paletteRowContent.implicitWidth
@@ -265,7 +265,7 @@ Item {
         Row {
           id: paletteRowContent
 
-          spacing: Style.marginXS
+          spacing: Style.spaceXXS
 
           Rectangle {
             width: paletteRow.diameter
@@ -314,12 +314,12 @@ Item {
         }
         height: card.imageHeight
         color: Color.mSurface
-        radius: Style.radiusL
+        radius: Style.radiusCard
         opacity: card.active ? 0 : 0.18
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
       }
@@ -349,10 +349,10 @@ Item {
       text: card.label
       visible: card.showLabel
       color: card.active ? Color.mOnSurface : Color.mOnSurfaceVariant
-      pointSize: Style.fontSizeXS
+      pointSize: Style.fontSizeLabelSmall
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginS
-      Layout.rightMargin: Style.marginS
+      Layout.leftMargin: Style.spaceXS
+      Layout.rightMargin: Style.spaceXS
       Layout.alignment: Qt.AlignHCenter
       horizontalAlignment: Text.AlignHCenter
       elide: Text.ElideRight

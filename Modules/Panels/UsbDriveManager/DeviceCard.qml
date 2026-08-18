@@ -27,19 +27,19 @@ NBox {
     return parts.join(" · ");
   }
 
-  implicitHeight: contentColumn.implicitHeight + Style.margin2M
+  implicitHeight: contentColumn.implicitHeight + Style.spaceS * 2
   color: Color.mSurfaceContainer
-  radius: Style.radiusL
+  radius: Style.radiusCard
 
   ColumnLayout {
     id: contentColumn
     anchors.fill: parent
-    anchors.margins: Style.marginM
-    spacing: Style.marginS
+    anchors.margins: Style.spaceS
+    spacing: Style.spaceXS
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       Rectangle {
         Layout.preferredWidth: Style.baseWidgetSize * 0.8
@@ -50,7 +50,7 @@ NBox {
         NIcon {
           anchors.centerIn: parent
           icon: "usb"
-          pointSize: Style.fontSizeL
+          pointSize: Style.fontSizeTitleSmall
           color: root.device.isMounted ? Color.mPrimary : Color.mOnSurfaceVariant
         }
       }
@@ -62,7 +62,7 @@ NBox {
         NText {
           Layout.fillWidth: true
           text: root.displayName
-          pointSize: Style.fontSizeM
+          pointSize: Style.fontSizeBodySmall
           font.weight: Style.fontWeightMedium
           color: Color.mOnSurface
           elide: Text.ElideRight
@@ -71,23 +71,23 @@ NBox {
         NText {
           Layout.fillWidth: true
           text: root.details
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
           elide: Text.ElideRight
         }
       }
 
       Rectangle {
-        Layout.preferredWidth: statusText.implicitWidth + Style.margin2S
-        Layout.preferredHeight: statusText.implicitHeight + Style.marginXS
-        radius: height / 2
+        Layout.preferredWidth: statusText.implicitWidth + Style.spaceXS * 2
+        Layout.preferredHeight: statusText.implicitHeight + Style.spaceXXS
+        radius: Style.radiusCapsule
         color: root.device.isMounted ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
 
         NText {
           id: statusText
           anchors.centerIn: parent
           text: root.device.isMounted ? I18n.tr("usb-drive-manager.device.mounted") : I18n.tr("usb-drive-manager.device.unmounted")
-          pointSize: Style.fontSizeXXS
+          pointSize: Style.fontSizeLabelSmall
           font.weight: Style.fontWeightMedium
           color: root.device.isMounted ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
         }
@@ -98,7 +98,7 @@ NBox {
       visible: root.device.isMounted
       Layout.fillWidth: true
       text: root.device.mountpoint
-      pointSize: Style.fontSizeXS
+      pointSize: Style.fontSizeLabelSmall
       font.family: Settings.data.ui.fontFixed
       color: Color.mOnSurfaceVariant
       elide: Text.ElideMiddle
@@ -107,7 +107,7 @@ NBox {
     ColumnLayout {
       visible: root.device.isMounted
       Layout.fillWidth: true
-      spacing: Style.marginXS
+      spacing: Style.spaceXXS
 
       Rectangle {
         Layout.fillWidth: true
@@ -130,7 +130,7 @@ NBox {
           text: root.device.usedBytes > 0 ? I18n.tr("usb-drive-manager.device.used", {
                                                       "size": UsbDriveService.formatBytes(root.device.usedBytes)
                                                     }) : I18n.tr("usb-drive-manager.device.usage-loading")
-          pointSize: Style.fontSizeXXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
         }
 
@@ -142,7 +142,7 @@ NBox {
           text: root.device.freeBytes > 0 ? I18n.tr("usb-drive-manager.device.free", {
                                                       "size": UsbDriveService.formatBytes(root.device.freeBytes)
                                                     }) : ""
-          pointSize: Style.fontSizeXXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
         }
       }
@@ -150,7 +150,7 @@ NBox {
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: Style.marginXS
+      spacing: Style.spaceXXS
 
       NButton {
         visible: root.device.isMounted

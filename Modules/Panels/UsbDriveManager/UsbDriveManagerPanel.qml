@@ -24,20 +24,20 @@ SmartPanel {
 
     ColumnLayout {
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       NBox {
         Layout.fillWidth: true
-        implicitHeight: headerRow.implicitHeight + Style.margin2M
+        implicitHeight: headerRow.implicitHeight + Style.spaceS * 2
         color: Color.mSurfaceContainerHigh
-        radius: Style.radiusL
+        radius: Style.radiusCard
 
         RowLayout {
           id: headerRow
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginM
+          anchors.margins: Style.spaceS
+          spacing: Style.spaceS
 
           Rectangle {
             Layout.preferredWidth: Style.baseWidgetSize * 0.8
@@ -48,7 +48,7 @@ SmartPanel {
             NIcon {
               anchors.centerIn: parent
               icon: "usb"
-              pointSize: Style.fontSizeL
+              pointSize: Style.fontSizeTitleSmall
               color: Color.mPrimary
             }
           }
@@ -60,7 +60,7 @@ SmartPanel {
             NText {
               Layout.fillWidth: true
               text: I18n.tr("usb-drive-manager.panel.title")
-              pointSize: Style.fontSizeL
+              pointSize: Style.fontSizeTitleSmall
               font.weight: Style.fontWeightBold
               color: Color.mOnSurface
             }
@@ -71,7 +71,7 @@ SmartPanel {
                               "count": UsbDriveService.devices.length,
                               "mounted": UsbDriveService.mountedCount
                             })
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelMedium
               color: Color.mOnSurfaceVariant
             }
           }
@@ -104,15 +104,15 @@ SmartPanel {
       NBox {
         visible: UsbDriveService.dependenciesChecked && UsbDriveService.missingDependencies.length > 0
         Layout.fillWidth: true
-        implicitHeight: dependencyRow.implicitHeight + Style.margin2M
+        implicitHeight: dependencyRow.implicitHeight + Style.spaceS * 2
         color: Color.mErrorContainer
-        radius: Style.radiusL
+        radius: Style.radiusCard
 
         RowLayout {
           id: dependencyRow
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginS
+          anchors.margins: Style.spaceS
+          spacing: Style.spaceXS
 
           NIcon {
             icon: "alert-triangle"
@@ -121,7 +121,7 @@ SmartPanel {
 
           ColumnLayout {
             Layout.fillWidth: true
-            spacing: Style.marginXS
+            spacing: Style.spaceXXS
 
             NText {
               Layout.fillWidth: true
@@ -135,7 +135,7 @@ SmartPanel {
               text: I18n.tr("usb-drive-manager.errors.dependencies-description", {
                               "programs": UsbDriveService.missingDependencies.join(", ")
                             })
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelMedium
               color: Color.mOnErrorContainer
               wrapMode: Text.Wrap
             }
@@ -150,12 +150,12 @@ SmartPanel {
 
         ColumnLayout {
           anchors.centerIn: parent
-          spacing: Style.marginS
+          spacing: Style.spaceXS
 
           NIcon {
             Layout.alignment: Qt.AlignHCenter
             icon: "refresh"
-            pointSize: Style.fontSizeXXL
+            pointSize: Style.fontSizeTitleMedium
             color: Color.mPrimary
 
             RotationAnimator on rotation {
@@ -182,19 +182,19 @@ SmartPanel {
 
         ColumnLayout {
           anchors.centerIn: parent
-          spacing: Style.marginS
+          spacing: Style.spaceXS
 
           NIcon {
             Layout.alignment: Qt.AlignHCenter
             icon: "usb"
-            pointSize: Style.fontSizeXXL
+            pointSize: Style.fontSizeTitleMedium
             color: Color.mOnSurfaceVariant
           }
 
           NText {
             Layout.alignment: Qt.AlignHCenter
             text: UsbDriveService.lsblkAvailable ? I18n.tr("usb-drive-manager.panel.empty") : I18n.tr("usb-drive-manager.panel.unavailable")
-            pointSize: Style.fontSizeM
+            pointSize: Style.fontSizeBodySmall
             font.weight: Style.fontWeightMedium
             color: Color.mOnSurface
           }
@@ -205,7 +205,7 @@ SmartPanel {
             text: UsbDriveService.lsblkAvailable ? I18n.tr("usb-drive-manager.panel.empty-hint") : I18n.tr("usb-drive-manager.errors.missing-lsblk")
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
             color: Color.mOnSurfaceVariant
           }
         }
@@ -216,7 +216,7 @@ SmartPanel {
         Layout.fillWidth: true
         Layout.fillHeight: true
         model: UsbDriveService.devices
-        spacing: Style.marginS
+        spacing: Style.spaceXS
         clip: true
         boundsBehavior: Flickable.StopAtBounds
 
@@ -232,14 +232,14 @@ SmartPanel {
         Layout.fillWidth: true
         text: I18n.tr("usb-drive-manager.panel.action-running")
         horizontalAlignment: Text.AlignHCenter
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: Color.mPrimary
       }
 
       RowLayout {
         visible: UsbDriveService.devices.length > 0
         Layout.fillWidth: true
-        spacing: Style.marginS
+        spacing: Style.spaceXS
 
         NButton {
           Layout.fillWidth: true

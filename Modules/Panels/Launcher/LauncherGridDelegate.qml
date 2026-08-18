@@ -45,22 +45,19 @@ Item {
     transformOrigin: Item.Center
 
     Behavior on scale {
-      ScaleAnimator {
-        duration: Style.animationFast
-        easing.type: Easing.OutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 
     Behavior on color {
-      ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuint
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
     Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuint
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
 
@@ -80,16 +77,14 @@ Item {
         opacity: gridEntryContainer.isSelected ? 1.0 : 0.85
 
         Behavior on scale {
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+          NAnim {
+            motionType: NAnim.ExpressiveDefaultSpatial
           }
         }
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
 
@@ -248,9 +243,8 @@ Item {
         maximumLineCount: 1
 
         Behavior on color {
-          ColorAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
           }
         }
       }

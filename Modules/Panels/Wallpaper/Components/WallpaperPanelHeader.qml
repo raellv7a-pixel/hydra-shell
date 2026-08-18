@@ -50,8 +50,8 @@ NBox {
   }
 
   color: Color.mSurfaceContainerLow
-  radius: Style.radiusL
-  implicitHeight: headerColumn.implicitHeight + Style.margin2L
+  radius: Style.radiusCard
+  implicitHeight: headerColumn.implicitHeight + Style.paddingCard * 2
 
   Timer {
     id: localFilterDebounce
@@ -74,22 +74,22 @@ NBox {
     id: headerColumn
 
     anchors.fill: parent
-    anchors.margins: Style.marginL
-    spacing: Style.marginM
+    anchors.margins: Style.paddingCard
+    spacing: Style.spaceS
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: Style.marginM
+      spacing: Style.spaceS
 
       NIcon {
         icon: "settings-wallpaper-selector"
-        pointSize: Style.fontSizeXXL
+        pointSize: Style.fontSizeTitleMedium
         color: Color.mPrimary
       }
 
       NText {
         text: I18n.tr("wallpaper.panel.title")
-        pointSize: Style.fontSizeL
+        pointSize: Style.fontSizeTitleMedium
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
         Layout.fillWidth: true
@@ -180,7 +180,7 @@ NBox {
 
       Layout.fillWidth: true
       currentIndex: root.mainTabIndex
-      spacing: Style.marginXS
+      spacing: Style.spaceXXS
       distributeEvenly: true
 
       onCurrentIndexChanged: {
@@ -214,7 +214,7 @@ NBox {
       visible: root.mainTabIndex === 0 && Settings.data.wallpaper.enabled && !Settings.data.wallpaper.linkLightAndDarkWallpapers
       Layout.fillWidth: true
       currentIndex: root.appearanceTabIndex
-      spacing: Style.marginXS
+      spacing: Style.spaceXXS
       distributeEvenly: true
 
       onCurrentIndexChanged: {
@@ -241,7 +241,7 @@ NBox {
       visible: root.mainTabIndex === 0 && root.screensStripVisible
       Layout.fillWidth: true
       currentIndex: root.screenIndex
-      spacing: Style.marginXS
+      spacing: Style.spaceXXS
       distributeEvenly: true
 
       onCurrentIndexChanged: {
@@ -268,7 +268,7 @@ NBox {
     RowLayout {
       visible: root.mainTabIndex === 0
       Layout.fillWidth: true
-      spacing: Style.marginM
+      spacing: Style.spaceS
 
       NTextInput {
         id: searchInput
@@ -278,7 +278,7 @@ NBox {
 
         inputIconName: "search"
         placeholderText: Settings.data.wallpaper.useWallhaven ? I18n.tr("placeholders.search-wallhaven") : I18n.tr("placeholders.search-wallpapers")
-        fontSize: Style.fontSizeM
+        fontSize: Style.fontSizeBodySmall
         Layout.fillWidth: true
 
         Component.onCompleted: {
@@ -397,19 +397,17 @@ NBox {
         SequentialAnimation {
           id: schemeGlowAnimation
 
-          NumberAnimation {
+          NAnim {
             target: colorSchemeComboBox
             property: "opacity"
             to: 0.3
-            duration: Style.animationSlow
-            easing.type: Easing.OutCubic
+            motionType: NAnim.StandardEffects
           }
-          NumberAnimation {
+          NAnim {
             target: colorSchemeComboBox
             property: "opacity"
             to: 1.0
-            duration: Style.animationSlow
-            easing.type: Easing.InCubic
+            motionType: NAnim.StandardEffects
           }
         }
       }

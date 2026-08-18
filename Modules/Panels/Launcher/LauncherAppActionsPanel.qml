@@ -103,16 +103,14 @@ Item {
   z: open ? 100 : 0
 
   Behavior on height {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
   }
 
   Behavior on opacity {
-    OpacityAnimator {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.StandardEffects
     }
   }
 
@@ -124,9 +122,8 @@ Item {
     topRightRadius: root.connectedToEntry ? root.seamRadius : root.outerRadius
 
     Behavior on color {
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCubic
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
   }
@@ -239,9 +236,8 @@ Item {
             opacity: (modelData.enabled === false && !modelData.busy) ? 0.38 : 1.0
 
             Behavior on opacity {
-              OpacityAnimator {
-                duration: Style.animationFast
-                easing.type: Easing.OutCubic
+              NAnim {
+                motionType: NAnim.StandardEffects
               }
             }
 
@@ -258,9 +254,8 @@ Item {
               }
 
               Behavior on color {
-                ColorAnimation {
-                  duration: Style.animationFast
-                  easing.type: Easing.OutCubic
+                NColorAnimation {
+                  duration: Style.motionDurationFastEffects
                 }
               }
             }

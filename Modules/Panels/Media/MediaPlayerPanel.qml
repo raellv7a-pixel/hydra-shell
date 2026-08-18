@@ -74,7 +74,7 @@ SmartPanel {
     id: playerContent
     anchors.fill: parent
 
-    property real contentPreferredHeight: mainLayout.implicitHeight + Style.margin2L
+    property real contentPreferredHeight: mainLayout.implicitHeight + Style.paddingCard * 2
 
     property Component visualizerSource: {
       switch (root.visualizerType) {
@@ -92,55 +92,85 @@ SmartPanel {
     ColumnLayout {
       id: mainLayout
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       NBox {
         Layout.fillWidth: true
-        Layout.preferredHeight: headerRow.implicitHeight + Style.margin2M
+        Layout.preferredHeight: headerRow.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
 
         RowLayout {
           id: headerRow
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginM
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
 
           NIcon {
             icon: "music"
-            pointSize: Style.fontSizeL
+            pointSize: Style.fontSizeHeadlineSmall
             color: Color.mPrimary
           }
 
           NText {
             text: I18n.tr("common.media-player")
             font.weight: Style.fontWeightBold
-            pointSize: Style.fontSizeL
+            pointSize: Style.fontSizeTitleSmall
             color: Color.mOnSurface
             Layout.fillWidth: true
           }
 
           Rectangle {
-            radius: Style.radiusS
-            color: playerSelectorMouse.containsMouse ? Color.mPrimary : "transparent"
-            implicitWidth: playerRow.implicitWidth + Style.marginM
+            id: playerSelector
+            readonly property real controlRadius: Style.radiusCapsule
+
+            radius: controlRadius
+            color: Color.mSurfaceContainerHigh
+            implicitWidth: playerRow.implicitWidth + Style.spaceM * 2
             implicitHeight: Style.baseWidgetSize * 0.8
             visible: MediaService.getAvailablePlayers().length > 1
+            activeFocusOnTab: true
+            Accessible.role: Accessible.Button
+            Accessible.name: MediaService.currentPlayer ? MediaService.currentPlayer.identity : I18n.tr("common.media-player")
+            Keys.onReturnPressed: event => {
+                                    playerContextMenu.open();
+                                    event.accepted = true;
+                                  }
+            Keys.onSpacePressed: event => {
+                                   playerContextMenu.open();
+                                   event.accepted = true;
+                                 }
 
             RowLayout {
               id: playerRow
               anchors.centerIn: parent
-              spacing: Style.marginXS
+              spacing: Style.spaceXS
 
               NText {
                 text: MediaService.currentPlayer ? MediaService.currentPlayer.identity : "Select Player"
-                pointSize: Style.fontSizeXS
-                color: playerSelectorMouse.containsMouse ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                pointSize: Style.fontSizeLabelLarge
+                color: Color.mOnSurfaceVariant
               }
               NIcon {
                 icon: "chevron-down"
-                pointSize: Style.fontSizeXS
-                color: playerSelectorMouse.containsMouse ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                pointSize: Style.fontSizeLabelLarge
+                color: Color.mOnSurfaceVariant
               }
+            }
+
+            NStateLayer {
+              id: playerSelectorStateLayer
+              anchors.fill: parent
+              hovered: playerSelectorMouse.containsMouse
+              pressed: playerSelectorMouse.pressed
+              focused: playerSelector.activeFocus
+              radius: playerSelector.controlRadius
+              stateColor: Color.mOnSurface
+            }
+
+            NFocusRing {
+              focusVisible: playerSelector.activeFocus
+              targetRadius: playerSelector.controlRadius
             }
 
             MouseArea {
@@ -148,6 +178,7 @@ SmartPanel {
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
+              onPressed: mouse => playerSelectorStateLayer.rippleAt(mouse.x, mouse.y)
               onClicked: playerContextMenu.open()
             }
 
@@ -156,13 +187,13 @@ SmartPanel {
               x: 0
               y: parent.height
               width: 160
-              padding: Style.marginS
+              padding: Style.spaceS
 
               background: Rectangle {
-                color: Color.mSurfaceVariant
-                border.color: Color.mOutline
+                color: Color.mSurfaceContainerHigh
+                border.color: Color.mOutlineVariant
                 border.width: Style.borderS
-                radius: Style.iRadiusM
+                radius: Style.radiusMenu
               }
 
               contentItem: ColumnLayout {
@@ -170,35 +201,63 @@ SmartPanel {
                 Repeater {
                   model: MediaService.getAvailablePlayers()
                   delegate: Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 30
-                    color: "transparent"
+                    id: playerItem
+                    readonly property bool selected: MediaService.currentPlayer && MediaService.currentPlayer.identity === modelData.identity
+                    readonly property real controlRadius: Style.radiusControl
 
-                    Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.round(40 * Style.uiScaleRatio)
+                    color: selected ? Color.mSecondaryContainer : "transparent"
+                    radius: controlRadius
+                    activeFocusOnTab: true
+                    Accessible.role: Accessible.MenuItem
+                    Accessible.name: modelData.identity
+                    Accessible.selected: selected
+                    Keys.onReturnPressed: event => {
+                                            MediaService.currentPlayer = modelData;
+                                            playerContextMenu.close();
+                                            event.accepted = true;
+                                          }
+                    Keys.onSpacePressed: event => {
+                                           MediaService.currentPlayer = modelData;
+                                           playerContextMenu.close();
+                                           event.accepted = true;
+                                         }
+
+                    NStateLayer {
+                      id: playerItemStateLayer
                       anchors.fill: parent
-                      color: itemMouse.containsMouse ? Color.mPrimary : "transparent"
-                      radius: Style.iRadiusS
+                      hovered: itemMouse.containsMouse
+                      pressed: itemMouse.pressed
+                      focused: playerItem.activeFocus
+                      radius: playerItem.controlRadius
+                      stateColor: Color.mOnSurface
                     }
 
                     RowLayout {
                       anchors.fill: parent
-                      anchors.margins: Style.marginS
-                      spacing: Style.marginS
+                      anchors.margins: Style.spaceS
+                      spacing: Style.spaceS
 
                       NIcon {
-                        visible: MediaService.currentPlayer && MediaService.currentPlayer.identity === modelData.identity
+                        visible: playerItem.selected
                         icon: "check"
-                        color: itemMouse.containsMouse ? Color.mOnPrimary : Color.mPrimary
-                        pointSize: Style.fontSizeS
+                        color: Color.mOnSecondaryContainer
+                        pointSize: Style.fontSizeBodySmall
                       }
 
                       NText {
                         text: modelData.identity
-                        pointSize: Style.fontSizeS
-                        color: itemMouse.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+                        pointSize: Style.fontSizeBodySmall
+                        color: playerItem.selected ? Color.mOnSecondaryContainer : Color.mOnSurface
                         Layout.fillWidth: true
                         elide: Text.ElideRight
                       }
+                    }
+
+                    NFocusRing {
+                      focusVisible: playerItem.activeFocus
+                      targetRadius: playerItem.controlRadius
                     }
 
                     MouseArea {
@@ -206,6 +265,7 @@ SmartPanel {
                       anchors.fill: parent
                       hoverEnabled: true
                       cursorShape: Qt.PointingHandCursor
+                      onPressed: mouse => playerItemStateLayer.rippleAt(mouse.x, mouse.y)
                       onClicked: {
                         MediaService.currentPlayer = modelData;
                         playerContextMenu.close();
@@ -228,28 +288,29 @@ SmartPanel {
 
       NBox {
         Layout.fillWidth: true
-        Layout.preferredHeight: mediaContentGrid.implicitHeight + Style.margin2M
+        Layout.preferredHeight: mediaContentGrid.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
 
         // Visualizer background for content area
         Loader {
+          id: visualizerLoader
           anchors.fill: parent
-          z: 0
-          active: !!(root.needsSpectrum && !root.showAlbumArt)
+          active: root.needsSpectrum && !root.showAlbumArt
           sourceComponent: visualizerSource
+          visible: active
+          opacity: 0.2
         }
 
         GridLayout {
           id: mediaContentGrid
-          anchors.left: parent.left
-          anchors.right: parent.right
-          anchors.top: parent.top
-          anchors.leftMargin: root.compactMode ? Style.marginL : Style.marginM
-          anchors.rightMargin: root.compactMode ? Style.marginL : Style.marginM
-          anchors.topMargin: Style.marginM
-          anchors.bottomMargin: Style.marginM
+          anchors.fill: parent
+          anchors.leftMargin: Style.paddingCard
+          anchors.rightMargin: Style.paddingCard
+          anchors.topMargin: Style.paddingCard
+          anchors.bottomMargin: Style.paddingCard
           columns: root.isSideBySide ? 2 : 1
-          columnSpacing: Style.marginL
-          rowSpacing: root.compactMode ? Style.marginL : Style.marginM
+          columnSpacing: Style.spaceM
+          rowSpacing: root.compactMode ? Style.spaceM : Style.spaceS
 
           // Album Art (Vertical in normal, Horizontal in compact)
           Item {
@@ -283,17 +344,17 @@ SmartPanel {
 
             NImageRounded {
               anchors.fill: parent
-              radius: root.compactMode ? Style.radiusM : Style.radiusL
+              radius: Style.radiusCard
               imagePath: MediaService.trackArtUrl
               imageFillMode: Image.PreserveAspectCrop
               fallbackIcon: "disc"
-              fallbackIconSize: root.compactMode ? Style.fontSizeXXXL * 3 : Style.fontSizeXXXL * 6
+              fallbackIconSize: root.compactMode ? Style.fontSizeDisplaySmall : Style.fontSizeDisplayLarge
               borderWidth: 0
             }
 
             Loader {
               anchors.fill: parent
-              anchors.margins: Style.marginS
+              anchors.margins: Style.spaceS
               z: 2
               active: !!(root.needsSpectrum && root.showAlbumArt)
               sourceComponent: visualizerSource
@@ -306,7 +367,7 @@ SmartPanel {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
             Layout.fillHeight: root.compactMode
-            spacing: root.compactMode ? Style.marginXS : Style.marginS
+            spacing: root.compactMode ? Style.spaceXS : Style.spaceS
 
             ColumnLayout {
               Layout.fillWidth: true
@@ -331,10 +392,10 @@ SmartPanel {
                   return NScrollText.ScrollMode.Never;
                 }
                 fadeExtent: 0.01
-                fadeCornerRadius: Style.radiusM
+                fadeCornerRadius: Style.radiusCard
 
                 delegate: NText {
-                  pointSize: root.compactMode ? Style.fontSizeL : Style.fontSizeXL
+                  pointSize: root.compactMode ? Style.fontSizeTitleMedium : Style.fontSizeHeadlineSmall
                   font.weight: Style.fontWeightBold
                   color: Color.mOnSurface
                   horizontalAlignment: root.isSideBySide ? Text.AlignLeft : Text.AlignHCenter
@@ -362,10 +423,10 @@ SmartPanel {
                   return NScrollText.ScrollMode.Never;
                 }
                 fadeExtent: 0.01
-                fadeCornerRadius: Style.radiusM
+                fadeCornerRadius: Style.radiusCard
 
                 delegate: NText {
-                  pointSize: root.compactMode ? Style.fontSizeS : Style.fontSizeM
+                  pointSize: root.compactMode ? Style.fontSizeBodySmall : Style.fontSizeBodyMedium
                   color: Color.mOnSurfaceVariant
                   horizontalAlignment: root.isSideBySide ? Text.AlignLeft : Text.AlignHCenter
                   elide: Text.ElideNone
@@ -427,6 +488,7 @@ SmartPanel {
                     snapAlways: false
                     enabled: MediaService.trackLength > 0 && MediaService.canSeek
                     heightRatio: 0.4
+                    wavy: MediaService.isPlaying
 
                     value: (!MediaService.isSeeking) ? progressWrapper.progressRatio : (progressWrapper.localSeekRatio >= 0 ? progressWrapper.localSeekRatio : 0)
 
@@ -457,7 +519,7 @@ SmartPanel {
 
                   NText {
                     text: MediaService.positionString || "0:00"
-                    pointSize: Style.fontSizeXS
+                    pointSize: Style.fontSizeLabelLarge
                     color: Color.mOnSurfaceVariant
                     visible: progressWrapper.visible
                   }
@@ -469,7 +531,7 @@ SmartPanel {
 
                   NText {
                     text: MediaService.lengthString || "0:00"
-                    pointSize: Style.fontSizeXS
+                    pointSize: Style.fontSizeLabelLarge
                     color: Color.mOnSurfaceVariant
                     horizontalAlignment: Text.AlignRight
                     visible: progressWrapper.visible
@@ -479,12 +541,12 @@ SmartPanel {
             }
 
             Item {
-              Layout.preferredHeight: root.isSideBySide ? Style.marginM : Style.marginS
+              Layout.preferredHeight: root.isSideBySide ? Style.spaceS : Style.spaceXS
             }
 
             RowLayout {
               Layout.alignment: Qt.AlignHCenter
-              spacing: root.isSideBySide ? Style.marginL : Style.marginXL
+              spacing: root.isSideBySide ? Style.spaceM : Style.spaceL
 
               NIconButton {
                 icon: "media-prev"
@@ -493,27 +555,56 @@ SmartPanel {
               }
 
               Rectangle {
+                id: playButton
+                readonly property real controlRadius: Style.radiusCapsule
+
                 implicitWidth: root.compactMode ? (Style.baseWidgetSize * 1.3) : (Style.baseWidgetSize * 1.8)
                 implicitHeight: root.compactMode ? (Style.baseWidgetSize * 1.3) : (Style.baseWidgetSize * 1.8)
-                radius: root.compactMode ? Style.iRadiusM : Style.iRadiusL
+                radius: controlRadius
                 color: Color.mPrimary
+                activeFocusOnTab: true
+                Accessible.role: Accessible.Button
+                Accessible.name: MediaService.isPlaying ? I18n.tr("common.pause") : I18n.tr("common.play")
+                Keys.onReturnPressed: event => {
+                                        MediaService.playPause();
+                                        event.accepted = true;
+                                      }
+                Keys.onSpacePressed: event => {
+                                       MediaService.playPause();
+                                       event.accepted = true;
+                                     }
+
+                NStateLayer {
+                  id: playStateLayer
+                  anchors.fill: parent
+                  hovered: playMouse.containsMouse
+                  pressed: playMouse.pressed
+                  focused: playButton.activeFocus
+                  radius: playButton.controlRadius
+                  stateColor: Color.mOnPrimary
+                }
 
                 NIcon {
                   anchors.centerIn: parent
                   icon: MediaService.isPlaying ? "media-pause" : "media-play"
-                  pointSize: root.compactMode ? Style.fontSizeL : Style.fontSizeXXL
+                  pointSize: root.compactMode ? Style.fontSizeTitleMedium : Style.fontSizeHeadlineSmall
                   color: Color.mOnPrimary
                 }
 
+                NFocusRing {
+                  focusVisible: playButton.activeFocus
+                  targetRadius: playButton.controlRadius
+                }
+
                 MouseArea {
+                  id: playMouse
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
                   hoverEnabled: true
-                  onEntered: parent.color = Color.mPrimary
+                  onPressed: mouse => playStateLayer.rippleAt(mouse.x, mouse.y)
                   onClicked: MediaService.playPause()
                 }
               }
-
               NIconButton {
                 icon: "media-next"
                 baseSize: root.compactMode ? (Style.baseWidgetSize * 0.9) : (Style.baseWidgetSize * 1.2)
@@ -530,7 +621,7 @@ SmartPanel {
   Component {
     id: linearComponent
     NLinearSpectrum {
-      width: parent.width - Style.marginS
+      width: parent.width - Style.spaceS
       height: 20
       values: SpectrumService.values
       fillColor: Color.mPrimary
@@ -543,8 +634,8 @@ SmartPanel {
   Component {
     id: mirroredComponent
     NMirroredSpectrum {
-      width: parent.width - Style.marginS
-      height: parent.height - Style.marginS
+      width: parent.width - Style.spaceS
+      height: parent.height - Style.spaceS
       values: SpectrumService.values
       fillColor: Color.mPrimary
       opacity: 0.4
@@ -555,8 +646,8 @@ SmartPanel {
   Component {
     id: waveComponent
     NWaveSpectrum {
-      width: parent.width - Style.marginS
-      height: parent.height - Style.marginS
+      width: parent.width - Style.spaceS
+      height: parent.height - Style.spaceS
       values: SpectrumService.values
       fillColor: Color.mPrimary
       opacity: 0.4
