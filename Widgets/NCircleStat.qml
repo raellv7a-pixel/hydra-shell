@@ -38,9 +38,8 @@ Item {
 
   Behavior on animatedRatio {
     enabled: !Settings.data.general.animationDisabled
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.StandardSpatial
     }
   }
 

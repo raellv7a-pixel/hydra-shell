@@ -2,16 +2,17 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Templates as T
 import qs.Commons
+import qs.Widgets
 
 ScrollView {
   id: root
 
-  property color handleColor: Qt.alpha(Color.mHover, 0.8)
-  property color handleHoverColor: handleColor
-  property color handlePressedColor: handleColor
+  property color handleColor: Color.mOutline
+  property color handleHoverColor: Color.mPrimary
+  property color handlePressedColor: Color.mPrimary
   property color trackColor: "transparent"
   property real handleWidth: Math.round(6 * Style.uiScaleRatio)
-  property real handleRadius: Style.iRadiusM
+  property real handleRadius: Style.radiusCapsule
   property int verticalPolicy: ScrollBar.AsNeeded
   property int horizontalPolicy: ScrollBar.AsNeeded
   property bool preventHorizontalScroll: horizontalPolicy === ScrollBar.AlwaysOff
@@ -28,7 +29,7 @@ ScrollView {
 
   // Scroll speed multiplier for mouse wheel (1.0 = default, higher = faster)
   property real wheelScrollMultiplier: 2.0
-  property int smoothWheelAnimationDuration: Style.animationNormal
+  property int smoothWheelAnimationDuration: Style.motionDurationDefaultSpatial
   property real _wheelTargetY: 0
 
   function clampScrollY(value) {
@@ -78,6 +79,7 @@ ScrollView {
     Qt.createQmlObject(`
       import QtQuick
       import qs.Commons
+      import qs.Widgets
       Rectangle {
         x: root.leftPadding
         y: root.topPadding
@@ -87,7 +89,7 @@ ScrollView {
         visible: root.showGradientMasks && root.verticalScrollable
         opacity: root.contentItem.contentY <= 1 ? 0 : 1
         Behavior on opacity {
-          NumberAnimation { duration: Style.animationFast; easing.type: Easing.InOutQuad }
+          NAnim { duration: Style.motionDurationFastEffects; motionType: NAnim.StandardEffects }
         }
         gradient: Gradient {
           GradientStop { position: 0.0; color: root.gradientColor }
@@ -99,6 +101,7 @@ ScrollView {
     Qt.createQmlObject(`
       import QtQuick
       import qs.Commons
+      import qs.Widgets
       Rectangle {
         x: root.leftPadding
         y: root.height - root.bottomPadding - height + 1
@@ -108,7 +111,7 @@ ScrollView {
         visible: root.showGradientMasks && root.verticalScrollable
         opacity: (root.contentItem.contentY + root.contentItem.height >= root.contentItem.contentHeight - 1) ? 0 : 1
         Behavior on opacity {
-          NumberAnimation { duration: Style.animationFast; easing.type: Easing.InOutQuad }
+          NAnim { duration: Style.motionDurationFastEffects; motionType: NAnim.StandardEffects }
         }
         gradient: Gradient {
           GradientStop { position: 0.0; color: "transparent" }
@@ -121,12 +124,12 @@ ScrollView {
   // Reference to the internal Flickable for wheel handling
   property Flickable _internalFlickable: null
 
-  NumberAnimation {
+  NAnim {
     id: wheelScrollAnimation
     target: root._internalFlickable
     property: "contentY"
     duration: root.smoothWheelAnimationDuration
-    easing.type: Easing.OutCubic
+    motionType: NAnim.StandardSpatial
   }
 
   Connections {
@@ -208,14 +211,16 @@ ScrollView {
       opacity: parent.policy === ScrollBar.AlwaysOn ? 1.0 : root.verticalScrollable ? ((root.showScrollbarWhenScrollable || parent.active) ? 1.0 : 0.0) : 0.0
 
       Behavior on opacity {
-        NumberAnimation {
-          duration: Style.animationFast
+        NAnim {
+          duration: Style.motionDurationFastEffects
+          motionType: NAnim.StandardEffects
         }
       }
 
       Behavior on color {
-        ColorAnimation {
-          duration: Style.animationFast
+        enabled: !Color.isTransitioning
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
       }
     }
@@ -228,8 +233,9 @@ ScrollView {
       radius: root.handleRadius / 2
 
       Behavior on opacity {
-        NumberAnimation {
-          duration: Style.animationFast
+        NAnim {
+          duration: Style.motionDurationFastEffects
+          motionType: NAnim.StandardEffects
         }
       }
     }
@@ -251,14 +257,16 @@ ScrollView {
       opacity: parent.policy === ScrollBar.AlwaysOn ? 1.0 : root.horizontalScrollable ? ((root.showScrollbarWhenScrollable || parent.active) ? 1.0 : 0.0) : 0.0
 
       Behavior on opacity {
-        NumberAnimation {
-          duration: Style.animationFast
+        NAnim {
+          duration: Style.motionDurationFastEffects
+          motionType: NAnim.StandardEffects
         }
       }
 
       Behavior on color {
-        ColorAnimation {
-          duration: Style.animationFast
+        enabled: !Color.isTransitioning
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
       }
     }
@@ -271,8 +279,9 @@ ScrollView {
       radius: root.handleRadius / 2
 
       Behavior on opacity {
-        NumberAnimation {
-          duration: Style.animationFast
+        NAnim {
+          duration: Style.motionDurationFastEffects
+          motionType: NAnim.StandardEffects
         }
       }
     }

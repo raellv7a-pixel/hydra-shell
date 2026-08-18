@@ -2,16 +2,17 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Templates as T
 import qs.Commons
+import qs.Widgets
 
 Item {
   id: root
 
-  property color handleColor: Qt.alpha(Color.mHover, 0.8)
-  property color handleHoverColor: handleColor
-  property color handlePressedColor: handleColor
+  property color handleColor: Color.mOutline
+  property color handleHoverColor: Color.mPrimary
+  property color handlePressedColor: Color.mPrimary
   property color trackColor: "transparent"
   property real handleWidth: Math.round(6 * Style.uiScaleRatio)
-  property real handleRadius: Style.iRadiusM
+  property real handleRadius: Style.radiusCapsule
   property int verticalPolicy: ScrollBar.AsNeeded
   property int horizontalPolicy: ScrollBar.AlwaysOff
   readonly property bool verticalScrollBarActive: {
@@ -73,7 +74,7 @@ Item {
 
   // Scroll speed multiplier for mouse wheel (1.0 = default, higher = faster)
   property real wheelScrollMultiplier: 2.0
-  property int smoothWheelAnimationDuration: Style.animationNormal
+  property int smoothWheelAnimationDuration: Style.motionDurationDefaultSpatial
   property real _wheelTargetY: 0
 
   function clampScrollY(value) {
@@ -194,6 +195,7 @@ Item {
     Qt.createQmlObject(`
       import QtQuick
       import qs.Commons
+      import qs.Widgets
       Rectangle {
         x: 0
         y: 0
@@ -207,7 +209,7 @@ Item {
           return 1;
         }
         Behavior on opacity {
-          NumberAnimation { duration: Style.animationFast; easing.type: Easing.InOutQuad }
+          NAnim { duration: Style.motionDurationFastEffects; motionType: NAnim.StandardEffects }
         }
         gradient: Gradient {
           GradientStop { position: 0.0; color: root.gradientColor }
@@ -219,6 +221,7 @@ Item {
     Qt.createQmlObject(`
       import QtQuick
       import qs.Commons
+      import qs.Widgets
       Rectangle {
         x: 0
         anchors.bottom: parent.bottom
@@ -233,7 +236,7 @@ Item {
           return 1;
         }
         Behavior on opacity {
-          NumberAnimation { duration: Style.animationFast; easing.type: Easing.InOutQuad }
+          NAnim { duration: Style.motionDurationFastEffects; motionType: NAnim.StandardEffects }
         }
         gradient: Gradient {
           GradientStop { position: 0.0; color: "transparent" }
@@ -251,12 +254,12 @@ Item {
     clip: true
     boundsBehavior: Flickable.StopAtBounds
 
-    NumberAnimation {
+    NAnim {
       id: wheelScrollAnimation
       target: listView
       property: "contentY"
       duration: root.smoothWheelAnimationDuration
-      easing.type: Easing.OutCubic
+      motionType: NAnim.StandardSpatial
     }
 
     onDraggingChanged: {
@@ -310,14 +313,16 @@ Item {
         opacity: parent.policy === ScrollBar.AlwaysOn ? 1.0 : root.verticalScrollBarActive ? ((root.showScrollbarWhenScrollable || parent.active) ? 1.0 : 0.0) : 0.0
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
+          NAnim {
+            duration: Style.motionDurationFastEffects
+            motionType: NAnim.StandardEffects
           }
         }
 
         Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
+          enabled: !Color.isTransitioning
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
           }
         }
       }
@@ -330,8 +335,9 @@ Item {
         radius: root.handleRadius / 2
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
+          NAnim {
+            duration: Style.motionDurationFastEffects
+            motionType: NAnim.StandardEffects
           }
         }
       }

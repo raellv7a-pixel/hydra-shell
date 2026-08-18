@@ -38,10 +38,10 @@ Popup {
   }
 
   background: Rectangle {
-    color: Color.mSurface
-    radius: Style.iRadiusL
-    border.color: Color.mPrimary
-    border.width: Style.borderM
+    color: Color.mSurfaceContainerHigh
+    radius: Style.radiusPopover
+    border.color: Color.mOutline
+    border.width: Style.borderS
   }
 
   ColumnLayout {
@@ -92,19 +92,59 @@ Popup {
       cellHeight: root.cellH
       model: root.filteredIcons
       reserveScrollbarSpace: false
-      gradientColor: Color.mSurface
+      gradientColor: Color.mSurfaceContainerHigh
 
       delegate: Rectangle {
         width: grid.cellWidth
         height: grid.cellHeight
-        radius: Style.iRadiusS
+        readonly property bool isSelected: root.selectedIcon === modelData
+        readonly property bool pressed: iconMouseArea.pressed
 
-        color: (root.selectedIcon === modelData) ? Qt.alpha(Color.mPrimary, 0.15) : "transparent"
-        border.color: (root.selectedIcon === modelData) ? Color.mPrimary : "transparent"
-        border.width: (root.selectedIcon === modelData) ? Style.borderS : 0
+        radius: iconMorph.radius
+        scale: iconMorph.scale
+        color: "transparent"
+        border.color: isSelected ? Color.mPrimary : "transparent"
+        border.width: isSelected ? Style.borderS : 0
+        activeFocusOnTab: true
+        Accessible.role: Accessible.RadioButton
+        Accessible.name: modelData
+        Accessible.checked: isSelected
+
+        NShapeMorph {
+          id: iconMorph
+
+          hovered: iconMouseArea.containsMouse
+          pressed: iconMouseArea.pressed
+          focused: parent.activeFocus
+          selected: parent.isSelected
+          restingRadius: Style.radiusControl
+          hoverRadius: Style.radiusControlChecked
+          pressedRadius: Style.radiusControlPressed
+          selectedRadius: Style.radiusControlChecked
+        }
+
+        NStateLayer {
+          id: iconStateLayer
+
+          anchors.fill: parent
+          radius: parent.radius
+          hovered: iconMouseArea.containsMouse
+          pressed: iconMouseArea.pressed
+          focused: parent.activeFocus
+          selected: parent.isSelected
+          stateColor: Color.mPrimary
+        }
 
         MouseArea {
+          id: iconMouseArea
+
           anchors.fill: parent
+          hoverEnabled: true
+          cursorShape: Qt.PointingHandCursor
+          onPressed: mouse => {
+                       parent.forceActiveFocus();
+                       iconStateLayer.rippleAt(mouse.x, mouse.y);
+                     }
           onClicked: root.selectedIcon = modelData
           onDoubleClicked: {
             root.selectedIcon = modelData;
@@ -112,6 +152,17 @@ Popup {
             root.close();
           }
         }
+
+        Keys.onSpacePressed: event => {
+                               root.selectedIcon = modelData;
+                               event.accepted = true;
+                             }
+        Keys.onReturnPressed: event => {
+                                root.selectedIcon = modelData;
+                                root.iconSelected(root.selectedIcon);
+                                root.close();
+                                event.accepted = true;
+                              }
 
         ColumnLayout {
           anchors.fill: parent
@@ -141,6 +192,10 @@ Popup {
           Item {
             Layout.fillHeight: true
           }
+        }
+        NFocusRing {
+          focusVisible: parent.activeFocus
+          targetRadius: parent.radius
         }
       }
     }

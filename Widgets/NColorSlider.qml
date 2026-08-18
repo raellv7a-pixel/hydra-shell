@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Shapes
 import qs.Commons
 import qs.Services.UI
+import qs.Widgets
 
 Slider {
   id: root
@@ -20,7 +21,7 @@ Slider {
 
   readonly property real knobDiameter: Math.round((Style.baseWidgetSize * widthRatio * Style.uiScaleRatio) / 2) * 2
   readonly property real trackWidth: Math.round((knobDiameter * 0.4 * Style.uiScaleRatio) / 2) * 2
-  readonly property real trackRadius: Math.min(Style.iRadiusL, trackWidth / 2)
+  readonly property real trackRadius: trackWidth / 2
   readonly property real cutoutExtra: Math.round((Style.baseWidgetSize * 0.1 * Style.uiScaleRatio) / 2) * 2
 
   orientation: Qt.Vertical
@@ -28,6 +29,7 @@ Slider {
   padding: cutoutExtra / 2
 
   snapMode: snapAlways ? Slider.SnapAlways : Slider.SnapOnRelease
+  opacity: root.enabled ? Style.opacityFull : Style.disabledContentOpacity
   implicitWidth: Math.max(trackWidth, knobDiameter)
 
   background: Item {
@@ -158,7 +160,7 @@ Slider {
       id: knobCutout
       implicitWidth: root.knobDiameter + root.cutoutExtra
       implicitHeight: root.knobDiameter + root.cutoutExtra
-      radius: Math.min(Style.iRadiusL, width / 2)
+      radius: width / 2
       color: root.cutoutColor !== undefined ? root.cutoutColor : Color.mSurface
       y: root.visualPosition * (root.availableHeight - root.knobDiameter) - root.cutoutExtra / 2
       anchors.horizontalCenter: parent.horizontalCenter
@@ -171,11 +173,35 @@ Slider {
     y: root.topPadding + root.visualPosition * (root.availableHeight - height)
     anchors.horizontalCenter: parent.horizontalCenter
 
+    NShapeMorph {
+      id: knobMorph
+
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      focused: root.activeFocus
+      restingRadius: root.knobDiameter / 2
+      hoverRadius: root.knobDiameter / 2
+      pressedRadius: root.knobDiameter / 2
+    }
+
+    NStateLayer {
+      anchors.fill: parent
+      radius: width / 2
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      focused: root.activeFocus
+      rippleEnabled: false
+      stateColor: Color.mPrimary
+    }
+
     Rectangle {
       id: knob
       implicitWidth: root.knobDiameter
       implicitHeight: root.knobDiameter
-      radius: Math.min(Style.iRadiusL, width / 2)
+      radius: knobMorph.radius
+      scale: knobMorph.scale
       color: {
         if (root.rainbowMode) {
           // Hue Logic: Map position (0.0 to 1.0) directly to Hue
@@ -191,15 +217,28 @@ Slider {
         }
       }
 
-      border.color: root.pressed ? Color.mHover : Color.mPrimary
+      border.color: Color.mPrimary
       border.width: Style.borderL
       anchors.centerIn: parent
 
       Behavior on color {
-        ColorAnimation {
-          duration: Style.animationFast
+        enabled: !Color.isTransitioning
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
       }
+
+      Behavior on border.color {
+        enabled: !Color.isTransitioning
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
+        }
+      }
+    }
+
+    NFocusRing {
+      focusVisible: root.activeFocus
+      targetRadius: root.knobDiameter / 2
     }
 
     MouseArea {

@@ -37,6 +37,10 @@ RowLayout {
   signal exited
 
   Layout.fillWidth: true
+  activeFocusOnTab: true
+  Accessible.role: Accessible.SpinBox
+  Accessible.name: root.label
+  Accessible.description: root.description
 
   readonly property bool isValueChanged: (defaultValue !== undefined) && (value !== defaultValue)
   readonly property string indicatorTooltip: defaultValue !== undefined ? I18n.tr("panels.indicator.default-value", {
@@ -94,15 +98,31 @@ RowLayout {
     Layout.margins: Style.borderS
     implicitWidth: 120
     implicitHeight: Math.round((root.baseSize - 4) / 2) * 2
-    radius: Style.iRadiusS
-    color: Color.mSurfaceVariant
-    border.color: (root.hovering || decreaseArea.containsMouse || increaseArea.containsMouse) ? Color.mHover : Color.mOutline
+    radius: spinMorph.radius
+    scale: spinMorph.scale
+    color: root.enabled ? Color.mSurfaceContainerHigh : Qt.alpha(Color.mOnSurface, Style.disabledContainerOpacity)
+    border.color: Color.mOutline
     border.width: Style.borderS
 
-    Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationFast
-      }
+    NShapeMorph {
+      id: spinMorph
+
+      enabled: root.enabled
+      hovered: root.hovering || decreaseArea.containsMouse || increaseArea.containsMouse
+      focused: root.activeFocus || valueInput.activeFocus
+      restingRadius: Style.radiusControl
+      hoverRadius: Style.radiusControlChecked
+      pressedRadius: Style.radiusControlPressed
+    }
+
+    NStateLayer {
+      anchors.fill: parent
+      radius: spinBoxContainer.radius
+      enabled: root.enabled
+      hovered: root.hovering
+      focused: root.activeFocus || valueInput.activeFocus
+      rippleEnabled: false
+      stateColor: Color.mPrimary
     }
 
     // Mouse area for hover and scroll
@@ -141,25 +161,22 @@ RowLayout {
       anchors.left: parent.left
       opacity: (root.enabled && root.value > root.from) || decreaseArea.containsMouse ? 1.0 : 0.3
 
-      Rectangle {
-        anchors.centerIn: parent
-        width: parent.height
-        height: width
+      NStateLayer {
+        id: decreaseStateLayer
+
+        anchors.fill: parent
         radius: spinBoxContainer.radius
-        color: Color.mHover
-        opacity: decreaseArea.containsMouse ? 1.0 : 0.0
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
-          }
-        }
+        enabled: decreaseArea.enabled
+        hovered: decreaseArea.containsMouse
+        pressed: decreaseArea.pressed
+        stateColor: Color.mPrimary
       }
 
       NIcon {
         anchors.centerIn: parent
         icon: "chevron-left"
         pointSize: Style.fontSizeS
-        color: decreaseArea.containsMouse ? Color.mOnHover : Color.mPrimary
+        color: Color.mPrimary
       }
 
       MouseArea {
@@ -168,6 +185,12 @@ RowLayout {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         enabled: root.enabled && root.value > root.from
+        onPressedChanged: {
+          if (pressed) {
+            root.forceActiveFocus();
+            decreaseStateLayer.rippleAt(width / 2, height / 2);
+          }
+        }
         onPressed: {
           root._repeatDirection = -1;
           changeValue(root._repeatDirection, root.stepSize);
@@ -188,25 +211,22 @@ RowLayout {
       anchors.right: parent.right
       opacity: (root.enabled && root.value < root.to) || increaseArea.containsMouse ? 1.0 : 0.3
 
-      Rectangle {
-        anchors.centerIn: parent
-        width: parent.height
-        height: width
+      NStateLayer {
+        id: increaseStateLayer
+
+        anchors.fill: parent
         radius: spinBoxContainer.radius
-        color: Color.mHover
-        opacity: increaseArea.containsMouse ? 1.0 : 0.0
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
-          }
-        }
+        enabled: increaseArea.enabled
+        hovered: increaseArea.containsMouse
+        pressed: increaseArea.pressed
+        stateColor: Color.mPrimary
       }
 
       NIcon {
         anchors.centerIn: parent
         icon: "chevron-right"
         pointSize: Style.fontSizeS
-        color: increaseArea.containsMouse ? Color.mOnHover : Color.mPrimary
+        color: Color.mPrimary
       }
 
       MouseArea {
@@ -215,6 +235,12 @@ RowLayout {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         enabled: root.enabled && root.value < root.to
+        onPressedChanged: {
+          if (pressed) {
+            root.forceActiveFocus();
+            increaseStateLayer.rippleAt(width / 2, height / 2);
+          }
+        }
         onPressed: {
           root._repeatDirection = 1;
           changeValue(root._repeatDirection, root.stepSize);
@@ -310,5 +336,29 @@ RowLayout {
         }
       }
     }
+
+    NFocusRing {
+      focusVisible: root.activeFocus || valueInput.activeFocus
+      targetRadius: spinBoxContainer.radius
+    }
   }
+
+  Keys.onUpPressed: event => {
+                      if (!root.enabled)
+                      return;
+                      root.changeValue(1, root.stepSize);
+                      event.accepted = true;
+                    }
+  Keys.onDownPressed: event => {
+                        if (!root.enabled)
+                        return;
+                        root.changeValue(-1, root.stepSize);
+                        event.accepted = true;
+                      }
+  Keys.onReturnPressed: event => {
+                          if (!root.enabled)
+                          return;
+                          valueInput.forceActiveFocus();
+                          event.accepted = true;
+                        }
 }

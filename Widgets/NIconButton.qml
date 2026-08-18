@@ -21,11 +21,11 @@ Item {
 
   property color colorBg: Color.smartAlpha(Color.mSurfaceVariant)
   property color colorFg: Color.mPrimary
-  property color colorBgHover: Color.mHover
-  property color colorFgHover: Color.mOnHover
+  property color colorBgHover: colorFg
+  property color colorFgHover: colorFg
   property color colorBorder: Color.mOutline
   property color colorBorderHover: Color.mOutline
-  property real customRadius: -1 // -1 means use default (iRadiusL), otherwise use this value
+  property real customRadius: -1 // -1 uses the semantic control radius
 
   // Expose border properties for backwards compatibility (aliases to visualButton)
   property alias border: visualButton.border
@@ -63,7 +63,7 @@ Item {
     color: root.enabled ? colorBg : Qt.alpha(colorBg, Style.disabledContainerOpacity)
     radius: morph.radius
     scale: morph.scale
-    border.color: root.enabled && root.hovering ? colorBorderHover : colorBorder
+    border.color: colorBorder
     border.width: Style.borderS
 
     Behavior on color {

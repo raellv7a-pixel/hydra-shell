@@ -14,14 +14,14 @@ Item {
   property var tooltipText
   property color backgroundColor: Color.mPrimary
   property color textColor: Color.mOnPrimary
-  property color hoverColor: Color.mHover
-  property color textHoverColor: Color.mOnHover
+  property color hoverColor: textColor
+  property color textHoverColor: textColor
   property real fontSize: Style.fontSizeM
   property int fontWeight: Style.fontWeightSemiBold
   property real iconSize: Style.fontSizeL
   property bool outlined: false
   property int horizontalAlignment: Qt.AlignHCenter
-  property real buttonRadius: Style.iRadiusS
+  property real buttonRadius: Style.radiusControl
 
   // Signals
   signal clicked
@@ -74,13 +74,7 @@ Item {
     }
 
     border.width: root.outlined ? Style.borderS : 0
-    border.color: {
-      if (!root.enabled)
-        return Color.mOutline;
-      if (root.hovered)
-        return root.hoverColor;
-      return root.outlined ? root.backgroundColor : "transparent";
-    }
+    border.color: !root.enabled ? Color.mOutline : (root.outlined ? root.backgroundColor : "transparent")
 
     Behavior on color {
       enabled: !Color.isTransitioning

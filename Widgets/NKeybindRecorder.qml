@@ -112,12 +112,15 @@ Item {
           height: root._pillHeight
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
+          activeFocusOnTab: true
+          Accessible.role: Accessible.Button
+          Accessible.name: slotArea.keybindText
 
           readonly property bool isOccupied: index < root.currentKeybinds.length
           readonly property bool isRecordingThis: root.recordingIndex === index
           readonly property string keybindText: isRecordingThis ? I18n.tr("placeholders.keybind-recording") : (isOccupied ? root.currentKeybinds[index] : I18n.tr("placeholders.add-new-keybind"))
 
-          onClicked: {
+          function activateSlot() {
             if (isRecordingThis) {
               root.recordingIndex = -1;
             } else {
@@ -126,23 +129,66 @@ Item {
             }
           }
 
+          onPressed: mouse => {
+                       slotArea.forceActiveFocus();
+                       slotStateLayer.rippleAt(mouse.x, mouse.y);
+                     }
+          onClicked: slotArea.activateSlot()
+
+          Keys.onReturnPressed: event => {
+                                  slotArea.activateSlot();
+                                  event.accepted = true;
+                                }
+          Keys.onSpacePressed: event => {
+                                 slotArea.activateSlot();
+                                 event.accepted = true;
+                               }
+
           Rectangle {
             id: slotBg
             anchors.fill: parent
-            radius: Style.iRadiusS
-            color: root.hasConflict && slotArea.isRecordingThis ? Color.mError : (slotArea.isRecordingThis ? Color.mSecondary : (slotArea.containsMouse ? Qt.alpha(Color.mSecondary, 0.15) : Color.mSurface))
-            border.color: root.hasConflict && slotArea.isRecordingThis ? Color.mError : (slotArea.isRecordingThis ? Color.mPrimary : (slotArea.containsMouse ? Color.mSecondary : Color.mOutline))
+            radius: slotMorph.radius
+            scale: slotMorph.scale
+            color: root.hasConflict && slotArea.isRecordingThis ? Color.mError : (slotArea.isRecordingThis ? Color.mSecondary : Color.mSurfaceContainer)
+            border.color: root.hasConflict && slotArea.isRecordingThis ? Color.mError : (slotArea.isRecordingThis ? Color.mPrimary : Color.mOutline)
             border.width: Style.borderS
 
             Behavior on color {
-              ColorAnimation {
-                duration: Style.animationFast
+              enabled: !Color.isTransitioning
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
               }
             }
             Behavior on border.color {
-              ColorAnimation {
-                duration: Style.animationFast
+              enabled: !Color.isTransitioning
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
               }
+            }
+
+            NShapeMorph {
+              id: slotMorph
+
+              hovered: slotArea.containsMouse
+              pressed: slotArea.pressed
+              focused: slotArea.activeFocus
+              selected: slotArea.isRecordingThis
+              restingRadius: Style.radiusControl
+              hoverRadius: Style.radiusControlChecked
+              pressedRadius: Style.radiusControlPressed
+              selectedRadius: Style.radiusControlChecked
+            }
+
+            NStateLayer {
+              id: slotStateLayer
+
+              anchors.fill: parent
+              radius: slotBg.radius
+              hovered: slotArea.containsMouse
+              pressed: slotArea.pressed
+              focused: slotArea.activeFocus
+              selected: slotArea.isRecordingThis
+              stateColor: slotArea.isRecordingThis ? Color.mOnSecondary : Color.mPrimary
             }
 
             RowLayout {
@@ -191,6 +237,10 @@ Item {
                   }
                 }
               }
+            }
+            NFocusRing {
+              focusVisible: slotArea.activeFocus
+              targetRadius: slotBg.radius
             }
           }
         }

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.Commons
+import qs.Widgets
 
 Rectangle {
   id: root
@@ -11,10 +12,10 @@ Rectangle {
   signal tokenClicked(string token)
 
   Layout.margins: Style.borderS
-  color: Color.mSurface
+  color: Color.mSurfaceContainerLow
   border.color: Color.mOutline
   border.width: Style.borderS
-  radius: Style.iRadiusM
+  radius: Style.radiusContent
 
   ColumnLayout {
     id: column
@@ -209,66 +210,65 @@ Rectangle {
 
           delegate: Rectangle {
             id: tokenDelegate
+
             width: tokensColumn.width
             height: layout.implicitHeight + Style.marginS
-            radius: Style.iRadiusS
-            color: {
-              if (tokenMouseArea.containsMouse) {
-                return Qt.alpha(Color.mPrimary, 0.1);
-              }
-              return index % 2 === 0 ? Color.mSurfaceVariant : Qt.alpha(Color.mSurfaceVariant, 0.6);
+            radius: tokenMorph.radius
+            scale: tokenMorph.scale
+            color: index % 2 === 0 ? Color.mSurfaceContainer : Color.mSurfaceContainerLow
+            activeFocusOnTab: true
+            Accessible.role: Accessible.Button
+            Accessible.name: modelData.token
+            Accessible.description: modelData.description
+
+            NShapeMorph {
+              id: tokenMorph
+
+              hovered: tokenMouseArea.containsMouse
+              pressed: tokenMouseArea.pressed
+              focused: tokenDelegate.activeFocus
+              restingRadius: Style.radiusControl
+              hoverRadius: Style.radiusControlChecked
+              pressedRadius: Style.radiusControlPressed
             }
 
-            // Mouse area for the entire delegate
+            NStateLayer {
+              id: tokenStateLayer
+
+              anchors.fill: parent
+              radius: parent.radius
+              hovered: tokenMouseArea.containsMouse
+              pressed: tokenMouseArea.pressed
+              focused: tokenDelegate.activeFocus
+              stateColor: Color.mPrimary
+            }
+
             MouseArea {
               id: tokenMouseArea
+
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
-
-              onClicked: {
-                root.tokenClicked(modelData.token);
-                clickAnimation.start();
-              }
-            }
-
-            // Click animation
-            SequentialAnimation {
-              id: clickAnimation
-              PropertyAnimation {
-                target: tokenDelegate
-                property: "color"
-                to: Qt.alpha(Color.mPrimary, 0.3)
-                duration: 100
-              }
-              PropertyAnimation {
-                target: tokenDelegate
-                property: "color"
-                to: tokenMouseArea.containsMouse ? Qt.alpha(Color.mPrimary, 0.1) : (index % 2 === 0 ? Color.mSurface : Color.mSurfaceVariant)
-                duration: 200
-              }
+              onPressed: mouse => {
+                           tokenDelegate.forceActiveFocus();
+                           tokenStateLayer.rippleAt(mouse.x, mouse.y);
+                         }
+              onClicked: root.tokenClicked(modelData.token)
             }
 
             RowLayout {
               id: layout
+
               anchors.fill: parent
               anchors.margins: Style.marginXS
               spacing: Style.marginM
 
-              // Category badge
               Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 width: 70
                 height: 22
                 color: getCategoryColor(modelData.category)[0]
-                radius: Style.iRadiusS
-                opacity: tokenMouseArea.containsMouse ? 0.9 : 1.0
-
-                Behavior on opacity {
-                  NumberAnimation {
-                    duration: Style.animationFast
-                  }
-                }
+                radius: Style.radiusControl
 
                 NText {
                   anchors.centerIn: parent
@@ -278,88 +278,62 @@ Rectangle {
                 }
               }
 
-              // Token - Made more prominent and clickable
               Rectangle {
-                id: tokenButton
-                Layout.alignment: Qt.AlignVCenter // Added this line
+                Layout.alignment: Qt.AlignVCenter
                 width: 100
                 height: 22
-                color: tokenMouseArea.containsMouse ? Color.mPrimary : Color.mOnSurface
-                radius: Style.iRadiusS
-
-                Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationFast
-                  }
-                }
+                color: Color.mSecondaryContainer
+                radius: Style.radiusControl
 
                 NText {
                   anchors.centerIn: parent
                   text: modelData.token
-                  color: tokenMouseArea.containsMouse ? Color.mOnPrimary : Color.mSurface
+                  color: Color.mOnSecondaryContainer
                   pointSize: Style.fontSizeS
                   font.weight: Style.fontWeightBold
-
-                  Behavior on color {
-                    ColorAnimation {
-                      duration: Style.animationFast
-                    }
-                  }
                 }
               }
 
-              // Description
               NText {
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter // Added this line
+                Layout.alignment: Qt.AlignVCenter
                 text: modelData.description
-                color: tokenMouseArea.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                color: Color.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 wrapMode: Text.WordWrap
-
-                Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationFast
-                  }
-                }
               }
 
-              // Live example
               Rectangle {
-                Layout.alignment: Qt.AlignVCenter // Added this line
+                Layout.alignment: Qt.AlignVCenter
                 width: 90
                 height: 22
-                color: tokenMouseArea.containsMouse ? Color.mPrimary : Color.mOnSurfaceVariant
-                radius: Style.iRadiusS
-                border.color: tokenMouseArea.containsMouse ? Color.mPrimary : Color.mOutline
+                color: Color.mSurfaceContainerHighest
+                radius: Style.radiusControl
+                border.color: Color.mOutline
                 border.width: Style.borderS
-
-                Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationFast
-                  }
-                }
-
-                Behavior on border.color {
-                  ColorAnimation {
-                    duration: Style.animationFast
-                  }
-                }
 
                 NText {
                   anchors.centerIn: parent
                   text: I18n.locale.toString(root.sampleDate, modelData.token)
-                  color: tokenMouseArea.containsMouse ? Color.mOnPrimary : Color.mSurfaceVariant
+                  color: Color.mOnSurface
                   pointSize: Style.fontSizeS
-
-                  Behavior on color {
-                    ColorAnimation {
-                      duration: Style.animationFast
-                    }
-                  }
                 }
               }
             }
+
+            NFocusRing {
+              focusVisible: tokenDelegate.activeFocus
+              targetRadius: tokenDelegate.radius
+            }
+
+            Keys.onReturnPressed: event => {
+                                    root.tokenClicked(modelData.token);
+                                    event.accepted = true;
+                                  }
+            Keys.onSpacePressed: event => {
+                                   root.tokenClicked(modelData.token);
+                                   event.accepted = true;
+                                 }
           }
         }
       }

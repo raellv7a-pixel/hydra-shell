@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Commons
+import qs.Widgets
 
 Item {
   id: root
@@ -8,7 +9,7 @@ Item {
   property color color: Color.mPrimary
   property int size: Style.baseWidgetSize
   property int strokeWidth: Style.borderL
-  property int duration: Style.animationSlow * 2
+  property int duration: Style.motionDurationSlowSpatial * 2
 
   implicitWidth: size
   implicitHeight: size
@@ -56,7 +57,7 @@ Item {
 
     // Smooth rotation animation - uses GPU transform, NO canvas repaints!
     RotationAnimation on rotation {
-      running: root.running
+      running: root.running && Style.motionEnabled
       from: 0
       to: 360
       duration: root.duration

@@ -4,6 +4,7 @@ import QtQuick.Effects
 import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
+import qs.Widgets
 
 Rectangle {
   id: root
@@ -24,8 +25,8 @@ Rectangle {
   // Color properties
   property color colorBg: Color.smartAlpha(Color.mSurfaceVariant)
   property color colorFg: Color.mPrimary
-  property color colorBgHover: Color.mHover
-  property color colorFgHover: Color.mOnHover
+  property color colorBgHover: Color.mPrimary
+  property color colorFgHover: colorFg
   property color colorBorder: Color.mOutline
   property color colorBorderHover: Color.mOutline
 
@@ -45,27 +46,54 @@ Rectangle {
   implicitHeight: applyUiScale ? Math.round(baseSize * Style.uiScaleRatio) : Math.round(baseSize)
 
   // Appearance
-  opacity: enabled ? 1.0 : 0.6
-  color: {
-    if (root.enabled && root.hovering || pressed) {
-      return colorBgHover;
-    }
-
-    if (hot) {
-      return colorBgHot;
-    }
-    return colorBg;
-  }
-  radius: Math.min(Style.iRadiusL, width / 2)
-  border.color: root.enabled && root.hovering ? colorBorderHover : colorBorder
+  opacity: enabled ? Style.opacityFull : Style.disabledContentOpacity
+  color: hot ? colorBgHot : colorBg
+  radius: hotMorph.radius
+  scale: hotMorph.scale
+  border.color: colorBorder
   border.width: Style.borderS
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: typeof tooltipText === "string" && tooltipText !== "" ? tooltipText : icon
+  Accessible.pressed: root.pressed
 
   Behavior on color {
     enabled: !Color.isTransitioning
-    ColorAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.InOutQuad
+    NColorAnimation {
+      motionType: NColorAnimation.Standard
     }
+  }
+
+  NShapeMorph {
+    id: hotMorph
+
+    enabled: root.enabled
+    hovered: root.hovering
+    pressed: root.pressed
+    focused: root.activeFocus
+    selected: root.hot
+    restingRadius: root.width / 2
+    hoverRadius: root.width / 2
+    pressedRadius: Style.radiusControlPressed
+    selectedRadius: root.width / 2
+  }
+
+  NStateLayer {
+    id: hotStateLayer
+
+    anchors.fill: parent
+    radius: root.radius
+    enabled: root.enabled
+    hovered: root.hovering
+    pressed: root.pressed
+    focused: root.activeFocus
+    selected: root.hot
+    stateColor: root.hot ? root.colorFgHot : root.colorBgHover
+  }
+
+  NFocusRing {
+    focusVisible: root.activeFocus
+    targetRadius: root.radius
   }
 
   // Icon
@@ -73,15 +101,7 @@ Rectangle {
     icon: root.icon
     pointSize: Math.max(1, Math.round(root.width * 0.48))
     applyUiScale: root.applyUiScale
-    color: {
-      if (root.enabled && root.hovering || pressed) {
-        return colorFgHover;
-      }
-      if (hot) {
-        return colorFgHot;
-      }
-      return colorFg;
-    }
+    color: root.hot ? colorFgHot : colorFg
     // Center horizontally
     x: (root.width - width) / 2
     // Center vertically accounting for font metrics
@@ -89,14 +109,15 @@ Rectangle {
 
     Behavior on color {
       enabled: !Color.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
   }
 
   MouseArea {
+    id: hotMouseArea
+
     // Always enabled to allow hover/tooltip even when the button is disabled
     enabled: true
     anchors.fill: parent
@@ -121,6 +142,8 @@ Rectangle {
     }
 
     onPressed: function (mouse) {
+      root.forceActiveFocus();
+      hotStateLayer.rippleAt(mouse.x, mouse.y);
       if (root.enabled) {
         root.pressed = true;
       }
@@ -130,7 +153,6 @@ Rectangle {
     }
 
     onReleased: function (mouse) {
-      root.scale = 1.0;
       root.pressed = false;
 
       if (!root.enabled && !allowClickWhenDisabled) {
@@ -152,10 +174,22 @@ Rectangle {
     onCanceled: {
       root.hovering = false;
       root.pressed = false;
-      root.scale = 1.0;
       if (tooltipText && (!Array.isArray(tooltipText) || tooltipText.length > 0)) {
         TooltipService.hide();
       }
     }
   }
+
+  Keys.onReturnPressed: event => {
+                          if (!root.enabled)
+                          return;
+                          root.clicked();
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         if (!root.enabled)
+                         return;
+                         root.clicked();
+                         event.accepted = true;
+                       }
 }

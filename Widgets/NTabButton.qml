@@ -20,6 +20,7 @@ Rectangle {
 
   // Internal state
   property bool isHovered: false
+  readonly property bool pressed: tabMouseArea.pressed
 
   signal clicked
 
@@ -34,22 +35,51 @@ Rectangle {
   Layout.fillHeight: true
   implicitWidth: contentLayout.implicitWidth + Style.margin2M
 
-  radius: height / 2
+  radius: tabMorph.radius
+  scale: tabMorph.scale
   activeFocusOnTab: true
   Accessible.role: Accessible.PageTab
   Accessible.name: root.text
   Accessible.selected: root.checked
 
-  color: root.checked ? Color.mSecondaryContainer : (root.isHovered ? Color.mSurfaceContainerHighest : "transparent")
-  border.color: root.activeFocus ? Color.mPrimary : "transparent"
-  border.width: root.activeFocus ? Style.borderM : 0
+  color: root.checked ? Color.mSecondaryContainer : "transparent"
+  border.color: "transparent"
 
   Behavior on color {
     enabled: !Color.isTransitioning
-    ColorAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NColorAnimation {
+      motionType: NColorAnimation.Standard
     }
+  }
+
+  NShapeMorph {
+    id: tabMorph
+
+    hovered: root.isHovered
+    pressed: root.pressed
+    focused: root.activeFocus
+    selected: root.checked
+    restingRadius: root.height / 2
+    hoverRadius: root.height / 2
+    pressedRadius: Style.radiusControlPressed
+    selectedRadius: root.height / 2
+  }
+
+  NStateLayer {
+    id: tabStateLayer
+
+    anchors.fill: parent
+    radius: root.radius
+    hovered: root.isHovered
+    pressed: root.pressed
+    focused: root.activeFocus
+    selected: root.checked
+    stateColor: root.checked ? Color.mOnSecondaryContainer : Color.mPrimary
+  }
+
+  NFocusRing {
+    focusVisible: root.activeFocus
+    targetRadius: root.radius
   }
 
   // Content
@@ -68,9 +98,8 @@ Rectangle {
 
       Behavior on color {
         enabled: !Color.isTransitioning
-        ColorAnimation {
-          duration: Style.animationFast
-          easing.type: Easing.OutCubic
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
       }
     }
@@ -88,9 +117,8 @@ Rectangle {
 
       Behavior on color {
         enabled: !Color.isTransitioning
-        ColorAnimation {
-          duration: Style.animationFast
-          easing.type: Easing.OutCubic
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
       }
     }
@@ -108,6 +136,8 @@ Rectangle {
   }
 
   MouseArea {
+    id: tabMouseArea
+
     anchors.fill: parent
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
@@ -124,12 +154,19 @@ Rectangle {
         TooltipService.hide();
       }
     }
-    onClicked: {
-      root.forceActiveFocus();
-      root.activate();
-    }
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 tabStateLayer.rippleAt(mouse.x, mouse.y);
+               }
+    onClicked: root.activate()
   }
 
-  Keys.onReturnPressed: root.activate()
-  Keys.onSpacePressed: root.activate()
+  Keys.onReturnPressed: event => {
+                          root.activate();
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         root.activate();
+                         event.accepted = true;
+                       }
 }

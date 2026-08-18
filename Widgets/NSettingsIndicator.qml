@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
+import qs.Widgets
 
 Rectangle {
   id: root
@@ -20,8 +21,9 @@ Rectangle {
   visible: root.show
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Style.animationFast
+    NAnim {
+      duration: Style.motionDurationFastEffects
+      motionType: NAnim.StandardEffects
     }
   }
 

@@ -431,8 +431,8 @@ NBox {
 
       Rectangle {
         anchors.fill: parent
-        radius: Style.iRadiusL
-        color: Qt.alpha(Color.mSecondary, 0.12)
+        radius: Style.radiusContent
+        color: Color.tonal(Color.mSurfaceContainerHighest, Color.mSecondary, Style.stateSelectedOpacity)
         border.color: Color.mSecondary
         border.width: Style.borderM
         visible: root.showCrossSectionDropHint
@@ -464,10 +464,13 @@ NBox {
 
             width: root.calculateWidgetWidth(parent.width)
             height: root.widgetItemHeight
-            radius: Style.iRadiusL
+            radius: Style.radiusControl
             color: root.getWidgetColor(modelData)[0]
-            border.color: Color.mOutline
+            border.color: flowDragArea.draggedIndex === index ? Color.mPrimary : Color.mOutline
             border.width: Style.borderS
+            activeFocusOnTab: true
+            Accessible.role: Accessible.ListItem
+            Accessible.name: modelData.id
 
             // Store the widget index for drag operations
             property int widgetIndex: index
@@ -480,14 +483,26 @@ NBox {
             z: flowDragArea.draggedIndex === index ? 1000 : 0
 
             Behavior on opacity {
-              NumberAnimation {
-                duration: Style.animationFast
+              NAnim {
+                duration: Style.motionDurationFastEffects
+                motionType: NAnim.StandardEffects
               }
             }
             Behavior on scale {
-              NumberAnimation {
-                duration: Style.animationFast
+              NAnim {
+                motionType: NAnim.EmphasizedSpatial
               }
+            }
+
+            NStateLayer {
+              id: widgetStateLayer
+
+              anchors.fill: parent
+              radius: widgetItem.radius
+              hovered: contextMouseArea.containsMouse
+              pressed: contextMouseArea.pressed || flowDragArea.draggedIndex === index
+              focused: widgetItem.activeFocus
+              stateColor: Color.mPrimary
             }
 
             // Context menu for moving widget to other sections
@@ -551,11 +566,13 @@ NBox {
               id: contextMouseArea
               anchors.fill: parent
               acceptedButtons: Qt.RightButton
+              hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
               z: -1 // Below the buttons but above background
               enabled: !flowDragArea.dragStarted && !flowDragArea.potentialDrag
 
               onPressed: mouse => {
+                           widgetItem.forceActiveFocus();
                            mouse.accepted = true;
                            // Check if click is not on the settings button area (if visible)
                            const localX = mouse.x;
@@ -641,6 +658,18 @@ NBox {
                 }
               }
             }
+
+            NFocusRing {
+              focusVisible: widgetItem.activeFocus
+              targetRadius: widgetItem.radius
+            }
+
+            Keys.onPressed: event => {
+                              if (event.key === Qt.Key_Menu) {
+                                contextMenu.openAtItem(widgetItem, widgetItem.width / 2, widgetItem.height / 2);
+                                event.accepted = true;
+                              }
+                            }
           }
         }
       }
@@ -650,11 +679,11 @@ NBox {
         id: dragGhost
         width: 0
         height: Style.baseWidgetSize * 1.15
-        radius: Style.iRadiusL
-        color: "transparent"
-        border.color: Color.mOutline
-        border.width: Style.borderS
-        opacity: 0.7
+        radius: Style.radiusControlPressed
+        color: Color.mSurfaceContainerHigh
+        border.color: Color.mPrimary
+        border.width: Style.borderM
+        opacity: Style.opacityHeavy
         visible: flowDragArea.dragStarted
         z: 2000
         clip: false // Ensure ghost isn't clipped
@@ -672,8 +701,8 @@ NBox {
         id: dropIndicator
         width: 3
         height: Style.baseWidgetSize * 1.15
-        radius: Style.iRadiusXXS
-        color: Color.mSecondary
+        radius: Style.radiusControl
+        color: Color.mPrimary
         opacity: 0
         visible: opacity > 0
         z: 1999
@@ -682,28 +711,28 @@ NBox {
           id: pulseAnimation
           running: false
           loops: Animation.Infinite
-          NumberAnimation {
+          NAnim {
             to: 1
-            duration: 400
-            easing.type: Easing.InOutQuad
+            duration: Style.motionDurationSlowEffects
+            motionType: NAnim.StandardEffects
           }
-          NumberAnimation {
-            to: 0.6
-            duration: 400
-            easing.type: Easing.InOutQuad
+          NAnim {
+            to: Style.opacityHeavy
+            duration: Style.motionDurationSlowEffects
+            motionType: NAnim.StandardEffects
           }
         }
 
         Behavior on x {
-          NumberAnimation {
-            duration: 100
-            easing.type: Easing.OutCubic
+          NAnim {
+            duration: Style.motionDurationFastSpatial
+            motionType: NAnim.EmphasizedSpatial
           }
         }
         Behavior on y {
-          NumberAnimation {
-            duration: 100
-            easing.type: Easing.OutCubic
+          NAnim {
+            duration: Style.motionDurationFastSpatial
+            motionType: NAnim.EmphasizedSpatial
           }
         }
       }
@@ -818,7 +847,7 @@ NBox {
               dropIndicator.x = bestPosition.x;
               dropIndicator.y = bestPosition.y;
               dropIndicator.opacity = 1;
-              if (!pulseAnimation.running) {
+              if (Style.motionEnabled && !pulseAnimation.running) {
                 pulseAnimation.running = true;
               }
             }

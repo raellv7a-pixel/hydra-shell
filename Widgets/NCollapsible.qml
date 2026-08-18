@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
+import qs.Widgets
 
 ColumnLayout {
   id: root
@@ -13,6 +14,12 @@ ColumnLayout {
 
   signal toggled(bool expanded)
 
+  function toggleExpanded() {
+    root._userInteracted = true;
+    root.expanded = !root.expanded;
+    root.toggled(root.expanded);
+  }
+
   Layout.fillWidth: true
   spacing: 0
 
@@ -24,26 +31,51 @@ ColumnLayout {
     id: headerContainer
     Layout.fillWidth: true
     Layout.preferredHeight: headerContent.implicitHeight + Style.margin2M
-    color: root.expanded ? Color.mSecondary : Color.mPrimary
-    radius: Style.iRadiusM
-    border.color: root.expanded ? Color.mOnSecondary : Color.mOutline
+    color: root.expanded ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
+    radius: headerMorph.radius
+    scale: headerMorph.scale
+    border.color: Color.mOutline
     border.width: Style.borderS
+    activeFocusOnTab: true
+    Accessible.role: Accessible.Button
+    Accessible.name: root.label
+    Accessible.description: root.description
 
-    // Smooth color transitions
     Behavior on color {
-      enabled: root._userInteracted
-      ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
+      enabled: root._userInteracted && !Color.isTransitioning
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
 
-    Behavior on border.color {
-      enabled: root._userInteracted
-      ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
+    NShapeMorph {
+      id: headerMorph
+
+      hovered: headerArea.containsMouse
+      pressed: headerArea.pressed
+      focused: headerContainer.activeFocus
+      selected: root.expanded
+      restingRadius: Style.radiusContent
+      hoverRadius: Style.radiusControlChecked
+      pressedRadius: Style.radiusControlPressed
+      selectedRadius: Style.radiusContent
+    }
+
+    NStateLayer {
+      id: headerStateLayer
+
+      anchors.fill: parent
+      radius: parent.radius
+      hovered: headerArea.containsMouse
+      pressed: headerArea.pressed
+      focused: headerContainer.activeFocus
+      selected: root.expanded
+      stateColor: root.expanded ? Color.mOnSecondaryContainer : Color.mPrimary
+    }
+
+    NFocusRing {
+      focusVisible: headerContainer.activeFocus
+      targetRadius: headerContainer.radius
     }
 
     MouseArea {
@@ -52,25 +84,13 @@ ColumnLayout {
       cursorShape: Qt.PointingHandCursor
       hoverEnabled: true
 
-      onClicked: {
-        root._userInteracted = true;
-        root.expanded = !root.expanded;
-        root.toggled(root.expanded);
-      }
+      onPressed: mouse => {
+                   headerContainer.forceActiveFocus();
+                   headerStateLayer.rippleAt(mouse.x, mouse.y);
+                 }
+      onClicked: root.toggleExpanded()
 
-      // Hover effect overlay
-      Rectangle {
-        anchors.fill: parent
-        color: headerArea.containsMouse ? Color.mOnSurface : "transparent"
-        opacity: headerArea.containsMouse ? 0.08 : 0
-        radius: headerContainer.radius // Reference the container's radius directly
-
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
-          }
-        }
-      }
+      enabled: true
     }
 
     RowLayout {
@@ -84,22 +104,21 @@ ColumnLayout {
         id: chevronIcon
         icon: "chevron-right"
         pointSize: Style.fontSizeL
-        color: root.expanded ? Color.mOnSecondary : Color.mOnPrimary
+        color: root.expanded ? Color.mOnSecondaryContainer : Color.mOnSurface
         Layout.alignment: Qt.AlignVCenter
 
         rotation: root.expanded ? 90 : 0
         Behavior on rotation {
           enabled: root._userInteracted
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutCubic
+          NAnim {
+            motionType: NAnim.EmphasizedSpatial
           }
         }
 
         Behavior on color {
-          enabled: root._userInteracted
-          ColorAnimation {
-            duration: Style.animationNormal
+          enabled: root._userInteracted && !Color.isTransitioning
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
           }
         }
       }
@@ -114,13 +133,13 @@ ColumnLayout {
           text: root.label
           pointSize: Style.fontSizeL
           font.weight: Style.fontWeightSemiBold
-          color: root.expanded ? Color.mOnSecondary : Color.mOnPrimary
+          color: root.expanded ? Color.mOnSecondaryContainer : Color.mOnSurface
           wrapMode: Text.WordWrap
 
           Behavior on color {
-            enabled: root._userInteracted
-            ColorAnimation {
-              duration: Style.animationNormal
+            enabled: root._userInteracted && !Color.isTransitioning
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
             }
           }
         }
@@ -129,21 +148,29 @@ ColumnLayout {
           text: root.description
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightRegular
-          color: root.expanded ? Color.mOnSecondary : Color.mOnPrimary
+          color: root.expanded ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
           Layout.fillWidth: true
           wrapMode: Text.WordWrap
           visible: root.description !== ""
           opacity: 0.87
 
           Behavior on color {
-            enabled: root._userInteracted
-            ColorAnimation {
-              duration: Style.animationNormal
+            enabled: root._userInteracted && !Color.isTransitioning
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
             }
           }
         }
       }
     }
+    Keys.onReturnPressed: event => {
+                            root.toggleExpanded();
+                            event.accepted = true;
+                          }
+    Keys.onSpacePressed: event => {
+                           root.toggleExpanded();
+                           event.accepted = true;
+                         }
   }
 
   // Collapsible content with Material 3 styling
@@ -152,9 +179,9 @@ ColumnLayout {
     Layout.fillWidth: true
     Layout.topMargin: Style.marginS
 
-    visible: root.expanded
-    color: Color.mSurface
-    radius: Style.iRadiusL
+    visible: root.expanded || opacity > 0
+    color: Color.mSurfaceContainerLow
+    radius: Style.radiusContent
     border.color: Color.mOutline
     border.width: Style.borderS
 
@@ -164,9 +191,8 @@ ColumnLayout {
     // Smooth height animation
     Behavior on Layout.preferredHeight {
       enabled: root._userInteracted
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
+      NAnim {
+        motionType: NAnim.EmphasizedSpatial
       }
     }
 
@@ -182,9 +208,9 @@ ColumnLayout {
     opacity: root.expanded ? 1.0 : 0.0
     Behavior on opacity {
       enabled: root._userInteracted
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
+      NAnim {
+        duration: Style.motionDurationDefaultEffects
+        motionType: NAnim.StandardEffects
       }
     }
   }

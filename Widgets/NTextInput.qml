@@ -18,7 +18,7 @@ ColumnLayout {
   property int fontWeight: Style.fontWeightRegular
   property var defaultValue: undefined
   property string settingsPath: ""
-  property real radius: Style.iRadiusL
+  property real radius: Style.radiusControl
   property real minimumInputWidth: 80 * Style.uiScaleRatio
   property bool showClearButton: true
 

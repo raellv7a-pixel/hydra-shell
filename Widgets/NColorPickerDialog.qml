@@ -56,10 +56,10 @@ Popup {
   }
 
   background: Rectangle {
-    color: Color.mSurface
-    radius: Style.iRadiusS
-    border.color: Color.mPrimary
-    border.width: Style.borderM
+    color: Color.mSurfaceContainerHigh
+    radius: Style.radiusPopover
+    border.color: Color.mOutline
+    border.width: Style.borderS
   }
 
   contentItem: ColumnLayout {
@@ -101,7 +101,7 @@ Popup {
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: 80
-      radius: Style.iRadiusS
+      radius: Style.radiusContent
       color: root.selectedColor
       border.color: Color.mOutline
       border.width: Style.borderS
@@ -566,7 +566,7 @@ Popup {
               Rectangle {
                 width: 10
                 height: 10
-                radius: Math.min(Style.iRadiusXS, width / 2)
+                radius: width / 2
                 color: "transparent"
                 border.color: root.selectedColor.hsvValue < 0.5 ? "white" : "black"
                 border.width: 1
@@ -666,17 +666,53 @@ Popup {
               ]
 
               Rectangle {
+                id: themeSwatch
+
                 width: 24
                 height: 24
-                radius: Style.iRadiusXXS
+                radius: Style.radiusControlPressed
                 color: modelData.color
                 border.color: root.selectedColor.toString() === modelData.color.toString() ? Color.mPrimary : Color.mOutline
                 border.width: Math.max(1, root.selectedColor.toString() === modelData.color.toString() ? Style.borderM : Style.borderS)
+                activeFocusOnTab: true
+                Accessible.role: Accessible.RadioButton
+                Accessible.name: modelData.name
+                Accessible.checked: root.selectedColor.toString() === modelData.color.toString()
+
+                NStateLayer {
+                  id: themeSwatchStateLayer
+
+                  anchors.fill: parent
+                  radius: parent.radius
+                  hovered: themeSwatchMouse.containsMouse
+                  pressed: themeSwatchMouse.pressed
+                  focused: parent.activeFocus
+                  selected: root.selectedColor.toString() === modelData.color.toString()
+                  stateColor: Color.mOnSurface
+                }
+
+                NFocusRing {
+                  focusVisible: parent.activeFocus
+                  targetRadius: parent.radius
+                }
+
+                Behavior on border.color {
+                  enabled: !Color.isTransitioning
+                  NColorAnimation {
+                    motionType: NColorAnimation.Standard
+                  }
+                }
 
                 MouseArea {
+                  id: themeSwatchMouse
+
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
                   hoverEnabled: true
+                  onPressed: mouse => {
+                               themeSwatch.forceActiveFocus();
+                               themeSwatchStateLayer.rippleAt(mouse.x, mouse.y);
+                             }
 
                   onEntered: {
                     TooltipService.show(parent, modelData.name + "\n" + parent.color.toString().toUpperCase());
@@ -689,6 +725,15 @@ Popup {
                     TooltipService.hide();
                   }
                 }
+
+                Keys.onReturnPressed: event => {
+                                        root.selectedColor = modelData.color;
+                                        event.accepted = true;
+                                      }
+                Keys.onSpacePressed: event => {
+                                       root.selectedColor = modelData.color;
+                                       event.accepted = true;
+                                     }
               }
             }
 
@@ -709,17 +754,53 @@ Popup {
               model: ColorList.colors
 
               Rectangle {
+                id: paletteSwatch
+
                 width: 24
                 height: 24
-                radius: Math.min(Style.iRadiusXS, width / 2)
+                radius: width / 2
                 color: modelData.color
                 border.color: root.selectedColor.toString() === modelData.color.toString() ? Color.mPrimary : Color.mOutline
                 border.width: root.selectedColor.toString() === modelData.color.toString() ? 2 : 1
+                activeFocusOnTab: true
+                Accessible.role: Accessible.RadioButton
+                Accessible.name: modelData.name
+                Accessible.checked: root.selectedColor.toString() === modelData.color.toString()
+
+                NStateLayer {
+                  id: paletteSwatchStateLayer
+
+                  anchors.fill: parent
+                  radius: parent.radius
+                  hovered: paletteSwatchMouse.containsMouse
+                  pressed: paletteSwatchMouse.pressed
+                  focused: parent.activeFocus
+                  selected: root.selectedColor.toString() === modelData.color.toString()
+                  stateColor: Color.mOnSurface
+                }
+
+                NFocusRing {
+                  focusVisible: parent.activeFocus
+                  targetRadius: parent.radius
+                }
+
+                Behavior on border.color {
+                  enabled: !Color.isTransitioning
+                  NColorAnimation {
+                    motionType: NColorAnimation.Standard
+                  }
+                }
 
                 MouseArea {
+                  id: paletteSwatchMouse
+
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
                   hoverEnabled: true
+                  onPressed: mouse => {
+                               paletteSwatch.forceActiveFocus();
+                               paletteSwatchStateLayer.rippleAt(mouse.x, mouse.y);
+                             }
 
                   onEntered: {
                     TooltipService.show(parent, modelData.name + "\n" + parent.color.toString().toUpperCase(), "auto");
@@ -732,6 +813,14 @@ Popup {
                     TooltipService.hide();
                   }
                 }
+                Keys.onReturnPressed: event => {
+                                        root.selectedColor = modelData.color;
+                                        event.accepted = true;
+                                      }
+                Keys.onSpacePressed: event => {
+                                       root.selectedColor = modelData.color;
+                                       event.accepted = true;
+                                     }
               }
             }
           }
