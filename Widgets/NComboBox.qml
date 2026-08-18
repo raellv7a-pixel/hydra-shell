@@ -135,7 +135,7 @@ RowLayout {
   ComboBox {
     id: combo
 
-    opacity: Style.opacityFull
+    opacity: enabled ? Style.opacityFull : Style.disabledContentOpacity
     Layout.margins: Style.borderS
     Layout.minimumWidth: Math.round(root.minimumWidth * Style.uiScaleRatio)
     Layout.preferredHeight: Math.round(root.preferredHeight * Style.uiScaleRatio)

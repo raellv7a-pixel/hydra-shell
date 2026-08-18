@@ -235,7 +235,7 @@ PanelWindow {
       y: (!barPlaceholder.isFramed && root.barShouldShow && !barPlaceholder.isHidden) ? barPlaceholder.y : 0
       width: (!barPlaceholder.isFramed && root.barShouldShow && !barPlaceholder.isHidden) ? barPlaceholder.width : 0
       height: (!barPlaceholder.isFramed && root.barShouldShow && !barPlaceholder.isHidden) ? barPlaceholder.height : 0
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       topLeftCorner: barPlaceholder.topLeftCornerState
       topRightCorner: barPlaceholder.topRightCornerState
       bottomLeftCorner: barPlaceholder.bottomLeftCornerState
@@ -266,7 +266,7 @@ PanelWindow {
       y: backgroundBlur.panelBg ? Math.round(backgroundBlur.panelBg.y) : 0
       width: backgroundBlur.panelBg ? Math.round(backgroundBlur.panelBg.width) : 0
       height: backgroundBlur.panelBg ? Math.round(backgroundBlur.panelBg.height) : 0
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       topLeftCorner: backgroundBlur.panelBg ? backgroundBlur.panelBg.topLeftCornerState : CornerState.Normal
       topRightCorner: backgroundBlur.panelBg ? backgroundBlur.panelBg.topRightCornerState : CornerState.Normal
       bottomLeftCorner: backgroundBlur.panelBg ? backgroundBlur.panelBg.bottomLeftCornerState : CornerState.Normal
@@ -279,7 +279,7 @@ PanelWindow {
       y: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.y) : 0
       width: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.width) : 0
       height: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.height) : 0
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       topLeftCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.topLeftCornerState : CornerState.Normal
       topRightCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.topRightCornerState : CornerState.Normal
       bottomLeftCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.bottomLeftCornerState : CornerState.Normal
@@ -292,7 +292,7 @@ PanelWindow {
       y: backgroundBlur.closingPanelBg ? Math.round(backgroundBlur.closingPanelBg.y) : 0
       width: backgroundBlur.closingPanelBg ? Math.round(backgroundBlur.closingPanelBg.width) : 0
       height: backgroundBlur.closingPanelBg ? Math.round(backgroundBlur.closingPanelBg.height) : 0
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       topLeftCorner: backgroundBlur.closingPanelBg ? backgroundBlur.closingPanelBg.topLeftCornerState : CornerState.Normal
       topRightCorner: backgroundBlur.closingPanelBg ? backgroundBlur.closingPanelBg.topRightCornerState : CornerState.Normal
       bottomLeftCorner: backgroundBlur.closingPanelBg ? backgroundBlur.closingPanelBg.bottomLeftCornerState : CornerState.Normal
@@ -664,7 +664,7 @@ PanelWindow {
       readonly property real frameHoleY: barPlaceholder.barPosition === "top" ? barPlaceholder.barHeight : barPlaceholder.frameThickness
       readonly property real frameHoleX2: root.width - (barPlaceholder.barPosition === "right" ? barPlaceholder.barHeight : barPlaceholder.frameThickness)
       readonly property real frameHoleY2: root.height - (barPlaceholder.barPosition === "bottom" ? barPlaceholder.barHeight : barPlaceholder.frameThickness)
-      readonly property real frameR: Settings.data.bar.frameRadius ?? 20
+      readonly property real frameR: Settings.data.bar.frameRadius ?? Style.radiusPanel
     }
 
     // Native idle inhibitor — one per active MainScreen window.

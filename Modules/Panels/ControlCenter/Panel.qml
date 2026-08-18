@@ -3083,18 +3083,21 @@ Item {
     Behavior on color {
       NColorAnimation {
         motionType: NColorAnimation.Standard
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
       }
     }
 
     Behavior on radius {
       NAnim {
         motionType: NAnim.ExpressiveFastSpatial
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
       }
     }
 
     Behavior on scale {
       NAnim {
         motionType: NAnim.ExpressiveFastSpatial
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
       }
     }
 
@@ -3144,6 +3147,7 @@ Item {
           Behavior on scale {
             NAnim {
               motionType: NAnim.ExpressiveFastSpatial
+              duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
             }
           }
         }

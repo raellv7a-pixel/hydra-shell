@@ -354,7 +354,6 @@ Item {
         fontSize: Style.fontSizeLabelMedium
         backgroundColor: Color.mPrimary
         textColor: Color.mOnPrimary
-        hoverColor: Color.mPrimary
         outlined: false
         implicitHeight: Math.round(28 * Style.uiScaleRatio)
 

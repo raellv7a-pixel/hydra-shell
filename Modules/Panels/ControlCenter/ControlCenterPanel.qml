@@ -44,6 +44,10 @@ SmartPanel {
           return Item.Top;
         if (root.resolvedPanelPosition === "bottom")
           return Item.Bottom;
+        if (root.resolvedPanelPosition === "left")
+          return Item.Left;
+        if (root.resolvedPanelPosition === "right")
+          return Item.Right;
         return Item.Center;
       }
 

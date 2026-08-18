@@ -43,7 +43,7 @@ SmartPanel {
           NIcon {
             icon: BluetoothService.enabled ? "bluetooth" : "bluetooth-off"
             pointSize: Style.fontSizeHeadlineSmall
-            color: Color.mPrimary
+            color: BluetoothService.enabled ? Color.mPrimary : Color.mOnSurfaceVariant
           }
 
           NText {
