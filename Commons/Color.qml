@@ -128,6 +128,10 @@ Singleton {
   }
 
   // --- Color transition animations ---
+  // Intentionally raw ColorAnimation/Easing, not NColorAnimation: NColorAnimation
+  // (Widgets/NColorAnimation.qml) imports qs.Commons for Style, so importing it
+  // here would create a Commons -> Widgets -> Commons circular dependency.
+  // Documented exception per PLANO_REFATORACAO_VISUAL_CAELESTIA.md Fase 9.
   Behavior on mPrimary {
     enabled: !root.skipTransition
     ColorAnimation {
