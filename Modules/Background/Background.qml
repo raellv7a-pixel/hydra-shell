@@ -535,14 +535,14 @@ Variants {
       }
 
       // Animation for the transition progress
-      NumberAnimation {
+      NAnim {
         id: transitionAnimation
         target: root
         property: "transitionProgress"
+        motionType: NAnim.StandardEffects
         from: 0.0
         to: 1.0
         duration: Settings.data.wallpaper.transitionDuration
-        easing.type: Easing.InOutCubic
         onFinished: {
           // Mark startup complete now that the animation has finished,
           // so displayScalesChanged doesn't trigger a duplicate transition.

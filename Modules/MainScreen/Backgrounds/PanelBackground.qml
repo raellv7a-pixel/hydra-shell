@@ -1,167 +1,47 @@
+import Hydra.Visual
 import QtQuick
-import QtQuick.Shapes
 import qs.Commons
-import qs.Modules.MainScreen.Backgrounds
 
 /**
-* PanelBackground - Dynamic ShapePath for rendering panel backgrounds
+* BlobRect dinâmico para um slot do PanelService.
 *
-* Dynamically switches between panels based on which panel is currently
-* assigned by PanelService. Only 2 instances are needed: one for the
-* currently open panel and one for a closing panel during transitions.
-*
-* Uses 4-state per-corner system for flexible corner rendering:
-* - State -1: No radius (flat/square corner)
-* - State 0: Normal (inner curve)
-* - State 1: Horizontal inversion (outer curve on X-axis)
-* - State 2: Vertical inversion (outer curve on Y-axis)
+* A geometria continua pertencendo ao SmartPanel; este item apenas projeta a
+* região no BlobGroup compartilhado e expõe a matriz física usada pelo conteúdo.
 */
-ShapePath {
+BlobRect {
   id: root
 
-  // Dynamically assigned panel (null if slot is unused)
   property var assignedPanel: null
+  property color defaultBackgroundColor: Color.mSurfaceContainer
 
-  // Required reference to AllBackgrounds shapeContainer
-  required property var shapeContainer
-
-  // Default background color (used if panel doesn't specify one)
-  property color defaultBackgroundColor: Color.mSurface
-
-  // Corner radius (from Style)
-  readonly property real radius: Style.radiusL
-
-  // Get panel's panelRegion (geometry placeholder)
   readonly property var panelRegion: assignedPanel?.panelRegion ?? null
+  readonly property var panelBg: panelRegion?.visible ? panelRegion.panelItem : null
+  readonly property real panelX: panelBg?.x ?? 0
+  readonly property real panelY: panelBg?.y ?? 0
+  readonly property real panelWidth: panelBg?.width ?? 0
+  readonly property real panelHeight: panelBg?.height ?? 0
+  readonly property bool isRenderable: !!assignedPanel && !!panelBg && panelWidth > 0 && panelHeight > 0
+  readonly property bool shouldFlatten: isRenderable && (panelWidth < radius * 2 || panelHeight < radius * 2)
+  readonly property real effectiveRadius: shouldFlatten ? Math.max(0, Math.min(panelWidth, panelHeight) / 2) : radius
 
-  // Get the actual panelBackground Item from panelRegion
-  // Only access panelItem if panelRegion exists and is visible
-  readonly property var panelBg: (panelRegion && panelRegion.visible) ? panelRegion.panelItem : null
-
-  // Effective background color: use panel's if defined, else default
-  readonly property color effectiveBackgroundColor: {
-    if (!assignedPanel)
-      return "transparent";
-    if (assignedPanel.panelBackgroundColor !== undefined) {
-      return assignedPanel.panelBackgroundColor;
-    }
-    return defaultBackgroundColor;
+  function cornerRadius(state) {
+    return state === -1 ? 0 : effectiveRadius;
   }
 
-  // Panel position - panelBg is in screen coordinates already
-  readonly property real panelX: panelBg ? panelBg.x : 0
-  readonly property real panelY: panelBg ? panelBg.y : 0
-  readonly property real panelWidth: panelBg ? panelBg.width : 0
-  readonly property real panelHeight: panelBg ? panelBg.height : 0
-  readonly property bool isRenderable: assignedPanel && panelBg && panelWidth > 0 && panelHeight > 0
+  x: isRenderable ? panelX : -1
+  y: isRenderable ? panelY : -1
+  width: isRenderable ? panelWidth : 0
+  height: isRenderable ? panelHeight : 0
+  visible: isRenderable
+  opacity: assignedPanel ? Math.max(0, Math.min(1, 1 - assignedPanel.offsetScale)) : 0
 
-  // Flatten corners if panel is too small
-  readonly property bool shouldFlatten: panelBg ? ShapeCornerHelper.shouldFlatten(panelWidth, panelHeight, radius) : false
-  readonly property real effectiveRadius: shouldFlatten ? ShapeCornerHelper.getFlattenedRadius(Math.min(panelWidth, panelHeight), radius) : radius
+  radius: Style.radiusPanel
+  topLeftRadius: panelBg ? cornerRadius(panelBg.topLeftCornerState) : radius
+  topRightRadius: panelBg ? cornerRadius(panelBg.topRightCornerState) : radius
+  bottomLeftRadius: panelBg ? cornerRadius(panelBg.bottomLeftCornerState) : radius
+  bottomRightRadius: panelBg ? cornerRadius(panelBg.bottomRightCornerState) : radius
 
-  // Minimum safe arc radius — prevents zero-displacement zero-radius PathArcs
-  // that crash qTriangulate in CurveRenderer. 0.01px is sub-pixel and invisible.
-  readonly property real _minR: 0.01
-
-  // Helper function for getting corner radius based on state
-  function getCornerRadius(cornerState) {
-    // State -1 = flat corner — use minimum safe radius instead of 0
-    // to prevent degenerate PathArc (zero displacement + zero radius)
-    if (cornerState === -1)
-      return _minR;
-    // All other states use effectiveRadius (clamped to safe minimum)
-    return Math.max(_minR, effectiveRadius);
-  }
-
-  // Per-corner multipliers and radii based on panelBg's corner states
-  readonly property real tlMultX: panelBg ? ShapeCornerHelper.getMultX(panelBg.topLeftCornerState) : 1
-  readonly property real tlMultY: panelBg ? ShapeCornerHelper.getMultY(panelBg.topLeftCornerState) : 1
-  readonly property real tlRadius: panelBg ? getCornerRadius(panelBg.topLeftCornerState) : 0
-
-  readonly property real trMultX: panelBg ? ShapeCornerHelper.getMultX(panelBg.topRightCornerState) : 1
-  readonly property real trMultY: panelBg ? ShapeCornerHelper.getMultY(panelBg.topRightCornerState) : 1
-  readonly property real trRadius: panelBg ? getCornerRadius(panelBg.topRightCornerState) : 0
-
-  readonly property real brMultX: panelBg ? ShapeCornerHelper.getMultX(panelBg.bottomRightCornerState) : 1
-  readonly property real brMultY: panelBg ? ShapeCornerHelper.getMultY(panelBg.bottomRightCornerState) : 1
-  readonly property real brRadius: panelBg ? getCornerRadius(panelBg.bottomRightCornerState) : 0
-
-  readonly property real blMultX: panelBg ? ShapeCornerHelper.getMultX(panelBg.bottomLeftCornerState) : 1
-  readonly property real blMultY: panelBg ? ShapeCornerHelper.getMultY(panelBg.bottomLeftCornerState) : 1
-  readonly property real blRadius: panelBg ? getCornerRadius(panelBg.bottomLeftCornerState) : 0
-
-  // ShapePath configuration
-  strokeWidth: -1 // No stroke, fill only
-
-  // Start point - use tiny off-screen non-degenerate fallback when not renderable.
-  // Fallback forms a 1×1 off-screen square where each edge is split between a PathLine
-  // and a PathArc, ensuring no arc has zero displacement (which can crash qTriangulate).
-  startX: isRenderable ? (panelX + tlRadius * tlMultX) : -0.75
-  startY: isRenderable ? panelY : -1
-
-  fillColor: isRenderable ? effectiveBackgroundColor : "transparent"
-
-  // ========== PATH DEFINITION ==========
-  // Draws a rectangle with potentially inverted corners
-  // All coordinates are relative to startX/startY
-
-  // Top edge (moving right)
-  PathLine {
-    relativeX: root.isRenderable ? (root.panelWidth - root.tlRadius * root.tlMultX - root.trRadius * root.trMultX) : 0.75
-    relativeY: 0
-  }
-
-  // Top-right corner arc
-  PathArc {
-    relativeX: root.isRenderable ? (root.trRadius * root.trMultX) : 0
-    relativeY: root.isRenderable ? (root.trRadius * root.trMultY) : 0.25
-    radiusX: root.isRenderable ? root.trRadius : 0
-    radiusY: root.isRenderable ? root.trRadius : 0
-    direction: ShapeCornerHelper.getArcDirection(root.trMultX, root.trMultY)
-  }
-
-  // Right edge (moving down)
-  PathLine {
-    relativeX: 0
-    relativeY: root.isRenderable ? (root.panelHeight - root.trRadius * root.trMultY - root.brRadius * root.brMultY) : 0.75
-  }
-
-  // Bottom-right corner arc
-  PathArc {
-    relativeX: root.isRenderable ? (-root.brRadius * root.brMultX) : -0.25
-    relativeY: root.isRenderable ? (root.brRadius * root.brMultY) : 0
-    radiusX: root.isRenderable ? root.brRadius : 0
-    radiusY: root.isRenderable ? root.brRadius : 0
-    direction: ShapeCornerHelper.getArcDirection(root.brMultX, root.brMultY)
-  }
-
-  // Bottom edge (moving left)
-  PathLine {
-    relativeX: root.isRenderable ? (-(root.panelWidth - root.brRadius * root.brMultX - root.blRadius * root.blMultX)) : -0.75
-    relativeY: 0
-  }
-
-  // Bottom-left corner arc
-  PathArc {
-    relativeX: root.isRenderable ? (-root.blRadius * root.blMultX) : 0
-    relativeY: root.isRenderable ? (-root.blRadius * root.blMultY) : -0.25
-    radiusX: root.isRenderable ? root.blRadius : 0
-    radiusY: root.isRenderable ? root.blRadius : 0
-    direction: ShapeCornerHelper.getArcDirection(root.blMultX, root.blMultY)
-  }
-
-  // Left edge (moving up) - closes the path back to start
-  PathLine {
-    relativeX: 0
-    relativeY: root.isRenderable ? (-(root.panelHeight - root.blRadius * root.blMultY - root.tlRadius * root.tlMultY)) : -0.75
-  }
-
-  // Top-left corner arc (back to start)
-  PathArc {
-    relativeX: root.isRenderable ? (root.tlRadius * root.tlMultX) : 0.25
-    relativeY: root.isRenderable ? (-root.tlRadius * root.tlMultY) : 0
-    radiusX: root.isRenderable ? root.tlRadius : 0
-    radiusY: root.isRenderable ? root.tlRadius : 0
-    direction: ShapeCornerHelper.getArcDirection(root.tlMultX, root.tlMultY)
-  }
+  stiffness: 220
+  damping: 18
+  deformScale: Style.motionEnabled ? 0.00045 : 0
 }

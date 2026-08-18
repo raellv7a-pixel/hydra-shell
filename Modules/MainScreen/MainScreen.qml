@@ -99,9 +99,9 @@ PanelWindow {
 
   Behavior on color {
     enabled: !PanelService.closedImmediately
-    ColorAnimation {
+    NColorAnimation {
+      motionType: NColorAnimation.Standard
       duration: isPanelClosing ? Style.animationFaster : Style.animationNormal
-      easing.type: Easing.OutQuad
     }
   }
 
@@ -127,6 +127,17 @@ PanelWindow {
     return monitors.length === 0 || monitors.includes(screenName);
   }
 
+  readonly property bool fullscreenActive: {
+    const windows = CompositorService.windows;
+    const screenName = screen?.name || "";
+    for (let i = 0; i < windows.count; ++i) {
+      const window = windows.get(i);
+      if (window.output === screenName && window.isFullscreen === true)
+        return true;
+    }
+    return false;
+  }
+
   // Make everything click-through except bar
   mask: Region {
     id: clickableMask
@@ -150,6 +161,7 @@ PanelWindow {
       readonly property real barThickness: Style.barHeight
       readonly property real frameThickness: Settings.data.bar.frameThickness ?? 12
       readonly property string barPos: Settings.data.bar.position || "top"
+      readonly property bool frameVisible: isFramed && root.barShouldShow && !root.fullscreenActive
 
       // Bar / Frame Mask
       Region {
@@ -167,17 +179,17 @@ PanelWindow {
         Region {
           x: 0
           y: 0
-          width: (barMaskRegion.isFramed && root.barShouldShow) ? root.width : 0
-          height: (barMaskRegion.isFramed && root.barShouldShow) ? (barMaskRegion.barPos === "top" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
+          width: barMaskRegion.frameVisible ? root.width : 0
+          height: barMaskRegion.frameVisible ? (barMaskRegion.barPos === "top" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
           intersection: Intersection.Subtract
         }
 
         // Bottom side
         Region {
           x: 0
-          y: (barMaskRegion.isFramed && root.barShouldShow) ? (root.height - (barMaskRegion.barPos === "bottom" ? barMaskRegion.barThickness : barMaskRegion.frameThickness)) : 0
-          width: (barMaskRegion.isFramed && root.barShouldShow) ? root.width : 0
-          height: (barMaskRegion.isFramed && root.barShouldShow) ? (barMaskRegion.barPos === "bottom" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
+          y: barMaskRegion.frameVisible ? (root.height - (barMaskRegion.barPos === "bottom" ? barMaskRegion.barThickness : barMaskRegion.frameThickness)) : 0
+          width: barMaskRegion.frameVisible ? root.width : 0
+          height: barMaskRegion.frameVisible ? (barMaskRegion.barPos === "bottom" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
           intersection: Intersection.Subtract
         }
 
@@ -185,16 +197,16 @@ PanelWindow {
         Region {
           x: 0
           y: 0
-          width: (barMaskRegion.isFramed && root.barShouldShow) ? (barMaskRegion.barPos === "left" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
-          height: (barMaskRegion.isFramed && root.barShouldShow) ? root.height : 0
+          width: barMaskRegion.frameVisible ? (barMaskRegion.barPos === "left" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
+          height: barMaskRegion.frameVisible ? root.height : 0
           intersection: Intersection.Subtract
         }
 
         // Right side
         Region {
-          x: (barMaskRegion.isFramed && root.barShouldShow) ? (root.width - (barMaskRegion.barPos === "right" ? barMaskRegion.barThickness : barMaskRegion.frameThickness)) : 0
-          width: (barMaskRegion.isFramed && root.barShouldShow) ? (barMaskRegion.barPos === "right" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
-          height: (barMaskRegion.isFramed && root.barShouldShow) ? root.height : 0
+          x: barMaskRegion.frameVisible ? (root.width - (barMaskRegion.barPos === "right" ? barMaskRegion.barThickness : barMaskRegion.frameThickness)) : 0
+          width: barMaskRegion.frameVisible ? (barMaskRegion.barPos === "right" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
+          height: barMaskRegion.frameVisible ? root.height : 0
           intersection: Intersection.Subtract
         }
       }
@@ -291,6 +303,7 @@ PanelWindow {
   // Container for all UI elements
   Item {
     id: container
+    readonly property var backgroundProvider: unifiedBackgrounds
     width: root.width
     height: root.height
 
@@ -302,6 +315,7 @@ PanelWindow {
       anchors.fill: parent
       bar: barPlaceholder.barItem || null
       windowRoot: root
+      fullscreenActive: root.fullscreenActive
       z: 0 // Behind all content
     }
 

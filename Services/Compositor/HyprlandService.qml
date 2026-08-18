@@ -346,6 +346,7 @@ Item {
           continue;
         const windowData = extractWindowData(toplevel);
         if (windowData) {
+          const isFullscreen = windowData.isFullscreen === true;
           // If the window claims to be focused, verify it's on an active workspace
           if (windowData.isFocused) {
             if (!activeWorkspaceIds[windowData.workspaceId]) {
@@ -362,7 +363,8 @@ Item {
             "isFocused": windowData.isFocused === true,
             "output": windowData.output ? String(windowData.output) : "",
             "x": (typeof windowData.x === "number" && !isNaN(windowData.x)) ? windowData.x : 0,
-            "y": (typeof windowData.y === "number" && !isNaN(windowData.y)) ? windowData.y : 0
+            "y": (typeof windowData.y === "number" && !isNaN(windowData.y)) ? windowData.y : 0,
+            "isFullscreen": isFullscreen
           };
 
           windowsList.push(normalized);
@@ -412,12 +414,14 @@ Item {
       const wsId = toplevel.workspace ? toplevel.workspace.id : null;
       const focused = toplevel.activated === true;
       const output = toplevel.monitor?.name || "";
+      const ipcData = toplevel.lastIpcObject;
+      const fullscreenMode = ipcData ? Number(ipcData.fullscreen || 0) : 0;
+      const isFullscreen = fullscreenMode > 0;
 
       // Extract position
       let x = 0;
       let y = 0;
       try {
-        const ipcData = toplevel.lastIpcObject;
         if (ipcData && ipcData.at) {
           x = ipcData.at[0];
           y = ipcData.at[1];
@@ -437,6 +441,7 @@ Item {
         "appId": appId,
         "workspaceId": wsId || -1,
         "isFocused": focused,
+        "isFullscreen": isFullscreen,
         "output": output,
         "x": safeX,
         "y": safeY
