@@ -19,6 +19,7 @@ import qs.Services.Power
 import qs.Services.System
 import qs.Services.UI
 import qs.Widgets
+import "Cards"
 
 Item {
   id: root
@@ -1741,327 +1742,6 @@ Item {
                 }
   }
 
-  component DashboardCard: NBox {
-    id: dashboardCard
-
-    property string styleKey: root.inheritedStyleKey(parent)
-    property bool styleRoot: false
-    property bool detailTransition: false
-    property string detailTransitionDirection: "right"
-    property real detailOffset: 0
-    readonly property bool borderEffectVisible: root.componentBorderVisible(styleKey, styleRoot)
-
-    color: styleKey !== "" ? root.componentBackground(styleKey) : root.m3SurfaceContainer
-    radius: styleRoot ? Style.radiusL : Style.radiusM
-    border.color: borderEffectVisible ? Qt.alpha(root.componentAccent(styleKey), 0.42) : (styleRoot ? "transparent" : Qt.alpha(Color.mOutline, 0.10))
-    border.width: borderEffectVisible ? Math.max(1, Style.borderS) : Style.borderS
-
-    transform: Translate {
-      x: dashboardCard.detailOffset
-    }
-
-    onVisibleChanged: {
-      if (visible && detailTransition && !root.dashboardPerformanceMode) {
-        detailEnterAnimation.restart();
-      } else if (visible && detailTransition) {
-        opacity = 1;
-        scale = 1;
-        detailOffset = 0;
-      }
-    }
-
-    ParallelAnimation {
-      id: detailEnterAnimation
-
-      OpacityAnimator {
-        target: dashboardCard
-        from: 0
-        to: 1
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
-
-      ScaleAnimator {
-        target: dashboardCard
-        from: 0.985
-        to: 1
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
-
-      NumberAnimation {
-        target: dashboardCard
-        property: "detailOffset"
-        from: dashboardCard.detailTransitionDirection === "left" ? -Math.round(22 * root.panelUnit) : Math.round(22 * root.panelUnit)
-        to: 0
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
-    }
-
-    ComponentBorderCanvas {
-      anchors.fill: parent
-      styleKey: parent.styleKey
-      styleRoot: parent.styleRoot
-      z: 20
-    }
-  }
-
-  component ComponentBorderCanvas: Canvas {
-    id: componentBorderCanvas
-
-    property string styleKey: ""
-    property bool styleRoot: false
-
-    visible: root.componentBorderVisible(styleKey, styleRoot) && width > 0 && height > 0
-    opacity: 0.86
-    antialiasing: true
-
-    readonly property string animation: root.componentBorderAnimation(styleKey)
-    readonly property var borderColors: root.componentBorderColors(styleKey)
-    readonly property real animationSpeed: root.clamp(root.componentBorderSpeed(styleKey), 0.15, 3)
-    readonly property real borderWidth: Math.max(1, Math.round(root.componentBorderWidth(styleKey) * root.panelUnit))
-    readonly property bool reactive: animation.indexOf("reactive") === 0
-    readonly property bool animationActive: reactive ? root.musicActive : animation !== "static"
-    readonly property real phase: animationActive ? root.sliderEffectPhase : 0
-
-    onAnimationChanged: requestPaint()
-    onAnimationSpeedChanged: requestPaint()
-    onBorderColorsChanged: requestPaint()
-    onBorderWidthChanged: requestPaint()
-    onPhaseChanged: requestPaint()
-    onVisibleChanged: requestPaint()
-    onWidthChanged: requestPaint()
-    onHeightChanged: requestPaint()
-
-    function rgba(c, alpha) {
-      const color = typeof c === "string" ? Qt.color(c) : c;
-      return "rgba(" + Math.round(color.r * 255) + "," + Math.round(color.g * 255) + "," + Math.round(color.b * 255) + "," + alpha + ")";
-    }
-
-    function roundedRect(ctx, x, y, w, h, r) {
-      const rr = Math.min(r, w / 2, h / 2);
-      ctx.beginPath();
-      ctx.moveTo(x + rr, y);
-      ctx.lineTo(x + w - rr, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
-      ctx.lineTo(x + w, y + h - rr);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
-      ctx.lineTo(x + rr, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
-      ctx.lineTo(x, y + rr);
-      ctx.quadraticCurveTo(x, y, x + rr, y);
-    }
-
-    function borderPoint(t, inset, radius) {
-      const x = inset;
-      const y = inset;
-      const w = width - inset * 2;
-      const h = height - inset * 2;
-      const r = Math.min(radius, w / 2, h / 2);
-      const top = Math.max(1, w - r * 2);
-      const side = Math.max(1, h - r * 2);
-      const arc = Math.PI * r / 2;
-      const perimeter = top * 2 + side * 2 + arc * 4;
-      let d = ((t % 1) + 1) % 1 * perimeter;
-
-      if (d < top)
-        return {
-          x: x + r + d,
-          y: y,
-          angle: 0
-        };
-      d -= top;
-      if (d < arc) {
-        const a = -Math.PI / 2 + d / arc * Math.PI / 2;
-        return {
-          x: x + w - r + Math.cos(a) * r,
-          y: y + r + Math.sin(a) * r,
-          angle: a + Math.PI / 2
-        };
-      }
-      d -= arc;
-      if (d < side)
-        return {
-          x: x + w,
-          y: y + r + d,
-          angle: Math.PI / 2
-        };
-      d -= side;
-      if (d < arc) {
-        const a = d / arc * Math.PI / 2;
-        return {
-          x: x + w - r + Math.cos(a) * r,
-          y: y + h - r + Math.sin(a) * r,
-          angle: a + Math.PI / 2
-        };
-      }
-      d -= arc;
-      if (d < top)
-        return {
-          x: x + w - r - d,
-          y: y + h,
-          angle: Math.PI
-        };
-      d -= top;
-      if (d < arc) {
-        const a = Math.PI / 2 + d / arc * Math.PI / 2;
-        return {
-          x: x + r + Math.cos(a) * r,
-          y: y + h - r + Math.sin(a) * r,
-          angle: a + Math.PI / 2
-        };
-      }
-      d -= arc;
-      if (d < side)
-        return {
-          x: x,
-          y: y + h - r - d,
-          angle: -Math.PI / 2
-        };
-
-      d -= side;
-      const a = Math.PI + d / arc * Math.PI / 2;
-      return {
-        x: x + r + Math.cos(a) * r,
-        y: y + r + Math.sin(a) * r,
-        angle: a + Math.PI / 2
-      };
-    }
-
-    function drawSpark(ctx, t, size, color, alpha, inset, radius) {
-      const p = borderPoint(t, inset, radius);
-      const nx = Math.cos(p.angle + Math.PI / 2);
-      const ny = Math.sin(p.angle + Math.PI / 2);
-      const tx = Math.cos(p.angle);
-      const ty = Math.sin(p.angle);
-      ctx.fillStyle = rgba(color, alpha);
-      ctx.beginPath();
-      ctx.moveTo(p.x + nx * size * 0.25, p.y + ny * size * 0.25);
-      ctx.lineTo(p.x - tx * size * 0.55 - nx * size * 0.8, p.y - ty * size * 0.55 - ny * size * 0.8);
-      ctx.lineTo(p.x + tx * size * 1.25 - nx * size * 0.25, p.y + ty * size * 1.25 - ny * size * 0.25);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    function applyDash(ctx, pattern, offset) {
-      if (typeof ctx.setLineDash !== "function")
-        return;
-      ctx.setLineDash(pattern);
-      ctx.lineDashOffset = offset || 0;
-    }
-
-    onPaint: {
-      const ctx = getContext("2d");
-      ctx.clearRect(0, 0, width, height);
-      if (!visible || width <= 0 || height <= 0)
-        return;
-
-      const lineWidth = borderWidth;
-      const inset = lineWidth / 2;
-      const colors = borderColors && borderColors.length > 0 ? borderColors : [Color.mPrimary];
-      const energy = reactive ? root.spectrumAverage() : 0;
-      const alpha = reactive ? root.clamp(0.48 + energy * 0.46, 0.48, 0.94) : 0.86;
-      const flow = animation === "flow" || animation === "flowEase" || animation === "spark" || animation === "reactiveFlow" || animation === "reactiveSpark" || animation === "scan" || animation === "profileAurora" || animation === "profileSpotlight";
-      const fade = animation === "fade" || animation === "reactivePulse";
-      const raw = phase * (flow ? 0.035 : 0.16) * animationSpeed;
-      const eased = raw + Math.sin(raw * 1.6) * 0.42;
-      const p = animation === "flowEase" ? eased : raw;
-      const radius = Math.max(0, Number(parent?.radius || Style.radiusM) - lineWidth / 2);
-      const pulse = 0.5 + Math.sin(p * 2.4) * 0.5;
-      const pathWidth = Math.max(1, (width - lineWidth) * 2 + (height - lineWidth) * 2);
-      const movingDash = animation === "chase";
-      const comet = animation === "comet";
-      const neon = animation === "neon";
-      const corners = animation === "corners";
-      const orbitDots = animation === "orbitDots";
-      const scan = animation === "scan";
-
-      if (neon) {
-        ctx.shadowColor = rgba(colors[0], 0.45 + pulse * 0.28);
-        ctx.shadowBlur = Math.max(6, lineWidth * (2.6 + pulse * 2.2));
-      }
-
-      if (scan && colors.length > 1) {
-        const sweep = ((p * 0.22) % 1 + 1) % 1;
-        const gradient = ctx.createLinearGradient(width * (sweep - 0.45), 0, width * (sweep + 0.45), height);
-        gradient.addColorStop(0, rgba(colors[0], 0.08));
-        gradient.addColorStop(0.46, rgba(colors[1 % colors.length], alpha));
-        gradient.addColorStop(0.54, rgba(colors[2 % colors.length], alpha));
-        gradient.addColorStop(1, rgba(colors[0], 0.08));
-        ctx.strokeStyle = gradient;
-      } else if (flow && colors.length > 1) {
-        const angle = p % (Math.PI * 2);
-        const cx = width / 2;
-        const cy = height / 2;
-        const dx = Math.cos(angle) * width / 2;
-        const dy = Math.sin(angle) * height / 2;
-        const gradient = ctx.createLinearGradient(cx - dx, cy - dy, cx + dx, cy + dy);
-        for (let i = 0; i < colors.length; i++)
-          gradient.addColorStop(i / Math.max(1, colors.length - 1), rgba(colors[i], alpha));
-        ctx.strokeStyle = gradient;
-      } else if (fade && colors.length > 1) {
-        const index = Math.floor(Math.abs(p)) % colors.length;
-        ctx.strokeStyle = rgba(colors[index], alpha);
-      } else {
-        ctx.strokeStyle = rgba(colors[0], alpha);
-      }
-
-      ctx.lineWidth = lineWidth;
-      if (animation === "reactivePulse")
-        applyDash(ctx, [Math.max(8, lineWidth * 4), Math.max(5, lineWidth * 2)], -(p * 52));
-      else if (movingDash)
-        applyDash(ctx, [Math.max(10, lineWidth * 5), Math.max(8, lineWidth * 4)], -(p * 52));
-      else if (comet)
-        applyDash(ctx, [Math.max(24, pathWidth * 0.12), Math.max(36, pathWidth * 0.68)], -(p * 52));
-      else
-        applyDash(ctx, [], 0);
-      roundedRect(ctx, inset, inset, width - lineWidth, height - lineWidth, radius);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      applyDash(ctx, [], 0);
-
-      if (corners) {
-        const corner = Math.min(width, height) * 0.22;
-        ctx.strokeStyle = rgba(colors[1 % colors.length], 0.48 + pulse * 0.32);
-        ctx.lineWidth = lineWidth + 1;
-        ctx.lineCap = "round";
-        for (let i = 0; i < 4; i++) {
-          const left = i === 0 || i === 3;
-          const topSide = i < 2;
-          const sx = left ? inset + radius * 0.55 : width - inset - radius * 0.55;
-          const sy = topSide ? inset : height - inset;
-          ctx.beginPath();
-          ctx.moveTo(sx, sy);
-          ctx.lineTo(left ? Math.min(sx + corner, width - inset) : Math.max(sx - corner, inset), sy);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(left ? inset : width - inset, topSide ? inset + radius * 0.55 : height - inset - radius * 0.55);
-          ctx.lineTo(left ? inset : width - inset, topSide ? Math.min(inset + radius * 0.55 + corner, height - inset) : Math.max(height - inset - radius * 0.55 - corner, inset));
-          ctx.stroke();
-        }
-      }
-
-      if (animation === "spark" || animation === "reactiveSpark" || orbitDots) {
-        const sparkCount = animation === "reactiveSpark" ? 5 : 7;
-        const boost = animation === "reactiveSpark" ? root.clamp(0.45 + energy * 0.9, 0.45, 1.15) : 0.85;
-        for (let i = 0; i < sparkCount; i++) {
-          const local = (p * 0.16 + i / sparkCount) % 1;
-          const flicker = 0.45 + 0.55 * Math.abs(Math.sin((p + i * 1.71) * 2.4));
-          if (orbitDots) {
-            const point = borderPoint(local, inset + lineWidth * 0.35, radius);
-            ctx.fillStyle = rgba(colors[i % colors.length], 0.26 + flicker * 0.5);
-            ctx.beginPath();
-            ctx.arc(point.x, point.y, Math.max(2, lineWidth * (0.75 + flicker * 0.6)), 0, Math.PI * 2);
-            ctx.fill();
-          } else {
-            drawSpark(ctx, local, Math.max(3, lineWidth * (1.4 + flicker)) * boost, colors[i % colors.length], 0.18 + flicker * 0.42, inset + lineWidth * 0.4, radius);
-          }
-        }
-      }
-    }
-  }
-
   component SubmoduleButton: Item {
     id: submoduleButton
 
@@ -2147,6 +1827,7 @@ Item {
   }
 
   component ProfileCard: DashboardCard {
+    root: root
     id: profileCard
     styleKey: "profile"
     styleRoot: true
@@ -2813,6 +2494,7 @@ Item {
   }
 
   component QuickActionsCard: DashboardCard {
+    root: root
     id: quickActionsCard
     styleKey: "quickActions"
     styleRoot: true
@@ -3031,6 +2713,7 @@ Item {
   }
 
   component ActionTile: DashboardCard {
+    root: root
     id: actionTile
 
     styleKey: "quickActions"
@@ -3173,6 +2856,7 @@ Item {
   }
 
   component RecordingCard: DashboardCard {
+    root: root
     styleKey: "recording"
     styleRoot: true
     clip: true
@@ -3255,6 +2939,7 @@ Item {
   }
 
   component ToolkitButton: DashboardCard {
+    root: root
     id: toolkitButton
 
     styleKey: root.inheritedStyleKey(parent)
@@ -3325,6 +3010,7 @@ Item {
   }
 
   component PerformanceCard: DashboardCard {
+    root: root
     styleKey: "performance"
     styleRoot: true
     detailTransition: true
@@ -3398,6 +3084,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: root.m3SurfaceContainerHigh
@@ -3438,6 +3125,7 @@ Item {
   }
 
   component PerformanceDetailsCard: DashboardCard {
+    root: root
     styleKey: "performance"
     styleRoot: true
     detailTransition: true
@@ -3528,6 +3216,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(120 * root.panelUnit)
         color: root.m3SurfaceContainerHigh
@@ -3573,6 +3262,7 @@ Item {
   }
 
   component DetailMetricTile: DashboardCard {
+    root: root
     id: detailMetric
 
     styleKey: root.inheritedStyleKey(parent)
@@ -3638,6 +3328,7 @@ Item {
   }
 
   component ProcessUsageCard: DashboardCard {
+    root: root
     id: processUsageCard
 
     styleKey: "performance"
@@ -3969,6 +3660,7 @@ Item {
   }
 
   component StatTile: DashboardCard {
+    root: root
     id: statTile
 
     styleKey: root.inheritedStyleKey(parent)
@@ -4025,6 +3717,7 @@ Item {
   }
 
   component MiniMeter: DashboardCard {
+    root: root
     id: miniMeter
 
     styleKey: root.inheritedStyleKey(parent)
@@ -4144,6 +3837,7 @@ Item {
   }
 
   component DiskPager: DashboardCard {
+    root: root
     id: diskPager
 
     property int currentIndex: 0
@@ -4279,6 +3973,7 @@ Item {
   }
 
   component TrafficTile: DashboardCard {
+    root: root
     property string iconName: ""
     property string titleText: ""
     property string valueText: ""
@@ -4317,156 +4012,6 @@ Item {
       }
     }
   }
-
-  component HistoryGraph: DashboardCard {
-    id: historyGraph
-
-    property string titleText: ""
-    property string valueText: ""
-    property var values: []
-    property real maxValue: 100
-    property color lineColor: Color.mPrimary
-    property real pulsePhase: 0
-
-    color: Qt.alpha(Color.mSurface, 0.32)
-    radius: Style.radiusS
-    clip: true
-
-    onValuesChanged: graphCanvas.requestPaint()
-    onLineColorChanged: graphCanvas.requestPaint()
-    onMaxValueChanged: graphCanvas.requestPaint()
-    onPulsePhaseChanged: graphCanvas.requestPaint()
-
-    function colorToRgba(c, alpha) {
-      return "rgba(" + Math.round(c.r * 255) + "," + Math.round(c.g * 255) + "," + Math.round(c.b * 255) + "," + alpha + ")";
-    }
-
-    Timer {
-      interval: 80
-      repeat: true
-      running: historyGraph.visible && !root.dashboardPerformanceMode && !Settings.data.general.animationDisabled
-      onTriggered: historyGraph.pulsePhase = (historyGraph.pulsePhase + 0.055) % 1
-    }
-
-    ColumnLayout {
-      anchors.fill: parent
-      anchors.margins: Style.marginS
-      spacing: Style.marginXXS
-
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        NText {
-          Layout.fillWidth: true
-          text: historyGraph.titleText
-          color: Color.mOnSurfaceVariant
-          pointSize: Style.fontSizeXS
-          elide: Text.ElideRight
-        }
-
-        NText {
-          text: historyGraph.valueText
-          color: Color.mOnSurface
-          pointSize: Style.fontSizeXS
-          font.weight: Style.fontWeightSemiBold
-        }
-      }
-
-      Canvas {
-        id: graphCanvas
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        antialiasing: true
-
-        onPaint: {
-          const ctx = getContext("2d");
-          ctx.clearRect(0, 0, width, height);
-          if (width <= 0 || height <= 0)
-            return;
-
-          const vals = historyGraph.values || [];
-          const count = vals.length;
-          if (count < 2)
-            return;
-
-          const pad = Math.max(2, Math.round(3 * root.panelUnit));
-          const graphW = Math.max(1, width - pad * 2);
-          const graphH = Math.max(1, height - pad * 2);
-          const points = [];
-          const max = Math.max(1, historyGraph.maxValue);
-          for (let i = 0; i < count; i++) {
-            const value = root.clamp(Number(vals[i] || 0) / max, 0, 1);
-            points.push({
-                          x: pad + (count === 1 ? 0 : (graphW * i / (count - 1))),
-                          y: pad + graphH - (graphH * value)
-                        });
-          }
-
-          ctx.strokeStyle = historyGraph.colorToRgba(Color.mOutline, 0.11);
-          ctx.lineWidth = 1;
-          for (let i = 1; i < 3; i++) {
-            const y = pad + graphH * i / 3;
-            ctx.beginPath();
-            ctx.moveTo(pad, y);
-            ctx.lineTo(width - pad, y);
-            ctx.stroke();
-          }
-
-          const areaGradient = ctx.createLinearGradient(0, pad, 0, height - pad);
-          areaGradient.addColorStop(0, historyGraph.colorToRgba(historyGraph.lineColor, 0.28));
-          areaGradient.addColorStop(0.62, historyGraph.colorToRgba(historyGraph.lineColor, 0.08));
-          areaGradient.addColorStop(1, historyGraph.colorToRgba(historyGraph.lineColor, 0.0));
-
-          ctx.beginPath();
-          ctx.moveTo(points[0].x, height - pad);
-          ctx.lineTo(points[0].x, points[0].y);
-          for (let i = 1; i < points.length; i++) {
-            const prev = points[i - 1];
-            const cur = points[i];
-            const midX = (prev.x + cur.x) / 2;
-            ctx.quadraticCurveTo(prev.x, prev.y, midX, (prev.y + cur.y) / 2);
-            ctx.quadraticCurveTo(cur.x, cur.y, cur.x, cur.y);
-          }
-          ctx.lineTo(points[points.length - 1].x, height - pad);
-          ctx.closePath();
-          ctx.fillStyle = areaGradient;
-          ctx.fill();
-
-          ctx.shadowColor = historyGraph.colorToRgba(historyGraph.lineColor, 0.22);
-          ctx.shadowBlur = Math.round(8 * root.panelUnit);
-          ctx.strokeStyle = historyGraph.colorToRgba(historyGraph.lineColor, 0.96);
-          ctx.lineWidth = Math.max(1.6, 2.2 * root.panelUnit);
-          ctx.lineCap = "round";
-          ctx.lineJoin = "round";
-          ctx.beginPath();
-          ctx.moveTo(points[0].x, points[0].y);
-          for (let i = 1; i < points.length; i++) {
-            const prev = points[i - 1];
-            const cur = points[i];
-            const midX = (prev.x + cur.x) / 2;
-            ctx.quadraticCurveTo(prev.x, prev.y, midX, (prev.y + cur.y) / 2);
-            ctx.quadraticCurveTo(cur.x, cur.y, cur.x, cur.y);
-          }
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-
-          const last = points[points.length - 1];
-          const pulse = 0.5 + Math.sin(historyGraph.pulsePhase * Math.PI * 2) * 0.5;
-          ctx.fillStyle = historyGraph.colorToRgba(historyGraph.lineColor, 0.18 + pulse * 0.12);
-          ctx.beginPath();
-          ctx.arc(last.x, last.y, Math.max(4, 6 * root.panelUnit + pulse * 2), 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = historyGraph.colorToRgba(historyGraph.lineColor, 1);
-          ctx.beginPath();
-          ctx.arc(last.x, last.y, Math.max(2.2, 3 * root.panelUnit), 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
-  }
-
   component ResourceLine: RowLayout {
     property string iconName: ""
     property string labelText: ""
@@ -4499,6 +4044,7 @@ Item {
   }
 
   component AudioDetailsCard: DashboardCard {
+    root: root
     styleKey: "systemControls"
     styleRoot: true
     detailTransition: true
@@ -4539,6 +4085,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(150 * root.panelUnit)
         color: root.m3SurfaceContainerHigh
@@ -4616,6 +4163,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: root.m3SurfaceContainerHigh
@@ -4684,6 +4232,7 @@ Item {
   }
 
   component AudioDeviceTile: DashboardCard {
+    root: root
     id: audioDeviceTile
 
     property string titleText: ""
@@ -4746,6 +4295,7 @@ Item {
   }
 
   component AppVolumeRow: DashboardCard {
+    root: root
     id: appVolumeRow
 
     property var streamNode: null
@@ -4805,6 +4355,7 @@ Item {
   }
 
   component MediaDetailsCard: DashboardCard {
+    root: root
     styleKey: "media"
     styleRoot: true
     detailTransition: true
@@ -4940,6 +4491,7 @@ Item {
                 spacing: Style.marginL
 
                 DashboardCard {
+                  root: root
                   id: mediaArtworkCard
 
                   Layout.fillWidth: true
@@ -5137,6 +4689,7 @@ Item {
                 }
 
                 DashboardCard {
+                  root: root
                   Layout.fillWidth: true
                   Layout.preferredHeight: playersColumn2.implicitHeight + Style.marginM * 2 + Style.marginS + Math.round(20 * root.panelUnit)
                   color: root.m3SurfaceContainerHigh
@@ -5206,6 +4759,7 @@ Item {
   }
 
   component EasyEffectsCard: DashboardCard {
+    root: root
     id: easyEffectsCard
 
     Layout.fillWidth: true
@@ -5374,6 +4928,7 @@ Item {
   }
 
   component PlayerRow: DashboardCard {
+    root: root
     id: playerRow
 
     property var playerData: null
@@ -5424,6 +4979,7 @@ Item {
   }
 
   component SystemControlsCard: DashboardCard {
+    root: root
     styleKey: "systemControls"
     styleRoot: true
     detailTransition: true
@@ -5941,6 +5497,7 @@ Item {
   }
 
   component NotificationsCard: DashboardCard {
+    root: root
     styleKey: "notifications"
     styleRoot: true
     detailTransition: true
@@ -6029,6 +5586,7 @@ Item {
   }
 
   component NotificationsDetailsCard: DashboardCard {
+    root: root
     styleKey: "notifications"
     styleRoot: true
     detailTransition: true
@@ -6073,6 +5631,7 @@ Item {
         spacing: Style.marginM
 
         DashboardCard {
+          root: root
           Layout.fillWidth: true
           Layout.preferredHeight: Math.round(72 * root.panelUnit)
           color: root.m3SurfaceContainerHigh
@@ -6124,6 +5683,7 @@ Item {
         }
 
         DashboardCard {
+          root: root
           Layout.fillWidth: true
           Layout.preferredHeight: Math.round(72 * root.panelUnit)
           color: root.m3SurfaceContainerHigh
@@ -6169,6 +5729,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: root.m3SurfaceContainerHigh
@@ -6238,6 +5799,7 @@ Item {
   }
 
   component NotificationRow: DashboardCard {
+    root: root
     id: notificationRow
 
     property var notificationData: ({})
@@ -6411,6 +5973,7 @@ Item {
   }
 
   component MediaCard: DashboardCard {
+    root: root
     id: mediaCard
     styleKey: "media"
     styleRoot: true
@@ -7208,6 +6771,7 @@ Item {
   }
 
   component WeatherDetailsCard: DashboardCard {
+    root: root
     styleKey: "calendar"
     styleRoot: true
     detailTransition: true
@@ -7324,6 +6888,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         visible: weatherReady
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -7371,6 +6936,7 @@ Item {
   }
 
   component WeatherInfoTile: DashboardCard {
+    root: root
     id: weatherInfoTile
 
     property string iconName: ""
@@ -7416,6 +6982,7 @@ Item {
   }
 
   component WeatherForecastRow: DashboardCard {
+    root: root
     id: forecastRow
 
     property int dayIndex: 0
@@ -7461,6 +7028,7 @@ Item {
   }
 
   component CalendarDetailsCard: DashboardCard {
+    root: root
     styleKey: "calendar"
     styleRoot: true
     detailTransition: true
@@ -7734,6 +7302,7 @@ Item {
   }
 
   component CalendarShell: DashboardCard {
+    root: root
     id: calendarShell
     styleKey: "calendar"
     styleRoot: true
@@ -7812,6 +7381,7 @@ Item {
   }
 
   component ScreenUsageDetailsCard: DashboardCard {
+    root: root
     id: screenUsageDetails
     styleKey: "screenUsage"
     styleRoot: true
@@ -7894,6 +7464,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(94 * root.panelUnit)
         color: root.m3SurfaceContainerHigh
@@ -7949,6 +7520,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: root.m3SurfaceContainerHigh
@@ -8242,6 +7814,7 @@ Item {
       }
 
       DashboardCard {
+        root: root
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(76 * root.panelUnit)
         color: Qt.alpha(Color.mSurface, 0.34)
@@ -8385,6 +7958,7 @@ Item {
   }
 
   component ScreenUsageRangeButton: DashboardCard {
+    root: root
     id: screenUsageRangeButton
 
     property string labelText: ""
@@ -8416,6 +7990,7 @@ Item {
   }
 
   component ScreenUsageDetailRow: DashboardCard {
+    root: root
     id: screenUsageDetailRow
 
     property var appData: null
