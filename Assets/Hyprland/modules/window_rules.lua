@@ -23,14 +23,19 @@ hl.window_rule({
 })
 
 -- hydra-shell's own Settings window (Modules/Panels/Settings/
--- SettingsPanelWindow.qml sets `title: "Noctalia"` — update this match if
--- that title is ever rebranded) — without this it tiles instead of floating
--- at its own content size.
+-- SettingsPanelWindow.qml sets `title: "Hydra Shell"`) — without float+center
+-- it can tile instead of floating at its own content size. rounding=0 and
+-- border_size=0 disable Hyprland's own compositor-level corner/border decor,
+-- which otherwise fights the QML content's own Style.radiusPanel-rounded
+-- Rectangle (a different, user-configurable radius) and leaves a visible
+-- mismatched double-corner with wallpaper bleeding through the gap.
 hl.window_rule({
   name = "hydra-shell-settings-float",
-  match = { title = "^(Noctalia)$" },
+  match = { title = "^(Hydra Shell)$" },
   float = true,
   center = true,
+  rounding = 0,
+  border_size = 0,
 })
 
 -- Small utility/dialog apps that misbehave tiled across every distro.

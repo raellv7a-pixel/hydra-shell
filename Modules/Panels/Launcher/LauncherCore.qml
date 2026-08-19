@@ -1065,7 +1065,13 @@ Rectangle {
 
         ColumnLayout {
           anchors.fill: parent
-          anchors.margins: Style.paddingCard
+          // Horizontal: 0 here, not Style.paddingCard — coverBannerHeader already
+          // insets the whole banner by paddingCard (Layout.leftMargin/rightMargin
+          // above), matching resultsSwapView/categoryTabs. Padding again here
+          // double-inset the search box, misaligning it from the results list
+          // and category tabs below by a full extra paddingCard on each side.
+          anchors.topMargin: Style.paddingCard
+          anchors.bottomMargin: Style.paddingCard
           spacing: Style.spaceS
 
           Item {
