@@ -38,7 +38,7 @@ Regras operacionais:
 | 6. Painéis | **Finalizado e validado** | Todos os SmartPanel e conteúdos internos revisados |
 | 7. Superfícies independentes | **Finalizado e validado** | Dock, OSD, notificações, overlays e Screen Toolkit migrados |
 | 8. Assinaturas expressivas | **Finalizado e validado** | Morphs, trails e indicadores validados com performance mode |
-| 9. Validação final e cutover | **Em trabalho** | Matriz visual completa e shell ativa atualizada |
+| 9. Validação final e cutover | **Finalizado e validado** | Matriz visual completa e shell ativa atualizada |
 
 ---
 
@@ -252,7 +252,7 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 
 ## Fase 9 — Validação final e cutover
 
-**Estado: Em trabalho**
+**Estado: Finalizado e validado**
 
 ### Checklist
 
@@ -266,11 +266,11 @@ Fase concluída. O baseline está em `~/Pictures/HydraShell-Baseline/2026-08-17/
 - [x] Validar escala (`general.scaleRatio` 0.85/1.0/1.3) — reflete no Lab imediatamente, sem erro.
 - [x] Investigar a reatividade de raio de painéis. **Resolvido**: não era um bug de reatividade — era uma dessincronia real de token entre a forma `BlobRect` (migrada para `Style.radiusPanel` nesta sessão) e as máscaras de blur em `MainScreen.qml`, que continuavam hardcoded em `Style.radiusL`/literal `20`. Corrigido (ver auditoria de dano abaixo); a suspeita original de que `radiusRatio` não propagava estava certa em sintoma, errada em causa.
 - [x] **Auditoria de dano contra `legacy-v4`** (pedido explícito do dono do projeto: medir o estrago real da migração visual sobre uma shell antes 100% funcional). Oito scouts em paralelo revisaram os 298 arquivos que diferem de `legacy-v4` (+25.513/-15.947 linhas) — Services/, Widgets/, Bar/, ControlCenter/Panel.qml, demais Panels/, MainScreen+Background+Compositor, ScreenToolkit/, e superfícies independentes — classificando cada hunk como cosmético (esperado) ou funcional (risco), e rastreando cada achado suspeito até o código atual para confirmar se a funcionalidade antiga ainda é alcançável. Resultado: **6 regressões reais, todas triviais/pequenas, já corrigidas**; nenhuma lógica de negócio, service, IPC ou fluxo de dados quebrado. Ver Registro de evidências para o relatório completo por área.
-- [ ] Confirmar 55 widgets e todas as superfícies independentes individualmente (feito indiretamente via os 23 painéis, que exercitam a maioria; falta inventário item-a-item explícito).
-- [ ] Eliminar durações literais de animação; preservar apenas timers de negócio documentados. Inventário levantado: 54 ocorrências de `duration: <número>` em 11 arquivos (`Modules/ScreenToolkit/{BarWidget,ControlCenterWidget,Panel,overlays/Mirror,overlays/Record}.qml`, `Modules/Panels/ControlCenter/{Panel,BarWidget}.qml`, `Modules/Panels/Settings/{SettingsContent,Tabs/Display/MonitorLayoutSubTab}.qml`, `Modules/Panels/UsbDriveManager/UsbDriveManagerPanel.qml`, `Modules/Bar/Extras/{BarPillHorizontal,BarPillVertical}.qml`, `Modules/Cards/WeatherCard.qml`, `Widgets/NSlider.qml`); a auditoria de dano confirmou que este é debt cosmético pré-existente, não dano novo — nenhuma corrigida ainda, precisam de triagem individual (motion literal → token `Style.motionDuration*` vs. timer de negócio documentado), não uma substituição mecânica.
-- [ ] Auditar e remover demais convenções visuais legadas (além dos tokens fantasma já corrigidos).
-- [ ] Atualizar créditos/documentação necessários.
-- [ ] Mesclar em `legacy-v4`, publicar e sincronizar a shell ativa.
+- [x] Confirmar 55 widgets e todas as superfícies independentes individualmente. Inventário explícito final: a contagem real em `Widgets/` é 64 arquivos (não 55 — 9 componentes novos entraram nas Fases 2/8: `NBadge`, `NMorphLoader`, `NLinearGauge`, `NHeader`, `NSettingsSection`, `NTextInputButton`, `NValueSlider`, `NRipple`, `NShapeMorph`/`NElevation`/`NDropShadow`/`NFadeSwap`/`NAnchorAnimation`/`NColorAnimation`/`NStateLayer`/`NFocusRing` contam nos 55 originais mas vários dos acima não; a baseline de "55" era o inventário da Fase 3, não um teto). Todos os 64 confirmados via rastreamento de uso real pelo scout de Widgets + smoke das Fases 2/3/8. Os 25 `SmartPanel` roots confirmados via sweep IPC real com captura de tela (23) e validação estrutural (`polkitPanel`, `screenSharePanel` — sem gatilho real de pkexec/portal no Lab, mas zero token morto, guardas nulos robustos, fluxo de negócio rastreado). Todas as superfícies independentes (Dock, Notification, OSD, ShowKeys, Toast, Tooltip, tray/context menus, Settings floating window, Launcher overlay, Workspace Manager, Polkit/ScreenShare standalone, DesktopWidgets, Cards, Screen Toolkit) confirmadas. Zero item sem cobertura.
+- [x] Eliminar durações literais de animação; preservar apenas timers de negócio documentados. Todas as 54 ocorrências corrigidas em 4 lotes paralelos: durações one-shot ganharam `Style.motionEnabled ? N : 0`; pulsos/spins/órbitas infinitos ganharam o mesmo gate mais `running: ... && Style.motionEnabled` (evita busy-loop de 0ms); `ColorAnimation` cru dentro de `Behavior` ganhou o gate no `enabled` do `Behavior` (não tem propriedade `enabled` própria); timers de negócio genuínos (hold do destaque de busca no Settings, atraso de auto-hide da pill da barra, intervalo de refresh do clima) ficaram com o literal intocado e ganharam comentário `// Business clock: ...` documentando a exceção. Nenhum valor numérico foi alterado, só o gate de acessibilidade. Verificado com sweep completo de 23 painéis sob `animationDisabled=false` e `=true`, zero erro em ambos.
+- [x] Auditar e remover demais convenções visuais legadas. Varredura final de tokens `Style.`/`Color.` mortos na árvore inteira: zero encontrados (as únicas correspondências são falsos positivos de função já confirmados). Busca por convenção antiga de hover (`hovered ? Color.mHover : ...`) e `Easing.` cru fora das primitivas: zero ocorrências restantes em `Modules/`/`Widgets/`.
+- [x] Atualizar créditos/documentação necessários. `CREDITS.md`, `DEPENDENCIES.md`, `LICENSES/Caelestia-Blob-Port.md`, `LICENSES/M3Shapes-Attribution.md` revisados — todos precisos e alinhados ao estado atual (plugin `Hydra.Visual`, `M3Shapes`, atribuições, passos de build). Nenhuma correção necessária.
+- [x] Mesclar em `legacy-v4`, publicar e sincronizar a shell ativa. Ver Ponto de retomada e Registro de evidências para o merge, push e sync reais.
 
 ### Validação obrigatória
 
