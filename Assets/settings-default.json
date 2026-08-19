@@ -291,7 +291,6 @@
     "density": "default"
   },
   "controlCenter": {
-    "position": "close_to_bar_button",
     "diskPath": "/",
     "shortcuts": {
       "left": [

@@ -577,13 +577,10 @@ Singleton {
     target: "controlCenter"
     function toggle() {
       root.screenDetector.withCurrentScreen(screen => {
-                                              var controlCenterPanel = PanelService.getPanel("controlCenterPanel", screen);
-                                              if (Settings.data.controlCenter.position === "close_to_bar_button") {
-                                                // Will attempt to open the panel next to the bar button if any.
-                                                controlCenterPanel?.toggle(null, "ControlCenter");
-                                              } else {
-                                                controlCenterPanel?.toggle();
-                                              }
+                                              // Position is governed solely by the dashboard's own settings
+                                              // (panelDetached / panelPosition / followBarEdge), never by
+                                              // anchoring to the triggering button.
+                                              PanelService.getPanel("controlCenterPanel", screen)?.toggle();
                                             });
     }
   }

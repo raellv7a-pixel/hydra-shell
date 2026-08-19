@@ -1598,6 +1598,7 @@ Item {
       contentWidth: Math.max(width, dashboardLayout.implicitWidth + Style.paddingCard * 2)
       contentHeight: Math.max(height, dashboardLayout.implicitHeight + Style.paddingCard * 2)
       boundsBehavior: Flickable.StopAtBounds
+      interactive: false
       clip: true
 
       RowLayout {

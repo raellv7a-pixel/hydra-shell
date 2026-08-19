@@ -105,13 +105,11 @@ NIconButton {
   }
 
   onClicked: {
-    var controlCenterPanel = PanelService.getPanel("controlCenterPanel", screen);
-    if (Settings.data.controlCenter.position === "close_to_bar_button") {
-      // Will open the panel next to the bar button.
-      controlCenterPanel?.toggle(this);
-    } else {
-      controlCenterPanel?.toggle();
-    }
+    // Position is governed solely by the dashboard's own settings
+    // (panelDetached / panelPosition / followBarEdge in control-center.json).
+    // Never anchor to this button — that silently overrides the user's
+    // configured position (e.g. "Centralizado").
+    PanelService.getPanel("controlCenterPanel", screen)?.toggle();
   }
   onRightClicked: {
     PanelService.showContextMenu(contextMenu, root, screen);
