@@ -84,10 +84,19 @@ DashboardCard {
         Repeater {
           model: NotificationService.historyModel
 
-          NotificationRow {
-            panelRoot: notificationsCard.panelRoot
+          ColumnLayout {
+            // Plain wrapper: Repeater doesn't reliably inject the `index`
+            // context property into a delegate whose root type has other
+            // required properties (NotificationRow requires panelRoot via
+            // DashboardCard). Keeping index/model resolution in this
+            // wrapper's own scope and forwarding it explicitly avoids that.
             Layout.fillWidth: true
-            notificationData: NotificationService.historyModel.get(index)
+
+            NotificationRow {
+              panelRoot: notificationsCard.panelRoot
+              Layout.fillWidth: true
+              notificationData: NotificationService.historyModel.get(index)
+            }
           }
         }
       }
