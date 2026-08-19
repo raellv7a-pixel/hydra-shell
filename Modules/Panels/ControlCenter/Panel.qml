@@ -1742,90 +1742,6 @@ Item {
                 }
   }
 
-  component SubmoduleButton: Item {
-    id: submoduleButton
-
-    property string styleKey: root.inheritedStyleKey(parent)
-    property string labelText: root.tr("openDetails")
-    property string iconName: "chevron-right"
-    property string targetView: ""
-    property var tooltipText: root.tr("details")
-
-    Layout.preferredWidth: Math.max(Math.round(78 * root.panelUnit), contentRow.implicitWidth + Style.marginM * 2)
-    Layout.preferredHeight: Math.round(30 * root.panelUnit)
-    implicitWidth: Layout.preferredWidth
-    implicitHeight: Layout.preferredHeight
-    width: implicitWidth
-    height: implicitHeight
-    scale: submoduleTap.pressed ? 0.96 : (submoduleHover.hovered || activeFocus ? 1.025 : 1)
-    transformOrigin: Item.Center
-    activeFocusOnTab: true
-    Accessible.role: Accessible.Button
-    Accessible.name: labelText
-
-    Rectangle {
-      anchors.fill: parent
-      radius: height / 2
-      color: submoduleHover.hovered || submoduleButton.activeFocus ? root.componentButtonBackground(submoduleButton.styleKey) : root.m3PrimaryContainer
-      border.width: submoduleButton.activeFocus ? Style.borderM : 0
-      border.color: root.componentAccent(submoduleButton.styleKey)
-
-      Behavior on color {
-        ColorAnimation {
-          duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-          easing.type: Easing.OutCubic
-        }
-      }
-
-      RowLayout {
-        id: contentRow
-        anchors.centerIn: parent
-        spacing: Style.marginXXS
-
-        NText {
-          text: submoduleButton.labelText
-          pointSize: Style.fontSizeXS
-          font.weight: Style.fontWeightSemiBold
-          color: submoduleHover.hovered || submoduleButton.activeFocus ? root.componentButtonText(submoduleButton.styleKey) : root.componentText(submoduleButton.styleKey, true)
-        }
-
-        NIcon {
-          icon: submoduleButton.iconName
-          pointSize: Style.fontSizeS
-          color: submoduleHover.hovered || submoduleButton.activeFocus ? root.componentButtonText(submoduleButton.styleKey) : root.componentAccent(submoduleButton.styleKey)
-        }
-      }
-    }
-
-    HoverHandler {
-      id: submoduleHover
-    }
-
-    TapHandler {
-      id: submoduleTap
-      onTapped: root.activeDetailView = submoduleButton.targetView
-    }
-
-    Behavior on scale {
-      ScaleAnimator {
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: submoduleTap.pressed ? Easing.OutCubic : Easing.OutBack
-      }
-    }
-
-    Keys.onReturnPressed: root.activeDetailView = submoduleButton.targetView
-    Keys.onSpacePressed: root.activeDetailView = submoduleButton.targetView
-
-    MouseArea {
-      anchors.fill: parent
-      hoverEnabled: true
-      cursorShape: Qt.PointingHandCursor
-      acceptedButtons: Qt.NoButton
-      onEntered: TooltipService.show(parent, submoduleButton.tooltipText)
-      onExited: TooltipService.hide()
-    }
-  }
-
   component ProfileCard: DashboardCard {
     panelRoot: root
     id: profileCard
@@ -3034,6 +2950,7 @@ Item {
         }
 
         SubmoduleButton {
+          panelRoot: root
           targetView: "performance"
         }
       }
@@ -3624,41 +3541,6 @@ Item {
     }
   }
 
-  component PageDots: Row {
-    id: pageDots
-
-    property int count: 0
-    property int currentIndex: 0
-    signal selected(int index)
-
-    spacing: Math.round(5 * root.panelUnit)
-    visible: count > 1
-
-    Repeater {
-      model: pageDots.count
-
-      Rectangle {
-        width: Math.round((index === pageDots.currentIndex ? 16 : 6) * root.panelUnit)
-        height: Math.round(6 * root.panelUnit)
-        radius: height / 2
-        color: index === pageDots.currentIndex ? Color.mPrimary : Qt.alpha(Color.mOnSurfaceVariant, 0.36)
-
-        Behavior on width {
-          NumberAnimation {
-            duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-            easing.type: Easing.OutCubic
-          }
-        }
-
-        MouseArea {
-          anchors.fill: parent
-          cursorShape: Qt.PointingHandCursor
-          onClicked: pageDots.selected(index)
-        }
-      }
-    }
-  }
-
   component StatTile: DashboardCard {
     panelRoot: root
     id: statTile
@@ -3958,6 +3840,7 @@ Item {
         }
 
         PageDots {
+          panelRoot: root
           count: diskPager.pageCount
           currentIndex: diskPager.safeIndex
           onSelected: index => diskPager.currentIndex = index
@@ -4097,6 +3980,7 @@ Item {
           spacing: Style.marginM
 
           ControlSlider {
+            panelRoot: root
             iconName: AudioService.muted ? "volume-off" : "volume"
             labelText: root.tr("outputVolume")
             valueText: Math.round(AudioService.volume * 100) + "%"
@@ -4111,6 +3995,7 @@ Item {
           }
 
           ControlSlider {
+            panelRoot: root
             iconName: AudioService.inputMuted ? "microphone-off" : "microphone"
             labelText: root.tr("inputVolume")
             valueText: Math.round(AudioService.inputVolume * 100) + "%"
@@ -4536,6 +4421,7 @@ Item {
                   }
 
                   MusicVisualizer {
+                    panelRoot: root
                     anchors.fill: parent
                     effect: root.mediaVisualizerEffect
                     active: root.musicActive
@@ -5003,12 +4889,14 @@ Item {
         }
 
         SubmoduleButton {
+          panelRoot: root
           targetView: "audio"
           tooltipText: root.tr("audioDetails")
         }
       }
 
       ControlSlider {
+        panelRoot: root
         iconName: AudioService.muted ? "volume-off" : "volume"
         labelText: root.tr("volume")
         valueText: Math.round(AudioService.volume * 100) + "%"
@@ -5023,6 +4911,7 @@ Item {
       }
 
       ControlSlider {
+        panelRoot: root
         iconName: AudioService.inputMuted ? "microphone-off" : "microphone"
         labelText: root.tr("microphone")
         valueText: Math.round(AudioService.inputVolume * 100) + "%"
@@ -5036,6 +4925,7 @@ Item {
       }
 
       ControlSlider {
+        panelRoot: root
         iconName: "brightness-up"
         labelText: root.tr("brightness")
         valueText: Math.round(root.currentBrightness() * 100) + "%"
@@ -5052,447 +4942,6 @@ Item {
     TapHandler {
       acceptedButtons: Qt.RightButton
       onTapped: root.activeDetailView = "audio"
-    }
-  }
-
-  component ControlSlider: ColumnLayout {
-    id: controlSlider
-
-    property string iconName: ""
-    property string labelText: ""
-    property string valueText: ""
-    property real value: 0
-    property string reactiveEffect: "none"
-    property bool reactiveActive: false
-    property real reactiveLevel: 0
-    property var reactiveValues: []
-    property bool reactiveOverflow: false
-    signal moved(real value)
-
-    Layout.fillWidth: true
-    spacing: Style.marginS
-    opacity: enabled ? 1 : 0.45
-
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: Style.marginM
-
-      NIcon {
-        icon: iconName
-        pointSize: Style.fontSizeL
-        color: Color.mPrimary
-      }
-
-      NText {
-        Layout.fillWidth: true
-        text: labelText
-        color: Color.mOnSurface
-        font.weight: Style.fontWeightMedium
-      }
-
-      NText {
-        text: valueText
-        color: Color.mOnSurfaceVariant
-        font.family: Settings.data.ui.fontFixed
-      }
-    }
-
-    ReactiveSlider {
-      Layout.fillWidth: true
-      from: 0
-      to: 1
-      stepSize: 0.01
-      value: controlSlider.value
-      effect: controlSlider.reactiveEffect
-      effectActive: controlSlider.reactiveActive
-      effectLevel: controlSlider.reactiveLevel
-      effectValues: controlSlider.reactiveValues
-      overflowEffects: controlSlider.reactiveOverflow
-      onMoved: controlSlider.moved(value)
-    }
-  }
-
-  component ReactiveSlider: Slider {
-    id: reactiveSlider
-
-    property string effect: "none"
-    property bool effectActive: false
-    property real effectLevel: 0
-    property var effectValues: []
-    property bool overflowEffects: false
-
-    readonly property real handleWidth: Math.max(2, Math.round((pressed ? 2 : 4) * root.panelUnit))
-    readonly property real handleHeight: Math.round(28 * root.panelUnit)
-    readonly property real baseTrackHeight: Math.max(6, Math.round(7 * root.panelUnit))
-    readonly property real activeTrackHeight: Math.max(baseTrackHeight, Math.round((8 + root.clamp(effectLevel, 0, 1) * 8) * root.panelUnit))
-    readonly property real visualTrackHeight: effectActive && effect !== "none" ? activeTrackHeight : baseTrackHeight
-    readonly property real trackCanvasHeight: Math.max(handleHeight, Math.round(28 * root.panelUnit))
-    readonly property real effectCanvasHeight: overflowEffects ? Math.max(trackCanvasHeight, Math.round(42 * root.panelUnit)) : trackCanvasHeight
-    readonly property real fillRatio: root.clamp(visualPosition, 0, 1)
-
-    Layout.preferredHeight: trackCanvasHeight
-    padding: Math.round(3 * root.panelUnit)
-    snapMode: Slider.SnapAlways
-    implicitHeight: trackCanvasHeight
-
-    onValueChanged: trackCanvas.requestPaint()
-    onVisualPositionChanged: trackCanvas.requestPaint()
-    onEffectChanged: trackCanvas.requestPaint()
-    onEffectActiveChanged: trackCanvas.requestPaint()
-    onEffectLevelChanged: trackCanvas.requestPaint()
-    onEffectValuesChanged: trackCanvas.requestPaint()
-    onOverflowEffectsChanged: trackCanvas.requestPaint()
-    onEnabledChanged: trackCanvas.requestPaint()
-    onWidthChanged: trackCanvas.requestPaint()
-    onHeightChanged: trackCanvas.requestPaint()
-
-    Connections {
-      target: root
-      function onSliderEffectPhaseChanged() {
-        trackCanvas.requestPaint();
-      }
-    }
-
-    background: Canvas {
-      id: trackCanvas
-
-      x: reactiveSlider.leftPadding
-      y: reactiveSlider.topPadding + Style.pixelAlignCenter(reactiveSlider.availableHeight, reactiveSlider.effectCanvasHeight)
-      width: reactiveSlider.availableWidth
-      height: reactiveSlider.effectCanvasHeight
-      antialiasing: true
-
-      // Decaying peak-hold state for the "spectrum" effect (classic VU-meter caps)
-      property var spectrumPeaks: []
-
-      onPaint: {
-        const ctx = getContext("2d");
-        ctx.clearRect(0, 0, width, height);
-        if (width <= 0 || height <= 0)
-          return;
-
-        const centerY = height / 2;
-        const inactiveAlpha = reactiveSlider.enabled ? 1 : 0.55;
-        const active = reactiveSlider.effectActive && reactiveSlider.effect !== "none" && reactiveSlider.enabled;
-        const activeW = width * reactiveSlider.fillRatio;
-        const baseH = reactiveSlider.baseTrackHeight;
-        const effectH = reactiveSlider.visualTrackHeight;
-        const level = root.clamp(Number(reactiveSlider.effectLevel || 0), 0, 1);
-        const values = reactiveSlider.effectValues || [];
-        const valuesLen = values.length || 0;
-        const phase = root.sliderEffectPhase;
-
-        function rgba(c, alpha) {
-          return "rgba(" + Math.round(c.r * 255) + "," + Math.round(c.g * 255) + "," + Math.round(c.b * 255) + "," + alpha + ")";
-        }
-
-        function sample(position) {
-          if (valuesLen <= 0)
-            return 0;
-          const index = Math.max(0, Math.min(valuesLen - 1, Math.round(position * (valuesLen - 1))));
-          return root.clamp(Number(values[index] || 0), 0, 1);
-        }
-
-        function roundedRect(x, y, w, h, r) {
-          const radius = Math.max(0, Math.min(r, w / 2, h / 2));
-          ctx.moveTo(x + radius, y);
-          ctx.lineTo(x + w - radius, y);
-          ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-          ctx.lineTo(x + w, y + h - radius);
-          ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-          ctx.lineTo(x + radius, y + h);
-          ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-          ctx.lineTo(x, y + radius);
-          ctx.quadraticCurveTo(x, y, x + radius, y);
-        }
-
-        function fillRoundedTrack(x, y, w, h, color) {
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          roundedRect(x, y, w, h, h / 2);
-          ctx.fill();
-        }
-
-        fillRoundedTrack(0, centerY - baseH / 2, width, baseH, rgba(root.m3SurfaceContainerHighest, inactiveAlpha));
-
-        const grad = ctx.createLinearGradient(0, 0, width, 0);
-        grad.addColorStop(0, rgba(Color.mPrimary, active ? 0.84 : 0.9));
-        grad.addColorStop(0.62, rgba(Color.mSecondary, active ? 0.78 : 0.86));
-        grad.addColorStop(1, rgba(Color.mPrimary, active ? 0.92 : 1));
-
-        if (activeW <= 0)
-          return;
-
-        if (!active) {
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, inactiveAlpha));
-          return;
-        }
-
-        ctx.save();
-        ctx.beginPath();
-        if (reactiveSlider.overflowEffects && reactiveSlider.effect === "ripple")
-          ctx.rect(0, 0, width, height);
-        else if (reactiveSlider.overflowEffects)
-          ctx.rect(0, 0, activeW, height);
-        else
-          roundedRect(0, centerY - effectH / 2, activeW, effectH, effectH / 2);
-        ctx.clip();
-
-        if (reactiveSlider.effect === "spectrum") {
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, 0.2 + level * 0.12));
-          const bands = Math.max(12, Math.min(36, Math.round(activeW / Math.max(4, 6 * root.panelUnit))));
-          if (trackCanvas.spectrumPeaks.length !== bands)
-            trackCanvas.spectrumPeaks = new Array(bands).fill(0);
-          const slot = activeW / bands;
-          const maxBandH = Math.max(baseH, height - Math.round(3 * root.panelUnit));
-          for (let i = 0; i < bands; i++) {
-            const p = i / Math.max(1, bands - 1);
-            const amp = sample(p);
-            const bandH = root.clamp(baseH + amp * maxBandH * (0.5 + level * 0.38), baseH, maxBandH);
-            const bandW = Math.max(1.5, slot * 0.42);
-            const x = i * slot + (slot - bandW) / 2;
-            const bandColor = i % 3 === 0 ? Color.mSecondary : Color.mPrimary;
-            ctx.fillStyle = rgba(bandColor, 0.42 + amp * 0.5);
-            ctx.beginPath();
-            roundedRect(x, centerY - bandH / 2, bandW, bandH, bandW / 2);
-            ctx.fill();
-
-            // Decaying peak-hold cap: snaps up instantly, falls back slowly (classic VU meter)
-            const peak = Math.max(amp, trackCanvas.spectrumPeaks[i] - 0.05);
-            trackCanvas.spectrumPeaks[i] = peak;
-            if (peak > 0.04) {
-              const peakH = root.clamp(baseH + peak * maxBandH * (0.5 + level * 0.38), baseH, maxBandH);
-              const capH = Math.max(1.5, 2 * root.panelUnit);
-              ctx.fillStyle = rgba(peak > 0.7 ? Color.mTertiary : Color.mSecondary, 0.5 + peak * 0.4);
-              ctx.beginPath();
-              roundedRect(x, centerY - peakH / 2 - capH, bandW, capH, capH / 2);
-              ctx.fill();
-            }
-          }
-        } else if (reactiveSlider.effect === "filament") {
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(root.m3SurfaceContainerHighest, 0.7));
-          const filamentStep = Math.max(2, activeW / 64);
-          function traceFilament(lineWidth, alpha, blur) {
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = rgba(Color.mPrimary, alpha);
-            ctx.shadowBlur = blur;
-            ctx.shadowColor = rgba(Color.mSecondary, alpha * 0.9);
-            ctx.beginPath();
-            for (let x = 0; x <= activeW + filamentStep; x += filamentStep) {
-              const p = x / Math.max(1, activeW);
-              const amp = sample(p);
-              const carrier = Math.sin(p * Math.PI * 7 + phase * 1.8);
-              const detail = Math.sin(p * Math.PI * 17 - phase * 1.15) * 0.34;
-              const y = centerY + (carrier + detail) * (2 + amp * height * 0.3 + level * 2);
-              if (x === 0)
-                ctx.moveTo(x, y);
-              else
-                ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-          }
-          traceFilament(Math.max(5, 7 * root.panelUnit), 0.16 + level * 0.08, 7 + level * 5);
-          ctx.shadowBlur = 0;
-          traceFilament(Math.max(1.5, 2 * root.panelUnit), 0.78 + level * 0.2, 0);
-          ctx.shadowColor = "transparent";
-        } else if (reactiveSlider.effect === "ripple") {
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, grad);
-          const pulseOriginX = Math.max(1, Math.min(width - 1, activeW));
-          for (let i = 0; i < 4; i++) {
-            const progress = (phase * 0.24 + i * 0.25) % 1;
-            const radius = (3 + progress * (14 + level * 7)) * root.panelUnit;
-            ctx.lineWidth = Math.max(1, (2.2 - progress * 1.2) * root.panelUnit);
-            ctx.strokeStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary, (1 - progress) * (0.22 + level * 0.42));
-            ctx.beginPath();
-            ctx.arc(pulseOriginX, centerY, radius, 0, Math.PI * 2);
-            ctx.stroke();
-          }
-        } else if (reactiveSlider.effect === "bars") {
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, 0.24 + level * 0.16));
-          const bars = 30;
-          const slot = width / bars;
-          for (let i = 0; i < bars; i++) {
-            const p = i / Math.max(1, bars - 1);
-            const amp = sample(p);
-            const h = Math.max(baseH, baseH + amp * effectH * 1.25);
-            const barW = Math.max(2, slot * 0.46);
-            const x = i * slot + slot * 0.27;
-            ctx.fillStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary, 0.28 + amp * 0.56);
-            ctx.beginPath();
-            roundedRect(x, centerY - h / 2, barW, h, barW / 2);
-            ctx.fill();
-          }
-        } else if (reactiveSlider.effect === "blocks") {
-          const blocks = 40;
-          const slot = activeW / blocks;
-          for (let i = 0; i < blocks; i++) {
-            const p = i / Math.max(1, blocks - 1);
-            const amp = sample(p);
-            const blockW = Math.max(2, slot * 0.75);
-            const x = i * slot + slot * 0.125;
-            const op = 0.3 + (amp * 0.7) + (level * 0.2);
-            ctx.fillStyle = rgba(Color.mPrimary, Math.min(1, op));
-            ctx.beginPath();
-            roundedRect(x, centerY - baseH / 2, blockW, baseH, baseH / 2);
-            ctx.fill();
-          }
-        } else if (reactiveSlider.effect === "dots") {
-          const numDots = 24;
-          const slot = activeW / numDots;
-          for (let i = 0; i < numDots; i++) {
-            const p = i / Math.max(1, numDots - 1);
-            const amp = sample(p);
-            const radius = (baseH * 0.3) + (amp * effectH * 0.35);
-            const x = i * slot + slot * 0.5;
-            ctx.fillStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary, 0.5 + amp * 0.5);
-            ctx.beginPath();
-            ctx.arc(x, centerY, radius, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        } else if (reactiveSlider.effect === "zigzag") {
-          ctx.lineCap = "round";
-          ctx.lineJoin = "round";
-          ctx.lineWidth = Math.max(baseH, effectH * 0.62);
-          ctx.strokeStyle = grad;
-          ctx.beginPath();
-          const steps = 24;
-          const amp = Math.max(2, effectH * (0.28 + level * 0.5));
-          for (let i = 0; i <= steps; i++) {
-            const x = (i / steps) * width;
-            const shift = Math.sin(phase * 2 + i * 0.5) * amp;
-            const y = centerY + shift;
-            if (i === 0)
-              ctx.moveTo(x, y);
-            else
-              ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-        } else if (reactiveSlider.effect === "pulse") {
-          const pulse = 0.5 + Math.sin(phase * 2.1) * 0.5;
-          const h = root.clamp(baseH + effectH * (0.18 + level * 0.66 + pulse * 0.18), baseH, effectH * 1.22);
-          fillRoundedTrack(0, centerY - h / 2, activeW, h, grad);
-          ctx.fillStyle = rgba(Color.mSecondary, 0.1 + pulse * 0.16 + level * 0.14);
-          ctx.beginPath();
-          roundedRect(0, centerY - h / 2, activeW, h * 0.48, h * 0.24);
-          ctx.fill();
-        } else if (reactiveSlider.effect === "glow") {
-          ctx.shadowBlur = 12 + level * 8;
-          ctx.shadowColor = rgba(Color.mPrimary, 0.6 + level * 0.4);
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, grad);
-          ctx.shadowBlur = 0;
-          ctx.shadowColor = "transparent";
-        } else if (reactiveSlider.effect === "wavy_fill") {
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.moveTo(0, centerY + baseH / 2);
-          const step = Math.max(2, activeW / 40);
-          for (let x = 0; x <= activeW; x += step) {
-            const p = x / Math.max(1, activeW);
-            const amp = sample(p);
-            const y = centerY - baseH / 2 - Math.sin(p * Math.PI * 6 + phase * 2.5) * (effectH * (0.2 + amp * 0.5 + level * 0.3));
-            ctx.lineTo(x, y);
-          }
-          ctx.lineTo(activeW, centerY + baseH / 2);
-          ctx.closePath();
-          ctx.fill();
-        } else if (reactiveSlider.effect === "comet") {
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(root.m3SurfaceContainerHighest, 0.55));
-          const travel = Math.max(8, activeW);
-          const speed = 0.32 + level * 0.68;
-          const cometX = ((phase * speed) % 1) * travel;
-          const cometR = Math.max(3, effectH * 0.32);
-          const tailLen = Math.max(18, travel * 0.3);
-          const tailStart = Math.max(0, cometX - tailLen);
-          const tailGrad = ctx.createLinearGradient(tailStart, 0, cometX, 0);
-          tailGrad.addColorStop(0, rgba(Color.mSecondary, 0));
-          tailGrad.addColorStop(1, rgba(Color.mSecondary, 0.55 + level * 0.35));
-          ctx.fillStyle = tailGrad;
-          ctx.beginPath();
-          roundedRect(tailStart, centerY - baseH / 2, cometX - tailStart, baseH, baseH / 2);
-          ctx.fill();
-
-          ctx.shadowBlur = 10 + level * 10;
-          ctx.shadowColor = rgba(Color.mPrimary, 0.7);
-          ctx.fillStyle = rgba(Color.mPrimary, 0.95);
-          ctx.beginPath();
-          ctx.arc(cometX, centerY, cometR, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-          ctx.shadowColor = "transparent";
-        } else if (reactiveSlider.effect === "aurora") {
-          fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(root.m3SurfaceContainerHighest, 0.55));
-          function auroraBand(colorC, freq, speedMul, ampScale, alpha) {
-            ctx.beginPath();
-            ctx.moveTo(0, centerY + baseH / 2);
-            const bandStep = Math.max(2, activeW / 48);
-            for (let x = 0; x <= activeW; x += bandStep) {
-              const p = x / Math.max(1, activeW);
-              const amp = sample(p);
-              const wobble = 0.5 + 0.5 * Math.sin(p * Math.PI * freq + phase * speedMul);
-              const y = centerY + baseH / 2 - effectH * (0.15 + amp * 0.5 + level * 0.25) * ampScale * wobble;
-              ctx.lineTo(x, y);
-            }
-            ctx.lineTo(activeW, centerY + baseH / 2);
-            ctx.closePath();
-            const bandGrad = ctx.createLinearGradient(0, centerY - effectH / 2, 0, centerY + baseH / 2);
-            bandGrad.addColorStop(0, rgba(colorC, 0));
-            bandGrad.addColorStop(1, rgba(colorC, alpha));
-            ctx.fillStyle = bandGrad;
-            ctx.fill();
-          }
-          auroraBand(Color.mTertiary, 2.4, 0.6, 1.0, 0.26 + level * 0.2);
-          auroraBand(Color.mSecondary, 3.1, -0.9, 0.75, 0.3 + level * 0.22);
-          auroraBand(Color.mPrimary, 4.0, 1.3, 0.5, 0.38 + level * 0.25);
-        } else {
-          ctx.lineCap = "round";
-          ctx.lineJoin = "round";
-          ctx.lineWidth = Math.max(baseH, effectH * 0.7);
-          ctx.strokeStyle = grad;
-          ctx.beginPath();
-          const step = Math.max(3, width / 64);
-          for (let x = 0; x <= width + step; x += step) {
-            const p = x / Math.max(1, width);
-            const amp = sample(p);
-            const y = centerY + Math.sin(p * Math.PI * 4 + phase * 1.2) * (effectH * (0.12 + amp * 0.42 + level * 0.18));
-            if (x === 0)
-              ctx.moveTo(x, y);
-            else
-              ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-        }
-
-        ctx.restore();
-
-        ctx.fillStyle = rgba(Color.mPrimary, 0.1 + level * 0.12);
-        ctx.beginPath();
-        const overlayH = reactiveSlider.overflowEffects ? baseH : effectH;
-        roundedRect(0, centerY - overlayH / 2, activeW, overlayH, overlayH / 2);
-        ctx.fill();
-      }
-    }
-
-    handle: Item {
-      implicitWidth: reactiveSlider.handleWidth
-      implicitHeight: reactiveSlider.handleHeight
-      x: reactiveSlider.leftPadding + reactiveSlider.visualPosition * (reactiveSlider.availableWidth - width)
-      anchors.verticalCenter: parent.verticalCenter
-
-      Rectangle {
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
-        radius: width / 2
-        color: reactiveSlider.enabled ? Color.mPrimary : Color.mOutline
-
-        Behavior on color {
-          ColorAnimation {
-            duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-          }
-        }
-      }
     }
   }
 
@@ -5544,6 +4993,7 @@ Item {
         }
 
         SubmoduleButton {
+          panelRoot: root
           targetView: "notifications"
           tooltipText: root.tr("details")
         }
@@ -5576,6 +5026,7 @@ Item {
             model: NotificationService.historyModel.count
 
             NotificationRow {
+              panelRoot: root
               Layout.fillWidth: true
               notificationData: NotificationService.historyModel.get(index)
             }
@@ -5787,185 +5238,12 @@ Item {
                 model: NotificationService.historyModel.count
 
                 NotificationRow {
+                  panelRoot: root
                   Layout.fillWidth: true
                   notificationData: NotificationService.historyModel.get(index)
                 }
               }
             }
-          }
-        }
-      }
-    }
-  }
-
-  component NotificationRow: DashboardCard {
-    panelRoot: root
-    id: notificationRow
-
-    property var notificationData: ({})
-    readonly property bool isExpanded: root.expandedNotificationId === notificationData.id
-    readonly property var actionsList: root.parseNotificationActions(notificationData.actionsJson)
-    readonly property bool canExpand: root.notificationCanExpand(notificationData)
-
-    Layout.fillWidth: true
-    Layout.preferredHeight: Math.max(Math.round(66 * root.panelUnit), contentColumn.implicitHeight + Style.marginS * 2)
-    color: isExpanded ? root.m3SurfaceContainerHighest : root.m3SurfaceContainerHigh
-    radius: Style.radiusM
-    border.color: isExpanded ? Qt.alpha(Color.mPrimary, 0.28) : "transparent"
-    border.width: Style.borderS
-    clip: true
-
-    Behavior on Layout.preferredHeight {
-      NumberAnimation {
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
-    }
-
-    Behavior on color {
-      ColorAnimation {
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: Easing.OutCubic
-      }
-    }
-
-    Behavior on border.color {
-      ColorAnimation {
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
-        easing.type: Easing.OutCubic
-      }
-    }
-
-    ColumnLayout {
-      id: contentColumn
-      anchors.fill: parent
-      anchors.margins: Style.marginS
-      spacing: Style.marginS
-
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginM
-
-        NImageRounded {
-          Layout.preferredWidth: Math.round(42 * root.panelUnit)
-          Layout.preferredHeight: Math.round(42 * root.panelUnit)
-          Layout.alignment: Qt.AlignTop
-          radius: Math.min(Style.radiusL, width / 2)
-          imagePath: notificationData.cachedImage || notificationData.originalImage || ""
-          fallbackIcon: "bell"
-          fallbackIconSize: Style.fontSizeXL
-          borderColor: Qt.alpha(Color.mOutline, 0.12)
-          borderWidth: Style.borderS
-        }
-
-        ColumnLayout {
-          Layout.fillWidth: true
-          Layout.alignment: Qt.AlignVCenter
-          spacing: Style.marginXXS
-
-          RowLayout {
-            Layout.fillWidth: true
-            spacing: Style.marginS
-
-            Rectangle {
-              Layout.preferredWidth: Math.round(6 * root.panelUnit)
-              Layout.preferredHeight: Math.round(6 * root.panelUnit)
-              Layout.alignment: Qt.AlignVCenter
-              radius: width / 2
-              visible: notificationData.urgency !== 1
-              color: notificationData.urgency === 2 ? Color.mError : Color.mOnSurfaceVariant
-            }
-
-            NText {
-              Layout.fillWidth: true
-              text: notificationData.appName || "Unknown"
-              pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
-              font.weight: Style.fontWeightSemiBold
-              elide: Text.ElideRight
-            }
-
-            NText {
-              text: root.notificationTimeText(notificationData.timestamp)
-              pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
-              font.family: Settings.data.ui.fontFixed
-              horizontalAlignment: Text.AlignRight
-            }
-          }
-
-          NText {
-            Layout.fillWidth: true
-            text: notificationData.summary || notificationData.body || ""
-            color: Color.mOnSurface
-            textFormat: Text.StyledText
-            wrapMode: isExpanded ? Text.WordWrap : Text.NoWrap
-            maximumLineCount: isExpanded ? 3 : 1
-            elide: Text.ElideRight
-            pointSize: Style.fontSizeS
-          }
-
-          TapHandler {
-            acceptedButtons: Qt.LeftButton
-            onTapped: {
-              if (notificationRow.isExpanded) {
-                root.activateNotification(notificationData);
-              } else if (notificationRow.canExpand) {
-                root.expandedNotificationId = notificationData.id;
-              } else {
-                root.activateNotification(notificationData);
-              }
-            }
-          }
-        }
-
-        NIconButton {
-          icon: isExpanded ? "chevron-up" : "chevron-down"
-          baseSize: Math.round(26 * root.panelUnit)
-          tooltipText: isExpanded ? root.tr("collapseNotification") : root.tr("expandNotification")
-          enabled: canExpand
-          opacity: canExpand ? 1 : 0.35
-          onClicked: root.expandedNotificationId = isExpanded ? "" : notificationData.id
-        }
-
-        NIconButton {
-          icon: "x"
-          baseSize: Math.round(26 * root.panelUnit)
-          tooltipText: root.tr("removeNotification")
-          onClicked: NotificationService.removeFromHistory(notificationData.id)
-        }
-      }
-
-      NText {
-        visible: isExpanded && String(notificationData.body || "").length > 0
-        Layout.fillWidth: true
-        text: notificationData.body || ""
-        color: Color.mOnSurfaceVariant
-        pointSize: Style.fontSizeS
-        textFormat: Text.StyledText
-        wrapMode: Text.WordWrap
-        maximumLineCount: 8
-        onLinkActivated: link => Qt.openUrlExternally(link)
-      }
-
-      Flow {
-        visible: isExpanded && actionsList.length > 0
-        Layout.fillWidth: true
-        spacing: Style.marginS
-
-        Repeater {
-          model: actionsList
-
-          NButton {
-            text: modelData.text || root.tr("notificationAction")
-            icon: modelData.identifier === "default" ? "external-link" : ""
-            fontSize: Style.fontSizeS
-            implicitHeight: Math.round(26 * root.panelUnit)
-            backgroundColor: Qt.alpha(Color.mPrimary, 0.16)
-            textColor: Color.mOnSurface
-            hoverColor: Color.mHover
-            textHoverColor: Color.mOnHover
-            onClicked: NotificationService.invokeAction(notificationData.id, modelData.identifier)
           }
         }
       }
@@ -6012,6 +5290,7 @@ Item {
     }
 
     MusicVisualizer {
+      panelRoot: root
       anchors.fill: parent
       anchors.margins: Math.round(4 * root.panelUnit)
       effect: root.mediaVisualizerEffect
@@ -6114,6 +5393,7 @@ Item {
           }
 
           SubmoduleButton {
+            panelRoot: root
             targetView: "media"
             tooltipText: root.tr("details")
           }
@@ -6219,461 +5499,6 @@ Item {
     }
   }
 
-  component MusicVisualizer: Item {
-    id: visualizer
-
-    property string effect: "bars"
-    property bool active: false
-    property var values: SpectrumService.values
-    property real phase: 0
-    property real clipRadius: 0
-
-    visible: effect !== "none"
-    opacity: active ? 1 : 0.24
-
-    Behavior on opacity {
-      NumberAnimation {
-        duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
-    }
-
-    onValuesChanged: {
-      visualizer.phase += 0.18;
-      visualCanvas.requestPaint();
-    }
-
-    onEffectChanged: visualCanvas.requestPaint()
-    onActiveChanged: visualCanvas.requestPaint()
-
-    function sample(index, fallback) {
-      if (!values)
-        return fallback;
-      const len = values.length;
-      if (len === undefined || len === 0)
-        return fallback;
-      const safeIndex = Math.max(0, Math.min(len - 1, Math.round(index)));
-      const value = Number(values[safeIndex] || 0);
-      return root.clamp(value, 0, 1);
-    }
-
-    function average() {
-      if (!values)
-        return 0;
-      const len = values.length;
-      if (len === undefined || len === 0)
-        return 0;
-      let total = 0;
-      for (let i = 0; i < len; i++)
-        total += Number(values[i] || 0);
-      return root.clamp(total / len, 0, 1);
-    }
-
-    function colorToRgba(c, alpha) {
-      return "rgba(" + Math.round(c.r * 255) + "," + Math.round(c.g * 255) + "," + Math.round(c.b * 255) + "," + alpha + ")";
-    }
-
-    function roundedRect(ctx, x, y, w, h, r) {
-      const radius = Math.max(0, Math.min(r, w / 2, h / 2));
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + w - radius, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-      ctx.lineTo(x + w, y + h - radius);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-      ctx.lineTo(x + radius, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
-    }
-
-    Canvas {
-      id: visualCanvas
-      anchors.fill: parent
-      antialiasing: true
-
-      onPaint: {
-        const ctx = getContext("2d");
-        ctx.clearRect(0, 0, width, height);
-        if (visualizer.effect === "none" || width <= 0 || height <= 0)
-          return;
-
-        ctx.save();
-        try {
-          if (visualizer.clipRadius > 0) {
-            ctx.beginPath();
-            visualizer.roundedRect(ctx, 0, 0, width, height, visualizer.clipRadius);
-            ctx.clip();
-          }
-
-          const t = visualizer.phase;
-          const avg = visualizer.average();
-          const beat = visualizer.active ? root.clamp(0.25 + avg * 1.8, 0.25, 1.35) : 0.16;
-
-          const primary = Color.mPrimary;
-          const secondary = Color.mSecondary;
-          const tertiary = Color.mTertiary;
-
-          if (visualizer.effect === "bars") {
-            const bars = 24;
-            const gap = 4;
-            const barWidth = Math.max(2, (width - gap * (bars - 1)) / bars);
-            for (let i = 0; i < bars; i++) {
-              const sampleIndex = (i / Math.max(1, bars - 1)) * ((visualizer.values?.length ?? 1) - 1);
-              const level = root.clamp(0.08 + visualizer.sample(sampleIndex, 0) * beat, 0.06, 0.92);
-              const h = height * level;
-              const x = i * (barWidth + gap);
-              const y = height - h;
-
-              const grad = ctx.createLinearGradient(x, y, x, height);
-              grad.addColorStop(0, visualizer.colorToRgba(primary, 0.08 + level * 0.4));
-              grad.addColorStop(1, visualizer.colorToRgba(secondary, 0.08 + level * 0.2));
-              ctx.fillStyle = grad;
-
-              ctx.beginPath();
-              visualizer.roundedRect(ctx, x, y, barWidth, h, barWidth / 2);
-              ctx.fill();
-
-              ctx.fillStyle = visualizer.colorToRgba(primary, 0.2 + level * 0.5);
-              ctx.beginPath();
-              ctx.arc(x + barWidth / 2, y + barWidth / 2, barWidth / 2, 0, Math.PI * 2);
-              ctx.fill();
-            }
-            return;
-          }
-
-          if (visualizer.effect === "wave") {
-            ctx.lineWidth = Math.max(1.5, 2.5 * root.panelUnit);
-
-            ctx.strokeStyle = visualizer.colorToRgba(secondary, visualizer.active ? 0.2 : 0.1);
-            ctx.beginPath();
-            for (let x = 0; x <= width; x += 4) {
-              const p = x / width;
-              const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
-              const amp = height * (0.03 + visualizer.sample(sampleIndex, 0) * 0.25 * beat);
-              const y = height * 0.5 + Math.sin(p * Math.PI * 3 + t * 0.8) * amp;
-              if (x === 0)
-                ctx.moveTo(x, y);
-              else
-                ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-
-            ctx.strokeStyle = visualizer.colorToRgba(primary, visualizer.active ? 0.45 : 0.2);
-            ctx.beginPath();
-            for (let x = 0; x <= width; x += 4) {
-              const p = x / width;
-              const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
-              const amp = height * (0.05 + visualizer.sample(sampleIndex, 0) * 0.36 * beat);
-              const y = height * 0.5 + Math.sin(p * Math.PI * 4 + t) * amp;
-              if (x === 0)
-                ctx.moveTo(x, y);
-              else
-                ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-
-            ctx.lineTo(width, height);
-            ctx.lineTo(0, height);
-            ctx.closePath();
-            const grad = ctx.createLinearGradient(0, height * 0.5, 0, height);
-            grad.addColorStop(0, visualizer.colorToRgba(primary, 0.1));
-            grad.addColorStop(1, visualizer.colorToRgba(primary, 0.0));
-            ctx.fillStyle = grad;
-            ctx.fill();
-
-            return;
-          }
-
-          if (visualizer.effect === "shock") {
-            const cx = width * 0.5;
-            const cy = height * 0.5;
-            const maxR = Math.max(width, height) * 0.9;
-
-            for (let i = 0; i < 5; i++) {
-              const progress = (t * (0.06 + avg * 0.16) + i * 0.2) % 1;
-              const radius = 16 + progress * maxR;
-              const colors = [primary, secondary, tertiary];
-              const color = colors[i % 3];
-
-              ctx.lineWidth = Math.max(1, (1.4 + beat * 2 * (1 - progress)) * root.panelUnit);
-
-              ctx.strokeStyle = visualizer.colorToRgba(color, (1 - progress) * (visualizer.active ? 0.42 : 0.12));
-              ctx.beginPath();
-              ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-              ctx.stroke();
-            }
-            return;
-          }
-
-          if (visualizer.effect === "pulse") {
-            for (let i = 0; i < 38; i++) {
-              const sampleIndex = (i / 37) * ((visualizer.values?.length ?? 1) - 1);
-              const amp = visualizer.sample(sampleIndex, 0);
-              const p = (i * 0.618 + t * 0.03) % 1;
-              const x = width * ((i * 37 % 101) / 100);
-              const y = height * ((Math.sin(i * 7.3 + t) + 1) / 2);
-              const r = 1.2 + 7 * amp * beat;
-
-              const colors = [primary, secondary, tertiary];
-              const color = colors[i % 3];
-
-              if (amp > 0.4 && visualizer.active) {
-                for (let j = 0; j < 5; j++) {
-                  const jx = width * (((i + j) * 37 % 101) / 100);
-                  const jy = height * ((Math.sin((i + j) * 7.3 + t) + 1) / 2);
-                  const dist = Math.sqrt(Math.pow(x - jx, 2) + Math.pow(y - jy, 2));
-                  if (dist < 50) {
-                    ctx.strokeStyle = visualizer.colorToRgba(color, 0.05 + amp * 0.1);
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(jx, jy);
-                    ctx.stroke();
-                  }
-                }
-              }
-
-              ctx.fillStyle = visualizer.colorToRgba(color, 0.04 + p * 0.1);
-              ctx.beginPath();
-              ctx.arc(x, y, r * 2.5, 0, Math.PI * 2);
-              ctx.fill();
-
-              ctx.fillStyle = visualizer.colorToRgba(color, 0.2 + p * 0.3);
-              ctx.beginPath();
-              ctx.arc(x, y, r, 0, Math.PI * 2);
-              ctx.fill();
-            }
-            return;
-          }
-
-          if (visualizer.effect === "nebula") {
-            for (let i = 0; i < 6; i++) {
-              const sampleIndex = (i / 5) * ((visualizer.values?.length ?? 1) - 1);
-              const amp = visualizer.sample(sampleIndex, 0.2);
-              const x = width * (0.2 + 0.6 * ((i * 1.618 + t * 0.02) % 1));
-              const y = height * (0.2 + 0.6 * ((i * 2.718 + Math.sin(t * 0.05)) % 1));
-              const r = Math.max(width, height) * 0.3 * (1 + amp * beat * 0.5);
-
-              const colors = [primary, secondary, tertiary];
-              const color = colors[i % 3];
-
-              const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-              grad.addColorStop(0, visualizer.colorToRgba(color, 0.15 + amp * 0.15));
-              grad.addColorStop(1, visualizer.colorToRgba(color, 0));
-
-              ctx.fillStyle = grad;
-              ctx.beginPath();
-              ctx.arc(x, y, r, 0, Math.PI * 2);
-              ctx.fill();
-            }
-            return;
-          }
-
-          if (visualizer.effect === "aurora") {
-            const bands = 3;
-            for (let b = 0; b < bands; b++) {
-              const colors = [primary, secondary, tertiary];
-              const color = colors[b % 3];
-
-              ctx.beginPath();
-              ctx.moveTo(0, height);
-
-              for (let x = 0; x <= width; x += 10) {
-                const p = x / width;
-                const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
-                const amp = visualizer.sample(sampleIndex, 0);
-
-                const wave1 = Math.sin(p * Math.PI * 2 + t * 0.5 + b * 2);
-                const wave2 = Math.sin(p * Math.PI * 4 - t * 0.3 + b);
-                const y = height * 0.5 + (wave1 * 0.3 + wave2 * 0.2) * height * (1 + amp * beat);
-
-                ctx.lineTo(x, y);
-              }
-
-              ctx.lineTo(width, height);
-              ctx.closePath();
-
-              const grad = ctx.createLinearGradient(0, 0, 0, height);
-              grad.addColorStop(0, visualizer.colorToRgba(color, 0));
-              grad.addColorStop(0.5, visualizer.colorToRgba(color, 0.1 + b * 0.05 + beat * 0.05));
-              grad.addColorStop(1, visualizer.colorToRgba(color, 0.02));
-
-              ctx.fillStyle = grad;
-              ctx.fill();
-            }
-            return;
-          }
-
-          if (visualizer.effect === "constellation") {
-            const nodes = 30;
-            const points = [];
-            for (let i = 0; i < nodes; i++) {
-              const px = ((i * 137.5) % 100) / 100 * width;
-              const py = ((i * 93.1) % 100) / 100 * height;
-              points.push({
-                            x: px,
-                            y: py,
-                            i: i
-                          });
-            }
-
-            ctx.lineWidth = 1;
-            for (let i = 0; i < nodes; i++) {
-              const p1 = points[i];
-              for (let j = i + 1; j < nodes; j++) {
-                const p2 = points[j];
-                const dist = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-                if (dist < width * 0.3) {
-                  const sampleIndex = ((i + j) / (nodes * 2)) * ((visualizer.values?.length ?? 1) - 1);
-                  const amp = visualizer.sample(sampleIndex, 0);
-
-                  if (amp > 0.3) {
-                    ctx.strokeStyle = visualizer.colorToRgba(secondary, (1 - dist / (width * 0.3)) * amp * beat * 0.5);
-                    ctx.beginPath();
-                    ctx.moveTo(p1.x, p1.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.stroke();
-                  }
-                }
-              }
-            }
-
-            for (let i = 0; i < nodes; i++) {
-              const p = points[i];
-              const sampleIndex = (i / nodes) * ((visualizer.values?.length ?? 1) - 1);
-              const amp = visualizer.sample(sampleIndex, 0);
-
-              const r = 1 + amp * 4 * beat;
-              ctx.fillStyle = visualizer.colorToRgba(primary, 0.3 + amp * 0.7);
-              ctx.beginPath();
-              ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-              ctx.fill();
-            }
-            return;
-          }
-
-          if (visualizer.effect === "radar") {
-            const cx = width / 2;
-            const cy = height + 10;
-            const r = Math.max(width, height);
-
-            const sweepAngle = Math.PI + (t * 0.8) % Math.PI;
-
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, r, sweepAngle - 0.5, sweepAngle);
-            ctx.closePath();
-
-            ctx.fillStyle = visualizer.colorToRgba(primary, 0.15);
-            ctx.fill();
-
-            for (let i = 0; i < 30; i++) {
-              const sampleIndex = (i / 30) * ((visualizer.values?.length ?? 1) - 1);
-              const amp = visualizer.sample(sampleIndex, 0);
-
-              if (amp > 0.4) {
-                const blipAngle = Math.PI + (i / 30) * Math.PI;
-                const blipDist = amp * r * 0.9;
-                const bx = cx + Math.cos(blipAngle) * blipDist;
-                const by = cy + Math.sin(blipAngle) * blipDist;
-
-                const age = (sweepAngle - blipAngle + Math.PI * 2) % (Math.PI * 2);
-                if (age < Math.PI) {
-                  const alpha = Math.max(0, 1 - age / Math.PI);
-                  ctx.fillStyle = visualizer.colorToRgba(tertiary, alpha * beat);
-                  ctx.beginPath();
-                  ctx.arc(bx, by, 3 + amp * 3, 0, Math.PI * 2);
-                  ctx.fill();
-                }
-              }
-            }
-
-            ctx.strokeStyle = visualizer.colorToRgba(primary, 0.1);
-            ctx.lineWidth = 1;
-            for (let i = 1; i <= 3; i++) {
-              ctx.beginPath();
-              ctx.arc(cx, cy, r * (i / 3), Math.PI, Math.PI * 2);
-              ctx.stroke();
-            }
-            return;
-          }
-
-          if (visualizer.effect === "mirror") {
-            const bars = 28;
-            const gap = Math.max(2, width / 140);
-            const barWidth = Math.max(2, (width - gap * (bars - 1)) / bars);
-            const half = height / 2;
-            for (let i = 0; i < bars; i++) {
-              const sampleIndex = (i / Math.max(1, bars - 1)) * ((visualizer.values?.length ?? 1) - 1);
-              const amp = visualizer.sample(sampleIndex, 0);
-              const level = root.clamp(0.08 + amp * beat, 0.05, 1);
-              const barH = half * level;
-              const x = i * (barWidth + gap);
-              const color = level > 0.75 ? tertiary : (level > 0.45 ? secondary : primary);
-
-              ctx.fillStyle = visualizer.colorToRgba(color, 0.12 + level * 0.4);
-              ctx.beginPath();
-              visualizer.roundedRect(ctx, x, half - barH, barWidth, barH, barWidth / 2);
-              ctx.fill();
-
-              ctx.fillStyle = visualizer.colorToRgba(color, 0.08 + level * 0.28);
-              ctx.beginPath();
-              visualizer.roundedRect(ctx, x, half, barWidth, barH, barWidth / 2);
-              ctx.fill();
-            }
-
-            ctx.strokeStyle = visualizer.colorToRgba(primary, 0.12);
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, half);
-            ctx.lineTo(width, half);
-            ctx.stroke();
-            return;
-          }
-
-          if (visualizer.effect === "ribbon") {
-            const centerY = height * 0.55;
-
-            function traceRibbon(colorC, freq, speedMul, ampMul, alpha, lw) {
-              ctx.lineWidth = Math.max(1, lw * root.panelUnit);
-              ctx.lineCap = "round";
-              ctx.lineJoin = "round";
-              ctx.strokeStyle = visualizer.colorToRgba(colorC, alpha);
-              ctx.beginPath();
-              const step = Math.max(3, width / 48);
-              let prevX = 0, prevY = centerY;
-              for (let x = 0; x <= width; x += step) {
-                const p = x / width;
-                const sampleIndex = p * ((visualizer.values?.length ?? 1) - 1);
-                const amp = visualizer.sample(sampleIndex, 0);
-                const carrier = Math.sin(p * Math.PI * freq + t * speedMul);
-                const y = centerY - height * (0.05 + amp * ampMul * beat) * carrier;
-                if (x === 0) {
-                  ctx.moveTo(x, y);
-                } else {
-                  const midX = (prevX + x) / 2, midY = (prevY + y) / 2;
-                  ctx.quadraticCurveTo(prevX, prevY, midX, midY);
-                }
-                prevX = x;
-                prevY = y;
-              }
-              ctx.lineTo(width, prevY);
-              ctx.stroke();
-            }
-
-            ctx.shadowBlur = visualizer.active ? 10 : 0;
-            ctx.shadowColor = visualizer.colorToRgba(secondary, 0.5);
-            traceRibbon(secondary, 2.6, 0.5, 0.42, visualizer.active ? 0.22 : 0.08, 5);
-            ctx.shadowBlur = 0;
-            traceRibbon(primary, 3.4, 0.9, 0.5, visualizer.active ? 0.55 : 0.18, 2);
-            return;
-          }
-        } finally {
-          ctx.restore();
-        }
-      }
-    }
-  }
 
   component ReactiveRoundedImage: Item {
     id: reactiveImage
@@ -7331,6 +6156,7 @@ Item {
         }
 
         SubmoduleButton {
+          panelRoot: root
           anchors.top: parent.top
           anchors.right: parent.right
           anchors.topMargin: Style.marginM
@@ -7371,6 +6197,7 @@ Item {
     }
 
     PageDots {
+      panelRoot: root
       anchors.horizontalCenter: parent.horizontalCenter
       anchors.bottom: parent.bottom
       anchors.bottomMargin: Style.marginS
@@ -7692,6 +6519,7 @@ Item {
         }
 
         SubmoduleButton {
+          panelRoot: root
           targetView: "calendar"
           tooltipText: root.tr("details")
         }
@@ -7807,6 +6635,7 @@ Item {
         }
 
         SubmoduleButton {
+          panelRoot: root
           labelText: root.tr("details")
           targetView: "screenUsage"
           tooltipText: root.tr("details")
