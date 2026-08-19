@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import qs.Commons
 
 // Waveform-reactive slider used by every volume/microphone control across
