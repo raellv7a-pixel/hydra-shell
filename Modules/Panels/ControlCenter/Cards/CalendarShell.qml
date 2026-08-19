@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import qs.Commons
 import qs.Widgets
 DashboardCard {
