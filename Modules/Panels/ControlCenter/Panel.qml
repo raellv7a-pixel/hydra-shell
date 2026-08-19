@@ -5044,7 +5044,7 @@ Item {
                         NumberAnimation {
                           to: 1.0
                           duration: 300
-                          easing.type: Easing.OutBounce
+                          easing.type: Easing.OutBack
                         }
                       }
 
@@ -5212,10 +5212,8 @@ Item {
               color: mediaSwipeView.currentIndex === index ? Color.mPrimary : Color.mSurfaceVariant
               Behavior on width {
                 NumberAnimation {
-                  duration: 300
-                  easing.type: Easing.OutElastic
-                  easing.amplitude: 2.0
-                  easing.period: 1.5
+                  duration: Style.animationNormal
+                  easing.type: Easing.OutBack
                 }
               }
               Behavior on color {
@@ -6516,7 +6514,7 @@ Item {
             NumberAnimation {
               to: 1.0
               duration: 300
-              easing.type: Easing.OutBounce
+              easing.type: Easing.OutBack
             }
           }
         }

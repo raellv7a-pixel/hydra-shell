@@ -51,20 +51,15 @@ Item {
   // Track actual visibility (delayed until content is loaded and sized)
   property bool isPanelVisible: false
 
-  // Track size animation completion for sequential opacity animation
-  property bool sizeAnimationComplete: false
-
-  // Derived state: track opening transition
-  readonly property bool isOpening: isPanelVisible && !isClosing && !sizeAnimationComplete
-
-  // Track close animation state: fade opacity first, then shrink size
+  // Track close animation in progress
   property bool isClosing: false
-  property bool opacityFadeComplete: false
   property bool closeFinalized: false // Prevent double-finalization
 
-  // Safety: Watchdog timers to prevent stuck states
-  property bool closeWatchdogActive: false
-  property bool openWatchdogActive: false
+  // Single presentation driver: true while the panel should be fully shown
+  // (visible, loaded, and not mid-close). Opacity, width and height all key
+  // off this one flag so open and close each run as one animated phase
+  // instead of a hand-sequenced chain of flags.
+  readonly property bool presented: isPanelVisible && !isClosing
 
   // Cached animation direction - set when panel opens, doesn't change during animation
   // These are computed once when opening and used for the entire open/close cycle
@@ -73,7 +68,6 @@ Item {
   property bool cachedAnimateFromLeft: false
   property bool cachedAnimateFromRight: false
 
-  readonly property bool animationsDisabled: Settings.data.general.animationDisabled
   property bool cachedShouldAnimateWidth: false
   property bool cachedShouldAnimateHeight: false
 
@@ -252,41 +246,24 @@ Item {
     // Reset immediate close flag to ensure animations work properly
     PanelService.closedImmediately = false;
 
-    // Start close sequence: fade opacity first
     isClosing = true;
-    sizeAnimationComplete = false;
     closeFinalized = false;
 
-    // Stop the open animation timer if it's still running
-    opacityTrigger.stop();
-    openWatchdogActive = false;
-    openWatchdogTimer.stop();
+    // Opacity, width and height all animate out together (see `presented`
+    // above); this timer is the single authority that finalizes the close
+    // once that shared duration has elapsed.
+    closeFinalizeTimer.restart();
 
-    // Start close watchdog timer
-    closeWatchdogActive = true;
-    closeWatchdogTimer.restart();
-
-    // If opacity is already 0 (closed during open animation before fade-in),
-    // skip directly to size animation
-    opacityFadeComplete = true;
-
-    // Opacity will fade out, then size will shrink, then finalizeClose() will complete
     Logger.d("SmartPanel", "Closing panel", objectName);
   }
 
   function closeImmediately() {
     // Close without any animation, useful for app launches to avoid focus issues
-    opacityTrigger.stop();
-    openWatchdogActive = false;
-    openWatchdogTimer.stop();
-    closeWatchdogActive = false;
-    closeWatchdogTimer.stop();
+    closeFinalizeTimer.stop();
 
     // Don't set opacity directly as it breaks the binding
     root.isPanelVisible = false;
-    root.sizeAnimationComplete = false;
     root.isClosing = false;
-    root.opacityFadeComplete = false;
     root.closeFinalized = true;
     root.isPanelOpen = false;
     panelBackground.dimensionsInitialized = false;
@@ -316,14 +293,10 @@ Item {
 
     // Complete the close sequence after animations finish
     root.closeFinalized = true;
-    root.closeWatchdogActive = false;
-    closeWatchdogTimer.stop();
 
     root.isPanelVisible = false;
     root.isPanelOpen = false;
     root.isClosing = false;
-    root.opacityFadeComplete = false;
-
     // Reset dimensionsInitialized for next opening
     panelBackground.dimensionsInitialized = false;
 
@@ -705,105 +678,30 @@ Item {
     }
   }
 
-  // Opacity animation
-  // Opening: fade in after size animation reaches 75%
-  // Closing: fade out immediately
-  opacity: {
-    if (isClosing)
-      return 0.0; // Fade out when closing
-    if (isPanelVisible && sizeAnimationComplete)
-      return 1.0; // Fade in when opening
-    return 0.0;
-  }
+  // Opacity animation: mirrors `presented`, fading in/out together with
+  // width/height (see panelBackground below).
+  opacity: presented ? 1.0 : 0.0
 
   Behavior on opacity {
     enabled: !PanelService.closedImmediately
     NumberAnimation {
-      id: opacityAnimation
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
-
-      onRunningChanged: {
-        // Safety: If animation didn't run (zero duration), handle immediately
-        if (!running && duration === 0) {
-          if (root.isClosing && root.opacity === 0.0) {
-            root.opacityFadeComplete = true;
-            var shouldFinalizeNow = panelContent.geometryPlaceholder && !panelContent.geometryPlaceholder.shouldAnimateWidth && !panelContent.geometryPlaceholder.shouldAnimateHeight;
-            if (shouldFinalizeNow) {
-              // Logger.d("SmartPanel", "Zero-duration opacity + no size animation - finalizing", root.objectName);
-              Qt.callLater(root.finalizeClose);
-            }
-          } else if (root.isPanelVisible && root.opacity === 1.0) {
-            // Open completed with zero duration
-            root.openWatchdogActive = false;
-            openWatchdogTimer.stop();
-          }
-          return;
-        }
-
-        // When opacity fade completes during close, trigger size animation
-        if (!running && root.isClosing) {
-          root.opacityFadeComplete = true;
-          // If no size animation will run (centered attached panels only), finalize immediately
-          // Detached panels (allowAttach === false) should always animate from top
-          var shouldFinalizeNow = panelContent.geometryPlaceholder && !panelContent.geometryPlaceholder.shouldAnimateWidth && !panelContent.geometryPlaceholder.shouldAnimateHeight;
-          if (shouldFinalizeNow) {
-            //Logger.d("SmartPanel", "No animation - finalizing immediately", root.objectName);
-            Qt.callLater(root.finalizeClose);
-          } else {
-            //Logger.d("SmartPanel", "Animation will run - waiting for size animation", root.objectName, "shouldAnimateHeight:", panelContent.geometryPlaceholder.shouldAnimateHeight, "shouldAnimateWidth:", panelContent.geometryPlaceholder.shouldAnimateWidth);
-          }
-        } // When opacity fade completes during open, stop watchdog
-        else if (!running && root.isPanelVisible && root.opacity === 1.0) {
-          root.openWatchdogActive = false;
-          openWatchdogTimer.stop();
-        }
-      }
+      duration: Style.animationNormal
+      easing.type: root.isClosing ? Easing.InCubic : Easing.OutCubic
     }
   }
 
-  // Timer to trigger opacity fade at 50% of size animation
+  // Single authority for completing a close: started in close(), fires once
+  // the shared open/close duration below has elapsed. Replaces the previous
+  // per-animation completion tracking plus watchdog timers, which raced
+  // each other and could leave a panel stuck open or closing forever
+  // (hence the "safety" watchdogs that patched over it).
   Timer {
-    id: opacityTrigger
-    interval: 0
-    onTriggered: {
-      if (root.isPanelVisible) {
-        root.sizeAnimationComplete = true;
-      }
-    }
-  }
-
-  // Watchdog timer for open sequence (safety mechanism)
-  Timer {
-    id: openWatchdogTimer
-    interval: Style.animationNormal * 3 // 3x normal animation time
+    id: closeFinalizeTimer
+    interval: Style.animationNormal
     repeat: false
-    onTriggered: {
-      if (root.openWatchdogActive) {
-        Logger.w("SmartPanel", "Open watchdog timeout - forcing panel visible state", root.objectName);
-        root.openWatchdogActive = false;
-        // Force completion of open sequence
-        if (root.isPanelOpen && !root.isPanelVisible) {
-          root.isPanelVisible = true;
-          root.sizeAnimationComplete = true;
-        }
-      }
-    }
+    onTriggered: root.finalizeClose()
   }
 
-  // Watchdog timer for close sequence (safety mechanism)
-  Timer {
-    id: closeWatchdogTimer
-    interval: Style.animationFast * 3 // 3x fast animation time
-    repeat: false
-    onTriggered: {
-      if (root.closeWatchdogActive && !root.closeFinalized) {
-        Logger.w("SmartPanel", "Close watchdog timeout - forcing panel close", root.objectName);
-        // Force finalization
-        Qt.callLater(root.finalizeClose);
-      }
-    }
-  }
 
   // ------------------------------------------------
   // Panel Content
@@ -1065,7 +963,7 @@ Item {
 
       // Current animated width/height (referenced by x/y for right/bottom positioning)
       readonly property real currentWidth: {
-        if (isClosing && opacityFadeComplete && shouldAnimateWidth)
+        if (isClosing && shouldAnimateWidth)
           return 0;
         if (isClosing || isPanelVisible)
           return targetWidth;
@@ -1074,7 +972,7 @@ Item {
         return shouldAnimateWidth ? 0 : targetWidth;
       }
       readonly property real currentHeight: {
-        if (isClosing && opacityFadeComplete && shouldAnimateHeight)
+        if (isClosing && shouldAnimateHeight)
           return 0;
         if (isClosing || isPanelVisible)
           return targetHeight;
@@ -1110,58 +1008,18 @@ Item {
       Behavior on width {
         enabled: !PanelService.closedImmediately
         NumberAnimation {
-          id: widthAnimation
-          // Use 0ms if dimensions not initialized to prevent initial changes from animating
-          // During opening: use 0ms if not animating width, otherwise use normal duration
-          // During closing: use 0ms if not animating width, otherwise use fast duration
-          // During normal content resizing: always use normal duration
-          duration: !panelBackground.dimensionsInitialized ? 0 : (root.isOpening && !panelBackground.shouldAnimateWidth) ? 0 : root.isOpening ? Style.animationFast : (root.isClosing && !panelBackground.shouldAnimateWidth) ? 0 : root.isClosing ? Style.animationFast : Style.animationFast
-          easing.type: Easing.OutCubic
-
-          onRunningChanged: {
-            // Safety: Zero-duration animation handling
-            if (!running && duration === 0) {
-              if (root.isClosing && panelBackground.width === 0 && panelBackground.shouldAnimateWidth) {
-                Logger.d("SmartPanel", "Zero-duration width animation - finalizing", root.objectName);
-                Qt.callLater(root.finalizeClose);
-              }
-              return;
-            }
-
-            // When width shrink completes during close, finalize
-            if (!running && root.isClosing && panelBackground.width === 0 && panelBackground.shouldAnimateWidth) {
-              Qt.callLater(root.finalizeClose);
-            }
-          }
+          // 0ms until the first layout pass has real dimensions, so the
+          // panel doesn't animate in from a stale/default size.
+          duration: !panelBackground.dimensionsInitialized ? 0 : Style.animationNormal
+          easing.type: root.isClosing ? Easing.InCubic : Easing.OutCubic
         }
       }
 
       Behavior on height {
         enabled: !PanelService.closedImmediately
         NumberAnimation {
-          id: heightAnimation
-          // Use 0ms if dimensions not initialized to prevent initial changes from animating
-          // During opening: use 0ms if not animating height, otherwise use normal duration
-          // During closing: use 0ms if not animating height, otherwise use fast duration
-          // During normal content resizing: always use normal duration
-          duration: !panelBackground.dimensionsInitialized ? 0 : (root.isOpening && !panelBackground.shouldAnimateHeight) ? 0 : root.isOpening ? Style.animationFast : (root.isClosing && !panelBackground.shouldAnimateHeight) ? 0 : root.isClosing ? Style.animationFast : Style.animationFast
-          easing.type: Easing.OutCubic
-
-          onRunningChanged: {
-            // Safety: Zero-duration animation handling
-            if (!running && duration === 0) {
-              if (root.isClosing && panelBackground.height === 0 && panelBackground.shouldAnimateHeight) {
-                Logger.d("SmartPanel", "Zero-duration height animation - finalizing", root.objectName);
-                Qt.callLater(root.finalizeClose);
-              }
-              return;
-            }
-
-            // When height shrink completes during close, finalize
-            if (!running && root.isClosing && panelBackground.height === 0 && panelBackground.shouldAnimateHeight) {
-              Qt.callLater(root.finalizeClose);
-            }
-          }
+          duration: !panelBackground.dimensionsInitialized ? 0 : Style.animationNormal
+          easing.type: root.isClosing ? Easing.InCubic : Easing.OutCubic
         }
       }
 
@@ -1344,17 +1202,9 @@ Item {
           root.cachedShouldAnimateWidth = panelBackground.shouldAnimateWidth;
           root.cachedShouldAnimateHeight = panelBackground.shouldAnimateHeight;
 
-          // Make panel visible, now only the intended dimension will animate
+          // Make panel visible; opacity/width/height Behaviors take it from
+          // here via `presented`.
           root.isPanelVisible = true;
-
-          root.sizeAnimationComplete = true;
-          opacityTrigger.start();
-
-          // Start open watchdog timer (skip when animations disabled - everything completes synchronously)
-          if (!root.animationsDisabled) {
-            root.openWatchdogActive = true;
-            openWatchdogTimer.start();
-          }
 
           opened();
         });

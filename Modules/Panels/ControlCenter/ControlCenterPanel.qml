@@ -32,44 +32,9 @@ SmartPanel {
   preferredHeight: Math.round((cfg.panelHeight || 700) * Style.uiScaleRatio * (cfg.panelScale || 1))
 
   panelContent: Component {
-    Item {
-      id: contentContainer
+    Panel {
       anchors.fill: parent
-      readonly property bool presented: root.isPanelVisible && !root.isClosing
-
-      opacity: presented ? 1 : 0
-      scale: presented ? 1 : 0.975
-      transformOrigin: {
-        if (root.resolvedPanelPosition === "top")
-          return Item.Top;
-        if (root.resolvedPanelPosition === "bottom")
-          return Item.Bottom;
-        if (root.resolvedPanelPosition === "left")
-          return Item.Left;
-        if (root.resolvedPanelPosition === "right")
-          return Item.Right;
-        return Item.Center;
-      }
-
-      Behavior on opacity {
-        OpacityAnimator {
-          duration: root.animationsDisabled ? 0 : Style.animationFast
-          easing.type: contentContainer.presented ? Easing.OutCubic : Easing.InCubic
-        }
-      }
-
-      Behavior on scale {
-        ScaleAnimator {
-          duration: root.animationsDisabled ? 0 : Style.animationFast
-          easing.type: contentContainer.presented ? Easing.OutCubic : Easing.InCubic
-        }
-      }
-
-      Panel {
-        id: dashboardContent
-        anchors.fill: parent
-        pluginApi: ControlCenterService.provider
-      }
+      pluginApi: ControlCenterService.provider
     }
   }
 }

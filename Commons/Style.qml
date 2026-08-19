@@ -82,7 +82,17 @@ Singleton {
   readonly property real shadowHorizontalOffset: Settings.data.general.shadowOffsetX
   readonly property real shadowVerticalOffset: Settings.data.general.shadowOffsetY
 
-  // Animation duration (ms)
+  // Animation duration (ms).
+  //
+  // Easing convention (keep new animations on one of these three so panels
+  // feel consistent — see SmartPanel.qml/ControlCenterPanel.qml for the
+  // reference implementation):
+  //   - Easing.OutCubic (open/show) + Easing.InCubic (close/hide): panel and
+  //     surface open/close, size and position changes.
+  //   - Easing.OutBack: interactive press/settle feedback (buttons, pills,
+  //     toggles) — a small controlled overshoot, not OutBounce/OutElastic.
+  //   - Easing.InOutQuad: passive state changes (hover/color fades) that
+  //     aren't a direct response to a press.
   readonly property int animationFaster: (Settings.data.general.animationDisabled || PowerProfileService.noctaliaPerformanceMode) ? 0 : Math.round(75 / Settings.data.general.animationSpeed)
   readonly property int animationFast: (Settings.data.general.animationDisabled || PowerProfileService.noctaliaPerformanceMode) ? 0 : Math.round(150 / Settings.data.general.animationSpeed)
   readonly property int animationNormal: (Settings.data.general.animationDisabled || PowerProfileService.noctaliaPerformanceMode) ? 0 : Math.round(300 / Settings.data.general.animationSpeed)
