@@ -531,7 +531,7 @@ SmartPanel {
 
     NBox {
       anchors.fill: parent
-      anchors.margins: Style.paddingCard
+      anchors.margins: Style.radiusPanel // this NBox sits directly against the panel's own blob edge (radius 28px), not paddingCard (16px), or the surface color shows a square notch through the panel's rounded corner. Its own radiusCard (line 536) only shapes this NBox itself, not its position within the panel.
       color: Color.mSurfaceContainerLow
       radius: Style.radiusCard
 

@@ -591,7 +591,7 @@ Variants {
                 id: notificationContent
                 visible: !notifWindow.isCompact
                 anchors.fill: cardBackground
-                anchors.margins: Style.paddingCard
+                anchors.margins: Style.radiusPopover // must be >= cardBackground's own radius (Style.radiusPopover, line 539), not paddingCard (16px < 20px), or content stops short and the card color shows a square notch through the rounded corner
                 spacing: Style.spaceS
 
                 RowLayout {

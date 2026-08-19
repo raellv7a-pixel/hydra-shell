@@ -40,7 +40,7 @@ SmartPanel {
 
     ColumnLayout {
       anchors.fill: parent
-      anchors.margins: Style.paddingCard
+      anchors.margins: Style.radiusPanel // must be >= this panel's own radiusPanel corner (drawn by the panelContent Rectangle itself, line 22), not paddingCard (16px), or content stops short and the surface color shows a square notch through the rounded corner
       spacing: Style.spaceS
 
       RowLayout {

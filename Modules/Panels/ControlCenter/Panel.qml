@@ -1595,18 +1595,27 @@ Item {
     Flickable {
       id: contentFlick
       anchors.fill: parent
-      contentWidth: Math.max(width, dashboardLayout.implicitWidth + Style.paddingCard * 2)
-      contentHeight: Math.max(height, dashboardLayout.implicitHeight + Style.paddingCard * 2)
+      // Content must be inset by at least the panel's own corner radius, not
+      // just Style.paddingCard (16px < Style.radiusPanel's 28px) — otherwise
+      // any card whose edge reaches this padding still sits inside the zone
+      // where the outer blob's rounded corner is cutting material away,
+      // leaving a gap where neither the (square) card nor the (rounded)
+      // blob paints anything and the wallpaper shows through. Only visible
+      // for cards that actually reach the panel edge (last card per column:
+      // RecordingCard, CalendarShell), which is why it looked card-specific.
+      readonly property real edgeInset: Style.radiusPanel
+      contentWidth: Math.max(width, dashboardLayout.implicitWidth + edgeInset * 2)
+      contentHeight: Math.max(height, dashboardLayout.implicitHeight + edgeInset * 2)
       boundsBehavior: Flickable.StopAtBounds
       interactive: false
       clip: true
 
       RowLayout {
         id: dashboardLayout
-        x: Style.paddingCard
-        y: Style.paddingCard
-        width: Math.max(contentFlick.width - Style.paddingCard * 2, implicitWidth)
-        height: Math.max(contentFlick.height - Style.paddingCard * 2, implicitHeight)
+        x: contentFlick.edgeInset
+        y: contentFlick.edgeInset
+        width: Math.max(contentFlick.width - contentFlick.edgeInset * 2, implicitWidth)
+        height: Math.max(contentFlick.height - contentFlick.edgeInset * 2, implicitHeight)
         spacing: Style.spaceS
 
         ColumnLayout {

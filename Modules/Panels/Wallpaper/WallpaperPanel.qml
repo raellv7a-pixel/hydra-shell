@@ -308,7 +308,7 @@ SmartPanel {
 
     RowLayout {
       anchors.fill: parent
-      anchors.margins: Style.paddingCard
+      anchors.margins: Style.radiusPanel // must be >= the panel's own blob corner radius (28px), not paddingCard (16px), or content stops short and the wallpaper shows through the rounded-off corner
       spacing: Style.paddingCard
 
       // LEFT COLUMN: header + active source view (roughly 62% of the width)

@@ -773,7 +773,7 @@ Item {
   // Main UI
   ColumnLayout {
     anchors.fill: parent
-    anchors.margins: Style.paddingCard
+    anchors.margins: Style.radiusPanel // must be >= this window's own radiusPanel corner (SettingsPanelWindow.qml draws it directly), not paddingCard (16px), or content stops short and the surface color shows a square notch through the rounded corner
     spacing: 0
 
     RowLayout {

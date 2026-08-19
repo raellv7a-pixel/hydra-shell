@@ -145,7 +145,7 @@ SmartPanel {
     ColumnLayout {
       id: wizardContent
       anchors.fill: parent
-      anchors.margins: Style.paddingCard
+      anchors.margins: Style.radiusPanel // must be >= the panel's own blob corner radius (28px), not paddingCard (16px), or content stops short and the wallpaper shows through the rounded-off corner
       spacing: Style.spaceS
 
       // Step content - takes most of the space
