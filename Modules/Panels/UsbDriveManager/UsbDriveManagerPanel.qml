@@ -84,7 +84,7 @@ SmartPanel {
             onClicked: UsbDriveService.refreshDevices()
 
             RotationAnimator on rotation {
-              running: UsbDriveService.loading
+              running: UsbDriveService.loading && Style.motionEnabled
               from: 0
               to: 360
               duration: 900
@@ -159,7 +159,7 @@ SmartPanel {
             color: Color.mPrimary
 
             RotationAnimator on rotation {
-              running: parent.parent.visible
+              running: parent.parent.visible && Style.motionEnabled
               from: 0
               to: 360
               duration: 900

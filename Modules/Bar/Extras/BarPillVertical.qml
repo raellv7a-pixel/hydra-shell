@@ -262,6 +262,7 @@ Item {
     }
   }
 
+  // Business clock: delay before the pill auto-hides, not visual motion.
   SequentialAnimation {
     id: delayedHideAnim
     running: false

@@ -2570,16 +2570,16 @@ Item {
             opacity: avatarStage.glowEffect ? 0.12 : 0
 
             SequentialAnimation on scale {
-              running: avatarStage.glowEffect
+              running: avatarStage.glowEffect && Style.motionEnabled
               loops: Animation.Infinite
               NAnim {
                 to: 1.08
-                duration: 900
+                duration: Style.motionEnabled ? 900 : 0
                 motionType: NAnim.StandardSpatial
               }
               NAnim {
                 to: 0.96
-                duration: 820
+                duration: Style.motionEnabled ? 820 : 0
                 motionType: NAnim.StandardSpatial
               }
             }
@@ -2603,16 +2603,16 @@ Item {
             opacity: avatarStage.ringEffect ? 0.55 : 0
 
             SequentialAnimation on scale {
-              running: avatarStage.ringEffect
+              running: avatarStage.ringEffect && Style.motionEnabled
               loops: Animation.Infinite
               NAnim {
                 to: 1.08
-                duration: 420
+                duration: Style.motionEnabled ? 420 : 0
                 motionType: NAnim.ExpressiveFastSpatial
               }
               NAnim {
                 to: 1.0
-                duration: 520
+                duration: Style.motionEnabled ? 520 : 0
                 motionType: NAnim.StandardSpatial
               }
             }
@@ -2629,16 +2629,16 @@ Item {
             opacity: avatarStage.ringEffect ? 0.22 : 0
 
             SequentialAnimation on scale {
-              running: avatarStage.ringEffect
+              running: avatarStage.ringEffect && Style.motionEnabled
               loops: Animation.Infinite
               NAnim {
                 to: 1.12
-                duration: 640
+                duration: Style.motionEnabled ? 640 : 0
                 motionType: NAnim.ExpressiveFastSpatial
               }
               NAnim {
                 to: 0.98
-                duration: 500
+                duration: Style.motionEnabled ? 500 : 0
                 motionType: NAnim.StandardSpatial
               }
             }
@@ -2652,11 +2652,11 @@ Item {
             opacity: avatarStage.orbitEffect ? 1 : 0
 
             RotationAnimator on rotation {
-              running: avatarStage.orbitEffect
+              running: avatarStage.orbitEffect && Style.motionEnabled
               loops: Animation.Infinite
               from: 0
               to: 360
-              duration: 4400
+              duration: Style.motionEnabled ? 4400 : 0
             }
 
             Rectangle {
@@ -2691,21 +2691,21 @@ Item {
             }
 
             SequentialAnimation {
-              running: avatarStage.morphEffect
+              running: avatarStage.morphEffect && Style.motionEnabled
               loops: Animation.Infinite
               ParallelAnimation {
                 NAnim {
                   target: avatarWarpScale
                   property: "xScale"
                   to: 1.05
-                  duration: 260
+                  duration: Style.motionEnabled ? 260 : 0
                   motionType: NAnim.StandardSpatial
                 }
                 NAnim {
                   target: avatarWarpScale
                   property: "yScale"
                   to: 0.96
-                  duration: 260
+                  duration: Style.motionEnabled ? 260 : 0
                   motionType: NAnim.StandardSpatial
                 }
               }
@@ -2714,14 +2714,14 @@ Item {
                   target: avatarWarpScale
                   property: "xScale"
                   to: 0.98
-                  duration: 300
+                  duration: Style.motionEnabled ? 300 : 0
                   motionType: NAnim.StandardSpatial
                 }
                 NAnim {
                   target: avatarWarpScale
                   property: "yScale"
                   to: 1.04
-                  duration: 300
+                  duration: Style.motionEnabled ? 300 : 0
                   motionType: NAnim.StandardSpatial
                 }
               }
@@ -2730,14 +2730,14 @@ Item {
                   target: avatarWarpScale
                   property: "xScale"
                   to: 1.0
-                  duration: 260
+                  duration: Style.motionEnabled ? 260 : 0
                   motionType: NAnim.StandardSpatial
                 }
                 NAnim {
                   target: avatarWarpScale
                   property: "yScale"
                   to: 1.0
-                  duration: 260
+                  duration: Style.motionEnabled ? 260 : 0
                   motionType: NAnim.StandardSpatial
                 }
               }
@@ -5058,12 +5058,12 @@ Item {
                         running: false
                         NAnim {
                           to: 1.04
-                          duration: 150
+                          duration: Style.motionEnabled ? 150 : 0
                           motionType: NAnim.ExpressiveFastSpatial
                         }
                         NAnim {
                           to: 1.0
-                          duration: 300
+                          duration: Style.motionEnabled ? 300 : 0
                           motionType: NAnim.EmphasizedSpatial
                         }
                       }
@@ -5233,10 +5233,11 @@ Item {
               Behavior on width {
                 NAnim {
                   motionType: NAnim.EmphasizedSpatial
-                  duration: 300
+                  duration: Style.motionEnabled ? 300 : 0
                 }
               }
               Behavior on color {
+                enabled: Style.motionEnabled
                 ColorAnimation {
                   duration: 300
                 }
@@ -5334,7 +5335,7 @@ Item {
                 Behavior on height {
                   NAnim {
                     motionType: NAnim.ExpressiveFastSpatial
-                    duration: 90
+                    duration: Style.motionEnabled ? 90 : 0
                   }
                 }
                 Behavior on color {
@@ -5362,7 +5363,7 @@ Item {
                 Behavior on y {
                   NAnim {
                     motionType: NAnim.ExpressiveFastSpatial
-                    duration: 90
+                    duration: Style.motionEnabled ? 90 : 0
                   }
                 }
               }
@@ -6528,12 +6529,12 @@ Item {
             running: false
             NAnim {
               to: 1.04
-              duration: 150
+              duration: Style.motionEnabled ? 150 : 0
               motionType: NAnim.ExpressiveFastSpatial
             }
             NAnim {
               to: 1.0
-              duration: 300
+              duration: Style.motionEnabled ? 300 : 0
               motionType: NAnim.EmphasizedSpatial
             }
           }

@@ -391,10 +391,10 @@ Item {
             icon: "loader"
             color: Color.mPrimary
             RotationAnimation on rotation {
-              running: root.isRunning
+              running: root.isRunning && Style.motionEnabled
               from: 0
               to: 360
-              duration: 1000
+              duration: Style.motionEnabled ? 1000 : 0
               loops: Animation.Infinite
             }
           }
@@ -468,10 +468,10 @@ Item {
             color: Color.mOnSurface
             anchors.verticalCenter: parent.verticalCenter
             RotationAnimation on rotation {
-              running: root.isConverting
+              running: root.isConverting && Style.motionEnabled
               from: 0
               to: 360
-              duration: 1000
+              duration: Style.motionEnabled ? 1000 : 0
               loops: Animation.Infinite
             }
           }
@@ -1344,17 +1344,17 @@ Item {
           radius: parent.radius
           color: Color.mError
           visible: btn.recording
-          opacity: 0
+          opacity: Style.motionEnabled ? 0 : 0.15
           SequentialAnimation on opacity {
-            running: btn.recording
+            running: btn.recording && Style.motionEnabled
             loops: Animation.Infinite
             NumberAnimation {
               to: 0.05
-              duration: 600
+              duration: Style.motionEnabled ? 600 : 0
             }
             NumberAnimation {
               to: 0.2
-              duration: 600
+              duration: Style.motionEnabled ? 600 : 0
             }
           }
         }
@@ -1375,21 +1375,21 @@ Item {
               target: ripple
               property: "width"
               to: 80
-              duration: 350
+              duration: Style.motionEnabled ? 350 : 0
               motionType: NAnim.ExpressiveFastSpatial
             }
             NAnim {
               target: ripple
               property: "height"
               to: 80
-              duration: 350
+              duration: Style.motionEnabled ? 350 : 0
               motionType: NAnim.ExpressiveFastSpatial
             }
             NAnim {
               target: ripple
               property: "opacity"
               to: 0
-              duration: 350
+              duration: Style.motionEnabled ? 350 : 0
               motionType: NAnim.StandardEffects
             }
           }

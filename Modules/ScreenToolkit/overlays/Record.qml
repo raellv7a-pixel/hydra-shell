@@ -360,15 +360,15 @@ Item {
             color: "#FF4444"
             anchors.verticalCenter: parent.verticalCenter
             SequentialAnimation on opacity {
-              running: root.isRecording
+              running: root.isRecording && Style.motionEnabled
               loops: Animation.Infinite
               NumberAnimation {
                 to: 0.15
-                duration: 600
+                duration: Style.motionEnabled ? 600 : 0
               }
               NumberAnimation {
                 to: 1.0
-                duration: 600
+                duration: Style.motionEnabled ? 600 : 0
               }
             }
           }

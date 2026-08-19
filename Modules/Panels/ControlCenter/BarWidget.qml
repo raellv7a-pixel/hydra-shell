@@ -225,7 +225,7 @@ Item {
   }
 
   NumberAnimation on borderPhase {
-    running: !root.dashboardPerformanceMode && root.componentBorderVisible() && root.componentStyle().borderAnimation !== "static"
+    running: !root.dashboardPerformanceMode && Style.motionEnabled && root.componentBorderVisible() && root.componentStyle().borderAnimation !== "static"
     from: 0
     to: 1000
     duration: 60000
@@ -887,7 +887,7 @@ Item {
     opacity: active ? 0.78 : 0.34
 
     NumberAnimation on phase {
-      running: reactive.visible && reactive.active && !root.dashboardPerformanceMode
+      running: reactive.visible && reactive.active && !root.dashboardPerformanceMode && Style.motionEnabled
       from: 0
       to: 1000
       duration: 180000

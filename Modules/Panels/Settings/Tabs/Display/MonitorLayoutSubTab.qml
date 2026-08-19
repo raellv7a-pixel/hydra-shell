@@ -259,13 +259,13 @@ ColumnLayout {
             radius: Style.radiusM
 
             Behavior on x {
-              enabled: !dragArea.drag.active
+              enabled: !dragArea.drag.active && Style.motionEnabled
               NumberAnimation {
                 duration: 120
               }
             }
             Behavior on y {
-              enabled: !dragArea.drag.active
+              enabled: !dragArea.drag.active && Style.motionEnabled
               NumberAnimation {
                 duration: 120
               }

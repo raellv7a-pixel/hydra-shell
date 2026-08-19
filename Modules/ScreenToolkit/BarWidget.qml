@@ -49,15 +49,15 @@ Item {
       rightMargin: Style.spaceXS
     }
     SequentialAnimation on opacity {
-      running: root._isRecording
+      running: root._isRecording && Style.motionEnabled
       loops: Animation.Infinite
       NumberAnimation {
         to: 0.3
-        duration: 600
+        duration: Style.motionEnabled ? 600 : 0
       }
       NumberAnimation {
         to: 1.0
-        duration: 600
+        duration: Style.motionEnabled ? 600 : 0
       }
     }
   }

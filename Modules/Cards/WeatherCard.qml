@@ -43,6 +43,7 @@ NBox {
       // Animated time for shaders
       property real shaderTime: 0
       NumberAnimation on shaderTime {
+        running: Style.motionEnabled
         loops: Animation.Infinite
         from: 0
         to: root.isSnowing ? 900 : 3000

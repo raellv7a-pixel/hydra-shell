@@ -338,16 +338,16 @@ Item {
           border.width: Style.borderL
           visible: root._isRecording
           SequentialAnimation on opacity {
-            running: root._isRecording
+            running: root._isRecording && Style.motionEnabled
             loops: Animation.Infinite
             NAnim {
               to: 0.3
-              duration: 600
+              duration: Style.motionEnabled ? 600 : 0
               motionType: NAnim.StandardEffects
             }
             NAnim {
               to: 1.0
-              duration: 600
+              duration: Style.motionEnabled ? 600 : 0
               motionType: NAnim.StandardEffects
             }
           }
@@ -375,16 +375,16 @@ Item {
               color: "#FF4444"
               anchors.verticalCenter: parent.verticalCenter
               SequentialAnimation on opacity {
-                running: root._isRecording
+                running: root._isRecording && Style.motionEnabled
                 loops: Animation.Infinite
                 NAnim {
                   to: 0.15
-                  duration: 600
+                  duration: Style.motionEnabled ? 600 : 0
                   motionType: NAnim.StandardEffects
                 }
                 NAnim {
                   to: 1.0
-                  duration: 600
+                  duration: Style.motionEnabled ? 600 : 0
                   motionType: NAnim.StandardEffects
                 }
               }
@@ -421,16 +421,16 @@ Item {
               color: "white"
               anchors.verticalCenter: parent.verticalCenter
               SequentialAnimation on opacity {
-                running: root._isSaving
+                running: root._isSaving && Style.motionEnabled
                 loops: Animation.Infinite
                 NAnim {
                   to: 0.3
-                  duration: 500
+                  duration: Style.motionEnabled ? 500 : 0
                   motionType: NAnim.StandardEffects
                 }
                 NAnim {
                   to: 1.0
-                  duration: 500
+                  duration: Style.motionEnabled ? 500 : 0
                   motionType: NAnim.StandardEffects
                 }
               }
@@ -458,18 +458,18 @@ Item {
             style: Text.Outline
             styleColor: Qt.rgba(0, 0, 0, 0.6)
             SequentialAnimation on scale {
-              running: root._countdownActive
+              running: root._countdownActive && Style.motionEnabled
               loops: Animation.Infinite
               NAnim {
                 from: 1.2
                 to: 0.85
-                duration: 900
+                duration: Style.motionEnabled ? 900 : 0
                 motionType: NAnim.ExpressiveFastSpatial
               }
               NAnim {
                 from: 0.85
                 to: 1.2
-                duration: 100
+                duration: Style.motionEnabled ? 100 : 0
                 motionType: NAnim.ExpressiveFastSpatial
               }
             }

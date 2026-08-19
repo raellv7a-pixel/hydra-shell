@@ -1296,6 +1296,8 @@ Item {
                   motionType: NAnim.StandardEffects
                 }
 
+                // Business clock: hold time for the search-result highlight flash
+                // (how long the target setting stays visible), not visual motion.
                 PauseAnimation {
                   duration: 2000
                 }
