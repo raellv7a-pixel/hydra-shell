@@ -203,7 +203,7 @@ DashboardCard {
             spacing: Style.marginS
 
             Repeater {
-              model: NotificationService.historyModel.count
+              model: NotificationService.historyModel
 
               NotificationRow {
                 panelRoot: notificationsDetailsCard.panelRoot
