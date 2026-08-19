@@ -1827,7 +1827,7 @@ Item {
   }
 
   component ProfileCard: DashboardCard {
-    root: root
+    panelRoot: root
     id: profileCard
     styleKey: "profile"
     styleRoot: true
@@ -2494,7 +2494,7 @@ Item {
   }
 
   component QuickActionsCard: DashboardCard {
-    root: root
+    panelRoot: root
     id: quickActionsCard
     styleKey: "quickActions"
     styleRoot: true
@@ -2713,7 +2713,7 @@ Item {
   }
 
   component ActionTile: DashboardCard {
-    root: root
+    panelRoot: root
     id: actionTile
 
     styleKey: "quickActions"
@@ -2856,7 +2856,7 @@ Item {
   }
 
   component RecordingCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "recording"
     styleRoot: true
     clip: true
@@ -2939,7 +2939,7 @@ Item {
   }
 
   component ToolkitButton: DashboardCard {
-    root: root
+    panelRoot: root
     id: toolkitButton
 
     styleKey: root.inheritedStyleKey(parent)
@@ -3010,7 +3010,7 @@ Item {
   }
 
   component PerformanceCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "performance"
     styleRoot: true
     detailTransition: true
@@ -3084,7 +3084,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: root.m3SurfaceContainerHigh
@@ -3125,7 +3125,7 @@ Item {
   }
 
   component PerformanceDetailsCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "performance"
     styleRoot: true
     detailTransition: true
@@ -3216,7 +3216,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(120 * root.panelUnit)
         color: root.m3SurfaceContainerHigh
@@ -3262,7 +3262,7 @@ Item {
   }
 
   component DetailMetricTile: DashboardCard {
-    root: root
+    panelRoot: root
     id: detailMetric
 
     styleKey: root.inheritedStyleKey(parent)
@@ -3328,7 +3328,7 @@ Item {
   }
 
   component ProcessUsageCard: DashboardCard {
-    root: root
+    panelRoot: root
     id: processUsageCard
 
     styleKey: "performance"
@@ -3660,7 +3660,7 @@ Item {
   }
 
   component StatTile: DashboardCard {
-    root: root
+    panelRoot: root
     id: statTile
 
     styleKey: root.inheritedStyleKey(parent)
@@ -3717,7 +3717,7 @@ Item {
   }
 
   component MiniMeter: DashboardCard {
-    root: root
+    panelRoot: root
     id: miniMeter
 
     styleKey: root.inheritedStyleKey(parent)
@@ -3837,7 +3837,7 @@ Item {
   }
 
   component DiskPager: DashboardCard {
-    root: root
+    panelRoot: root
     id: diskPager
 
     property int currentIndex: 0
@@ -3973,7 +3973,7 @@ Item {
   }
 
   component TrafficTile: DashboardCard {
-    root: root
+    panelRoot: root
     property string iconName: ""
     property string titleText: ""
     property string valueText: ""
@@ -4044,7 +4044,7 @@ Item {
   }
 
   component AudioDetailsCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "systemControls"
     styleRoot: true
     detailTransition: true
@@ -4085,7 +4085,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(150 * root.panelUnit)
         color: root.m3SurfaceContainerHigh
@@ -4163,7 +4163,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: root.m3SurfaceContainerHigh
@@ -4232,7 +4232,7 @@ Item {
   }
 
   component AudioDeviceTile: DashboardCard {
-    root: root
+    panelRoot: root
     id: audioDeviceTile
 
     property string titleText: ""
@@ -4295,7 +4295,7 @@ Item {
   }
 
   component AppVolumeRow: DashboardCard {
-    root: root
+    panelRoot: root
     id: appVolumeRow
 
     property var streamNode: null
@@ -4355,7 +4355,7 @@ Item {
   }
 
   component MediaDetailsCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "media"
     styleRoot: true
     detailTransition: true
@@ -4491,7 +4491,7 @@ Item {
                 spacing: Style.marginL
 
                 DashboardCard {
-                  root: root
+                  panelRoot: root
                   id: mediaArtworkCard
 
                   Layout.fillWidth: true
@@ -4689,7 +4689,7 @@ Item {
                 }
 
                 DashboardCard {
-                  root: root
+                  panelRoot: root
                   Layout.fillWidth: true
                   Layout.preferredHeight: playersColumn2.implicitHeight + Style.marginM * 2 + Style.marginS + Math.round(20 * root.panelUnit)
                   color: root.m3SurfaceContainerHigh
@@ -4759,7 +4759,7 @@ Item {
   }
 
   component EasyEffectsCard: DashboardCard {
-    root: root
+    panelRoot: root
     id: easyEffectsCard
 
     Layout.fillWidth: true
@@ -4928,7 +4928,7 @@ Item {
   }
 
   component PlayerRow: DashboardCard {
-    root: root
+    panelRoot: root
     id: playerRow
 
     property var playerData: null
@@ -4979,7 +4979,7 @@ Item {
   }
 
   component SystemControlsCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "systemControls"
     styleRoot: true
     detailTransition: true
@@ -5497,7 +5497,7 @@ Item {
   }
 
   component NotificationsCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "notifications"
     styleRoot: true
     detailTransition: true
@@ -5586,7 +5586,7 @@ Item {
   }
 
   component NotificationsDetailsCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "notifications"
     styleRoot: true
     detailTransition: true
@@ -5631,7 +5631,7 @@ Item {
         spacing: Style.marginM
 
         DashboardCard {
-          root: root
+          panelRoot: root
           Layout.fillWidth: true
           Layout.preferredHeight: Math.round(72 * root.panelUnit)
           color: root.m3SurfaceContainerHigh
@@ -5683,7 +5683,7 @@ Item {
         }
 
         DashboardCard {
-          root: root
+          panelRoot: root
           Layout.fillWidth: true
           Layout.preferredHeight: Math.round(72 * root.panelUnit)
           color: root.m3SurfaceContainerHigh
@@ -5729,7 +5729,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: root.m3SurfaceContainerHigh
@@ -5799,7 +5799,7 @@ Item {
   }
 
   component NotificationRow: DashboardCard {
-    root: root
+    panelRoot: root
     id: notificationRow
 
     property var notificationData: ({})
@@ -5973,7 +5973,7 @@ Item {
   }
 
   component MediaCard: DashboardCard {
-    root: root
+    panelRoot: root
     id: mediaCard
     styleKey: "media"
     styleRoot: true
@@ -6771,7 +6771,7 @@ Item {
   }
 
   component WeatherDetailsCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "calendar"
     styleRoot: true
     detailTransition: true
@@ -6888,7 +6888,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         visible: weatherReady
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -6936,7 +6936,7 @@ Item {
   }
 
   component WeatherInfoTile: DashboardCard {
-    root: root
+    panelRoot: root
     id: weatherInfoTile
 
     property string iconName: ""
@@ -6982,7 +6982,7 @@ Item {
   }
 
   component WeatherForecastRow: DashboardCard {
-    root: root
+    panelRoot: root
     id: forecastRow
 
     property int dayIndex: 0
@@ -7028,7 +7028,7 @@ Item {
   }
 
   component CalendarDetailsCard: DashboardCard {
-    root: root
+    panelRoot: root
     styleKey: "calendar"
     styleRoot: true
     detailTransition: true
@@ -7302,7 +7302,7 @@ Item {
   }
 
   component CalendarShell: DashboardCard {
-    root: root
+    panelRoot: root
     id: calendarShell
     styleKey: "calendar"
     styleRoot: true
@@ -7381,7 +7381,7 @@ Item {
   }
 
   component ScreenUsageDetailsCard: DashboardCard {
-    root: root
+    panelRoot: root
     id: screenUsageDetails
     styleKey: "screenUsage"
     styleRoot: true
@@ -7464,7 +7464,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(94 * root.panelUnit)
         color: root.m3SurfaceContainerHigh
@@ -7520,7 +7520,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: root.m3SurfaceContainerHigh
@@ -7814,7 +7814,7 @@ Item {
       }
 
       DashboardCard {
-        root: root
+        panelRoot: root
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(76 * root.panelUnit)
         color: Qt.alpha(Color.mSurface, 0.34)
@@ -7958,7 +7958,7 @@ Item {
   }
 
   component ScreenUsageRangeButton: DashboardCard {
-    root: root
+    panelRoot: root
     id: screenUsageRangeButton
 
     property string labelText: ""
@@ -7990,7 +7990,7 @@ Item {
   }
 
   component ScreenUsageDetailRow: DashboardCard {
-    root: root
+    panelRoot: root
     id: screenUsageDetailRow
 
     property var appData: null

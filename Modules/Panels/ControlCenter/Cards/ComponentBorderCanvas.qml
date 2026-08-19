@@ -4,7 +4,8 @@ import qs.Commons
 Canvas {
   id: componentBorderCanvas
 
-  required property var root
+  required property var panelRoot
+  readonly property var root: panelRoot
 
   property string styleKey: ""
   property bool styleRoot: false

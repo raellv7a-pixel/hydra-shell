@@ -7,9 +7,14 @@ NBox {
 
   // Every dashboard card needs the popup's derived state (per-component
   // style overrides, performance mode, panelUnit scale, music/spectrum
-  // state). Passed explicitly from Panel.qml instead of relying on the
-  // implicit outer-scope access a same-file inline component would get.
-  required property var root
+  // state). Passed explicitly from Panel.qml. Named panelRoot (not "root")
+  // because a property named the same as the caller's `id: root` would
+  // shadow it: `root: root` on this object would try to bind our own
+  // "root" to itself instead of reaching the caller's id. The `root` alias
+  // below is what the rest of this file (and every DashboardCard-derived
+  // card) actually uses, unchanged from the original inline-component code.
+  required property var panelRoot
+  readonly property var root: panelRoot
 
   property string styleKey: root.inheritedStyleKey(parent)
   property bool styleRoot: false
@@ -67,7 +72,7 @@ NBox {
   }
 
   ComponentBorderCanvas {
-    root: dashboardCard.root
+    panelRoot: dashboardCard.root
     anchors.fill: parent
     styleKey: parent.styleKey
     styleRoot: parent.styleRoot
