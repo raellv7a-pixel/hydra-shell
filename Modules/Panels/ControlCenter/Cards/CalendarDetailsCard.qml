@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
+import qs.Modules.Cards
 DashboardCard {
   id: calendarDetailsCard
 

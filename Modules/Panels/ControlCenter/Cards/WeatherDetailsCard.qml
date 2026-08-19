@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
+import qs.Modules.Cards
 import qs.Services.Location
 DashboardCard {
   id: weatherDetailsCard
