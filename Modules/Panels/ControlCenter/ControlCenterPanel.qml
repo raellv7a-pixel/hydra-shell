@@ -34,7 +34,6 @@ SmartPanel {
   panelContent: Component {
     Panel {
       anchors.fill: parent
-      pluginApi: ControlCenterService.provider
     }
   }
 }

@@ -23,44 +23,42 @@ import qs.Widgets
 Item {
   id: root
 
-  property var pluginApi: ControlCenterService.provider
-  property var cfg: pluginApi?.pluginSettings || ({})
-  property var defaults: pluginApi?.manifest?.metadata?.defaultSettings || ({})
+  property var cfg: ControlCenterService.settings
 
-  readonly property var activeScreen: pluginApi?.panelOpenScreen
-  readonly property bool panelDetached: cfg.panelDetached ?? defaults.panelDetached ?? true
-  readonly property string panelPosition: cfg.panelPosition ?? defaults.panelPosition ?? "center"
-  readonly property bool followBarEdge: cfg.followBarEdge ?? defaults.followBarEdge ?? true
+  readonly property var activeScreen: PanelService.findScreenForPanels()
+  readonly property bool panelDetached: cfg.panelDetached ?? true
+  readonly property string panelPosition: cfg.panelPosition ?? "center"
+  readonly property bool followBarEdge: cfg.followBarEdge ?? true
   readonly property string barPosition: Settings.getBarPositionForScreen(activeScreen?.name)
   readonly property string resolvedPanelPosition: (!panelDetached && followBarEdge) ? barPosition : panelPosition
-  readonly property real localScale: cfg.panelScale ?? defaults.panelScale ?? 1
-  readonly property real panelBaseWidth: cfg.panelWidth ?? defaults.panelWidth ?? 1120
-  readonly property real panelBaseHeight: cfg.panelHeight ?? defaults.panelHeight ?? 700
-  readonly property string configuredAvatar: cfg.avatarPath ?? defaults.avatarPath ?? ""
+  readonly property real localScale: cfg.panelScale ?? 1
+  readonly property real panelBaseWidth: cfg.panelWidth ?? 1120
+  readonly property real panelBaseHeight: cfg.panelHeight ?? 700
+  readonly property string configuredAvatar: cfg.avatarPath ?? ""
   readonly property string avatarPath: configuredAvatar !== "" ? configuredAvatar : Settings.data.general.avatarImage
-  readonly property string profileDanceGifPath: cfg.profileDanceGifPath ?? defaults.profileDanceGifPath ?? ""
+  readonly property string profileDanceGifPath: cfg.profileDanceGifPath ?? ""
   readonly property string resolvedProfileDanceGifPath: profileDanceGifPath !== "" ? Settings.preprocessPath(profileDanceGifPath) : ""
-  readonly property bool showProfileDanceGif: cfg.showProfileDanceGif ?? defaults.showProfileDanceGif ?? true
-  readonly property bool showProfileWallpaper: cfg.showProfileWallpaper ?? defaults.showProfileWallpaper ?? true
-  readonly property string profileCoverMode: showProfileWallpaper ? (cfg.profileCoverMode ?? defaults.profileCoverMode ?? "auto") : "none"
-  readonly property string profileCoverPath: cfg.profileCoverPath ?? defaults.profileCoverPath ?? ""
-  readonly property string profileCoverFolder: cfg.profileCoverFolder ?? defaults.profileCoverFolder ?? ""
-  readonly property bool profileCoverOverlayEnabled: cfg.profileCoverOverlayEnabled ?? defaults.profileCoverOverlayEnabled ?? true
-  readonly property real profileCoverOverlay: cfg.profileCoverOverlay ?? defaults.profileCoverOverlay ?? 0.58
-  readonly property bool profileCoverBlurEnabled: cfg.profileCoverBlurEnabled ?? defaults.profileCoverBlurEnabled ?? false
-  readonly property real profileCoverBlur: cfg.profileCoverBlur ?? defaults.profileCoverBlur ?? 0
-  readonly property bool profileCoverBorder: cfg.profileCoverBorder ?? defaults.profileCoverBorder ?? true
-  readonly property real profileCoverBorderWidth: cfg.profileCoverBorderWidth ?? defaults.profileCoverBorderWidth ?? 2
-  readonly property string profileCoverBorderEffect: cfg.profileCoverBorderEffect ?? defaults.profileCoverBorderEffect ?? "primary"
-  readonly property string profileCoverBorderColorMode: cfg.profileCoverBorderColorMode ?? defaults.profileCoverBorderColorMode ?? "auto"
+  readonly property bool showProfileDanceGif: cfg.showProfileDanceGif ?? true
+  readonly property bool showProfileWallpaper: cfg.showProfileWallpaper ?? true
+  readonly property string profileCoverMode: showProfileWallpaper ? (cfg.profileCoverMode ?? "auto") : "none"
+  readonly property string profileCoverPath: cfg.profileCoverPath ?? ""
+  readonly property string profileCoverFolder: cfg.profileCoverFolder ?? ""
+  readonly property bool profileCoverOverlayEnabled: cfg.profileCoverOverlayEnabled ?? true
+  readonly property real profileCoverOverlay: cfg.profileCoverOverlay ?? 0.58
+  readonly property bool profileCoverBlurEnabled: cfg.profileCoverBlurEnabled ?? false
+  readonly property real profileCoverBlur: cfg.profileCoverBlur ?? 0
+  readonly property bool profileCoverBorder: cfg.profileCoverBorder ?? true
+  readonly property real profileCoverBorderWidth: cfg.profileCoverBorderWidth ?? 2
+  readonly property string profileCoverBorderEffect: cfg.profileCoverBorderEffect ?? "primary"
+  readonly property string profileCoverBorderColorMode: cfg.profileCoverBorderColorMode ?? "auto"
   readonly property string profileCoverBorderAnimation: cfg.profileCoverBorderAnimation ?? legacyProfileCoverBorderAnimation()
-  readonly property real profileCoverBorderSpeed: cfg.profileCoverBorderSpeed ?? defaults.profileCoverBorderSpeed ?? 1
-  readonly property int profileCoverBorderColorCount: cfg.profileCoverBorderColorCount ?? defaults.profileCoverBorderColorCount ?? 3
-  readonly property string profileCoverBorderColor1: cfg.profileCoverBorderColor1 ?? defaults.profileCoverBorderColor1 ?? "#fff59b"
-  readonly property string profileCoverBorderColor2: cfg.profileCoverBorderColor2 ?? defaults.profileCoverBorderColor2 ?? "#8bd5ff"
-  readonly property string profileCoverBorderColor3: cfg.profileCoverBorderColor3 ?? defaults.profileCoverBorderColor3 ?? "#cba6f7"
-  readonly property string profileCoverBorderColor4: cfg.profileCoverBorderColor4 ?? defaults.profileCoverBorderColor4 ?? "#f38ba8"
-  readonly property string profileCoverBorderColor5: cfg.profileCoverBorderColor5 ?? defaults.profileCoverBorderColor5 ?? "#a6e3a1"
+  readonly property real profileCoverBorderSpeed: cfg.profileCoverBorderSpeed ?? 1
+  readonly property int profileCoverBorderColorCount: cfg.profileCoverBorderColorCount ?? 3
+  readonly property string profileCoverBorderColor1: cfg.profileCoverBorderColor1 ?? "#fff59b"
+  readonly property string profileCoverBorderColor2: cfg.profileCoverBorderColor2 ?? "#8bd5ff"
+  readonly property string profileCoverBorderColor3: cfg.profileCoverBorderColor3 ?? "#cba6f7"
+  readonly property string profileCoverBorderColor4: cfg.profileCoverBorderColor4 ?? "#f38ba8"
+  readonly property string profileCoverBorderColor5: cfg.profileCoverBorderColor5 ?? "#a6e3a1"
   readonly property var componentStyles: cfg.componentStyles ?? ({})
   property string randomProfileCoverPath: ""
   readonly property string profileWallpaperPath: {
@@ -72,14 +70,14 @@ Item {
       return randomProfileCoverPath;
     return WallpaperService.getWallpaper(activeScreen?.name ?? "") || "";
   }
-  readonly property string mediaVisualizerEffect: cfg.mediaVisualizerEffect ?? defaults.mediaVisualizerEffect ?? "bars"
-  readonly property string audioSliderEffect: cfg.audioSliderEffect ?? defaults.audioSliderEffect ?? "wave"
-  readonly property string microphoneSliderEffect: cfg.microphoneSliderEffect ?? defaults.microphoneSliderEffect ?? "pulse"
-  readonly property string avatarMusicEffect: cfg.avatarMusicEffect ?? defaults.avatarMusicEffect ?? "ring"
-  readonly property string avatarShape: cfg.avatarShape ?? defaults.avatarShape ?? "circle"
-  readonly property string profileCardShape: cfg.profileCardShape ?? defaults.profileCardShape ?? "rounded"
-  readonly property bool followNoctaliaPerformanceMode: cfg.followNoctaliaPerformanceMode ?? defaults.followNoctaliaPerformanceMode ?? true
-  readonly property bool powerSaverPerformanceMode: cfg.powerSaverPerformanceMode ?? defaults.powerSaverPerformanceMode ?? true
+  readonly property string mediaVisualizerEffect: cfg.mediaVisualizerEffect ?? "bars"
+  readonly property string audioSliderEffect: cfg.audioSliderEffect ?? "wave"
+  readonly property string microphoneSliderEffect: cfg.microphoneSliderEffect ?? "pulse"
+  readonly property string avatarMusicEffect: cfg.avatarMusicEffect ?? "ring"
+  readonly property string avatarShape: cfg.avatarShape ?? "circle"
+  readonly property string profileCardShape: cfg.profileCardShape ?? "rounded"
+  readonly property bool followNoctaliaPerformanceMode: cfg.followNoctaliaPerformanceMode ?? true
+  readonly property bool powerSaverPerformanceMode: cfg.powerSaverPerformanceMode ?? true
   readonly property bool dashboardPerformanceMode: (followNoctaliaPerformanceMode && PowerProfileService.noctaliaPerformanceMode) || (powerSaverPerformanceMode && PowerProfileService.available && PowerProfileService.profile === 0)
   readonly property bool musicActive: MediaService.currentPlayer !== null && MediaService.isPlaying
   readonly property string panelSpectrumComponentId: "plugin:raell-dashboard:panel:" + (activeScreen?.name ?? "unknown")
@@ -105,8 +103,13 @@ Item {
   property bool panelAnchorVerticalCenter: resolvedPanelPosition === "center" || resolvedPanelPosition === "left" || resolvedPanelPosition === "right"
   property bool panelAnchorTop: resolvedPanelPosition === "top"
   property bool panelAnchorBottom: resolvedPanelPosition === "bottom"
-  property real contentPreferredWidth: Math.min(panelBaseWidth * panelUnit, maxPanelWidth)
-  property real contentPreferredHeight: Math.min(panelBaseHeight * panelUnit, maxPanelHeight)
+  // Outer panel size: at least what the fixed-width card columns actually
+  // need (implicitWidth/Height of dashboardLayout, see panelContainer
+  // below), so the content is never cramped into a Flickable. panelWidth/
+  // panelHeight/panelScale can still make the panel bigger than that; the
+  // extra space is distributed as centered margin, not a lopsided gap.
+  property real contentPreferredWidth: Math.min(Math.max(panelBaseWidth * panelUnit, dashboardLayout.implicitWidth + Style.margin2L), maxPanelWidth)
+  property real contentPreferredHeight: Math.min(Math.max(panelBaseHeight * panelUnit, dashboardLayout.implicitHeight + Style.margin2L), maxPanelHeight)
   property string expandedNotificationId: ""
   property string activeDetailView: ""
   property string processUsageMetric: "cpu"
@@ -189,22 +192,24 @@ Item {
   onProfileCoverFolderChanged: root.pickRandomProfileCover()
 
   function tr(key) {
-    return pluginApi?.tr("panel." + key);
+    return ControlCenterService.tr("panel." + key);
   }
 
   function updateAvatar(path) {
-    if (!pluginApi || !path || path.length === 0) {
+    if (!path || path.length === 0) {
       return;
     }
-    pluginApi.pluginSettings.avatarPath = path;
-    pluginApi.saveSettings();
+    ControlCenterService.settings.avatarPath = path;
+    ControlCenterService.saveSettings();
   }
 
   function openDashboardSettings() {
-    if (!pluginApi?.manifest) {
+    const panel = PanelService.getPanel("settingsPanel", activeScreen);
+    if (!panel) {
       return;
     }
-    BarService.openPluginSettings(pluginApi?.panelOpenScreen, pluginApi.manifest);
+    panel.requestedTab = SettingsPanel.Tab.ControlCenter;
+    panel.open();
   }
 
   function compositorName() {
@@ -1043,7 +1048,7 @@ Item {
   }
 
   function activePanelScreen() {
-    return pluginApi?.panelOpenScreen || activeScreen;
+    return activeScreen;
   }
 
   property var pendingNativePanelScreen: null
@@ -1057,30 +1062,12 @@ Item {
   }
 
   function closeDashboardPanel() {
-    if (pluginApi && pluginApi.closePanel) {
-      pluginApi.closePanel(activePanelScreen());
-    }
+    PanelService.closePanel();
     if (PanelService.openedPanel && !PanelService.openedPanel.isClosing) {
       PanelService.openedPanel.close();
     }
   }
 
-  function runNoctaliaIpc(target, action, args, closeFirst) {
-    const command = ["qs", "-c", "noctalia-shell", "ipc", "call", target, action];
-    const extraArgs = args || [];
-    for (let i = 0; i < extraArgs.length; i++) {
-      command.push(String(extraArgs[i]));
-    }
-
-    if (closeFirst === false) {
-      Quickshell.execDetached(command);
-      return;
-    }
-
-    pendingIpcCommand = command;
-    closeDashboardPanel();
-    deferredIpcTimer.restart();
-  }
 
   function showCaptureNotice(message, detail, icon) {
     const body = detail && String(detail).length > 0 ? message + "\n" + detail : message;
@@ -1586,27 +1573,18 @@ Item {
     }
   }
 
-  Rectangle {
+  Item {
     id: panelContainer
     anchors.fill: parent
-    color: "transparent"
     clip: true
 
-    Flickable {
-      id: contentFlick
-      anchors.fill: parent
-      contentWidth: Math.max(width, dashboardLayout.implicitWidth + Style.margin2L)
-      contentHeight: Math.max(height, dashboardLayout.implicitHeight + Style.margin2L)
-      boundsBehavior: Flickable.StopAtBounds
-      clip: true
-
-      RowLayout {
-        id: dashboardLayout
-        x: Style.marginL
-        y: Style.marginL
-        width: Math.max(contentFlick.width - Style.margin2L, implicitWidth)
-        height: Math.max(contentFlick.height - Style.margin2L, implicitHeight)
-        spacing: Style.marginL
+    // Fixed-size card columns, centered — no scrolling. contentPreferredWidth/
+    // Height above guarantee the outer panel is never smaller than this
+    // layout's implicit size, so it never needs to pan.
+    RowLayout {
+      id: dashboardLayout
+      anchors.centerIn: parent
+      spacing: Style.marginL
 
         ColumnLayout {
           Layout.preferredWidth: Math.round(300 * root.panelUnit)
@@ -1624,7 +1602,7 @@ Item {
           }
 
           RecordingCard {
-            visible: root.cfg.showRecordingCard ?? root.defaults.showRecordingCard ?? true
+            visible: root.cfg.showRecordingCard ?? true
             Layout.fillWidth: true
             Layout.preferredHeight: Math.round((root.toolkitRecording ? 194 : 164) * root.panelUnit)
 
@@ -1681,19 +1659,19 @@ Item {
           spacing: Style.marginL
 
           NotificationsCard {
-            visible: !root.rightDetailOpen && (root.cfg.showNotifications ?? root.defaults.showNotifications ?? true)
+            visible: !root.rightDetailOpen && (root.cfg.showNotifications ?? true)
             Layout.fillWidth: true
             Layout.preferredHeight: Math.round(272 * root.panelUnit)
           }
 
           MediaCard {
-            visible: !root.rightDetailOpen && (root.cfg.showMedia ?? root.defaults.showMedia ?? true)
+            visible: !root.rightDetailOpen && (root.cfg.showMedia ?? true)
             Layout.fillWidth: true
             Layout.preferredHeight: visible ? Math.round(132 * root.panelUnit) : 0
           }
 
           CalendarShell {
-            visible: !root.rightDetailOpen && (root.cfg.showCalendar ?? root.defaults.showCalendar ?? true)
+            visible: !root.rightDetailOpen && (root.cfg.showCalendar ?? true)
             Layout.fillWidth: true
             Layout.fillHeight: true
           }
@@ -1749,7 +1727,6 @@ Item {
           }
         }
       }
-    }
   }
 
   NFilePicker {
@@ -2959,7 +2936,7 @@ Item {
           secondaryIcon: "adjustments-horizontal"
           secondaryTooltip: root.tr("dashboardSettings")
           onTriggered: {
-            const panel = PanelService.getPanel("settingsPanel", pluginApi?.panelOpenScreen);
+            const panel = PanelService.getPanel("settingsPanel", root.activeScreen);
             if (panel) {
               panel.requestedTab = SettingsPanel.Tab.General;
               panel.open();

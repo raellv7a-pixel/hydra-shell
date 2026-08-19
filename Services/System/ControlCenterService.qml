@@ -174,52 +174,6 @@ Singleton {
     }
   }
 
-  // Backward-compatibility provider object replacing legacy pluginApi
-  readonly property var provider: QtObject {
-    property var mainInstance: root.mainInstance
-    property var pluginSettings: root.settings
-    property var manifest: ({
-                              "name": "Control Center",
-                              "id": "control-center",
-                              "metadata": {
-                                "defaultSettings": root.settings
-                              }
-                            })
-    property var panelOpenScreen: PanelService.findScreenForPanels()
-
-    function tr(key, interp) {
-      return root.tr(key, interp);
-    }
-    function saveSettings() {
-      root.saveSettings();
-    }
-    function closePanel(screen) {
-      if (screen)
-        PanelService.closePanel(screen);
-    }
-    function openPanel(screen) {
-      var sc = screen || PanelService.findScreenForPanels();
-      if (sc) {
-        var p = PanelService.getPanel("controlCenterPanel", sc);
-        if (p)
-          p.open();
-      }
-    }
-    function togglePanel(screen) {
-      var sc = screen || PanelService.findScreenForPanels();
-      if (sc) {
-        var p = PanelService.getPanel("controlCenterPanel", sc);
-        if (p)
-          p.toggle();
-      }
-    }
-    function withCurrentScreen(cb) {
-      var sc = PanelService.findScreenForPanels();
-      if (sc && cb)
-        cb(sc);
-    }
-  }
-
   // Convenience toggle for IPC and keybindings
   function toggle() {
     var sc = PanelService.findScreenForPanels();
