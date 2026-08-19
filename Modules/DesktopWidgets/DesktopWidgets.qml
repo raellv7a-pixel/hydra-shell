@@ -366,15 +366,15 @@ Variants {
 
           readonly property int barOffsetTop: {
             if (barPos !== "top")
-              return Style.marginM;
+              return Style.spaceS;
             const floatMarginV = barFloating ? Math.ceil(Settings.data.bar.marginVertical) : 0;
-            return barHeight + floatMarginV + Style.marginM;
+            return barHeight + floatMarginV + Style.spaceS;
           }
           readonly property int barOffsetRight: {
             if (barPos !== "right")
-              return Style.marginM;
+              return Style.spaceS;
             const floatMarginH = barFloating ? Math.ceil(Settings.data.bar.marginHorizontal) : 0;
-            return barHeight + floatMarginH + Style.marginM;
+            return barHeight + floatMarginH + Style.spaceS;
           }
 
           // Internal state for drag tracking (session-only, resets on restart)
@@ -400,11 +400,11 @@ Variants {
           x: panelInternal.isDragging ? panelInternal.dragOffsetX : panelInternal.baseX
           y: panelInternal.isDragging ? panelInternal.dragOffsetY : panelInternal.baseY
 
-          width: controlsLayout.implicitWidth + Style.margin2XL
-          height: controlsLayout.implicitHeight + Style.margin2XL
+          width: controlsLayout.implicitWidth + Style.paddingPanel * 2
+          height: controlsLayout.implicitHeight + Style.paddingPanel * 2
 
-          color: Qt.rgba(Color.mSurface.r, Color.mSurface.g, Color.mSurface.b, 0.85)
-          radius: Style.radiusL
+          color: Qt.alpha(Color.mSurfaceContainerHigh, 0.92)
+          radius: Style.radiusPopover
           border {
             width: Style.borderS
             color: Color.mOutline
@@ -456,18 +456,26 @@ Variants {
               panelInternal.isDragging = false;
             }
           }
+          NStateLayer {
+            anchors.fill: parent
+            hovered: dragArea.containsMouse
+            pressed: dragArea.pressed
+            dragged: panelInternal.isDragging
+            stateColor: Color.mPrimary
+            radius: Style.radiusPopover
+          }
 
           ColumnLayout {
             id: controlsLayout
             anchors {
               fill: parent
-              margins: Style.marginXL
+              margins: Style.paddingPanel
             }
-            spacing: Style.marginL
+            spacing: Style.spaceS
 
             RowLayout {
               Layout.alignment: Qt.AlignRight
-              spacing: Style.marginS
+              spacing: Style.spaceXS
 
               NIconButton {
                 id: addWidgetButton
@@ -486,7 +494,7 @@ Variants {
                                    icon: "layout-grid-add"
                                  });
                     }
-                    var globalPos = addWidgetButton.mapToItem(null, 0, addWidgetButton.height + Style.marginS);
+                    var globalPos = addWidgetButton.mapToItem(null, 0, addWidgetButton.height + Style.spaceXS);
                     popupMenuWindow.showDynamicContextMenu(items, globalPos.x, globalPos.y, function (widgetId) {
                       addWidgetToCurrentScreen(widgetId);
                       return false;
@@ -524,8 +532,8 @@ Variants {
                 text: I18n.tr("panels.desktop-widgets.edit-mode-exit-button")
                 icon: "logout"
                 outlined: false
-                fontSize: Style.fontSizeS
-                iconSize: Style.fontSizeM
+                fontSize: Style.fontSizeLabelMedium
+                iconSize: Style.fontSizeLabelLarge
                 onClicked: DesktopWidgetRegistry.editMode = false
               }
             }
@@ -534,7 +542,7 @@ Variants {
               Layout.alignment: Qt.AlignRight
               Layout.maximumWidth: 300 * Style.uiScaleRatio
               text: I18n.tr("panels.desktop-widgets.edit-mode-controls-explanation")
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeBodySmall
               color: Color.mOnSurfaceVariant
               horizontalAlignment: Text.AlignRight
               wrapMode: Text.WordWrap

@@ -95,15 +95,15 @@ Singleton {
 
       command: {
         switch (stage) {
-        case "mkdir":
+          case "mkdir":
           return ["mkdir", "-p", "--", destinationDirectory];
-        case "download":
+          case "download":
           return ["curl", "--fail", "--location", "--silent", "--show-error", "--retry", "2", "--retry-delay", "1", "--connect-timeout", "15", "--max-time", "180", "--output", temporaryPath, url];
-        case "validate":
+          case "validate":
           return ["file", "--brief", "--mime-type", "--", temporaryPath];
-        case "commit":
+          case "commit":
           return ["mv", "--force", "--", temporaryPath, finalPath];
-        default:
+          default:
           return [];
         }
       }
@@ -310,9 +310,7 @@ Singleton {
       retrySearch = request;
       const retryAfterHeader = xhr.getResponseHeader("Retry-After");
       const retryAfter = retryAfterHeader ? Number(retryAfterHeader) : NaN;
-      const delayMs = xhr.status === 429
-        ? Math.max(1000, (isNaN(retryAfter) ? 60 : retryAfter) * 1000)
-        : Math.min(8000, 1000 * Math.pow(2, request.attempt - 1));
+      const delayMs = xhr.status === 429 ? Math.max(1000, (isNaN(retryAfter) ? 60 : retryAfter) * 1000) : Math.min(8000, 1000 * Math.pow(2, request.attempt - 1));
       retrySeconds = Math.ceil(delayMs / 1000);
       retryTimer.interval = delayMs;
       retryTimer.restart();
@@ -327,7 +325,9 @@ Singleton {
     } else if (xhr.status === 0) {
       _publishSearchFailure(I18n.tr("wallpaper.wallhaven.error-network"));
     } else {
-      _publishSearchFailure(I18n.tr("wallpaper.wallhaven.error-api", { status: xhr.status }));
+      _publishSearchFailure(I18n.tr("wallpaper.wallhaven.error-api", {
+                                      status: xhr.status
+                                    }));
     }
   }
 
@@ -354,21 +354,7 @@ Singleton {
   }
 
   function _cacheKey(request) {
-    return JSON.stringify([
-                            request.query,
-                            request.page,
-                            request.categories,
-                            request.purity,
-                            request.sorting,
-                            request.order,
-                            request.topRange,
-                            request.sorting === "random" ? request.seed : "",
-                            request.minResolution,
-                            request.resolutions,
-                            request.ratios,
-                            request.colors,
-                            request.authenticated
-                          ]);
+    return JSON.stringify([request.query, request.page, request.categories, request.purity, request.sorting, request.order, request.topRange, request.sorting === "random" ? request.seed : "", request.minResolution, request.resolutions, request.ratios, request.colors, request.authenticated]);
   }
 
   function _cacheGet(key) {

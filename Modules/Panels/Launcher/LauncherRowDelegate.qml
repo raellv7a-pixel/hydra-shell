@@ -102,9 +102,8 @@ Item {
     z: 101
 
     Behavior on x {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
     }
   }

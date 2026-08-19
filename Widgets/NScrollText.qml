@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import qs.Commons
+import qs.Widgets
 
 /*
 NScrollText {
@@ -182,11 +183,11 @@ Item {
       }
     }
 
-    NumberAnimation on x {
+    NAnim on x {
       running: root.state === NScrollText.ScrollState.Resetting
       to: 0
       duration: root.resettingDuration
-      easing.type: Easing.OutQuad
+      motionType: NAnim.StandardSpatial
       onFinished: {
         root.state = NScrollText.ScrollState.None;
         root.updateState();

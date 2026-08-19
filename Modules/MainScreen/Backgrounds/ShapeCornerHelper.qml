@@ -36,6 +36,25 @@ Singleton {
   }
 
   /**
+  * Map the two edges meeting at one panel corner to a corner state.
+  * `touchingVerticalEdge` is the left/right screen edge; `touchingHorizontalEdge`
+  * is the top/bottom screen edge. Touching both (a real screen corner) or
+  * neither yields a normal rounded corner; touching exactly one edge inverts
+  * the corner along that edge's axis. Shared by SmartPanel (bar-attached
+  * panels) and LauncherOverlayWindow (standalone overlay), which both feed
+  * this same leaf decision from their own edge/bar-attachment detection.
+  */
+  function cornerStateFromEdges(touchingVerticalEdge, touchingHorizontalEdge) {
+    if (touchingVerticalEdge && touchingHorizontalEdge)
+      return 0;
+    if (touchingVerticalEdge)
+      return 2;
+    if (touchingHorizontalEdge)
+      return 1;
+    return 0;
+  }
+
+  /**
   * Get PathArc direction for a corner based on its multipliers
   * Uses XOR logic: if X inverted differs from Y inverted, use Counterclockwise
   * This creates the outer curve effect for inverted corners

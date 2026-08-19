@@ -132,7 +132,7 @@ Singleton {
 
     onExited: (exitCode, exitStatus) => {
       if (!root.captureEnabled || !root.evtestAvailable)
-        return;
+      return;
 
       root._restartAttempts++;
       if (root._restartAttempts > 5) {
@@ -157,11 +157,11 @@ Singleton {
   readonly property string modPrefix: {
     var p = "";
     if (metaHeld)
-      p += "󰴈 +";
+    p += "󰴈 +";
     if (ctrlHeld)
-      p += "CTRL+";
+    p += "CTRL+";
     if (altHeld)
-      p += "ALT+";
+    p += "ALT+";
     return p;
   }
 
@@ -287,64 +287,64 @@ Singleton {
 
   // ── Key label (case-aware via CapsLock & ShiftMap) ───
   readonly property var shiftMap: ({
-      "1": "!",
-      "2": "@",
-      "3": "#",
-      "4": "$",
-      "5": "%",
-      "6": "^",
-      "7": "&",
-      "8": "*",
-      "9": "(",
-      "0": ")",
-      "MINUS": "_",
-      "EQUAL": "+",
-      "LEFTBRACE": "{",
-      "RIGHTBRACE": "}",
-      "SEMICOLON": ":",
-      "APOSTROPHE": "\"",
-      "GRAVE": "~",
-      "BACKSLASH": "|",
-      "COMMA": "<",
-      "DOT": ">",
-      "SLASH": "?"
-    })
+                                     "1": "!",
+                                     "2": "@",
+                                     "3": "#",
+                                     "4": "$",
+                                     "5": "%",
+                                     "6": "^",
+                                     "7": "&",
+                                     "8": "*",
+                                     "9": "(",
+                                     "0": ")",
+                                     "MINUS": "_",
+                                     "EQUAL": "+",
+                                     "LEFTBRACE": "{",
+                                     "RIGHTBRACE": "}",
+                                     "SEMICOLON": ":",
+                                     "APOSTROPHE": "\"",
+                                     "GRAVE": "~",
+                                     "BACKSLASH": "|",
+                                     "COMMA": "<",
+                                     "DOT": ">",
+                                     "SLASH": "?"
+                                   })
   readonly property var normalMap: ({
-      "MINUS": "-",
-      "EQUAL": "=",
-      "LEFTBRACE": "[",
-      "RIGHTBRACE": "]",
-      "SEMICOLON": ";",
-      "APOSTROPHE": "'",
-      "GRAVE": "`",
-      "BACKSLASH": "\\",
-      "COMMA": ",",
-      "DOT": ".",
-      "SLASH": "/"
-    })
+                                      "MINUS": "-",
+                                      "EQUAL": "=",
+                                      "LEFTBRACE": "[",
+                                      "RIGHTBRACE": "]",
+                                      "SEMICOLON": ";",
+                                      "APOSTROPHE": "'",
+                                      "GRAVE": "`",
+                                      "BACKSLASH": "\\",
+                                      "COMMA": ",",
+                                      "DOT": ".",
+                                      "SLASH": "/"
+                                    })
 
   readonly property var specialMap: ({
-      "BACKSPACE": "󰁮",
-      "ENTER": "󰌑",
-      "ESC": "󱊷",
-      "SPACE": "󱁐",
-      "TAB": "󰌒",
-      "DELETE": "󰆴",
-      "UP": "↑",
-      "DOWN": "↓",
-      "LEFT": "←",
-      "RIGHT": "→",
-      "HOME": "Home",
-      "END": "End",
-      "PAGEUP": "PgUp",
-      "PAGEDOWN": "PgDn",
-      "INSERT": "Ins",
-      "CAPSLOCK": "Caps",
-      "NUMLOCK": "Num",
-      "SCROLLLOCK": "Scr",
-      "SYSRQ": "PrtSc",
-      "PAUSE": "Pause"
-    })
+                                       "BACKSPACE": "󰁮",
+                                       "ENTER": "󰌑",
+                                       "ESC": "󱊷",
+                                       "SPACE": "󱁐",
+                                       "TAB": "󰌒",
+                                       "DELETE": "󰆴",
+                                       "UP": "↑",
+                                       "DOWN": "↓",
+                                       "LEFT": "←",
+                                       "RIGHT": "→",
+                                       "HOME": "Home",
+                                       "END": "End",
+                                       "PAGEUP": "PgUp",
+                                       "PAGEDOWN": "PgDn",
+                                       "INSERT": "Ins",
+                                       "CAPSLOCK": "Caps",
+                                       "NUMLOCK": "Num",
+                                       "SCROLLLOCK": "Scr",
+                                       "SYSRQ": "PrtSc",
+                                       "PAUSE": "Pause"
+                                     })
 
   function keyLabel(k) {
     if (specialMap[k] !== undefined)

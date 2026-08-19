@@ -11,6 +11,9 @@ import qs.Widgets.AudioSpectrum
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: title
 
   property ShellScreen screen
   property string widgetId: ""
@@ -140,21 +143,19 @@ Item {
   }
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.InOutCubic
+    NAnim {
+      duration: Style.motionDurationDefaultEffects
+      motionType: NAnim.StandardEffects
     }
   }
   Behavior on implicitWidth {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.InOutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
   }
   Behavior on implicitHeight {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.InOutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
   }
 
@@ -236,22 +237,31 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: Style.toOdd(isVertical ? (isHidden ? 0 : verticalSize) : (isHidden ? 0 : contentWidth))
     height: Style.toOdd(isVertical ? (isHidden ? 0 : verticalSize) : capsuleHeight)
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
     Behavior on width {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.InOutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
     }
     Behavior on height {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.InOutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
+    }
+
+    NStateLayer {
+      id: mediaStateLayer
+
+      anchors.fill: parent
+      hovered: mainMouseArea.containsMouse
+      pressed: mainMouseArea.pressed
+      focused: root.activeFocus
+      stateColor: Color.mSecondary
+      radius: parent.radius
     }
 
     Item {
@@ -377,6 +387,12 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: container
+    focusVisible: root.activeFocus
+    targetRadius: container.radius
+  }
+
   // Mouse interaction
   MouseArea {
     id: mainMouseArea
@@ -391,6 +407,11 @@ Item {
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton | Qt.ForwardButton | Qt.BackButton
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(mediaStateLayer, mouse.x, mouse.y);
+                 mediaStateLayer.rippleAt(point.x, point.y);
+               }
 
     onClicked: mouse => {
                  TooltipService.hide();
@@ -421,6 +442,15 @@ Item {
     }
     onExited: TooltipService.hide()
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.getPanel("mediaPlayerPanel", screen)?.toggle(container);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.getPanel("mediaPlayerPanel", screen)?.toggle(container);
+                         event.accepted = true;
+                       }
 
   // Components
   Component {

@@ -16,14 +16,20 @@ ColumnLayout {
 
   readonly property real cardWidth: Math.round(282 * Style.uiScaleRatio)
   readonly property real cardHeight: Math.round(158 * Style.uiScaleRatio)
-  readonly property real itemStride: cardWidth + Style.marginM
+  readonly property real itemStride: cardWidth + Style.spaceS
 
   readonly property var pinnedSpecials: Array.from(Settings.data.workspaceManager.pinnedSpecials || [])
   readonly property var customOrder: Array.from(Settings.data.workspaceManager.customOrder || [])
 
   readonly property var carouselModel: {
     if (special && Settings.data.workspaceManager.hideSpecials) {
-      return [{ "isAddAction": true, "id": 0, "name": "" }];
+      return [
+            {
+              "isAddAction": true,
+              "id": 0,
+              "name": ""
+            }
+          ];
     }
 
     let list = Array.from(workspaces || []);
@@ -33,27 +39,36 @@ ColumnLayout {
         list = list.filter(ws => ws.active === true || ws.isActive === true);
       }
       list.sort((a, b) => {
-        const pinA = pinnedSpecials.includes(a.name);
-        const pinB = pinnedSpecials.includes(b.name);
-        if (pinA && !pinB) return -1;
-        if (!pinA && pinB) return 1;
-        return (a.id || 0) - (b.id || 0);
-      });
+                  const pinA = pinnedSpecials.includes(a.name);
+                  const pinB = pinnedSpecials.includes(b.name);
+                  if (pinA && !pinB)
+                  return -1;
+                  if (!pinA && pinB)
+                  return 1;
+                  return (a.id || 0) - (b.id || 0);
+                });
     } else if (customOrder.length > 0) {
       list.sort((a, b) => {
-        const keyA = String(a.id);
-        const keyB = String(b.id);
-        const idxA = customOrder.indexOf(keyA);
-        const idxB = customOrder.indexOf(keyB);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return (a.id || 0) - (b.id || 0);
-      });
+                  const keyA = String(a.id);
+                  const keyB = String(b.id);
+                  const idxA = customOrder.indexOf(keyA);
+                  const idxB = customOrder.indexOf(keyB);
+                  if (idxA !== -1 && idxB !== -1)
+                  return idxA - idxB;
+                  if (idxA !== -1)
+                  return -1;
+                  if (idxB !== -1)
+                  return 1;
+                  return (a.id || 0) - (b.id || 0);
+                });
     }
 
     if (special)
-      list.push({ "isAddAction": true, "id": 0, "name": "" });
+      list.push({
+                  "isAddAction": true,
+                  "id": 0,
+                  "name": ""
+                });
 
     return list;
   }
@@ -76,7 +91,8 @@ ColumnLayout {
   }
 
   function togglePinSpecial(wsName) {
-    if (!wsName) return;
+    if (!wsName)
+      return;
     const current = Array.from(Settings.data.workspaceManager.pinnedSpecials || []);
     const idx = current.indexOf(wsName);
     if (idx !== -1) {
@@ -87,16 +103,16 @@ ColumnLayout {
     Settings.data.workspaceManager.pinnedSpecials = current;
   }
 
-  spacing: Style.marginS
+  spacing: Style.spaceXS
 
   RowLayout {
     Layout.fillWidth: true
-    spacing: Style.marginS
+    spacing: Style.spaceXS
 
     NText {
       Layout.fillWidth: true
       text: root.title
-      pointSize: Style.fontSizeM
+      pointSize: Style.fontSizeTitleSmall
       font.weight: Style.fontWeightBold
     }
 
@@ -110,7 +126,7 @@ ColumnLayout {
 
     NText {
       text: carouselList.count ? qsTr("%1 of %2").arg(carouselList.currentIndex + 1).arg(carouselList.count) : ""
-      pointSize: Style.fontSizeXS
+      pointSize: Style.fontSizeLabelSmall
       color: Color.mOnSurfaceVariant
     }
     NIconButton {
@@ -138,7 +154,7 @@ ColumnLayout {
       anchors.fill: parent
       orientation: ListView.Horizontal
       model: root.carouselModel
-      spacing: Style.marginM
+      spacing: Style.spaceS
       clip: true
       reuseItems: !root.overview.dragging
       cacheBuffer: root.cardWidth * 2
@@ -152,12 +168,11 @@ ColumnLayout {
           currentIndex = Math.max(0, Math.min(count - 1, Math.round(contentX / root.itemStride)));
       }
 
-      NumberAnimation {
+      NAnim {
         id: carouselAnimation
         target: carouselList
         property: "contentX"
-        duration: Settings.data.general.animationDisabled ? 0 : 280
-        easing.type: Easing.OutQuint
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
 
       delegate: Item {
@@ -180,11 +195,8 @@ ColumnLayout {
                 overview: root.overview
                 isSpecial: root.special
                 livePreviews: root.livePreviews
-                isPrivate: root.overview.isWorkspacePrivate(delegateRoot.modelData.id,
-                                                            delegateRoot.modelData.name)
-                inViewport: delegateRoot.x + delegateRoot.width >= carouselList.contentX - 50
-                            && delegateRoot.x <= carouselList.contentX + carouselList.width + 50
-                            && !root.overview.overviewGrid
+                isPrivate: root.overview.isWorkspacePrivate(delegateRoot.modelData.id, delegateRoot.modelData.name)
+                inViewport: delegateRoot.x + delegateRoot.width >= carouselList.contentX - 50 && delegateRoot.x <= carouselList.contentX + carouselList.width + 50 && !root.overview.overviewGrid
               }
 
               NIconButton {
@@ -192,7 +204,7 @@ ColumnLayout {
                 visible: root.special
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
-                anchors.margins: Style.marginS
+                anchors.margins: Style.spaceXS
                 icon: root.pinnedSpecials.includes(delegateRoot.modelData.name) ? "pin-filled" : "pin"
                 baseSize: Style.baseWidgetSize * 0.72
                 colorFg: root.pinnedSpecials.includes(delegateRoot.modelData.name) ? Color.mPrimary : Color.mOnSurfaceVariant
@@ -208,23 +220,30 @@ ColumnLayout {
           active: delegateRoot.modelData.isAddAction === true
           sourceComponent: Component {
             Rectangle {
-              radius: Style.radiusL
-              color: addArea.containsMouse ? Color.mSurfaceContainerHigh : Color.mSurfaceContainer
+              radius: Style.radiusCard
+              color: Color.mSurfaceContainer
               border.width: Style.borderS
               border.color: addArea.containsMouse ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.72)
 
               Row {
                 anchors.centerIn: parent
-                spacing: Style.marginS
+                spacing: Style.spaceXS
                 NIcon {
                   icon: "plus"
-                  pointSize: Style.fontSizeL
+                  pointSize: Style.fontSizeHeadlineSmall
                   color: Color.mPrimary
                 }
                 NText {
                   text: qsTr("New special workspace")
                   color: Color.mOnSurfaceVariant
                 }
+              }
+              NStateLayer {
+                anchors.fill: parent
+                hovered: addArea.containsMouse
+                pressed: addArea.pressed
+                stateColor: Color.mPrimary
+                radius: Style.radiusCard
               }
               MouseArea {
                 id: addArea
@@ -243,34 +262,42 @@ ColumnLayout {
       target: carouselList
       acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
       onWheel: event => {
-        const vertical = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
-        const pixel = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.pixelDelta.x;
-        root.accumulatedWheelDelta += pixel !== 0 ? pixel * 2 : vertical;
-        if (Math.abs(root.accumulatedWheelDelta) >= 80) {
-          root.moveBy(root.accumulatedWheelDelta > 0 ? -1 : 1);
-          root.accumulatedWheelDelta = 0;
-        }
-        event.accepted = true;
-      }
+                 const vertical = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
+                 const pixel = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.pixelDelta.x;
+                 root.accumulatedWheelDelta += pixel !== 0 ? pixel * 2 : vertical;
+                 if (Math.abs(root.accumulatedWheelDelta) >= 80) {
+                   root.moveBy(root.accumulatedWheelDelta > 0 ? -1 : 1);
+                   root.accumulatedWheelDelta = 0;
+                 }
+                 event.accepted = true;
+               }
     }
 
     Rectangle {
       anchors.left: parent.left
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      width: Style.marginM
+      width: Style.spaceS
       color: Color.mSurface
       opacity: carouselList.contentX > 1 ? 0.72 : 0
-      Behavior on opacity { NumberAnimation { duration: Style.animationFast } }
+      Behavior on opacity {
+        NAnim {
+          motionType: NAnim.StandardEffects
+        }
+      }
     }
     Rectangle {
       anchors.right: parent.right
       anchors.top: parent.top
       anchors.bottom: parent.bottom
-      width: Style.marginM
+      width: Style.spaceS
       color: Color.mSurface
       opacity: carouselList.contentX < carouselList.contentWidth - carouselList.width - 1 ? 0.72 : 0
-      Behavior on opacity { NumberAnimation { duration: Style.animationFast } }
+      Behavior on opacity {
+        NAnim {
+          motionType: NAnim.StandardEffects
+        }
+      }
     }
   }
 }

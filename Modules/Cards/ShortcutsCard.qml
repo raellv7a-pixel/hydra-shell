@@ -8,7 +8,7 @@ import qs.Widgets
 
 RowLayout {
   Layout.fillWidth: true
-  spacing: Style.marginL
+  spacing: Style.paddingCard
 
   NBox {
     Layout.fillWidth: true
@@ -18,7 +18,7 @@ RowLayout {
     RowLayout {
       id: leftContent
       anchors.fill: parent
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       Item {
         Layout.fillWidth: true
@@ -58,7 +58,7 @@ RowLayout {
     RowLayout {
       id: rightContent
       anchors.fill: parent
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       Item {
         Layout.fillWidth: true

@@ -133,8 +133,8 @@ Popup {
   anchors.centerIn: Overlay.overlay
 
   background: Rectangle {
-    color: Color.mSurfaceVariant
-    radius: Style.iRadiusL
+    color: Color.mSurfaceContainerHigh
+    radius: Style.radiusPopover
     border.color: Color.mOutline
     border.width: Style.borderS
   }
@@ -279,8 +279,8 @@ Popup {
       Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 45
-        color: Color.mSurfaceVariant
-        radius: Style.iRadiusS
+        color: Color.mSurfaceContainer
+        radius: Style.radiusControl
         border.color: Color.mOutline
         border.width: Style.borderS
 
@@ -406,8 +406,8 @@ Popup {
       Rectangle {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Color.mSurface
-        radius: Style.iRadiusM
+        color: Color.mSurfaceContainerLow
+        radius: Style.radiusControl
         border.color: Color.mOutline
         border.width: Style.borderS
 
@@ -460,7 +460,7 @@ Popup {
           model: filteredModel
           visible: filePickerPanel.viewMode
           reuseItems: true
-          gradientColor: Color.mSurface
+          gradientColor: Color.mSurfaceContainerLow
 
           property int columns: Math.max(1, Math.floor(availableWidth / 120))
           property int itemSize: Math.floor((availableWidth - leftMargin - rightMargin - (columns * Style.marginS)) / columns)
@@ -478,39 +478,58 @@ Popup {
             width: gridView.itemSize
             height: gridView.cellHeight
             color: "transparent"
-            radius: Style.iRadiusM
+            radius: gridMorph.radius
+            scale: gridMorph.scale
 
             property bool isSelected: filePickerPanel.currentSelection.includes(model.filePath)
 
-            Rectangle {
-              anchors.fill: parent
-              color: "transparent"
-              radius: parent.radius
-              border.color: isSelected ? Color.mSecondary : Color.mSurface
-              border.width: Style.borderL
-              Behavior on color {
-                ColorAnimation {
-                  duration: Style.animationFast
-                }
+            activeFocusOnTab: true
+            Accessible.role: Accessible.ListItem
+            Accessible.name: model.fileName
+            Accessible.selected: isSelected
+
+            function activateEntry(modifiers) {
+              if (model.fileIsDir) {
+                if (root.selectionMode === "folders")
+                  filePickerPanel.itemClicked(modifiers, model.filePath);
+              } else if (root.selectionMode === "files") {
+                filePickerPanel.itemClicked(modifiers, model.filePath);
               }
             }
 
-            Rectangle {
+            function openEntry() {
+              if (model.fileIsDir) {
+                folderModel.folder = "file://" + model.filePath;
+                root.currentPath = model.filePath;
+              } else if (root.selectionMode === "files") {
+                filePickerPanel.currentSelection = [model.filePath];
+                root.confirmSelection();
+              }
+            }
+
+            NShapeMorph {
+              id: gridMorph
+
+              hovered: mouseArea.containsMouse
+              pressed: mouseArea.pressed
+              focused: gridItem.activeFocus
+              selected: gridItem.isSelected
+              restingRadius: Style.radiusControl
+              hoverRadius: Style.radiusControlChecked
+              pressedRadius: Style.radiusControlPressed
+              selectedRadius: Style.radiusControlChecked
+            }
+
+            NStateLayer {
+              id: gridStateLayer
+
               anchors.fill: parent
-              color: (mouseArea.containsMouse && !isSelected) ? Color.mHover : "transparent"
               radius: parent.radius
-              border.color: (mouseArea.containsMouse && !isSelected) ? Color.mHover : "transparent"
-              border.width: Style.borderS
-              Behavior on color {
-                ColorAnimation {
-                  duration: Style.animationFast
-                }
-              }
-              Behavior on border.color {
-                ColorAnimation {
-                  duration: Style.animationFast
-                }
-              }
+              hovered: mouseArea.containsMouse
+              pressed: mouseArea.pressed
+              focused: gridItem.activeFocus
+              selected: gridItem.isSelected
+              stateColor: Color.mPrimary
             }
 
             ColumnLayout {
@@ -550,8 +569,8 @@ Popup {
 
                   Rectangle {
                     anchors.fill: parent
-                    color: Color.mSurfaceVariant
-                    radius: Style.iRadiusS
+                    color: Color.mSurfaceContainer
+                    radius: Style.radiusControl
                     visible: thumbnail.status === Image.Loading
                     NIcon {
                       icon: "filepicker-photo"
@@ -565,14 +584,7 @@ Popup {
                 NIcon {
                   icon: model.fileIsDir ? "filepicker-folder" : root.getFileIcon(model.fileName)
                   pointSize: Style.fontSizeXXL * 2
-                  color: {
-                    if (isSelected)
-                      return Color.mSecondary;
-                    else if (mouseArea.containsMouse)
-                      return Color.mOnHover;
-                    else
-                      return model.fileIsDir ? Color.mPrimary : Color.mOnSurfaceVariant;
-                  }
+                  color: isSelected ? Color.mPrimary : (model.fileIsDir ? Color.mPrimary : Color.mOnSurfaceVariant)
                   anchors.centerIn: parent
                   visible: !iconContainer.isImage || thumbnail.status !== Image.Ready
                 }
@@ -583,7 +595,7 @@ Popup {
                   anchors.margins: Style.marginS
                   width: 24
                   height: 24
-                  radius: Math.min(Style.iRadiusL, width / 2)
+                  radius: width / 2
                   color: Color.mSecondary
                   border.color: Color.mOutline
                   border.width: Style.borderS
@@ -599,14 +611,7 @@ Popup {
 
               NText {
                 text: model.fileName
-                color: {
-                  if (isSelected)
-                    return Color.mSecondary;
-                  else if (mouseArea.containsMouse)
-                    return Color.mOnHover;
-                  else
-                    return Color.mOnSurfaceVariant;
-                }
+                color: isSelected ? Color.mPrimary : Color.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 font.weight: isSelected ? Style.fontWeightBold : Style.fontWeightRegular
                 Layout.fillWidth: true
@@ -622,40 +627,36 @@ Popup {
               anchors.fill: parent
               hoverEnabled: true
               acceptedButtons: Qt.LeftButton | Qt.RightButton
+              cursorShape: Qt.PointingHandCursor
+              onPressed: mouse => {
+                           gridItem.forceActiveFocus();
+                           gridStateLayer.rippleAt(mouse.x, mouse.y);
+                         }
 
               onClicked: mouse => {
-                           if (mouse.button === Qt.LeftButton) {
-                             if (model.fileIsDir) {
-                               // In folder mode, single click selects the folder
-                               if (root.selectionMode === "folders") {
-                                 filePickerPanel.itemClicked(mouse.modifiers, model.filePath);
-                               }
-                               // In file mode, single click on folder does nothing (must double-click to enter)
-                             } else {
-                               // Single click on file selects it (only in file mode)
-                               if (root.selectionMode === "files") {
-                                 filePickerPanel.itemClicked(mouse.modifiers, model.filePath);
-                               }
-                             }
-                           }
+                           if (mouse.button === Qt.LeftButton)
+                           gridItem.activateEntry(mouse.modifiers);
                          }
 
               onDoubleClicked: mouse => {
-                                 if (mouse.button === Qt.LeftButton) {
-                                   if (model.fileIsDir) {
-                                     // Double-click on folder always navigates into it
-                                     folderModel.folder = "file://" + model.filePath;
-                                     root.currentPath = model.filePath;
-                                   } else {
-                                     // Double-click on file selects and confirms (only in file mode)
-                                     if (root.selectionMode === "files") {
-                                       filePickerPanel.currentSelection = [model.filePath];
-                                       root.confirmSelection();
-                                     }
-                                   }
-                                 }
+                                 if (mouse.button === Qt.LeftButton)
+                                 gridItem.openEntry();
                                }
             }
+
+            NFocusRing {
+              focusVisible: gridItem.activeFocus
+              targetRadius: gridItem.radius
+            }
+
+            Keys.onSpacePressed: event => {
+                                   gridItem.activateEntry(Qt.NoModifier);
+                                   event.accepted = true;
+                                 }
+            Keys.onReturnPressed: event => {
+                                    gridItem.openEntry();
+                                    event.accepted = true;
+                                  }
           }
         }
 
@@ -666,24 +667,64 @@ Popup {
           anchors.margins: Style.marginS
           model: filteredModel
           visible: !filePickerPanel.viewMode
-          gradientColor: Color.mSurface
+          gradientColor: Color.mSurfaceContainerLow
 
           delegate: Rectangle {
             id: listItem
             width: listView.width
             height: 40
-            color: {
-              if (filePickerPanel.currentSelection.includes(model.filePath))
-                return Color.mSecondary;
-              if (mouseArea.containsMouse)
-                return Color.mHover;
-              return "transparent";
-            }
-            radius: Style.iRadiusS
-            Behavior on color {
-              ColorAnimation {
-                duration: Style.animationFast
+            readonly property bool isSelected: filePickerPanel.currentSelection.includes(model.filePath)
+
+            color: "transparent"
+            radius: listMorph.radius
+            scale: listMorph.scale
+            activeFocusOnTab: true
+            Accessible.role: Accessible.ListItem
+            Accessible.name: model.fileName
+            Accessible.selected: isSelected
+
+            function activateEntry(modifiers) {
+              if (model.fileIsDir) {
+                if (root.selectionMode === "folders")
+                  filePickerPanel.itemClicked(modifiers, model.filePath);
+              } else if (root.selectionMode === "files") {
+                filePickerPanel.itemClicked(modifiers, model.filePath);
               }
+            }
+
+            function openEntry() {
+              if (model.fileIsDir) {
+                folderModel.folder = "file://" + model.filePath;
+                root.currentPath = model.filePath;
+              } else if (root.selectionMode === "files") {
+                filePickerPanel.currentSelection = [model.filePath];
+                root.confirmSelection();
+              }
+            }
+
+            NShapeMorph {
+              id: listMorph
+
+              hovered: mouseArea.containsMouse
+              pressed: mouseArea.pressed
+              focused: listItem.activeFocus
+              selected: listItem.isSelected
+              restingRadius: Style.radiusControl
+              hoverRadius: Style.radiusControlChecked
+              pressedRadius: Style.radiusControlPressed
+              selectedRadius: Style.radiusControlChecked
+            }
+
+            NStateLayer {
+              id: listStateLayer
+
+              anchors.fill: parent
+              radius: parent.radius
+              hovered: mouseArea.containsMouse
+              pressed: mouseArea.pressed
+              focused: listItem.activeFocus
+              selected: listItem.isSelected
+              stateColor: Color.mPrimary
             }
 
             RowLayout {
@@ -695,12 +736,12 @@ Popup {
               NIcon {
                 icon: model.fileIsDir ? "filepicker-folder" : root.getFileIcon(model.fileName)
                 pointSize: Style.fontSizeL
-                color: model.fileIsDir ? (filePickerPanel.currentSelection.includes(model.filePath) ? Color.mOnSecondary : Color.mPrimary) : Color.mOnSurfaceVariant
+                color: model.fileIsDir ? Color.mPrimary : Color.mOnSurfaceVariant
               }
 
               NText {
                 text: model.fileName
-                color: filePickerPanel.currentSelection.includes(model.filePath) ? Color.mOnSecondary : Color.mOnSurface
+                color: Color.mOnSurface
                 pointSize: Style.fontSizeM
                 font.weight: filePickerPanel.currentSelection.includes(model.filePath) ? Style.fontWeightBold : Style.fontWeightRegular
                 Layout.fillWidth: true
@@ -709,7 +750,7 @@ Popup {
 
               NText {
                 text: model.fileIsDir ? "" : root.formatFileSize(model.fileSize)
-                color: filePickerPanel.currentSelection.includes(model.filePath) ? Color.mOnSecondary : Color.mOnSurfaceVariant
+                color: Color.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 visible: !model.fileIsDir
                 Layout.preferredWidth: implicitWidth
@@ -721,40 +762,36 @@ Popup {
               anchors.fill: parent
               hoverEnabled: true
               acceptedButtons: Qt.LeftButton | Qt.RightButton
+              cursorShape: Qt.PointingHandCursor
+              onPressed: mouse => {
+                           listItem.forceActiveFocus();
+                           listStateLayer.rippleAt(mouse.x, mouse.y);
+                         }
 
               onClicked: mouse => {
-                           if (mouse.button === Qt.LeftButton) {
-                             if (model.fileIsDir) {
-                               // In folder mode, single click selects the folder
-                               if (root.selectionMode === "folders") {
-                                 filePickerPanel.itemClicked(mouse.modifiers, model.filePath);
-                               }
-                               // In file mode, single click on folder does nothing (must double-click to enter)
-                             } else {
-                               // Single click on file selects it (only in file mode)
-                               if (root.selectionMode === "files") {
-                                 filePickerPanel.itemClicked(mouse.modifiers, model.filePath);
-                               }
-                             }
-                           }
+                           if (mouse.button === Qt.LeftButton)
+                           listItem.activateEntry(mouse.modifiers);
                          }
 
               onDoubleClicked: mouse => {
-                                 if (mouse.button === Qt.LeftButton) {
-                                   if (model.fileIsDir) {
-                                     // Double-click on folder always navigates into it
-                                     folderModel.folder = "file://" + model.filePath;
-                                     root.currentPath = model.filePath;
-                                   } else {
-                                     // Double-click on file selects and confirms (only in file mode)
-                                     if (root.selectionMode === "files") {
-                                       filePickerPanel.currentSelection = [model.filePath];
-                                       root.confirmSelection();
-                                     }
-                                   }
-                                 }
+                                 if (mouse.button === Qt.LeftButton)
+                                 listItem.openEntry();
                                }
             }
+
+            NFocusRing {
+              focusVisible: listItem.activeFocus
+              targetRadius: listItem.radius
+            }
+
+            Keys.onSpacePressed: event => {
+                                   listItem.activateEntry(Qt.NoModifier);
+                                   event.accepted = true;
+                                 }
+            Keys.onReturnPressed: event => {
+                                    listItem.openEntry();
+                                    event.accepted = true;
+                                  }
           }
         }
       }

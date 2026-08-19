@@ -1,6 +1,6 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Widgets
@@ -29,8 +29,6 @@ Item {
   property string editScale: ""
 
   anchors.fill: parent
-
-
 
   function computeSceneBounds(list) {
     if (!list || list.length === 0) {
@@ -178,9 +176,9 @@ Item {
       var hz = Number(modes[index].refresh || 0).toFixed(2).replace(/\.00$/, "");
       var compactLabel = modes[index].width + "x" + modes[index].height + (hz === "0" ? "" : "@" + hz);
       model.push({
-        "key": modes[index].id,
-        "name": compactLabel
-      });
+                   "key": modes[index].id,
+                   "name": compactLabel
+                 });
     }
     return model;
   }
@@ -439,50 +437,50 @@ Item {
                       cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
 
                       onPressed: mouse => {
-                        var scenePoint = dragArea.mapToItem(sceneCanvas, mouse.x, mouse.y);
-                        outputTile.pressSceneX = scenePoint.x;
-                        outputTile.pressSceneY = scenePoint.y;
-                        outputTile.pressOutputX = outputData.x;
-                        outputTile.pressOutputY = outputData.y;
-                        outputTile.dragging = true;
-                        outputTile.dragOffsetSceneX = 0;
-                        outputTile.dragOffsetSceneY = 0;
-                        if (mainInstance) {
-                          mainInstance.selectOutput(outputData.outputId);
-                        }
-                      }
+                                   var scenePoint = dragArea.mapToItem(sceneCanvas, mouse.x, mouse.y);
+                                   outputTile.pressSceneX = scenePoint.x;
+                                   outputTile.pressSceneY = scenePoint.y;
+                                   outputTile.pressOutputX = outputData.x;
+                                   outputTile.pressOutputY = outputData.y;
+                                   outputTile.dragging = true;
+                                   outputTile.dragOffsetSceneX = 0;
+                                   outputTile.dragOffsetSceneY = 0;
+                                   if (mainInstance) {
+                                     mainInstance.selectOutput(outputData.outputId);
+                                   }
+                                 }
 
                       onPositionChanged: mouse => {
-                        if (!(mouse.buttons & Qt.LeftButton) || !outputTile.dragging || root.sceneScale <= 0) {
-                          return;
-                        }
+                                           if (!(mouse.buttons & Qt.LeftButton) || !outputTile.dragging || root.sceneScale <= 0) {
+                                             return;
+                                           }
 
-                        var scenePoint = dragArea.mapToItem(sceneCanvas, mouse.x, mouse.y);
-                        outputTile.dragOffsetSceneX = scenePoint.x - outputTile.pressSceneX;
-                        outputTile.dragOffsetSceneY = scenePoint.y - outputTile.pressSceneY;
-                      }
+                                           var scenePoint = dragArea.mapToItem(sceneCanvas, mouse.x, mouse.y);
+                                           outputTile.dragOffsetSceneX = scenePoint.x - outputTile.pressSceneX;
+                                           outputTile.dragOffsetSceneY = scenePoint.y - outputTile.pressSceneY;
+                                         }
 
                       onReleased: mouse => {
-                        if (!outputTile.dragging) {
-                          return;
-                        }
+                                    if (!outputTile.dragging) {
+                                      return;
+                                    }
 
-                        outputTile.dragging = false;
+                                    outputTile.dragging = false;
 
-                        if (!mainInstance || root.sceneScale <= 0) {
-                          outputTile.dragOffsetSceneX = 0;
-                          outputTile.dragOffsetSceneY = 0;
-                          return;
-                        }
+                                    if (!mainInstance || root.sceneScale <= 0) {
+                                      outputTile.dragOffsetSceneX = 0;
+                                      outputTile.dragOffsetSceneY = 0;
+                                      return;
+                                    }
 
-                        var scenePoint = dragArea.mapToItem(sceneCanvas, mouse.x, mouse.y);
-                        var deltaX = (scenePoint.x - outputTile.pressSceneX) / root.sceneScale;
-                        var deltaY = (scenePoint.y - outputTile.pressSceneY) / root.sceneScale;
-                        mainInstance.setOutputPosition(outputData.outputId, outputTile.pressOutputX + deltaX, outputTile.pressOutputY + deltaY, true);
+                                    var scenePoint = dragArea.mapToItem(sceneCanvas, mouse.x, mouse.y);
+                                    var deltaX = (scenePoint.x - outputTile.pressSceneX) / root.sceneScale;
+                                    var deltaY = (scenePoint.y - outputTile.pressSceneY) / root.sceneScale;
+                                    mainInstance.setOutputPosition(outputData.outputId, outputTile.pressOutputX + deltaX, outputTile.pressOutputY + deltaY, true);
 
-                        outputTile.dragOffsetSceneX = 0;
-                        outputTile.dragOffsetSceneY = 0;
-                      }
+                                    outputTile.dragOffsetSceneX = 0;
+                                    outputTile.dragOffsetSceneY = 0;
+                                  }
 
                       onCanceled: {
                         outputTile.dragging = false;
@@ -569,10 +567,10 @@ Item {
                       model: root.resolutionModel(selectedOutput)
                       currentKey: selectedOutput ? selectedOutput.modeId : ""
                       onSelected: key => {
-                        if (selectedOutput && mainInstance) {
-                          mainInstance.setOutputResolution(selectedOutput.outputId, key);
-                        }
-                      }
+                                    if (selectedOutput && mainInstance) {
+                                      mainInstance.setOutputResolution(selectedOutput.outputId, key);
+                                    }
+                                  }
                     }
                   }
 
@@ -660,7 +658,6 @@ Item {
                     pointSize: Style.fontSizeS
                     color: Color.mOnSurfaceVariant
                   }
-
                 }
               }
 
@@ -775,9 +772,11 @@ Item {
 
                     NText {
                       text: {
-                        if (!mainInstance) return "";
+                        if (!mainInstance)
+                          return "";
                         var cfg = mainInstance.getConfigurationScript();
-                        if (cfg.error) return cfg.error;
+                        if (cfg.error)
+                          return cfg.error;
                         return cfg.content || "";
                       }
                       pointSize: Style.fontSizeS

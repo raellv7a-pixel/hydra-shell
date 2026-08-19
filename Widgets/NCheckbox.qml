@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.Commons
+import qs.Widgets
 
 RowLayout {
   id: root
@@ -11,6 +12,7 @@ RowLayout {
   property string description: ""
   property bool checked: false
   property bool hovering: false
+  readonly property bool pressed: boxMouseArea.pressed
   property color activeColor: Color.mPrimary
   property color activeOnColor: Color.mOnPrimary
   property int baseSize: root.defaultSize
@@ -23,6 +25,11 @@ RowLayout {
   signal exited
 
   Layout.fillWidth: true
+  activeFocusOnTab: true
+  Accessible.role: Accessible.CheckBox
+  Accessible.name: root.label
+  Accessible.description: root.description
+  Accessible.checked: root.checked
 
   NLabel {
     label: root.label
@@ -39,40 +46,92 @@ RowLayout {
   Rectangle {
     id: box
 
-    opacity: enabled ? 1.0 : 0.6
+    opacity: root.enabled ? Style.opacityFull : Style.disabledContentOpacity
     Layout.margins: Style.borderS
     implicitWidth: Style.toOdd(root.baseSize)
     implicitHeight: Style.toOdd(root.baseSize)
-    radius: Style.iRadiusXS * (root.baseSize / root.defaultSize)
+    radius: boxMorph.radius
+    scale: boxMorph.scale
     color: root.checked ? root.activeColor : Color.mSurface
     border.color: Color.mOutline
     border.width: Style.borderS
 
     Behavior on color {
-      ColorAnimation {
-        duration: Style.animationFast
+      enabled: !Color.isTransitioning
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
 
     Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationFast
+      enabled: !Color.isTransitioning
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
 
+    NShapeMorph {
+      id: boxMorph
+
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      selected: root.checked
+      restingRadius: Style.radiusControlChecked * (root.baseSize / root.defaultSize)
+      hoverRadius: Style.radiusControlPressed * (root.baseSize / root.defaultSize)
+      pressedRadius: Style.radiusControlPressed * (root.baseSize / root.defaultSize)
+      selectedRadius: Style.radiusControlPressed * (root.baseSize / root.defaultSize)
+    }
+
+    NStateLayer {
+      id: boxStateLayer
+
+      anchors.fill: parent
+      radius: box.radius
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      focused: root.activeFocus
+      selected: root.checked
+      stateColor: root.checked ? root.activeOnColor : root.activeColor
+    }
+
     NIcon {
-      visible: root.checked
+      visible: true
       x: Style.pixelAlignCenter(parent.width, width)
       y: Style.pixelAlignCenter(parent.height, height)
       icon: "check"
       color: root.activeOnColor
       pointSize: Style.toOdd(root.baseSize * 0.5)
+      opacity: root.checked ? 1 : 0
+      scale: root.checked ? 1 : Style.morphPressedScale
+
+      Behavior on opacity {
+        NAnim {
+          duration: Style.motionDurationFastEffects
+          motionType: NAnim.StandardEffects
+        }
+      }
+
+      Behavior on scale {
+        NAnim {
+          motionType: NAnim.ExpressiveFastSpatial
+        }
+      }
+    }
+
+    NFocusRing {
+      focusVisible: root.activeFocus
+      targetRadius: box.radius
     }
 
     MouseArea {
+      id: boxMouseArea
+
       anchors.fill: parent
       cursorShape: Qt.PointingHandCursor
       hoverEnabled: true
+      enabled: root.enabled
       onEntered: {
         hovering = true;
         root.entered();
@@ -81,7 +140,24 @@ RowLayout {
         hovering = false;
         root.exited();
       }
+      onPressed: mouse => {
+                   root.forceActiveFocus();
+                   boxStateLayer.rippleAt(mouse.x, mouse.y);
+                 }
       onClicked: root.toggled(!root.checked)
     }
   }
+
+  Keys.onReturnPressed: event => {
+                          if (!root.enabled)
+                          return;
+                          root.toggled(!root.checked);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         if (!root.enabled)
+                         return;
+                         root.toggled(!root.checked);
+                         event.accepted = true;
+                       }
 }

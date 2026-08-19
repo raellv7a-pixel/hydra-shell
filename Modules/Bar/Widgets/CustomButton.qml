@@ -191,14 +191,14 @@ Item {
         return null;
       }
     })();
-    return baseColor !== null ? (forHover ? Qt.darker(baseColor, 1.2) : baseColor) : null;
+    return baseColor;
   }
 
   // Resolve icon color with priority: dynamic > static > default
   function _resolveIconColor(dynamicColorName, staticColorName, isHover) {
     if (dynamicColorName && dynamicColorName !== "") {
       if (dynamicColorName === "none") {
-        return isHover ? Color.mOnHover : Color.mOnSurface;
+        return Color.mOnSurface;
       }
       const color = _getColorValue(dynamicColorName, isHover);
       if (color !== null)
@@ -211,7 +211,7 @@ Item {
         return color;
     }
 
-    return isHover ? Color.mOnHover : Color.mOnSurface;
+    return Color.mOnSurface;
   }
 
   readonly property color iconColor: _resolveIconColor(_dynamicIconColor || _dynamicColor, colorizeSystemIcon, false)

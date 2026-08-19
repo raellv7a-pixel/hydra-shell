@@ -41,7 +41,7 @@ NCollapsible {
         fontSize: Style.fontSizeS
         iconSize: Style.fontSizeS
         fontWeight: Style.fontWeightSemiBold
-        buttonRadius: Style.iRadiusM
+        buttonRadius: Style.radiusControl
       }
     }
   }

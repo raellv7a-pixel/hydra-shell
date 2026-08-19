@@ -133,12 +133,16 @@ Rectangle {
   readonly property int coverBannerHeight: hasCoverBanner ? Math.round((Settings.data.appLauncher.coverHeight || 160) * Style.uiScaleRatio) : 0
 
   readonly property string profileWallpaperPath: {
-    if (coverMode === "none") return "";
-    if (coverMode === "custom") return Settings.data.appLauncher.coverPath !== "" ? Settings.preprocessPath(Settings.data.appLauncher.coverPath) : "";
-    if (coverMode === "random") return randomCoverPath !== "" ? Settings.preprocessPath(randomCoverPath) : "";
+    if (coverMode === "none")
+      return "";
+    if (coverMode === "custom")
+      return Settings.data.appLauncher.coverPath !== "" ? Settings.preprocessPath(Settings.data.appLauncher.coverPath) : "";
+    if (coverMode === "random")
+      return randomCoverPath !== "" ? Settings.preprocessPath(randomCoverPath) : "";
     // "auto" mode — use the current wallpaper
     var wp = WallpaperService.getWallpaper(screen?.name ?? "");
-    if (wp && !WallpaperService.isSolidColorPath(wp)) return wp;
+    if (wp && !WallpaperService.isSolidColorPath(wp))
+      return wp;
     return WallpaperService.defaultWallpaper || "";
   }
 
@@ -146,12 +150,12 @@ Rectangle {
     id: randomCoverProcess
     stdout: StdioCollector {}
     onExited: code => {
-      if (code === 0) {
-        root.randomCoverPath = String(stdout.text || "").trim();
-      } else {
-        root.randomCoverPath = "";
-      }
-    }
+                if (code === 0) {
+                  root.randomCoverPath = String(stdout.text || "").trim();
+                } else {
+                  root.randomCoverPath = "";
+                }
+              }
   }
 
   function pickRandomCover() {
@@ -160,8 +164,8 @@ Rectangle {
       return;
     }
     randomCoverProcess.exec({
-      command: ["bash", "-c", "dir=$1; find \"$dir\" -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \\) 2>/dev/null | shuf -n 1", "raell-launcher", Settings.preprocessPath(Settings.data.appLauncher.coverFolder)]
-    });
+                              command: ["bash", "-c", "dir=$1; find \"$dir\" -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \\) 2>/dev/null | shuf -n 1", "raell-launcher", Settings.preprocessPath(Settings.data.appLauncher.coverFolder)]
+                            });
   }
 
   readonly property int targetGridColumns: {
@@ -385,7 +389,6 @@ Rectangle {
       root.refreshAppPanelActions();
     }
   }
-
 
   function applyCategorySelection(tabIndex, categories) {
     const categoryList = categories || providerCategories;
@@ -789,8 +792,7 @@ Rectangle {
     }
 
     // Clipboard pin shortcut. Ctrl avoids stealing plain text input from search.
-    if (event.key === Qt.Key_P && (event.modifiers & Qt.ControlModifier)
-        && selectedIndex >= 0 && results && results[selectedIndex]) {
+    if (event.key === Qt.Key_P && (event.modifiers & Qt.ControlModifier) && selectedIndex >= 0 && results && results[selectedIndex]) {
       const pinItem = results[selectedIndex];
       const pinProvider = pinItem.provider || currentProvider;
       if (pinProvider && pinProvider.canPinItem && pinProvider.canPinItem(pinItem))
@@ -925,9 +927,8 @@ Rectangle {
   opacity: resultsReady ? 1.0 : 0.0
 
   Behavior on opacity {
-    OpacityAnimator {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.StandardEffects
     }
   }
 
@@ -959,9 +960,9 @@ Rectangle {
 
   ColumnLayout {
     anchors.fill: parent
-    anchors.topMargin: Style.marginM
-    anchors.bottomMargin: Style.marginM
-    spacing: Style.marginS
+    anchors.topMargin: Style.paddingCard
+    anchors.bottomMargin: Style.paddingCard
+    spacing: Style.spaceS
 
     // Header Cover Banner (when coverMode !== "none")
     Item {
@@ -969,14 +970,13 @@ Rectangle {
       visible: root.hasCoverBanner
       Layout.fillWidth: true
       Layout.preferredHeight: root.coverBannerHeight
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
+      Layout.leftMargin: Style.paddingCard
+      Layout.rightMargin: Style.paddingCard
       Layout.topMargin: 0
       clip: false
 
       // Two-layer elevation: a wide ambient halo plus a tight contact shadow.
-      // Both stay well inside the panel's side margins so they never bleed past
-      // the launcher edges (Style.marginM on each side, blurMax is 22px).
+      // The shadows stay inside the panel padding and never bleed past the launcher edge.
       NDropShadow {
         anchors.fill: bannerContainer
         source: bannerContainer
@@ -1002,7 +1002,7 @@ Rectangle {
       Rectangle {
         id: bannerContainer
         anchors.fill: parent
-        radius: Style.radiusL
+        radius: Style.radiusCard
         color: Color.mSurfaceContainerLow
         border.color: "transparent"
         border.width: 0
@@ -1012,7 +1012,7 @@ Rectangle {
           anchors.fill: parent
           imagePath: root.profileWallpaperPath
           imageFillMode: Image.PreserveAspectCrop
-          radius: Style.radiusL
+          radius: Style.radiusCard
         }
 
         Rectangle {
@@ -1020,29 +1020,44 @@ Rectangle {
           // Gradient-style overlay: stronger at bottom for text legibility
           gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.4) }
-            GradientStop { position: 0.6; color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.7) }
-            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40) }
+            GradientStop {
+              position: 0.0
+              color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.4)
+            }
+            GradientStop {
+              position: 0.6
+              color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.7)
+            }
+            GradientStop {
+              position: 1.0
+              color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40)
+            }
           }
-          radius: Style.radiusL
+          radius: Style.radiusCard
         }
 
         // Rim light: reads as a lit top edge, which is what actually sells the
         // floating look now that the shadow no longer carries it alone.
         Rectangle {
           anchors.fill: parent
-          radius: Style.radiusL
+          radius: Style.radiusCard
           gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.10) }
-            GradientStop { position: 0.35; color: Qt.rgba(1, 1, 1, 0.0) }
+            GradientStop {
+              position: 0.0
+              color: Qt.rgba(1, 1, 1, 0.10)
+            }
+            GradientStop {
+              position: 0.35
+              color: Qt.rgba(1, 1, 1, 0.0)
+            }
           }
         }
 
         // Hairline outline so the banner keeps a crisp edge against the panel
         Rectangle {
           anchors.fill: parent
-          radius: Style.radiusL
+          radius: Style.radiusCard
           color: "transparent"
           border.width: Style.borderS
           border.color: Qt.rgba(1, 1, 1, 0.14)
@@ -1050,57 +1065,62 @@ Rectangle {
 
         ColumnLayout {
           anchors.fill: parent
-          anchors.margins: Style.marginL
-          spacing: Style.marginS
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
 
-        Item { Layout.fillHeight: true }
+          Item {
+            Layout.fillHeight: true
+          }
 
-        RowLayout {
-          Layout.fillWidth: true
-          spacing: Style.marginS
-
-          NTextInput {
-            id: bannerSearchInput
+          RowLayout {
             Layout.fillWidth: true
-            radius: Style.iRadiusL
-            inputIconName: "search"
-            text: root.searchText
-            placeholderText: I18n.tr("placeholders.search-launcher")
-            fontSize: Style.fontSizeM
-            onTextChanged: root.searchText = text
+            spacing: Style.marginS
 
-            Component.onCompleted: {
-              if (bannerSearchInput.inputItem) {
-                bannerSearchInput.inputItem.forceActiveFocus();
-                bannerSearchInput.inputItem.Keys.onPressed.connect(function (event) {
-                  root.handleKeyPress(event);
-                });
+            NTextInput {
+              id: bannerSearchInput
+              Layout.fillWidth: true
+              radius: Style.radiusCapsule
+              inputIconName: "search"
+              text: root.searchText
+              placeholderText: I18n.tr("placeholders.search-launcher")
+              fontSize: Style.fontSizeBodyMedium
+              onTextChanged: root.searchText = text
+
+              Component.onCompleted: {
+                if (bannerSearchInput.inputItem) {
+                  bannerSearchInput.inputItem.forceActiveFocus();
+                  bannerSearchInput.inputItem.Keys.onPressed.connect(function (event) {
+                    root.handleKeyPress(event);
+                  });
+                }
+              }
+            }
+
+            NIconButton {
+              visible: root.showLayoutToggle
+              icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
+              tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
+              customRadius: Style.radiusControl
+              colorBg: Color.mSurfaceContainerHigh
+              colorBgHover: Color.mPrimaryContainer
+              colorFg: Color.mOnSurfaceVariant
+              colorFgHover: Color.mOnPrimaryContainer
+              colorBorder: "transparent"
+              colorBorderHover: "transparent"
+              Layout.preferredWidth: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
+              Layout.preferredHeight: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
+              onClicked: {
+                const current = Settings.data.appLauncher.viewMode;
+                if (current === "columns")
+                  Settings.data.appLauncher.viewMode = "grid";
+                else if (current === "grid")
+                  Settings.data.appLauncher.viewMode = "list";
+                else
+                  Settings.data.appLauncher.viewMode = "columns";
               }
             }
           }
-
-          NIconButton {
-            visible: root.showLayoutToggle
-            icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
-            tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
-            customRadius: Style.iRadiusL
-            colorBg: Color.mSurfaceContainerHigh
-            colorBgHover: Color.mPrimaryContainer
-            colorFg: Color.mOnSurfaceVariant
-            colorFgHover: Color.mOnPrimaryContainer
-            colorBorder: "transparent"
-            colorBorderHover: "transparent"
-            Layout.preferredWidth: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
-            Layout.preferredHeight: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
-            onClicked: {
-              const current = Settings.data.appLauncher.viewMode;
-              if (current === "columns") Settings.data.appLauncher.viewMode = "grid";
-              else if (current === "grid") Settings.data.appLauncher.viewMode = "list";
-              else Settings.data.appLauncher.viewMode = "columns";
-            }
-          }
         }
-      }
       } // ends bannerContainer
     } // ends coverBannerHeader
 
@@ -1108,18 +1128,18 @@ Rectangle {
     RowLayout {
       visible: !root.hasCoverBanner
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
-      spacing: Style.marginS
+      Layout.leftMargin: Style.paddingCard
+      Layout.rightMargin: Style.paddingCard
+      spacing: Style.spaceS
 
       NTextInput {
         id: searchInput
         Layout.fillWidth: true
-        radius: Style.iRadiusL
+        radius: Style.radiusCapsule
         inputIconName: "search"
         text: root.searchText
         placeholderText: I18n.tr("placeholders.search-launcher")
-        fontSize: Style.fontSizeM
+        fontSize: Style.fontSizeBodyMedium
         onTextChanged: root.searchText = text
 
         Component.onCompleted: {
@@ -1136,7 +1156,7 @@ Rectangle {
         visible: root.showLayoutToggle
         icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
         tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
-        customRadius: Style.iRadiusL
+        customRadius: Style.radiusControl
         colorBg: Color.mSurfaceContainerHigh
         colorBgHover: Color.mPrimaryContainer
         colorFg: Color.mOnSurfaceVariant
@@ -1147,9 +1167,12 @@ Rectangle {
         Layout.preferredHeight: searchInput.height
         onClicked: {
           const current = Settings.data.appLauncher.viewMode;
-          if (current === "columns") Settings.data.appLauncher.viewMode = "grid";
-          else if (current === "grid") Settings.data.appLauncher.viewMode = "list";
-          else Settings.data.appLauncher.viewMode = "columns";
+          if (current === "columns")
+            Settings.data.appLauncher.viewMode = "grid";
+          else if (current === "grid")
+            Settings.data.appLauncher.viewMode = "list";
+          else
+            Settings.data.appLauncher.viewMode = "columns";
         }
       }
     }
@@ -1159,8 +1182,8 @@ Rectangle {
       id: categoryTabs
       visible: root.showProviderCategories
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
+      Layout.leftMargin: Style.paddingCard
+      Layout.rightMargin: Style.paddingCard
 
       categories: root.providerCategories
       currentIndex: visible && root.providerCategories.length > 0 ? root.providerCategories.indexOf(root.currentProvider.selectedCategory) : 0
@@ -1173,8 +1196,8 @@ Rectangle {
     NSlideSwapView {
       id: resultsSwapView
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
+      Layout.leftMargin: Style.paddingCard
+      Layout.rightMargin: Style.paddingCard
       Layout.fillHeight: true
       animationsEnabled: !root.animationsDisabled
       sourceComponent: root.isSingleView ? singleViewComponent : rowsViewComponent
@@ -1230,7 +1253,7 @@ Rectangle {
               return;
             Qt.callLater(() => {
                            if (resultsRows)
-                             resultsRows.positionViewAtIndex(resultsRows.selectedRow, ListView.Contain);
+                           resultsRows.positionViewAtIndex(resultsRows.selectedRow, ListView.Contain);
                          });
           }
         }
@@ -1339,5 +1362,4 @@ Rectangle {
       }
     }
   }
-
 }

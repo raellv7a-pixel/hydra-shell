@@ -180,9 +180,9 @@ ColumnLayout {
     selectionMode: "files"
     nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"]
     onAccepted: paths => {
-      if (paths && paths.length > 0)
-        Settings.data.appLauncher.coverPath = paths[0];
-    }
+                  if (paths && paths.length > 0)
+                  Settings.data.appLauncher.coverPath = paths[0];
+                }
   }
 
   NFilePicker {
@@ -191,9 +191,9 @@ ColumnLayout {
     selectionMode: "folders"
     showDirs: true
     onAccepted: paths => {
-      if (paths && paths.length > 0)
-        Settings.data.appLauncher.coverFolder = paths[0];
-    }
+                  if (paths && paths.length > 0)
+                  Settings.data.appLauncher.coverFolder = paths[0];
+                }
   }
 
   NComboBox {

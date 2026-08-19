@@ -298,18 +298,18 @@ SmartPanel {
       initialPath: Settings.data.wallpaper.directory || Quickshell.env("HOME") + "/Pictures"
       nameFilters: [I18n.tr("wallpaper.panel.import-filter-media") + " (*.webm *.mp4 *.mkv *.mov *.png *.jpg *.jpeg *.webp)", I18n.tr("wallpaper.panel.import-filter-all") + " (*)"]
       onAccepted: paths => {
-        if (paths.length === 0) {
-          return;
-        }
-        panelContent.applyWallpaper(paths[0]);
-        ToastService.showNotice(I18n.tr("wallpaper.panel.applied-toast-title"), I18n.tr("wallpaper.panel.applied-toast-body"), "check", 3000);
-      }
+                    if (paths.length === 0) {
+                      return;
+                    }
+                    panelContent.applyWallpaper(paths[0]);
+                    ToastService.showNotice(I18n.tr("wallpaper.panel.applied-toast-title"), I18n.tr("wallpaper.panel.applied-toast-body"), "check", 3000);
+                  }
     }
 
     RowLayout {
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginL
+      anchors.margins: Style.paddingCard
+      spacing: Style.paddingCard
 
       // LEFT COLUMN: header + active source view (roughly 62% of the width)
       ColumnLayout {
@@ -317,7 +317,7 @@ SmartPanel {
         Layout.fillHeight: true
         Layout.preferredWidth: root.width * 0.62
         Layout.minimumWidth: 380 * Style.uiScaleRatio
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         WallpaperPanelHeader {
           id: header
@@ -342,10 +342,10 @@ SmartPanel {
             settingsPanel.open();
           }
           onWallhavenSettingsRequested: anchorItem => {
-            if (wallhavenSettingsPopup.item) {
-              wallhavenSettingsPopup.item.showAt(anchorItem);
-            }
-          }
+                                          if (wallhavenSettingsPopup.item) {
+                                            wallhavenSettingsPopup.item.showAt(anchorItem);
+                                          }
+                                        }
           onWallhavenQueryChanged: query => wallhavenView.search(query)
           onFocusGridRequested: {
             // Only hand focus over when the grid can actually take it —
@@ -361,13 +361,13 @@ SmartPanel {
           Layout.fillWidth: true
           Layout.fillHeight: true
           color: Color.mSurfaceContainerLow
-          radius: Style.radiusL
+          radius: Style.radiusCard
 
           StackLayout {
             id: contentStack
 
             anchors.fill: parent
-            anchors.margins: Style.marginL
+            anchors.margins: Style.paddingCard
 
             currentIndex: {
               if (header.mainTabIndex === 1) {
@@ -405,10 +405,10 @@ SmartPanel {
                   upscalePrompt: upscalePromptItem
                   // Only the visible screen's gallery may drive the preview.
                   onPreviewRequested: candidate => {
-                    if (modelData?.name === panelContent.currentScreenName) {
-                      panelContent.previewCandidate = candidate;
-                    }
-                  }
+                                        if (modelData?.name === panelContent.currentScreenName) {
+                                          panelContent.previewCandidate = candidate;
+                                        }
+                                      }
                 }
               }
             }

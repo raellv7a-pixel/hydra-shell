@@ -289,14 +289,14 @@ Item {
     color: DesktopWidgetRegistry.editMode ? Qt.rgba(Color.mPrimary.r, Color.mPrimary.g, Color.mPrimary.b, 0.1) : "transparent"
     border.color: (DesktopWidgetRegistry.editMode || internal.isDragging) ? (internal.isDragging ? Color.mOutline : Color.mPrimary) : "transparent"
     border.width: DesktopWidgetRegistry.editMode ? 3 : 0
-    radius: Math.min(Math.round(Style.radiusL * root.widgetScale), Style.radiusL, width / 2, height / 2)
+    radius: Math.min(Math.round(Style.radiusCard * root.widgetScale), Style.radiusCard, width / 2, height / 2)
     z: -1
   }
 
   Rectangle {
     id: container
     anchors.fill: parent
-    radius: root.roundedCorners ? Math.min(Math.round(Style.radiusL * root.widgetScale), Style.radiusL, width / 2, height / 2) : 0
+    radius: root.roundedCorners ? Math.min(Math.round(Style.radiusCard * root.widgetScale), Style.radiusCard, width / 2, height / 2) : 0
     color: Qt.alpha(Color.mSurface, Settings.data.ui.panelBackgroundOpacity)
     border {
       width: 1
@@ -322,6 +322,16 @@ Item {
     anchors.fill: parent
     z: 1
     clip: true
+  }
+  NStateLayer {
+    anchors.fill: parent
+    z: 2
+    visible: DesktopWidgetRegistry.editMode
+    hovered: dragArea.containsMouse || contextMenuArea.containsMouse
+    pressed: dragArea.pressed
+    dragged: internal.isDragging || internal.isScaling
+    stateColor: Color.mPrimary
+    radius: root.roundedCorners ? Math.min(Math.round(Style.radiusCard * root.widgetScale), Style.radiusCard, width / 2, height / 2) : 0
   }
 
   // Context menu model and handler - menu is created dynamically in PopupMenuWindow
@@ -480,7 +490,7 @@ Item {
 
   // Corner handles for scaling - using Repeater to avoid code duplication
   readonly property real cornerHandleSize: 8 * widgetScale
-  readonly property real outlineMargin: Style.marginS * widgetScale
+  readonly property real outlineMargin: Style.spaceXS * widgetScale
   readonly property color colorHandle: Color.mSecondary
 
   // Corner handle model: defines position, direction, cursor, and triangle points for each corner

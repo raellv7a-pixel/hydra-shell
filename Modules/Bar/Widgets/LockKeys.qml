@@ -13,6 +13,9 @@ import qs.Widgets
 //test
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: "Teclas de bloqueio"
 
   property ShellScreen screen
   property string widgetId: ""
@@ -87,9 +90,20 @@ Item {
     color: Style.capsuleColor
     width: root.contentWidth
     height: root.contentHeight
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: lockKeysStateLayer
+
+      anchors.fill: parent
+      hovered: lockKeysMouseArea.containsMouse
+      pressed: lockKeysMouseArea.pressed
+      focused: root.activeFocus
+      stateColor: Color.mOnSurface
+      radius: parent.radius
+    }
 
     Item {
       id: layout
@@ -151,8 +165,21 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: visualCapsule
+    focusVisible: root.activeFocus
+    targetRadius: visualCapsule.radius
+  }
+
   // MouseArea at root level for extended click area
   MouseArea {
+    id: lockKeysMouseArea
+    hoverEnabled: true
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(lockKeysStateLayer, mouse.x, mouse.y);
+                 lockKeysStateLayer.rippleAt(point.x, point.y);
+               }
     acceptedButtons: Qt.RightButton
     anchors.fill: parent
 
@@ -162,4 +189,13 @@ Item {
                  }
                }
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.showContextMenu(contextMenu, root, screen);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.showContextMenu(contextMenu, root, screen);
+                         event.accepted = true;
+                       }
 }

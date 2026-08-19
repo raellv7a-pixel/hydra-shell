@@ -34,16 +34,18 @@ NIconButton {
 
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
+  customRadius: Style.radiusCapsule
   visible: PowerProfileService.available
   icon: PowerProfileService.getIcon()
   tooltipText: I18n.tr("tooltips.power-profile", {
                          "profile": PowerProfileService.getName()
                        })
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
-  colorBg: (PowerProfileService.profile === PowerProfile.Balanced) ? Style.capsuleColor : Color.mPrimary
+  colorBg: (PowerProfileService.profile === PowerProfile.Balanced) ? Qt.alpha(Color.mPrimary, 0.16) : Color.mPrimary
   colorFg: (PowerProfileService.profile === PowerProfile.Balanced) ? Color.resolveColorKey(iconColorKey) : Color.mOnPrimary
-  border.color: Style.capsuleBorderColor
+  colorBgHover: (PowerProfileService.profile === PowerProfile.Balanced) ? Color.mPrimary : Color.mOnPrimary
+  colorFgHover: colorFg
+  border.color: Qt.alpha(Color.mPrimary, 0.36)
   border.width: Style.capsuleBorderWidth
   onClicked: PowerProfileService.cycleProfile()
 

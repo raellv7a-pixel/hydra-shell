@@ -1,204 +1,167 @@
+import Hydra.Visual
 import QtQuick
-import QtQuick.Shapes
 import qs.Commons
 import qs.Services.UI
 import qs.Widgets
 
 /**
-* AllBackgrounds - Unified Shape container for all bar and panel backgrounds
+* Superfície SDF global para barra, painéis e modais.
 *
-* Unified shadow system. This component contains a single Shape
-* with multiple ShapePath children (one for bar, one for each panel type).
-*
-* Benefits:
-* - Single GPU-accelerated rendering pass for all backgrounds
-* - Unified shadow system (one MultiEffect for everything)
+* Todos os slots ativos compartilham um BlobGroup por camada de opacidade. Isso
+* permite fusão contínua entre superfícies e mantém o contrato de slots do
+* PanelService: abertura, fechamento e modal coexistem durante as transições.
 */
 Item {
   id: root
 
-  // Reference Bar
   required property var bar
-
-  // Reference to MainScreen (for panel access)
   required property var windowRoot
+  required property bool fullscreenActive
 
-  readonly property color panelBackgroundColor: Color.mSurface
+  readonly property color panelBackgroundColor: Color.mSurfaceContainer
+  readonly property real blobSmoothing: Style.radiusPanel
+  readonly property bool hasPanelSurface: !!(panelForSlot(0) || panelForSlot(1) || panelForSlot(2))
+
+  function panelForSlot(index) {
+    const panel = PanelService.backgroundSlotAssignments[index];
+    return panel?.screen === root.windowRoot.screen ? panel : null;
+  }
+
+  function blobForPanel(panel) {
+    const candidates = Settings.data.bar.useSeparateOpacity ? [separatePanel0, separatePanel1, separatePanel2] : [unifiedPanel0, unifiedPanel1, unifiedPanel2];
+    for (let i = 0; i < candidates.length; ++i) {
+      if (candidates[i].assignedPanel === panel)
+        return candidates[i];
+    }
+    return null;
+  }
 
   anchors.fill: parent
 
-  // Unified background container
   Item {
+    id: unifiedLayer
+
     anchors.fill: parent
+    visible: !Settings.data.bar.useSeparateOpacity
+    opacity: Style.effectivePanelOpacity
+    layer.enabled: visible
 
-    // When not using separate bar opacity, use unified approach (original behavior)
-    Item {
-      anchors.fill: parent
-      visible: !Settings.data.bar.useSeparateOpacity
+    BlobGroup {
+      id: unifiedGroup
 
-      // Enable layer caching to prevent continuous re-rendering
-      layer.enabled: true
-      opacity: Style.effectivePanelOpacity
-
-      Shape {
-        id: unifiedBackgroundsShape
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-        asynchronous: true
-        enabled: false
-
-        Component.onCompleted: {
-          Logger.d("AllBackgrounds", "AllBackgrounds initialized");
-        }
-
-        /**
-        *  Bar
-        */
-        BarBackground {
-          bar: root.bar
-          shapeContainer: unifiedBackgroundsShape
-          windowRoot: root.windowRoot
-          backgroundColor: panelBackgroundColor
-        }
-
-        /**
-        *  Panel Background Slots
-        *  Slot 0: open/opening panel, slot 1: closing panel, slot 2: modal
-        *  overlay (polkit), which stacks on top of slot 0 instead of replacing it.
-        */
-
-        // Slot 0: Currently open/opening panel
-        PanelBackground {
-          assignedPanel: {
-            var p = PanelService.backgroundSlotAssignments[0];
-            // Only render if this panel belongs to this screen
-            return (p && p.screen === root.windowRoot.screen) ? p : null;
-          }
-          shapeContainer: unifiedBackgroundsShape
-          defaultBackgroundColor: panelBackgroundColor
-        }
-
-        // Slot 1: Closing panel (during transitions)
-        PanelBackground {
-          assignedPanel: {
-            var p = PanelService.backgroundSlotAssignments[1];
-            // Only render if this panel belongs to this screen
-            return (p && p.screen === root.windowRoot.screen) ? p : null;
-          }
-          shapeContainer: unifiedBackgroundsShape
-          defaultBackgroundColor: panelBackgroundColor
-        }
-
-        // Slot 2: Modal overlay, drawn over whatever occupies slot 0
-        PanelBackground {
-          assignedPanel: {
-            var p = PanelService.backgroundSlotAssignments[2];
-            return (p && p.screen === root.windowRoot.screen) ? p : null;
-          }
-          shapeContainer: unifiedBackgroundsShape
-          defaultBackgroundColor: panelBackgroundColor
-        }
-      }
-
-      // Apply shadow to the unified backgrounds
-      NDropShadow {
-        anchors.fill: parent
-        source: unifiedBackgroundsShape
-      }
+      color: root.panelBackgroundColor
+      smoothing: root.blobSmoothing
+      cornerFill: true
     }
 
-    // When using separate bar opacity, separate the rendering
-    Item {
+    BarBackground {
       anchors.fill: parent
-      visible: Settings.data.bar.useSeparateOpacity
-
-      // Panel backgrounds with panel opacity
-      Item {
-        anchors.fill: parent
-
-        layer.enabled: true
-        opacity: Style.effectivePanelOpacity
-
-        Shape {
-          id: panelBackgroundsShape
-          anchors.fill: parent
-          preferredRendererType: Shape.CurveRenderer
-          asynchronous: true
-          enabled: false
-
-          /**
-          *  Panel Background Slots
-          *  Slot 0: open/opening panel, slot 1: closing panel, slot 2: modal
-          *  overlay (polkit), which stacks on top of slot 0 instead of replacing it.
-          */
-
-          // Slot 0: Currently open/opening panel
-          PanelBackground {
-            assignedPanel: {
-              var p = PanelService.backgroundSlotAssignments[0];
-              // Only render if this panel belongs to this screen
-              return (p && p.screen === root.windowRoot.screen) ? p : null;
-            }
-            shapeContainer: panelBackgroundsShape
-            defaultBackgroundColor: panelBackgroundColor
-          }
-
-          // Slot 1: Closing panel (during transitions)
-          PanelBackground {
-            assignedPanel: {
-              var p = PanelService.backgroundSlotAssignments[1];
-              // Only render if this panel belongs to this screen
-              return (p && p.screen === root.windowRoot.screen) ? p : null;
-            }
-            shapeContainer: panelBackgroundsShape
-            defaultBackgroundColor: panelBackgroundColor
-          }
-
-          // Slot 2: Modal overlay, drawn over whatever occupies slot 0
-          PanelBackground {
-            assignedPanel: {
-              var p = PanelService.backgroundSlotAssignments[2];
-              return (p && p.screen === root.windowRoot.screen) ? p : null;
-            }
-            shapeContainer: panelBackgroundsShape
-            defaultBackgroundColor: panelBackgroundColor
-          }
-        }
-
-        // Apply shadow to the panel backgrounds
-        NDropShadow {
-          anchors.fill: parent
-          source: panelBackgroundsShape
-        }
-      }
-
-      // Bar background with separate opacity
-      Item {
-        anchors.fill: parent
-
-        layer.enabled: true
-        opacity: Style.effectiveBarOpacity
-
-        Shape {
-          id: barBackgroundShape
-          anchors.fill: parent
-          preferredRendererType: Shape.CurveRenderer
-          asynchronous: true
-          enabled: false
-
-          BarBackground {
-            bar: root.bar
-            shapeContainer: barBackgroundShape
-            windowRoot: root.windowRoot
-            backgroundColor: panelBackgroundColor
-          }
-        }
-
-        NDropShadow {
-          anchors.fill: parent
-          source: barBackgroundShape
-        }
-      }
+      bar: root.bar
+      windowRoot: root.windowRoot
+      blobGroup: unifiedGroup
+      fullscreenActive: root.fullscreenActive
     }
+
+    PanelBackground {
+      id: unifiedPanel0
+
+      assignedPanel: root.panelForSlot(0)
+      group: unifiedLayer.visible ? unifiedGroup : null
+    }
+
+    PanelBackground {
+      id: unifiedPanel1
+
+      assignedPanel: root.panelForSlot(1)
+      group: unifiedLayer.visible ? unifiedGroup : null
+    }
+
+    PanelBackground {
+      id: unifiedPanel2
+
+      assignedPanel: root.panelForSlot(2)
+      group: unifiedLayer.visible ? unifiedGroup : null
+    }
+  }
+
+  NDropShadow {
+    anchors.fill: unifiedLayer
+    source: unifiedLayer
+    active: unifiedLayer.visible && (!root.fullscreenActive || root.hasPanelSurface)
+  }
+
+  Item {
+    id: separatePanelLayer
+
+    anchors.fill: parent
+    visible: Settings.data.bar.useSeparateOpacity
+    opacity: Style.effectivePanelOpacity
+    layer.enabled: visible
+
+    BlobGroup {
+      id: separatePanelGroup
+
+      color: root.panelBackgroundColor
+      smoothing: root.blobSmoothing
+      cornerFill: true
+    }
+
+    PanelBackground {
+      id: separatePanel0
+
+      assignedPanel: root.panelForSlot(0)
+      group: separatePanelLayer.visible ? separatePanelGroup : null
+    }
+
+    PanelBackground {
+      id: separatePanel1
+
+      assignedPanel: root.panelForSlot(1)
+      group: separatePanelLayer.visible ? separatePanelGroup : null
+    }
+
+    PanelBackground {
+      id: separatePanel2
+
+      assignedPanel: root.panelForSlot(2)
+      group: separatePanelLayer.visible ? separatePanelGroup : null
+    }
+  }
+
+  NDropShadow {
+    anchors.fill: separatePanelLayer
+    source: separatePanelLayer
+    active: separatePanelLayer.visible && root.hasPanelSurface
+  }
+
+  Item {
+    id: separateBarLayer
+
+    anchors.fill: parent
+    visible: Settings.data.bar.useSeparateOpacity
+    opacity: Style.effectiveBarOpacity
+    layer.enabled: visible
+
+    BlobGroup {
+      id: separateBarGroup
+
+      color: root.panelBackgroundColor
+      smoothing: root.blobSmoothing
+      cornerFill: true
+    }
+
+    BarBackground {
+      anchors.fill: parent
+      bar: root.bar
+      windowRoot: root.windowRoot
+      blobGroup: separateBarGroup
+      fullscreenActive: root.fullscreenActive
+    }
+  }
+
+  NDropShadow {
+    anchors.fill: separateBarLayer
+    source: separateBarLayer
+    active: separateBarLayer.visible && !root.fullscreenActive
   }
 }

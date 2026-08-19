@@ -22,8 +22,8 @@ SmartPanel {
   // Sizing properties must stay at root for preferredWidth/Height
   readonly property int maxColumns: 8
   readonly property real cellSize: Math.round(Style.capsuleHeight * 0.65)
-  readonly property real outerPadding: Style.marginM
-  readonly property real innerSpacing: Style.marginM
+  readonly property real outerPadding: Style.spaceS
+  readonly property real innerSpacing: Style.spaceXS
 
   // All tray items from SystemTray
   readonly property var trayValuesAll: (SystemTray.items && SystemTray.items.values) ? SystemTray.items.values : []
@@ -181,8 +181,20 @@ SmartPanel {
         model: root.trayValues
 
         delegate: Item {
+          id: trayButton
           width: root.cellSize
           height: root.cellSize
+          activeFocusOnTab: true
+          Accessible.role: Accessible.Button
+          Accessible.name: modelData?.tooltipTitle || modelData?.name || modelData?.id || "Tray Item"
+          Keys.onReturnPressed: event => {
+                                  modelData?.activate();
+                                  event.accepted = true;
+                                }
+          Keys.onSpacePressed: event => {
+                                 modelData?.activate();
+                                 event.accepted = true;
+                               }
 
           IconImage {
             id: trayIcon
@@ -211,6 +223,7 @@ SmartPanel {
             }
 
             MouseArea {
+              id: trayMouse
               anchors.fill: parent
               cursorShape: Qt.PointingHandCursor
               hoverEnabled: true
@@ -245,20 +258,20 @@ SmartPanel {
                                let menuX, menuY;
 
                                if (barPosition === "left") {
-                                 menuX = trayIcon.width + Style.marginL;
+                                 menuX = trayIcon.width + Style.paddingCard;
                                  menuY = 0;
                                } else if (barPosition === "right") {
-                                 menuX = -panelContent.trayMenu.item.width - Style.marginL;
+                                 menuX = -panelContent.trayMenu.item.width - Style.paddingCard;
                                  menuY = 0;
                                } else if (barPosition === "bottom") {
                                  // For bottom bar: let TrayMenu handle positioning by passing anchorY >= 0
                                  // TrayMenu will position above the anchor item
                                  menuX = (trayIcon.width / 2) - (panelContent.trayMenu.item.width / 2);
-                                 menuY = trayIcon.height + Style.marginL;
+                                 menuY = trayIcon.height + Style.paddingCard;
                                } else {
                                  // For top bar: position menu below the icon with more spacing
                                  menuX = (trayIcon.width / 2) - (panelContent.trayMenu.item.width / 2);
-                                 menuY = trayIcon.height + Style.marginL;
+                                 menuY = trayIcon.height + Style.paddingCard;
                                }
 
                                PanelService.showTrayMenu(root.screen, modelData, panelContent.trayMenu.item, trayIcon, menuX, menuY, root.widgetSection, root.widgetIndex);
@@ -266,6 +279,7 @@ SmartPanel {
                            }
                          }
 
+              onPressed: mouse => trayStateLayer.rippleAt(mouse.x, mouse.y)
               onWheel: wheel => {
                          if (wheel.angleDelta.y > 0)
                          modelData?.scrollUp();
@@ -281,6 +295,20 @@ SmartPanel {
               }
               onExited: TooltipService.hide()
             }
+          }
+
+          NStateLayer {
+            id: trayStateLayer
+            anchors.fill: parent
+            hovered: trayMouse.containsMouse
+            pressed: trayMouse.pressed
+            radius: Style.radiusControl
+          }
+
+          NFocusRing {
+            anchors.fill: parent
+            focusVisible: trayButton.activeFocus
+            targetRadius: Style.radiusControl
           }
         }
       }

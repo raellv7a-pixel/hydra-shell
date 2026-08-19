@@ -1,7 +1,9 @@
 import QtQuick
 import Quickshell
 import qs.Commons
+import qs.Modules.MainScreen.Backgrounds
 import qs.Services.UI
+import qs.Widgets
 
 /**
 * SmartPanel for use within MainScreen
@@ -51,16 +53,11 @@ Item {
   // Track actual visibility (delayed until content is loaded and sized)
   property bool isPanelVisible: false
 
-  // Track size animation completion for sequential opacity animation
-  property bool sizeAnimationComplete: false
-
-  // Derived state: track opening transition
-  readonly property bool isOpening: isPanelVisible && !isClosing && !sizeAnimationComplete
-
-  // Track close animation state: fade opacity first, then shrink size
+  // offsetScale: 0 = aberto, 1 = recolhido. A geometria permanece estável;
+  // somente posição, opacidade e a deformação visual mudam na transição.
+  property real offsetScale: 1
   property bool isClosing: false
-  property bool opacityFadeComplete: false
-  property bool closeFinalized: false // Prevent double-finalization
+  property bool closeFinalized: false
 
   // Safety: Watchdog timers to prevent stuck states
   property bool closeWatchdogActive: false
@@ -74,8 +71,6 @@ Item {
   property bool cachedAnimateFromRight: false
 
   readonly property bool animationsDisabled: Settings.data.general.animationDisabled
-  property bool cachedShouldAnimateWidth: false
-  property bool cachedShouldAnimateHeight: false
 
   // Whether blur should be applied behind this panel
   property bool blurEnabled: true
@@ -102,6 +97,7 @@ Item {
 
   // Expose panel region for background rendering
   readonly property var panelRegion: panelContent.geometryPlaceholder
+  readonly property var blobBackground: parent?.backgroundProvider?.blobForPanel(root) ?? null
 
   readonly property string barPosition: Settings.getBarPositionForScreen(screen?.name)
   readonly property bool barIsVertical: barPosition === "left" || barPosition === "right"
@@ -249,48 +245,35 @@ Item {
   }
 
   function close() {
-    // Reset immediate close flag to ensure animations work properly
     PanelService.closedImmediately = false;
+    root.isClosing = true;
+    root.closeFinalized = false;
 
-    // Start close sequence: fade opacity first
-    isClosing = true;
-    sizeAnimationComplete = false;
-    closeFinalized = false;
-
-    // Stop the open animation timer if it's still running
-    opacityTrigger.stop();
-    openWatchdogActive = false;
+    root.openWatchdogActive = false;
     openWatchdogTimer.stop();
 
-    // Start close watchdog timer
-    closeWatchdogActive = true;
+    root.closeWatchdogActive = true;
     closeWatchdogTimer.restart();
 
-    // If opacity is already 0 (closed during open animation before fade-in),
-    // skip directly to size animation
-    opacityFadeComplete = true;
+    const alreadyHidden = root.offsetScale >= 0.999;
+    root.offsetScale = 1;
+    if (alreadyHidden || !Style.motionEnabled)
+      Qt.callLater(root.finalizeClose);
 
-    // Opacity will fade out, then size will shrink, then finalizeClose() will complete
     Logger.d("SmartPanel", "Closing panel", objectName);
   }
 
   function closeImmediately() {
-    // Close without any animation, useful for app launches to avoid focus issues
-    opacityTrigger.stop();
-    openWatchdogActive = false;
+    root.openWatchdogActive = false;
     openWatchdogTimer.stop();
-    closeWatchdogActive = false;
+    root.closeWatchdogActive = false;
     closeWatchdogTimer.stop();
 
-    // Don't set opacity directly as it breaks the binding
+    root.offsetScale = 1;
     root.isPanelVisible = false;
-    root.sizeAnimationComplete = false;
     root.isClosing = false;
-    root.opacityFadeComplete = false;
     root.closeFinalized = true;
     root.isPanelOpen = false;
-    panelBackground.dimensionsInitialized = false;
-
     // Signal immediate close so MainScreen can skip dimmer animation
     PanelService.closedImmediately = true;
     if (root.modalOverlay)
@@ -322,10 +305,7 @@ Item {
     root.isPanelVisible = false;
     root.isPanelOpen = false;
     root.isClosing = false;
-    root.opacityFadeComplete = false;
-
-    // Reset dimensionsInitialized for next opening
-    panelBackground.dimensionsInitialized = false;
+    root.offsetScale = 1;
 
     if (root.modalOverlay)
       PanelService.closedModal(root);
@@ -705,56 +685,22 @@ Item {
     }
   }
 
-  // Opacity animation
-  // Opening: fade in after size animation reaches 75%
-  // Closing: fade out immediately
-  opacity: {
-    if (isClosing)
-      return 0.0; // Fade out when closing
-    if (isPanelVisible && sizeAnimationComplete)
-      return 1.0; // Fade in when opening
-    return 0.0;
-  }
+  opacity: Math.max(0, Math.min(1, 1 - offsetScale))
 
-  Behavior on opacity {
+  Behavior on offsetScale {
     enabled: !PanelService.closedImmediately
-    NumberAnimation {
-      id: opacityAnimation
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NAnim {
+      id: offsetScaleAnimation
 
+      duration: Style.motionDurationDefaultSpatial
+      motionType: NAnim.ExpressiveDefaultSpatial
       onRunningChanged: {
-        // Safety: If animation didn't run (zero duration), handle immediately
-        if (!running && duration === 0) {
-          if (root.isClosing && root.opacity === 0.0) {
-            root.opacityFadeComplete = true;
-            var shouldFinalizeNow = panelContent.geometryPlaceholder && !panelContent.geometryPlaceholder.shouldAnimateWidth && !panelContent.geometryPlaceholder.shouldAnimateHeight;
-            if (shouldFinalizeNow) {
-              // Logger.d("SmartPanel", "Zero-duration opacity + no size animation - finalizing", root.objectName);
-              Qt.callLater(root.finalizeClose);
-            }
-          } else if (root.isPanelVisible && root.opacity === 1.0) {
-            // Open completed with zero duration
-            root.openWatchdogActive = false;
-            openWatchdogTimer.stop();
-          }
+        if (running)
           return;
-        }
 
-        // When opacity fade completes during close, trigger size animation
-        if (!running && root.isClosing) {
-          root.opacityFadeComplete = true;
-          // If no size animation will run (centered attached panels only), finalize immediately
-          // Detached panels (allowAttach === false) should always animate from top
-          var shouldFinalizeNow = panelContent.geometryPlaceholder && !panelContent.geometryPlaceholder.shouldAnimateWidth && !panelContent.geometryPlaceholder.shouldAnimateHeight;
-          if (shouldFinalizeNow) {
-            //Logger.d("SmartPanel", "No animation - finalizing immediately", root.objectName);
-            Qt.callLater(root.finalizeClose);
-          } else {
-            //Logger.d("SmartPanel", "Animation will run - waiting for size animation", root.objectName, "shouldAnimateHeight:", panelContent.geometryPlaceholder.shouldAnimateHeight, "shouldAnimateWidth:", panelContent.geometryPlaceholder.shouldAnimateWidth);
-          }
-        } // When opacity fade completes during open, stop watchdog
-        else if (!running && root.isPanelVisible && root.opacity === 1.0) {
+        if (root.isClosing && !root.closeFinalized && root.offsetScale >= 0.999) {
+          Qt.callLater(root.finalizeClose);
+        } else if (!root.isClosing && root.isPanelVisible && root.offsetScale <= 0.001) {
           root.openWatchdogActive = false;
           openWatchdogTimer.stop();
         }
@@ -762,30 +708,19 @@ Item {
     }
   }
 
-  // Timer to trigger opacity fade at 50% of size animation
-  Timer {
-    id: opacityTrigger
-    interval: 0
-    onTriggered: {
-      if (root.isPanelVisible) {
-        root.sizeAnimationComplete = true;
-      }
-    }
-  }
-
   // Watchdog timer for open sequence (safety mechanism)
   Timer {
     id: openWatchdogTimer
-    interval: Style.animationNormal * 3 // 3x normal animation time
+    interval: Math.max(1, Style.motionDurationSlowSpatial * 3)
     repeat: false
     onTriggered: {
       if (root.openWatchdogActive) {
         Logger.w("SmartPanel", "Open watchdog timeout - forcing panel visible state", root.objectName);
         root.openWatchdogActive = false;
         // Force completion of open sequence
-        if (root.isPanelOpen && !root.isPanelVisible) {
+        if (root.isPanelOpen) {
           root.isPanelVisible = true;
-          root.sizeAnimationComplete = true;
+          root.offsetScale = 0;
         }
       }
     }
@@ -794,7 +729,7 @@ Item {
   // Watchdog timer for close sequence (safety mechanism)
   Timer {
     id: closeWatchdogTimer
-    interval: Style.animationFast * 3 // 3x fast animation time
+    interval: Math.max(1, Style.motionDurationSlowSpatial * 3)
     repeat: false
     onTriggered: {
       if (root.closeWatchdogActive && !root.closeFinalized) {
@@ -857,11 +792,6 @@ Item {
       property real targetHeight: 0
       property real targetX: root.x
       property real targetY: root.y
-
-      // Track whether dimensions have been initialized (to prevent initial changes from animating)
-      property bool dimensionsInitialized: false
-
-      property var bezierCurve: [0.05, 0, 0.133, 0.06, 0.166, 0.4, 0.208, 0.82, 0.25, 1, 1, 1]
 
       // Determine which edges the panel is closest to for animation direction
       // Use target position (not animated position) to avoid binding loops
@@ -1060,110 +990,29 @@ Item {
       // Priority: horizontal edges (top/bottom) take precedence over vertical edges (left/right)
       // This prevents diagonal animations when panel is attached to a corner
       // Use reactive values here - they're evaluated BEFORE isPanelVisible becomes true
-      readonly property bool shouldAnimateWidth: !shouldAnimateHeight && (animateFromLeft || animateFromRight)
-      readonly property bool shouldAnimateHeight: animateFromTop || animateFromBottom
 
-      // Current animated width/height (referenced by x/y for right/bottom positioning)
-      readonly property real currentWidth: {
-        if (isClosing && opacityFadeComplete && shouldAnimateWidth)
-          return 0;
-        if (isClosing || isPanelVisible)
-          return targetWidth;
-        // If not animating width, start at target (no visual change)
-        // If animating width, start at 0 (will animate to target)
-        return shouldAnimateWidth ? 0 : targetWidth;
+      readonly property real transitionOffsetX: {
+        if (root.cachedAnimateFromLeft)
+          return -(targetX + targetWidth + Style.marginM);
+        if (root.cachedAnimateFromRight)
+          return root.width - targetX + Style.marginM;
+        return 0;
       }
-      readonly property real currentHeight: {
-        if (isClosing && opacityFadeComplete && shouldAnimateHeight)
-          return 0;
-        if (isClosing || isPanelVisible)
-          return targetHeight;
-        // If not animating height, start at target (no visual change)
-        // If animating height, start at 0 (will animate to target)
-        return shouldAnimateHeight ? 0 : targetHeight;
-      }
-
-      width: currentWidth
-      height: currentHeight
-
-      x: {
-        // Offset x to make panel grow/shrink from the appropriate edge
-        // Use CACHED values to prevent recalculation during animation
-        if (root.cachedAnimateFromRight && root.cachedShouldAnimateWidth) {
-          // Keep the RIGHT edge fixed at its target position
-          var targetRightEdge = targetX + targetWidth;
-          return targetRightEdge - width;
+      readonly property real transitionOffsetY: {
+        if (root.cachedAnimateFromTop) {
+          if (panelContent.allowAttach && isActuallyAttachedToAnyEdge)
+            return -(targetY + targetHeight + Style.marginM);
+          return -(Math.min(targetHeight * 0.18, 96 * Style.uiScaleRatio) + Style.marginM);
         }
-        return targetX;
-      }
-      y: {
-        // Offset y to make panel grow/shrink from the appropriate edge
-        // Use CACHED values to prevent recalculation during animation
-        if (root.cachedAnimateFromBottom && root.cachedShouldAnimateHeight) {
-          // Keep the BOTTOM edge fixed at its target position
-          var targetBottomEdge = targetY + targetHeight;
-          return targetBottomEdge - height;
-        }
-        return targetY;
+        if (root.cachedAnimateFromBottom)
+          return root.height - targetY + Style.marginM;
+        return 0;
       }
 
-      Behavior on width {
-        enabled: !PanelService.closedImmediately
-        NumberAnimation {
-          id: widthAnimation
-          // Use 0ms if dimensions not initialized to prevent initial changes from animating
-          // During opening: use 0ms if not animating width, otherwise use normal duration
-          // During closing: use 0ms if not animating width, otherwise use fast duration
-          // During normal content resizing: always use normal duration
-          duration: !panelBackground.dimensionsInitialized ? 0 : (root.isOpening && !panelBackground.shouldAnimateWidth) ? 0 : root.isOpening ? Style.animationFast : (root.isClosing && !panelBackground.shouldAnimateWidth) ? 0 : root.isClosing ? Style.animationFast : Style.animationFast
-          easing.type: Easing.OutCubic
-
-          onRunningChanged: {
-            // Safety: Zero-duration animation handling
-            if (!running && duration === 0) {
-              if (root.isClosing && panelBackground.width === 0 && panelBackground.shouldAnimateWidth) {
-                Logger.d("SmartPanel", "Zero-duration width animation - finalizing", root.objectName);
-                Qt.callLater(root.finalizeClose);
-              }
-              return;
-            }
-
-            // When width shrink completes during close, finalize
-            if (!running && root.isClosing && panelBackground.width === 0 && panelBackground.shouldAnimateWidth) {
-              Qt.callLater(root.finalizeClose);
-            }
-          }
-        }
-      }
-
-      Behavior on height {
-        enabled: !PanelService.closedImmediately
-        NumberAnimation {
-          id: heightAnimation
-          // Use 0ms if dimensions not initialized to prevent initial changes from animating
-          // During opening: use 0ms if not animating height, otherwise use normal duration
-          // During closing: use 0ms if not animating height, otherwise use fast duration
-          // During normal content resizing: always use normal duration
-          duration: !panelBackground.dimensionsInitialized ? 0 : (root.isOpening && !panelBackground.shouldAnimateHeight) ? 0 : root.isOpening ? Style.animationFast : (root.isClosing && !panelBackground.shouldAnimateHeight) ? 0 : root.isClosing ? Style.animationFast : Style.animationFast
-          easing.type: Easing.OutCubic
-
-          onRunningChanged: {
-            // Safety: Zero-duration animation handling
-            if (!running && duration === 0) {
-              if (root.isClosing && panelBackground.height === 0 && panelBackground.shouldAnimateHeight) {
-                Logger.d("SmartPanel", "Zero-duration height animation - finalizing", root.objectName);
-                Qt.callLater(root.finalizeClose);
-              }
-              return;
-            }
-
-            // When height shrink completes during close, finalize
-            if (!running && root.isClosing && panelBackground.height === 0 && panelBackground.shouldAnimateHeight) {
-              Qt.callLater(root.finalizeClose);
-            }
-          }
-        }
-      }
+      width: targetWidth
+      height: targetHeight
+      x: targetX + transitionOffsetX * root.offsetScale
+      y: targetY + transitionOffsetY * root.offsetScale
 
       // Corner states for PanelBackground to read
       // State -1: No radius (flat/square corner)
@@ -1177,15 +1026,7 @@ Item {
         if (!root.barShouldShow) {
           // Only check edge touching, not bar touching
           var edgeInverted = panelContent.allowAttach && (panelContent.touchingLeftEdge || panelContent.touchingTopEdge);
-          if (edgeInverted) {
-            if (panelContent.touchingLeftEdge && panelContent.touchingTopEdge)
-              return 0; // Both edges: no inversion (normal rounded corner)
-            if (panelContent.touchingLeftEdge)
-              return 2; // Left edge: vertical inversion
-            if (panelContent.touchingTopEdge)
-              return 1; // Top edge: horizontal inversion
-          }
-          return 0;
+          return edgeInverted ? ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingLeftEdge, panelContent.touchingTopEdge) : 0;
         }
 
         var barTouchInverted = panelContent.touchingTopBar || panelContent.touchingLeftBar;
@@ -1193,13 +1034,8 @@ Item {
         var edgeInverted = panelContent.allowAttach && (panelContent.touchingLeftEdge || panelContent.touchingTopEdge);
 
         if (barTouchInverted || edgeInverted) {
-          // Determine inversion direction based on which edge is touched
-          if (panelContent.touchingLeftEdge && panelContent.touchingTopEdge)
-            return 0; // Both edges: no inversion (normal rounded corner)
-          if (panelContent.touchingLeftEdge)
-            return 2; // Left edge: vertical inversion
-          if (panelContent.touchingTopEdge)
-            return 1; // Top edge: horizontal inversion
+          if (edgeInverted)
+            return ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingLeftEdge, panelContent.touchingTopEdge);
           return root.barIsVertical ? 2 : 1;
         }
         return 0;
@@ -1210,15 +1046,7 @@ Item {
         if (!root.barShouldShow) {
           // Only check edge touching, not bar touching
           var edgeInverted = panelContent.allowAttach && (panelContent.touchingRightEdge || panelContent.touchingTopEdge);
-          if (edgeInverted) {
-            if (panelContent.touchingRightEdge && panelContent.touchingTopEdge)
-              return 0; // Both edges: no inversion (normal rounded corner)
-            if (panelContent.touchingRightEdge)
-              return 2; // Right edge: vertical inversion
-            if (panelContent.touchingTopEdge)
-              return 1; // Top edge: horizontal inversion
-          }
-          return 0;
+          return edgeInverted ? ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingRightEdge, panelContent.touchingTopEdge) : 0;
         }
 
         var barTouchInverted = panelContent.touchingTopBar || panelContent.touchingRightBar;
@@ -1226,13 +1054,8 @@ Item {
         var edgeInverted = panelContent.allowAttach && (panelContent.touchingRightEdge || panelContent.touchingTopEdge);
 
         if (barTouchInverted || edgeInverted) {
-          // Determine inversion direction based on which edge is touched
-          if (panelContent.touchingRightEdge && panelContent.touchingTopEdge)
-            return 0; // Both edges: no inversion (normal rounded corner)
-          if (panelContent.touchingRightEdge)
-            return 2; // Right edge: vertical inversion
-          if (panelContent.touchingTopEdge)
-            return 1; // Top edge: horizontal inversion
+          if (edgeInverted)
+            return ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingRightEdge, panelContent.touchingTopEdge);
           return root.barIsVertical ? 2 : 1;
         }
         return 0;
@@ -1243,15 +1066,7 @@ Item {
         if (!root.barShouldShow) {
           // Only check edge touching, not bar touching
           var edgeInverted = panelContent.allowAttach && (panelContent.touchingLeftEdge || panelContent.touchingBottomEdge);
-          if (edgeInverted) {
-            if (panelContent.touchingLeftEdge && panelContent.touchingBottomEdge)
-              return 0; // Both edges: no inversion (normal rounded corner)
-            if (panelContent.touchingLeftEdge)
-              return 2; // Left edge: vertical inversion
-            if (panelContent.touchingBottomEdge)
-              return 1; // Bottom edge: horizontal inversion
-          }
-          return 0;
+          return edgeInverted ? ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingLeftEdge, panelContent.touchingBottomEdge) : 0;
         }
 
         var barTouchInverted = panelContent.touchingBottomBar || panelContent.touchingLeftBar;
@@ -1259,13 +1074,8 @@ Item {
         var edgeInverted = panelContent.allowAttach && (panelContent.touchingLeftEdge || panelContent.touchingBottomEdge);
 
         if (barTouchInverted || edgeInverted) {
-          // Determine inversion direction based on which edge is touched
-          if (panelContent.touchingLeftEdge && panelContent.touchingBottomEdge)
-            return 0; // Both edges: no inversion (normal rounded corner)
-          if (panelContent.touchingLeftEdge)
-            return 2; // Left edge: vertical inversion
-          if (panelContent.touchingBottomEdge)
-            return 1; // Bottom edge: horizontal inversion
+          if (edgeInverted)
+            return ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingLeftEdge, panelContent.touchingBottomEdge);
           return root.barIsVertical ? 2 : 1;
         }
         return 0;
@@ -1276,15 +1086,7 @@ Item {
         if (!root.barShouldShow) {
           // Only check edge touching, not bar touching
           var edgeInverted = panelContent.allowAttach && (panelContent.touchingRightEdge || panelContent.touchingBottomEdge);
-          if (edgeInverted) {
-            if (panelContent.touchingRightEdge && panelContent.touchingBottomEdge)
-              return 0; // Both edges: no inversion (normal rounded corner)
-            if (panelContent.touchingRightEdge)
-              return 2; // Right edge: vertical inversion
-            if (panelContent.touchingBottomEdge)
-              return 1; // Bottom edge: horizontal inversion
-          }
-          return 0;
+          return edgeInverted ? ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingRightEdge, panelContent.touchingBottomEdge) : 0;
         }
 
         var barTouchInverted = panelContent.touchingBottomBar || panelContent.touchingRightBar;
@@ -1292,13 +1094,8 @@ Item {
         var edgeInverted = panelContent.allowAttach && (panelContent.touchingRightEdge || panelContent.touchingBottomEdge);
 
         if (barTouchInverted || edgeInverted) {
-          // Determine inversion direction based on which edge is touched
-          if (panelContent.touchingRightEdge && panelContent.touchingBottomEdge)
-            return 0; // Both edges: no inversion (normal rounded corner)
-          if (panelContent.touchingRightEdge)
-            return 2; // Right edge: vertical inversion
-          if (panelContent.touchingBottomEdge)
-            return 1; // Bottom edge: horizontal inversion
+          if (edgeInverted)
+            return ShapeCornerHelper.cornerStateFromEdges(panelContent.touchingRightEdge, panelContent.touchingBottomEdge);
           return root.barIsVertical ? 2 : 1;
         }
         return 0;
@@ -1319,39 +1116,32 @@ Item {
     // Panel top content: Text, icons, etc...
     Loader {
       id: contentLoader
+
       active: isPanelOpen
       x: panelBackground.x
       y: panelBackground.y
       width: panelBackground.width
       height: panelBackground.height
+      scale: 1 - root.offsetScale * 0.025
+      transformOrigin: Item.Center
+      transform: Matrix4x4 {
+        matrix: root.blobBackground?.deformMatrix ?? Qt.matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+      }
       sourceComponent: root.panelContent
 
       onLoaded: {
-        // Wait for contentPreferredWidth/Height to be available before making visible
         Qt.callLater(function () {
-          // Calculate position with stable contentPreferredWidth/Height values
-          setPosition();
+          root.setPosition();
 
-          // Mark dimensions as initialized to enable animations
-          panelBackground.dimensionsInitialized = true;
-
-          // Cache animation direction BEFORE isPanelVisible becomes true
-          // This locks in the direction for the entire open/close cycle
           root.cachedAnimateFromTop = panelBackground.animateFromTop;
           root.cachedAnimateFromBottom = panelBackground.animateFromBottom;
           root.cachedAnimateFromLeft = panelBackground.animateFromLeft;
           root.cachedAnimateFromRight = panelBackground.animateFromRight;
-          root.cachedShouldAnimateWidth = panelBackground.shouldAnimateWidth;
-          root.cachedShouldAnimateHeight = panelBackground.shouldAnimateHeight;
 
-          // Make panel visible, now only the intended dimension will animate
           root.isPanelVisible = true;
+          root.offsetScale = 0;
 
-            root.sizeAnimationComplete = true;
-            opacityTrigger.start();
-
-          // Start open watchdog timer (skip when animations disabled - everything completes synchronously)
-          if (!root.animationsDisabled) {
+          if (Style.motionEnabled) {
             root.openWatchdogActive = true;
             openWatchdogTimer.start();
           }

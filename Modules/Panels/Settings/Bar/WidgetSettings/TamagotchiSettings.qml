@@ -13,9 +13,7 @@ ColumnLayout {
 
   signal settingsChanged(var settings)
 
-  property bool valueShowPercentage: widgetData.showPercentage !== undefined
-    ? widgetData.showPercentage
-    : widgetMetadata.showPercentage
+  property bool valueShowPercentage: widgetData.showPercentage !== undefined ? widgetData.showPercentage : widgetMetadata.showPercentage
 
   function saveSettings() {
     const settings = Object.assign({}, widgetData || {});
@@ -29,9 +27,9 @@ ColumnLayout {
     checked: root.valueShowPercentage
     defaultValue: widgetMetadata.showPercentage
     onToggled: checked => {
-      root.valueShowPercentage = checked;
-      root.saveSettings();
-    }
+                 root.valueShowPercentage = checked;
+                 root.saveSettings();
+               }
   }
 
   NDivider {

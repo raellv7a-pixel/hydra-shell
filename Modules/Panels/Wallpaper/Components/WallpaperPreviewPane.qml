@@ -38,7 +38,7 @@ NBox {
   signal findSimilarRequested(string wallpaperId)
 
   color: Color.mSurfaceContainerLow
-  radius: Style.radiusL
+  radius: Style.radiusCard
 
   WallpaperFileInfo {
     id: fileInfo
@@ -111,22 +111,22 @@ NBox {
 
   ColumnLayout {
     anchors.fill: parent
-    anchors.margins: Style.marginL
-    spacing: Style.marginM
+    anchors.margins: Style.paddingCard
+    spacing: Style.spaceS
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       NIcon {
         icon: "device-desktop"
-        pointSize: Style.fontSizeL
+        pointSize: Style.fontSizeTitleSmall
         color: Color.mPrimary
       }
 
       NText {
         text: I18n.tr("wallpaper.panel.preview-title")
-        pointSize: Style.fontSizeM
+        pointSize: Style.fontSizeTitleSmall
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
         Layout.fillWidth: true
@@ -135,8 +135,8 @@ NBox {
       // Makes explicit whether the mock-up shows a pick under consideration or
       // the wallpaper already on screen — the old preview never distinguished them.
       Rectangle {
-        Layout.preferredWidth: stateChipText.implicitWidth + Style.marginM * 2
-        Layout.preferredHeight: stateChipText.implicitHeight + Style.marginXS * 2
+        Layout.preferredWidth: stateChipText.implicitWidth + Style.spaceXS * 2
+        Layout.preferredHeight: stateChipText.implicitHeight + Style.spaceXXS * 2
         radius: height / 2
         color: root.showingCandidate ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
 
@@ -145,7 +145,7 @@ NBox {
 
           anchors.centerIn: parent
           text: root.showingCandidate ? I18n.tr("wallpaper.panel.preview-chip-candidate") : I18n.tr("wallpaper.panel.preview-chip-applied")
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelMedium
           font.weight: Style.fontWeightBold
           color: root.showingCandidate ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
         }
@@ -177,20 +177,20 @@ NBox {
     // Metadata card
     NBox {
       Layout.fillWidth: true
-      Layout.preferredHeight: infoColumn.implicitHeight + Style.marginM * 2
+      Layout.preferredHeight: infoColumn.implicitHeight + Style.spaceS * 2
       color: Color.mSurfaceContainerHigh
-      radius: Style.radiusL
+      radius: Style.radiusCard
 
       ColumnLayout {
         id: infoColumn
 
         anchors.fill: parent
-        anchors.margins: Style.marginM
-        spacing: Style.marginXXS
+        anchors.margins: Style.spaceS
+        spacing: Style.spaceXXS
 
         NText {
           text: root.titleText()
-          pointSize: Style.fontSizeM
+          pointSize: Style.fontSizeBodySmall
           font.weight: Style.fontWeightMedium
           color: Color.mOnSurface
           elide: Text.ElideMiddle
@@ -200,7 +200,7 @@ NBox {
         NText {
           text: root.primaryInfo()
           visible: text !== ""
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
           color: Color.mOnSurfaceVariant
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -209,7 +209,7 @@ NBox {
         NText {
           text: root.secondaryInfo()
           visible: text !== ""
-          pointSize: Style.fontSizeXS
+          pointSize: Style.fontSizeLabelSmall
           color: Color.mOnSurfaceVariant
           elide: Text.ElideRight
           Layout.fillWidth: true
@@ -217,7 +217,7 @@ NBox {
 
         WallpaperThemeDiffBadge {
           Layout.fillWidth: true
-          Layout.topMargin: Style.marginXS
+          Layout.topMargin: Style.spaceXXS
           Layout.preferredHeight: visible ? implicitHeight : 0
           currentPalette: mockPreview.colorSnapshot()
           candidatePalette: mockPreview.candidatePalette ? mockPreview.candidatePalette[mockPreview.previewDarkMode ? "dark" : "light"] : null
@@ -233,8 +233,8 @@ NBox {
           readonly property int diameter: Math.round(18 * Style.uiScaleRatio)
 
           Layout.fillWidth: true
-          Layout.topMargin: Style.marginXS
-          spacing: Style.marginXS
+          Layout.topMargin: Style.spaceXXS
+          spacing: Style.spaceXXS
           visible: palette !== null
 
           Repeater {
@@ -262,16 +262,16 @@ NBox {
     // Actions
     RowLayout {
       Layout.fillWidth: true
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       NComboBox {
         Layout.preferredWidth: 130 * Style.uiScaleRatio
         model: WallpaperService.fillModeModel
         currentKey: mockPreview.currentFillMode
         onSelected: key => {
-          mockPreview.currentFillMode = key;
-          Settings.data.wallpaper.fillMode = key;
-        }
+                      mockPreview.currentFillMode = key;
+                      Settings.data.wallpaper.fillMode = key;
+                    }
       }
 
       NIconButton {

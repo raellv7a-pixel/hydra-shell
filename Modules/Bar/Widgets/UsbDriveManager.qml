@@ -48,10 +48,12 @@ NIconButton {
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
-  colorBg: hasMountedDevices ? Color.mPrimary : Style.capsuleColor
-  colorFg: hasMountedDevices ? Color.mOnPrimary : Color.resolveColorKey(iconColorKey)
-  border.color: Style.capsuleBorderColor
+  customRadius: Style.radiusCapsule
+  colorBg: hasMountedDevices ? Color.mSecondary : Qt.alpha(Color.mSecondary, 0.16)
+  colorFg: hasMountedDevices ? Color.mOnSecondary : Color.resolveColorKey(iconColorKey)
+  colorBgHover: hasMountedDevices ? Color.mOnSecondary : Color.mSecondary
+  colorFgHover: colorFg
+  border.color: Qt.alpha(Color.mSecondary, 0.36)
   border.width: Style.capsuleBorderWidth
 
   onClicked: {
@@ -113,20 +115,20 @@ NIconButton {
     ]
 
     onTriggered: action => {
-      contextMenu.close();
-      PanelService.closeContextMenu(screen);
-      if (action === "open-panel") {
-        UsbDriveService.refreshDevices();
-        PanelService.getPanel("usbDriveManagerPanel", screen)?.toggle(root);
-      } else if (action === "refresh") {
-        UsbDriveService.refreshDevices();
-      } else if (action === "unmount-all") {
-        UsbDriveService.unmountAll();
-      } else if (action === "eject-all") {
-        UsbDriveService.ejectAll();
-      } else if (action === "widget-settings") {
-        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-      }
-    }
+                   contextMenu.close();
+                   PanelService.closeContextMenu(screen);
+                   if (action === "open-panel") {
+                     UsbDriveService.refreshDevices();
+                     PanelService.getPanel("usbDriveManagerPanel", screen)?.toggle(root);
+                   } else if (action === "refresh") {
+                     UsbDriveService.refreshDevices();
+                   } else if (action === "unmount-all") {
+                     UsbDriveService.unmountAll();
+                   } else if (action === "eject-all") {
+                     UsbDriveService.ejectAll();
+                   } else if (action === "widget-settings") {
+                     BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+                   }
+                 }
   }
 }

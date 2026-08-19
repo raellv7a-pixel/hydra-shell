@@ -9,6 +9,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: buildTooltipText()
 
   property ShellScreen screen
 
@@ -63,10 +66,21 @@ Item {
     height: root.contentHeight
     anchors.centerIn: parent
 
-    radius: Style.radiusL
+    radius: Style.radiusCapsule
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: clockStateLayer
+
+      anchors.fill: parent
+      hovered: clockMouseArea.containsMouse
+      pressed: clockMouseArea.pressed
+      focused: root.activeFocus
+      stateColor: root.textColor
+      radius: parent.radius
+    }
 
     Item {
       id: clockContainer
@@ -142,6 +156,12 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: visualClock
+    focusVisible: root.activeFocus
+    targetRadius: visualClock.radius
+  }
+
   NPopupContextMenu {
     id: contextMenu
 
@@ -186,6 +206,11 @@ Item {
     cursorShape: Qt.PointingHandCursor
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(clockStateLayer, mouse.x, mouse.y);
+                 clockStateLayer.rippleAt(point.x, point.y);
+               }
     onEntered: {
       if (!PanelService.getPanel("clockPanel", screen)?.isPanelOpen) {
         TooltipService.show(root, buildTooltipText(), BarService.getTooltipDirection(root.screen?.name));
@@ -205,6 +230,15 @@ Item {
                  }
                }
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.getPanel("clockPanel", screen)?.toggle(root);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.getPanel("clockPanel", screen)?.toggle(root);
+                         event.accepted = true;
+                       }
 
   Timer {
     id: tooltipRefreshTimer

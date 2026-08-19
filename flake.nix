@@ -7,6 +7,10 @@
       url = "github:noctalia-dev/noctalia-qs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    m3shapes = {
+      url = "github:soramanew/m3shapes/bdc327b29f95394a732baf3c9b19658ba23755b6";
+      flake = false;
+    };
   };
 
   outputs =
@@ -14,6 +18,7 @@
       self,
       nixpkgs,
       noctalia-qs,
+      m3shapes,
       ...
     }:
     let
@@ -47,7 +52,7 @@
           noctalia-qs.overlays.default
           (final: prev: {
             noctalia-shell = final.callPackage ./nix/package.nix {
-              inherit version;
+              inherit version m3shapes;
             };
           })
         ];

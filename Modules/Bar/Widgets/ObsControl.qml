@@ -8,6 +8,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: shouldShow
+  Accessible.role: Accessible.Button
+  Accessible.name: tooltipText
 
   property ShellScreen screen
   property string widgetId: ""
@@ -19,11 +22,11 @@ Item {
   readonly property string screenName: screen?.name ?? ""
   property var widgetSettings: {
     if (section && sectionWidgetIndex >= 0 && screenName) {
-      const widgets = Settings.getBarWidgetsForScreen(screenName)[section]
+      const widgets = Settings.getBarWidgetsForScreen(screenName)[section];
       if (widgets && sectionWidgetIndex < widgets.length)
-        return widgets[sectionWidgetIndex]
+        return widgets[sectionWidgetIndex];
     }
-    return ({})
+    return ({});
   }
 
   readonly property bool hideWhenInactive: widgetSettings.hideWhenInactive ?? widgetMetadata.hideWhenInactive ?? false
@@ -32,45 +35,34 @@ Item {
   readonly property bool isVertical: ["left", "right"].includes(Settings.getBarPositionForScreen(screenName))
   readonly property real capsuleHeight: Style.getCapsuleHeightForScreen(screenName)
   readonly property real barFontSize: Style.getBarFontSizeForScreen(screenName)
-  readonly property bool errorState: ObsControlService.effectiveState === "dependency-missing"
-                                         || ObsControlService.effectiveState === "configuration-missing"
-                                         || ObsControlService.effectiveState === "connection-error"
+  readonly property bool errorState: ObsControlService.effectiveState === "dependency-missing" || ObsControlService.effectiveState === "configuration-missing" || ObsControlService.effectiveState === "connection-error"
   readonly property bool shouldShow: !hideWhenInactive || ObsControlService.anyOutputActive || !ObsControlService.connected
   readonly property string outputText: {
-    let labels = []
+    let labels = [];
     if (ObsControlService.recording)
-      labels.push(I18n.tr("bar.obs-control.recording-short"))
+      labels.push(I18n.tr("bar.obs-control.recording-short"));
     if (ObsControlService.streaming)
-      labels.push(I18n.tr("bar.obs-control.streaming-short"))
+      labels.push(I18n.tr("bar.obs-control.streaming-short"));
     if (ObsControlService.replayBuffer)
-      labels.push(I18n.tr("bar.obs-control.replay-short"))
+      labels.push(I18n.tr("bar.obs-control.replay-short"));
     if (labels.length === 0)
-      return ""
-    let duration = 0
+      return "";
+    let duration = 0;
     if (ObsControlService.recording)
-      duration = ObsControlService.displayRecordDurationMs
+      duration = ObsControlService.displayRecordDurationMs;
     else if (ObsControlService.streaming)
-      duration = ObsControlService.displayStreamDurationMs
-    return showElapsed && duration > 0 ? `${labels.join("+")} ${formatDuration(duration)}` : labels.join("+")
+      duration = ObsControlService.displayStreamDurationMs;
+    return showElapsed && duration > 0 ? `${labels.join("+")} ${formatDuration(duration)}` : labels.join("+");
   }
-  readonly property color accentColor: errorState ? Color.mError
-                                        : ObsControlService.recording ? Color.mError
-                                        : ObsControlService.streaming ? Color.mPrimary
-                                        : ObsControlService.replayBuffer ? Color.mSecondary
-                                        : Color.resolveColorKey(iconColorKey)
-  readonly property string iconName: ObsControlService.recording ? "player-record-filled"
-                                      : ObsControlService.streaming ? "broadcast"
-                                      : ObsControlService.replayBuffer ? "history"
-                                      : errorState ? "alert-triangle"
-                                      : ObsControlService.connected ? "brand-obs"
-                                      : "plug-connected-x"
+  readonly property color accentColor: errorState ? Color.mError : ObsControlService.recording ? Color.mError : ObsControlService.streaming ? Color.mPrimary : ObsControlService.replayBuffer ? Color.mSecondary : Color.resolveColorKey(iconColorKey)
+  readonly property string iconName: ObsControlService.recording ? "player-record-filled" : ObsControlService.streaming ? "broadcast" : ObsControlService.replayBuffer ? "history" : errorState ? "alert-triangle" : ObsControlService.connected ? "brand-obs" : "plug-connected-x"
   readonly property string tooltipText: {
-    let text = I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`)
+    let text = I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`);
     if (ObsControlService.anyOutputActive)
-      text += `\n${I18n.tr("bar.obs-control.active-outputs")}: ${outputText}`
+      text += `\n${I18n.tr("bar.obs-control.active-outputs")}: ${outputText}`;
     if (ObsControlService.lastError !== "" && ObsControlService.effectiveState === "connection-error")
-      text += `\n${ObsControlService.lastError}`
-    return text
+      text += `\n${ObsControlService.lastError}`;
+    return text;
   }
 
   visible: shouldShow
@@ -78,21 +70,39 @@ Item {
   implicitHeight: shouldShow ? (isVertical ? content.implicitHeight + Style.margin2M : capsuleHeight) : 0
 
   function formatDuration(milliseconds) {
-    const seconds = Math.floor(Math.max(0, milliseconds) / 1000)
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const remainder = seconds % 60
-    const minuteText = String(minutes).padStart(2, "0")
-    const secondText = String(remainder).padStart(2, "0")
-    return hours > 0 ? `${hours}:${minuteText}:${secondText}` : `${minuteText}:${secondText}`
+    const seconds = Math.floor(Math.max(0, milliseconds) / 1000);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainder = seconds % 60;
+    const minuteText = String(minutes).padStart(2, "0");
+    const secondText = String(remainder).padStart(2, "0");
+    return hours > 0 ? `${hours}:${minuteText}:${secondText}` : `${minuteText}:${secondText}`;
   }
 
   Rectangle {
+    id: obsCapsule
     anchors.fill: parent
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
-    radius: Style.radiusL
+    color: Style.capsuleColor
+    radius: Style.radiusCapsule
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: obsStateLayer
+
+      anchors.fill: parent
+      hovered: mouseArea.containsMouse
+      pressed: mouseArea.pressed
+      focused: root.activeFocus
+      stateColor: root.accentColor
+      radius: parent.radius
+    }
+  }
+
+  NFocusRing {
+    anchors.fill: obsCapsule
+    focusVisible: root.activeFocus
+    targetRadius: obsCapsule.radius
   }
 
   Item {
@@ -157,31 +167,53 @@ Item {
 
     onEntered: TooltipService.show(root, root.tooltipText, BarService.getTooltipDirection(root.screenName))
     onExited: TooltipService.hide(root)
-    onPressed: TooltipService.hide(root)
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 TooltipService.hide(root);
+                 const point = mapToItem(obsStateLayer, mouse.x, mouse.y);
+                 obsStateLayer.rippleAt(point.x, point.y);
+               }
     onClicked: mouse => {
-      if (mouse.button === Qt.LeftButton) {
-        PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root)
-      } else if (mouse.button === Qt.MiddleButton) {
-        ObsControlService.toggleRecord()
-      } else if (mouse.button === Qt.RightButton) {
-        PanelService.showContextMenu(contextMenu, root, root.screen)
-      }
-    }
+                 if (mouse.button === Qt.LeftButton) {
+                   PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root);
+                 } else if (mouse.button === Qt.MiddleButton) {
+                   ObsControlService.toggleRecord();
+                 } else if (mouse.button === Qt.RightButton) {
+                   PanelService.showContextMenu(contextMenu, root, root.screen);
+                 }
+               }
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root);
+                         event.accepted = true;
+                       }
 
   NPopupContextMenu {
     id: contextMenu
     model: [
-      { label: I18n.tr("bar.obs-control.refresh"), action: "refresh", icon: "refresh" },
-      { label: I18n.tr("actions.widget-settings"), action: "settings", icon: "settings" }
+      {
+        label: I18n.tr("bar.obs-control.refresh"),
+        action: "refresh",
+        icon: "refresh"
+      },
+      {
+        label: I18n.tr("actions.widget-settings"),
+        action: "settings",
+        icon: "settings"
+      }
     ]
     onTriggered: action => {
-      contextMenu.close()
-      PanelService.closeContextMenu(root.screen)
-      if (action === "refresh")
-        ObsControlService.refresh()
-      else if (action === "settings")
-        BarService.openWidgetSettings(root.screen, root.section, root.sectionWidgetIndex, root.widgetId, root.widgetSettings)
-    }
+                   contextMenu.close();
+                   PanelService.closeContextMenu(root.screen);
+                   if (action === "refresh")
+                   ObsControlService.refresh();
+                   else if (action === "settings")
+                   BarService.openWidgetSettings(root.screen, root.section, root.sectionWidgetIndex, root.widgetId, root.widgetSettings);
+                 }
   }
 }

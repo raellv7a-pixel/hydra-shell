@@ -112,9 +112,9 @@ ColumnLayout {
     selectionMode: "files"
     nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif"]
     onAccepted: paths => {
-      if (paths && paths.length > 0)
-        Settings.data.sessionMenu.coverCardPath = paths[0];
-    }
+                  if (paths && paths.length > 0)
+                  Settings.data.sessionMenu.coverCardPath = paths[0];
+                }
   }
 
   NDivider {

@@ -187,7 +187,7 @@ Item {
         return barHeight + floatMarginH;
       }
 
-      readonly property int shadowPadding: Style.shadowBlurMax + Style.marginL
+      readonly property int shadowPadding: Style.shadowBlurMax + Style.spaceL
 
       // Anchoring
       anchors.top: isTop
@@ -196,10 +196,10 @@ Item {
       anchors.right: isRight
 
       // Margins for PanelWindow - only apply bar offset for the specific edge where the bar is
-      margins.top: isTop ? barOffsetTop - shadowPadding + Style.marginM : 0
-      margins.bottom: isBottom ? barOffsetBottom - shadowPadding + Style.marginM : 0
-      margins.left: isLeft ? barOffsetLeft - shadowPadding + Style.marginM : 0
-      margins.right: isRight ? barOffsetRight - shadowPadding + Style.marginM : 0
+      margins.top: isTop ? barOffsetTop - shadowPadding + Style.spaceS : 0
+      margins.bottom: isBottom ? barOffsetBottom - shadowPadding + Style.spaceS : 0
+      margins.left: isLeft ? barOffsetLeft - shadowPadding + Style.spaceS : 0
+      margins.right: isRight ? barOffsetRight - shadowPadding + Style.spaceS : 0
 
       implicitWidth: Math.round(toastItem.width)
       implicitHeight: Math.round(toastItem.height)

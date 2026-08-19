@@ -424,13 +424,13 @@ Item {
       property: "effectsActive"
       value: true
     }
-    NumberAnimation {
+    NAnim {
       target: root
       property: "masterProgress"
       from: 0.0
       to: 1.0
-      duration: Style.animationSlow * 2
-      easing.type: Easing.OutQuint
+      duration: Style.motionDurationSlowSpatial
+      motionType: NAnim.ExpressiveSlowSpatial
     }
     PropertyAction {
       target: root
@@ -535,7 +535,7 @@ Item {
     visible: !appVisible
     width: isVertical ? capsuleHeight : parent.width
     height: isVertical ? parent.height : capsuleHeight
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -597,6 +597,36 @@ Item {
     }
   }
 
+  Rectangle {
+    id: horizontalActiveTrail
+
+    readonly property int currentIndex: root.getFocusedLocalIndex()
+    readonly property var currentItem: currentIndex >= 0 ? workspaceRepeaterHorizontal.itemAt(currentIndex) : null
+    readonly property real targetOffset: currentItem ? currentItem.x + (currentItem.width - currentItem.pillWidth) / 2 : 0
+    property real leading: targetOffset
+    property real trailing: targetOffset
+
+    visible: !root.isVertical && !root.appVisible && currentItem !== null
+    x: pillRow.x + Math.min(leading, trailing)
+    y: currentItem ? Style.pixelAlignCenter(root.height, currentItem.pillHeight) : 0
+    width: currentItem ? Math.abs(leading - trailing) + currentItem.pillWidth : 0
+    height: currentItem ? currentItem.pillHeight : 0
+    radius: Style.radiusCapsule
+    color: Qt.alpha(Color.resolveColorKey(root.focusedColor), 0.48)
+
+    Behavior on leading {
+      NAnim {
+        motionType: NAnim.EmphasizedSpatial
+      }
+    }
+    Behavior on trailing {
+      NAnim {
+        duration: Style.motionDurationSlowSpatial
+        motionType: NAnim.EmphasizedSpatial
+      }
+    }
+  }
+
   // Horizontal layout for top/bottom bars
   Row {
     id: pillRow
@@ -606,10 +636,9 @@ Item {
     visible: !isVertical && !appVisible
     scale: visible ? 1.0 : 0.8
     Behavior on scale {
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutBack
-        easing.overshoot: 1.2
+      NAnim {
+        duration: Style.motionDurationFastSpatial
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 
@@ -640,6 +669,36 @@ Item {
     }
   }
 
+  Rectangle {
+    id: verticalActiveTrail
+
+    readonly property int currentIndex: root.getFocusedLocalIndex()
+    readonly property var currentItem: currentIndex >= 0 ? workspaceRepeaterVertical.itemAt(currentIndex) : null
+    readonly property real targetOffset: currentItem ? currentItem.y + (currentItem.height - currentItem.pillHeight) / 2 : 0
+    property real leading: targetOffset
+    property real trailing: targetOffset
+
+    visible: root.isVertical && !root.appVisible && currentItem !== null
+    x: currentItem ? Style.pixelAlignCenter(root.width, currentItem.pillWidth) : 0
+    y: pillColumn.y + Math.min(leading, trailing)
+    width: currentItem ? currentItem.pillWidth : 0
+    height: currentItem ? Math.abs(leading - trailing) + currentItem.pillHeight : 0
+    radius: Style.radiusCapsule
+    color: Qt.alpha(Color.resolveColorKey(root.focusedColor), 0.48)
+
+    Behavior on leading {
+      NAnim {
+        motionType: NAnim.EmphasizedSpatial
+      }
+    }
+    Behavior on trailing {
+      NAnim {
+        duration: Style.motionDurationSlowSpatial
+        motionType: NAnim.EmphasizedSpatial
+      }
+    }
+  }
+
   // Vertical layout for left/right bars
   Column {
     id: pillColumn
@@ -649,10 +708,9 @@ Item {
     visible: isVertical && !appVisible
     scale: visible ? 1.0 : 0.8
     Behavior on scale {
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutBack
-        easing.overshoot: 1.2
+      NAnim {
+        duration: Style.motionDurationFastSpatial
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 
@@ -697,6 +755,9 @@ Item {
       // Fetch windows directly from service to avoid Qt 6.9 ListModel nested array issues
       property var liveWindows: []
       property bool hasWindows: liveWindows.length > 0
+      activeFocusOnTab: true
+      Accessible.role: Accessible.Button
+      Accessible.name: "Espaço de trabalho " + (workspaceModel?.name || workspaceModel?.idx || "")
 
       function updateWindows() {
         var wsId = workspaceModel?.id;
@@ -725,24 +786,37 @@ Item {
       width: Style.toOdd((hasWindows ? groupedIconsFlow.implicitWidth : root.iconSize) + (root.isVertical ? (root.baseItemSize - root.iconSize + Style.marginXS) : Style.marginXL))
       height: Style.toOdd((hasWindows ? groupedIconsFlow.implicitHeight : root.iconSize) + (root.isVertical ? Style.marginL : (root.baseItemSize - root.iconSize + Style.marginXS)))
       color: Style.capsuleColor
-      radius: Style.radiusS
-      border.color: Settings.data.bar.showOutline ? Style.capsuleBorderColor : Qt.alpha((workspaceModel.isFocused ? Color.mPrimary : (groupHoverHandler.hovered ? Color.mHover : Color.mOutline)), root.groupedBorderOpacity)
+      radius: Style.radiusCapsule
+      border.color: Settings.data.bar.showOutline ? Style.capsuleBorderColor : Qt.alpha((workspaceModel.isFocused ? Color.mPrimary : Color.mOutline), root.groupedBorderOpacity)
       border.width: Style.borderS
 
       Behavior on width {
-        NumberAnimation {
-          duration: Style.animationFast
-          easing.type: Easing.OutCubic
+        NAnim {
+          duration: Style.motionDurationFastSpatial
+          motionType: NAnim.ExpressiveFastSpatial
         }
       }
       Behavior on height {
-        NumberAnimation {
-          duration: Style.animationFast
-          easing.type: Easing.OutCubic
+        NAnim {
+          duration: Style.motionDurationFastSpatial
+          motionType: NAnim.ExpressiveFastSpatial
         }
       }
 
+      NStateLayer {
+        id: groupedWorkspaceStateLayer
+
+        anchors.fill: parent
+        hovered: groupHoverHandler.hovered
+        pressed: groupMouseArea.pressed
+        focused: groupedContainer.activeFocus
+        selected: workspaceModel.isFocused
+        stateColor: Color.mPrimary
+        radius: parent.radius
+      }
+
       MouseArea {
+        id: groupMouseArea
         anchors.fill: parent
         hoverEnabled: true
         enabled: true
@@ -750,6 +824,9 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         preventStealing: true
         onPressed: mouse => {
+                     groupedContainer.forceActiveFocus();
+                     const point = mapToItem(groupedWorkspaceStateLayer, mouse.x, mouse.y);
+                     groupedWorkspaceStateLayer.rippleAt(point.x, point.y);
                      if (mouse.button === Qt.LeftButton) {
                        CompositorService.switchToWorkspace(groupedContainer.workspaceModel);
                      }
@@ -764,6 +841,15 @@ Item {
                       }
                     }
       }
+
+      Keys.onReturnPressed: event => {
+                              CompositorService.switchToWorkspace(groupedContainer.workspaceModel);
+                              event.accepted = true;
+                            }
+      Keys.onSpacePressed: event => {
+                             CompositorService.switchToWorkspace(groupedContainer.workspaceModel);
+                             event.accepted = true;
+                           }
 
       Flow {
         id: groupedIconsFlow
@@ -780,12 +866,27 @@ Item {
             id: groupedTaskbarItem
 
             readonly property bool isFocused: modelData?.isFocused ?? false
+            activeFocusOnTab: true
+            Accessible.role: Accessible.Button
+            Accessible.name: modelData?.title || modelData?.appId || "Aplicativo"
 
             width: root.iconSize
             height: root.iconSize
 
             HoverHandler {
               id: windowHoverHandler
+            }
+
+            NStateLayer {
+              id: groupedWindowStateLayer
+
+              anchors.fill: parent
+              hovered: windowHoverHandler.hovered
+              pressed: groupedWindowMouseArea.pressed
+              focused: groupedTaskbarItem.activeFocus
+              selected: groupedTaskbarItem.isFocused
+              stateColor: Color.mPrimary
+              radius: Style.radiusCapsule
             }
 
             IconImage {
@@ -811,7 +912,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Style.toOdd(root.iconSize * 0.25)
                 height: 4
-                color: groupedTaskbarItem.isFocused ? Color.mPrimary : Color.mHover
+                color: Color.mPrimary
                 radius: Math.min(Style.radiusXXS, width / 2)
               }
 
@@ -822,7 +923,14 @@ Item {
               }
             }
 
+            NFocusRing {
+              anchors.fill: parent
+              focusVisible: groupedTaskbarItem.activeFocus
+              targetRadius: Style.radiusCapsule
+            }
+
             MouseArea {
+              id: groupedWindowMouseArea
               anchors.fill: parent
               hoverEnabled: true
               cursorShape: Qt.PointingHandCursor
@@ -830,6 +938,9 @@ Item {
               preventStealing: true
 
               onPressed: mouse => {
+                           groupedTaskbarItem.forceActiveFocus();
+                           const point = mapToItem(groupedWindowStateLayer, mouse.x, mouse.y);
+                           groupedWindowStateLayer.rippleAt(point.x, point.y);
                            if (mouse.button === Qt.LeftButton && modelData) {
                              CompositorService.focusWindow(modelData);
                            }
@@ -853,6 +964,17 @@ Item {
                 TooltipService.hide();
               }
             }
+
+            Keys.onReturnPressed: event => {
+                                    if (modelData)
+                                    CompositorService.focusWindow(modelData);
+                                    event.accepted = true;
+                                  }
+            Keys.onSpacePressed: event => {
+                                   if (modelData)
+                                   CompositorService.focusWindow(modelData);
+                                   event.accepted = true;
+                                 }
           }
         }
       }
@@ -876,7 +998,7 @@ Item {
           id: groupedWorkspaceNumberBackground
 
           anchors.fill: parent
-          radius: Math.min(Style.radiusL, width / 2)
+          radius: Style.radiusCapsule
 
           color: {
             if (groupedContainer.workspaceModel.isFocused)
@@ -892,17 +1014,16 @@ Item {
           scale: groupedContainer.workspaceModel.isActive ? 1.0 : 0.8
 
           Behavior on scale {
-            NumberAnimation {
-              duration: Style.animationNormal
-              easing.type: Easing.OutBack
+            NAnim {
+              duration: Style.motionDurationDefaultSpatial
+              motionType: NAnim.ExpressiveDefaultSpatial
             }
           }
 
           Behavior on color {
             enabled: !Color.isTransitioning
-            ColorAnimation {
-              duration: Style.animationFast
-              easing.type: Easing.InOutCubic
+            NColorAnimation {
+              duration: Style.motionDurationFastEffects
             }
           }
         }
@@ -959,19 +1080,25 @@ Item {
           }
 
           Behavior on opacity {
-            NumberAnimation {
-              duration: Style.animationFast
-              easing.type: Easing.InOutCubic
+            NAnim {
+              duration: Style.motionDurationFastEffects
+              motionType: NAnim.StandardEffects
             }
           }
         }
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
-            easing.type: Easing.InOutCubic
+          NAnim {
+            duration: Style.motionDurationFastEffects
+            motionType: NAnim.StandardEffects
           }
         }
+      }
+
+      NFocusRing {
+        anchors.fill: parent
+        focusVisible: groupedContainer.activeFocus
+        targetRadius: groupedContainer.radius
       }
     }
   }
@@ -981,10 +1108,9 @@ Item {
     visible: appVisible
     scale: visible ? 1.0 : 0.8
     Behavior on scale {
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCubic
-        easing.overshoot: 1.2
+      NAnim {
+        duration: Style.motionDurationFastSpatial
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 

@@ -24,7 +24,8 @@ SmartPanel {
 
   // App identity resolved from the requesting action (icon, common name, description)
   readonly property string appIconPath: {
-    if (typeof ThemeIcons === 'undefined' || !root.flow) return "";
+    if (typeof ThemeIcons === 'undefined' || !root.flow)
+      return "";
     const fallback = root.flow.iconName || "shield-lock";
     return root.appEntry ? ThemeIcons.iconFromName(root.appEntry.icon, fallback) : ThemeIcons.iconFromName(fallback, "shield-lock");
   }
@@ -32,7 +33,8 @@ SmartPanel {
   readonly property string appDescription: root.resolvedMessage || (root.flow ? root.flow.message : "")
 
   function prettifyActionId(actionId) {
-    if (!actionId) return "Autenticação Requerida";
+    if (!actionId)
+      return "Autenticação Requerida";
     var parts = actionId.split(".");
     var segment = parts.length > 2 ? parts[2] : parts[parts.length - 1];
     segment = segment.replace(/[-_]/g, " ").trim();
@@ -97,10 +99,7 @@ SmartPanel {
     target: flow
     function onFailedChanged() {
       if (flow && flow.failed) {
-        ToastService.showError(
-          "Autenticação Falhou",
-          "A senha digitada está incorreta. Tente novamente."
-        );
+        ToastService.showError("Autenticação Falhou", "A senha digitada está incorreta. Tente novamente.");
       }
     }
   }
@@ -117,8 +116,10 @@ SmartPanel {
     running: false
 
     stdout: StdioCollector {
-      onStreamFinished: function() {
-        var args = this.text.split(String.fromCharCode(0)).filter(function(s) { return s.length > 0; });
+      onStreamFinished: function () {
+        var args = this.text.split(String.fromCharCode(0)).filter(function (s) {
+          return s.length > 0;
+        });
         if (args.length > 0 && root.transientMatch) {
           var resolvedCmd = args.join(' ');
           var isCommand = args.length > 1 || args[0].includes('/');
@@ -132,7 +133,8 @@ SmartPanel {
   }
 
   function resolveTransientServiceName(message) {
-    if (!message) return;
+    if (!message)
+      return;
     var match = message.match(/run-p?(\d+)-[^.]+\.service/);
     if (!match) {
       root.resolvedMessage = message;
@@ -163,29 +165,45 @@ SmartPanel {
         running: root.flow && root.flow.failed && PolkitService.errorShake
         loops: 1
 
-        NumberAnimation { target: shakeTranslate; property: "x"; from: 0; to: -10; duration: 50; easing.type: Easing.InOutQuad }
-        NumberAnimation { target: shakeTranslate; property: "x"; from: -10; to: 10; duration: 50; easing.type: Easing.InOutQuad }
-        NumberAnimation { target: shakeTranslate; property: "x"; from: 10; to: -10; duration: 50; easing.type: Easing.InOutQuad }
-        NumberAnimation { target: shakeTranslate; property: "x"; from: -10; to: 10; duration: 50; easing.type: Easing.InOutQuad }
-        NumberAnimation { target: shakeTranslate; property: "x"; from: 10; to: 0; duration: 50; easing.type: Easing.InOutQuad }
+        NAnim {
+          target: shakeTranslate
+          property: "x"
+          from: 0
+          to: -8
+          motionType: NAnim.StandardEffects
+        }
+        NAnim {
+          target: shakeTranslate
+          property: "x"
+          from: -8
+          to: 8
+          motionType: NAnim.StandardEffects
+        }
+        NAnim {
+          target: shakeTranslate
+          property: "x"
+          from: 8
+          to: 0
+          motionType: NAnim.StandardEffects
+        }
       }
 
       ColumnLayout {
         id: contentLayout
         anchors.fill: parent
-        anchors.margins: Style.marginM
-        spacing: Style.marginM
+        anchors.margins: Style.paddingCard
+        spacing: Style.spaceS
 
         // Header with app icon, common name, description and action-id pill
         ColumnLayout {
           Layout.fillWidth: true
           Layout.alignment: Qt.AlignHCenter
-          spacing: Style.marginXXS
+          spacing: Style.spaceXXS
 
           NImageRounded {
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: Style.fontSizeXXL * 2.6
-            Layout.preferredHeight: Style.fontSizeXXL * 2.6
+            Layout.preferredWidth: Style.fontSizeHeadlineSmall * 2
+            Layout.preferredHeight: Style.fontSizeHeadlineSmall * 2
             imagePath: root.appIconPath
             fallbackIcon: "shield-lock"
             borderWidth: 0
@@ -193,10 +211,10 @@ SmartPanel {
 
           NText {
             Layout.fillWidth: true
-            Layout.topMargin: Style.marginS
+            Layout.topMargin: Style.spaceXS
             text: root.appName
             horizontalAlignment: Text.AlignHCenter
-            pointSize: Style.fontSizeXXL
+            pointSize: Style.fontSizeTitleLarge
             font.weight: Style.fontWeightBold
             color: Color.mOnSurface
             wrapMode: Text.Wrap
@@ -207,25 +225,25 @@ SmartPanel {
             visible: text !== ""
             text: root.appDescription
             horizontalAlignment: Text.AlignHCenter
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
             color: Color.mOnSurfaceVariant
             wrapMode: Text.Wrap
           }
 
           Rectangle {
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Style.marginXS
+            Layout.topMargin: Style.spaceXXS
             visible: actionIdLabel.text !== ""
-            radius: height / 2
+            radius: Style.radiusCapsule
             color: Qt.alpha(Color.mPrimary, 0.16)
-            implicitWidth: actionIdLabel.implicitWidth + Style.marginM * 2
-            implicitHeight: actionIdLabel.implicitHeight + Style.marginXS * 2
+            implicitWidth: actionIdLabel.implicitWidth + Style.spaceS * 2
+            implicitHeight: actionIdLabel.implicitHeight + Style.spaceXXS * 2
 
             NText {
               id: actionIdLabel
               anchors.centerIn: parent
               text: root.flow ? root.flow.actionId : ""
-              pointSize: Style.fontSizeXXS
+              pointSize: Style.fontSizeLabelSmall
               font.weight: Style.fontWeightSemiBold
               color: Color.mPrimary
             }
@@ -236,7 +254,7 @@ SmartPanel {
         NText {
           visible: root.flow && root.flow.supplementaryMessage !== ""
           text: root.flow ? root.flow.supplementaryMessage : ""
-          pointSize: Style.fontSizeS
+          pointSize: Style.fontSizeLabelMedium
           color: (root.flow && root.flow.supplementaryIsError) ? Color.mError : Color.mOnSurfaceVariant
           wrapMode: Text.Wrap
           Layout.fillWidth: true
@@ -266,10 +284,12 @@ SmartPanel {
         // Action Buttons
         RowLayout {
           Layout.fillWidth: true
-          Layout.topMargin: Style.marginS
-          spacing: Style.marginM
+          Layout.topMargin: Style.spaceXS
+          spacing: Style.spaceS
 
-          Item { Layout.fillWidth: true } // Spacer
+          Item {
+            Layout.fillWidth: true
+          } // Spacer
 
           NButton {
             text: "Cancelar"

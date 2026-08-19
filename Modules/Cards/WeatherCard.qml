@@ -29,7 +29,7 @@ NBox {
   readonly property bool isClearNight: testEffects === "clear_night" || (testEffects === "" && (currentWeatherCode === 0 && !isDayTime))
 
   visible: Settings.data.location.weatherEnabled
-  implicitHeight: Math.max(100 * Style.uiScaleRatio, content.implicitHeight + Style.margin2XL)
+  implicitHeight: Math.max(100 * Style.uiScaleRatio, content.implicitHeight + Style.spaceXL * 2)
 
   // Weather effect layer (rain/snow)
   Loader {
@@ -43,6 +43,7 @@ NBox {
       // Animated time for shaders
       property real shaderTime: 0
       NumberAnimation on shaderTime {
+        running: Style.motionEnabled
         loops: Animation.Infinite
         from: 0
         to: root.isSnowing ? 900 : 3000
@@ -53,7 +54,7 @@ NBox {
         id: weatherEffect
         anchors.fill: parent
         // Rain matches content margins, everything else fills the box
-        anchors.margins: root.isRaining ? Style.marginXL : root.border.width
+        anchors.margins: root.isRaining ? Style.spaceXL : root.border.width
 
         property var source: ShaderEffectSource {
           sourceItem: content
@@ -92,34 +93,34 @@ NBox {
   ColumnLayout {
     id: content
     anchors.fill: parent
-    anchors.margins: Style.marginXL
-    spacing: Style.marginM
+    anchors.margins: Style.spaceXL
+    spacing: Style.spaceS
     clip: true
 
     RowLayout {
       visible: weatherReady
       Layout.fillWidth: true
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       Item {
-        Layout.preferredWidth: Style.marginXXS
+        Layout.preferredWidth: Style.spaceXXS
       }
 
       RowLayout {
-        spacing: Style.marginL
+        spacing: Style.paddingCard
         Layout.fillWidth: true
 
         Item {
           Layout.preferredWidth: mainWeatherIconSide
           Layout.preferredHeight: mainWeatherIconSide
           Layout.alignment: Qt.AlignVCenter
-          readonly property int mainWeatherIconSide: Math.round(Style.fontSizeXXXL * 1.75 * Style.uiScaleRatio * 1.6)
+          readonly property int mainWeatherIconSide: Math.round(Style.fontSizeHeadlineSmall * 1.75 * Style.uiScaleRatio * 1.6)
 
           NIcon {
             visible: !LocationService.taliaWeatherMascotActive
             anchors.centerIn: parent
             icon: weatherReady ? LocationService.weatherSymbolFromCode(LocationService.data.weather.current_weather.weathercode) : ""
-            pointSize: Style.fontSizeXXXL * 1.75
+            pointSize: Style.fontSizeHeadlineSmall * 1.75
             color: Color.mPrimary
           }
           Loader {
@@ -140,14 +141,14 @@ NBox {
         }
 
         ColumnLayout {
-          spacing: Style.marginXXS
+          spacing: Style.spaceXXS
           NText {
             text: {
               // Ensure the name is not too long if one had to specify the country
               const chunks = Settings.data.location.name.split(",");
               return chunks[0];
             }
-            pointSize: Style.fontSizeL
+            pointSize: Style.fontSizeTitleSmall
             font.weight: Style.fontWeightBold
             visible: showLocation && !Settings.data.location.hideWeatherCityName
           }
@@ -166,13 +167,13 @@ NBox {
                 temp = Math.round(temp);
                 return `${temp}°${suffix}`;
               }
-              pointSize: showLocation ? Style.fontSizeXL : Style.fontSizeXL * 1.6
+              pointSize: showLocation ? Style.fontSizeTitleMedium : Style.fontSizeHeadlineSmall
               font.weight: Style.fontWeightBold
             }
 
             NText {
               text: weatherReady ? `(${LocationService.data.weather.timezone_abbreviation})` : ""
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelSmall
               color: Color.mOnSurfaceVariant
               visible: LocationService.data.weather && showLocation && !Settings.data.location.hideWeatherTimezone
             }
@@ -190,13 +191,13 @@ NBox {
       visible: weatherReady
       Layout.fillWidth: true
       Layout.alignment: Qt.AlignVCenter
-      spacing: Style.marginM
+      spacing: Style.spaceS
 
       Repeater {
         model: weatherReady ? Math.min(root.forecastDays, LocationService.data.weather.daily.time.length) : 0
         delegate: ColumnLayout {
           Layout.fillWidth: true
-          spacing: Style.marginXS
+          spacing: Style.spaceXXS
           Item {
             Layout.fillWidth: true
           }
@@ -212,13 +213,13 @@ NBox {
             Layout.preferredWidth: forecastWeatherIconSide
             Layout.preferredHeight: forecastWeatherIconSide
             Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-            readonly property int forecastWeatherIconSide: Math.round(Style.fontSizeXXL * 1.6 * Style.uiScaleRatio * 1.6)
+            readonly property int forecastWeatherIconSide: Math.round(Style.fontSizeTitleMedium * 1.6 * Style.uiScaleRatio * 1.6)
 
             NIcon {
               visible: !LocationService.taliaWeatherMascotActive
               anchors.centerIn: parent
               icon: LocationService.weatherSymbolFromCode(LocationService.data.weather.daily.weathercode[index])
-              pointSize: Style.fontSizeXXL * 1.6
+              pointSize: Style.fontSizeTitleMedium * 1.6
               color: Color.mPrimary
             }
             Loader {
@@ -250,7 +251,7 @@ NBox {
               min = Math.round(min);
               return `${max}°/${min}°`;
             }
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             color: Color.mOnSurfaceVariant
           }
         }
@@ -260,7 +261,7 @@ NBox {
     ColumnLayout {
       visible: !weatherReady
       Layout.alignment: Qt.AlignCenter
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       NBusyIndicator {
         Layout.alignment: Qt.AlignCenter
@@ -271,7 +272,7 @@ NBox {
         visible: !LocationService.locationConfigured
         Layout.alignment: Qt.AlignCenter
         text: I18n.tr("common.weather-no-location")
-        pointSize: Style.fontSizeS
+        pointSize: Style.fontSizeLabelMedium
         color: Color.mOnSurfaceVariant
       }
     }

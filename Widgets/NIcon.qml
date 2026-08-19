@@ -7,9 +7,10 @@ Text {
   id: root
 
   property string icon: Icons.defaultIcon
-  property real pointSize: Style.fontSizeL
+  property real pointSize: Style.fontSizeTitleMedium
   property bool applyUiScale: true
 
+  opacity: enabled ? Style.opacityFull : Style.disabledContentOpacity
   visible: (icon !== undefined) && (icon !== "")
   text: {
     if ((icon === undefined) || (icon === "")) {

@@ -32,12 +32,13 @@ import qs.Modules.Panels.Tamagotchi
 import qs.Modules.Panels.Tray
 import qs.Modules.Panels.UsbDriveManager
 import qs.Modules.Panels.Wallpaper
+import qs.Modules.Polkit
 import qs.Modules.ScreenShare
 import qs.Modules.ScreenToolkit
-import qs.Modules.Polkit
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI
+import qs.Widgets
 
 /**
 * MainScreen - Single PanelWindow per screen that manages all panels and the bar
@@ -99,9 +100,9 @@ PanelWindow {
 
   Behavior on color {
     enabled: !PanelService.closedImmediately
-    ColorAnimation {
+    NColorAnimation {
+      motionType: NColorAnimation.Standard
       duration: isPanelClosing ? Style.animationFaster : Style.animationNormal
-      easing.type: Easing.OutQuad
     }
   }
 
@@ -127,6 +128,17 @@ PanelWindow {
     return monitors.length === 0 || monitors.includes(screenName);
   }
 
+  readonly property bool fullscreenActive: {
+    const windows = CompositorService.windows;
+    const screenName = screen?.name || "";
+    for (let i = 0; i < windows.count; ++i) {
+      const window = windows.get(i);
+      if (window.output === screenName && window.isFullscreen === true)
+        return true;
+    }
+    return false;
+  }
+
   // Make everything click-through except bar
   mask: Region {
     id: clickableMask
@@ -150,6 +162,7 @@ PanelWindow {
       readonly property real barThickness: Style.barHeight
       readonly property real frameThickness: Settings.data.bar.frameThickness ?? 12
       readonly property string barPos: Settings.data.bar.position || "top"
+      readonly property bool frameVisible: isFramed && root.barShouldShow && !root.fullscreenActive
 
       // Bar / Frame Mask
       Region {
@@ -167,17 +180,17 @@ PanelWindow {
         Region {
           x: 0
           y: 0
-          width: (barMaskRegion.isFramed && root.barShouldShow) ? root.width : 0
-          height: (barMaskRegion.isFramed && root.barShouldShow) ? (barMaskRegion.barPos === "top" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
+          width: barMaskRegion.frameVisible ? root.width : 0
+          height: barMaskRegion.frameVisible ? (barMaskRegion.barPos === "top" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
           intersection: Intersection.Subtract
         }
 
         // Bottom side
         Region {
           x: 0
-          y: (barMaskRegion.isFramed && root.barShouldShow) ? (root.height - (barMaskRegion.barPos === "bottom" ? barMaskRegion.barThickness : barMaskRegion.frameThickness)) : 0
-          width: (barMaskRegion.isFramed && root.barShouldShow) ? root.width : 0
-          height: (barMaskRegion.isFramed && root.barShouldShow) ? (barMaskRegion.barPos === "bottom" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
+          y: barMaskRegion.frameVisible ? (root.height - (barMaskRegion.barPos === "bottom" ? barMaskRegion.barThickness : barMaskRegion.frameThickness)) : 0
+          width: barMaskRegion.frameVisible ? root.width : 0
+          height: barMaskRegion.frameVisible ? (barMaskRegion.barPos === "bottom" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
           intersection: Intersection.Subtract
         }
 
@@ -185,16 +198,16 @@ PanelWindow {
         Region {
           x: 0
           y: 0
-          width: (barMaskRegion.isFramed && root.barShouldShow) ? (barMaskRegion.barPos === "left" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
-          height: (barMaskRegion.isFramed && root.barShouldShow) ? root.height : 0
+          width: barMaskRegion.frameVisible ? (barMaskRegion.barPos === "left" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
+          height: barMaskRegion.frameVisible ? root.height : 0
           intersection: Intersection.Subtract
         }
 
         // Right side
         Region {
-          x: (barMaskRegion.isFramed && root.barShouldShow) ? (root.width - (barMaskRegion.barPos === "right" ? barMaskRegion.barThickness : barMaskRegion.frameThickness)) : 0
-          width: (barMaskRegion.isFramed && root.barShouldShow) ? (barMaskRegion.barPos === "right" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
-          height: (barMaskRegion.isFramed && root.barShouldShow) ? root.height : 0
+          x: barMaskRegion.frameVisible ? (root.width - (barMaskRegion.barPos === "right" ? barMaskRegion.barThickness : barMaskRegion.frameThickness)) : 0
+          width: barMaskRegion.frameVisible ? (barMaskRegion.barPos === "right" ? barMaskRegion.barThickness : barMaskRegion.frameThickness) : 0
+          height: barMaskRegion.frameVisible ? root.height : 0
           intersection: Intersection.Subtract
         }
       }
@@ -222,7 +235,7 @@ PanelWindow {
       y: (!barPlaceholder.isFramed && root.barShouldShow && !barPlaceholder.isHidden) ? barPlaceholder.y : 0
       width: (!barPlaceholder.isFramed && root.barShouldShow && !barPlaceholder.isHidden) ? barPlaceholder.width : 0
       height: (!barPlaceholder.isFramed && root.barShouldShow && !barPlaceholder.isHidden) ? barPlaceholder.height : 0
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       topLeftCorner: barPlaceholder.topLeftCornerState
       topRightCorner: barPlaceholder.topRightCornerState
       bottomLeftCorner: barPlaceholder.bottomLeftCornerState
@@ -253,7 +266,7 @@ PanelWindow {
       y: backgroundBlur.panelBg ? Math.round(backgroundBlur.panelBg.y) : 0
       width: backgroundBlur.panelBg ? Math.round(backgroundBlur.panelBg.width) : 0
       height: backgroundBlur.panelBg ? Math.round(backgroundBlur.panelBg.height) : 0
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       topLeftCorner: backgroundBlur.panelBg ? backgroundBlur.panelBg.topLeftCornerState : CornerState.Normal
       topRightCorner: backgroundBlur.panelBg ? backgroundBlur.panelBg.topRightCornerState : CornerState.Normal
       bottomLeftCorner: backgroundBlur.panelBg ? backgroundBlur.panelBg.bottomLeftCornerState : CornerState.Normal
@@ -266,7 +279,7 @@ PanelWindow {
       y: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.y) : 0
       width: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.width) : 0
       height: backgroundBlur.modalBg ? Math.round(backgroundBlur.modalBg.height) : 0
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       topLeftCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.topLeftCornerState : CornerState.Normal
       topRightCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.topRightCornerState : CornerState.Normal
       bottomLeftCorner: backgroundBlur.modalBg ? backgroundBlur.modalBg.bottomLeftCornerState : CornerState.Normal
@@ -279,7 +292,7 @@ PanelWindow {
       y: backgroundBlur.closingPanelBg ? Math.round(backgroundBlur.closingPanelBg.y) : 0
       width: backgroundBlur.closingPanelBg ? Math.round(backgroundBlur.closingPanelBg.width) : 0
       height: backgroundBlur.closingPanelBg ? Math.round(backgroundBlur.closingPanelBg.height) : 0
-      radius: Style.radiusL
+      radius: Style.radiusPanel
       topLeftCorner: backgroundBlur.closingPanelBg ? backgroundBlur.closingPanelBg.topLeftCornerState : CornerState.Normal
       topRightCorner: backgroundBlur.closingPanelBg ? backgroundBlur.closingPanelBg.topRightCornerState : CornerState.Normal
       bottomLeftCorner: backgroundBlur.closingPanelBg ? backgroundBlur.closingPanelBg.bottomLeftCornerState : CornerState.Normal
@@ -291,6 +304,7 @@ PanelWindow {
   // Container for all UI elements
   Item {
     id: container
+    readonly property var backgroundProvider: unifiedBackgrounds
     width: root.width
     height: root.height
 
@@ -302,6 +316,7 @@ PanelWindow {
       anchors.fill: parent
       bar: barPlaceholder.barItem || null
       windowRoot: root
+      fullscreenActive: root.fullscreenActive
       z: 0 // Behind all content
     }
 
@@ -649,7 +664,7 @@ PanelWindow {
       readonly property real frameHoleY: barPlaceholder.barPosition === "top" ? barPlaceholder.barHeight : barPlaceholder.frameThickness
       readonly property real frameHoleX2: root.width - (barPlaceholder.barPosition === "right" ? barPlaceholder.barHeight : barPlaceholder.frameThickness)
       readonly property real frameHoleY2: root.height - (barPlaceholder.barPosition === "bottom" ? barPlaceholder.barHeight : barPlaceholder.frameThickness)
-      readonly property real frameR: Settings.data.bar.frameRadius ?? 20
+      readonly property real frameR: Settings.data.bar.frameRadius ?? Style.radiusPanel
     }
 
     // Native idle inhibitor — one per active MainScreen window.
@@ -673,33 +688,35 @@ PanelWindow {
   // authentication rather than the panel that requested it.
   // Panels can implement: onEscapePressed, onTabPressed, onBackTabPressed,
   // onUpPressed, onDownPressed, onReturnPressed, etc...
+  readonly property var shortcutPanel: PanelService.activePanel
+
   Instantiator {
     model: Settings.data.general.keybinds.keyEscape || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.activePanel.onEscapePressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.activePanel.onEscapePressed()
+      enabled: root.isPanelOpen && (root.shortcutPanel?.onEscapePressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: root.shortcutPanel?.onEscapePressed?.()
     }
   }
 
   Shortcut {
     sequence: "Tab"
-    enabled: root.isPanelOpen && (PanelService.activePanel.onTabPressed !== undefined)
-    onActivated: PanelService.activePanel.onTabPressed()
+    enabled: root.isPanelOpen && (root.shortcutPanel?.onTabPressed !== undefined)
+    onActivated: root.shortcutPanel?.onTabPressed?.()
   }
 
   Shortcut {
     sequence: "Backtab"
-    enabled: root.isPanelOpen && (PanelService.activePanel.onBackTabPressed !== undefined)
-    onActivated: PanelService.activePanel.onBackTabPressed()
+    enabled: root.isPanelOpen && (root.shortcutPanel?.onBackTabPressed !== undefined)
+    onActivated: root.shortcutPanel?.onBackTabPressed?.()
   }
 
   Instantiator {
     model: Settings.data.general.keybinds.keyUp || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.activePanel.onUpPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.activePanel.onUpPressed()
+      enabled: root.isPanelOpen && (root.shortcutPanel?.onUpPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: root.shortcutPanel?.onUpPressed?.()
     }
   }
 
@@ -707,8 +724,8 @@ PanelWindow {
     model: Settings.data.general.keybinds.keyDown || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.activePanel.onDownPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.activePanel.onDownPressed()
+      enabled: root.isPanelOpen && (root.shortcutPanel?.onDownPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: root.shortcutPanel?.onDownPressed?.()
     }
   }
 
@@ -716,8 +733,8 @@ PanelWindow {
     model: Settings.data.general.keybinds.keyEnter || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.activePanel.onEnterPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.activePanel.onEnterPressed()
+      enabled: root.isPanelOpen && (root.shortcutPanel?.onEnterPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: root.shortcutPanel?.onEnterPressed?.()
     }
   }
 
@@ -725,8 +742,8 @@ PanelWindow {
     model: Settings.data.general.keybinds.keyLeft || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.activePanel.onLeftPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.activePanel.onLeftPressed()
+      enabled: root.isPanelOpen && (root.shortcutPanel?.onLeftPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: root.shortcutPanel?.onLeftPressed?.()
     }
   }
 
@@ -734,32 +751,32 @@ PanelWindow {
     model: Settings.data.general.keybinds.keyRight || []
     Shortcut {
       sequence: modelData
-      enabled: root.isPanelOpen && (PanelService.activePanel.onRightPressed !== undefined) && !PanelService.isKeybindRecording
-      onActivated: PanelService.activePanel.onRightPressed()
+      enabled: root.isPanelOpen && (root.shortcutPanel?.onRightPressed !== undefined) && !PanelService.isKeybindRecording
+      onActivated: root.shortcutPanel?.onRightPressed?.()
     }
   }
 
   Shortcut {
     sequence: "Home"
-    enabled: root.isPanelOpen && (PanelService.activePanel.onHomePressed !== undefined)
-    onActivated: PanelService.activePanel.onHomePressed()
+    enabled: root.isPanelOpen && (root.shortcutPanel?.onHomePressed !== undefined)
+    onActivated: root.shortcutPanel?.onHomePressed?.()
   }
 
   Shortcut {
     sequence: "End"
-    enabled: root.isPanelOpen && (PanelService.activePanel.onEndPressed !== undefined)
-    onActivated: PanelService.activePanel.onEndPressed()
+    enabled: root.isPanelOpen && (root.shortcutPanel?.onEndPressed !== undefined)
+    onActivated: root.shortcutPanel?.onEndPressed?.()
   }
 
   Shortcut {
     sequence: "PgUp"
-    enabled: root.isPanelOpen && (PanelService.activePanel.onPageUpPressed !== undefined)
-    onActivated: PanelService.activePanel.onPageUpPressed()
+    enabled: root.isPanelOpen && (root.shortcutPanel?.onPageUpPressed !== undefined)
+    onActivated: root.shortcutPanel?.onPageUpPressed?.()
   }
 
   Shortcut {
     sequence: "PgDown"
-    enabled: root.isPanelOpen && (PanelService.activePanel.onPageDownPressed !== undefined)
-    onActivated: PanelService.activePanel.onPageDownPressed()
+    enabled: root.isPanelOpen && (root.shortcutPanel?.onPageDownPressed !== undefined)
+    onActivated: root.shortcutPanel?.onPageDownPressed?.()
   }
 }

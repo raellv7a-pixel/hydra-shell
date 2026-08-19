@@ -16,17 +16,17 @@ SmartPanel {
     id: panelContent
 
     property bool allowAttach: true
-    property real contentPreferredHeight: content.implicitHeight + Style.margin2L
+    property real contentPreferredHeight: content.implicitHeight + Style.paddingCard * 2
 
     ColumnLayout {
       id: content
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       RowLayout {
         Layout.fillWidth: true
-        spacing: Style.marginM
+        spacing: Style.spaceS
 
         Rectangle {
           Layout.preferredWidth: Style.baseWidgetSize * 0.9
@@ -37,19 +37,19 @@ SmartPanel {
           NIcon {
             anchors.centerIn: parent
             icon: ObsControlService.recording ? "player-record-filled" : "brand-obs"
-            pointSize: Style.fontSizeL
+            pointSize: Style.fontSizeTitleSmall
             color: ObsControlService.recording ? Color.mOnErrorContainer : Color.mOnPrimaryContainer
           }
         }
 
         ColumnLayout {
           Layout.fillWidth: true
-          spacing: Style.marginXXS
+          spacing: Style.spaceXXS
 
           NText {
             Layout.fillWidth: true
             text: I18n.tr("bar.obs-control.title")
-            pointSize: Style.fontSizeL
+            pointSize: Style.fontSizeTitleSmall
             font.weight: Style.fontWeightBold
             color: Color.mOnSurface
           }
@@ -76,14 +76,15 @@ SmartPanel {
 
       NBox {
         Layout.fillWidth: true
-        implicitHeight: statusColumn.implicitHeight + Style.margin2M
+        implicitHeight: statusColumn.implicitHeight + Style.spaceS * 2
         color: Color.mSurfaceContainer
+        radius: Style.radiusCard
 
         ColumnLayout {
           id: statusColumn
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginS
+          anchors.margins: Style.spaceS
+          spacing: Style.spaceXS
 
           NText {
             Layout.fillWidth: true
@@ -94,7 +95,7 @@ SmartPanel {
 
           RowLayout {
             Layout.fillWidth: true
-            spacing: Style.marginS
+            spacing: Style.spaceXS
 
             NIcon {
               icon: ObsControlService.connected ? "plug-connected" : "plug-connected-x"
@@ -102,9 +103,7 @@ SmartPanel {
             }
             NText {
               Layout.fillWidth: true
-              text: ObsControlService.connected
-                    ? I18n.tr("bar.obs-control.authenticated")
-                    : I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`)
+              text: ObsControlService.connected ? I18n.tr("bar.obs-control.authenticated") : I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`)
               wrapMode: Text.WordWrap
               color: Color.mOnSurfaceVariant
             }
@@ -145,8 +144,8 @@ SmartPanel {
       GridLayout {
         Layout.fillWidth: true
         columns: 2
-        columnSpacing: Style.marginM
-        rowSpacing: Style.marginM
+        columnSpacing: Style.spaceS
+        rowSpacing: Style.spaceS
 
         NButton {
           Layout.fillWidth: true
@@ -195,13 +194,13 @@ SmartPanel {
     }
 
     function formatDuration(milliseconds) {
-      const seconds = Math.floor(Math.max(0, milliseconds) / 1000)
-      const hours = Math.floor(seconds / 3600)
-      const minutes = Math.floor((seconds % 3600) / 60)
-      const remainder = seconds % 60
-      const minuteText = String(minutes).padStart(2, "0")
-      const secondText = String(remainder).padStart(2, "0")
-      return hours > 0 ? `${hours}:${minuteText}:${secondText}` : `${minuteText}:${secondText}`
+      const seconds = Math.floor(Math.max(0, milliseconds) / 1000);
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainder = seconds % 60;
+      const minuteText = String(minutes).padStart(2, "0");
+      const secondText = String(remainder).padStart(2, "0");
+      return hours > 0 ? `${hours}:${minuteText}:${secondText}` : `${minuteText}:${secondText}`;
     }
   }
 }

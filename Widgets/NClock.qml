@@ -417,8 +417,8 @@ Item {
         color: isActive ? activeColor : Qt.alpha(activeColor, 0.2)
 
         Behavior on color {
-          ColorAnimation {
-            duration: 200
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
           }
         }
       }

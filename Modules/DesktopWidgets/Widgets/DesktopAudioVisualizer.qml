@@ -59,13 +59,13 @@ DraggableDesktopWidget {
     id: visualizerMask
     anchors.fill: parent
     color: "transparent"
-    radius: root.roundedCorners ? Math.min(Math.round(Style.radiusL * root.widgetScale), Style.radiusL, width / 2, height / 2) : 0
+    radius: root.roundedCorners ? Math.min(Math.round(Style.radiusCard * root.widgetScale), Style.radiusCard, width / 2, height / 2) : 0
     clip: true
 
     Loader {
       id: visualizerLoader
       anchors.fill: parent
-      anchors.margins: root.showBackground ? Math.round(Style.marginXS * root.widgetScale) : 0
+      anchors.margins: root.showBackground ? Math.round(Style.spaceXXS * root.widgetScale) : 0
       active: root.shouldShow
       asynchronous: true
 

@@ -50,16 +50,14 @@ NBox {
   }
 
   Behavior on color {
-    ColorAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutQuint
+    NColorAnimation {
+      motionType: NColorAnimation.Standard
     }
   }
 
   Behavior on scale {
-    ScaleAnimator {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveFastSpatial
     }
   }
 
@@ -78,8 +76,16 @@ NBox {
     transformOrigin: Item.Center
     z: 5
 
-    Behavior on scale { ScaleAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic } }
-    Behavior on opacity { OpacityAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic } }
+    Behavior on scale {
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
+      }
+    }
+    Behavior on opacity {
+      NAnim {
+        motionType: NAnim.StandardEffects
+      }
+    }
   }
 
   ColumnLayout {
@@ -105,16 +111,14 @@ NBox {
         opacity: entry.isSelected ? 1.0 : 0.85
 
         Behavior on scale {
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+          NAnim {
+            motionType: NAnim.ExpressiveDefaultSpatial
           }
         }
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         // Icon background
@@ -286,9 +290,8 @@ NBox {
           Layout.fillWidth: true
 
           Behavior on color {
-            ColorAnimation {
-              duration: Style.animationNormal
-              easing.type: Easing.OutQuint
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
             }
           }
         }
@@ -303,14 +306,12 @@ NBox {
           visible: text !== "" && !launcher.isCompactDensity
 
           Behavior on color {
-            ColorAnimation {
-              duration: Style.animationNormal
-              easing.type: Easing.OutQuint
+            NColorAnimation {
+              motionType: NColorAnimation.Standard
             }
           }
         }
       }
-
     }
   }
 

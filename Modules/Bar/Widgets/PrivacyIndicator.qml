@@ -9,6 +9,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: buildTooltip()
 
   property ShellScreen screen
   property string widgetId: ""
@@ -64,27 +67,21 @@ Item {
     var parts = [];
 
     if (micActive) {
-      parts.push(micApps.length > 0
-                 ? I18n.tr("tooltips.privacy-indicator-mic", {
-                             "apps": micApps.join(", ")
-                           })
-                 : I18n.tr("tooltips.privacy-indicator-mic-active"));
+      parts.push(micApps.length > 0 ? I18n.tr("tooltips.privacy-indicator-mic", {
+                                                "apps": micApps.join(", ")
+                                              }) : I18n.tr("tooltips.privacy-indicator-mic-active"));
     }
 
     if (camActive) {
-      parts.push(camApps.length > 0
-                 ? I18n.tr("tooltips.privacy-indicator-cam", {
-                             "apps": camApps.join(", ")
-                           })
-                 : I18n.tr("tooltips.privacy-indicator-cam-active"));
+      parts.push(camApps.length > 0 ? I18n.tr("tooltips.privacy-indicator-cam", {
+                                                "apps": camApps.join(", ")
+                                              }) : I18n.tr("tooltips.privacy-indicator-cam-active"));
     }
 
     if (scrActive) {
-      parts.push(scrApps.length > 0
-                 ? I18n.tr("tooltips.privacy-indicator-screen", {
-                             "apps": scrApps.join(", ")
-                           })
-                 : I18n.tr("tooltips.privacy-indicator-screen-active"));
+      parts.push(scrApps.length > 0 ? I18n.tr("tooltips.privacy-indicator-screen", {
+                                                "apps": scrApps.join(", ")
+                                              }) : I18n.tr("tooltips.privacy-indicator-screen-active"));
     }
 
     if (cameraDetectionState === "limited")
@@ -92,9 +89,7 @@ Item {
     else if (cameraDetectionState === "timeout" || cameraDetectionState === "unavailable")
       parts.push(I18n.tr("tooltips.privacy-indicator-camera-unavailable"));
 
-    return parts.length > 0
-        ? parts.join("\n")
-        : I18n.tr("tooltips.privacy-indicator-idle");
+    return parts.length > 0 ? parts.join("\n") : I18n.tr("tooltips.privacy-indicator-idle");
   }
 
   NPopupContextMenu {
@@ -124,9 +119,20 @@ Item {
     color: Style.capsuleColor
     width: root.contentWidth
     height: root.contentHeight
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: privacyStateLayer
+
+      anchors.fill: parent
+      hovered: privacyMouseArea.containsMouse
+      pressed: privacyMouseArea.pressed
+      focused: root.activeFocus
+      stateColor: Color.mTertiary
+      radius: parent.radius
+    }
 
     Item {
       id: layout
@@ -163,10 +169,22 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: visualCapsule
+    focusVisible: root.activeFocus
+    targetRadius: visualCapsule.radius
+  }
+
   MouseArea {
+    id: privacyMouseArea
     anchors.fill: parent
     acceptedButtons: Qt.RightButton
     hoverEnabled: true
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(privacyStateLayer, mouse.x, mouse.y);
+                 privacyStateLayer.rippleAt(point.x, point.y);
+               }
 
     onClicked: mouse => {
                  if (mouse.button === Qt.RightButton) {
@@ -182,4 +200,13 @@ Item {
     }
     onExited: TooltipService.hide()
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.showContextMenu(contextMenu, root, screen);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.showContextMenu(contextMenu, root, screen);
+                         event.accepted = true;
+                       }
 }

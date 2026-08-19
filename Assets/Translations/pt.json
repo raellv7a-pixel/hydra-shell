@@ -904,7 +904,7 @@
       "system-uptime": "Tempo de atividade:",
       "system-wm": "WM:",
       "telemetry-data-copied": "Dados de telemetria copiados para a área de transferência.",
-      "telemetry-desc": "Ajude a melhorar o Noctalia compartilhando informações anônimas do sistema (resolução da tela, compositor, distribuição). Enviado uma vez na inicialização, sem rastreamento, os dados são excluídos automaticamente após 30 dias.",
+      "telemetry-desc": "Ajude a melhorar a Hydra Shell compartilhando informações anônimas do sistema (resolução da tela, compositor e distribuição). Os dados são enviados uma vez na inicialização, sem rastreamento, e excluídos automaticamente após 30 dias.",
       "telemetry-enabled": "Enviar informações anônimas do sistema",
       "telemetry-show-data": "Visualizar dados",
       "telemetry-title": "Privacidade",
@@ -2064,7 +2064,7 @@
     "skip-setup": "Ignorar configuração",
     "telemetry-wizard-done": "Entendi!",
     "telemetry-wizard-note": "Você está no controle — ative ou desative isso a qualquer momento nas configurações",
-    "telemetry-wizard-subtitle": "Adicionámos análises anónimas para ajudar a melhorar o Noctalia",
+    "telemetry-wizard-subtitle": "Adicionamos análises anônimas para ajudar a melhorar a Hydra Shell",
     "telemetry-wizard-title": "Atualização de privacidade",
     "wallpaper": {
       "choose-dir": "Escolha um diretório contendo seus papéis de parede",
@@ -2083,7 +2083,7 @@
     "welcome": "Bem-vindo",
     "welcome-note": "Apenas alguns ajustes básicos para começar — o restante está em configurações",
     "welcome-subtitle": "Vamos tornar o seu ambiente de trabalho único",
-    "welcome-title": "Bem-vindo ao Noctalia!"
+    "welcome-title": "Bem-vindo à Hydra Shell!"
   },
   "system": {
     "cpu-temperature": "{temp}°C",

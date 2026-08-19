@@ -26,9 +26,18 @@ ColumnLayout {
 
       Repeater {
         model: [
-          { "key": "dwindle", "label": "Dwindle" },
-          { "key": "master", "label": "Master" },
-          { "key": "scrolling", "label": "Scrolling" }
+          {
+            "key": "dwindle",
+            "label": "Dwindle"
+          },
+          {
+            "key": "master",
+            "label": "Master"
+          },
+          {
+            "key": "scrolling",
+            "label": "Scrolling"
+          }
         ]
         delegate: NButton {
           required property var modelData

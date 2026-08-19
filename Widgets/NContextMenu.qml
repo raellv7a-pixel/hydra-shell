@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.Commons
+import qs.Widgets
 
 /*
 * NContextMenu - Popup-based context menu for use inside panels and dialogs
@@ -62,10 +63,10 @@ Popup {
   padding: Style.marginS
 
   background: Rectangle {
-    color: Color.mSurfaceVariant
+    color: Color.mSurfaceContainerHigh
     border.color: Color.mOutline
     border.width: Style.borderS
-    radius: Style.iRadiusM
+    radius: Style.radiusPopover
   }
 
   contentItem: NListView {
@@ -82,20 +83,25 @@ Popup {
       id: menuItem
       width: listView.availableWidth
       height: root.itemHeight
-      opacity: modelData.enabled !== false ? 1.0 : 0.5
+      opacity: enabled ? Style.opacityFull : Style.disabledContentOpacity
       enabled: modelData.enabled !== false
 
       // Store reference to the popup
       property var popup: root
 
-      background: Rectangle {
-        color: menuItem.hovered && menuItem.enabled ? Color.mHover : "transparent"
-        radius: Style.iRadiusS
+      background: NStateLayer {
+        id: menuStateLayer
 
-        Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
+        radius: Style.radiusControl
+        enabled: menuItem.enabled
+        hovered: menuItem.hovered
+        pressed: menuItem.pressed
+        focused: menuItem.activeFocus
+        stateColor: Color.mPrimary
+
+        NFocusRing {
+          focusVisible: menuItem.activeFocus
+          targetRadius: parent.radius
         }
       }
 
@@ -107,30 +113,23 @@ Popup {
           visible: modelData.icon !== undefined
           icon: modelData.icon || ""
           pointSize: Style.fontSizeM
-          color: menuItem.hovered && menuItem.enabled ? Color.mOnHover : Color.mOnSurface
+          color: Color.mOnSurface
           Layout.leftMargin: root.itemPadding
-
-          Behavior on color {
-            ColorAnimation {
-              duration: Style.animationFast
-            }
-          }
         }
 
         NText {
           text: modelData.label || modelData.text || ""
           pointSize: Style.fontSizeM
-          color: menuItem.hovered && menuItem.enabled ? Color.mOnHover : Color.mOnSurface
+          color: Color.mOnSurface
           verticalAlignment: Text.AlignVCenter
           Layout.fillWidth: true
           Layout.leftMargin: modelData.icon === undefined ? root.itemPadding : 0
-
-          Behavior on color {
-            ColorAnimation {
-              duration: Style.animationFast
-            }
-          }
         }
+      }
+
+      onPressedChanged: {
+        if (pressed)
+          menuStateLayer.rippleAt(width / 2, height / 2);
       }
 
       onClicked: {

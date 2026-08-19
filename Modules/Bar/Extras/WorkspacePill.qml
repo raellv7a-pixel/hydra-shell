@@ -5,6 +5,9 @@ import qs.Widgets
 
 Item {
   id: pillContainer
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: workspace.name || workspace.idx.toString()
 
   required property var workspace
   required property bool isVertical
@@ -52,39 +55,16 @@ Item {
     }
   ]
 
-  transitions: [
-    Transition {
-      from: "inactive"
-      to: "active"
-      NumberAnimation {
-        properties: isVertical ? "height,pillHeight" : "width,pillWidth"
-        duration: Style.animationNormal
-        easing.type: Easing.OutBack
-      }
-    },
-    Transition {
-      from: "active"
-      to: "inactive"
-      NumberAnimation {
-        properties: isVertical ? "height,pillHeight" : "width,pillWidth"
-        duration: Style.animationNormal
-        easing.type: Easing.OutBack
-      }
-    }
-  ]
-
   Rectangle {
     id: pill
     width: pillContainer.pillWidth
     height: pillContainer.pillHeight
     x: Style.pixelAlignCenter(parent.width, width)
     y: Style.pixelAlignCenter(parent.height, height)
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     z: 0
 
     color: {
-      if (pillMouseArea.containsMouse)
-        return Color.mHover;
       if (workspace.isFocused)
         return Color.resolveColorKey(focusedColor);
       if (workspace.isUrgent)
@@ -92,6 +72,18 @@ Item {
       if (workspace.isOccupied)
         return Color.resolveColorKey(occupiedColor);
       return Qt.alpha(Color.resolveColorKey(emptyColor), 0.3);
+    }
+
+    NStateLayer {
+      id: workspaceStateLayer
+
+      anchors.fill: parent
+      hovered: pillMouseArea.containsMouse
+      pressed: pillMouseArea.pressed
+      focused: pillContainer.activeFocus
+      selected: workspace.isFocused
+      stateColor: workspace.isFocused ? Color.resolveOnColorKey(focusedColor) : Color.mOnSurface
+      radius: parent.radius
     }
 
     Loader {
@@ -125,8 +117,6 @@ Item {
           verticalAlignment: Text.AlignVCenter
           wrapMode: Text.Wrap
           color: {
-            if (pillMouseArea.containsMouse)
-              return Color.mOnHover;
             if (workspace.isFocused)
               return Color.resolveOnColorKey(focusedColor);
             if (workspace.isUrgent)
@@ -138,9 +128,8 @@ Item {
 
           Behavior on color {
             enabled: !Color.isTransitioning
-            ColorAnimation {
-              duration: Style.animationFast
-              easing.type: Easing.InOutQuad
+            NColorAnimation {
+              duration: Style.motionDurationFastEffects
             }
           }
         }
@@ -149,54 +138,48 @@ Item {
 
     // Material 3-inspired smooth animations
     Behavior on scale {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutBack
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
     Behavior on color {
       enabled: !Color.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
+      NColorAnimation {
+        duration: Style.motionDurationFastEffects
       }
     }
     Behavior on opacity {
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutCubic
-      }
-    }
-    Behavior on radius {
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutBack
+      NAnim {
+        duration: Style.motionDurationFastEffects
+        motionType: NAnim.StandardEffects
       }
     }
   }
 
+  NFocusRing {
+    anchors.fill: pill
+    focusVisible: pillContainer.activeFocus
+    targetRadius: pill.radius
+  }
+
   Behavior on width {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutBack
+    NAnim {
+      motionType: NAnim.EmphasizedSpatial
     }
   }
   Behavior on height {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutBack
+    NAnim {
+      motionType: NAnim.EmphasizedSpatial
     }
   }
   Behavior on pillWidth {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutBack
+    NAnim {
+      motionType: NAnim.EmphasizedSpatial
     }
   }
   Behavior on pillHeight {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutBack
+    NAnim {
+      motionType: NAnim.EmphasizedSpatial
     }
   }
 
@@ -206,10 +189,24 @@ Item {
     anchors.fill: parent
     cursorShape: Qt.PointingHandCursor
     hoverEnabled: true
+    onPressed: mouse => {
+                 pillContainer.forceActiveFocus();
+                 const point = mapToItem(workspaceStateLayer, mouse.x, mouse.y);
+                 workspaceStateLayer.rippleAt(point.x, point.y);
+               }
     onClicked: {
       CompositorService.switchToWorkspace(workspace);
     }
   }
+
+  Keys.onReturnPressed: event => {
+                          CompositorService.switchToWorkspace(workspace);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         CompositorService.switchToWorkspace(workspace);
+                         event.accepted = true;
+                       }
 
   // Burst effect overlay for focused pill
   Rectangle {
@@ -217,7 +214,7 @@ Item {
     anchors.centerIn: pill
     width: pillContainer.pillWidth + 18 * masterProgress * scale
     height: pillContainer.pillHeight + 18 * masterProgress * scale
-    radius: width / 2
+    radius: Style.radiusCapsule
     color: "transparent"
     border.color: effectColor
     border.width: Math.max(1, Math.round((2 + 6 * (1.0 - masterProgress))))

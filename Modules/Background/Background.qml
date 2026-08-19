@@ -1,11 +1,12 @@
-import QtQuick
 import QtMultimedia
+import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.Commons
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI
+import qs.Widgets
 
 Variants {
   id: backgroundVariants
@@ -249,7 +250,8 @@ Variants {
       }
 
       function isVideoPath(p) {
-        if (!p) return false;
+        if (!p)
+          return false;
         var s = p.toString().toLowerCase();
         return s.endsWith(".webm") || s.endsWith(".mp4") || s.endsWith(".mkv") || s.endsWith(".mov");
       }
@@ -271,7 +273,9 @@ Variants {
             source: root.activeVideoSource
             loops: MediaPlayer.Infinite
             videoOutput: bgVideoOutput
-            audioOutput: AudioOutput { muted: true }
+            audioOutput: AudioOutput {
+              muted: true
+            }
             onSourceChanged: {
               if (source !== "") {
                 play();
@@ -297,10 +301,13 @@ Variants {
             anchors.fill: parent
             fillMode: {
               switch (root.fillMode) {
-                case 1: return VideoOutput.PreserveAspectFit;
-                case 2: return VideoOutput.Stretch;
-                case 0:
-                default: return VideoOutput.PreserveAspectCrop;
+              case 1:
+                return VideoOutput.PreserveAspectFit;
+              case 2:
+                return VideoOutput.Stretch;
+              case 0:
+              default:
+                return VideoOutput.PreserveAspectCrop;
               }
             }
           }
@@ -529,14 +536,14 @@ Variants {
       }
 
       // Animation for the transition progress
-      NumberAnimation {
+      NAnim {
         id: transitionAnimation
         target: root
         property: "transitionProgress"
+        motionType: NAnim.StandardEffects
         from: 0.0
         to: 1.0
         duration: Settings.data.wallpaper.transitionDuration
-        easing.type: Easing.InOutCubic
         onFinished: {
           // Mark startup complete now that the animation has finished,
           // so displayScalesChanged doesn't trigger a duplicate transition.

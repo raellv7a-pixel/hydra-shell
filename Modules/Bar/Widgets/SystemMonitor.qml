@@ -12,6 +12,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: I18n.tr("system-monitor.title")
 
   property ShellScreen screen
 
@@ -193,10 +196,21 @@ Item {
     width: root.contentWidth
     height: root.contentHeight
     anchors.centerIn: parent
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
+
+    NStateLayer {
+      id: systemMonitorStateLayer
+
+      anchors.fill: parent
+      hovered: tooltipArea.containsMouse
+      pressed: tooltipArea.pressed
+      focused: root.activeFocus
+      stateColor: Color.mPrimary
+      radius: parent.radius
+    }
 
     // Mini gauge component for compact mode, vertical gauge that fills from bottom
     Component {
@@ -923,6 +937,12 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: visualCapsule
+    focusVisible: root.activeFocus
+    targetRadius: visualCapsule.radius
+  }
+
   // MouseArea at root level for extended click area
   MouseArea {
     id: tooltipArea
@@ -930,6 +950,11 @@ Item {
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
     hoverEnabled: true
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(systemMonitorStateLayer, mouse.x, mouse.y);
+                 systemMonitorStateLayer.rippleAt(point.x, point.y);
+               }
     onClicked: mouse => {
                  if (mouse.button === Qt.LeftButton) {
                    PanelService.getPanel("systemStatsPanel", screen)?.toggle(root);
@@ -953,6 +978,15 @@ Item {
       TooltipService.hide();
     }
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.getPanel("systemStatsPanel", screen)?.toggle(root);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.getPanel("systemStatsPanel", screen)?.toggle(root);
+                         event.accepted = true;
+                       }
 
   Timer {
     id: tooltipRefreshTimer

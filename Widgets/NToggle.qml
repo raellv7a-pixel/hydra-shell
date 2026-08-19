@@ -12,6 +12,7 @@ RowLayout {
   property string icon: ""
   property bool checked: false
   property bool hovering: false
+  readonly property bool pressed: mouseArea.pressed
   property int baseSize: Math.round(Style.baseWidgetSize * 0.8 * Style.uiScaleRatio)
   property var defaultValue: undefined
   property string settingsPath: ""
@@ -47,48 +48,89 @@ RowLayout {
   Rectangle {
     id: switcher
 
-    opacity: enabled ? 1.0 : 0.6
+    opacity: root.enabled ? Style.opacityFull : Style.disabledContentOpacity
     Layout.alignment: Qt.AlignVCenter
     Layout.margins: Style.borderS
     implicitWidth: Math.round(root.baseSize * .85) * 2
     implicitHeight: Math.round(root.baseSize * .5) * 2
-    radius: Math.min(Style.iRadiusL, height / 2)
+    radius: height / 2
+    scale: morph.scale
     color: root.checked ? Color.mPrimary : Color.mSurfaceContainerHighest
-    border.color: root.activeFocus ? Color.mPrimary : (root.checked ? "transparent" : Color.mOutline)
-    border.width: root.activeFocus ? Style.borderM : (root.checked ? 0 : Style.borderS)
+    border.color: root.checked ? "transparent" : Color.mOutline
+    border.width: root.checked ? 0 : Style.borderS
 
     Behavior on color {
-      ColorAnimation {
-        duration: Style.animationFast
+      enabled: !Color.isTransitioning
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
     }
 
     Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationFast
+      enabled: !Color.isTransitioning
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
+    }
+
+    NShapeMorph {
+      id: morph
+
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      restingRadius: switcher.radius
+      hoverRadius: switcher.radius
+      pressedRadius: switcher.radius
+    }
+
+    NStateLayer {
+      id: stateLayer
+
+      anchors.fill: parent
+      radius: switcher.radius
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      focused: root.activeFocus
+      stateColor: root.checked ? Color.mOnPrimary : Color.mOnSurface
     }
 
     Rectangle {
       implicitWidth: Math.round(root.baseSize * 0.4) * 2
       implicitHeight: Math.round(root.baseSize * 0.4) * 2
-      radius: Math.min(Style.iRadiusL, height / 2)
+      radius: height / 2
       color: root.checked ? Color.mOnPrimary : Color.mOnSurfaceVariant
       border.color: "transparent"
       border.width: 0
       anchors.verticalCenter: parent.verticalCenter
       anchors.verticalCenterOffset: 0
       x: root.checked ? switcher.width - width - 3 : 3
+      scale: root.pressed ? 1.18 : 1.0
 
       Behavior on x {
-        NumberAnimation {
-          duration: Style.animationFast
-          easing.type: Easing.OutCubic
+        NAnim {
+          motionType: NAnim.ExpressiveFastSpatial
+        }
+      }
+
+      Behavior on scale {
+        enabled: Style.motionEnabled
+        SpringAnimation {
+          spring: 5.2
+          damping: 0.4
         }
       }
     }
 
+    NFocusRing {
+      focusVisible: root.activeFocus
+      targetRadius: switcher.radius
+    }
+
     MouseArea {
+      id: mouseArea
+
       enabled: root.enabled
       anchors.fill: parent
       cursorShape: Qt.PointingHandCursor
@@ -105,6 +147,12 @@ RowLayout {
         hovering = false;
         root.exited();
       }
+      onPressed: mouse => {
+                   if (!root.enabled)
+                   return;
+                   root.forceActiveFocus();
+                   stateLayer.rippleAt(mouse.x, mouse.y);
+                 }
       onClicked: {
         if (!enabled)
           return;
@@ -114,6 +162,16 @@ RowLayout {
     }
   }
 
-  Keys.onReturnPressed: root.toggled(!root.checked)
-  Keys.onSpacePressed: root.toggled(!root.checked)
+  Keys.onReturnPressed: event => {
+                          if (!root.enabled)
+                          return;
+                          root.toggled(!root.checked);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         if (!root.enabled)
+                         return;
+                         root.toggled(!root.checked);
+                         event.accepted = true;
+                       }
 }

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.Commons
+import qs.Widgets
 
 Item {
   id: root
@@ -92,7 +93,7 @@ Item {
 
           width: parent.width
           spacing: Style.marginS
-          opacity: isDisabled ? 0.5 : 1.0
+          opacity: isDisabled ? Style.disabledContentOpacity : Style.opacityFull
 
           // Drag handle
           Rectangle {
@@ -100,13 +101,41 @@ Item {
 
             Layout.preferredWidth: root.baseSize
             Layout.preferredHeight: root.baseSize
-            radius: Style.iRadiusXS
-            color: dragHandleMouseArea.containsMouse ? Color.mSurfaceVariant : "transparent"
+            radius: dragMorph.radius
+            scale: dragMorph.scale
+            color: "transparent"
+            activeFocusOnTab: delegateItem.canDrag
+            Accessible.role: Accessible.Button
+            Accessible.name: I18n.tr("common.reorder") + " " + delegateItem.text
 
-            Behavior on color {
-              ColorAnimation {
-                duration: Style.animationFast
-              }
+            NShapeMorph {
+              id: dragMorph
+
+              enabled: delegateItem.canDrag
+              hovered: dragHandleMouseArea.containsMouse
+              pressed: dragHandleMouseArea.pressed
+              focused: dragHandle.activeFocus
+              restingRadius: Style.radiusControl
+              hoverRadius: Style.radiusControlChecked
+              pressedRadius: Style.radiusControlPressed
+            }
+
+            NStateLayer {
+              id: dragStateLayer
+
+              anchors.fill: parent
+              radius: parent.radius
+              enabled: delegateItem.canDrag
+              hovered: dragHandleMouseArea.containsMouse
+              pressed: dragHandleMouseArea.pressed
+              focused: dragHandle.activeFocus
+              rippleEnabled: false
+              stateColor: Color.mPrimary
+            }
+
+            NFocusRing {
+              focusVisible: dragHandle.activeFocus
+              targetRadius: dragHandle.radius
             }
 
             ColumnLayout {
@@ -135,6 +164,7 @@ Item {
               z: 1000
 
               onPressed: mouse => {
+                           dragHandle.forceActiveFocus();
                            if (!delegateItem.canDrag) {
                              return;
                            }
@@ -193,6 +223,18 @@ Item {
                 delegateItem.z = 0;
               }
             }
+            Keys.onUpPressed: event => {
+                                if (delegateItem.index > 0) {
+                                  root.moveItem(delegateItem.index, delegateItem.index - 1);
+                                  event.accepted = true;
+                                }
+                              }
+            Keys.onDownPressed: event => {
+                                  if (delegateItem.index < root.model.length - 1) {
+                                    root.moveItem(delegateItem.index, delegateItem.index + 1);
+                                    event.accepted = true;
+                                  }
+                                }
           }
 
           // Checkbox
@@ -201,44 +243,112 @@ Item {
 
             Layout.preferredWidth: root.baseSize
             Layout.preferredHeight: root.baseSize
-            radius: Style.iRadiusXS
-            color: delegateItem.itemEnabled ? root.activeColor : Color.mSurface
+            radius: boxMorph.radius
+            scale: boxMorph.scale
+            color: delegateItem.itemEnabled ? root.activeColor : Color.mSurfaceContainer
             border.color: delegateItem.required ? root.activeColor : Color.mOutline
             border.width: Style.borderS
-            opacity: delegateItem.required ? 0.7 : 1.0
+            opacity: delegateItem.required ? Style.opacityMedium : Style.opacityFull
+            activeFocusOnTab: !delegateItem.required && !delegateItem.isDisabled
+            Accessible.role: Accessible.CheckBox
+            Accessible.name: delegateItem.text
+            Accessible.checked: delegateItem.itemEnabled
 
             Behavior on color {
-              ColorAnimation {
-                duration: Style.animationFast
+              enabled: !Color.isTransitioning
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
               }
             }
 
             Behavior on border.color {
-              ColorAnimation {
-                duration: Style.animationFast
+              enabled: !Color.isTransitioning
+              NColorAnimation {
+                motionType: NColorAnimation.Standard
               }
             }
 
+            NShapeMorph {
+              id: boxMorph
+
+              enabled: !delegateItem.required && !delegateItem.isDisabled
+              hovered: checkboxMouseArea.containsMouse
+              pressed: checkboxMouseArea.pressed
+              focused: box.activeFocus
+              selected: delegateItem.itemEnabled
+              restingRadius: Style.radiusControlChecked
+              hoverRadius: Style.radiusControlPressed
+              pressedRadius: Style.radiusControlPressed
+              selectedRadius: Style.radiusControlPressed
+            }
+
+            NStateLayer {
+              id: boxStateLayer
+
+              anchors.fill: parent
+              radius: parent.radius
+              enabled: !delegateItem.required && !delegateItem.isDisabled
+              hovered: checkboxMouseArea.containsMouse
+              pressed: checkboxMouseArea.pressed
+              focused: box.activeFocus
+              selected: delegateItem.itemEnabled
+              stateColor: delegateItem.itemEnabled ? root.activeOnColor : root.activeColor
+            }
+
             NIcon {
-              visible: delegateItem.itemEnabled
+              visible: true
               anchors.centerIn: parent
               anchors.horizontalCenterOffset: -1
               icon: "check"
               color: root.activeOnColor
               pointSize: Math.max(Style.fontSizeXS, root.baseSize * 0.5)
-            }
+              opacity: delegateItem.itemEnabled ? 1 : 0
+              scale: delegateItem.itemEnabled ? 1 : Style.morphPressedScale
 
+              Behavior on opacity {
+                NAnim {
+                  duration: Style.motionDurationFastEffects
+                  motionType: NAnim.StandardEffects
+                }
+              }
+
+              Behavior on scale {
+                NAnim {
+                  motionType: NAnim.ExpressiveFastSpatial
+                }
+              }
+            }
             MouseArea {
+              id: checkboxMouseArea
+
               anchors.fill: parent
               cursorShape: (!delegateItem.required && !delegateItem.isDisabled) ? Qt.PointingHandCursor : Qt.ArrowCursor
               enabled: !delegateItem.required && !delegateItem.isDisabled
 
+              onPressed: mouse => {
+                           box.forceActiveFocus();
+                           boxStateLayer.rippleAt(mouse.x, mouse.y);
+                         }
               onClicked: {
                 if (!delegateItem.required && !delegateItem.isDisabled) {
                   root.toggleItem(delegateItem.index);
                 }
               }
             }
+
+            NFocusRing {
+              focusVisible: box.activeFocus
+              targetRadius: box.radius
+            }
+
+            Keys.onReturnPressed: event => {
+                                    root.toggleItem(delegateItem.index);
+                                    event.accepted = true;
+                                  }
+            Keys.onSpacePressed: event => {
+                                   root.toggleItem(delegateItem.index);
+                                   event.accepted = true;
+                                 }
           }
 
           // Label
@@ -299,9 +409,8 @@ Item {
 
         Behavior on y {
           enabled: !delegateItem.dragging
-          NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuad
+          NAnim {
+            motionType: NAnim.EmphasizedSpatial
           }
         }
       }

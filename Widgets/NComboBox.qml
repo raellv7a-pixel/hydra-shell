@@ -135,7 +135,7 @@ RowLayout {
   ComboBox {
     id: combo
 
-    opacity: enabled ? 1.0 : 0.6
+    opacity: enabled ? Style.opacityFull : Style.disabledContentOpacity
     Layout.margins: Style.borderS
     Layout.minimumWidth: Math.round(root.minimumWidth * Style.uiScaleRatio)
     Layout.preferredHeight: Math.round(root.preferredHeight * Style.uiScaleRatio)
@@ -193,17 +193,60 @@ RowLayout {
                          }
 
     background: Rectangle {
+      id: comboBackground
+
       implicitWidth: Math.round(Style.baseWidgetSize * 3.75 * Style.uiScaleRatio)
       implicitHeight: Math.round(root.preferredHeight * Style.uiScaleRatio)
-      color: Color.mSurfaceContainerHigh
-      border.color: combo.activeFocus ? Color.mPrimary : Color.mOutline
-      border.width: combo.activeFocus ? Style.borderM : Style.borderS
-      radius: Style.iRadiusL
+      color: root.enabled ? Color.mSurfaceContainerHigh : Qt.alpha(Color.mOnSurface, Style.disabledContainerOpacity)
+      border.color: Color.mOutline
+      border.width: Style.borderS
+      radius: comboMorph.radius
+      scale: comboMorph.scale
 
       Behavior on border.color {
-        ColorAnimation {
-          duration: Style.animationFast
+        enabled: !Color.isTransitioning
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
+      }
+
+      NShapeMorph {
+        id: comboMorph
+
+        enabled: root.enabled
+        hovered: combo.hovered
+        pressed: combo.pressed
+        selected: combo.popup.visible
+        restingRadius: Style.radiusControl
+        hoverRadius: Style.radiusControlChecked
+        pressedRadius: Style.radiusControlPressed
+        selectedRadius: Style.radiusControlChecked
+      }
+
+      NStateLayer {
+        id: comboStateLayer
+
+        anchors.fill: parent
+        radius: comboBackground.radius
+        enabled: root.enabled
+        hovered: combo.hovered
+        pressed: combo.pressed
+        focused: combo.activeFocus
+        selected: combo.popup.visible
+        stateColor: Color.mPrimary
+
+        Connections {
+          target: combo
+          function onPressedChanged() {
+            if (combo.pressed)
+              comboStateLayer.rippleAt(comboStateLayer.width / 2, comboStateLayer.height / 2);
+          }
+        }
+      }
+
+      NFocusRing {
+        focusVisible: combo.activeFocus
+        targetRadius: comboBackground.radius
       }
 
       MouseArea {
@@ -211,14 +254,12 @@ RowLayout {
         hoverEnabled: true
         acceptedButtons: Qt.NoButton
         onEntered: {
-          if (root.tooltip != "") {
+          if (root.tooltip != "")
             TooltipService.show(root, root.tooltip);
-          }
         }
         onExited: {
-          if (root.tooltip != "") {
+          if (root.tooltip != "")
             TooltipService.hide();
-          }
         }
       }
     }
@@ -243,7 +284,14 @@ RowLayout {
       x: combo.width - width - Style.marginM
       y: combo.topPadding + (combo.availableHeight - height) / 2
       icon: "caret-down"
-      pointSize: Style.fontSizeL
+      pointSize: Style.fontSizeTitleMedium
+      rotation: combo.popup.visible ? 180 : 0
+
+      Behavior on rotation {
+        NAnim {
+          motionType: NAnim.ExpressiveFastSpatial
+        }
+      }
     }
 
     popup: Popup {
@@ -266,22 +314,34 @@ RowLayout {
 
         delegate: Rectangle {
           id: delegateRect
+
           required property int index
           property bool isHighlighted: listView.currentIndex === index
 
           width: listView.availableWidth
           height: delegateText.implicitHeight + Style.margin2S
-          radius: height / 2
-          color: isHighlighted ? Color.mSecondaryContainer : "transparent"
+          radius: Style.radiusControl
+          color: "transparent"
+
+          NStateLayer {
+            id: delegateStateLayer
+
+            anchors.fill: parent
+            radius: delegateRect.radius
+            hovered: delegateMouse.containsMouse
+            selected: delegateRect.isHighlighted
+            stateColor: Color.mSecondary
+          }
 
           NText {
             id: delegateText
+
             anchors.fill: parent
             anchors.leftMargin: Style.marginM
             anchors.rightMargin: Style.marginM
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
-            pointSize: Style.fontSizeM
+            pointSize: Style.fontSizeBodyMedium
             color: delegateRect.isHighlighted ? Color.mOnSecondaryContainer : Color.mOnSurface
             text: {
               var item = root.getItem(delegateRect.index);
@@ -290,13 +350,15 @@ RowLayout {
           }
 
           MouseArea {
+            id: delegateMouse
+
             anchors.fill: parent
             hoverEnabled: true
             onContainsMouseChanged: {
-              if (containsMouse) {
+              if (containsMouse)
                 listView.currentIndex = delegateRect.index;
-              }
             }
+            onPressed: mouse => delegateStateLayer.rippleAt(mouse.x, mouse.y)
             onClicked: {
               var item = root.getItem(delegateRect.index);
               if (item && item.key !== undefined) {
@@ -313,7 +375,7 @@ RowLayout {
         color: Color.mSurfaceContainerHigh
         border.color: "transparent"
         border.width: 0
-        radius: Style.iRadiusL
+        radius: Style.radiusPopover
       }
     }
 

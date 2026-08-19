@@ -7,6 +7,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: root.text || root.icon
 
   required property ShellScreen screen
 
@@ -58,11 +61,10 @@ Item {
   readonly property bool revealed: !forceClose && (forceOpen || showPill)
   readonly property bool hasIcon: root.icon !== ""
 
-  // Always prioritize hover color, then the custom one and finally the fallback color
-  readonly property color bgColor: hovered ? Color.mHover : (customBackgroundColor.a > 0) ? customBackgroundColor : Style.capsuleColor
-  readonly property color fgColor: hovered ? Color.mOnHover : (customTextIconColor.a > 0) ? customTextIconColor : Color.mOnSurface
-  readonly property color iconFgColor: hovered ? Color.mOnHover : (customIconColor.a > 0) ? customIconColor : (customTextIconColor.a > 0) ? customTextIconColor : Color.mOnSurface
-  readonly property color textFgColor: hovered ? Color.mOnHover : (customTextColor.a > 0) ? customTextColor : (customTextIconColor.a > 0) ? customTextIconColor : Color.mOnSurface
+  readonly property color bgColor: (customBackgroundColor.a > 0) ? customBackgroundColor : Style.capsuleColor
+  readonly property color fgColor: (customTextIconColor.a > 0) ? customTextIconColor : Color.mOnSurface
+  readonly property color iconFgColor: (customIconColor.a > 0) ? customIconColor : (customTextIconColor.a > 0) ? customTextIconColor : Color.mOnSurface
+  readonly property color textFgColor: (customTextColor.a > 0) ? customTextColor : (customTextIconColor.a > 0) ? customTextIconColor : Color.mOnSurface
 
   readonly property real iconSize: Style.toOdd(pillHeight * 0.48)
 
@@ -99,7 +101,7 @@ Item {
     id: pillBackground
     width: buttonSize
     height: root.contentHeight
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     color: root.bgColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -109,11 +111,27 @@ Item {
 
     Behavior on color {
       enabled: !Color.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
+      NColorAnimation {
+        duration: Style.motionDurationFastEffects
       }
     }
+  }
+
+  NStateLayer {
+    id: pillStateLayer
+
+    anchors.fill: pillBackground
+    hovered: root.hovered
+    pressed: pillMouseArea.pressed
+    focused: root.activeFocus
+    stateColor: root.fgColor
+    radius: pillBackground.radius
+  }
+
+  NFocusRing {
+    anchors.fill: pillBackground
+    focusVisible: root.activeFocus
+    targetRadius: pillBackground.radius
   }
 
   Rectangle {
@@ -163,23 +181,23 @@ Item {
     }
     Behavior on width {
       enabled: showAnim.running || hideAnim.running
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
+      NAnim {
+        duration: Style.motionDurationDefaultSpatial
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
     }
     Behavior on height {
       enabled: showAnim.running || hideAnim.running
-      NumberAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
+      NAnim {
+        duration: Style.motionDurationDefaultSpatial
+        motionType: NAnim.ExpressiveDefaultSpatial
       }
     }
     Behavior on opacity {
       enabled: showAnim.running || hideAnim.running
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCubic
+      NAnim {
+        duration: Style.motionDurationFastEffects
+        motionType: NAnim.StandardEffects
       }
     }
   }
@@ -188,7 +206,7 @@ Item {
     id: iconCircle
     width: buttonSize
     height: buttonSize
-    radius: Math.min(Style.radiusL, width / 2)
+    radius: Style.radiusCapsule
     color: "transparent" // Make icon background transparent to avoid double opacity
 
     // Icon positioning based on direction
@@ -211,29 +229,29 @@ Item {
   ParallelAnimation {
     id: showAnim
     running: false
-    NumberAnimation {
+    NAnim {
       target: pill
       property: "width"
       from: 1
       to: maxPillWidth
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+      duration: Style.motionDurationDefaultSpatial
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
-    NumberAnimation {
+    NAnim {
       target: pill
       property: "height"
       from: 1
       to: maxPillHeight
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+      duration: Style.motionDurationDefaultSpatial
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
-    NumberAnimation {
+    NAnim {
       target: pill
       property: "opacity"
       from: 0
       to: 1
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+      duration: Style.motionDurationFastEffects
+      motionType: NAnim.StandardEffects
     }
     onStarted: {
       showPill = true;
@@ -244,6 +262,7 @@ Item {
     }
   }
 
+  // Business clock: delay before the pill auto-hides, not visual motion.
   SequentialAnimation {
     id: delayedHideAnim
     running: false
@@ -260,29 +279,29 @@ Item {
   ParallelAnimation {
     id: hideAnim
     running: false
-    NumberAnimation {
+    NAnim {
       target: pill
       property: "width"
       from: maxPillWidth
       to: 1
-      duration: Style.animationNormal
-      easing.type: Easing.InCubic
+      duration: Style.motionDurationDefaultSpatial
+      motionType: NAnim.StandardSpatial
     }
-    NumberAnimation {
+    NAnim {
       target: pill
       property: "height"
       from: maxPillHeight
       to: 1
-      duration: Style.animationNormal
-      easing.type: Easing.InCubic
+      duration: Style.motionDurationDefaultSpatial
+      motionType: NAnim.StandardSpatial
     }
-    NumberAnimation {
+    NAnim {
       target: pill
       property: "opacity"
       from: 1
       to: 0
-      duration: Style.animationFast
-      easing.type: Easing.InCubic
+      duration: Style.motionDurationFastEffects
+      motionType: NAnim.StandardEffects
     }
     onStopped: {
       showPill = false;
@@ -302,10 +321,16 @@ Item {
   }
 
   MouseArea {
+    id: pillMouseArea
     anchors.fill: parent
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
     cursorShape: root.clicked ? Qt.PointingHandCursor : Qt.ArrowCursor
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(pillStateLayer, mouse.x, mouse.y);
+                 pillStateLayer.rippleAt(point.x, point.y);
+               }
     onEntered: {
       hovered = true;
       root.entered();
@@ -337,6 +362,15 @@ Item {
                }
     onWheel: wheel => root.wheel(wheel.angleDelta.y)
   }
+
+  Keys.onReturnPressed: event => {
+                          root.clicked();
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         root.clicked();
+                         event.accepted = true;
+                       }
 
   function show() {
     if (collapseToIcon || root.text.trim().length === 0)

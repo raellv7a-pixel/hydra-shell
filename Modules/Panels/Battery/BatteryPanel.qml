@@ -20,7 +20,7 @@ SmartPanel {
   panelContent: Item {
     id: panelContent
 
-    property real contentPreferredHeight: mainLayout.implicitHeight + Style.margin2L
+    property real contentPreferredHeight: mainLayout.implicitHeight + Style.paddingCard * 2
 
     property var batteryWidgetInstance: BarService.lookupWidget("Battery", screen ? screen.name : null)
     readonly property var batteryWidgetSettings: batteryWidgetInstance ? batteryWidgetInstance.widgetSettings : null
@@ -74,33 +74,34 @@ SmartPanel {
     ColumnLayout {
       id: mainLayout
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       // HEADER
       NBox {
         Layout.fillWidth: true
-        implicitHeight: headerRow.implicitHeight + Style.margin2M
+        implicitHeight: headerRow.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
 
         RowLayout {
           id: headerRow
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginM
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
 
           NIcon {
-            pointSize: Style.fontSizeXXL
+            pointSize: Style.fontSizeHeadlineSmall
             color: (BatteryService.isCharging(primaryDevice) || BatteryService.isPluggedIn(primaryDevice)) ? Color.mPrimary : (BatteryService.isCriticalBattery(primaryDevice) || BatteryService.isLowBattery(primaryDevice)) ? Color.mError : Color.mOnSurface
             icon: BatteryService.getIcon(BatteryService.getPercentage(primaryDevice), BatteryService.isCharging(primaryDevice), BatteryService.isPluggedIn(primaryDevice), BatteryService.isDeviceReady(primaryDevice))
           }
 
           ColumnLayout {
-            spacing: Style.marginXXS
+            spacing: Style.spaceXS
             Layout.fillWidth: true
 
             NText {
               text: I18n.tr("common.battery")
-              pointSize: Style.fontSizeL
+              pointSize: Style.fontSizeTitleMedium
               font.weight: Style.fontWeightBold
               color: Color.mOnSurface
               Layout.fillWidth: true
@@ -120,29 +121,30 @@ SmartPanel {
       // Charge level + health/time
       NBox {
         Layout.fillWidth: true
-        implicitHeight: chargeLayout.implicitHeight + Style.margin2L
+        implicitHeight: chargeLayout.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
         visible: BatteryService.laptopBatteries.length > 0 || BatteryService.bluetoothBatteries.length > 0
 
         ColumnLayout {
           id: chargeLayout
           anchors.fill: parent
-          anchors.margins: Style.marginL
-          spacing: Style.marginL
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceM
 
           // Laptop batteries section
           Repeater {
             model: BatteryService.laptopBatteries
             delegate: ColumnLayout {
               Layout.fillWidth: true
-              spacing: Style.marginS
+              spacing: Style.spaceS
 
               RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.marginS
+                spacing: Style.spaceS
 
                 ColumnLayout {
                   Layout.fillWidth: true
-                  spacing: Style.marginS
+                  spacing: Style.spaceS
 
                   RowLayout {
                     Item {
@@ -163,7 +165,7 @@ SmartPanel {
                           readonly property string dName: BatteryService.getDeviceName(modelData)
                           text: dName ? dName : I18n.tr("common.battery")
                           color: (BatteryService.isCharging(modelData) || BatteryService.isPluggedIn(modelData)) ? Color.mPrimary : (BatteryService.isCriticalBattery(modelData) || BatteryService.isLowBattery(modelData)) ? Color.mError : Color.mOnSurface
-                          pointSize: Style.fontSizeS
+                          pointSize: Style.fontSizeBodySmall
                         }
                       }
 
@@ -185,18 +187,18 @@ SmartPanel {
 
                     NText {
                       text: BatteryService.getTimeRemainingText(modelData)
-                      pointSize: Style.fontSizeS
+                      pointSize: Style.fontSizeBodySmall
                       color: Color.mOnSurfaceVariant
                     }
                   }
 
                   RowLayout {
                     Layout.fillWidth: true
-                    spacing: Style.marginS
+                    spacing: Style.spaceS
                     Rectangle {
                       Layout.fillWidth: true
                       height: Math.round(8 * Style.uiScaleRatio)
-                      radius: Math.min(Style.radiusL, height / 2)
+                      radius: height / 2
                       color: Color.mSurface
 
                       Rectangle {
@@ -217,7 +219,7 @@ SmartPanel {
                       horizontalAlignment: Text.AlignRight
                       text: `${BatteryService.getPercentage(modelData)}%`
                       color: (BatteryService.isCharging(modelData) || BatteryService.isPluggedIn(modelData)) ? Color.mPrimary : (BatteryService.isCriticalBattery(modelData) || BatteryService.isLowBattery(modelData)) ? Color.mError : Color.mOnSurface
-                      pointSize: Style.fontSizeS
+                      pointSize: Style.fontSizeBodySmall
                       font.weight: Style.fontWeightBold
                     }
                   }
@@ -236,10 +238,10 @@ SmartPanel {
             model: BatteryService.bluetoothBatteries
             delegate: ColumnLayout {
               Layout.fillWidth: true
-              spacing: Style.marginS
+              spacing: Style.spaceS
               RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.marginS
+                spacing: Style.spaceS
 
                 NIcon {
                   icon: BluetoothService.getDeviceIcon(modelData)
@@ -250,17 +252,17 @@ SmartPanel {
                   readonly property string dName: BatteryService.getDeviceName(modelData)
                   text: dName ? dName : I18n.tr("common.bluetooth")
                   color: (BatteryService.isCharging(modelData) || BatteryService.isPluggedIn(modelData)) ? Color.mPrimary : (BatteryService.isCriticalBattery(modelData) || BatteryService.isLowBattery(modelData)) ? Color.mError : Color.mOnSurface
-                  pointSize: Style.fontSizeS
+                  pointSize: Style.fontSizeBodySmall
                 }
               }
               RowLayout {
                 Layout.fillWidth: true
-                spacing: Style.marginS
+                spacing: Style.spaceS
 
                 Rectangle {
                   Layout.fillWidth: true
                   height: Math.round(8 * Style.uiScaleRatio)
-                  radius: Math.min(Style.radiusL, height / 2)
+                  radius: height / 2
                   color: Color.mSurface
 
                   Rectangle {
@@ -281,7 +283,7 @@ SmartPanel {
                   horizontalAlignment: Text.AlignRight
                   text: `${BatteryService.getPercentage(modelData)}%`
                   color: (BatteryService.isCharging(modelData) || BatteryService.isPluggedIn(modelData)) ? Color.mPrimary : (BatteryService.isCriticalBattery(modelData) || BatteryService.isLowBattery(modelData)) ? Color.mError : Color.mOnSurface
-                  pointSize: Style.fontSizeS
+                  pointSize: Style.fontSizeBodySmall
                   font.weight: Style.fontWeightBold
                 }
               }
@@ -292,21 +294,22 @@ SmartPanel {
 
       NBox {
         Layout.fillWidth: true
-        height: controlsLayout.implicitHeight + Style.margin2L
+        height: controlsLayout.implicitHeight + Style.paddingCard * 2
+        radius: Style.radiusCard
         visible: showPowerProfiles || showNoctaliaPerformance
 
         ColumnLayout {
           id: controlsLayout
           anchors.fill: parent
-          anchors.margins: Style.marginL
-          spacing: Style.marginM
+          anchors.margins: Style.paddingCard
+          spacing: Style.spaceS
 
           ColumnLayout {
             visible: powerProfileAvailable && showPowerProfiles
 
             RowLayout {
               Layout.fillWidth: true
-              spacing: Style.marginS
+              spacing: Style.spaceS
 
               NText {
                 text: I18n.tr("battery.power-profile")
@@ -342,24 +345,24 @@ SmartPanel {
 
             RowLayout {
               Layout.fillWidth: true
-              spacing: Style.marginS
+              spacing: Style.spaceS
 
               NIcon {
                 icon: "powersaver"
-                pointSize: Style.fontSizeS
+                pointSize: Style.fontSizeBodySmall
                 color: PowerProfileService.getIcon() === "powersaver" ? Color.mPrimary : Color.mOnSurfaceVariant
               }
 
               NIcon {
                 icon: "balanced"
-                pointSize: Style.fontSizeS
+                pointSize: Style.fontSizeBodySmall
                 color: PowerProfileService.getIcon() === "balanced" ? Color.mPrimary : Color.mOnSurfaceVariant
                 Layout.fillWidth: true
               }
 
               NIcon {
                 icon: "performance"
-                pointSize: Style.fontSizeS
+                pointSize: Style.fontSizeBodySmall
                 color: PowerProfileService.getIcon() === "performance" ? Color.mPrimary : Color.mOnSurfaceVariant
               }
             }
@@ -372,12 +375,12 @@ SmartPanel {
 
           RowLayout {
             Layout.fillWidth: true
-            spacing: Style.marginS
+            spacing: Style.spaceS
             visible: showNoctaliaPerformance
 
             NText {
               text: I18n.tr("toast.noctalia-performance.label")
-              pointSize: Style.fontSizeM
+              pointSize: Style.fontSizeBodySmall
               font.weight: Style.fontWeightBold
               color: Color.mOnSurface
               Layout.fillWidth: true
@@ -385,7 +388,7 @@ SmartPanel {
 
             NIcon {
               icon: PowerProfileService.noctaliaPerformanceMode ? "rocket" : "rocket-off"
-              pointSize: Style.fontSizeL
+              pointSize: Style.fontSizeTitleSmall
               color: PowerProfileService.noctaliaPerformanceMode ? Color.mPrimary : Color.mOnSurfaceVariant
             }
 

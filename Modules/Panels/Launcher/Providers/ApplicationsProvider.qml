@@ -39,45 +39,45 @@ Item {
     stdout: StdioCollector {}
     stderr: StdioCollector {}
     onExited: exitCode => {
-      root.shellyBusy = false;
-      if (exitCode !== 0) {
-        root.shellyAvailable = false;
-        root.shellyError = String(stderr.text || "").trim();
-        root.updateRevision++;
-        return;
-      }
+                root.shellyBusy = false;
+                if (exitCode !== 0) {
+                  root.shellyAvailable = false;
+                  root.shellyError = String(stderr.text || "").trim();
+                  root.updateRevision++;
+                  return;
+                }
 
-      try {
-        const parsed = JSON.parse(String(stdout.text || "{}"));
-        const nextUpdates = {};
+                try {
+                  const parsed = JSON.parse(String(stdout.text || "{}"));
+                  const nextUpdates = {};
 
-        for (const bucket in root.updateBuckets) {
-          const packages = Array.isArray(parsed) ? (bucket === "Packages" ? parsed : []) : (parsed[bucket] || []);
-          if (!Array.isArray(packages))
-            continue;
+                  for (const bucket in root.updateBuckets) {
+                    const packages = Array.isArray(parsed) ? (bucket === "Packages" ? parsed : []) : (parsed[bucket] || []);
+                    if (!Array.isArray(packages))
+                    continue;
 
-          for (const pkg of packages) {
-            const update = root.buildUpdateRecord(pkg, root.updateBuckets[bucket]);
-            if (!update)
-              continue;
-            // Index under every alias the desktop entry could match on.
-            for (const alias of update.aliases)
-              nextUpdates[alias] = update;
-          }
-        }
+                    for (const pkg of packages) {
+                      const update = root.buildUpdateRecord(pkg, root.updateBuckets[bucket]);
+                      if (!update)
+                      continue;
+                      // Index under every alias the desktop entry could match on.
+                      for (const alias of update.aliases)
+                      nextUpdates[alias] = update;
+                    }
+                  }
 
-        root.availableUpdates = nextUpdates;
-        root.shellyAvailable = true;
-        root.shellyError = "";
-        root.updateRevision++;
-        if (root.launcher && root.launcher.isOpen)
-          root.launcher.updateResults();
-      } catch (error) {
-        root.shellyAvailable = false;
-        root.shellyError = String(error);
-        root.updateRevision++;
-      }
-    }
+                  root.availableUpdates = nextUpdates;
+                  root.shellyAvailable = true;
+                  root.shellyError = "";
+                  root.updateRevision++;
+                  if (root.launcher && root.launcher.isOpen)
+                  root.launcher.updateResults();
+                } catch (error) {
+                  root.shellyAvailable = false;
+                  root.shellyError = String(error);
+                  root.updateRevision++;
+                }
+              }
   }
   // The privileged work runs in PackageManagerService so it survives the
   // launcher panel being unloaded; these mirror its state for the action rows.
@@ -113,7 +113,7 @@ Item {
     const addAlias = value => {
       const normalized = normalizeAppId(String(value || "").replace(/\.desktop$/i, ""));
       if (normalized && !aliases.includes(normalized))
-        aliases.push(normalized);
+      aliases.push(normalized);
     };
 
     addAlias(name);
@@ -138,7 +138,6 @@ Item {
       "aliases": aliases
     };
   }
-
 
   Timer {
     id: shellyUpdatesTimer
@@ -346,7 +345,6 @@ Item {
     return hiddenApps.some(hiddenId => normalizeAppId(hiddenId) === normalizedId);
   }
 
-
   function appMatchesCategory(app, category) {
     if (category === "Hidden")
       return isAppHidden(app);
@@ -417,7 +415,6 @@ Item {
       }
     }
 
-
     for (let app of entries) {
       const appCategories = getAppCategories(app);
       const primaryCategory = getAppCategory(app);
@@ -433,7 +430,6 @@ Item {
       }
     }
 
-
     const result = [];
 
     // Add Pinned category first if there are pinned apps
@@ -442,7 +438,6 @@ Item {
     }
     if (hasHidden)
       result.push("Hidden");
-
 
     result.push("all");
 
@@ -696,8 +691,8 @@ Item {
       "isBusy": busy,
       "badgeIcon": busy ? "refresh" : (update ? "refresh-dot" : ""),
       "badgeTooltip": busy ? I18n.tr(`launcher.app-actions.busy-${operationState}`) : (update ? I18n.tr("launcher.app-actions.update-to", {
-                                                                                                        "value": update.version
-                                                                                                      }) : ""),
+                                                                                                          "value": update.version
+                                                                                                        }) : ""),
       "appData": app,
       "_score": (score !== undefined ? score : 0),
       "_updateRevision": revision,
@@ -774,7 +769,7 @@ Item {
     const addAlias = value => {
       const normalized = normalizeAppId(String(value || "").replace(/\.desktop$/i, ""));
       if (normalized && !aliases.includes(normalized))
-        aliases.push(normalized);
+      aliases.push(normalized);
     };
 
     addAlias(getAppKey(app));
@@ -802,8 +797,8 @@ Item {
       return;
     shellyBusy = true;
     shellyUpdatesProcess.exec({
-      command: ["shelly", "list-updates", "all", "--json"]
-    });
+                                command: ["shelly", "list-updates", "all", "--json"]
+                              });
   }
 
   // Resolves the package Shelly should act on. Prefers the record coming from
@@ -836,10 +831,10 @@ Item {
     // Repository and AUR packages are both ALPM packages, so `standard` removes
     // either one.
     return executable ? {
-      "name": executable,
-      "type": "standard",
-      "version": ""
-    } : null;
+                          "name": executable,
+                          "type": "standard",
+                          "version": ""
+                        } : null;
   }
 
   // Shelly has no per-package "update" verb: repository and AUR packages are
@@ -939,48 +934,48 @@ Item {
     const canOperate = root.shellyAvailable && !shellyBusy && !operationState;
 
     return [
-      {
-        "id": "pin",
-        "icon": pinned ? "unpin" : "pin",
-        "label": pinned ? I18n.tr("common.unpin") : I18n.tr("common.pin"),
-        "action": () => togglePin(item.appId)
-      },
-      {
-        "id": "hide",
-        "icon": hidden ? "eye" : "eye-off",
-        "label": hidden ? I18n.tr("common.show") : I18n.tr("common.hide"),
-        "action": () => toggleHidden(item.appId)
-      },
-      {
-        "id": "update",
-        "icon": "download",
-        "label": I18n.tr("common.update"),
-        "description": describeUpdateAction(update, busyHere && operationState === "update"),
-        "enabled": !!update && canOperate,
-        "busy": busyHere && operationState === "update",
-        "keepOpen": true,
-        "action": () => updateApp(item)
-      },
-      {
-        "id": "uninstall",
-        "icon": "trash",
-        "label": I18n.tr("common.uninstall"),
-        "description": (busyHere && operationState === "remove") ? I18n.tr("launcher.app-actions.busy-remove") : (packageInfo ? I18n.tr(`launcher.app-actions.backend-${packageInfo.type}`) : ""),
-        "enabled": !!packageInfo && canOperate,
-        "busy": busyHere && operationState === "remove",
-        "destructive": true,
-        "confirm": true,
-        "keepOpen": true,
-        "action": () => removeApp(item)
-      },
-      {
-        "id": "properties",
-        "icon": "info",
-        "label": I18n.tr("common.properties"),
-        "keepOpen": true,
-        "action": () => launcher.showAppProperties(item)
-      }
-    ];
+          {
+            "id": "pin",
+            "icon": pinned ? "unpin" : "pin",
+            "label": pinned ? I18n.tr("common.unpin") : I18n.tr("common.pin"),
+            "action": () => togglePin(item.appId)
+          },
+          {
+            "id": "hide",
+            "icon": hidden ? "eye" : "eye-off",
+            "label": hidden ? I18n.tr("common.show") : I18n.tr("common.hide"),
+            "action": () => toggleHidden(item.appId)
+          },
+          {
+            "id": "update",
+            "icon": "download",
+            "label": I18n.tr("common.update"),
+            "description": describeUpdateAction(update, busyHere && operationState === "update"),
+            "enabled": !!update && canOperate,
+            "busy": busyHere && operationState === "update",
+            "keepOpen": true,
+            "action": () => updateApp(item)
+          },
+          {
+            "id": "uninstall",
+            "icon": "trash",
+            "label": I18n.tr("common.uninstall"),
+            "description": (busyHere && operationState === "remove") ? I18n.tr("launcher.app-actions.busy-remove") : (packageInfo ? I18n.tr(`launcher.app-actions.backend-${packageInfo.type}`) : ""),
+            "enabled": !!packageInfo && canOperate,
+            "busy": busyHere && operationState === "remove",
+            "destructive": true,
+            "confirm": true,
+            "keepOpen": true,
+            "action": () => removeApp(item)
+          },
+          {
+            "id": "properties",
+            "icon": "info",
+            "label": I18n.tr("common.properties"),
+            "keepOpen": true,
+            "action": () => launcher.showAppProperties(item)
+          }
+        ];
   }
 
   function togglePin(appId) {

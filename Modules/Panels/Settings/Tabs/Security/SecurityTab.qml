@@ -39,8 +39,8 @@ ColumnLayout {
         description: "Habilita a caixa de diálogo nativa da Hydra Shell para elevação de privilégios administrativos (sudo / pkexec)"
         checked: PolkitService.enabled
         onToggled: checked => {
-          PolkitService.enabled = checked;
-        }
+                     PolkitService.enabled = checked;
+                   }
       }
 
       NComboBox {
@@ -50,15 +50,23 @@ ColumnLayout {
         description: "Escolha onde o prompt de senha de administrador será exibido"
         currentKey: PolkitService.position
         model: [
-          { key: "center", name: "Centralizado no Centro da Tela" },
-          { key: "attached", name: "Acoplado à Barra Superior da Shell" }
+          {
+            key: "center",
+            name: "Centralizado no Centro da Tela"
+          },
+          {
+            key: "attached",
+            name: "Acoplado à Barra Superior da Shell"
+          }
         ]
         onSelected: key => {
-          PolkitService.position = key;
-        }
+                      PolkitService.position = key;
+                    }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Comportamento & Efeitos Visuais"
@@ -74,8 +82,8 @@ ColumnLayout {
         description: "Vibra a janela suavemente quando a senha de administrador estiver incorreta"
         checked: PolkitService.errorShake
         onToggled: checked => {
-          PolkitService.errorShake = checked;
-        }
+                     PolkitService.errorShake = checked;
+                   }
       }
 
       NToggle {
@@ -85,8 +93,8 @@ ColumnLayout {
         description: "Direciona o teclado automaticamente para o campo de senha ao abrir a janela"
         checked: PolkitService.autoFocus
         onToggled: checked => {
-          PolkitService.autoFocus = checked;
-        }
+                     PolkitService.autoFocus = checked;
+                   }
       }
     }
   }

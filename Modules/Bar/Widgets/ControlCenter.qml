@@ -59,13 +59,13 @@ NIconButton {
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
-  colorBg: Style.capsuleColor
-  colorFg: iconColor
-  colorBgHover: Color.mHover
-  colorFgHover: Color.mOnHover
-  colorBorder: Style.capsuleBorderColor
-  colorBorderHover: Style.capsuleBorderColor
+  customRadius: Style.radiusCapsule
+  colorBg: Qt.alpha(Color.mSecondary, 0.16)
+  colorFg: enableColorization ? iconColor : Color.mSecondary
+  colorBgHover: Color.mSecondary
+  colorFgHover: colorFg
+  colorBorder: Qt.alpha(Color.mSecondary, 0.36)
+  colorBorderHover: colorBorder
 
   NPopupContextMenu {
     id: contextMenu
@@ -135,7 +135,7 @@ NIconButton {
     asynchronous: true
     layer.enabled: (enableColorization) && (useDistroLogo || customIconPath !== "")
     layer.effect: ShaderEffect {
-      property color targetColor: !hovering ? iconColor : Color.mOnHover
+      property color targetColor: root.colorFg
       property real colorizeMode: 2.0
 
       fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/Shaders/qsb/appicon_colorize.frag.qsb")

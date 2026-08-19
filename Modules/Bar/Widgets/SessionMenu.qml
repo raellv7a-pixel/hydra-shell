@@ -35,7 +35,7 @@ NIconButton {
 
   baseSize: Style.getCapsuleHeightForScreen(screenName)
   applyUiScale: false
-  customRadius: Style.radiusL
+  customRadius: Style.radiusCapsule
   icon: "power"
   tooltipText: {
     if (PanelService.getPanel("sessionMenuPanel", screen)?.isPanelOpen)
@@ -44,9 +44,11 @@ NIconButton {
       return I18n.tr("tooltips.session-menu");
   }
   tooltipDirection: BarService.getTooltipDirection(screenName)
-  colorBg: Style.capsuleColor
+  colorBg: Qt.alpha(Color.mError, 0.16)
   colorFg: Color.resolveColorKey(iconColorKey)
-  border.color: Style.capsuleBorderColor
+  colorBgHover: Color.mError
+  colorFgHover: colorFg
+  border.color: Qt.alpha(Color.mError, 0.36)
   border.width: Style.capsuleBorderWidth
 
   NPopupContextMenu {

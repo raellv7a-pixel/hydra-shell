@@ -29,9 +29,18 @@ ColumnLayout {
       label: pluginApi?.tr("settings.backend.label")
       description: pluginApi?.tr("settings.backend.desc")
       model: [
-        { "key": "auto", "name": pluginApi?.tr("settings.backend.auto") },
-        { "key": "sway", "name": pluginApi?.tr("settings.backend.sway") },
-        { "key": "hyprland", "name": pluginApi?.tr("settings.backend.hyprland") }
+        {
+          "key": "auto",
+          "name": pluginApi?.tr("settings.backend.auto")
+        },
+        {
+          "key": "sway",
+          "name": pluginApi?.tr("settings.backend.sway")
+        },
+        {
+          "key": "hyprland",
+          "name": pluginApi?.tr("settings.backend.hyprland")
+        }
       ]
       currentKey: root.editBackend
       onSelected: key => root.editBackend = key

@@ -46,14 +46,46 @@ RowLayout {
 
         property bool isSelected: root.currentKey === modelData.key
         property bool isHovered: circleMouseArea.containsMouse
+        readonly property bool pressed: circleMouseArea.pressed
 
         Layout.alignment: Qt.AlignHCenter
         implicitWidth: root.diameter
         implicitHeight: root.diameter
         radius: root.diameter * 0.5
+        scale: circleMorph.scale
+        activeFocusOnTab: true
+        Accessible.role: Accessible.RadioButton
+        Accessible.name: modelData.name
+        Accessible.checked: colorCircle.isSelected
         color: (modelData.key === "none" && root.noneColor !== undefined) ? root.noneColor : Color.resolveColorKey(modelData.key)
         border.color: (isSelected || isHovered) ? Color.mOnSurface : Color.mOutline
         border.width: Style.borderM
+
+        NShapeMorph {
+          id: circleMorph
+
+          enabled: root.enabled
+          hovered: colorCircle.isHovered
+          pressed: colorCircle.pressed
+          selected: colorCircle.isSelected
+          restingRadius: colorCircle.width / 2
+          hoverRadius: colorCircle.width / 2
+          pressedRadius: colorCircle.width / 2
+          selectedRadius: colorCircle.width / 2
+        }
+
+        NStateLayer {
+          id: circleStateLayer
+
+          anchors.fill: parent
+          radius: colorCircle.radius
+          enabled: root.enabled
+          hovered: colorCircle.isHovered
+          pressed: colorCircle.pressed
+          focused: colorCircle.activeFocus
+          selected: colorCircle.isSelected
+          stateColor: Color.resolveOnColorKey(modelData.key)
+        }
 
         MouseArea {
           id: circleMouseArea
@@ -61,13 +93,33 @@ RowLayout {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
+          enabled: root.enabled
           onEntered: TooltipService.show(parent, modelData.name)
           onExited: TooltipService.hide()
+          onPressed: mouse => {
+                       colorCircle.forceActiveFocus();
+                       circleStateLayer.rippleAt(mouse.x, mouse.y);
+                     }
           onClicked: {
             root.currentKey = modelData.key;
             root.selected(modelData.key);
           }
         }
+
+        Keys.onReturnPressed: event => {
+                                if (!root.enabled)
+                                return;
+                                root.currentKey = modelData.key;
+                                root.selected(modelData.key);
+                                event.accepted = true;
+                              }
+        Keys.onSpacePressed: event => {
+                               if (!root.enabled)
+                               return;
+                               root.currentKey = modelData.key;
+                               root.selected(modelData.key);
+                               event.accepted = true;
+                             }
 
         NIcon {
           anchors.centerIn: parent
@@ -78,9 +130,15 @@ RowLayout {
           visible: colorCircle.isSelected
         }
 
+        NFocusRing {
+          focusVisible: colorCircle.activeFocus
+          targetRadius: colorCircle.radius
+        }
+
         Behavior on border.color {
-          ColorAnimation {
-            duration: Style.animationFast
+          enabled: !Color.isTransitioning
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
           }
         }
       }

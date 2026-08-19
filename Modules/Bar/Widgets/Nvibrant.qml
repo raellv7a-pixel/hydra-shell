@@ -41,12 +41,14 @@ NIconButton {
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
-  colorBg: Style.capsuleColor
-  colorFg: root.vibranceEnabled ? Color.mPrimary : Color.resolveColorKey(iconColorKey)
+  customRadius: Style.radiusCapsule
+  colorBg: root.vibranceEnabled ? Color.mTertiary : Qt.alpha(Color.mTertiary, 0.16)
+  colorFg: root.vibranceEnabled ? Color.mOnTertiary : Color.resolveColorKey(iconColorKey)
+  colorBgHover: root.vibranceEnabled ? Color.mOnTertiary : Color.mTertiary
+  colorFgHover: colorFg
   onClicked: root.toggle()
 
-  border.color: Style.capsuleBorderColor
+  border.color: Qt.alpha(Color.mTertiary, 0.36)
   border.width: Style.capsuleBorderWidth
 
   function buildCommand(value) {
@@ -73,12 +75,12 @@ NIconButton {
     command: ["sh", "-c", "command -v nvibrant >/dev/null 2>&1"]
 
     onExited: exitCode => {
-      if (exitCode === 0) {
-        applyProcess.running = true;
-      } else {
-        ToastService.showError(I18n.tr("bar.nvibrant.missing-binary-title"), I18n.tr("bar.nvibrant.missing-binary-description"));
-      }
-    }
+                if (exitCode === 0) {
+                  applyProcess.running = true;
+                } else {
+                  ToastService.showError(I18n.tr("bar.nvibrant.missing-binary-title"), I18n.tr("bar.nvibrant.missing-binary-description"));
+                }
+              }
   }
 
   Process {
@@ -87,14 +89,14 @@ NIconButton {
     command: root.buildCommand(root.pendingEnabled ? root.vibranceValue : 0)
 
     onExited: exitCode => {
-      if (exitCode === 0) {
-        Settings.data.nvibrant.enabled = root.pendingEnabled;
-      } else {
-        ToastService.showError(I18n.tr("bar.nvibrant.apply-failed-title"), I18n.tr("bar.nvibrant.apply-failed-description", {
-                                                                                   "code": exitCode
-                                                                                 }));
-      }
-    }
+                if (exitCode === 0) {
+                  Settings.data.nvibrant.enabled = root.pendingEnabled;
+                } else {
+                  ToastService.showError(I18n.tr("bar.nvibrant.apply-failed-title"), I18n.tr("bar.nvibrant.apply-failed-description", {
+                                                                                               "code": exitCode
+                                                                                             }));
+                }
+              }
   }
 
   NPopupContextMenu {

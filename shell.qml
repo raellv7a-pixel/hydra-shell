@@ -23,13 +23,13 @@ import qs.Modules.Dock
 import qs.Modules.MainScreen
 import qs.Modules.Notification
 import qs.Modules.OSD
-import qs.Modules.ScreenToolkit
-import qs.Modules.ScreenShare
-import qs.Modules.Polkit
 
 import qs.Modules.Panels.Launcher
 import qs.Modules.Panels.Settings
 import qs.Modules.Panels.WorkspaceManager
+import qs.Modules.Polkit
+import qs.Modules.ScreenShare
+import qs.Modules.ScreenToolkit
 import qs.Modules.Toast
 import qs.Services.Control
 import qs.Services.Hardware
@@ -139,7 +139,9 @@ ShellRoot {
       ToastOverlay {}
       ScreenToolkitNative {}
       ScreenShareNative {}
-      PolkitNative { id: polkitAgent }
+      PolkitNative {
+        id: polkitAgent
+      }
 
       // Launcher overlay window (for overlay layer mode)
       Loader {
@@ -151,6 +153,7 @@ ShellRoot {
 
       FadeOverlay {}
       ShowKeysOsd {}
+      OSD {}
 
       // Settings window mode (single window across all monitors)
       SettingsPanelWindow {}

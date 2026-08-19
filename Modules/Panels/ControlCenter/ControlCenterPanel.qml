@@ -52,16 +52,14 @@ SmartPanel {
       }
 
       Behavior on opacity {
-        OpacityAnimator {
-          duration: root.animationsDisabled ? 0 : Style.animationFast
-          easing.type: contentContainer.presented ? Easing.OutCubic : Easing.InCubic
+        NAnim {
+          motionType: NAnim.StandardEffects
         }
       }
 
       Behavior on scale {
-        ScaleAnimator {
-          duration: root.animationsDisabled ? 0 : Style.animationFast
-          easing.type: contentContainer.presented ? Easing.OutCubic : Easing.InCubic
+        NAnim {
+          motionType: NAnim.ExpressiveFastSpatial
         }
       }
 

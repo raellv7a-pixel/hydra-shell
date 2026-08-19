@@ -87,14 +87,14 @@ Loader {
       readonly property bool isAttachedMode: Settings.data.dock.dockType === "attached"
       readonly property int hideDelay: 500
       readonly property int showDelay: 100
-      readonly property int hideAnimationDuration: Math.max(0, Math.round(Style.animationFast / (Settings.data.dock.animationSpeed || 1.0)))
-      readonly property int showAnimationDuration: Math.max(0, Math.round(Style.animationFast / (Settings.data.dock.animationSpeed || 1.0)))
+      readonly property int hideAnimationDuration: Math.max(0, Math.round(Style.motionDurationFastSpatial / (Settings.data.dock.animationSpeed || 1.0)))
+      readonly property int showAnimationDuration: Math.max(0, Math.round(Style.motionDurationFastSpatial / (Settings.data.dock.animationSpeed || 1.0)))
       readonly property int peekThickness: 1
       readonly property int indicatorThickness: Settings.data.dock.indicatorThickness || 3
       readonly property string indicatorColorKey: Settings.data.dock.indicatorColor || "primary"
       readonly property real indicatorOpacity: Settings.data.dock.indicatorOpacity !== undefined ? Settings.data.dock.indicatorOpacity : 0.6
       readonly property int iconSize: Math.round(12 + 24 * (Settings.data.dock.size ?? 1))
-      readonly property int floatingMargin: Settings.data.dock.floatingRatio * Style.marginL
+      readonly property int floatingMargin: Settings.data.dock.floatingRatio * Style.spaceM
       readonly property int maxWidth: modelData ? modelData.width * 0.8 : 1000
       readonly property int maxHeight: modelData ? modelData.height * 0.8 : 1000
 
@@ -169,9 +169,9 @@ Loader {
       readonly property int dockIndicatorLength: {
         if (dockItemCount <= 0)
           return 0;
-        const spacing = Style.marginS;
+        const spacing = Style.spaceXS;
         const layoutLength = (iconSize * dockItemCount) + (spacing * Math.max(0, dockItemCount - 1));
-        const padded = layoutLength + Style.marginXL;
+        const padded = layoutLength + Style.spaceL;
         return Math.min(padded, isVertical ? maxHeight : maxWidth);
       }
 
@@ -801,9 +801,8 @@ Loader {
             opacity: indicatorVisible ? 1 : 0
 
             Behavior on opacity {
-              NumberAnimation {
-                duration: Style.animationNormal
-                easing.type: Easing.InOutQuad
+              NAnim {
+                motionType: NAnim.StandardEffects
               }
             }
           }
@@ -851,9 +850,9 @@ Loader {
           property real slideOffset: hidden ? slideDistance : 0
 
           Behavior on slideOffset {
-            NumberAnimation {
+            NAnim {
               duration: hidden ? hideAnimationDuration : showAnimationDuration
-              easing.type: hidden ? Easing.InCubic : Easing.OutCubic
+              motionType: NAnim.ExpressiveFastSpatial
             }
           }
 
@@ -870,7 +869,7 @@ Loader {
               y: Math.round(dockContainerWrapper.y + dockContent.dockContainer.y + dockWindow.slideY)
               width: Math.round(dockContent.dockContainer.width)
               height: Math.round(dockContent.dockContainer.height)
-              radius: Style.radiusL
+              radius: Style.radiusPopover
             }
           }
 

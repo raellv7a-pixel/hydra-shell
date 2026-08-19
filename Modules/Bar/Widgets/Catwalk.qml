@@ -8,6 +8,9 @@ import qs.Widgets
 
 Item {
   id: root
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: tooltipText
 
   property ShellScreen screen
 
@@ -97,16 +100,20 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
-    radius: Math.min(Style.iRadiusL, width / 2)
+    color: Style.capsuleColor
+    radius: Style.radiusCapsule
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
-    Behavior on color {
-      ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.InOutQuad
-      }
+    NStateLayer {
+      id: catwalkStateLayer
+
+      anchors.fill: parent
+      hovered: mouseArea.containsMouse
+      pressed: mouseArea.pressed
+      focused: root.activeFocus
+      stateColor: Color.mOnSurface
+      radius: parent.radius
     }
 
     Image {
@@ -133,12 +140,23 @@ Item {
     }
   }
 
+  NFocusRing {
+    anchors.fill: visualCapsule
+    focusVisible: root.activeFocus
+    targetRadius: visualCapsule.radius
+  }
+
   MouseArea {
     id: mouseArea
     anchors.fill: parent
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: true
+    onPressed: mouse => {
+                 root.forceActiveFocus();
+                 const point = mapToItem(catwalkStateLayer, mouse.x, mouse.y);
+                 catwalkStateLayer.rippleAt(point.x, point.y);
+               }
     onEntered: {
       TooltipService.show(root, root.tooltipText, BarService.getTooltipDirection(root.screenName));
     }
@@ -152,4 +170,13 @@ Item {
                  }
                }
   }
+
+  Keys.onReturnPressed: event => {
+                          PanelService.showContextMenu(contextMenu, root, screen);
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         PanelService.showContextMenu(contextMenu, root, screen);
+                         event.accepted = true;
+                       }
 }

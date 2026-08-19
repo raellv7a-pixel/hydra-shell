@@ -1,6 +1,6 @@
+import QtMultimedia
 import QtQuick
 import QtQuick.Layouts
-import QtMultimedia
 import Quickshell
 import qs.Commons
 import qs.Modules.MainScreen
@@ -47,20 +47,20 @@ SmartPanel {
   panelContent: Item {
     ColumnLayout {
       anchors.fill: parent
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       NBox {
         Layout.fillWidth: true
-        implicitHeight: headerRow.implicitHeight + Style.margin2M
+        implicitHeight: headerRow.implicitHeight + Style.spaceS * 2
         color: Color.mSurfaceContainerHigh
-        radius: Style.radiusL
+        radius: Style.radiusCard
 
         RowLayout {
           id: headerRow
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginM
+          anchors.margins: Style.spaceS
+          spacing: Style.spaceS
 
           ColumnLayout {
             Layout.fillWidth: true
@@ -69,7 +69,7 @@ SmartPanel {
             NText {
               Layout.fillWidth: true
               text: I18n.tr("tamagotchi.panel.title")
-              pointSize: Style.fontSizeL
+              pointSize: Style.fontSizeTitleSmall
               font.weight: Style.fontWeightBold
               color: Color.mOnSurface
             }
@@ -77,7 +77,7 @@ SmartPanel {
             NText {
               Layout.fillWidth: true
               text: root.stateLabel
-              pointSize: Style.fontSizeXS
+              pointSize: Style.fontSizeLabelMedium
               color: Color.mOnSurfaceVariant
             }
           }
@@ -94,41 +94,57 @@ SmartPanel {
       GridLayout {
         Layout.fillWidth: true
         columns: 2
-        columnSpacing: Style.marginM
-        rowSpacing: Style.marginS
+        columnSpacing: Style.spaceS
+        rowSpacing: Style.spaceXS
 
         Repeater {
           model: [
-            { "label": I18n.tr("tamagotchi.needs.hunger"), "value": TamagotchiService.hunger, "icon": "tools-kitchen-2" },
-            { "label": I18n.tr("tamagotchi.needs.happiness"), "value": TamagotchiService.happiness, "icon": "mood-smile" },
-            { "label": I18n.tr("tamagotchi.needs.cleanliness"), "value": TamagotchiService.cleanliness, "icon": "sparkles" },
-            { "label": I18n.tr("tamagotchi.needs.energy"), "value": TamagotchiService.energy, "icon": "bolt" }
+            {
+              "label": I18n.tr("tamagotchi.needs.hunger"),
+              "value": TamagotchiService.hunger,
+              "icon": "tools-kitchen-2"
+            },
+            {
+              "label": I18n.tr("tamagotchi.needs.happiness"),
+              "value": TamagotchiService.happiness,
+              "icon": "mood-smile"
+            },
+            {
+              "label": I18n.tr("tamagotchi.needs.cleanliness"),
+              "value": TamagotchiService.cleanliness,
+              "icon": "sparkles"
+            },
+            {
+              "label": I18n.tr("tamagotchi.needs.energy"),
+              "value": TamagotchiService.energy,
+              "icon": "bolt"
+            }
           ]
 
           delegate: ColumnLayout {
             required property var modelData
             Layout.fillWidth: true
-            spacing: Style.marginXS
+            spacing: Style.spaceXXS
 
             RowLayout {
               Layout.fillWidth: true
 
               NIcon {
                 icon: modelData.icon
-                pointSize: Style.fontSizeM
+                pointSize: Style.fontSizeBodySmall
                 color: modelData.value < 20 ? Color.mError : Color.mPrimary
               }
 
               NText {
                 Layout.fillWidth: true
                 text: modelData.label
-                pointSize: Style.fontSizeXS
+                pointSize: Style.fontSizeLabelMedium
                 color: Color.mOnSurfaceVariant
               }
 
               NText {
                 text: Math.round(modelData.value) + "%"
-                pointSize: Style.fontSizeXS
+                pointSize: Style.fontSizeLabelMedium
                 font.weight: Style.fontWeightSemiBold
                 color: Color.mOnSurface
               }
@@ -155,12 +171,12 @@ SmartPanel {
         Layout.fillWidth: true
         Layout.fillHeight: true
         color: Color.mSurfaceContainer
-        radius: Style.radiusL
+        radius: Style.radiusCard
 
         ColumnLayout {
           anchors.fill: parent
-          anchors.margins: Style.marginM
-          spacing: Style.marginXS
+          anchors.margins: Style.spaceS
+          spacing: Style.spaceXXS
 
           Item {
             Layout.fillWidth: true
@@ -178,7 +194,7 @@ SmartPanel {
             text: root.feedbackText
             visible: text !== ""
             horizontalAlignment: Text.AlignHCenter
-            pointSize: Style.fontSizeS
+            pointSize: Style.fontSizeLabelMedium
             font.weight: Style.fontWeightSemiBold
             color: Color.mPrimary
           }
@@ -188,8 +204,8 @@ SmartPanel {
       GridLayout {
         Layout.fillWidth: true
         columns: 2
-        columnSpacing: Style.marginS
-        rowSpacing: Style.marginS
+        columnSpacing: Style.spaceXS
+        rowSpacing: Style.spaceXS
 
         NButton {
           Layout.fillWidth: true

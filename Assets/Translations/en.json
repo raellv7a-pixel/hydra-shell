@@ -904,7 +904,7 @@
       "system-uptime": "Uptime:",
       "system-wm": "WM:",
       "telemetry-data-copied": "Telemetry data copied to clipboard",
-      "telemetry-desc": "Help improve Noctalia by sharing anonymous system info (screen resolution, compositor, distro). Sent once at startup, no tracking, data auto-deleted after 30 days.",
+      "telemetry-desc": "Help improve Hydra Shell by sharing anonymous system information (screen resolution, compositor, and distribution). Data is sent once at startup, without tracking, and deleted automatically after 30 days.",
       "telemetry-enabled": "Send anonymous system information",
       "telemetry-show-data": "View data",
       "telemetry-title": "Privacy",
@@ -2064,7 +2064,7 @@
     "skip-setup": "Skip Setup",
     "telemetry-wizard-done": "Got it!",
     "telemetry-wizard-note": "You're in control — enable or disable this anytime in settings",
-    "telemetry-wizard-subtitle": "We've added anonymous analytics to help improve Noctalia",
+    "telemetry-wizard-subtitle": "We've added anonymous analytics to help improve Hydra Shell",
     "telemetry-wizard-title": "Privacy Update",
     "wallpaper": {
       "choose-dir": "Choose a directory containing your wallpaper images",
@@ -2083,7 +2083,7 @@
     "welcome": "Welcome",
     "welcome-note": "Just a few basics to get you started — full options are in the settings",
     "welcome-subtitle": "Let's make your desktop uniquely yours",
-    "welcome-title": "Welcome to Noctalia!"
+    "welcome-title": "Welcome to Hydra Shell!"
   },
   "system": {
     "cpu-temperature": "{temp}°C",

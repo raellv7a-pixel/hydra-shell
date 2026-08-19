@@ -10,10 +10,10 @@ import qs.Widgets
 Rectangle {
   id: root
   Layout.fillWidth: true
-  Layout.minimumHeight: (60 * Style.uiScaleRatio) + Style.margin2M
-  Layout.preferredHeight: (60 * Style.uiScaleRatio) + Style.margin2M
-  implicitHeight: (60 * Style.uiScaleRatio) + Style.margin2M
-  radius: Style.radiusL
+  Layout.minimumHeight: (60 * Style.uiScaleRatio) + Style.spaceS * 2
+  Layout.preferredHeight: (60 * Style.uiScaleRatio) + Style.spaceS * 2
+  implicitHeight: (60 * Style.uiScaleRatio) + Style.spaceS * 2
+  radius: Style.radiusCard
   color: Color.mPrimary
 
   // Internal state
@@ -29,10 +29,10 @@ Rectangle {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.bottom: parent.bottom
-    anchors.topMargin: Style.marginM
-    anchors.bottomMargin: Style.marginM
-    anchors.rightMargin: clockLoader.width + Style.margin2XL
-    anchors.leftMargin: Style.marginXL
+    anchors.topMargin: Style.spaceS
+    anchors.bottomMargin: Style.spaceS
+    anchors.rightMargin: clockLoader.width + Style.spaceXXL
+    anchors.leftMargin: Style.spaceXL
     spacing: 0
 
     // Combined layout for date, month year, location and time-zone
@@ -40,7 +40,7 @@ Rectangle {
       Layout.fillWidth: true
       height: 60 * Style.uiScaleRatio
       clip: true
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       // Today day number
       NText {
@@ -49,7 +49,7 @@ Rectangle {
         clip: true
         Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
         text: root.now.getDate()
-        pointSize: Style.fontSizeXXXL * 1.5
+        pointSize: Style.fontSizeDisplaySmall
         font.weight: Style.fontWeightBold
         color: Color.mOnPrimary
       }
@@ -58,16 +58,16 @@ Rectangle {
       ColumnLayout {
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-        Layout.bottomMargin: Style.marginXXS
-        Layout.topMargin: -Style.marginXXS
-        spacing: -Style.marginXS
+        Layout.bottomMargin: Style.spaceXXS
+        Layout.topMargin: -Style.spaceXXS
+        spacing: -Style.spaceXXS
 
         RowLayout {
-          spacing: Style.marginS
+          spacing: Style.spaceXS
 
           NText {
             text: I18n.locale.monthName(root.currentMonth, Locale.LongFormat).toUpperCase()
-            pointSize: Style.fontSizeXL * 1.1
+            pointSize: Style.fontSizeTitleMedium
             font.weight: Style.fontWeightBold
             color: Color.mOnPrimary
             Layout.alignment: Qt.AlignBaseline
@@ -76,7 +76,7 @@ Rectangle {
 
           NText {
             text: `${root.currentYear}`
-            pointSize: Style.fontSizeM
+            pointSize: Style.fontSizeLabelLarge
             font.weight: Style.fontWeightBold
             color: Qt.alpha(Color.mOnPrimary, 0.7)
             Layout.alignment: Qt.AlignBaseline
@@ -99,7 +99,7 @@ Rectangle {
               const chunks = Settings.data.location.name.split(",");
               return chunks[0];
             }
-            pointSize: Style.fontSizeM
+            pointSize: Style.fontSizeLabelLarge
             color: Color.mOnPrimary
             Layout.maximumWidth: 150
             elide: Text.ElideRight
@@ -107,7 +107,7 @@ Rectangle {
 
           NText {
             text: root.weatherReady && !Settings.data.location.hideWeatherTimezone ? `${Settings.data.location.hideWeatherCityName ? "" : " "}(${LocationService.data.weather.timezone_abbreviation})` : ""
-            pointSize: Style.fontSizeXS
+            pointSize: Style.fontSizeLabelSmall
             color: Qt.alpha(Color.mOnPrimary, 0.7)
           }
         }
@@ -124,7 +124,7 @@ Rectangle {
   NClock {
     id: clockLoader
     anchors.right: parent.right
-    anchors.rightMargin: Style.marginXL
+    anchors.rightMargin: Style.spaceXL
     anchors.verticalCenter: parent.verticalCenter
     clockStyle: Settings.data.location.analogClockInCalendar ? "analog" : "digital"
     progressColor: Color.mOnPrimary

@@ -88,7 +88,7 @@ NBox {
         sourceItem: Rectangle {
           width: root.width
           height: root.height
-          radius: Style.radiusM
+          radius: Style.radiusCard
           color: "white"
         }
       }
@@ -123,7 +123,7 @@ NBox {
       anchors.fill: parent
       color: Color.mSurface
       opacity: 0.65
-      radius: Style.radiusM
+      radius: Style.radiusCard
     }
 
     // Border
@@ -132,7 +132,7 @@ NBox {
       color: "transparent"
       border.color: Style.boxBorderColor
       border.width: Style.borderS
-      radius: Style.radiusM
+      radius: Style.radiusCard
     }
 
     // Background visualizer on top of the artwork
@@ -194,32 +194,73 @@ NBox {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.topMargin: Style.marginXS
-    anchors.leftMargin: Style.marginM
-    anchors.rightMargin: Style.marginM
+    anchors.topMargin: Style.spaceXXS
+    anchors.leftMargin: Style.spaceS
+    anchors.rightMargin: Style.spaceS
     height: Style.baseWidgetSize
     visible: MediaService.getAvailablePlayers().length > 1
-    radius: Style.radiusM
+    radius: Style.radiusControl
     color: "transparent"
+    activeFocusOnTab: visible
+    Accessible.role: Accessible.Button
+    Accessible.name: playerSelectorButton.currentPlayer ? playerSelectorButton.currentPlayer.identity : I18n.tr("common.media-player")
+    Keys.onReturnPressed: event => {
+                            playerSelectorButton.openPlayerMenu();
+                            event.accepted = true;
+                          }
+    Keys.onSpacePressed: event => {
+                           playerSelectorButton.openPlayerMenu();
+                           event.accepted = true;
+                         }
+
+    function openPlayerMenu() {
+      var menuItems = [];
+      var players = MediaService.getAvailablePlayers();
+      for (var i = 0; i < players.length; i++) {
+        menuItems.push({
+                         "label": players[i].identity,
+                         "action": i.toString(),
+                         "icon": "disc",
+                         "enabled": true,
+                         "visible": true
+                       });
+      }
+      playerContextMenu.model = menuItems;
+      playerContextMenu.openAtItem(playerSelectorButton, playerSelectorButton.width - playerContextMenu.width, playerSelectorButton.height);
+    }
 
     property var currentPlayer: MediaService.getAvailablePlayers()[MediaService.selectedPlayerIndex]
 
     RowLayout {
       anchors.fill: parent
-      spacing: Style.marginS
+      spacing: Style.spaceXS
 
       NIcon {
         icon: "caret-down"
-        pointSize: Style.fontSizeXXL
+        pointSize: Style.fontSizeTitleMedium
         color: Color.mOnSurfaceVariant
       }
 
       NText {
         text: playerSelectorButton.currentPlayer ? playerSelectorButton.currentPlayer.identity : ""
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelSmall
         color: Color.mOnSurfaceVariant
         Layout.fillWidth: true
       }
+    }
+
+    NStateLayer {
+      id: playerSelectorStateLayer
+      anchors.fill: parent
+      hovered: playerSelectorMouseArea.containsMouse
+      pressed: playerSelectorMouseArea.pressed
+      targetRadius: playerSelectorButton.radius
+    }
+
+    NFocusRing {
+      anchors.fill: parent
+      focusVisible: playerSelectorButton.activeFocus
+      targetRadius: playerSelectorButton.radius
     }
 
     MouseArea {
@@ -228,21 +269,8 @@ NBox {
       hoverEnabled: true
       cursorShape: Qt.PointingHandCursor
 
-      onClicked: {
-        var menuItems = [];
-        var players = MediaService.getAvailablePlayers();
-        for (var i = 0; i < players.length; i++) {
-          menuItems.push({
-                           "label": players[i].identity,
-                           "action": i.toString(),
-                           "icon": "disc",
-                           "enabled": true,
-                           "visible": true
-                         });
-        }
-        playerContextMenu.model = menuItems;
-        playerContextMenu.openAtItem(playerSelectorButton, playerSelectorButton.width - playerContextMenu.width, playerSelectorButton.height);
-      }
+      onPressed: mouse => playerSelectorStateLayer.rippleAt(mouse.x, mouse.y)
+      onClicked: playerSelectorButton.openPlayerMenu()
     }
 
     NContextMenu {
@@ -263,17 +291,17 @@ NBox {
   // Content container that adjusts for player selector
   Item {
     anchors.fill: parent
-    anchors.topMargin: playerSelectorButton.visible ? (playerSelectorButton.height + Style.marginXS + Style.marginM) : Style.marginM
-    anchors.leftMargin: Style.marginM
-    anchors.rightMargin: Style.marginM
-    anchors.bottomMargin: Style.marginM
+    anchors.topMargin: playerSelectorButton.visible ? (playerSelectorButton.height + Style.spaceXXS + Style.spaceS) : Style.spaceS
+    anchors.leftMargin: Style.spaceS
+    anchors.rightMargin: Style.spaceS
+    anchors.bottomMargin: Style.spaceS
 
     // No media player detected - centered disc icon
     NIcon {
       anchors.centerIn: parent
       visible: !root.hasActivePlayer && SpectrumService.isIdle
       icon: "disc"
-      pointSize: Style.fontSizeXXXL * 3
+      pointSize: Style.fontSizeDisplayLarge
       color: Color.mOnSurfaceVariant
       opacity: 1.0
     }
@@ -303,11 +331,11 @@ NBox {
         ColumnLayout {
           id: main
           anchors.fill: parent
-          spacing: Style.marginS
+          spacing: Style.spaceXS
 
           // Spacer to push content down
           Item {
-            Layout.preferredHeight: Style.marginM
+            Layout.preferredHeight: Style.spaceS
           }
 
           // Metadata
@@ -315,12 +343,12 @@ NBox {
             id: metadata
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft
-            spacing: Style.marginXS
+            spacing: Style.spaceXXS
 
             NText {
               visible: MediaService.trackTitle !== ""
               text: MediaService.trackTitle
-              pointSize: Style.fontSizeL
+              pointSize: Style.fontSizeTitleSmall
               font.weight: Style.fontWeightBold
               elide: Text.ElideRight
               wrapMode: Text.Wrap
@@ -332,7 +360,7 @@ NBox {
               visible: MediaService.trackArtist !== ""
               text: MediaService.trackArtist
               color: Color.mSecondary
-              pointSize: Style.fontSizeS
+              pointSize: Style.fontSizeLabelMedium
               elide: Text.ElideRight
               Layout.fillWidth: true
             }
@@ -341,7 +369,7 @@ NBox {
               visible: MediaService.trackAlbum !== ""
               text: MediaService.trackAlbum
               color: Color.mOnSurfaceVariant
-              pointSize: Style.fontSizeM
+              pointSize: Style.fontSizeBodySmall
               elide: Text.ElideRight
               Layout.fillWidth: true
             }
@@ -391,6 +419,7 @@ NBox {
               snapAlways: false
               enabled: MediaService.trackLength > 0 && MediaService.canSeek
               heightRatio: 0.6
+              wavy: MediaService.isPlaying
 
               onMoved: {
                 progressWrapper.localSeekRatio = value;
@@ -422,12 +451,12 @@ NBox {
 
           // Spacer to push media controls down
           Item {
-            Layout.preferredHeight: Style.marginL
+            Layout.preferredHeight: Style.paddingCard
           }
 
           // Media controls
           RowLayout {
-            spacing: Style.marginS
+            spacing: Style.spaceXS
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignHCenter
 

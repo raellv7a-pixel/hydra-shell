@@ -57,8 +57,8 @@ Singleton {
 
     Logger.d("PackageManager", `Running: ${command.join(" ")} (elevator: ${elevatorLabel})`);
     operationProcess.exec({
-      command: command
-    });
+                            command: command
+                          });
     return true;
   }
 
@@ -94,7 +94,7 @@ Singleton {
       // panel open, so the result lands where the action was started. Uninstall
       // removes the entry, so there is nothing left to anchor to.
       if (!(success && operation === "remove"))
-        PanelService.openLauncherWithAppPanel(appId);
+      PanelService.openLauncherWithAppPanel(appId);
 
       root.operationAppId = "";
       root.operationAppName = "";

@@ -57,15 +57,15 @@ Singleton {
 
       command: {
         switch (stage) {
-        case "mkdir":
+          case "mkdir":
           return ["mkdir", "-p", "--", destinationDirectory];
-        case "download":
+          case "download":
           return ["curl", "--fail", "--location", "--silent", "--show-error", "--retry", "2", "--retry-delay", "1", "--connect-timeout", "15", "--max-time", "300", "--user-agent", root.userAgent, "--referer", root.baseUrl + "/", "--output", temporaryPath, url];
-        case "validate":
+          case "validate":
           return ["file", "--brief", "--mime-type", "--", temporaryPath];
-        case "commit":
+          case "commit":
           return ["mv", "--force", "--", temporaryPath, finalPath];
-        default:
+          default:
           return [];
         }
       }

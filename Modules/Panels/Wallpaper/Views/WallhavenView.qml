@@ -230,11 +230,11 @@ Item {
         }
 
         onKeyPressed: event => {
-          if (Keybinds.checkKey(event, 'enter', Settings)) {
-            root.activateCurrentIndex();
-            event.accepted = true;
-          }
-        }
+                        if (Keybinds.checkKey(event, 'enter', Settings)) {
+                          root.activateCurrentIndex();
+                          event.accepted = true;
+                        }
+                      }
 
         delegate: WallpaperGridCard {
           id: card
@@ -282,7 +282,7 @@ Item {
           width: Math.min(parent.width - Style.margin2L, 420 * Style.uiScaleRatio)
           spacing: Style.marginM
 
-          NBusyIndicator {
+          NMorphLoader {
             size: Style.baseWidgetSize * 1.5
             color: Color.mPrimary
             Layout.alignment: Qt.AlignHCenter

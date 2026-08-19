@@ -145,8 +145,8 @@ SmartPanel {
     ColumnLayout {
       id: wizardContent
       anchors.fill: parent
-      anchors.margins: Style.marginXL
-      spacing: Style.marginL
+      anchors.margins: Style.paddingCard
+      spacing: Style.spaceS
 
       // Step content - takes most of the space
       Item {
@@ -163,64 +163,48 @@ SmartPanel {
           Item {
             ColumnLayout {
               anchors.centerIn: parent
-              width: Math.round(Math.max(parent.width * 0.5, 420))
-              spacing: Style.marginXL
+              width: Math.min(parent.width - Style.paddingCard * 2, Math.round(760 * Style.uiScaleRatio))
+              spacing: Style.spaceL
 
               // Logo with subtle glow effect
               Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 120
+                Layout.preferredHeight: Math.round(96 * Style.uiScaleRatio)
                 Layout.alignment: Qt.AlignHCenter
 
                 Rectangle {
+                  id: brandMark
                   anchors.centerIn: parent
-                  width: 120
-                  height: 120
-                  radius: width / 2
-                  color: Color.mPrimary
-                  opacity: 0.08
-                  scale: 1.3
-                }
+                  width: Math.round(96 * Style.uiScaleRatio)
+                  height: width
+                  radius: Style.radiusCard
+                  color: Color.mPrimaryContainer
+                  border.color: Qt.alpha(Color.mPrimary, 0.38)
+                  border.width: Style.borderS
 
-                Image {
-                  anchors.centerIn: parent
-                  width: 110
-                  height: 110
-                  source: Qt.resolvedUrl(Quickshell.shellDir + "/Assets/noctalia.svg")
-                  fillMode: Image.PreserveAspectFit
-                  smooth: true
-
-                  Rectangle {
-                    anchors.fill: parent
-                    color: Color.mSurfaceVariant
-                    radius: width / 2
-                    border.color: Color.mOutline
-                    border.width: Style.borderM
-                    visible: parent.status === Image.Error
-
-                    NIcon {
-                      icon: "sparkles"
-                      pointSize: Style.fontSizeXXL * 1.5
-                      color: Color.mPrimary
-                      anchors.centerIn: parent
-                    }
+                  NIcon {
+                    anchors.centerIn: parent
+                    icon: "sparkles"
+                    pointSize: Style.fontSizeDisplaySmall
+                    color: Color.mOnPrimaryContainer
                   }
 
-                  // Subtle pulse animation
                   SequentialAnimation on scale {
-                    running: true
+                    running: Style.motionEnabled && brandMark.visible
                     loops: Animation.Infinite
-                    NumberAnimation {
+
+                    NAnim {
                       from: 1.0
-                      to: 1.05
-                      duration: 2000
-                      easing.type: Easing.InOutQuad
+                      to: 1.04
+                      duration: Style.motionDurationSlowSpatial * 2
+                      motionType: NAnim.ExpressiveSlowSpatial
                     }
-                    NumberAnimation {
-                      from: 1.05
+
+                    NAnim {
+                      from: 1.04
                       to: 1.0
-                      duration: 2000
-                      easing.type: Easing.InOutQuad
+                      duration: Style.motionDurationSlowSpatial * 2
+                      motionType: NAnim.ExpressiveSlowSpatial
                     }
                   }
                 }
@@ -230,11 +214,11 @@ SmartPanel {
               ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter
-                spacing: Style.marginM
+                spacing: Style.spaceS
 
                 NText {
                   text: root.telemetryOnlyMode ? I18n.tr("setup.telemetry-wizard-title") : I18n.tr("setup.welcome-title")
-                  pointSize: Style.fontSizeXXL * 1.4
+                  pointSize: Style.fontSizeHeadlineMedium
                   font.weight: Style.fontWeightBold
                   color: Color.mOnSurface
                   Layout.fillWidth: true
@@ -243,7 +227,7 @@ SmartPanel {
 
                 NText {
                   text: root.telemetryOnlyMode ? I18n.tr("setup.telemetry-wizard-subtitle") : I18n.tr("setup.welcome-subtitle")
-                  pointSize: Style.fontSizeL
+                  pointSize: Style.fontSizeBodyLarge
                   color: Color.mOnSurfaceVariant
                   Layout.fillWidth: true
                   horizontalAlignment: Text.AlignHCenter
@@ -253,16 +237,16 @@ SmartPanel {
                 // Friendly subtext
                 Rectangle {
                   Layout.fillWidth: true
-                  Layout.topMargin: Style.marginL
-                  Layout.preferredHeight: childrenRect.height + Style.margin2M
-                  color: Color.mSurfaceVariant
-                  radius: Style.radiusL
+                  Layout.topMargin: Style.spaceL
+                  Layout.preferredHeight: childrenRect.height + Style.paddingCard * 2
+                  color: Color.mSurfaceContainerHigh
+                  radius: Style.radiusCard
 
                   NText {
                     anchors.centerIn: parent
-                    width: parent.width - Style.margin2L
+                    width: parent.width - Style.paddingCard * 2
                     text: root.telemetryOnlyMode ? I18n.tr("setup.telemetry-wizard-note") : I18n.tr("setup.welcome-note")
-                    pointSize: Style.fontSizeM
+                    pointSize: Style.fontSizeBodyMedium
                     color: Color.mOnSurfaceVariant
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
@@ -272,7 +256,7 @@ SmartPanel {
                 // Telemetry toggle
                 NToggle {
                   Layout.fillWidth: true
-                  Layout.topMargin: Style.marginM
+                  Layout.topMargin: Style.spaceS
                   label: I18n.tr("panels.about.telemetry-enabled")
                   description: I18n.tr("panels.about.telemetry-desc")
                   checked: Settings.data.general.telemetryEnabled
@@ -346,7 +330,7 @@ SmartPanel {
 
         RowLayout {
           anchors.centerIn: parent
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           Repeater {
             model: [
@@ -376,54 +360,67 @@ SmartPanel {
               }
             ]
             delegate: RowLayout {
-              spacing: Style.marginS
+              spacing: Style.spaceS
 
               Rectangle {
-                width: 24
-                height: 24
-                radius: width / 2
-                color: index <= currentStep ? Color.mPrimary : Color.mSurfaceVariant
-                border.color: index === currentStep ? Color.mPrimary : "transparent"
-                border.width: index === currentStep ? 2 : 0
+                readonly property bool completed: index < currentStep
+                readonly property bool active: index === currentStep
+
+                width: Math.round(28 * Style.uiScaleRatio)
+                height: width
+                radius: Style.radiusCapsule
+                color: active ? Color.mPrimaryContainer : (completed ? Color.mPrimary : Color.mSurfaceContainerHigh)
+                scale: active ? 1.08 : 1.0
 
                 NIcon {
                   icon: modelData.icon
-                  pointSize: Style.fontSizeS
-                  color: index <= currentStep ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                  pointSize: Style.fontSizeBodySmall
+                  color: parent.active ? Color.mOnPrimaryContainer : (parent.completed ? Color.mOnPrimary : Color.mOnSurfaceVariant)
                   anchors.centerIn: parent
+
+                  Behavior on color {
+                    NColorAnimation {
+                      motionType: NColorAnimation.Standard
+                    }
+                  }
                 }
 
                 Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationNormal
+                  NColorAnimation {
+                    motionType: NColorAnimation.Standard
+                  }
+                }
+
+                Behavior on scale {
+                  NAnim {
+                    motionType: NAnim.ExpressiveFastSpatial
                   }
                 }
               }
 
               NText {
                 text: modelData.label
-                pointSize: Style.fontSizeS
+                pointSize: Style.fontSizeLabelLarge
                 color: index <= currentStep ? Color.mPrimary : Color.mOnSurfaceVariant
-                font.weight: index === currentStep ? Style.fontWeightBold : Style.fontWeightRegular
+                font.weight: index === currentStep ? Style.fontWeightBold : Style.fontWeightMedium
 
                 Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationNormal
+                  NColorAnimation {
+                    motionType: NColorAnimation.Standard
                   }
                 }
               }
 
-              // Connector line
               Rectangle {
-                width: 40
+                width: Math.round(24 * Style.uiScaleRatio)
                 height: 2
-                radius: 1
-                color: index < currentStep ? Color.mPrimary : Color.mSurfaceVariant
+                radius: Style.radiusCapsule
+                color: index < currentStep ? Color.mPrimary : Color.mSurfaceContainerHigh
                 visible: index < totalSteps - 1
 
                 Behavior on color {
-                  ColorAnimation {
-                    duration: Style.animationNormal
+                  NColorAnimation {
+                    motionType: NColorAnimation.Standard
                   }
                 }
               }
@@ -436,17 +433,18 @@ SmartPanel {
       Item {
         Layout.fillWidth: true
         Layout.preferredHeight: 44
-        Layout.topMargin: Style.marginS
+        Layout.topMargin: Style.spaceS
 
         RowLayout {
           anchors.fill: parent
-          spacing: Style.marginM
+          spacing: Style.spaceS
 
           NButton {
             text: I18n.tr("setup.skip-setup")
             outlined: true
             visible: !root.telemetryOnlyMode
             Layout.preferredHeight: 44
+            fontSize: Style.fontSizeBodySmall
             onClicked: {
               panelContent.completeSetup();
             }
@@ -461,6 +459,7 @@ SmartPanel {
             outlined: true
             visible: currentStep > 0 && !root.telemetryOnlyMode
             Layout.preferredHeight: 44
+            fontSize: Style.fontSizeBodySmall
             onClicked: {
               if (currentStep > 0) {
                 currentStep--;
@@ -471,6 +470,7 @@ SmartPanel {
           NButton {
             text: root.telemetryOnlyMode ? I18n.tr("setup.telemetry-wizard-done") : (currentStep === totalSteps - 1 ? I18n.tr("setup.all-done") : I18n.tr("common.continue") + " →")
             Layout.preferredHeight: 44
+            fontSize: Style.fontSizeBodySmall
             onClicked: {
               if (currentStep < totalSteps - 1) {
                 currentStep++;

@@ -1,12 +1,13 @@
 import QtQuick
 import qs.Commons
+import qs.Widgets
 
 Item {
   id: root
 
   property Component sourceComponent
   property bool animationsEnabled: true
-  property int duration: Style.animationNormal
+  property int duration: Style.motionDurationDefaultSpatial
   property real transitionGap: Style.marginXL
   property real incomingStartOpacity: 0.0
   property real outgoingTargetOpacity: 0.25
@@ -36,7 +37,7 @@ Item {
   }
 
   function swap(direction, applyChange) {
-    if (!animationsEnabled || width <= 0 || height <= 0 || direction === 0) {
+    if (!animationsEnabled || !Style.motionEnabled || width <= 0 || height <= 0 || direction === 0) {
       if (applyChange)
         applyChange();
       return;
@@ -102,33 +103,33 @@ Item {
 
   ParallelAnimation {
     id: transition
-    NumberAnimation {
+    NAnim {
       target: root
       property: "_contentOffset"
       to: 0
       duration: root.duration
-      easing.type: Easing.OutCubic
+      motionType: NAnim.EmphasizedSpatial
     }
-    NumberAnimation {
+    NAnim {
       target: root
       property: "_contentOpacity"
       to: 1
       duration: root.duration
-      easing.type: Easing.OutCubic
+      motionType: NAnim.StandardEffects
     }
-    NumberAnimation {
+    NAnim {
       target: root
       property: "_snapshotOffset"
       to: root._snapshotTargetOffset
       duration: root.duration
-      easing.type: Easing.OutCubic
+      motionType: NAnim.EmphasizedSpatial
     }
-    NumberAnimation {
+    NAnim {
       target: root
       property: "_snapshotOpacity"
       to: root.outgoingTargetOpacity
       duration: root.duration
-      easing.type: Easing.OutCubic
+      motionType: NAnim.StandardEffects
     }
     onFinished: root.resetVisuals()
   }

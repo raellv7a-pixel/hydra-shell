@@ -19,7 +19,7 @@ NBox {
   Item {
     id: content
     anchors.fill: parent
-    anchors.margins: Style.marginS
+    anchors.margins: Style.spaceXS
 
     Column {
       anchors.fill: parent

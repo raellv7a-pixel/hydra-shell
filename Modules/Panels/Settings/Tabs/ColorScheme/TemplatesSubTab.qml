@@ -326,9 +326,9 @@ ColumnLayout {
     label: I18n.tr("panels.color-scheme.templates-cursor-size-label")
     description: I18n.tr("panels.color-scheme.templates-cursor-size-description")
     model: [16, 20, 22, 24, 28, 32, 40, 48, 56, 64].map(s => ({
-                                                             "key": String(s),
-                                                             "name": s + "px"
-                                                           }))
+                                                                "key": String(s),
+                                                                "name": s + "px"
+                                                              }))
     currentKey: String(Settings.data.templates.cursorSize)
     onSelected: key => {
                   Settings.data.templates.cursorSize = parseInt(key, 10);

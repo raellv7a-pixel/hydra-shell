@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Widgets
 import qs.Commons
 import qs.Services.UI
+import qs.Widgets
 
 Item {
   id: root
@@ -16,14 +17,15 @@ Item {
   property bool allowClickWhenDisabled: false
   property bool handleWheel: false
   property bool hovering: false
+  readonly property bool pressed: mouseArea.pressed
 
   property color colorBg: Color.smartAlpha(Color.mSurfaceVariant)
   property color colorFg: Color.mPrimary
-  property color colorBgHover: Color.mHover
-  property color colorFgHover: Color.mOnHover
+  property color colorBgHover: colorFg
+  property color colorFgHover: colorFg
   property color colorBorder: Color.mOutline
   property color colorBorderHover: Color.mOutline
-  property real customRadius: -1 // -1 means use default (iRadiusL), otherwise use this value
+  property real customRadius: -1 // -1 uses the semantic control radius
 
   // Expose border properties for backwards compatibility (aliases to visualButton)
   property alias border: visualButton.border
@@ -40,12 +42,16 @@ Item {
   // Calculate button size based on settings
   readonly property real buttonSize: applyUiScale ? Style.toOdd(baseSize * Style.uiScaleRatio) : Style.toOdd(baseSize)
 
+  activeFocusOnTab: true
+  Accessible.role: Accessible.Button
+  Accessible.name: typeof tooltipText === "string" && tooltipText !== "" ? tooltipText : icon
+
   // Size: use implicit width/height which layout can override
   // BarWidgetLoader sets explicit width/height to extend click area
   implicitWidth: buttonSize
   implicitHeight: buttonSize
 
-  opacity: enabled ? 1.0 : 0.6
+  opacity: Style.opacityFull
 
   // Visual button - stays at buttonSize, centered in parent
   Rectangle {
@@ -54,17 +60,40 @@ Item {
     height: root.buttonSize
     anchors.centerIn: parent
 
-    color: root.enabled && root.hovering ? colorBgHover : colorBg
-    radius: Math.min((customRadius >= 0 ? customRadius : Style.iRadiusL), width / 2)
-    border.color: root.enabled && root.hovering ? colorBorderHover : colorBorder
+    color: root.enabled ? colorBg : Qt.alpha(colorBg, Style.disabledContainerOpacity)
+    radius: morph.radius
+    scale: morph.scale
+    border.color: colorBorder
     border.width: Style.borderS
 
     Behavior on color {
       enabled: !Color.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
+    }
+
+    NShapeMorph {
+      id: morph
+
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      restingRadius: Math.min((root.customRadius >= 0 ? root.customRadius : Style.radiusControl), visualButton.width / 2)
+      hoverRadius: Math.min((root.customRadius >= 0 ? root.customRadius : Style.radiusControlChecked), visualButton.width / 2)
+      pressedRadius: Math.min((root.customRadius >= 0 ? root.customRadius : Style.radiusControlPressed), visualButton.width / 2)
+    }
+
+    NStateLayer {
+      id: stateLayer
+
+      anchors.fill: parent
+      radius: visualButton.radius
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      focused: root.activeFocus
+      stateColor: root.colorBgHover
     }
 
     NIcon {
@@ -78,16 +107,22 @@ Item {
 
       Behavior on color {
         enabled: !Color.isTransitioning
-        ColorAnimation {
-          duration: Style.animationFast
-          easing.type: Easing.InOutQuad
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
       }
+    }
+
+    NFocusRing {
+      focusVisible: root.activeFocus
+      targetRadius: visualButton.radius
     }
   }
 
   // MouseArea fills root (extends beyond visual button for bar click area)
   MouseArea {
+    id: mouseArea
+
     // Always enabled to allow hover/tooltip even when the button is disabled
     enabled: true
     anchors.fill: parent
@@ -108,6 +143,13 @@ Item {
       }
       root.exited();
     }
+    onPressed: mouse => {
+                 if (!root.enabled)
+                 return;
+                 root.forceActiveFocus();
+                 const position = mouseArea.mapToItem(visualButton, mouse.x, mouse.y);
+                 stateLayer.rippleAt(position.x, position.y);
+               }
     onClicked: mouse => {
                  if (tooltipText && (!Array.isArray(tooltipText) || tooltipText.length > 0)) {
                    TooltipService.hide(root);
@@ -130,4 +172,17 @@ Item {
                wheel.accepted = false;
              }
   }
+
+  Keys.onReturnPressed: event => {
+                          if (!root.enabled)
+                          return;
+                          root.clicked();
+                          event.accepted = true;
+                        }
+  Keys.onSpacePressed: event => {
+                         if (!root.enabled)
+                         return;
+                         root.clicked();
+                         event.accepted = true;
+                       }
 }

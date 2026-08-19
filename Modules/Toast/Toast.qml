@@ -21,10 +21,10 @@ Item {
 
   readonly property bool isCompact: Settings.data.notifications?.density === "compact"
   readonly property int notificationWidth: Math.round((isCompact ? 320 : 440) * Style.uiScaleRatio)
-  readonly property int shadowPadding: Style.shadowBlurMax + Style.marginL
+  readonly property int shadowPadding: Style.shadowBlurMax + Style.spaceL
 
   width: notificationWidth + shadowPadding * 2
-  height: Math.round(contentLayout.implicitHeight + Style.margin2M * 2 + shadowPadding * 2)
+  height: Math.round(contentLayout.implicitHeight + Style.paddingCard * 2 + shadowPadding * 2)
   visible: true
   opacity: 0
   scale: initialScale
@@ -95,8 +95,8 @@ Item {
     id: background
     anchors.fill: parent
     anchors.margins: shadowPadding
-    radius: Style.radiusL
-    color: Qt.alpha(Color.mSurface, Color.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
+    radius: Style.radiusPopover
+    color: Qt.alpha(Color.mSurfaceContainerHigh, Color.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
 
     // Colored border based on type
     border.width: Style.borderS
@@ -146,6 +146,14 @@ Item {
         }
       }
     }
+    NStateLayer {
+      anchors.fill: parent
+      hovered: root.isHovered
+      pressed: toastDragArea.pressed
+      rippleEnabled: false
+      stateColor: Color.mOnSurface
+      radius: parent.radius
+    }
   }
 
   NDropShadow {
@@ -154,6 +162,7 @@ Item {
     autoPaddingEnabled: true
   }
 
+  // Business clock: this linear animation is the toast lifetime itself, not visual motion.
   NumberAnimation {
     id: progressAnimation
     target: root
@@ -172,38 +181,34 @@ Item {
   // Timer: hideTimer removed, using progressAnimation
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.StandardEffects
     }
   }
 
   Behavior on scale {
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveDefaultSpatial
     }
   }
 
   Behavior on swipeOffset {
     enabled: !root.isSwiping
-    NumberAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveFastSpatial
     }
   }
 
   Behavior on swipeOffsetY {
     enabled: !root.isSwiping
-    NumberAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.ExpressiveFastSpatial
     }
   }
 
   Timer {
     id: hideAnimation
-    interval: Style.animationFast
+    interval: Style.motionDurationFastSpatial
     onTriggered: {
       root.visible = false;
       root.hidden();
@@ -283,11 +288,11 @@ Item {
   RowLayout {
     id: contentLayout
     anchors.fill: background
-    anchors.topMargin: isCompact ? Style.marginS : Style.marginM
-    anchors.bottomMargin: isCompact ? Style.marginS : Style.marginM
-    anchors.leftMargin: isCompact ? Style.marginM : Style.margin2M
-    anchors.rightMargin: isCompact ? Style.marginM : Style.margin2M
-    spacing: isCompact ? Style.marginM : Style.marginL
+    anchors.topMargin: isCompact ? Style.spaceS : Style.paddingCard
+    anchors.bottomMargin: isCompact ? Style.spaceS : Style.paddingCard
+    anchors.leftMargin: isCompact ? Style.spaceS : Style.paddingCard
+    anchors.rightMargin: isCompact ? Style.spaceS : Style.paddingCard
+    spacing: isCompact ? Style.spaceXS : Style.spaceS
 
     // Icon
     NIcon {
@@ -310,13 +315,13 @@ Item {
           return Color.mOnSurface;
         }
       }
-      pointSize: isCompact ? Style.fontSizeXL : Style.fontSizeXXL * 1.5
+      pointSize: isCompact ? Style.fontSizeTitleMedium : Style.fontSizeTitleLarge
       Layout.alignment: Qt.AlignVCenter
     }
 
     // Label and description
     ColumnLayout {
-      spacing: Style.marginXXS
+      spacing: Style.spaceXXS
       Layout.fillWidth: true
       Layout.alignment: Qt.AlignVCenter
 
@@ -324,7 +329,7 @@ Item {
         Layout.fillWidth: true
         text: root.title
         color: Color.mOnSurface
-        pointSize: isCompact ? Style.fontSizeM : Style.fontSizeL
+        pointSize: isCompact ? Style.fontSizeBodyMedium : Style.fontSizeTitleSmall
         font.weight: Style.fontWeightBold
         wrapMode: Text.WordWrap
         visible: text.length > 0
@@ -334,7 +339,7 @@ Item {
         Layout.fillWidth: true
         text: root.description
         color: Color.mOnSurface
-        pointSize: isCompact ? Style.fontSizeS : Style.fontSizeM
+        pointSize: isCompact ? Style.fontSizeBodySmall : Style.fontSizeBodyMedium
         wrapMode: Text.WordWrap
         maximumLineCount: isCompact ? 2 : 20
         elide: isCompact ? Text.ElideRight : Text.ElideNone
@@ -345,13 +350,12 @@ Item {
       NButton {
         text: root.actionLabel
         visible: root.actionLabel.length > 0 && root.actionCallback !== null
-        Layout.topMargin: Style.marginXS
-        fontSize: Style.fontSizeS
+        Layout.topMargin: Style.spaceXS
+        fontSize: Style.fontSizeLabelMedium
         backgroundColor: Color.mPrimary
-        textColor: hovered ? Color.mOnHover : Color.mOnPrimary
-        hoverColor: Color.mHover
+        textColor: Color.mOnPrimary
         outlined: false
-        implicitHeight: 24
+        implicitHeight: Math.round(28 * Style.uiScaleRatio)
 
         onClicked: {
           if (root.actionCallback) {

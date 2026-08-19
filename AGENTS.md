@@ -29,11 +29,12 @@ token-lean TOON by default; add --format human|toon|json|markdown.
 
 Auto-generated from the Prowl index, refreshed on each `overview`/`init`. Prefer retrieving from Prowl (and reading the cited files) over grepping or relying on training memory; this is the current shape of the repo.
 
-- size: 701 files, 82589 symbols, 4883 edges (resolved 3821, external deps 108, unresolved 954)
-- languages: qml:522 json:76 bash:28 python:27 css:10 lua:10 toml:10 generic:8
+- size: 730 files, 82835 symbols, 4884 edges (resolved 3822, external deps 108, unresolved 954)
+- languages: qml:522 json:76 bash:31 python:27 javascript:14 markdown:12 css:10 lua:10
 - subsystems: Modules/Panels(231,qml) · Widgets(53,qml) · Modules/Bar(44,qml) · Commons/Migrations(26,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(17,qml) · Services/System(16,qml) · Commons(12,qml)
-- entrypoints: shell.qml · Widgets/NInputAction.qml · Assets/Hyprland/hyprland.lua · Modules/Cards/AudioCard.qml · Modules/Cards/BrightnessCard.qml · Modules/Cards/ShortcutsCard.qml · Modules/Cards/SystemMonitorCard.qml · Modules/Polkit/PolkitWindow.qml · (+78 more)
+- entrypoints: shell.qml · Widgets/NInputAction.qml · Assets/Hyprland/hyprland.lua · Modules/Cards/AudioCard.qml · Modules/Cards/BrightnessCard.qml · Modules/Cards/ShortcutsCard.qml · Modules/Cards/SystemMonitorCard.qml · Modules/Polkit/PolkitWindow.qml · (+79 more)
 - central files (most depended-on): Commons/Settings.qml · Commons/Logger.qml · Commons/Time.qml · Commons/I18n.qml · Commons/Style.qml
+- read these guides first: README.md
 
 Depth on demand: `prowl-agent find|def|outline|references <name>`, `search <text>`, `context search "<question>"`, `sketch <ui>`.
 <!-- /prowl-agent:map -->

@@ -172,7 +172,7 @@ RowLayout {
   ComboBox {
     id: combo
 
-    opacity: enabled ? 1.0 : 0.6
+    opacity: enabled ? Style.opacityFull : Style.disabledContentOpacity
     Layout.margins: Style.borderS
     Layout.minimumWidth: Math.round(root.minimumWidth * Style.uiScaleRatio)
     Layout.preferredHeight: Math.round(root.preferredHeight * Style.uiScaleRatio)
@@ -186,18 +186,50 @@ RowLayout {
       }
     }
 
+    onPressedChanged: {
+      if (pressed)
+        comboStateLayer.rippleAt(comboStateLayer.width / 2, comboStateLayer.height / 2);
+    }
+
     background: Rectangle {
       implicitWidth: Math.round(Style.baseWidgetSize * 3.75 * Style.uiScaleRatio)
       implicitHeight: Math.round(root.preferredHeight * Style.uiScaleRatio)
-      color: Color.mSurface
-      border.color: combo.activeFocus ? Color.mSecondary : Color.mOutline
+      color: Color.mSurfaceContainerHigh
+      border.color: Color.mOutline
       border.width: Style.borderS
-      radius: Style.iRadiusM
+      radius: comboMorph.radius
+      scale: comboMorph.scale
 
-      Behavior on border.color {
-        ColorAnimation {
-          duration: Style.animationFast
-        }
+      NShapeMorph {
+        id: comboMorph
+
+        enabled: combo.enabled
+        hovered: combo.hovered
+        pressed: combo.pressed
+        focused: combo.activeFocus
+        selected: combo.popup.visible
+        restingRadius: Style.radiusControl
+        hoverRadius: Style.radiusControlChecked
+        pressedRadius: Style.radiusControlPressed
+        selectedRadius: Style.radiusControlChecked
+      }
+
+      NStateLayer {
+        id: comboStateLayer
+
+        anchors.fill: parent
+        radius: parent.radius
+        enabled: combo.enabled
+        hovered: combo.hovered
+        pressed: combo.pressed
+        focused: combo.activeFocus
+        selected: combo.popup.visible
+        stateColor: Color.mPrimary
+      }
+
+      NFocusRing {
+        focusVisible: combo.activeFocus
+        targetRadius: parent.radius
       }
     }
 
@@ -221,6 +253,13 @@ RowLayout {
       y: combo.topPadding + (combo.availableHeight - height) / 2
       icon: "caret-down"
       pointSize: Style.fontSizeL
+      rotation: combo.popup.visible ? 180 : 0
+
+      Behavior on rotation {
+        NAnim {
+          motionType: NAnim.ExpressiveFastSpatial
+        }
+      }
     }
 
     popup: Popup {
@@ -313,6 +352,11 @@ RowLayout {
               hoverEnabled: true
               highlighted: ListView.view.currentIndex === index
 
+              onPressedChanged: {
+                if (pressed)
+                  delegateStateLayer.rippleAt(width / 2, height / 2);
+              }
+
               onHoveredChanged: {
                 if (hovered) {
                   ListView.view.currentIndex = index;
@@ -332,7 +376,7 @@ RowLayout {
                 NText {
                   text: name
                   pointSize: Style.fontSizeM
-                  color: highlighted ? Color.mOnHover : Color.mOnSurface
+                  color: Color.mOnSurface
                   verticalAlignment: Text.AlignVCenter
                   elide: Text.ElideRight
                   Layout.fillWidth: true
@@ -379,7 +423,7 @@ RowLayout {
                         else
                           return Style.fontSizeXS;
                       }
-                      color: highlighted ? Color.mOnHover : (badgeData && badgeData.color ? badgeData.color : Color.mOnSurface)
+                      color: badgeData && badgeData.color ? badgeData.color : Color.mOnSurface
                       Layout.preferredWidth: Math.round(Style.baseWidgetSize * 0.6)
                       Layout.preferredHeight: Math.round(Style.baseWidgetSize * 0.6)
                       visible: badgeData && badgeData.icon !== undefined && badgeData.icon !== ""
@@ -387,10 +431,16 @@ RowLayout {
                   }
                 }
               }
-              background: Rectangle {
-                anchors.fill: parent
-                color: highlighted ? Color.mHover : "transparent"
-                radius: Style.iRadiusS
+              background: NStateLayer {
+                id: delegateStateLayer
+
+                radius: Style.radiusControl
+                enabled: delegateRoot.enabled
+                hovered: delegateRoot.hovered
+                pressed: delegateRoot.pressed
+                focused: delegateRoot.activeFocus
+                selected: delegateRoot.highlighted
+                stateColor: Color.mPrimary
               }
             }
           }
@@ -398,10 +448,10 @@ RowLayout {
       }
 
       background: Rectangle {
-        color: Color.mSurfaceVariant
+        color: Color.mSurfaceContainerHigh
         border.color: Color.mOutline
         border.width: Style.borderS
-        radius: Style.iRadiusM
+        radius: Style.radiusPopover
       }
     }
 

@@ -7,6 +7,6 @@
 hl.on("hyprland.start", function()
   hl.exec_cmd(
     "pgrep -x quickshell >/dev/null 2>&1 || " ..
-    "command -v qs >/dev/null 2>&1 && qs -c hydra-shell -d"
+    "command -v qs >/dev/null 2>&1 && QML_IMPORT_PATH=\"$HOME/.local/lib/qt6/qml${QML_IMPORT_PATH:+:$QML_IMPORT_PATH}\" qs -c hydra-shell -d"
   )
 end)

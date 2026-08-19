@@ -101,19 +101,7 @@ Item {
       }
     }
 
-    const borderFields = [
-      "borderWidth",
-      "borderScope",
-      "borderColorMode",
-      "borderColorCount",
-      "borderColor1",
-      "borderColor2",
-      "borderColor3",
-      "borderColor4",
-      "borderColor5",
-      "borderAnimation",
-      "borderSpeed"
-    ];
+    const borderFields = ["borderWidth", "borderScope", "borderColorMode", "borderColorCount", "borderColor1", "borderColor2", "borderColor3", "borderColor4", "borderColor5", "borderAnimation", "borderSpeed"];
     if (source.borderEnabled === true) {
       target.borderEnabled = true;
       for (let i = 0; i < borderFields.length; i++) {
@@ -156,13 +144,7 @@ Item {
     if (!style || String(style.borderColorMode || "auto") !== "custom")
       return [Color.mPrimary, Color.mSecondary, Color.mTertiary, Color.mError];
 
-    const source = [
-      style.borderColor1,
-      style.borderColor2,
-      style.borderColor3,
-      style.borderColor4,
-      style.borderColor5
-    ];
+    const source = [style.borderColor1, style.borderColor2, style.borderColor3, style.borderColor4, style.borderColor5];
     const count = Math.max(3, Math.min(5, Number(style.borderColorCount || 3)));
     const colors = [];
     for (let i = 0; i < count; i++) {
@@ -236,14 +218,14 @@ Item {
   }
 
   Behavior on implicitWidth {
-    NumberAnimation {
+    NAnim {
+      motionType: NAnim.StandardSpatial
       duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-      easing.type: Easing.InOutCubic
     }
   }
 
   NumberAnimation on borderPhase {
-    running: !root.dashboardPerformanceMode && root.componentBorderVisible() && root.componentStyle().borderAnimation !== "static"
+    running: !root.dashboardPerformanceMode && Style.motionEnabled && root.componentBorderVisible() && root.componentStyle().borderAnimation !== "static"
     from: 0
     to: 1000
     duration: 60000
@@ -264,9 +246,9 @@ Item {
     clip: true
 
     Behavior on width {
-      NumberAnimation {
+      NAnim {
+        motionType: NAnim.StandardSpatial
         duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
-        easing.type: Easing.InOutCubic
       }
     }
 
@@ -358,35 +340,67 @@ Item {
         let d = ((t % 1) + 1) % 1 * perimeter;
 
         if (d < top)
-          return { x: x + r + d, y: y, angle: 0 };
+          return {
+            x: x + r + d,
+            y: y,
+            angle: 0
+          };
         d -= top;
         if (d < arc) {
           const a = -Math.PI / 2 + d / arc * Math.PI / 2;
-          return { x: x + w - r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + w - r + Math.cos(a) * r,
+            y: y + r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < side)
-          return { x: x + w, y: y + r + d, angle: Math.PI / 2 };
+          return {
+            x: x + w,
+            y: y + r + d,
+            angle: Math.PI / 2
+          };
         d -= side;
         if (d < arc) {
           const a = d / arc * Math.PI / 2;
-          return { x: x + w - r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + w - r + Math.cos(a) * r,
+            y: y + h - r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < top)
-          return { x: x + w - r - d, y: y + h, angle: Math.PI };
+          return {
+            x: x + w - r - d,
+            y: y + h,
+            angle: Math.PI
+          };
         d -= top;
         if (d < arc) {
           const a = Math.PI / 2 + d / arc * Math.PI / 2;
-          return { x: x + r + Math.cos(a) * r, y: y + h - r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+          return {
+            x: x + r + Math.cos(a) * r,
+            y: y + h - r + Math.sin(a) * r,
+            angle: a + Math.PI / 2
+          };
         }
         d -= arc;
         if (d < side)
-          return { x: x, y: y + h - r - d, angle: -Math.PI / 2 };
+          return {
+            x: x,
+            y: y + h - r - d,
+            angle: -Math.PI / 2
+          };
 
         d -= side;
         const a = Math.PI + d / arc * Math.PI / 2;
-        return { x: x + r + Math.cos(a) * r, y: y + r + Math.sin(a) * r, angle: a + Math.PI / 2 };
+        return {
+          x: x + r + Math.cos(a) * r,
+          y: y + r + Math.sin(a) * r,
+          angle: a + Math.PI / 2
+        };
       }
 
       function drawSpark(ctx, t, size, color, alpha, inset, radius) {
@@ -668,19 +682,19 @@ Item {
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton | Qt.ForwardButton | Qt.BackButton
 
     onClicked: mouse => {
-      TooltipService.hide();
-      if (mouse.button === Qt.LeftButton) {
-        pluginApi?.togglePanel(screen);
-      } else if (mouse.button === Qt.RightButton) {
-        PanelService.showContextMenu(contextMenu, container, screen);
-      } else if (mouse.button === Qt.MiddleButton && root.hasPlayer) {
-        MediaService.playPause();
-      } else if (mouse.button === Qt.ForwardButton && root.hasPlayer) {
-        MediaService.next();
-      } else if (mouse.button === Qt.BackButton && root.hasPlayer) {
-        MediaService.previous();
-      }
-    }
+                 TooltipService.hide();
+                 if (mouse.button === Qt.LeftButton) {
+                   pluginApi?.togglePanel(screen);
+                 } else if (mouse.button === Qt.RightButton) {
+                   PanelService.showContextMenu(contextMenu, container, screen);
+                 } else if (mouse.button === Qt.MiddleButton && root.hasPlayer) {
+                   MediaService.playPause();
+                 } else if (mouse.button === Qt.ForwardButton && root.hasPlayer) {
+                   MediaService.next();
+                 } else if (mouse.button === Qt.BackButton && root.hasPlayer) {
+                   MediaService.previous();
+                 }
+               }
 
     onEntered: TooltipService.show(root, root.showMediaMode ? root.title : pluginApi?.tr("bar.tooltip"), BarService.getTooltipDirection(root.screen?.name))
     onExited: TooltipService.hide()
@@ -700,7 +714,10 @@ Item {
     z: 30
 
     Behavior on opacity {
-      NumberAnimation { duration: root.dashboardPerformanceMode ? 0 : Style.animationFast; easing.type: Easing.OutCubic }
+      NAnim {
+        motionType: NAnim.StandardEffects
+        duration: root.dashboardPerformanceMode ? 0 : Style.animationFast
+      }
     }
 
     HoverHandler {
@@ -790,21 +807,21 @@ Item {
     }
 
     onTriggered: action => {
-      contextMenu.close();
-      PanelService.closeContextMenu(screen);
+                   contextMenu.close();
+                   PanelService.closeContextMenu(screen);
 
-      if (action === "toggle-dashboard") {
-        pluginApi?.togglePanel(screen);
-      } else if (action === "play-pause") {
-        MediaService.playPause();
-      } else if (action === "previous") {
-        MediaService.previous();
-      } else if (action === "next") {
-        MediaService.next();
-      } else if (action === "settings" && pluginApi?.manifest) {
-        BarService.openPluginSettings(screen, pluginApi.manifest);
-      }
-    }
+                   if (action === "toggle-dashboard") {
+                     pluginApi?.togglePanel(screen);
+                   } else if (action === "play-pause") {
+                     MediaService.playPause();
+                   } else if (action === "previous") {
+                     MediaService.previous();
+                   } else if (action === "next") {
+                     MediaService.next();
+                   } else if (action === "settings" && pluginApi?.manifest) {
+                     BarService.openPluginSettings(screen, pluginApi.manifest);
+                   }
+                 }
   }
 
   Component {
@@ -870,7 +887,7 @@ Item {
     opacity: active ? 0.78 : 0.34
 
     NumberAnimation on phase {
-      running: reactive.visible && reactive.active && !root.dashboardPerformanceMode
+      running: reactive.visible && reactive.active && !root.dashboardPerformanceMode && Style.motionEnabled
       from: 0
       to: 1000
       duration: 180000

@@ -54,7 +54,7 @@ Item {
       return;
     }
     WallpaperUpscaleService.probeImageResolution(target, function (width, height) {
-      if (generation !== root._generation) {
+      if (!root || generation !== root._generation) {
         return;
       }
       root.pixelWidth = width;
@@ -77,15 +77,15 @@ Item {
     stdout: StdioCollector {}
 
     onExited: exitCode => {
-      if (exitCode !== 0 || generation !== root._generation) {
-        return;
-      }
-      const parts = stdout.text.trim().split(/\s+/);
-      if (parts.length < 2) {
-        return;
-      }
-      root.fileBytes = parseFloat(parts[0]) || 0;
-      root.modifiedEpoch = parseFloat(parts[1]) || 0;
-    }
+                if (exitCode !== 0 || generation !== root._generation) {
+                  return;
+                }
+                const parts = stdout.text.trim().split(/\s+/);
+                if (parts.length < 2) {
+                  return;
+                }
+                root.fileBytes = parseFloat(parts[0]) || 0;
+                root.modifiedEpoch = parseFloat(parts[1]) || 0;
+              }
   }
 }

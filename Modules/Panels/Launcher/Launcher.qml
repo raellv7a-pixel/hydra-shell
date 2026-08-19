@@ -87,16 +87,14 @@ SmartPanel {
     Component.onCompleted: root.launcherCoreRef = launcherCore
 
     Behavior on opacity {
-      OpacityAnimator {
-        duration: Style.animationFast
-        easing.type: presented ? Easing.OutCubic : Easing.InCubic
+      NAnim {
+        motionType: NAnim.StandardEffects
       }
     }
 
     Behavior on scale {
-      ScaleAnimator {
-        duration: Style.animationFast
-        easing.type: presented ? Easing.OutCubic : Easing.InCubic
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 
@@ -145,14 +143,13 @@ SmartPanel {
 
       opacity: visible ? 1.0 : 0.0
       Behavior on opacity {
-        NumberAnimation {
-          duration: Style.animationFast
+        NAnim {
+          motionType: NAnim.StandardEffects
         }
       }
       Behavior on y {
-        NumberAnimation {
-          duration: Style.animationFast
-          easing.type: Easing.OutCubic
+        NAnim {
+          motionType: NAnim.ExpressiveFastSpatial
         }
       }
 

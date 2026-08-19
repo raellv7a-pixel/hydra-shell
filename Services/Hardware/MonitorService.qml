@@ -3,10 +3,10 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.Commons
-import qs.Services.Compositor
 import "../../Modules/Panels/Settings/Tabs/Display/MonitorLayout/backends/HyprlandBackend.js" as HyprBackend
 import "../../Modules/Panels/Settings/Tabs/Display/MonitorLayout/backends/SwayBackend.js" as SwayBackend
+import qs.Commons
+import qs.Services.Compositor
 
 Singleton {
   id: root
@@ -21,15 +21,17 @@ Singleton {
   }
 
   function activeBackend() {
-    if (CompositorService.isHyprland) return HyprBackend;
-    if (CompositorService.isSway) return SwayBackend;
+    if (CompositorService.isHyprland)
+      return HyprBackend;
+    if (CompositorService.isSway)
+      return SwayBackend;
     return HyprBackend;
   }
 
   Process {
     id: fetchProc
     stdout: StdioCollector {}
-    onExited: (code) => {
+    onExited: code => {
       root.isBusy = false;
       if (code === 0) {
         var res = root.activeBackend().parseOutputs(fetchProc.stdout.text);
@@ -46,7 +48,7 @@ Singleton {
 
   Process {
     id: applyProc
-    onExited: (code) => {
+    onExited: code => {
       root.isBusy = false;
       if (code === 0) {
         ToastService.showNotice("Arranjo de Monitores", "Layout de telas aplicado com sucesso!", "display");
@@ -60,7 +62,9 @@ Singleton {
   function fetchOutputs() {
     root.isBusy = true;
     var cmd = root.activeBackend().buildFetchCommand({}, {});
-    fetchProc.exec({ command: cmd });
+    fetchProc.exec({
+                     command: cmd
+                   });
   }
 
   function selectOutput(id) {
@@ -104,11 +108,14 @@ Singleton {
   }
 
   function applyLayout() {
-    if (root.draftOutputs.length === 0) return;
+    if (root.draftOutputs.length === 0)
+      return;
     root.isBusy = true;
     var res = root.activeBackend().buildApplyCommand(root.draftOutputs, {}, {});
     if (res && res.script) {
-      applyProc.exec({ command: ["bash", "-c", res.script] });
+      applyProc.exec({
+                       command: ["bash", "-c", res.script]
+                     });
     } else if (res && res.error) {
       root.isBusy = false;
       ToastService.showError("Erro no Layout", res.error);

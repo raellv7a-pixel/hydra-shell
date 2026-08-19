@@ -76,9 +76,9 @@ ColumnLayout {
         description: "Exibe a central flutuante no centro ou posição fixa, desvinculada da barra"
         checked: root.cfg.panelDetached ?? true
         onToggled: checked => {
-          root.cfg.panelDetached = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.panelDetached = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NToggle {
@@ -88,9 +88,9 @@ ColumnLayout {
         description: "Anexa a central na mesma borda da tela onde a barra principal está posicionada"
         checked: root.cfg.followBarEdge ?? true
         onToggled: checked => {
-          root.cfg.followBarEdge = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.followBarEdge = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NComboBox {
@@ -99,21 +99,44 @@ ColumnLayout {
         description: "Alinhamento padrão da janela da central de controle"
         currentKey: root.cfg.panelPosition ?? "center"
         model: [
-          { key: "center", name: "Centralizado" },
-          { key: "top_left", name: "Superior Esquerdo" },
-          { key: "top_right", name: "Superior Direito" },
-          { key: "bottom_left", name: "Inferior Esquerdo" },
-          { key: "bottom_right", name: "Inferior Direito" },
-          { key: "left", name: "Esquerda" },
-          { key: "right", name: "Direita" }
+          {
+            key: "center",
+            name: "Centralizado"
+          },
+          {
+            key: "top_left",
+            name: "Superior Esquerdo"
+          },
+          {
+            key: "top_right",
+            name: "Superior Direito"
+          },
+          {
+            key: "bottom_left",
+            name: "Inferior Esquerdo"
+          },
+          {
+            key: "bottom_right",
+            name: "Inferior Direito"
+          },
+          {
+            key: "left",
+            name: "Esquerda"
+          },
+          {
+            key: "right",
+            name: "Direita"
+          }
         ]
         onSelected: key => {
-          root.cfg.panelPosition = key;
-          ControlCenterService.saveSettings();
-        }
+                      root.cfg.panelPosition = key;
+                      ControlCenterService.saveSettings();
+                    }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Dimensões e Escala"
@@ -130,9 +153,9 @@ ColumnLayout {
         stepSize: 20
         value: root.cfg.panelWidth ?? 1120
         onMoved: val => {
-          root.cfg.panelWidth = Math.round(val);
-          ControlCenterService.saveSettings();
-        }
+                   root.cfg.panelWidth = Math.round(val);
+                   ControlCenterService.saveSettings();
+                 }
       }
 
       NValueSlider {
@@ -143,9 +166,9 @@ ColumnLayout {
         stepSize: 20
         value: root.cfg.panelHeight ?? 700
         onMoved: val => {
-          root.cfg.panelHeight = Math.round(val);
-          ControlCenterService.saveSettings();
-        }
+                   root.cfg.panelHeight = Math.round(val);
+                   ControlCenterService.saveSettings();
+                 }
       }
 
       NValueSlider {
@@ -156,9 +179,9 @@ ColumnLayout {
         stepSize: 0.05
         value: root.cfg.panelScale ?? 1.0
         onMoved: val => {
-          root.cfg.panelScale = Math.round(val * 100) / 100;
-          ControlCenterService.saveSettings();
-        }
+                   root.cfg.panelScale = Math.round(val * 100) / 100;
+                   ControlCenterService.saveSettings();
+                 }
       }
     }
 
@@ -182,14 +205,23 @@ ColumnLayout {
         label: "Formato da Foto de Perfil"
         currentKey: root.cfg.avatarShape ?? "circle"
         model: [
-          { key: "circle", name: "Círculo" },
-          { key: "rounded", name: "Canto Arredondado" },
-          { key: "square", name: "Quadrado" }
+          {
+            key: "circle",
+            name: "Círculo"
+          },
+          {
+            key: "rounded",
+            name: "Canto Arredondado"
+          },
+          {
+            key: "square",
+            name: "Quadrado"
+          }
         ]
         onSelected: key => {
-          root.cfg.avatarShape = key;
-          ControlCenterService.saveSettings();
-        }
+                      root.cfg.avatarShape = key;
+                      ControlCenterService.saveSettings();
+                    }
       }
 
       NToggle {
@@ -198,12 +230,14 @@ ColumnLayout {
         description: "Mostra um pequeno mascote GIF animado ao lado do cartão de perfil"
         checked: root.cfg.showProfileDanceGif ?? true
         onToggled: checked => {
-          root.cfg.showProfileDanceGif = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.showProfileDanceGif = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Capa do Banner de Perfil"
@@ -218,15 +252,27 @@ ColumnLayout {
         description: "Origem da imagem exibida no topo do cartão de perfil"
         currentKey: root.cfg.profileCoverMode ?? "auto"
         model: [
-          { key: "auto", name: "Automático (Usa o Papel de Parede Atual)" },
-          { key: "custom", name: "Imagem Personalizada" },
-          { key: "random", name: "Aleatório de uma Pasta" },
-          { key: "none", name: "Desativado (Cor Sólida)" }
+          {
+            key: "auto",
+            name: "Automático (Usa o Papel de Parede Atual)"
+          },
+          {
+            key: "custom",
+            name: "Imagem Personalizada"
+          },
+          {
+            key: "random",
+            name: "Aleatório de uma Pasta"
+          },
+          {
+            key: "none",
+            name: "Desativado (Cor Sólida)"
+          }
         ]
         onSelected: key => {
-          root.cfg.profileCoverMode = key;
-          ControlCenterService.saveSettings();
-        }
+                      root.cfg.profileCoverMode = key;
+                      ControlCenterService.saveSettings();
+                    }
       }
 
       NTextInputButton {
@@ -238,9 +284,9 @@ ColumnLayout {
         placeholderText: "~/"
         buttonIcon: "photo"
         onInputTextChanged: text => {
-          root.cfg.profileCoverPath = text;
-          ControlCenterService.saveSettings();
-        }
+                              root.cfg.profileCoverPath = text;
+                              ControlCenterService.saveSettings();
+                            }
         onButtonClicked: coverImagePicker.openFilePicker()
       }
 
@@ -253,9 +299,9 @@ ColumnLayout {
         placeholderText: "~/"
         buttonIcon: "folder"
         onInputTextChanged: text => {
-          root.cfg.profileCoverFolder = text;
-          ControlCenterService.saveSettings();
-        }
+                              root.cfg.profileCoverFolder = text;
+                              ControlCenterService.saveSettings();
+                            }
         onButtonClicked: coverFolderPicker.openFilePicker()
       }
 
@@ -265,11 +311,11 @@ ColumnLayout {
         selectionMode: "files"
         nameFilters: ImageCacheService.basicImageFilters
         onAccepted: paths => {
-          if (paths.length > 0) {
-            root.cfg.profileCoverPath = paths[0];
-            ControlCenterService.saveSettings();
-          }
-        }
+                      if (paths.length > 0) {
+                        root.cfg.profileCoverPath = paths[0];
+                        ControlCenterService.saveSettings();
+                      }
+                    }
       }
 
       NFilePicker {
@@ -277,11 +323,11 @@ ColumnLayout {
         title: "Selecionar Pasta de Capas"
         selectionMode: "folders"
         onAccepted: paths => {
-          if (paths.length > 0) {
-            root.cfg.profileCoverFolder = paths[0];
-            ControlCenterService.saveSettings();
-          }
-        }
+                      if (paths.length > 0) {
+                        root.cfg.profileCoverFolder = paths[0];
+                        ControlCenterService.saveSettings();
+                      }
+                    }
       }
 
       NToggle {
@@ -290,9 +336,9 @@ ColumnLayout {
         description: "Aplica um tom escuro sobre o banner para destacar o texto"
         checked: root.cfg.profileCoverOverlayEnabled ?? true
         onToggled: checked => {
-          root.cfg.profileCoverOverlayEnabled = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.profileCoverOverlayEnabled = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NValueSlider {
@@ -304,9 +350,9 @@ ColumnLayout {
         stepSize: 0.05
         value: root.cfg.profileCoverOverlay ?? 0.58
         onMoved: val => {
-          root.cfg.profileCoverOverlay = Math.round(val * 100) / 100;
-          ControlCenterService.saveSettings();
-        }
+                   root.cfg.profileCoverOverlay = Math.round(val * 100) / 100;
+                   ControlCenterService.saveSettings();
+                 }
       }
 
       NToggle {
@@ -315,9 +361,9 @@ ColumnLayout {
         description: "Aplica uma borda estilizada ao redor do cartão de perfil"
         checked: root.cfg.profileCoverBorder ?? true
         onToggled: checked => {
-          root.cfg.profileCoverBorder = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.profileCoverBorder = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NComboBox {
@@ -326,30 +372,87 @@ ColumnLayout {
         label: "Efeito de Animação da Borda"
         currentKey: root.cfg.profileCoverBorderAnimation ?? "static"
         model: [
-          { key: "static", name: "Estática" },
-          { key: "fade", name: "Alternar cores" },
-          { key: "flow", name: "Cores circulando" },
-          { key: "flowEase", name: "Circular elástico" },
-          { key: "spark", name: "Circular com faíscas" },
-          { key: "pulse", name: "Pulso" },
-          { key: "chase", name: "Traços correndo" },
-          { key: "comet", name: "Cometa" },
-          { key: "neon", name: "Neon pulsante" },
-          { key: "corners", name: "Cantos vivos" },
-          { key: "orbitDots", name: "Pontos orbitais" },
-          { key: "scan", name: "Varredura luminosa" },
-          { key: "profileAurora", name: "Perfil: aurora" },
-          { key: "profileHalo", name: "Perfil: halo interno" },
-          { key: "profileHeartbeat", name: "Perfil: batida cardíaca" },
-          { key: "profileSpotlight", name: "Perfil: reflexo diagonal" },
-          { key: "reactivePulse", name: "Reativa: pulso" },
-          { key: "reactiveFlow", name: "Reativa: circular" },
-          { key: "reactiveSpark", name: "Reativa: faíscas" }
+          {
+            key: "static",
+            name: "Estática"
+          },
+          {
+            key: "fade",
+            name: "Alternar cores"
+          },
+          {
+            key: "flow",
+            name: "Cores circulando"
+          },
+          {
+            key: "flowEase",
+            name: "Circular elástico"
+          },
+          {
+            key: "spark",
+            name: "Circular com faíscas"
+          },
+          {
+            key: "pulse",
+            name: "Pulso"
+          },
+          {
+            key: "chase",
+            name: "Traços correndo"
+          },
+          {
+            key: "comet",
+            name: "Cometa"
+          },
+          {
+            key: "neon",
+            name: "Neon pulsante"
+          },
+          {
+            key: "corners",
+            name: "Cantos vivos"
+          },
+          {
+            key: "orbitDots",
+            name: "Pontos orbitais"
+          },
+          {
+            key: "scan",
+            name: "Varredura luminosa"
+          },
+          {
+            key: "profileAurora",
+            name: "Perfil: aurora"
+          },
+          {
+            key: "profileHalo",
+            name: "Perfil: halo interno"
+          },
+          {
+            key: "profileHeartbeat",
+            name: "Perfil: batida cardíaca"
+          },
+          {
+            key: "profileSpotlight",
+            name: "Perfil: reflexo diagonal"
+          },
+          {
+            key: "reactivePulse",
+            name: "Reativa: pulso"
+          },
+          {
+            key: "reactiveFlow",
+            name: "Reativa: circular"
+          },
+          {
+            key: "reactiveSpark",
+            name: "Reativa: faíscas"
+          }
         ]
         onSelected: key => {
-          root.cfg.profileCoverBorderAnimation = key;
-          ControlCenterService.saveSettings();
-        }
+                      root.cfg.profileCoverBorderAnimation = key;
+                      ControlCenterService.saveSettings();
+                    }
       }
     }
 
@@ -374,22 +477,55 @@ ColumnLayout {
         description: "Estilo visual do espectro ao tocar músicas"
         currentKey: root.cfg.mediaVisualizerEffect ?? "bars"
         model: [
-          { key: "none", name: "Desativado" },
-          { key: "bars", name: "Barras Verticais" },
-          { key: "mirror", name: "Barras Espelhadas" },
-          { key: "wave", name: "Onda Fluida" },
-          { key: "ribbon", name: "Fita Suave" },
-          { key: "shock", name: "Ondas de Choque" },
-          { key: "pulse", name: "Pulso Central" },
-          { key: "nebula", name: "Nebulosa" },
-          { key: "aurora", name: "Aurora" },
-          { key: "constellation", name: "Constelação" },
-          { key: "radar", name: "Radar" }
+          {
+            key: "none",
+            name: "Desativado"
+          },
+          {
+            key: "bars",
+            name: "Barras Verticais"
+          },
+          {
+            key: "mirror",
+            name: "Barras Espelhadas"
+          },
+          {
+            key: "wave",
+            name: "Onda Fluida"
+          },
+          {
+            key: "ribbon",
+            name: "Fita Suave"
+          },
+          {
+            key: "shock",
+            name: "Ondas de Choque"
+          },
+          {
+            key: "pulse",
+            name: "Pulso Central"
+          },
+          {
+            key: "nebula",
+            name: "Nebulosa"
+          },
+          {
+            key: "aurora",
+            name: "Aurora"
+          },
+          {
+            key: "constellation",
+            name: "Constelação"
+          },
+          {
+            key: "radar",
+            name: "Radar"
+          }
         ]
         onSelected: key => {
-          root.cfg.mediaVisualizerEffect = key;
-          ControlCenterService.saveSettings();
-        }
+                      root.cfg.mediaVisualizerEffect = key;
+                      ControlCenterService.saveSettings();
+                    }
       }
 
       NComboBox {
@@ -398,25 +534,67 @@ ColumnLayout {
         description: "Efeito animado sobre a barra de volume principal"
         currentKey: root.cfg.audioSliderEffect ?? "wave"
         model: [
-          { key: "none", name: "Padrão" },
-          { key: "wave", name: "Onda Fluida" },
-          { key: "zigzag", name: "Zigzag" },
-          { key: "pulse", name: "Pulsação de Som" },
-          { key: "bars", name: "Barras" },
-          { key: "spectrum", name: "Espectro Aberto" },
-          { key: "filament", name: "Filamento Neon" },
-          { key: "ripple", name: "Ondas de Impacto" },
-          { key: "glow", name: "Brilho Dinâmico" },
-          { key: "wavy_fill", name: "Onda Sólida" },
-          { key: "blocks", name: "Blocos" },
-          { key: "dots", name: "Pontos" },
-          { key: "comet", name: "Cometa" },
-          { key: "aurora", name: "Aurora" }
+          {
+            key: "none",
+            name: "Padrão"
+          },
+          {
+            key: "wave",
+            name: "Onda Fluida"
+          },
+          {
+            key: "zigzag",
+            name: "Zigzag"
+          },
+          {
+            key: "pulse",
+            name: "Pulsação de Som"
+          },
+          {
+            key: "bars",
+            name: "Barras"
+          },
+          {
+            key: "spectrum",
+            name: "Espectro Aberto"
+          },
+          {
+            key: "filament",
+            name: "Filamento Neon"
+          },
+          {
+            key: "ripple",
+            name: "Ondas de Impacto"
+          },
+          {
+            key: "glow",
+            name: "Brilho Dinâmico"
+          },
+          {
+            key: "wavy_fill",
+            name: "Onda Sólida"
+          },
+          {
+            key: "blocks",
+            name: "Blocos"
+          },
+          {
+            key: "dots",
+            name: "Pontos"
+          },
+          {
+            key: "comet",
+            name: "Cometa"
+          },
+          {
+            key: "aurora",
+            name: "Aurora"
+          }
         ]
         onSelected: key => {
-          root.cfg.audioSliderEffect = key;
-          ControlCenterService.saveSettings();
-        }
+                      root.cfg.audioSliderEffect = key;
+                      ControlCenterService.saveSettings();
+                    }
       }
 
       NComboBox {
@@ -425,25 +603,60 @@ ColumnLayout {
         description: "Efeito animado para a barra de entrada de áudio"
         currentKey: root.cfg.microphoneSliderEffect ?? "pulse"
         model: [
-          { key: "none", name: "Padrão" },
-          { key: "wave", name: "Onda Fluida" },
-          { key: "zigzag", name: "Zigzag" },
-          { key: "pulse", name: "Pulsação de Voz" },
-          { key: "bars", name: "Barras" },
-          { key: "glow", name: "Brilho Dinâmico" },
-          { key: "wavy_fill", name: "Onda Sólida" },
-          { key: "blocks", name: "Blocos" },
-          { key: "dots", name: "Pontos" },
-          { key: "comet", name: "Cometa" },
-          { key: "aurora", name: "Aurora" }
+          {
+            key: "none",
+            name: "Padrão"
+          },
+          {
+            key: "wave",
+            name: "Onda Fluida"
+          },
+          {
+            key: "zigzag",
+            name: "Zigzag"
+          },
+          {
+            key: "pulse",
+            name: "Pulsação de Voz"
+          },
+          {
+            key: "bars",
+            name: "Barras"
+          },
+          {
+            key: "glow",
+            name: "Brilho Dinâmico"
+          },
+          {
+            key: "wavy_fill",
+            name: "Onda Sólida"
+          },
+          {
+            key: "blocks",
+            name: "Blocos"
+          },
+          {
+            key: "dots",
+            name: "Pontos"
+          },
+          {
+            key: "comet",
+            name: "Cometa"
+          },
+          {
+            key: "aurora",
+            name: "Aurora"
+          }
         ]
         onSelected: key => {
-          root.cfg.microphoneSliderEffect = key;
-          ControlCenterService.saveSettings();
-        }
+                      root.cfg.microphoneSliderEffect = key;
+                      ControlCenterService.saveSettings();
+                    }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Desempenho e Energia"
@@ -458,9 +671,9 @@ ColumnLayout {
         description: "Pausa os efeitos visuais pesados quando o modo Performance estiver ativo"
         checked: root.cfg.followNoctaliaPerformanceMode ?? true
         onToggled: checked => {
-          root.cfg.followNoctaliaPerformanceMode = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.followNoctaliaPerformanceMode = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NToggle {
@@ -469,9 +682,9 @@ ColumnLayout {
         description: "Reduz o uso de CPU/GPU ao usar a bateria do notebook"
         checked: root.cfg.powerSaverPerformanceMode ?? true
         onToggled: checked => {
-          root.cfg.powerSaverPerformanceMode = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.powerSaverPerformanceMode = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
     }
 
@@ -495,9 +708,9 @@ ColumnLayout {
         label: "Exibir Painel de Notificações"
         checked: root.cfg.showNotifications ?? true
         onToggled: checked => {
-          root.cfg.showNotifications = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.showNotifications = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NToggle {
@@ -505,9 +718,9 @@ ColumnLayout {
         label: "Exibir Player de Mídia"
         checked: root.cfg.showMedia ?? true
         onToggled: checked => {
-          root.cfg.showMedia = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.showMedia = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NToggle {
@@ -515,9 +728,9 @@ ColumnLayout {
         label: "Exibir Calendário e Eventos"
         checked: root.cfg.showCalendar ?? true
         onToggled: checked => {
-          root.cfg.showCalendar = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.showCalendar = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NToggle {
@@ -525,12 +738,14 @@ ColumnLayout {
         label: "Exibir Ferramentas de Captura"
         checked: root.cfg.showRecordingCard ?? true
         onToggled: checked => {
-          root.cfg.showRecordingCard = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.showRecordingCard = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
-      Item { Layout.preferredHeight: Style.marginS }
+      Item {
+        Layout.preferredHeight: Style.marginS
+      }
 
       NText {
         text: "Mídia na Barra Superior"
@@ -544,9 +759,9 @@ ColumnLayout {
         label: "Exibir Mídia na Barra"
         checked: root.cfg.showBarMediaInfo ?? true
         onToggled: checked => {
-          root.cfg.showBarMediaInfo = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.showBarMediaInfo = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NToggle {
@@ -555,9 +770,9 @@ ColumnLayout {
         label: "Exibir Capa do Álbum na Barra"
         checked: root.cfg.barMediaShowAlbumArt ?? true
         onToggled: checked => {
-          root.cfg.barMediaShowAlbumArt = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.barMediaShowAlbumArt = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
 
       NToggle {
@@ -566,9 +781,9 @@ ColumnLayout {
         label: "Exibir Progresso da Música na Barra"
         checked: root.cfg.barMediaShowProgressRing ?? true
         onToggled: checked => {
-          root.cfg.barMediaShowProgressRing = checked;
-          ControlCenterService.saveSettings();
-        }
+                     root.cfg.barMediaShowProgressRing = checked;
+                     ControlCenterService.saveSettings();
+                   }
       }
     }
   }

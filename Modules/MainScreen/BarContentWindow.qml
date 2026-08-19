@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Modules.Bar
 import qs.Services.UI
+import qs.Widgets
 
 /**
 * BarContentWindow - Separate transparent PanelWindow for bar content
@@ -26,7 +27,10 @@ PanelWindow {
   visible: contentLoaded && windowVisible && BarService.effectivelyVisible
 
   Component.onCompleted: {
-    Logger.d("BarContentWindow", "Bar content window created for screen:", barWindow.screen?.name);
+    const screenName = barWindow.screen?.name;
+    if (screenName)
+      BarService.getOrCreateAutoHideState(screenName);
+    Logger.d("BarContentWindow", "Bar content window created for screen:", screenName);
     if (!isHidden)
       contentLoaded = true;
   }
@@ -213,9 +217,9 @@ PanelWindow {
 
       Behavior on opacity {
         enabled: barWindow.autoHide
-        NumberAnimation {
+        NAnim {
+          motionType: NAnim.StandardEffects
           duration: Style.animationFast
-          easing.type: Easing.OutQuad
         }
       }
 

@@ -110,7 +110,8 @@ SmartPanel {
       return Settings.preprocessPath(Settings.data.general.avatarImage);
     }
     var wp = WallpaperService.getWallpaper(screen?.name ?? "");
-    if (wp && !WallpaperService.isSolidColorPath(wp)) return wp;
+    if (wp && !WallpaperService.isSolidColorPath(wp))
+      return wp;
     return WallpaperService.defaultWallpaper || "";
   }
 
@@ -170,14 +171,14 @@ SmartPanel {
       if (settingOption.enabled && actionMetadata[settingOption.action]) {
         var metadata = actionMetadata[settingOption.action];
         options.push({
-          "action": settingOption.action,
-          "icon": metadata.icon,
-          "title": metadata.title,
-          "isShutdown": metadata.isShutdown,
-          "countdownEnabled": settingOption.countdownEnabled !== undefined ? settingOption.countdownEnabled : true,
-          "command": settingOption.command || "",
-          "keybind": settingOption.keybind || ""
-        });
+                       "action": settingOption.action,
+                       "icon": metadata.icon,
+                       "title": metadata.title,
+                       "isShutdown": metadata.isShutdown,
+                       "countdownEnabled": settingOption.countdownEnabled !== undefined ? settingOption.countdownEnabled : true,
+                       "command": settingOption.command || "",
+                       "keybind": settingOption.keybind || ""
+                     });
       }
     }
     return options;
@@ -301,7 +302,8 @@ SmartPanel {
   }
 
   function navigateGrid(direction) {
-    if (powerOptions.length === 0) return;
+    if (powerOptions.length === 0)
+      return;
 
     const grid = getGridInfo();
     let newRow = grid.currentRow >= 0 ? grid.currentRow : 0;
@@ -344,11 +346,13 @@ SmartPanel {
   }
 
   function selectFirst() {
-    if (powerOptions.length > 0) selectedIndex = 0;
+    if (powerOptions.length > 0)
+      selectedIndex = 0;
   }
 
   function selectLast() {
-    if (powerOptions.length > 0) selectedIndex = powerOptions.length - 1;
+    if (powerOptions.length > 0)
+      selectedIndex = powerOptions.length - 1;
   }
 
   function activate() {
@@ -361,11 +365,21 @@ SmartPanel {
     return Keybinds.checkKey(event, settingName, Settings);
   }
 
-  function handleUp() { navigateGrid("up"); }
-  function handleDown() { navigateGrid("down"); }
-  function handleLeft() { navigateGrid("left"); }
-  function handleRight() { navigateGrid("right"); }
-  function handleEnter() { activate(); }
+  function handleUp() {
+    navigateGrid("up");
+  }
+  function handleDown() {
+    navigateGrid("down");
+  }
+  function handleLeft() {
+    navigateGrid("left");
+  }
+  function handleRight() {
+    navigateGrid("right");
+  }
+  function handleEnter() {
+    activate();
+  }
 
   function handleEscape() {
     if (timerActive) {
@@ -375,24 +389,46 @@ SmartPanel {
     }
   }
 
-  function onEscapePressed() { handleEscape(); }
-  function onTabPressed() { selectNextWrapped(); }
-  function onBackTabPressed() { selectPreviousWrapped(); }
-  function onLeftPressed() { handleLeft(); }
-  function onRightPressed() { handleRight(); }
-  function onUpPressed() { handleUp(); }
-  function onDownPressed() { handleDown(); }
-  function onEnterPressed() { handleEnter(); }
-  function onHomePressed() { selectFirst(); }
-  function onEndPressed() { selectLast(); }
+  function onEscapePressed() {
+    handleEscape();
+  }
+  function onTabPressed() {
+    selectNextWrapped();
+  }
+  function onBackTabPressed() {
+    selectPreviousWrapped();
+  }
+  function onLeftPressed() {
+    handleLeft();
+  }
+  function onRightPressed() {
+    handleRight();
+  }
+  function onUpPressed() {
+    handleUp();
+  }
+  function onDownPressed() {
+    handleDown();
+  }
+  function onEnterPressed() {
+    handleEnter();
+  }
+  function onHomePressed() {
+    selectFirst();
+  }
+  function onEndPressed() {
+    selectLast();
+  }
 
   function checkKeybind(event) {
-    if (powerOptions.length === 0) return false;
+    if (powerOptions.length === 0)
+      return false;
     if (event.key === Qt.Key_Control || event.key === Qt.Key_Shift || event.key === Qt.Key_Alt || event.key === Qt.Key_Meta) {
       return false;
     }
     const pressedKeybind = Keybinds.getKeybindString(event);
-    if (!pressedKeybind) return false;
+    if (!pressedKeybind)
+      return false;
 
     for (var i = 0; i < powerOptions.length; i++) {
       if (powerOptions[i].keybind === pressedKeybind) {
@@ -426,29 +462,57 @@ SmartPanel {
       target: root
       function onOpened() {
         Qt.callLater(() => {
-          panelContent.forceActiveFocus();
-        });
+                       panelContent.forceActiveFocus();
+                     });
       }
     }
 
     Keys.onPressed: event => {
-      if (root.checkKeybind(event)) { event.accepted = true; return; }
-      if (checkKey(event, 'up')) { handleUp(); event.accepted = true; return; }
-      if (checkKey(event, 'down')) { handleDown(); event.accepted = true; return; }
-      if (checkKey(event, 'left')) { handleLeft(); event.accepted = true; return; }
-      if (checkKey(event, 'right')) { handleRight(); event.accepted = true; return; }
-      if (checkKey(event, 'enter')) { handleEnter(); event.accepted = true; return; }
-      if (checkKey(event, 'escape')) { handleEscape(); event.accepted = true; return; }
-      if (event.key === Qt.Key_Up || event.key === Qt.Key_Down || event.key === Qt.Key_Left || event.key === Qt.Key_Right || event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Escape) {
-        event.accepted = true;
-        return;
-      }
-    }
+                      if (root.checkKeybind(event)) {
+                        event.accepted = true;
+                        return;
+                      }
+                      if (checkKey(event, 'up')) {
+                        handleUp();
+                        event.accepted = true;
+                        return;
+                      }
+                      if (checkKey(event, 'down')) {
+                        handleDown();
+                        event.accepted = true;
+                        return;
+                      }
+                      if (checkKey(event, 'left')) {
+                        handleLeft();
+                        event.accepted = true;
+                        return;
+                      }
+                      if (checkKey(event, 'right')) {
+                        handleRight();
+                        event.accepted = true;
+                        return;
+                      }
+                      if (checkKey(event, 'enter')) {
+                        handleEnter();
+                        event.accepted = true;
+                        return;
+                      }
+                      if (checkKey(event, 'escape')) {
+                        handleEscape();
+                        event.accepted = true;
+                        return;
+                      }
+                      if (event.key === Qt.Key_Up || event.key === Qt.Key_Down || event.key === Qt.Key_Left || event.key === Qt.Key_Right || event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Escape) {
+                        event.accepted = true;
+                        return;
+                      }
+                    }
 
     HoverHandler {
       id: globalHoverHandler
       onPointChanged: {
-        if (!root.mouseTrackingReady) return;
+        if (!root.mouseTrackingReady)
+          return;
         if (!root.globalMouseInitialized) {
           root.globalLastMouseX = point.position.x;
           root.globalLastMouseY = point.position.y;
@@ -467,14 +531,14 @@ SmartPanel {
 
     NBox {
       anchors.fill: parent
-      anchors.margins: Style.marginM
+      anchors.margins: Style.paddingCard
       color: Color.mSurfaceContainerLow
-      radius: Style.radiusL
+      radius: Style.radiusCard
 
       ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Style.marginM
-        spacing: Style.marginM
+        anchors.margins: Style.paddingCard
+        spacing: Style.spaceS
 
         // TOP CARD - Cover Wallpaper + Profile Badge + Uptime
         Item {
@@ -487,74 +551,78 @@ SmartPanel {
             anchors.fill: parent
             imagePath: root.profileWallpaperPath
             imageFillMode: Image.PreserveAspectCrop
-            radius: Style.radiusL
+            radius: Style.radiusCard
           }
 
           Rectangle {
             anchors.fill: parent
             color: "black"
             opacity: 0.18
-            radius: Style.radiusL
+            radius: Style.radiusCard
           }
 
           ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Style.marginM
-            spacing: Style.marginS
+            anchors.margins: Style.paddingCard
+            spacing: Style.spaceS
 
             // User Profile Badge Box (Top)
             Rectangle {
               visible: Settings.data.sessionMenu.showProfileBadge ?? true
               Layout.fillWidth: true
               Layout.preferredHeight: Math.round(42 * Style.uiScaleRatio)
-              radius: Style.iRadiusL
+              radius: Style.radiusCapsule
               color: Qt.alpha(Color.mSurfaceContainerHigh, 0.82)
               border.color: Qt.alpha(Color.mOutline, 0.32)
               border.width: Style.borderS
 
               RowLayout {
                 anchors.centerIn: parent
-                spacing: Style.marginS
+                spacing: Style.spaceS
 
                 NIcon {
                   icon: "person"
-                  pointSize: Style.fontSizeM
+                  pointSize: Style.fontSizeBodyMedium
                   color: Color.mPrimary
                 }
 
                 NText {
                   text: HostService.displayName || Quickshell.env("USER") || "user"
                   font.weight: Style.fontWeightBold
-                  pointSize: Style.fontSizeM
+                  pointSize: Style.fontSizeBodyMedium
                   color: Color.mOnSurface
                   elide: Text.ElideRight
                 }
               }
             }
 
-            Item { Layout.fillHeight: true }
+            Item {
+              Layout.fillHeight: true
+            }
 
             // Uptime Box (Bottom)
             Rectangle {
               visible: Settings.data.sessionMenu.showUptimeBadge ?? true
               Layout.fillWidth: true
               Layout.preferredHeight: Math.round(36 * Style.uiScaleRatio)
-              radius: Style.iRadiusL
+              radius: Style.radiusCapsule
               color: Qt.alpha(Color.mSurfaceContainerHighest, 0.88)
 
               RowLayout {
                 anchors.centerIn: parent
-                spacing: Style.marginS
+                spacing: Style.spaceS
 
                 NIcon {
                   icon: "clock"
-                  pointSize: Style.fontSizeS
+                  pointSize: Style.fontSizeBodySmall
                   color: Color.mPrimary
                 }
 
                 NText {
-                  text: I18n.tr("system.uptime", { "uptime": root.uptimeText })
-                  pointSize: Style.fontSizeS
+                  text: I18n.tr("system.uptime", {
+                                  "uptime": root.uptimeText
+                                })
+                  pointSize: Style.fontSizeBodySmall
                   color: Color.mOnSurface
                   font.weight: Style.fontWeightMedium
                 }
@@ -569,8 +637,8 @@ SmartPanel {
           Layout.fillWidth: true
           Layout.fillHeight: true
           columns: 2
-          rowSpacing: Style.marginS
-          columnSpacing: Style.marginS
+          rowSpacing: Style.spaceS
+          columnSpacing: Style.spaceS
 
           Repeater {
             model: powerOptions
@@ -614,16 +682,21 @@ SmartPanel {
     readonly property bool activeFocusOrHover: isSelected || effectiveHover
     readonly property bool destructiveState: isShutdown && (pending || activeFocusOrHover)
     readonly property color containerColor: {
-      if (destructiveState) return Color.blend(Color.mSurfaceContainerHigh, Color.mError, 0.24);
-      if (pending) return Color.mPrimaryContainer;
-      if (mouseArea.pressed) return Color.mPrimaryContainer;
-      if (activeFocusOrHover) return Color.mSecondaryContainer;
+      if (destructiveState)
+        return Color.mErrorContainer;
+      if (pending)
+        return Color.mPrimaryContainer;
+      if (isSelected)
+        return Color.mSecondaryContainer;
       return Color.mSurfaceContainerHigh;
     }
     readonly property color contentColor: {
-      if (destructiveState) return Color.mError;
-      if (pending || mouseArea.pressed) return Color.mOnPrimaryContainer;
-      if (activeFocusOrHover) return Color.mOnSecondaryContainer;
+      if (destructiveState)
+        return Color.mOnErrorContainer;
+      if (pending)
+        return Color.mOnPrimaryContainer;
+      if (isSelected)
+        return Color.mOnSecondaryContainer;
       return Color.mOnSurface;
     }
 
@@ -634,61 +707,78 @@ SmartPanel {
     Accessible.description: pending ? (Math.ceil(timeRemaining / 1000) + "s") : keybind
     Accessible.pressed: mouseArea.pressed
 
-    radius: pending || activeFocusOrHover ? Style.iRadiusL : Style.iRadiusM
+    radius: mouseArea.pressed ? Style.radiusControlPressed : (pending || isSelected ? Style.radiusControlChecked : Style.radiusControl)
     color: containerColor
-    border.width: isSelected ? Style.borderM : 0
-    border.color: destructiveState ? Color.mError : Color.mPrimary
+    border.width: 0
+    border.color: "transparent"
 
-    scale: mouseArea.pressed ? 0.98 : 1.0
+    scale: mouseArea.pressed ? Style.morphPressedScale : 1.0
 
     Behavior on radius {
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 
     Behavior on scale {
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCubic
+      NAnim {
+        motionType: NAnim.ExpressiveFastSpatial
       }
     }
 
     Behavior on color {
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.OutCirc
+      NColorAnimation {
+        motionType: NColorAnimation.Standard
       }
+    }
+
+    NStateLayer {
+      id: buttonStateLayer
+      anchors.fill: parent
+      hovered: buttonRoot.effectiveHover
+      pressed: mouseArea.pressed
+      focused: buttonRoot.isSelected
+      radius: buttonRoot.radius
+      stateColor: buttonRoot.contentColor
+    }
+
+    NFocusRing {
+      focusVisible: buttonRoot.isSelected
+      targetRadius: buttonRoot.radius
+      ringColor: buttonRoot.destructiveState ? Color.mError : Color.mPrimary
     }
 
     ColumnLayout {
       anchors.centerIn: parent
-      spacing: Style.marginXXS
+      spacing: Style.spaceXS
 
       NIcon {
         id: iconElem
         Layout.alignment: Qt.AlignHCenter
         icon: buttonRoot.icon
-        pointSize: Style.fontSizeXXXL
-        color: buttonRoot.isShutdown ? Color.mError : buttonRoot.contentColor
+        pointSize: Style.fontSizeHeadlineSmall
+        color: buttonRoot.destructiveState ? Color.mError : buttonRoot.contentColor
 
         Behavior on color {
-          ColorAnimation { duration: Style.animationFast }
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
+          }
         }
       }
 
       NText {
         Layout.alignment: Qt.AlignHCenter
         text: buttonRoot.pending ? (Math.ceil(timeRemaining / 1000) + "s") : buttonRoot.title
-        pointSize: Style.fontSizeXS
+        pointSize: Style.fontSizeLabelLarge
         font.weight: Style.fontWeightMedium
         color: buttonRoot.contentColor
         elide: Text.ElideRight
         maximumLineCount: 1
 
         Behavior on color {
-          ColorAnimation { duration: Style.animationFast }
+          NColorAnimation {
+            motionType: NColorAnimation.Standard
+          }
         }
       }
     }
@@ -697,10 +787,10 @@ SmartPanel {
     Rectangle {
       anchors.top: parent.top
       anchors.right: parent.right
-      anchors.margins: Style.marginXS
-      width: keybindText.implicitWidth + Style.marginS
-      height: keybindText.implicitHeight + Style.marginXS
-      radius: height / 2
+      anchors.margins: Style.spaceXS
+      width: keybindText.implicitWidth + Style.spaceS
+      height: keybindText.implicitHeight + Style.spaceXS
+      radius: Style.radiusCapsule
       color: buttonRoot.activeFocusOrHover ? Color.mSurfaceContainerHighest : Color.mSurfaceContainer
       visible: Settings.data.sessionMenu.showKeybinds && (buttonRoot.keybind !== "") && !buttonRoot.pending
       z: 5
@@ -709,7 +799,7 @@ SmartPanel {
         id: keybindText
         anchors.centerIn: parent
         text: buttonRoot.keybind
-        pointSize: Style.fontSizeXXS
+        pointSize: Style.fontSizeLabelSmall
         color: buttonRoot.activeFocusOrHover ? Color.mOnSurface : Color.mOnSurfaceVariant
         font.weight: Style.fontWeightMedium
       }
@@ -720,6 +810,7 @@ SmartPanel {
       anchors.fill: parent
       hoverEnabled: true
       cursorShape: Qt.PointingHandCursor
+      onPressed: mouse => buttonStateLayer.rippleAt(mouse.x, mouse.y)
 
       onEntered: {
         if (!root.ignoreMouseHover) {

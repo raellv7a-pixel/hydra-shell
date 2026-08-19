@@ -94,9 +94,8 @@ Item {
 
   Behavior on animatedPercentage {
     enabled: !Settings.data.general.animationDisabled
-    NumberAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutCubic
+    NAnim {
+      motionType: NAnim.StandardSpatial
     }
   }
 
@@ -176,9 +175,9 @@ Item {
 
     Behavior on opacity {
       enabled: !Settings.data.general.animationDisabled
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
+      NAnim {
+        duration: Style.motionDurationFastEffects
+        motionType: NAnim.StandardEffects
       }
     }
   }
@@ -196,9 +195,9 @@ Item {
 
     Behavior on opacity {
       enabled: !Settings.data.general.animationDisabled
-      NumberAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
+      NAnim {
+        duration: Style.motionDurationFastEffects
+        motionType: NAnim.StandardEffects
       }
     }
   }

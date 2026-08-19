@@ -33,12 +33,14 @@ NIconButton {
   tooltipDirection: BarService.getTooltipDirection(screen?.name)
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
-  customRadius: Style.radiusL
-  colorBg: Style.capsuleColor
-  colorFg: Color.resolveColorKey(iconColorKey)
+  customRadius: Style.radiusCapsule
+  colorBg: Settings.data.colorSchemes.darkMode ? Color.mTertiary : Qt.alpha(Color.mTertiary, 0.16)
+  colorFg: Settings.data.colorSchemes.darkMode ? Color.mOnTertiary : Color.resolveColorKey(iconColorKey)
+  colorBgHover: Settings.data.colorSchemes.darkMode ? Color.mOnTertiary : Color.mTertiary
+  colorFgHover: colorFg
   onClicked: Settings.data.colorSchemes.darkMode = !Settings.data.colorSchemes.darkMode
 
-  border.color: Style.capsuleBorderColor
+  border.color: Qt.alpha(Color.mTertiary, 0.36)
   border.width: Style.capsuleBorderWidth
 
   NPopupContextMenu {

@@ -308,7 +308,7 @@ Item {
     height: capsuleContentHeight
     x: Style.pixelAlignCenter(parent.width, width)
     y: Style.pixelAlignCenter(parent.height, height)
-    radius: Style.radiusM
+    radius: Style.radiusCapsule
     color: Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -359,7 +359,7 @@ Item {
       tooltipDirection: BarService.getTooltipDirection(root.screen?.name)
       baseSize: capsuleHeight
       applyUiScale: false
-      customRadius: Style.radiusL
+      customRadius: Style.radiusCapsule
       colorBg: "transparent"
       colorFg: root.chevronColor
       colorBorder: "transparent"
@@ -394,6 +394,9 @@ Item {
         height: isVertical ? capsuleHeight : barHeight
         visible: modelData
         readonly property bool isHovered: root.hoveredItemIndex === index
+        activeFocusOnTab: true
+        Accessible.role: Accessible.Button
+        Accessible.name: modelData?.tooltipTitle || modelData?.name || modelData?.id || "Item da bandeja"
 
         // Tooltip anchor representing the visual area (for proper tooltip positioning)
         Item {
@@ -402,6 +405,17 @@ Item {
           height: capsuleHeight
           x: Style.pixelAlignCenter(parent.width, width)
           y: Style.pixelAlignCenter(parent.height, height)
+        }
+
+        NStateLayer {
+          id: trayItemStateLayer
+
+          anchors.fill: tooltipAnchor
+          hovered: itemMouseArea.containsMouse
+          pressed: itemMouseArea.pressed
+          focused: trayDelegate.activeFocus
+          stateColor: Color.mPrimary
+          radius: Style.radiusCapsule
         }
 
         IconImage {
@@ -447,15 +461,20 @@ Item {
           anchors.horizontalCenter: trayIcon.horizontalCenter
           width: Style.toOdd(iconSize * 0.25)
           height: 4
-          color: trayDelegate.isHovered ? Color.mHover : "transparent"
+          color: trayDelegate.isHovered ? Color.mPrimary : "transparent"
           radius: Math.min(Style.radiusXXS, width / 2)
 
           Behavior on color {
-            ColorAnimation {
-              duration: Style.animationFast
-              easing.type: Easing.OutCubic
+            NColorAnimation {
+              duration: Style.motionDurationFastEffects
             }
           }
+        }
+
+        NFocusRing {
+          anchors.fill: tooltipAnchor
+          focusVisible: trayDelegate.activeFocus
+          targetRadius: Style.radiusCapsule
         }
 
         MouseArea {
@@ -464,6 +483,11 @@ Item {
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
           acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+          onPressed: mouse => {
+                       trayDelegate.forceActiveFocus();
+                       const point = mapToItem(trayItemStateLayer, mouse.x, mouse.y);
+                       trayItemStateLayer.rippleAt(point.x, point.y);
+                     }
           onContainsMouseChanged: {
             if (containsMouse) {
               if (popupMenuWindow) {
@@ -542,6 +566,17 @@ Item {
                        }
                      }
         }
+
+        Keys.onReturnPressed: event => {
+                                if (modelData && !modelData.onlyMenu)
+                                modelData.activate();
+                                event.accepted = true;
+                              }
+        Keys.onSpacePressed: event => {
+                               if (modelData && !modelData.onlyMenu)
+                               modelData.activate();
+                               event.accepted = true;
+                             }
       }
     }
 
@@ -555,11 +590,10 @@ Item {
       tooltipDirection: BarService.getTooltipDirection(root.screen?.name)
       baseSize: capsuleHeight
       applyUiScale: false
-      customRadius: Style.radiusL
+      customRadius: Style.radiusCapsule
       colorBg: "transparent"
       colorFg: root.chevronColor
       colorBorder: "transparent"
-      colorBorderHover: "transparent"
       icon: {
         switch (barPosition) {
         case "bottom":

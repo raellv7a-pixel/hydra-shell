@@ -15,6 +15,20 @@ Slider {
   property var tooltipText
   property string tooltipDirection: "auto"
   property bool hovering: false
+  property bool wavy: false
+  property real waveAmplitude: Math.round(4 * Style.uiScaleRatio)
+  property real waveWavelength: Math.round(16 * Style.uiScaleRatio)
+  property real wavePhase: 0
+
+  readonly property bool waveActive: root.wavy && Style.motionEnabled
+
+  NumberAnimation on wavePhase {
+    running: root.waveActive
+    loops: Animation.Infinite
+    from: 0
+    to: Math.PI * 2
+    duration: 1400
+  }
 
   readonly property color effectiveFillColor: enabled ? fillColor : Color.mOutline
 
@@ -22,7 +36,7 @@ Slider {
   readonly property real handleWidth: Math.max(3, Math.round(4 * Style.uiScaleRatio))
   readonly property real handleTouchWidth: Math.max(knobDiameter, Math.round(28 * Style.uiScaleRatio))
   readonly property real trackHeight: Math.max(6, Math.round(8 * Style.uiScaleRatio))
-  readonly property real trackRadius: Math.min(Style.iRadiusL, trackHeight / 2)
+  readonly property real trackRadius: trackHeight / 2
   readonly property real cutoutExtra: Math.round((Style.baseWidgetSize * 0.1 * Style.uiScaleRatio) / 2) * 2
 
   padding: cutoutExtra / 2
@@ -184,12 +198,55 @@ Slider {
       }
     }
 
+    // Material 3 Expressive wavy overlay — a sine stroke riding the fill,
+    // signalling "live" progress (e.g. active media playback). Purely
+    // decorative: the solid fillPath above remains the source of truth for
+    // the actual value, so disabling motion/performance mode just hides
+    // this overlay without affecting the slider's read value.
+    Shape {
+      id: waveOverlay
+      width: bgContainer.fillWidth
+      height: bgContainer.height
+      visible: root.waveActive && bgContainer.fillWidth > root.waveWavelength * 2
+      preferredRendererType: Shape.CurveRenderer
+      asynchronous: true
+      clip: true
+
+      ShapePath {
+        strokeColor: Qt.alpha(Color.mOnPrimary, 0.65)
+        strokeWidth: Math.max(1.5, root.trackHeight * 0.18)
+        fillColor: "transparent"
+        capStyle: ShapePath.RoundCap
+        joinStyle: ShapePath.RoundJoin
+
+        PathSvg {
+          path: {
+            const w = bgContainer.fillWidth;
+            const h = bgContainer.height;
+            const midY = h / 2;
+            const amp = root.waveAmplitude;
+            const wl = Math.max(1, root.waveWavelength);
+            const phase = root.wavePhase;
+            const step = Math.max(2, wl / 8);
+            let d = "M 0," + midY.toFixed(2);
+            for (let x = step; x <= w; x += step) {
+              const fadeIn = Math.min(1, x / wl);
+              const fadeOut = Math.min(1, (w - x) / wl + 0.4);
+              const y = midY + Math.sin((x / wl) * Math.PI * 2 + phase) * amp * fadeIn * fadeOut;
+              d += " L " + x.toFixed(2) + "," + y.toFixed(2);
+            }
+            return d;
+          }
+        }
+      }
+    }
+
     // Material 3 gap around the handle
     Rectangle {
       id: knobCutout
       implicitWidth: root.handleWidth + root.cutoutExtra
       implicitHeight: root.knobDiameter + root.cutoutExtra
-      radius: Math.min(Style.iRadiusL, width / 2)
+      radius: width / 2
       color: root.cutoutColor !== undefined ? root.cutoutColor : Color.mSurface
       x: root.visualPosition * (root.availableWidth - root.handleTouchWidth) + (root.handleTouchWidth - width) / 2
       anchors.verticalCenter: parent.verticalCenter
@@ -202,6 +259,17 @@ Slider {
     x: root.leftPadding + root.visualPosition * (root.availableWidth - width)
     anchors.verticalCenter: parent.verticalCenter
 
+    NStateLayer {
+      anchors.fill: parent
+      radius: width / 2
+      enabled: root.enabled
+      hovered: root.hovering
+      pressed: root.pressed
+      focused: root.activeFocus
+      rippleEnabled: false
+      stateColor: root.fillColor
+    }
+
     Rectangle {
       id: knob
       implicitWidth: root.pressed ? Math.max(2, root.handleWidth / 2) : root.handleWidth
@@ -213,10 +281,22 @@ Slider {
       anchors.centerIn: parent
 
       Behavior on color {
-        ColorAnimation {
-          duration: Style.animationFast
+        enabled: !Color.isTransitioning
+        NColorAnimation {
+          motionType: NColorAnimation.Standard
         }
       }
+
+      Behavior on implicitWidth {
+        NAnim {
+          motionType: NAnim.ExpressiveFastSpatial
+        }
+      }
+    }
+
+    NFocusRing {
+      focusVisible: root.activeFocus
+      targetRadius: width / 2
     }
 
     MouseArea {

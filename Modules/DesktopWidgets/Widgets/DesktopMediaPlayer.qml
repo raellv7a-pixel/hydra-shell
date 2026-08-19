@@ -59,7 +59,7 @@ DraggableDesktopWidget {
   readonly property int visibleButtonCount: root.showButtons ? (1 + (showPrev ? 1 : 0) + (showNext ? 1 : 0)) : 0
 
   implicitWidth: Math.round(400 * widgetScale)
-  implicitHeight: Math.round(64 * widgetScale + Style.margin2M * widgetScale)
+  implicitHeight: Math.round(64 * widgetScale + Style.paddingControl * 2 * widgetScale)
   width: implicitWidth
   height: implicitHeight
 
@@ -76,9 +76,9 @@ DraggableDesktopWidget {
   // Completely disabled during scaling to avoid expensive canvas redraws
   Loader {
     anchors.fill: parent
-    anchors.leftMargin: Math.round(Style.marginXS * widgetScale)
-    anchors.rightMargin: Math.round(Style.marginXS * widgetScale)
-    anchors.topMargin: Math.round(Style.marginXS * widgetScale)
+    anchors.leftMargin: Math.round(Style.spaceXXS * widgetScale)
+    anchors.rightMargin: Math.round(Style.spaceXXS * widgetScale)
+    anchors.topMargin: Math.round(Style.spaceXXS * widgetScale)
     anchors.bottomMargin: 0
     z: 0
     clip: true
@@ -89,9 +89,9 @@ DraggableDesktopWidget {
       maskEnabled: root.roundedCorners
       maskSource: ShaderEffectSource {
         sourceItem: Rectangle {
-          width: root.width - Math.round(Style.marginXS * widgetScale) * 2
-          height: root.height - Math.round(Style.marginXS * widgetScale)
-          radius: root.roundedCorners ? Math.round(Math.max(0, (Style.radiusL - Style.marginXS) * widgetScale)) : 0
+          width: root.width - Math.round(Style.spaceXXS * widgetScale) * 2
+          height: root.height - Math.round(Style.spaceXXS * widgetScale)
+          radius: root.roundedCorners ? Math.round(Math.max(0, (Style.radiusCard - Style.spaceXXS) * widgetScale)) : 0
           color: "white"
         }
       }
@@ -186,8 +186,8 @@ DraggableDesktopWidget {
         }
       }
     ]
-    anchors.margins: Math.round(Style.marginM * widgetScale)
-    spacing: Math.round(Style.marginS * widgetScale)
+    anchors.margins: Math.round(Style.spaceS * widgetScale)
+    spacing: Math.round(Style.spaceXS * widgetScale)
     z: 2
 
     Item {
@@ -199,7 +199,7 @@ DraggableDesktopWidget {
       NImageRounded {
         visible: hasPlayer
         anchors.fill: parent
-        radius: Math.round(Style.radiusM * widgetScale)
+        radius: Math.round(Style.radiusControl * widgetScale)
         imagePath: MediaService.trackArtUrl
         imageFillMode: Image.PreserveAspectCrop
         fallbackIcon: isPlaying ? "media-pause" : "media-play"
@@ -225,7 +225,7 @@ DraggableDesktopWidget {
       NText {
         Layout.fillWidth: true
         text: hasPlayer ? (MediaService.trackTitle || "Unknown Track") : "No media playing"
-        pointSize: Math.round(Style.fontSizeS * widgetScale)
+        pointSize: Math.round(Style.fontSizeLabelMedium * widgetScale)
         font.weight: Style.fontWeightSemiBold
         color: Color.mOnSurface
         elide: Text.ElideRight
@@ -236,7 +236,7 @@ DraggableDesktopWidget {
         visible: hasPlayer && MediaService.trackArtist
         Layout.fillWidth: true
         text: MediaService.trackArtist || ""
-        pointSize: Math.round(Style.fontSizeXS * widgetScale)
+        pointSize: Math.round(Style.fontSizeLabelSmall * widgetScale)
         font.weight: Style.fontWeightRegular
         color: Color.mSecondary
         elide: Text.ElideRight
@@ -246,7 +246,7 @@ DraggableDesktopWidget {
 
     RowLayout {
       id: controlsRow
-      spacing: Math.round(Style.marginXS * widgetScale)
+      spacing: Math.round(Style.spaceXXS * widgetScale)
       z: 10
       visible: root.showButtons
       Layout.alignment: root.showAlbumArt ? Qt.AlignVCenter : Qt.AlignCenter
@@ -254,9 +254,8 @@ DraggableDesktopWidget {
       NIconButton {
         opacity: showPrev ? 1 : 0
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationSlow
-            easing.type: Easing.InOutQuad
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         baseSize: Math.round(32 * widgetScale)
@@ -264,7 +263,7 @@ DraggableDesktopWidget {
         enabled: hasPlayer && MediaService.canGoPrevious
         colorBg: Color.mSurfaceVariant
         colorFg: enabled ? Color.mPrimary : Color.mOnSurfaceVariant
-        customRadius: Math.round(Style.radiusS * widgetScale)
+        customRadius: Math.round(Style.radiusControl * widgetScale)
         onClicked: {
           if (enabled)
             MediaService.previous();
@@ -279,7 +278,7 @@ DraggableDesktopWidget {
         colorFg: Color.mOnPrimary
         colorBgHover: Qt.lighter(Color.mPrimary, 1.1)
         colorFgHover: Color.mOnPrimary
-        customRadius: Math.round(Style.radiusS * widgetScale)
+        customRadius: Math.round(Style.radiusControl * widgetScale)
         onClicked: {
           if (enabled) {
             MediaService.playPause();
@@ -290,9 +289,8 @@ DraggableDesktopWidget {
       NIconButton {
         opacity: showNext ? 1 : 0
         Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationSlow
-            easing.type: Easing.InOutQuad
+          NAnim {
+            motionType: NAnim.StandardEffects
           }
         }
         baseSize: Math.round(32 * widgetScale)
@@ -300,7 +298,7 @@ DraggableDesktopWidget {
         enabled: hasPlayer && MediaService.canGoNext
         colorBg: Color.mSurfaceVariant
         colorFg: enabled ? Color.mPrimary : Color.mOnSurfaceVariant
-        customRadius: Math.round(Style.radiusS * widgetScale)
+        customRadius: Math.round(Style.radiusControl * widgetScale)
         onClicked: {
           if (enabled)
             MediaService.next();

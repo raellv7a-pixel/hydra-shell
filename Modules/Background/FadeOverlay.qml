@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.Commons
 import qs.Services.Power
+import qs.Widgets
 
 /**
 * IdleFadeOverlay — full-screen fade-to-black shown before each idle action.
@@ -39,12 +40,12 @@ Item {
           right: true
         }
 
-        ColorAnimation on color {
+        NColorAnimation on color {
           running: true
           from: Qt.rgba(0, 0, 0, 0)
           to: Qt.rgba(0, 0, 0, 1)
+          motionType: NColorAnimation.Standard
           duration: IdleService.fadeDuration * 1000
-          easing.type: Easing.InQuad
         }
       }
     }

@@ -66,6 +66,18 @@ sudo cmake --install noctalia-qs/build   # já cria /usr/local/bin/{quickshell,q
 contextos de execução (systemd `--user`, greeters, o próprio ambiente `exec`
 do Hyprland) não têm `/usr/local/bin` no `PATH`.
 
+## Módulos QML nativos (`Hydra.Visual`, `M3Shapes`)
+
+`Scripts/dev/build-visual-plugin.sh` (chamado por `Scripts/bash/install.sh`)
+compila `plugin/` com CMake/Ninja e instala dois módulos QML nativos em
+`~/.local/lib/qt6/qml/`:
+
+- **`Hydra.Visual`** (GPL-3.0-only) - motor de blobs SDF portado da Caelestia Shell; código vendido em `plugin/src/Hydra/Visual/`. Ver [`LICENSES/Caelestia-Blob-Port.md`](LICENSES/Caelestia-Blob-Port.md).
+- **`M3Shapes`** (Apache-2.0) - catálogo de formas Material 3 com morph, buscado via CMake `FetchContent` de `github.com/soramanew/m3shapes` na primeira compilação (**requer acesso à rede**; execuções seguintes reusam o checkout em `.build/visual-plugin/_deps/`). Ver [`LICENSES/M3Shapes-Attribution.md`](LICENSES/M3Shapes-Attribution.md).
+
+Só requer `cmake`/`ninja` além dos pacotes Qt6 já listados acima; nenhum
+pacote adicional do sistema é necessário.
+
 ## AUR (via `paru`/`yay`)
 
 ```bash
