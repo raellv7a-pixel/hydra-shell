@@ -7,25 +7,22 @@ NBox {
 
   // Every dashboard card needs the popup's derived state (per-component
   // style overrides, performance mode, panelUnit scale, music/spectrum
-  // state). Passed explicitly from Panel.qml. Named panelRoot (not "root")
-  // because a property named the same as the caller's `id: root` would
-  // shadow it: `root: root` on this object would try to bind our own
-  // "root" to itself instead of reaching the caller's id. The `root` alias
-  // below is what the rest of this file (and every DashboardCard-derived
-  // card) actually uses, unchanged from the original inline-component code.
+  // state). Passed explicitly from Panel.qml. NOT named "root": any
+  // DashboardCard-derived type composes this property in too, and a
+  // property literally named "root" would shadow the caller's own
+  // `id: root` for every card that still lives inline in Panel.qml.
   required property var panelRoot
-  readonly property var root: panelRoot
 
-  property string styleKey: root.inheritedStyleKey(parent)
+  property string styleKey: panelRoot.inheritedStyleKey(parent)
   property bool styleRoot: false
   property bool detailTransition: false
   property string detailTransitionDirection: "right"
   property real detailOffset: 0
-  readonly property bool borderEffectVisible: root.componentBorderVisible(styleKey, styleRoot)
+  readonly property bool borderEffectVisible: panelRoot.componentBorderVisible(styleKey, styleRoot)
 
-  color: styleKey !== "" ? root.componentBackground(styleKey) : root.m3SurfaceContainer
+  color: styleKey !== "" ? panelRoot.componentBackground(styleKey) : panelRoot.m3SurfaceContainer
   radius: styleRoot ? Style.radiusL : Style.radiusM
-  border.color: borderEffectVisible ? Qt.alpha(root.componentAccent(styleKey), 0.42) : (styleRoot ? "transparent" : Qt.alpha(Color.mOutline, 0.10))
+  border.color: borderEffectVisible ? Qt.alpha(panelRoot.componentAccent(styleKey), 0.42) : (styleRoot ? "transparent" : Qt.alpha(Color.mOutline, 0.10))
   border.width: borderEffectVisible ? Math.max(1, Style.borderS) : Style.borderS
 
   transform: Translate {
@@ -33,7 +30,7 @@ NBox {
   }
 
   onVisibleChanged: {
-    if (visible && detailTransition && !root.dashboardPerformanceMode) {
+    if (visible && detailTransition && !panelRoot.dashboardPerformanceMode) {
       detailEnterAnimation.restart();
     } else if (visible && detailTransition) {
       opacity = 1;
@@ -49,7 +46,7 @@ NBox {
       target: dashboardCard
       from: 0
       to: 1
-      duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+      duration: panelRoot.dashboardPerformanceMode ? 0 : Style.animationNormal
       easing.type: Easing.OutCubic
     }
 
@@ -57,22 +54,22 @@ NBox {
       target: dashboardCard
       from: 0.985
       to: 1
-      duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+      duration: panelRoot.dashboardPerformanceMode ? 0 : Style.animationNormal
       easing.type: Easing.OutCubic
     }
 
     NumberAnimation {
       target: dashboardCard
       property: "detailOffset"
-      from: dashboardCard.detailTransitionDirection === "left" ? -Math.round(22 * root.panelUnit) : Math.round(22 * root.panelUnit)
+      from: dashboardCard.detailTransitionDirection === "left" ? -Math.round(22 * panelRoot.panelUnit) : Math.round(22 * panelRoot.panelUnit)
       to: 0
-      duration: root.dashboardPerformanceMode ? 0 : Style.animationNormal
+      duration: panelRoot.dashboardPerformanceMode ? 0 : Style.animationNormal
       easing.type: Easing.OutCubic
     }
   }
 
   ComponentBorderCanvas {
-    panelRoot: dashboardCard.root
+    panelRoot: dashboardCard.panelRoot
     anchors.fill: parent
     styleKey: parent.styleKey
     styleRoot: parent.styleRoot

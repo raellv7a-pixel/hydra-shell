@@ -5,22 +5,21 @@ Canvas {
   id: componentBorderCanvas
 
   required property var panelRoot
-  readonly property var root: panelRoot
 
   property string styleKey: ""
   property bool styleRoot: false
 
-  visible: root.componentBorderVisible(styleKey, styleRoot) && width > 0 && height > 0
+  visible: panelRoot.componentBorderVisible(styleKey, styleRoot) && width > 0 && height > 0
   opacity: 0.86
   antialiasing: true
 
-  readonly property string animation: root.componentBorderAnimation(styleKey)
-  readonly property var borderColors: root.componentBorderColors(styleKey)
-  readonly property real animationSpeed: root.clamp(root.componentBorderSpeed(styleKey), 0.15, 3)
-  readonly property real borderWidth: Math.max(1, Math.round(root.componentBorderWidth(styleKey) * root.panelUnit))
+  readonly property string animation: panelRoot.componentBorderAnimation(styleKey)
+  readonly property var borderColors: panelRoot.componentBorderColors(styleKey)
+  readonly property real animationSpeed: panelRoot.clamp(panelRoot.componentBorderSpeed(styleKey), 0.15, 3)
+  readonly property real borderWidth: Math.max(1, Math.round(panelRoot.componentBorderWidth(styleKey) * panelRoot.panelUnit))
   readonly property bool reactive: animation.indexOf("reactive") === 0
-  readonly property bool animationActive: reactive ? root.musicActive : animation !== "static"
-  readonly property real phase: animationActive ? root.sliderEffectPhase : 0
+  readonly property bool animationActive: reactive ? panelRoot.musicActive : animation !== "static"
+  readonly property real phase: animationActive ? panelRoot.sliderEffectPhase : 0
 
   onAnimationChanged: requestPaint()
   onAnimationSpeedChanged: requestPaint()
@@ -157,8 +156,8 @@ Canvas {
     const lineWidth = borderWidth;
     const inset = lineWidth / 2;
     const colors = borderColors && borderColors.length > 0 ? borderColors : [Color.mPrimary];
-    const energy = reactive ? root.spectrumAverage() : 0;
-    const alpha = reactive ? root.clamp(0.48 + energy * 0.46, 0.48, 0.94) : 0.86;
+    const energy = reactive ? panelRoot.spectrumAverage() : 0;
+    const alpha = reactive ? panelRoot.clamp(0.48 + energy * 0.46, 0.48, 0.94) : 0.86;
     const flow = animation === "flow" || animation === "flowEase" || animation === "spark" || animation === "reactiveFlow" || animation === "reactiveSpark" || animation === "scan" || animation === "profileAurora" || animation === "profileSpotlight";
     const fade = animation === "fade" || animation === "reactivePulse";
     const raw = phase * (flow ? 0.035 : 0.16) * animationSpeed;
@@ -241,7 +240,7 @@ Canvas {
 
     if (animation === "spark" || animation === "reactiveSpark" || orbitDots) {
       const sparkCount = animation === "reactiveSpark" ? 5 : 7;
-      const boost = animation === "reactiveSpark" ? root.clamp(0.45 + energy * 0.9, 0.45, 1.15) : 0.85;
+      const boost = animation === "reactiveSpark" ? panelRoot.clamp(0.45 + energy * 0.9, 0.45, 1.15) : 0.85;
       for (let i = 0; i < sparkCount; i++) {
         const local = (p * 0.16 + i / sparkCount) % 1;
         const flicker = 0.45 + 0.55 * Math.abs(Math.sin((p + i * 1.71) * 2.4));
