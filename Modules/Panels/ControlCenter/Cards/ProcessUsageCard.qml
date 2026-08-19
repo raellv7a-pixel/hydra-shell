@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 import Quickshell.Io
+import Quickshell.Widgets
 import qs.Services.System
 DashboardCard {
   id: processUsageCard
