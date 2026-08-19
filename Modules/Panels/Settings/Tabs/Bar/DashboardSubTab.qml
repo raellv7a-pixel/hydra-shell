@@ -17,7 +17,10 @@ ColumnLayout {
   property var cfg: ControlCenterService.settings
   property int subTab: 0
 
-  // Navegação por abas em Português Brasileiro (pt_BR)
+  function dtr(key) {
+    return I18n.tr("panels.dashboard." + key);
+  }
+
   NTabBar {
     id: subTabBar
     Layout.fillWidth: true
@@ -25,25 +28,25 @@ ColumnLayout {
     distributeEvenly: true
 
     NTabButton {
-      text: "Janela & Layout"
+      text: root.dtr("settingsTabWindow")
       tabIndex: 0
       checked: root.subTab === 0
       onClicked: root.subTab = 0
     }
     NTabButton {
-      text: "Perfil & Banner"
+      text: root.dtr("settingsTabProfile")
       tabIndex: 1
       checked: root.subTab === 1
       onClicked: root.subTab = 1
     }
     NTabButton {
-      text: "Efeitos & Áudio"
+      text: root.dtr("settingsTabEffects")
       tabIndex: 2
       checked: root.subTab === 2
       onClicked: root.subTab = 2
     }
     NTabButton {
-      text: "Seções da Tela"
+      text: root.dtr("settingsTabSections")
       tabIndex: 3
       checked: root.subTab === 3
       onClicked: root.subTab = 3
@@ -64,7 +67,7 @@ ColumnLayout {
       spacing: Style.marginM
 
       NText {
-        text: "Comportamento da Janela"
+        text: root.dtr("settingsWindowBehavior")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -72,8 +75,8 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Painel Destacado (Flutuante)"
-        description: "Exibe a central flutuante no centro ou posição fixa, desvinculada da barra"
+        label: root.dtr("settingsPanelDetached")
+        description: root.dtr("settingsPanelDetachedDesc")
         checked: root.cfg.panelDetached ?? true
         onToggled: checked => {
                      root.cfg.panelDetached = checked;
@@ -84,8 +87,8 @@ ColumnLayout {
       NToggle {
         Layout.fillWidth: true
         visible: !root.cfg.panelDetached
-        label: "Seguir Posição da Barra"
-        description: "Anexa a central na mesma borda da tela onde a barra principal está posicionada"
+        label: root.dtr("settingsFollowBarEdge")
+        description: root.dtr("settingsFollowBarEdgeDesc")
         checked: root.cfg.followBarEdge ?? true
         onToggled: checked => {
                      root.cfg.followBarEdge = checked;
@@ -95,37 +98,37 @@ ColumnLayout {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Posição da Janela na Tela"
-        description: "Alinhamento padrão da janela da central de controle"
+        label: root.dtr("settingsPanelPosition")
+        description: root.dtr("settingsPanelPositionDesc")
         currentKey: root.cfg.panelPosition ?? "center"
         model: [
           {
             key: "center",
-            name: "Centralizado"
+            name: root.dtr("settingsPositionCenter")
           },
           {
             key: "top_left",
-            name: "Superior Esquerdo"
+            name: root.dtr("settingsPositionTopLeft")
           },
           {
             key: "top_right",
-            name: "Superior Direito"
+            name: root.dtr("settingsPositionTopRight")
           },
           {
             key: "bottom_left",
-            name: "Inferior Esquerdo"
+            name: root.dtr("settingsPositionBottomLeft")
           },
           {
             key: "bottom_right",
-            name: "Inferior Direito"
+            name: root.dtr("settingsPositionBottomRight")
           },
           {
             key: "left",
-            name: "Esquerda"
+            name: root.dtr("settingsPositionLeft")
           },
           {
             key: "right",
-            name: "Direita"
+            name: root.dtr("settingsPositionRight")
           }
         ]
         onSelected: key => {
@@ -139,7 +142,7 @@ ColumnLayout {
       }
 
       NText {
-        text: "Dimensões e Escala"
+        text: root.dtr("settingsDimensions")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -147,7 +150,7 @@ ColumnLayout {
 
       NValueSlider {
         Layout.fillWidth: true
-        label: "Largura da Central (px)"
+        label: root.dtr("settingsPanelWidth")
         from: 800
         to: 1400
         stepSize: 20
@@ -160,7 +163,7 @@ ColumnLayout {
 
       NValueSlider {
         Layout.fillWidth: true
-        label: "Altura da Central (px)"
+        label: root.dtr("settingsPanelHeight")
         from: 500
         to: 950
         stepSize: 20
@@ -173,7 +176,7 @@ ColumnLayout {
 
       NValueSlider {
         Layout.fillWidth: true
-        label: "Escala Geral da Interface"
+        label: root.dtr("settingsPanelScale")
         from: 0.7
         to: 1.3
         stepSize: 0.05
@@ -194,7 +197,7 @@ ColumnLayout {
       spacing: Style.marginM
 
       NText {
-        text: "Foto de Perfil & Animação"
+        text: root.dtr("settingsProfilePhoto")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -202,20 +205,20 @@ ColumnLayout {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Formato da Foto de Perfil"
+        label: root.dtr("settingsAvatarShapeLabel")
         currentKey: root.cfg.avatarShape ?? "circle"
         model: [
           {
             key: "circle",
-            name: "Círculo"
+            name: root.dtr("settingsAvatarShapeCircle")
           },
           {
             key: "rounded",
-            name: "Canto Arredondado"
+            name: root.dtr("settingsAvatarShapeRounded")
           },
           {
             key: "square",
-            name: "Quadrado"
+            name: root.dtr("settingsAvatarShapeSquare")
           }
         ]
         onSelected: key => {
@@ -224,10 +227,80 @@ ColumnLayout {
                     }
       }
 
+      NComboBox {
+        Layout.fillWidth: true
+        label: root.dtr("settingsProfileCardShape")
+        description: root.dtr("settingsProfileCardShapeDesc")
+        currentKey: root.cfg.profileCardShape ?? "rounded"
+        model: [
+          {
+            key: "rounded",
+            name: root.dtr("settingsProfileCardShapeRounded")
+          },
+          {
+            key: "soft",
+            name: root.dtr("settingsProfileCardShapeSoft")
+          },
+          {
+            key: "pill",
+            name: root.dtr("settingsProfileCardShapePill")
+          },
+          {
+            key: "sharp",
+            name: root.dtr("settingsProfileCardShapeSharp")
+          }
+        ]
+        onSelected: key => {
+                      root.cfg.profileCardShape = key;
+                      ControlCenterService.saveSettings();
+                    }
+      }
+
+      NComboBox {
+        Layout.fillWidth: true
+        label: root.dtr("settingsAvatarMusicEffect")
+        description: root.dtr("settingsAvatarMusicEffectDesc")
+        currentKey: root.cfg.avatarMusicEffect ?? "ring"
+        model: [
+          {
+            key: "none",
+            name: root.dtr("settingsAvatarEffectNone")
+          },
+          {
+            key: "ring",
+            name: root.dtr("settingsAvatarEffectRing")
+          },
+          {
+            key: "morph",
+            name: root.dtr("settingsAvatarEffectMorph")
+          },
+          {
+            key: "both",
+            name: root.dtr("settingsAvatarEffectBoth")
+          },
+          {
+            key: "glow",
+            name: root.dtr("settingsAvatarEffectGlow")
+          },
+          {
+            key: "orbit",
+            name: root.dtr("settingsAvatarEffectOrbit")
+          },
+          {
+            key: "studio",
+            name: root.dtr("settingsAvatarEffectStudio")
+          }
+        ]
+        onSelected: key => {
+                      root.cfg.avatarMusicEffect = key;
+                      ControlCenterService.saveSettings();
+                    }
+      }
+
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Mascote GIF Animado"
-        description: "Mostra um pequeno mascote GIF animado ao lado do cartão de perfil"
+        label: root.dtr("settingsShowDanceGif")
+        description: root.dtr("settingsShowDanceGifDesc")
         checked: root.cfg.showProfileDanceGif ?? true
         onToggled: checked => {
                      root.cfg.showProfileDanceGif = checked;
@@ -235,38 +308,78 @@ ColumnLayout {
                    }
       }
 
+      NTextInputButton {
+        Layout.fillWidth: true
+        visible: root.cfg.showProfileDanceGif ?? true
+        label: root.dtr("settingsProfileDanceGifPath")
+        description: root.dtr("settingsProfileDanceGifPathDesc")
+        text: root.cfg.profileDanceGifPath ?? ""
+        placeholderText: "~/"
+        buttonIcon: "gif"
+        onInputTextChanged: text => {
+                               root.cfg.profileDanceGifPath = text;
+                               ControlCenterService.saveSettings();
+                             }
+        onButtonClicked: danceGifPicker.openFilePicker()
+      }
+
+      NFilePicker {
+        id: danceGifPicker
+        title: root.dtr("settingsProfileDanceGifPath")
+        selectionMode: "files"
+        nameFilters: ["*.gif", "*.png", "*.jpg", "*.jpeg", "*.webp"]
+        onAccepted: paths => {
+                      if (paths.length > 0) {
+                        root.cfg.profileDanceGifPath = paths[0];
+                        ControlCenterService.saveSettings();
+                      }
+                    }
+      }
+
       Item {
         Layout.preferredHeight: Style.marginS
       }
 
       NText {
-        text: "Capa do Banner de Perfil"
+        text: root.dtr("settingsProfileCover")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
       }
 
+      NToggle {
+        Layout.fillWidth: true
+        label: root.dtr("settingsShowProfileWallpaper")
+        description: root.dtr("settingsShowProfileWallpaperDesc")
+        checked: root.cfg.showProfileWallpaper ?? true
+        onToggled: checked => {
+                     root.cfg.showProfileWallpaper = checked;
+                     ControlCenterService.saveSettings();
+                   }
+      }
+
       NComboBox {
         Layout.fillWidth: true
-        label: "Modo de Imagem do Banner"
-        description: "Origem da imagem exibida no topo do cartão de perfil"
+        visible: root.cfg.showProfileWallpaper ?? true
+        label: root.dtr("settingsCoverMode")
+        description: root.dtr("settingsCoverModeDesc")
         currentKey: root.cfg.profileCoverMode ?? "auto"
         model: [
           {
             key: "auto",
-            name: "Automático (Usa o Papel de Parede Atual)"
+            name: root.dtr("settingsCoverModeAuto")
           },
           {
             key: "custom",
-            name: "Imagem Personalizada"
+            name: root.dtr("settingsCoverModeCustom")
           },
           {
             key: "random",
-            name: "Aleatório de uma Pasta"
+            name: root.dtr("settingsCoverModeRandom")
           },
           {
             key: "none",
-            name: "Desativado (Cor Sólida)"
+            name: root.dtr("settingsCoverModeNone")
           }
         ]
         onSelected: key => {
@@ -277,9 +390,9 @@ ColumnLayout {
 
       NTextInputButton {
         Layout.fillWidth: true
-        visible: root.cfg.profileCoverMode === "custom"
-        label: "Arquivo da capa"
-        description: "Imagem ou GIF local usado como fundo"
+        visible: (root.cfg.showProfileWallpaper ?? true) && root.cfg.profileCoverMode === "custom"
+        label: root.dtr("settingsCoverFile")
+        description: root.dtr("settingsCoverFileDesc")
         text: root.cfg.profileCoverPath ?? ""
         placeholderText: "~/"
         buttonIcon: "photo"
@@ -292,9 +405,9 @@ ColumnLayout {
 
       NTextInputButton {
         Layout.fillWidth: true
-        visible: root.cfg.profileCoverMode === "random"
-        label: "Pasta de capas aleatórias"
-        description: "Escolhe uma imagem aleatória desta pasta"
+        visible: (root.cfg.showProfileWallpaper ?? true) && root.cfg.profileCoverMode === "random"
+        label: root.dtr("settingsCoverFolder")
+        description: root.dtr("settingsCoverFolderDesc")
         text: root.cfg.profileCoverFolder ?? ""
         placeholderText: "~/"
         buttonIcon: "folder"
@@ -307,7 +420,7 @@ ColumnLayout {
 
       NFilePicker {
         id: coverImagePicker
-        title: "Selecionar Imagem de Capa"
+        title: root.dtr("settingsCoverFile")
         selectionMode: "files"
         nameFilters: ImageCacheService.basicImageFilters
         onAccepted: paths => {
@@ -320,7 +433,7 @@ ColumnLayout {
 
       NFilePicker {
         id: coverFolderPicker
-        title: "Selecionar Pasta de Capas"
+        title: root.dtr("settingsCoverFolder")
         selectionMode: "folders"
         onAccepted: paths => {
                       if (paths.length > 0) {
@@ -332,8 +445,8 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Escurecimento Suave (Overlay)"
-        description: "Aplica um tom escuro sobre o banner para destacar o texto"
+        label: root.dtr("settingsCoverOverlayEnabled")
+        description: root.dtr("settingsCoverOverlayEnabledDesc")
         checked: root.cfg.profileCoverOverlayEnabled ?? true
         onToggled: checked => {
                      root.cfg.profileCoverOverlayEnabled = checked;
@@ -344,7 +457,7 @@ ColumnLayout {
       NValueSlider {
         Layout.fillWidth: true
         visible: root.cfg.profileCoverOverlayEnabled ?? true
-        label: "Intensidade do Escurecimento"
+        label: root.dtr("settingsCoverOverlay")
         from: 0.1
         to: 0.9
         stepSize: 0.05
@@ -357,8 +470,33 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Borda Decorativa no Cartão"
-        description: "Aplica uma borda estilizada ao redor do cartão de perfil"
+        label: root.dtr("settingsBlurEnabled")
+        description: root.dtr("settingsBlurEnabledDesc")
+        checked: root.cfg.profileCoverBlurEnabled ?? false
+        onToggled: checked => {
+                     root.cfg.profileCoverBlurEnabled = checked;
+                     ControlCenterService.saveSettings();
+                   }
+      }
+
+      NValueSlider {
+        Layout.fillWidth: true
+        visible: root.cfg.profileCoverBlurEnabled ?? false
+        label: root.dtr("settingsBlur")
+        from: 0
+        to: 64
+        stepSize: 1
+        value: root.cfg.profileCoverBlur ?? 0
+        onMoved: val => {
+                   root.cfg.profileCoverBlur = Math.round(val);
+                   ControlCenterService.saveSettings();
+                 }
+      }
+
+      NToggle {
+        Layout.fillWidth: true
+        label: root.dtr("settingsCoverBorder")
+        description: root.dtr("settingsCoverBorderDesc")
         checked: root.cfg.profileCoverBorder ?? true
         onToggled: checked => {
                      root.cfg.profileCoverBorder = checked;
@@ -366,93 +504,199 @@ ColumnLayout {
                    }
       }
 
+      NValueSlider {
+        Layout.fillWidth: true
+        visible: root.cfg.profileCoverBorder ?? true
+        label: root.dtr("settingsBorderWidth")
+        from: 1
+        to: 6
+        stepSize: 1
+        value: root.cfg.profileCoverBorderWidth ?? 2
+        onMoved: val => {
+                   root.cfg.profileCoverBorderWidth = Math.round(val);
+                   ControlCenterService.saveSettings();
+                 }
+      }
+
       NComboBox {
         Layout.fillWidth: true
         visible: root.cfg.profileCoverBorder ?? true
-        label: "Efeito de Animação da Borda"
+        label: root.dtr("settingsBorderColorMode")
+        description: root.dtr("settingsBorderColorModeDesc")
+        currentKey: root.cfg.profileCoverBorderColorMode ?? "auto"
+        model: [
+          {
+            key: "auto",
+            name: root.dtr("settingsBorderAutoColors")
+          },
+          {
+            key: "custom",
+            name: root.dtr("settingsBorderCustomColors")
+          }
+        ]
+        onSelected: key => {
+                      root.cfg.profileCoverBorderColorMode = key;
+                      ControlCenterService.saveSettings();
+                    }
+      }
+
+      NComboBox {
+        Layout.fillWidth: true
+        visible: (root.cfg.profileCoverBorder ?? true) && root.cfg.profileCoverBorderColorMode === "custom"
+        label: root.dtr("settingsBorderColorCount")
+        description: root.dtr("settingsBorderColorCountDesc")
+        currentKey: String(root.cfg.profileCoverBorderColorCount ?? 3)
+        model: [
+          {
+            key: "3",
+            name: "3"
+          },
+          {
+            key: "4",
+            name: "4"
+          },
+          {
+            key: "5",
+            name: "5"
+          }
+        ]
+        onSelected: key => {
+                      root.cfg.profileCoverBorderColorCount = parseInt(key, 10);
+                      ControlCenterService.saveSettings();
+                    }
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        visible: (root.cfg.profileCoverBorder ?? true) && root.cfg.profileCoverBorderColorMode === "custom"
+        spacing: Style.marginM
+
+        Repeater {
+          model: Math.max(3, Math.min(5, root.cfg.profileCoverBorderColorCount ?? 3))
+
+          ColumnLayout {
+            required property int index
+            readonly property string colorKey: "profileCoverBorderColor" + (index + 1)
+            spacing: Style.marginXS
+
+            NText {
+              text: root.dtr("settingsBorderColor" + (index + 1))
+              pointSize: Style.fontSizeS
+              color: Color.mOnSurfaceVariant
+            }
+
+            NColorPicker {
+              selectedColor: root.cfg[colorKey] ?? "#ffffff"
+              onColorSelected: color => {
+                                  root.cfg[colorKey] = color.toString();
+                                  ControlCenterService.saveSettings();
+                                }
+            }
+          }
+        }
+      }
+
+      NComboBox {
+        Layout.fillWidth: true
+        visible: root.cfg.profileCoverBorder ?? true
+        label: root.dtr("settingsCoverBorderAnimation")
         currentKey: root.cfg.profileCoverBorderAnimation ?? "static"
         model: [
           {
             key: "static",
-            name: "Estática"
+            name: root.dtr("settingsBorderAnimStatic")
           },
           {
             key: "fade",
-            name: "Alternar cores"
+            name: root.dtr("settingsBorderAnimFade")
           },
           {
             key: "flow",
-            name: "Cores circulando"
+            name: root.dtr("settingsBorderAnimFlow")
           },
           {
             key: "flowEase",
-            name: "Circular elástico"
+            name: root.dtr("settingsBorderAnimFlowEase")
           },
           {
             key: "spark",
-            name: "Circular com faíscas"
+            name: root.dtr("settingsBorderAnimSpark")
           },
           {
             key: "pulse",
-            name: "Pulso"
+            name: root.dtr("settingsBorderAnimPulse")
           },
           {
             key: "chase",
-            name: "Traços correndo"
+            name: root.dtr("settingsBorderAnimChase")
           },
           {
             key: "comet",
-            name: "Cometa"
+            name: root.dtr("settingsBorderAnimComet")
           },
           {
             key: "neon",
-            name: "Neon pulsante"
+            name: root.dtr("settingsBorderAnimNeon")
           },
           {
             key: "corners",
-            name: "Cantos vivos"
+            name: root.dtr("settingsBorderAnimCorners")
           },
           {
             key: "orbitDots",
-            name: "Pontos orbitais"
+            name: root.dtr("settingsBorderAnimOrbitDots")
           },
           {
             key: "scan",
-            name: "Varredura luminosa"
+            name: root.dtr("settingsBorderAnimScan")
           },
           {
             key: "profileAurora",
-            name: "Perfil: aurora"
+            name: root.dtr("settingsBorderAnimProfileAurora")
           },
           {
             key: "profileHalo",
-            name: "Perfil: halo interno"
+            name: root.dtr("settingsBorderAnimProfileHalo")
           },
           {
             key: "profileHeartbeat",
-            name: "Perfil: batida cardíaca"
+            name: root.dtr("settingsBorderAnimProfileHeartbeat")
           },
           {
             key: "profileSpotlight",
-            name: "Perfil: reflexo diagonal"
+            name: root.dtr("settingsBorderAnimProfileSpotlight")
           },
           {
             key: "reactivePulse",
-            name: "Reativa: pulso"
+            name: root.dtr("settingsBorderAnimReactivePulse")
           },
           {
             key: "reactiveFlow",
-            name: "Reativa: circular"
+            name: root.dtr("settingsBorderAnimReactiveFlow")
           },
           {
             key: "reactiveSpark",
-            name: "Reativa: faíscas"
+            name: root.dtr("settingsBorderAnimReactiveSpark")
           }
         ]
         onSelected: key => {
                       root.cfg.profileCoverBorderAnimation = key;
                       ControlCenterService.saveSettings();
                     }
+      }
+
+      NValueSlider {
+        Layout.fillWidth: true
+        visible: root.cfg.profileCoverBorder ?? true
+        label: root.dtr("settingsBorderSpeed")
+        from: 0.25
+        to: 3
+        stepSize: 0.25
+        value: root.cfg.profileCoverBorderSpeed ?? 1
+        onMoved: val => {
+                   root.cfg.profileCoverBorderSpeed = Math.round(val * 100) / 100;
+                   ControlCenterService.saveSettings();
+                 }
       }
     }
 
@@ -465,7 +709,7 @@ ColumnLayout {
       spacing: Style.marginM
 
       NText {
-        text: "Visualizadores de Áudio"
+        text: root.dtr("settingsAudioVisualizers")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -473,53 +717,53 @@ ColumnLayout {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Espectro de Mídia na Central"
-        description: "Estilo visual do espectro ao tocar músicas"
+        label: root.dtr("settingsMediaVisualizer")
+        description: root.dtr("settingsMediaVisualizerDesc")
         currentKey: root.cfg.mediaVisualizerEffect ?? "bars"
         model: [
           {
             key: "none",
-            name: "Desativado"
+            name: root.dtr("visualizerNone")
           },
           {
             key: "bars",
-            name: "Barras Verticais"
+            name: root.dtr("visualizerBars")
           },
           {
             key: "mirror",
-            name: "Barras Espelhadas"
+            name: root.dtr("settingsVisualizerMirror")
           },
           {
             key: "wave",
-            name: "Onda Fluida"
+            name: root.dtr("visualizerWave")
           },
           {
             key: "ribbon",
-            name: "Fita Suave"
+            name: root.dtr("settingsVisualizerRibbon")
           },
           {
             key: "shock",
-            name: "Ondas de Choque"
+            name: root.dtr("visualizerShock")
           },
           {
             key: "pulse",
-            name: "Pulso Central"
+            name: root.dtr("visualizerPulse")
           },
           {
             key: "nebula",
-            name: "Nebulosa"
+            name: root.dtr("visualizerNebula")
           },
           {
             key: "aurora",
-            name: "Aurora"
+            name: root.dtr("visualizerAurora")
           },
           {
             key: "constellation",
-            name: "Constelação"
+            name: root.dtr("visualizerConstellation")
           },
           {
             key: "radar",
-            name: "Radar"
+            name: root.dtr("visualizerRadar")
           }
         ]
         onSelected: key => {
@@ -530,65 +774,65 @@ ColumnLayout {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Efeito no Controle de Volume"
-        description: "Efeito animado sobre a barra de volume principal"
+        label: root.dtr("settingsAudioSliderEffect")
+        description: root.dtr("settingsAudioSliderEffectDesc")
         currentKey: root.cfg.audioSliderEffect ?? "wave"
         model: [
           {
             key: "none",
-            name: "Padrão"
+            name: root.dtr("sliderEffectNone")
           },
           {
             key: "wave",
-            name: "Onda Fluida"
+            name: root.dtr("sliderEffectWave")
           },
           {
             key: "zigzag",
-            name: "Zigzag"
+            name: root.dtr("sliderEffectZigzag")
           },
           {
             key: "pulse",
-            name: "Pulsação de Som"
+            name: root.dtr("sliderEffectPulse")
           },
           {
             key: "bars",
-            name: "Barras"
+            name: root.dtr("sliderEffectBars")
           },
           {
             key: "spectrum",
-            name: "Espectro Aberto"
+            name: root.dtr("sliderEffectSpectrum")
           },
           {
             key: "filament",
-            name: "Filamento Neon"
+            name: root.dtr("sliderEffectFilament")
           },
           {
             key: "ripple",
-            name: "Ondas de Impacto"
+            name: root.dtr("sliderEffectRipple")
           },
           {
             key: "glow",
-            name: "Brilho Dinâmico"
+            name: root.dtr("sliderEffectGlow")
           },
           {
             key: "wavy_fill",
-            name: "Onda Sólida"
+            name: root.dtr("sliderEffectWavyFill")
           },
           {
             key: "blocks",
-            name: "Blocos"
+            name: root.dtr("sliderEffectBlocks")
           },
           {
             key: "dots",
-            name: "Pontos"
+            name: root.dtr("sliderEffectDots")
           },
           {
             key: "comet",
-            name: "Cometa"
+            name: root.dtr("settingsSliderEffectComet")
           },
           {
             key: "aurora",
-            name: "Aurora"
+            name: root.dtr("settingsSliderEffectAurora")
           }
         ]
         onSelected: key => {
@@ -599,53 +843,53 @@ ColumnLayout {
 
       NComboBox {
         Layout.fillWidth: true
-        label: "Efeito no Controle de Microfone"
-        description: "Efeito animado para a barra de entrada de áudio"
+        label: root.dtr("settingsMicSliderEffect")
+        description: root.dtr("settingsMicSliderEffectDesc")
         currentKey: root.cfg.microphoneSliderEffect ?? "pulse"
         model: [
           {
             key: "none",
-            name: "Padrão"
+            name: root.dtr("sliderEffectNone")
           },
           {
             key: "wave",
-            name: "Onda Fluida"
+            name: root.dtr("sliderEffectWave")
           },
           {
             key: "zigzag",
-            name: "Zigzag"
+            name: root.dtr("sliderEffectZigzag")
           },
           {
             key: "pulse",
-            name: "Pulsação de Voz"
+            name: root.dtr("sliderEffectPulse")
           },
           {
             key: "bars",
-            name: "Barras"
+            name: root.dtr("sliderEffectBars")
           },
           {
             key: "glow",
-            name: "Brilho Dinâmico"
+            name: root.dtr("sliderEffectGlow")
           },
           {
             key: "wavy_fill",
-            name: "Onda Sólida"
+            name: root.dtr("sliderEffectWavyFill")
           },
           {
             key: "blocks",
-            name: "Blocos"
+            name: root.dtr("sliderEffectBlocks")
           },
           {
             key: "dots",
-            name: "Pontos"
+            name: root.dtr("sliderEffectDots")
           },
           {
             key: "comet",
-            name: "Cometa"
+            name: root.dtr("settingsSliderEffectComet")
           },
           {
             key: "aurora",
-            name: "Aurora"
+            name: root.dtr("settingsSliderEffectAurora")
           }
         ]
         onSelected: key => {
@@ -659,7 +903,7 @@ ColumnLayout {
       }
 
       NText {
-        text: "Desempenho e Energia"
+        text: root.dtr("settingsPerformanceEnergy")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -667,8 +911,8 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Respeitar Modo Desempenho da Shell"
-        description: "Pausa os efeitos visuais pesados quando o modo Performance estiver ativo"
+        label: root.dtr("settingsFollowShellPerf")
+        description: root.dtr("settingsFollowShellPerfDesc")
         checked: root.cfg.followNoctaliaPerformanceMode ?? true
         onToggled: checked => {
                      root.cfg.followNoctaliaPerformanceMode = checked;
@@ -678,8 +922,8 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Economia em Uso de Bateria"
-        description: "Reduz o uso de CPU/GPU ao usar a bateria do notebook"
+        label: root.dtr("settingsPowerSaver")
+        description: root.dtr("settingsPowerSaverDesc")
         checked: root.cfg.powerSaverPerformanceMode ?? true
         onToggled: checked => {
                      root.cfg.powerSaverPerformanceMode = checked;
@@ -697,7 +941,7 @@ ColumnLayout {
       spacing: Style.marginM
 
       NText {
-        text: "Cards Visíveis na Central de Controle"
+        text: root.dtr("settingsVisibleCards")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -705,7 +949,7 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Painel de Notificações"
+        label: root.dtr("settingsShowNotifications")
         checked: root.cfg.showNotifications ?? true
         onToggled: checked => {
                      root.cfg.showNotifications = checked;
@@ -715,7 +959,7 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Player de Mídia"
+        label: root.dtr("settingsShowMedia")
         checked: root.cfg.showMedia ?? true
         onToggled: checked => {
                      root.cfg.showMedia = checked;
@@ -725,7 +969,7 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Calendário e Eventos"
+        label: root.dtr("settingsShowCalendar")
         checked: root.cfg.showCalendar ?? true
         onToggled: checked => {
                      root.cfg.showCalendar = checked;
@@ -735,7 +979,7 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Ferramentas de Captura"
+        label: root.dtr("settingsShowRecordingCard")
         checked: root.cfg.showRecordingCard ?? true
         onToggled: checked => {
                      root.cfg.showRecordingCard = checked;
@@ -748,7 +992,7 @@ ColumnLayout {
       }
 
       NText {
-        text: "Mídia na Barra Superior"
+        text: root.dtr("settingsBarMedia")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
         color: Color.mOnSurface
@@ -756,7 +1000,7 @@ ColumnLayout {
 
       NToggle {
         Layout.fillWidth: true
-        label: "Exibir Mídia na Barra"
+        label: root.dtr("settingsShowBarMediaInfo")
         checked: root.cfg.showBarMediaInfo ?? true
         onToggled: checked => {
                      root.cfg.showBarMediaInfo = checked;
@@ -767,7 +1011,7 @@ ColumnLayout {
       NToggle {
         Layout.fillWidth: true
         visible: root.cfg.showBarMediaInfo ?? true
-        label: "Exibir Capa do Álbum na Barra"
+        label: root.dtr("settingsShowBarAlbumArt")
         checked: root.cfg.barMediaShowAlbumArt ?? true
         onToggled: checked => {
                      root.cfg.barMediaShowAlbumArt = checked;
@@ -778,7 +1022,7 @@ ColumnLayout {
       NToggle {
         Layout.fillWidth: true
         visible: root.cfg.showBarMediaInfo ?? true
-        label: "Exibir Progresso da Música na Barra"
+        label: root.dtr("settingsShowBarProgressRing")
         checked: root.cfg.barMediaShowProgressRing ?? true
         onToggled: checked => {
                      root.cfg.barMediaShowProgressRing = checked;
