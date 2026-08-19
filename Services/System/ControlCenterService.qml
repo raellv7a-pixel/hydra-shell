@@ -70,43 +70,6 @@ Singleton {
                             "iconName": "layout-dashboard"
                           })
 
-  // Translation dictionaries
-  property var translations: ({})
-
-  FileView {
-    id: ptFileView
-    path: Quickshell.shellDir + "/Modules/Panels/ControlCenter/i18n/pt.json"
-    printErrors: false
-    onLoaded: {
-      try {
-        var data = JSON.parse(text());
-        var updated = Object.assign({}, root.translations);
-        updated["pt"] = data;
-        root.translations = updated;
-        Logger.d("ControlCenterService", "Loaded PT translations");
-      } catch (e) {
-        Logger.e("ControlCenterService", "Failed to parse PT translations:", e);
-      }
-    }
-  }
-
-  FileView {
-    id: enFileView
-    path: Quickshell.shellDir + "/Modules/Panels/ControlCenter/i18n/en.json"
-    printErrors: false
-    onLoaded: {
-      try {
-        var data = JSON.parse(text());
-        var updated = Object.assign({}, root.translations);
-        updated["en"] = data;
-        root.translations = updated;
-        Logger.d("ControlCenterService", "Loaded EN translations");
-      } catch (e) {
-        Logger.e("ControlCenterService", "Failed to parse EN translations:", e);
-      }
-    }
-  }
-
   FileView {
     id: settingsFileView
     path: Settings.directoriesCreated ? (Settings.configDir + "control-center.json") : undefined
@@ -119,49 +82,6 @@ Singleton {
         }
       } catch (e) {}
     }
-  }
-
-  function tr(key, interp) {
-    if (!key)
-      return "";
-    var lang = (typeof I18n !== "undefined" && I18n.langCode) ? I18n.langCode : "pt";
-    var dict = root.translations[lang] || root.translations["pt"] || root.translations["en"] || {};
-
-    var parts = key.split(".");
-    var curr = dict;
-    for (var i = 0; i < parts.length; i++) {
-      if (curr && typeof curr === "object" && parts[i] in curr) {
-        curr = curr[parts[i]];
-      } else {
-        curr = null;
-        break;
-      }
-    }
-
-    if (typeof curr !== "string") {
-      // Fallback to English
-      dict = root.translations["en"] || root.translations["pt"] || {};
-      curr = dict;
-      for (var j = 0; j < parts.length; j++) {
-        if (curr && typeof curr === "object" && parts[j] in curr) {
-          curr = curr[parts[j]];
-        } else {
-          curr = key;
-          break;
-        }
-      }
-    }
-
-    if (typeof curr !== "string")
-      curr = key;
-
-    if (interp && typeof interp === "object") {
-      for (var k in interp) {
-        curr = curr.replace("{" + k + "}", interp[k]);
-      }
-    }
-
-    return curr;
   }
 
   function saveSettings() {

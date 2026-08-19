@@ -192,7 +192,7 @@ Item {
   onProfileCoverFolderChanged: root.pickRandomProfileCover()
 
   function tr(key) {
-    return ControlCenterService.tr("panel." + key);
+    return I18n.tr("panels.dashboard." + key);
   }
 
   function updateAvatar(path) {
