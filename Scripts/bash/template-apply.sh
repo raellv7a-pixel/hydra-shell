@@ -347,20 +347,37 @@ hyprland)
     # Prefer Lua config when present. .conf file is kept
     # only for legacy compatibility
     if [ -f "$LUA_CONFIG_FILE" ]; then
-      if grep -qF 'hydra-colors.lua' "$LUA_CONFIG_FILE"; then
+      # hyprland.lua is a symlink into the shell checkout on a standard
+      # install (Scripts/bash/hyprland-adopt.sh), so appending through it
+      # would dirty that git checkout and block Scripts/dev/lab-sync.sh.
+      # It ends with optional("user"), so write the include into the
+      # user-owned file it loads instead — same load position, no churn in
+      # tracked files.
+      LUA_USER_FILE="$CONFIG_DIR/user.lua"
+      if [ -L "$LUA_CONFIG_FILE" ]; then
+        LUA_TARGET_FILE="$LUA_USER_FILE"
+      else
+        LUA_TARGET_FILE="$LUA_CONFIG_FILE"
+      fi
+
+      # Match a real dofile() statement, never a comment mentioning the file
+      # (hyprland.lua documents this include, which would false-positive).
+      LUA_INCLUDE_RE='^[[:space:]]*dofile\(.*hydra-colors\.lua'
+      if grep -qE "$LUA_INCLUDE_RE" "$LUA_CONFIG_FILE" ||
+        { [ -f "$LUA_USER_FILE" ] && grep -qE "$LUA_INCLUDE_RE" "$LUA_USER_FILE"; }; then
         echo "Lua theme already included, skipping modification."
       else
-        if [ -L "$LUA_CONFIG_FILE" ] && [ ! -w "$LUA_CONFIG_FILE" ]; then
+        if [ -L "$LUA_TARGET_FILE" ] && [ ! -w "$LUA_TARGET_FILE" ]; then
           echo "Detected read-only symlink, converting to local file..."
-          cp --remove-destination "$(readlink -f "$LUA_CONFIG_FILE")" "$LUA_CONFIG_FILE"
-          chmod +w "$LUA_CONFIG_FILE"
+          cp --remove-destination "$(readlink -f "$LUA_TARGET_FILE")" "$LUA_TARGET_FILE"
+          chmod +w "$LUA_TARGET_FILE"
         fi
 
         printf "\n%s\n%s\n" \
           "-- This loads Hydra-generated Hyprland colors." \
-          "$LUA_INCLUDE_LINE" >> "$LUA_CONFIG_FILE"
+          "$LUA_INCLUDE_LINE" >> "$LUA_TARGET_FILE"
 
-        echo "Added Hydra Lua theme include to config."
+        echo "Added Hydra Lua theme include to $LUA_TARGET_FILE."
       fi
 
     else

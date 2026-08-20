@@ -59,12 +59,13 @@ optional("hydra-shell.monitors")
 optional("hydra-shell.settings")
 optional("hydra-shell.rebinds")
 
--- Color template output (window border / group bar colors) is unrelated to
--- this plan and manages its own inclusion: Scripts/bash/template-apply.sh
--- idempotently appends a `dofile(...)` line for
--- ~/.config/hypr/hydra/hydra-colors.lua at the end of whichever file is
--- ~/.config/hypr/hyprland.lua the first time a Hyprland color template runs —
--- this file included. Nothing to add here; do not hand-add a second include.
+-- Color template output (window border / group bar colors) manages its own
+-- inclusion: Scripts/bash/template-apply.sh idempotently appends a
+-- `dofile(".../hypr/hydra/hydra-colors.lua")` line the first time a Hyprland
+-- color template runs. Since this file is a symlink into the shell checkout on
+-- a standard install, the include goes into ~/.config/hypr/user.lua (loaded by
+-- the optional("user") below) instead of here, keeping the checkout clean.
+-- Nothing to add here; do not hand-add a second include.
 
 -- Last word. Yours.
 optional("user")
