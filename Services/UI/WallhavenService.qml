@@ -28,7 +28,7 @@ Singleton {
   property string ratios: ""
   property string colors: ""
 
-  readonly property string envApiKey: Quickshell.env("NOCTALIA_WALLHAVEN_API_KEY") || ""
+  readonly property string envApiKey: Quickshell.env("HYDRA_WALLHAVEN_API_KEY") || ""
   readonly property string apiKey: envApiKey !== "" ? envApiKey : (Settings.data.wallpaper.wallhavenApiKey || "")
   readonly property bool apiKeyManagedByEnv: envApiKey !== ""
   readonly property string apiBaseUrl: "https://wallhaven.cc/api/v1"

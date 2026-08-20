@@ -5,28 +5,28 @@
   ...
 }:
 let
-  cfg = config.programs.noctalia-shell;
+  cfg = config.programs.hydra-shell;
   jsonFormat = pkgs.formats.json { };
   tomlFormat = pkgs.formats.toml { };
 
   generateJson =
     name: value:
     if lib.isString value then
-      pkgs.writeText "noctalia-${name}.json" value
+      pkgs.writeText "hydra-${name}.json" value
     else if builtins.isPath value || lib.isStorePath value then
       value
     else
-      jsonFormat.generate "noctalia-${name}.json" value;
+      jsonFormat.generate "hydra-${name}.json" value;
 in
 {
-  options.programs.noctalia-shell = {
-    enable = lib.mkEnableOption "Noctalia shell configuration";
+  options.programs.hydra-shell = {
+    enable = lib.mkEnableOption "Hydra shell configuration";
 
-    systemd.enable = lib.mkEnableOption "Noctalia shell systemd integration";
+    systemd.enable = lib.mkEnableOption "Hydra shell systemd integration";
 
     package = lib.mkOption {
       type = lib.types.nullOr lib.types.package;
-      description = "The noctalia-shell package to use";
+      description = "The hydra-shell package to use";
     };
 
     settings = lib.mkOption {
@@ -56,8 +56,8 @@ in
         }
       '';
       description = ''
-        Noctalia shell configuration settings as an attribute set, string
-        or filepath, to be written to ~/.config/noctalia/settings.json.
+        Hydra shell configuration settings as an attribute set, string
+        or filepath, to be written to ~/.config/hydra/settings.json.
       '';
     };
 
@@ -89,8 +89,8 @@ in
         }
       '';
       description = ''
-        Noctalia shell color configuration as an attribute set, string
-        or filepath, to be written to ~/.config/noctalia/colors.json.
+        Hydra shell color configuration as an attribute set, string
+        or filepath, to be written to ~/.config/hydra/colors.json.
       '';
     };
 
@@ -107,7 +107,7 @@ in
         {
           templates = {
             neovim = {
-              input_path = "~/.config/noctalia/templates/template.lua";
+              input_path = "~/.config/hydra/templates/template.lua";
               output_path = "~/.config/nvim/generated.lua";
               post_hook = "pkill -SIGUSR1 nvim";
             };
@@ -115,7 +115,7 @@ in
         }
       '';
       description = ''
-        Template definitions for Noctalia, to be written to ~/.config/noctalia/user-templates.toml.
+        Template definitions for Hydra, to be written to ~/.config/hydra/user-templates.toml.
 
         This option accepts:
         - a Nix attrset (converted to TOML automatically)
@@ -138,7 +138,7 @@ in
           sources = [
             {
               enabled = true;
-              name = "Noctalia Plugins";
+              name = "Hydra Plugins";
               url = "https://github.com/noctalia-dev/noctalia-plugins";
             }
           ];
@@ -152,8 +152,8 @@ in
         }
       '';
       description = ''
-        Noctalia shell plugin configuration as an attribute set, string
-        or filepath, to be written to ~/.config/noctalia/plugins.json.
+        Hydra shell plugin configuration as an attribute set, string
+        or filepath, to be written to ~/.config/hydra/plugins.json.
       '';
     };
 
@@ -176,13 +176,13 @@ in
       '';
       description = ''
         Each plugin’s settings as an attribute set, string
-        or filepath, to be written to ~/.config/noctalia/plugins/plugin-name/settings.json.
+        or filepath, to be written to ~/.config/hydra/plugins/plugin-name/settings.json.
       '';
     };
 
     hyprland = {
       enable = lib.mkEnableOption ''
-        letting noctalia-shell manage ~/.config/hypr/hyprland.lua and
+        letting hydra-shell manage ~/.config/hypr/hyprland.lua and
         ~/.config/hypr/modules, symlinked from the package's own
         Assets/Hyprland (see PLANO_INTEGRACAO_HYPRMOD.md §4.3). This is the
         declarative equivalent of accepting the adoption offer in the Setup
@@ -202,26 +202,26 @@ in
   config = lib.mkIf cfg.enable {
     warnings = lib.mkIf cfg.systemd.enable [
       ''
-        Running noctalia-shell as a systemd service has been deprecated!
+        Running hydra-shell as a systemd service has been deprecated!
         See https://docs.noctalia.dev/getting-started/nixos/#running-the-shell for details.
       ''
     ];
 
-    systemd.user.services.noctalia-shell = lib.mkIf cfg.systemd.enable {
+    systemd.user.services.hydra-shell = lib.mkIf cfg.systemd.enable {
       Unit = {
-        Description = "Noctalia Shell - Wayland desktop shell";
+        Description = "Hydra Shell - Wayland desktop shell";
         Documentation = "https://docs.noctalia.dev";
         PartOf = [ config.wayland.systemd.target ];
         After = [ config.wayland.systemd.target ];
         X-Restart-Triggers =
-          lib.optional (cfg.settings != { }) "${config.xdg.configFile."noctalia/settings.json".source}"
-          ++ lib.optional (cfg.colors != { }) "${config.xdg.configFile."noctalia/colors.json".source}"
-          ++ lib.optional (cfg.plugins != { }) "${config.xdg.configFile."noctalia/plugins.json".source}"
+          lib.optional (cfg.settings != { }) "${config.xdg.configFile."hydra/settings.json".source}"
+          ++ lib.optional (cfg.colors != { }) "${config.xdg.configFile."hydra/colors.json".source}"
+          ++ lib.optional (cfg.plugins != { }) "${config.xdg.configFile."hydra/plugins.json".source}"
           ++ lib.optional (
             cfg.user-templates != { }
-          ) "${config.xdg.configFile."noctalia/user-templates.toml".source}"
+          ) "${config.xdg.configFile."hydra/user-templates.toml".source}"
           ++ lib.mapAttrsToList (
-            name: _: "${config.xdg.configFile."noctalia/plugins/${name}/settings.json".source}"
+            name: _: "${config.xdg.configFile."hydra/plugins/${name}/settings.json".source}"
           ) cfg.pluginSettings;
       };
 
@@ -236,34 +236,34 @@ in
     home.packages = lib.optional (cfg.package != null) cfg.package;
 
     xdg.configFile = {
-      "noctalia/settings.json" = lib.mkIf (cfg.settings != { }) {
+      "hydra/settings.json" = lib.mkIf (cfg.settings != { }) {
         source = generateJson "settings" cfg.settings;
       };
-      "noctalia/colors.json" = lib.mkIf (cfg.colors != { }) {
+      "hydra/colors.json" = lib.mkIf (cfg.colors != { }) {
         source = generateJson "colors" cfg.colors;
       };
-      "noctalia/plugins.json" = lib.mkIf (cfg.plugins != { }) {
+      "hydra/plugins.json" = lib.mkIf (cfg.plugins != { }) {
         source = generateJson "plugins" cfg.plugins;
       };
-      "noctalia/user-templates.toml" = lib.mkIf (cfg.user-templates != { }) {
+      "hydra/user-templates.toml" = lib.mkIf (cfg.user-templates != { }) {
         source =
           if lib.isString cfg.user-templates then
-            pkgs.writeText "noctalia-user-templates.toml" cfg.user-templates
+            pkgs.writeText "hydra-user-templates.toml" cfg.user-templates
           else if builtins.isPath cfg.user-templates || lib.isStorePath cfg.user-templates then
             cfg.user-templates
           else
-            tomlFormat.generate "noctalia-user-templates.toml" cfg.user-templates;
+            tomlFormat.generate "hydra-user-templates.toml" cfg.user-templates;
       };
       "hypr/hyprland.lua" = lib.mkIf cfg.hyprland.enable {
-        source = "${cfg.package}/share/noctalia-shell/Assets/Hyprland/hyprland.lua";
+        source = "${cfg.package}/share/hydra-shell/Assets/Hyprland/hyprland.lua";
       };
       "hypr/modules" = lib.mkIf cfg.hyprland.enable {
-        source = "${cfg.package}/share/noctalia-shell/Assets/Hyprland/modules";
+        source = "${cfg.package}/share/hydra-shell/Assets/Hyprland/modules";
       };
     }
     // lib.mapAttrs' (
       name: value:
-      lib.nameValuePair "noctalia/plugins/${name}/settings.json" {
+      lib.nameValuePair "hydra/plugins/${name}/settings.json" {
         source = generateJson "${name}-settings" value;
       }
     ) cfg.pluginSettings;
@@ -271,11 +271,11 @@ in
     assertions = [
       {
         assertion = !cfg.systemd.enable || cfg.package != null;
-        message = "noctalia-shell: The package option must not be null when systemd service is enabled.";
+        message = "hydra-shell: The package option must not be null when systemd service is enabled.";
       }
       {
         assertion = !cfg.hyprland.enable || cfg.package != null;
-        message = "noctalia-shell: The package option must not be null when programs.noctalia-shell.hyprland.enable is set.";
+        message = "hydra-shell: The package option must not be null when programs.hydra-shell.hyprland.enable is set.";
       }
     ];
   };

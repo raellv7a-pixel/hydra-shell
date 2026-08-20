@@ -1,6 +1,6 @@
 # Polkit Agent
 
-This plugin provides a Polkit authentication agent for Noctalia. It allows you to authenticate actions that require elevated privileges directly within the shell.
+This plugin provides a Polkit authentication agent for Hydra. It allows you to authenticate actions that require elevated privileges directly within the shell.
 
 ![Preview](preview.png)
 

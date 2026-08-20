@@ -22,7 +22,7 @@ PanelWindow {
   }
   color: "transparent"
 
-  WlrLayershell.namespace: "noctalia-workspace-manager-" + (screen?.name || "unknown")
+  WlrLayershell.namespace: "hydra-workspace-manager-" + (screen?.name || "unknown")
   WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.exclusionMode: ExclusionMode.Ignore

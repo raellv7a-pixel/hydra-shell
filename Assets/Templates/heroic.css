@@ -1,9 +1,9 @@
 /* Heroic derives the injected body class from the theme file's *name*
-   (output_path in TemplateRegistry.qml is noctalia.css, so Heroic applies
-   `body.noctalia`, never `body.matugen`) — every rule below was scoped to
+   (output_path in TemplateRegistry.qml is hydra.css, so Heroic applies
+   `body.hydra`, never `body.matugen`) — every rule below was scoped to
    the wrong class and silently no-opped, leaving Heroic's own default
    (pale/light) theme showing through untouched. */
-body.noctalia {
+body.hydra {
   --accent: {{colors.tertiary.default.hex}};
   --accent-overlay: {{colors.inverse_primary.default.hex}};
   

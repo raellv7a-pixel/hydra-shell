@@ -79,7 +79,7 @@ Variants {
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.keyboardFocus: (root.isVisible && isPrimary) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.namespace: "noctalia-annotate"
+    WlrLayershell.namespace: "hydra-annotate"
     Item {
       id: fullMask
       anchors.fill: parent

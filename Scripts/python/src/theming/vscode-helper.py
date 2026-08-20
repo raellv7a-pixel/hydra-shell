@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-# Finds all installed Noctalia theme extensions for VSCode/VSCodium.
+# Finds all installed Hydra theme extensions for VSCode/VSCodium.
 
 import sys
 from pathlib import Path
 
 
-def find_all_noctalia_themes(extensions_dir: Path, prefix: str) -> list[str]:
+def find_all_hydra_themes(extensions_dir: Path, prefix: str) -> list[str]:
     # Bail early if the extensions directory doesn't exist
     if not extensions_dir.is_dir():
         return []
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     prefix = sys.argv[2] if len(sys.argv) > 2 else "noctalia.noctaliatheme-"
 
     # Print the resolved paths to stdout for the QML Process to capture
-    results = find_all_noctalia_themes(extensions_dir, prefix)
+    results = find_all_hydra_themes(extensions_dir, prefix)
     if results:
         for path in results:
             print(path)

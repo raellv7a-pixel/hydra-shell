@@ -292,7 +292,48 @@
   },
   "controlCenter": {
     "position": "close_to_bar_button",
+    "detached": true,
     "diskPath": "/",
+    "panelWidth": 1120,
+    "panelHeight": 700,
+    "panelScale": 1.0,
+    "avatarPath": "",
+    "avatarShape": "circle",
+    "avatarMusicEffect": "ring",
+    "profileCardShape": "rounded",
+    "showProfileDanceGif": true,
+    "profileDanceGifPath": "",
+    "showProfileWallpaper": true,
+    "profileCoverMode": "auto",
+    "profileCoverPath": "",
+    "profileCoverFolder": "",
+    "profileCoverOverlayEnabled": true,
+    "profileCoverOverlay": 0.58,
+    "profileCoverBlurEnabled": false,
+    "profileCoverBlur": 0,
+    "profileCoverBorder": true,
+    "profileCoverBorderWidth": 2,
+    "profileCoverBorderEffect": "primary",
+    "profileCoverBorderColorMode": "auto",
+    "profileCoverBorderAnimation": "static",
+    "profileCoverBorderSpeed": 1.0,
+    "profileCoverBorderColorCount": 3,
+    "profileCoverBorderColor1": "#fff59b",
+    "profileCoverBorderColor2": "#8bd5ff",
+    "profileCoverBorderColor3": "#cba6f7",
+    "profileCoverBorderColor4": "#f38ba8",
+    "profileCoverBorderColor5": "#a6e3a1",
+    "mediaVisualizerEffect": "bars",
+    "audioSliderEffect": "wave",
+    "microphoneSliderEffect": "pulse",
+    "followHydraPerformanceMode": true,
+    "powerSaverPerformanceMode": true,
+    "showNotifications": true,
+    "showMedia": true,
+    "showCalendar": true,
+    "showRecordingCard": true,
+    "componentStyles": [],
+    "legacyStoreImported": false,
     "shortcuts": {
       "left": [
         {
@@ -305,7 +346,7 @@
           "id": "WallpaperSelector"
         },
         {
-          "id": "NoctaliaPerformance"
+          "id": "HydraPerformance"
         }
       ],
       "right": [
@@ -373,7 +414,7 @@
     "criticalColor": "",
     "externalMonitor": "resources || missioncenter || jdsystemmonitor || corestats || system-monitoring-center || gnome-system-monitor || plasma-systemmonitor || mate-system-monitor || ukui-system-monitor || deepin-system-monitor || pantheon-system-monitor"
   },
-  "noctaliaPerformance": {
+  "hydraPerformance": {
     "disableWallpaper": true,
     "disableDesktopWidgets": true
   },
@@ -542,7 +583,7 @@
   },
   "colorSchemes": {
     "useWallpaperColors": false,
-    "predefinedScheme": "Noctalia (default)",
+    "predefinedScheme": "Hydra (default)",
     "darkMode": true,
     "schedulingMode": "off",
     "manualSunrise": "06:30",

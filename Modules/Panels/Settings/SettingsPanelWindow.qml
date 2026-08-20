@@ -10,7 +10,7 @@ import qs.Widgets
 FloatingWindow {
   id: root
 
-  title: "Noctalia"
+  title: "Hydra"
   // A real toplevel window (FloatingWindow, not layer-shell) — resizing by
   // dragging an edge already works via the compositor, no maximumSize cap
   // and no custom chrome needed for it.

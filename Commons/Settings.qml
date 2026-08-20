@@ -7,7 +7,7 @@ import "../Helpers/QtObj2JS.js" as QtObj2JS
 import qs.Commons
 import qs.Commons.Migrations
 import qs.Modules.OSD
-import qs.Services.Noctalia
+import qs.Services.Hydra
 import qs.Services.UI
 
 Singleton {
@@ -21,17 +21,17 @@ Singleton {
 
   /*
   Shell directories.
-  - Default config directory: ~/.config/noctalia
-  - Default cache directory: ~/.cache/noctalia
+  - Default config directory: ~/.config/hydra
+  - Default cache directory: ~/.cache/hydra
   */
   readonly property alias data: adapter  // Used to access via Settings.data.xxx.yyy
-  readonly property int settingsVersion: 59
-  property bool isDebug: Quickshell.env("NOCTALIA_DEBUG") === "1"
-  readonly property string shellName: "noctalia"
-  readonly property string configDir: ensureTrailingSlash(Quickshell.env("NOCTALIA_CONFIG_DIR") || (Quickshell.env("XDG_CONFIG_HOME") || Quickshell.env("HOME") + "/.config") + "/" + shellName + "/")
-  readonly property string cacheDir: ensureTrailingSlash(Quickshell.env("NOCTALIA_CACHE_DIR") || (Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache") + "/" + shellName + "/")
+  readonly property int settingsVersion: 60
+  property bool isDebug: Quickshell.env("HYDRA_DEBUG") === "1"
+  readonly property string shellName: "hydra"
+  readonly property string configDir: ensureTrailingSlash(Quickshell.env("HYDRA_CONFIG_DIR") || (Quickshell.env("XDG_CONFIG_HOME") || Quickshell.env("HOME") + "/.config") + "/" + shellName + "/")
+  readonly property string cacheDir: ensureTrailingSlash(Quickshell.env("HYDRA_CACHE_DIR") || (Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache") + "/" + shellName + "/")
 
-  readonly property string settingsFile: Quickshell.env("NOCTALIA_SETTINGS_FILE") || (configDir + "settings.json")
+  readonly property string settingsFile: Quickshell.env("HYDRA_SETTINGS_FILE") || (configDir + "settings.json")
   readonly property string defaultAvatar: Quickshell.env("HOME") + "/.face"
   readonly property string defaultVideosDirectory: Quickshell.env("HOME") + "/Videos"
   readonly property string defaultWallpapersDirectory: Quickshell.env("HOME") + "/Pictures/Wallpapers"
@@ -191,6 +191,136 @@ Singleton {
       } catch (e) {
         Logger.w("Settings", "Failed to parse default settings file: " + e);
         root._defaultSettings = null;
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // One-shot import of the pre-native dashboard store (control-center.json),
+  // which the Raell Dashboard wrote while it was still a plugin. It lives here
+  // rather than in a Migration because migrations only receive settings.json's
+  // parsed contents and cannot read a second file. Gated on isLoaded so the
+  // import never lands on a not-yet-populated adapter.
+  // ---------------------------------------------------------------------------
+  FileView {
+    id: legacyControlCenterFileView
+    // path is a QString, so the "not ready yet" sentinel must be "" and not
+    // undefined, which the scene graph rejects with a type warning.
+    path: isLoaded ? (configDir + "control-center.json") : ""
+    printErrors: false
+    watchChanges: false
+    onPathChanged: {
+      if (path !== "") {
+        reload();
+      }
+    }
+    onLoaded: {
+      if (root.data.controlCenter.legacyStoreImported)
+        return;
+      try {
+        var legacy = JSON.parse(legacyControlCenterFileView.text());
+        if (legacy && typeof legacy === "object") {
+          root.importLegacyControlCenter(legacy);
+          Logger.i("Settings", "Imported legacy control-center.json into controlCenter settings");
+        }
+      } catch (e) {
+        Logger.w("Settings", "Ignoring malformed legacy control-center.json: " + e);
+      }
+      root.data.controlCenter.legacyStoreImported = true;
+      // Flush now instead of letting saveTimer coalesce it: settingsFileView
+      // watches the file, and its external-reload pass would otherwise re-read
+      // the pre-import contents over the values we just set.
+      root.saveImmediate();
+    }
+  }
+
+  readonly property var _legacyControlCenterStringKeys: ["diskPath", "avatarPath", "avatarShape", "avatarMusicEffect", "profileCardShape", "profileDanceGifPath", "profileCoverMode", "profileCoverPath", "profileCoverFolder", "profileCoverBorderEffect", "profileCoverBorderColorMode", "profileCoverBorderAnimation", "profileCoverBorderColor1", "profileCoverBorderColor2", "profileCoverBorderColor3", "profileCoverBorderColor4", "profileCoverBorderColor5", "mediaVisualizerEffect", "audioSliderEffect", "microphoneSliderEffect"]
+  readonly property var _legacyControlCenterIntKeys: ["panelWidth", "panelHeight", "profileCoverBlur", "profileCoverBorderWidth", "profileCoverBorderColorCount"]
+  readonly property var _legacyControlCenterRealKeys: ["panelScale", "profileCoverOverlay", "profileCoverBorderSpeed"]
+  readonly property var _legacyControlCenterBoolKeys: ["showProfileDanceGif", "showProfileWallpaper", "profileCoverOverlayEnabled", "profileCoverBlurEnabled", "profileCoverBorder", "followHydraPerformanceMode", "powerSaverPerformanceMode", "showNotifications", "showMedia", "showCalendar", "showRecordingCard"]
+
+  // Legacy panelPosition vocabulary -> native controlCenter.position enum.
+  // The legacy "left"/"right" meant vertically centred against that edge.
+  readonly property var _legacyControlCenterPositions: ({
+                                                          "center": "center",
+                                                          "top_left": "top_left",
+                                                          "top_right": "top_right",
+                                                          "bottom_left": "bottom_left",
+                                                          "bottom_right": "bottom_right",
+                                                          "left": "center_left",
+                                                          "right": "center_right"
+                                                        })
+
+  function _legacyBool(value) {
+    if (typeof value === "string")
+      return value !== "" && value !== "false" && value !== "0";
+    return !!value;
+  }
+
+  function importLegacyControlCenter(legacy) {
+    var cc = root.data.controlCenter;
+    var i;
+    var key;
+    var value;
+
+    // Coerce on the way in: a stringly-typed legacy file must not poison a
+    // typed JsonObject property.
+    for (i = 0; i < _legacyControlCenterStringKeys.length; i++) {
+      key = _legacyControlCenterStringKeys[i];
+      value = legacy[key];
+      if (value !== undefined && value !== null)
+        cc[key] = String(value);
+    }
+
+    for (i = 0; i < _legacyControlCenterIntKeys.length; i++) {
+      key = _legacyControlCenterIntKeys[i];
+      value = parseInt(legacy[key], 10);
+      if (!isNaN(value))
+        cc[key] = value;
+    }
+
+    for (i = 0; i < _legacyControlCenterRealKeys.length; i++) {
+      key = _legacyControlCenterRealKeys[i];
+      value = parseFloat(legacy[key]);
+      if (!isNaN(value))
+        cc[key] = value;
+    }
+
+    for (i = 0; i < _legacyControlCenterBoolKeys.length; i++) {
+      key = _legacyControlCenterBoolKeys[i];
+      if (legacy[key] !== undefined)
+        cc[key] = _legacyBool(legacy[key]);
+    }
+
+    // The legacy store keyed styles by styleKey; the native store is a list of
+    // entries carrying that styleKey in a "key" field.
+    if (legacy.componentStyles && typeof legacy.componentStyles === "object") {
+      var entries = [];
+      var styleKeys = Object.keys(legacy.componentStyles);
+      for (i = 0; i < styleKeys.length; i++) {
+        var style = legacy.componentStyles[styleKeys[i]];
+        if (style && typeof style === "object") {
+          var entry = Object.assign({}, style);
+          entry.key = styleKeys[i];
+          entries.push(entry);
+        }
+      }
+      cc.componentStyles = entries;
+    }
+
+    // Legacy panelDetached maps straight onto detached; followBarEdge only ever
+    // meant "sit on the bar's edge", which is now position=close_to_bar_button.
+    if (legacy.panelDetached !== undefined)
+      cc.detached = _legacyBool(legacy.panelDetached);
+
+    if (legacy.panelDetached !== undefined || legacy.followBarEdge !== undefined || legacy.panelPosition !== undefined) {
+      var detached = legacy.panelDetached !== undefined ? _legacyBool(legacy.panelDetached) : true;
+      if (!detached && _legacyBool(legacy.followBarEdge)) {
+        cc.position = "close_to_bar_button";
+      } else {
+        var mapped = _legacyControlCenterPositions[String(legacy.panelPosition)];
+        if (mapped !== undefined)
+          cc.position = mapped;
       }
     }
   }
@@ -509,9 +639,77 @@ Singleton {
 
     // control center
     property JsonObject controlCenter: JsonObject {
-      // Position: close_to_bar_button, center, top_left, top_right, bottom_left, bottom_right, bottom_center, top_center
+      // Where the panel appears. "close_to_bar_button" makes it track the bar
+      // widget; every other value pins it to a screen edge or corner.
+      // close_to_bar_button, center, top_center, top_left, top_right,
+      // center_left, center_right, bottom_center, bottom_left, bottom_right
       property string position: "close_to_bar_button"
+
+      // Orthogonal to position: false glues the panel flush against the bar
+      // (SmartPanel's allowAttach path), true floats it with a screen margin.
+      // Any position can be either, e.g. top_left attached vs top_left floating.
+      property bool detached: true
+
       property string diskPath: "/"
+
+      // Panel geometry
+      property int panelWidth: 1120
+      property int panelHeight: 700
+      property real panelScale: 1
+
+      // Profile card
+      property string avatarPath: ""
+      property string avatarShape: "circle"
+      property string avatarMusicEffect: "ring"
+      property string profileCardShape: "rounded"
+      property bool showProfileDanceGif: true
+      property string profileDanceGifPath: ""
+      property bool showProfileWallpaper: true
+      property string profileCoverMode: "auto"
+      property string profileCoverPath: ""
+      property string profileCoverFolder: ""
+      property bool profileCoverOverlayEnabled: true
+      property real profileCoverOverlay: 0.58
+      property bool profileCoverBlurEnabled: false
+      property int profileCoverBlur: 0
+      property bool profileCoverBorder: true
+      property int profileCoverBorderWidth: 2
+      property string profileCoverBorderEffect: "primary"
+      property string profileCoverBorderColorMode: "auto"
+      property string profileCoverBorderAnimation: "static"
+      property real profileCoverBorderSpeed: 1
+      property int profileCoverBorderColorCount: 3
+      property string profileCoverBorderColor1: "#fff59b"
+      property string profileCoverBorderColor2: "#8bd5ff"
+      property string profileCoverBorderColor3: "#cba6f7"
+      property string profileCoverBorderColor4: "#f38ba8"
+      property string profileCoverBorderColor5: "#a6e3a1"
+
+      // Visualizer / slider effects
+      property string mediaVisualizerEffect: "bars"
+      property string audioSliderEffect: "wave"
+      property string microphoneSliderEffect: "pulse"
+
+      // Performance
+      property bool followHydraPerformanceMode: true
+      property bool powerSaverPerformanceMode: true
+
+      // Card visibility
+      property bool showNotifications: true
+      property bool showMedia: true
+      property bool showCalendar: true
+      property bool showRecordingCard: true
+
+      // Per-card style overrides. Each entry is an object carrying a "key"
+      // field naming the card's styleKey; the reserved key "__global" applies to
+      // every card. Edited through the config file only; there is no UI for it.
+      // A list rather than a keyed map because Quickshell's JsonObject supports
+      // list<var> but segfaults on a bare `var` map property.
+      property list<var> componentStyles: []
+
+      // One-shot import marker for the pre-native control-center.json store.
+      property bool legacyStoreImported: false
+
       property JsonObject shortcuts
       shortcuts: JsonObject {
         property list<var> left: [
@@ -525,7 +723,7 @@ Singleton {
             "id": "WallpaperSelector"
           },
           {
-            "id": "NoctaliaPerformance"
+            "id": "HydraPerformance"
           }
         ]
         property list<var> right: [
@@ -597,7 +795,7 @@ Singleton {
     }
 
     // performance
-    property JsonObject noctaliaPerformance: JsonObject {
+    property JsonObject hydraPerformance: JsonObject {
       property bool disableWallpaper: true
       property bool disableDesktopWidgets: true
     }
@@ -781,7 +979,7 @@ Singleton {
 
     property JsonObject colorSchemes: JsonObject {
       property bool useWallpaperColors: false
-      property string predefinedScheme: "Noctalia (default)"
+      property string predefinedScheme: "Hydra (default)"
       property bool darkMode: true
       // Valid values: "off", "manual" (fixed sunrise/sunset), "location" (weather API
       // sunrise/sunset), "wallpaper" (derived from the active wallpaper's luminance).
@@ -1242,7 +1440,7 @@ Singleton {
 
       var defaultPath = Quickshell.shellDir + "/Assets/settings-default.json";
 
-      Quickshell.execDetached(["sh", "-c", `cat > "${defaultPath}" << 'NOCTALIA_EOF'\n${jsonData}\nNOCTALIA_EOF`]);
+      Quickshell.execDetached(["sh", "-c", `cat > "${defaultPath}" << 'HYDRA_EOF'\n${jsonData}\nHYDRA_EOF`]);
     } catch (error) {
       Logger.e("Settings", "Failed to generate default settings file: " + error);
     }
@@ -1263,7 +1461,7 @@ Singleton {
 
       var defaultPath = Quickshell.shellDir + "/Assets/settings-widgets-default.json";
 
-      Quickshell.execDetached(["sh", "-c", `cat > "${defaultPath}" << 'NOCTALIA_EOF'\n${jsonData}\nNOCTALIA_EOF`]);
+      Quickshell.execDetached(["sh", "-c", `cat > "${defaultPath}" << 'HYDRA_EOF'\n${jsonData}\nHYDRA_EOF`]);
     } catch (error) {
       Logger.e("Settings", "Failed to generate widget default settings file: " + error);
     }

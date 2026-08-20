@@ -23,12 +23,12 @@ hl.window_rule({
 })
 
 -- hydra-shell's own Settings window (Modules/Panels/Settings/
--- SettingsPanelWindow.qml sets `title: "Noctalia"` — update this match if
+-- SettingsPanelWindow.qml sets `title: "Hydra"` — update this match if
 -- that title is ever rebranded) — without this it tiles instead of floating
 -- at its own content size.
 hl.window_rule({
   name = "hydra-shell-settings-float",
-  match = { title = "^(Noctalia)$" },
+  match = { title = "^(Hydra)$" },
   float = true,
   center = true,
 })

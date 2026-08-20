@@ -1,6 +1,6 @@
 # Monitor Layout
 
-Monitor Layout is a Noctalia Shell plugin for visually arranging multiple monitors and changing their resolutions, with support for both Sway and Hyprland compositors.
+Monitor Layout is a Hydra Shell plugin for visually arranging multiple monitors and changing their resolutions, with support for both Sway and Hyprland compositors.
 
 ## Features
 

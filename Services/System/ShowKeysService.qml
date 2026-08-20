@@ -7,7 +7,7 @@ import qs.Commons
 import qs.Services.UI
 
 // Reads raw keyboard events via `evtest` and renders them as a fading pill row
-// on Modules/OSD/ShowKeysOsd.qml. Ported from the noctalia-legacy show-keys plugin.
+// on Modules/OSD/ShowKeysOsd.qml. Ported from the hydra-legacy show-keys plugin.
 //
 // Security note: evtest reads /dev/input/eventN directly, bypassing the
 // compositor's usual input isolation. Off by default; the user must opt in

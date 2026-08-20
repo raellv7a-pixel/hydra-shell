@@ -1,4 +1,4 @@
-# Plano de nativização de plugins Noctalia
+# Plano de nativização de plugins Hydra
 
 Fonte dos plugins (clonados via sparse-checkout, **não alterar**):
 `/home/raell/Projetos/Exemplos/noctalia-legacy-v4-plugins/<plugin-id>/`
@@ -152,7 +152,7 @@ Referência: `noctalia-legacy-v4-plugins/clipper/{ClipboardCard.qml,CHANGELOG*.m
 - [x] `Services/Keyboard/ClipboardService.qml`: `isPinned()`/`togglePin()`, ordenação estável com fixados no topo, notas autorais com `contentType: \"note\"`, criação/cópia/colagem/exclusão e `wipeAll()` que mantém notas e entradas cliphist fixadas.
 - [x] `Modules/Panels/Launcher/Providers/ClipboardProvider.qml`: chips Fixados/Notas, ação pin/unpin, comando `>clip note <texto>` e ícone próprio para notas.
 - [x] `Modules/Panels/Launcher/LauncherCore.qml`: `Ctrl+P` fixa/desafixa o item selecionado sem roubar a tecla `p` da pesquisa.
-- [x] Smoke test ao vivo: criado `Hydra note test` via launcher, confirmado em `~/.config/noctalia/settings.json`, launcher fechado/reaberto e nota recuperada no topo; `Ctrl+P` persistiu o ID e Delete removeu nota+pin. O dado sintético foi removido ao final. `wipeAll()` não foi disparado contra o histórico real do usuário; o caminho preserva fixados filtrando os IDs antes de chamar `cliphist delete`.
+- [x] Smoke test ao vivo: criado `Hydra note test` via launcher, confirmado em `~/.config/hydra/settings.json`, launcher fechado/reaberto e nota recuperada no topo; `Ctrl+P` persistiu o ID e Delete removeu nota+pin. O dado sintético foi removido ao final. `wipeAll()` não foi disparado contra o histórico real do usuário; o caminho preserva fixados filtrando os IDs antes de chamar `cliphist delete`.
 
 
 ### 10. color-scheme-creator → editor na aba paleta do wallpaper — 🟢 Finalizado
@@ -174,6 +174,27 @@ Referência: `noctalia-legacy-v4-plugins/color-scheme-creator/{Panel.qml,Setting
 
 
 **Marco Fase 3:** 🟢 Finalizado — itens 8, 9, 10 e 11 implementados e validados.
+
+---
+
+## Fase 4 — raell-dashboard → painel nativo da Central de Controle
+
+Origem (plugin próprio, não o registro da Hydra): `https://github.com/raellv7a-pixel/raell-noctalia-plugins` → `raell-dashboard/`.
+Diferente das fases 1–3, este plugin já havia sido *injetado* na shell por um shim `pluginApi` em vez de portado. Esta fase concluiu o corte.
+
+### 12. raell-dashboard — 🟢 Finalizado
+- [x] ~~Remover o resto do shim de plugin~~ — `Modules/Panels/ControlCenter/BarWidget.qml` (1051 linhas) deletado: nunca esteve no `BarWidgetRegistry` (que importa só `qs.Modules.Bar.Widgets`, então `"ControlCenter"` resolve para `Modules/Bar/Widgets/ControlCenter.qml`) e ainda lia `ControlCenterService.provider`, propriedade que já não existia — era impossível renderizar. Com ele saíram as 13 chaves que só ele consumia (`showBarMediaInfo`, os 11 `barMedia*` e `iconName`), incluindo as 3 que apareciam no painel de Configurações sem efeito nenhum.
+- [x] ~~Migrar o store para o nativo~~ — as 39 chaves restantes viraram propriedades de `Settings.data.controlCenter` em `Commons/Settings.qml`. O store antigo era um `property var settings: ({...})` mutado **no lugar**, que não emite notificação: essa era a causa raiz dos toggles que não mudavam de estado. Também morreu o `saveSettings()` que persistia via `Quickshell.execDetached(["bash","-c","cat << 'EOF' > "+file+...])`, interpolando strings do usuário em comando de shell.
+- [x] ~~Unificar a posição do painel~~ — havia **dois** ajustes de posição concorrentes: `Settings.data.controlCenter.position` (nativo, o único respeitado) e `panelPosition`/`panelDetached`/`followBarEdge` (do plugin, o único visível na UI). O trio foi eliminado; `position` é a fonte única, com `close_to_bar_button` substituindo "seguir a barra". `ControlCenterPanel.qml` agora mapeia os 10 valores, inclusive os 4 cantos, que antes não casavam com nada e deixavam todas as âncoras falsas — daí o painel cair sempre no fallback de posição do botão. Adicionados `center_left`/`center_right` para preservar o `left`/`right` do plugin. `Modules/Bar/Bar.qml` (`handleEmptyBarClick`) passava `"ControlCenter"` sem checar o ajuste, ligando `useButtonPosition` no `SmartPanel` e sobrepondo a posição escolhida; agora é condicionado como nos outros dois call sites.
+- [x] ~~Restaurar a aba de Configurações~~ — `ControlCenterTab.qml` tinha sido reduzido a `DashboardSubTab { }`, o que **orfanou** `AppearanceSubTab`/`CardsSubTab`/`ShortcutsSubTab` (era ali que ficava o controle de posição que funcionava). Voltou a ser `NTabBar`+`NTabView` com 6 subabas: Aparência, Cartões, Atalhos, Perfil, Efeitos, Seções. `DashboardSubTab.qml` (1034 linhas) foi dividido nas três últimas e deletado, junto com a aba `"Central de Controle"` de rótulo pt-BR fixo que duplicava tudo dentro de `BarTab.qml`.
+- [x] ~~Import one-shot do `control-center.json`~~ — em `Commons/Settings.qml` (não em `Migration*`: migração só recebe o conteúdo do `settings.json` e não pode ler um segundo arquivo). Coage tipos na entrada, converte `componentStyles` de mapa para lista, traduz o trio de posição e grava com `saveImmediate()` — sem o flush a passagem de *external reload* do `settingsFileView` relia o arquivo pré-import por cima. Guardado por `legacyStoreImported`; `ControlCenterService.qml` foi deletado por inteiro (zero referências: o IPC já falava direto com o `PanelService`).
+- [x] Armadilha registrada: `property var` dentro de um `JsonObject` **causa segfault** no Quickshell (derrubou a shell em 100% das execuções). Só `list<var>` é suportado — por isso `componentStyles` é uma lista de objetos com campo `key`. Vale para qualquer ajuste novo em `Commons/Settings.qml`.
+- [x] Verificação ao vivo (`quickshell -p .` na sessão Hyprland, screenshots com `grim`): painel renderizado em `top_left`, `center` e `bottom_right` conforme o ajuste; import do arquivo legado do usuário produziu `position: "top_left"` a partir de `panelPosition: "top_left"` + `panelDetached: false`, determinístico em 3 execuções limpas e sem repetir no segundo boot; clique real (`ydotool`) em "Exibir Painel de Notificações" inverteu o botão na UI, persistiu `false` no `settings.json` e removeu a coluna Notificações do painel, confirmando a reatividade ponta a ponta; 44 chaves persistidas; zero avisos novos de runtime em relação ao HEAD.
+- [ ] Pré-existente, fora do escopo: `adapter.settingsVersion` é lido como lixo (ex. `-583977888`) mesmo no HEAD com config nova, o que faz todas as migrações rodarem a cada boot. Não foi introduzido aqui e não foi corrigido.
+- [x] Correção pós-revisão — **acoplado vs flutuante voltou a existir**. Na primeira passada eu colapsei `panelDetached` dentro de `position` (`allowAttach: position === "close_to_bar_button"`), o que apagou a opção: tudo virou flutuante. Os dois são eixos **independentes** — qualquer posição pode estar encostada na barra ou afastada dela por uma margem. Restaurado `Settings.data.controlCenter.detached` (bool, default `true`) com `allowAttach: !detached`, exatamente a semântica do original; o importador legado voltou a mapear `panelDetached` → `detached`, e `followBarEdge` continua colapsado em `position = close_to_bar_button` (era só isso que ele significava). Toggle "Painel Destacado (Flutuante)" de volta na subaba Aparência, com as strings pt/en originais recuperadas do git.
+- [x] Correção pós-revisão — **botão "Configurações" dos controles rápidos**. Não era regressão desta fase: veio do split da Fase E (`9fa03b4af`), que moveu o `ActionTile` para `Cards/QuickActionsCard.qml` sem levar o import `qs.Modules.Panels.Settings`. O `onTriggered` inline referenciava `SettingsPanel.Tab.General`, lançava ReferenceError e nunca chegava no `panel.open()` — enquanto o botão secundário funcionava porque delegava para `panelRoot.openDashboardSettings()`, que vive no `Panel.qml` (esse importa). Corrigido na convenção do próprio arquivo: `openSettingsTab(tab)` no `Panel.qml` com `openShellSettings()`/`openDashboardSettings()` em cima, e o card só delega. Nenhum card volta a referenciar `SettingsPanel` direto.
+
+**Marco Fase 4:** 🟢 Finalizado — o dashboard é um painel nativo; não resta shim, store paralelo nem ajuste duplicado.
 
 ---
 

@@ -67,7 +67,7 @@ Variants {
 
       color: "transparent"
 
-      WlrLayershell.namespace: "noctalia-launcher-overlay-" + (screen?.name || "unknown")
+      WlrLayershell.namespace: "hydra-launcher-overlay-" + (screen?.name || "unknown")
       WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
       WlrLayershell.layer: WlrLayer.Overlay
       WlrLayershell.exclusionMode: ExclusionMode.Ignore

@@ -14,7 +14,7 @@ import qs.Services.Hardware
 import qs.Services.Location
 import qs.Services.Media
 import qs.Services.Networking
-import qs.Services.Noctalia
+import qs.Services.Hydra
 import qs.Services.Power
 import qs.Services.System
 import qs.Services.UI
@@ -24,43 +24,38 @@ import "Cards"
 Item {
   id: root
 
-  property var cfg: ControlCenterService.settings
+  readonly property var cfg: Settings.data.controlCenter
 
   readonly property var activeScreen: PanelService.findScreenForPanels()
-  readonly property bool panelDetached: cfg.panelDetached ?? true
-  readonly property string panelPosition: cfg.panelPosition ?? "center"
-  readonly property bool followBarEdge: cfg.followBarEdge ?? true
-  readonly property string barPosition: Settings.getBarPositionForScreen(activeScreen?.name)
-  readonly property string resolvedPanelPosition: (!panelDetached && followBarEdge) ? barPosition : panelPosition
-  readonly property real localScale: cfg.panelScale ?? 1
-  readonly property real panelBaseWidth: cfg.panelWidth ?? 1120
-  readonly property real panelBaseHeight: cfg.panelHeight ?? 700
-  readonly property string configuredAvatar: cfg.avatarPath ?? ""
+  readonly property real localScale: cfg.panelScale
+  readonly property real panelBaseWidth: cfg.panelWidth
+  readonly property real panelBaseHeight: cfg.panelHeight
+  readonly property string configuredAvatar: cfg.avatarPath
   readonly property string avatarPath: configuredAvatar !== "" ? configuredAvatar : Settings.data.general.avatarImage
-  readonly property string profileDanceGifPath: cfg.profileDanceGifPath ?? ""
+  readonly property string profileDanceGifPath: cfg.profileDanceGifPath
   readonly property string resolvedProfileDanceGifPath: profileDanceGifPath !== "" ? Settings.preprocessPath(profileDanceGifPath) : ""
-  readonly property bool showProfileDanceGif: cfg.showProfileDanceGif ?? true
-  readonly property bool showProfileWallpaper: cfg.showProfileWallpaper ?? true
-  readonly property string profileCoverMode: showProfileWallpaper ? (cfg.profileCoverMode ?? "auto") : "none"
-  readonly property string profileCoverPath: cfg.profileCoverPath ?? ""
-  readonly property string profileCoverFolder: cfg.profileCoverFolder ?? ""
-  readonly property bool profileCoverOverlayEnabled: cfg.profileCoverOverlayEnabled ?? true
-  readonly property real profileCoverOverlay: cfg.profileCoverOverlay ?? 0.58
-  readonly property bool profileCoverBlurEnabled: cfg.profileCoverBlurEnabled ?? false
-  readonly property real profileCoverBlur: cfg.profileCoverBlur ?? 0
-  readonly property bool profileCoverBorder: cfg.profileCoverBorder ?? true
-  readonly property real profileCoverBorderWidth: cfg.profileCoverBorderWidth ?? 2
-  readonly property string profileCoverBorderEffect: cfg.profileCoverBorderEffect ?? "primary"
-  readonly property string profileCoverBorderColorMode: cfg.profileCoverBorderColorMode ?? "auto"
-  readonly property string profileCoverBorderAnimation: cfg.profileCoverBorderAnimation ?? legacyProfileCoverBorderAnimation()
-  readonly property real profileCoverBorderSpeed: cfg.profileCoverBorderSpeed ?? 1
-  readonly property int profileCoverBorderColorCount: cfg.profileCoverBorderColorCount ?? 3
-  readonly property string profileCoverBorderColor1: cfg.profileCoverBorderColor1 ?? "#fff59b"
-  readonly property string profileCoverBorderColor2: cfg.profileCoverBorderColor2 ?? "#8bd5ff"
-  readonly property string profileCoverBorderColor3: cfg.profileCoverBorderColor3 ?? "#cba6f7"
-  readonly property string profileCoverBorderColor4: cfg.profileCoverBorderColor4 ?? "#f38ba8"
-  readonly property string profileCoverBorderColor5: cfg.profileCoverBorderColor5 ?? "#a6e3a1"
-  readonly property var componentStyles: cfg.componentStyles ?? ({})
+  readonly property bool showProfileDanceGif: cfg.showProfileDanceGif
+  readonly property bool showProfileWallpaper: cfg.showProfileWallpaper
+  readonly property string profileCoverMode: showProfileWallpaper ? cfg.profileCoverMode : "none"
+  readonly property string profileCoverPath: cfg.profileCoverPath
+  readonly property string profileCoverFolder: cfg.profileCoverFolder
+  readonly property bool profileCoverOverlayEnabled: cfg.profileCoverOverlayEnabled
+  readonly property real profileCoverOverlay: cfg.profileCoverOverlay
+  readonly property bool profileCoverBlurEnabled: cfg.profileCoverBlurEnabled
+  readonly property real profileCoverBlur: cfg.profileCoverBlur
+  readonly property bool profileCoverBorder: cfg.profileCoverBorder
+  readonly property real profileCoverBorderWidth: cfg.profileCoverBorderWidth
+  readonly property string profileCoverBorderEffect: cfg.profileCoverBorderEffect
+  readonly property string profileCoverBorderColorMode: cfg.profileCoverBorderColorMode
+  readonly property string profileCoverBorderAnimation: cfg.profileCoverBorderAnimation
+  readonly property real profileCoverBorderSpeed: cfg.profileCoverBorderSpeed
+  readonly property int profileCoverBorderColorCount: cfg.profileCoverBorderColorCount
+  readonly property string profileCoverBorderColor1: cfg.profileCoverBorderColor1
+  readonly property string profileCoverBorderColor2: cfg.profileCoverBorderColor2
+  readonly property string profileCoverBorderColor3: cfg.profileCoverBorderColor3
+  readonly property string profileCoverBorderColor4: cfg.profileCoverBorderColor4
+  readonly property string profileCoverBorderColor5: cfg.profileCoverBorderColor5
+  readonly property var componentStyles: cfg.componentStyles
   property string randomProfileCoverPath: ""
   readonly property string profileWallpaperPath: {
     if (profileCoverMode === "none")
@@ -71,15 +66,15 @@ Item {
       return randomProfileCoverPath;
     return WallpaperService.getWallpaper(activeScreen?.name ?? "") || "";
   }
-  readonly property string mediaVisualizerEffect: cfg.mediaVisualizerEffect ?? "bars"
-  readonly property string audioSliderEffect: cfg.audioSliderEffect ?? "wave"
-  readonly property string microphoneSliderEffect: cfg.microphoneSliderEffect ?? "pulse"
-  readonly property string avatarMusicEffect: cfg.avatarMusicEffect ?? "ring"
-  readonly property string avatarShape: cfg.avatarShape ?? "circle"
-  readonly property string profileCardShape: cfg.profileCardShape ?? "rounded"
-  readonly property bool followNoctaliaPerformanceMode: cfg.followNoctaliaPerformanceMode ?? true
-  readonly property bool powerSaverPerformanceMode: cfg.powerSaverPerformanceMode ?? true
-  readonly property bool dashboardPerformanceMode: (followNoctaliaPerformanceMode && PowerProfileService.noctaliaPerformanceMode) || (powerSaverPerformanceMode && PowerProfileService.available && PowerProfileService.profile === 0)
+  readonly property string mediaVisualizerEffect: cfg.mediaVisualizerEffect
+  readonly property string audioSliderEffect: cfg.audioSliderEffect
+  readonly property string microphoneSliderEffect: cfg.microphoneSliderEffect
+  readonly property string avatarMusicEffect: cfg.avatarMusicEffect
+  readonly property string avatarShape: cfg.avatarShape
+  readonly property string profileCardShape: cfg.profileCardShape
+  readonly property bool followHydraPerformanceMode: cfg.followHydraPerformanceMode
+  readonly property bool powerSaverPerformanceMode: cfg.powerSaverPerformanceMode
+  readonly property bool dashboardPerformanceMode: (followHydraPerformanceMode && PowerProfileService.hydraPerformanceMode) || (powerSaverPerformanceMode && PowerProfileService.available && PowerProfileService.profile === 0)
   readonly property bool musicActive: MediaService.currentPlayer !== null && MediaService.isPlaying
   readonly property string panelSpectrumComponentId: "plugin:raell-dashboard:panel:" + (activeScreen?.name ?? "unknown")
   readonly property bool needsMediaSpectrum: activeDetailView === "media" || (mediaVisualizerEffect !== "" && mediaVisualizerEffect !== "none")
@@ -97,13 +92,9 @@ Item {
   readonly property color m3PrimaryContainer: Color.mPrimaryContainer
 
   readonly property var geometryPlaceholder: panelContainer
-  readonly property bool allowAttach: !panelDetached
-  property bool panelAnchorRight: resolvedPanelPosition === "right"
-  property bool panelAnchorLeft: resolvedPanelPosition === "left"
-  property bool panelAnchorHorizontalCenter: resolvedPanelPosition === "center" || resolvedPanelPosition === "top" || resolvedPanelPosition === "bottom"
-  property bool panelAnchorVerticalCenter: resolvedPanelPosition === "center" || resolvedPanelPosition === "left" || resolvedPanelPosition === "right"
-  property bool panelAnchorTop: resolvedPanelPosition === "top"
-  property bool panelAnchorBottom: resolvedPanelPosition === "bottom"
+  // Attach/float is its own axis, independent of position: any position can be
+  // glued flush to the bar or floated off it with a screen margin.
+  readonly property bool allowAttach: !Settings.data.controlCenter.detached
   // Outer panel size: at least what the fixed-width card columns actually
   // need (implicitWidth/Height of dashboardLayout, see panelContainer
   // below), so the content is never cramped into a Flickable. panelWidth/
@@ -200,17 +191,26 @@ Item {
     if (!path || path.length === 0) {
       return;
     }
-    ControlCenterService.settings.avatarPath = path;
-    ControlCenterService.saveSettings();
+    Settings.data.controlCenter.avatarPath = path;
   }
 
-  function openDashboardSettings() {
+  // Both openers live here rather than inline in a card: SettingsPanel is only
+  // imported in this file, and referencing it from a card file throws.
+  function openSettingsTab(tab) {
     const panel = PanelService.getPanel("settingsPanel", activeScreen);
     if (!panel) {
       return;
     }
-    panel.requestedTab = SettingsPanel.Tab.ControlCenter;
+    panel.requestedTab = tab;
     panel.open();
+  }
+
+  function openShellSettings() {
+    openSettingsTab(SettingsPanel.Tab.General);
+  }
+
+  function openDashboardSettings() {
+    openSettingsTab(SettingsPanel.Tab.ControlCenter);
   }
 
   function compositorName() {
@@ -275,16 +275,6 @@ Item {
     return Math.max(0, root.profileCardRadius(width, height) - Math.max(1, Style.borderS));
   }
 
-  function legacyProfileCoverBorderAnimation() {
-    if (profileCoverBorderEffect === "pulse")
-      return "pulse";
-    if (profileCoverBorderEffect === "rainbow")
-      return "flow";
-    if (profileCoverBorderEffect === "reactive")
-      return "reactivePulse";
-    return "static";
-  }
-
   function automaticProfileBorderColors() {
     if (profileCoverBorderEffect === "secondary")
       return [Color.mSecondary, Color.mTertiary, Color.mPrimary];
@@ -322,13 +312,24 @@ Item {
     return colors[index];
   }
 
+  // componentStyles is a list of entries tagged with a "key" field (see
+  // Settings.qml). Linear scan: the list is user-authored and holds a handful of
+  // entries at most, so an index would cost more than it saves.
+  function componentStyleEntry(componentKey) {
+    const styles = root.componentStyles;
+    if (!styles)
+      return null;
+    for (let i = 0; i < styles.length; i++) {
+      if (styles[i] && styles[i].key === componentKey)
+        return styles[i];
+    }
+    return null;
+  }
+
   function componentStyle(componentKey) {
-    const styles = root.componentStyles || {};
-    const globalStyle = styles.__global || {};
-    const localStyle = styles[componentKey] || {};
     const merged = {};
-    root.mergeComponentStyle(merged, globalStyle);
-    root.mergeComponentStyle(merged, localStyle);
+    root.mergeComponentStyle(merged, root.componentStyleEntry("__global"));
+    root.mergeComponentStyle(merged, root.componentStyleEntry(componentKey));
 
     return merged;
   }
@@ -409,10 +410,11 @@ Item {
   function anyComponentBorderAnimationActive() {
     if (root.dashboardPerformanceMode)
       return false;
-    const styles = root.componentStyles || {};
-    const keys = Object.keys(styles);
-    for (let i = 0; i < keys.length; i++) {
-      const style = styles[keys[i]] || {};
+    const styles = root.componentStyles;
+    if (!styles)
+      return false;
+    for (let i = 0; i < styles.length; i++) {
+      const style = styles[i] || {};
       const animation = String(style.borderAnimation || "static");
       if (style.borderEnabled === true && animation !== "static" && animation.indexOf("reactive") !== 0)
         return true;
@@ -512,7 +514,9 @@ Item {
     const id = String(appId || "").toLowerCase();
     if (id === "" || id === "unknown")
       return true;
-    if (id.indexOf("dev.noctalia.") === 0 || id === "noctalia" || id.indexOf("quickshell") >= 0)
+    // "dev.noctalia.*" is the app id the Quickshell engine (noctalia-qs) still
+    // reports for our own windows — engine-side identifier, not our branding.
+    if (id.indexOf("dev.noctalia.") === 0 || id.indexOf("dev.hydra.") === 0 || id === "hydra" || id.indexOf("quickshell") >= 0)
       return true;
 
     const compact = id.replace(/[._\\-\\s]/g, "");
@@ -1606,7 +1610,7 @@ Item {
 
           RecordingCard {
             panelRoot: root
-            visible: root.cfg.showRecordingCard ?? true
+            visible: root.cfg.showRecordingCard
             Layout.fillWidth: true
             Layout.preferredHeight: Math.round((root.toolkitRecording ? 194 : 164) * root.panelUnit)
 
@@ -1670,21 +1674,21 @@ Item {
 
           NotificationsCard {
             panelRoot: root
-            visible: !root.rightDetailOpen && (root.cfg.showNotifications ?? true)
+            visible: !root.rightDetailOpen && root.cfg.showNotifications
             Layout.fillWidth: true
             Layout.preferredHeight: Math.round(272 * root.panelUnit)
           }
 
           MediaCard {
             panelRoot: root
-            visible: !root.rightDetailOpen && (root.cfg.showMedia ?? true)
+            visible: !root.rightDetailOpen && root.cfg.showMedia
             Layout.fillWidth: true
             Layout.preferredHeight: visible ? Math.round(132 * root.panelUnit) : 0
           }
 
           CalendarShell {
             panelRoot: root
-            visible: !root.rightDetailOpen && (root.cfg.showCalendar ?? true)
+            visible: !root.rightDetailOpen && root.cfg.showCalendar
             Layout.fillWidth: true
             Layout.fillHeight: true
           }

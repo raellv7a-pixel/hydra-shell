@@ -27,7 +27,7 @@ Singleton {
     return hash.substring(0, 6);
   }
 
-  // Check if a source is the main Noctalia plugins repository
+  // Check if a source is the main Hydra plugins repository
   function isMainSource(sourceUrl) {
     return sourceUrl === root.mainSourceUrl;
   }
@@ -119,7 +119,7 @@ Singleton {
       if (root.pluginSources.length === 0) {
         root.pluginSources = [
           {
-            "name": "Noctalia Plugins",
+            "name": "Hydra Plugins",
             "url": "https://github.com/noctalia-dev/noctalia-plugins",
             "enabled": true
           }
@@ -140,7 +140,7 @@ Singleton {
       root.pluginStates = {};
       root.pluginSources = [
             {
-              "name": "Noctalia Plugins",
+              "name": "Hydra Plugins",
               "url": "https://github.com/noctalia-dev/noctalia-plugins",
               "enabled": true
             }
@@ -180,19 +180,19 @@ Singleton {
       }
     }
 
-    // Migration: rename "Official Noctalia Plugins" -> "Noctalia Plugins"
+    // Migration: rename "Official Hydra Plugins" -> "Hydra Plugins"
     var newSources = [];
     var sourcesChanged = false;
     for (var i = 0; i < root.pluginSources.length; i++) {
       var source = root.pluginSources[i];
-      if (source.name === "Official Noctalia Plugins") {
+      if (source.name === "Official Hydra Plugins") {
         newSources.push({
-                          name: "Noctalia Plugins",
+                          name: "Hydra Plugins",
                           url: source.url,
                           enabled: source.enabled
                         });
         sourcesChanged = true;
-        Logger.i("PluginRegistry", "Migrating source name: 'Official Noctalia Plugins' -> 'Noctalia Plugins'");
+        Logger.i("PluginRegistry", "Migrating source name: 'Official Hydra Plugins' -> 'Hydra Plugins'");
       } else {
         newSources.push(source);
       }

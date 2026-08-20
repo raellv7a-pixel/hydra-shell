@@ -19,7 +19,7 @@
 #   2. Installs the build toolchain and compiles noctalia-qs (the Quickshell
 #      fork hydra-shell runs on) from source. There is no AUR package for it
 #      — AUR only has "noctalia-git", which is the unrelated, incompatible
-#      Noctalia v5 rewrite. Building from source is the only correct path
+#      Hydra v5 rewrite. Building from source is the only correct path
 #      (this is also what nix/package.nix does under Nix).
 #   3. Bootstraps an AUR helper (paru) only if genuinely needed, and installs
 #      the handful of polish packages that only exist on the AUR.
@@ -196,6 +196,11 @@ else
   log "Cloning hydra-shell into $INSTALL_DIR"
   git clone --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
 fi
+
+# ── 5b. migrate pre-rebrand Noctalia state before anything reads it ────────
+# Idempotent no-op once the directories/settings keys are already Hydra-named.
+log "Migrating pre-rebrand Noctalia config, if any"
+bash "$INSTALL_DIR/Scripts/bash/migrate-noctalia-config.sh"
 
 # ── 6. adopt the Hyprland config (existing, idempotent, backs up first) ────
 log "Installing Hyprland Lua config"

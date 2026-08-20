@@ -62,7 +62,7 @@ optional("hydra-shell.rebinds")
 -- Color template output (window border / group bar colors) is unrelated to
 -- this plan and manages its own inclusion: Scripts/bash/template-apply.sh
 -- idempotently appends a `dofile(...)` line for
--- ~/.config/hypr/noctalia/noctalia-colors.lua at the end of whichever file is
+-- ~/.config/hypr/hydra/hydra-colors.lua at the end of whichever file is
 -- ~/.config/hypr/hyprland.lua the first time a Hyprland color template runs —
 -- this file included. Nothing to add here; do not hand-add a second include.
 

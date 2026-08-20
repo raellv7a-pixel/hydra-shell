@@ -1,6 +1,6 @@
 # Screen Toolkit
 
-A unified collection of screen utilities for the **Noctalia Shell**, designed to streamline screenshotting, annotation, recording, and visual inspection workflows.
+A unified collection of screen utilities for the **Hydra Shell**, designed to streamline screenshotting, annotation, recording, and visual inspection workflows.
 
 ---
 
@@ -219,7 +219,7 @@ Files automatically receive appropriate extensions (`.png`, `.mp4`, `.gif`).
 Control Screen Toolkit via scripts or keybindings:
 
 ```bash
-qs -c noctalia-shell ipc call plugin:screen-toolkit <command>
+qs -c hydra-shell ipc call plugin:screen-toolkit <command>
 ```
 
 Replace `<command>` with any of the following:

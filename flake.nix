@@ -1,5 +1,5 @@
 {
-  description = "Noctalia shell - a Wayland desktop shell built with Quickshell";
+  description = "Hydra shell - a Wayland desktop shell built with Quickshell";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -39,14 +39,14 @@
       formatter = eachSystem (system: pkgsFor.${system}.nixfmt);
 
       packages = eachSystem (system: {
-        default = pkgsFor.${system}.noctalia-shell;
+        default = pkgsFor.${system}.hydra-shell;
       });
 
       overlays = {
         default = nixpkgs.lib.composeManyExtensions [
           noctalia-qs.overlays.default
           (final: prev: {
-            noctalia-shell = final.callPackage ./nix/package.nix {
+            hydra-shell = final.callPackage ./nix/package.nix {
               inherit version;
             };
           })
@@ -67,7 +67,7 @@
         }:
         {
           imports = [ ./nix/home-module.nix ];
-          programs.noctalia-shell.package =
+          programs.hydra-shell.package =
             lib.mkDefault
               self.packages.${pkgs.stdenv.hostPlatform.system}.default;
         };
@@ -80,7 +80,7 @@
         }:
         {
           imports = [ ./nix/nixos-module.nix ];
-          services.noctalia-shell.package =
+          services.hydra-shell.package =
             lib.mkDefault
               self.packages.${pkgs.stdenv.hostPlatform.system}.default;
         };

@@ -114,8 +114,8 @@ DashboardCard {
         secondaryIcon: PowerProfileService.available ? PowerProfileService.getIcon() : "battery-off"
         secondaryTooltip: panelRoot.tr("cyclePowerProfile")
         iconName: "device-gamepad-2"
-        active: PowerProfileService.noctaliaPerformanceMode
-        onTriggered: PowerProfileService.toggleNoctaliaPerformance()
+        active: PowerProfileService.hydraPerformanceMode
+        onTriggered: PowerProfileService.toggleHydraPerformance()
         onSecondaryTriggered: PowerProfileService.cycleProfile()
       }
 
@@ -138,13 +138,7 @@ DashboardCard {
         iconName: "settings"
         secondaryIcon: "adjustments-horizontal"
         secondaryTooltip: panelRoot.tr("dashboardSettings")
-        onTriggered: {
-          const panel = PanelService.getPanel("settingsPanel", panelRoot.activeScreen);
-          if (panel) {
-            panel.requestedTab = SettingsPanel.Tab.General;
-            panel.open();
-          }
-        }
+        onTriggered: panelRoot.openShellSettings()
         onSecondaryTriggered: panelRoot.openDashboardSettings()
       }
 

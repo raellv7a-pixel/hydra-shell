@@ -40,7 +40,7 @@ THEME_DESCRIPTION = "Bibata cursors, recolored live from Hydra Shell's Material 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SVG_SRC = SCRIPT_DIR.parents[3] / "Assets" / "Cursor" / "Bibata" / "svg"
 ICONS_DIR = Path.home() / ".local" / "share" / "icons"
-BUILD_DIR = Path.home() / ".cache" / "noctalia" / "cursor-build"
+BUILD_DIR = Path.home() / ".cache" / "hydra" / "cursor-build"
 
 DEFAULT_SIZE = 24
 

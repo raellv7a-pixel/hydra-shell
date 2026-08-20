@@ -96,6 +96,13 @@ if pgrep -x qs >/dev/null 2>&1; then
   pgrep -x qs >/dev/null 2>&1 && { warn "qs não saiu a tempo, forçando"; pkill -9 -x qs; sleep 0.3; }
 fi
 
+# A shell é relançada aqui direto, sem passar pelo hook de
+# Assets/Hyprland/modules/autostart.lua, então a migração pré-rebrand
+# (~/.config/noctalia -> ~/.config/hydra) tem que rodar neste ponto: com a
+# shell antiga já morta e antes da nova ler os settings. No-op se já migrado.
+log "Migrando config pré-rebrand (Noctalia), se houver"
+bash "$ACTIVE_DIR/Scripts/bash/migrate-noctalia-config.sh"
+
 # O --no-duplicate padrão do qs decide se já há instância rodando checando o
 # PID gravado em $XDG_RUNTIME_DIR/quickshell/by-pid/<pid>; um lock deixado
 # por um processo morto sem limpeza (crash, SIGKILL) pode fazer o próximo

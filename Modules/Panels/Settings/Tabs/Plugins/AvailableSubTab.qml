@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
-import qs.Services.Noctalia
+import qs.Services.Hydra
 import qs.Services.UI
 import qs.Widgets
 
@@ -200,7 +200,7 @@ ColumnLayout {
               elide: Text.ElideRight
             }
 
-            // Official badge (Noctalia Team maintained)
+            // Official badge (Hydra Team maintained)
             Rectangle {
               visible: modelData.official === true
               color: Color.mSecondary

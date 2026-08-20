@@ -30,7 +30,7 @@ Singleton {
                            "Microphone": microphoneComponent,
                            "Network": networkComponent,
                            "NightLight": nightLightComponent,
-                           "NoctaliaPerformance": noctaliaPerformanceComponent,
+                           "HydraPerformance": hydraPerformanceComponent,
                            "NotificationHistory": notificationHistoryComponent,
                            "Nvibrant": nvibrantComponent,
                            "ObsControl": obsControlComponent,
@@ -69,7 +69,7 @@ Singleton {
                                      "Microphone": "WidgetSettings/MicrophoneSettings.qml",
                                      "Network": "WidgetSettings/NetworkSettings.qml",
                                      "NightLight": "WidgetSettings/NightLightSettings.qml",
-                                     "NoctaliaPerformance": "WidgetSettings/NoctaliaPerformanceSettings.qml",
+                                     "HydraPerformance": "WidgetSettings/HydraPerformanceSettings.qml",
                                      "NotificationHistory": "WidgetSettings/NotificationHistorySettings.qml",
                                      "Nvibrant": "WidgetSettings/NvibrantSettings.qml",
                                      "ObsControl": "WidgetSettings/ObsControlSettings.qml",
@@ -109,7 +109,7 @@ Singleton {
                                     "displayMode": "graphic-clean",
                                     "deviceNativePath": "__default__",
                                     "showPowerProfiles": false,
-                                    "showNoctaliaPerformance": false,
+                                    "showHydraPerformance": false,
                                     "hideIfNotDetected": true,
                                     "hideIfIdle": false
                                   },
@@ -137,7 +137,7 @@ Singleton {
                                   },
                                   "ControlCenter": {
                                     "useDistroLogo": false,
-                                    "icon": "noctalia",
+                                    "icon": "hydra",
                                     "customIconPath": "",
                                     "colorizeDistroLogo": false,
                                     "colorizeSystemIcon": "none",
@@ -300,7 +300,7 @@ Singleton {
                                   "NightLight": {
                                     "iconColor": "none"
                                   },
-                                  "NoctaliaPerformance": {
+                                  "HydraPerformance": {
                                     "iconColor": "none"
                                   },
                                   "Nvibrant": {
@@ -407,8 +407,8 @@ Singleton {
   property Component nightLightComponent: Component {
     NightLight {}
   }
-  property Component noctaliaPerformanceComponent: Component {
-    NoctaliaPerformance {}
+  property Component hydraPerformanceComponent: Component {
+    HydraPerformance {}
   }
   property Component notificationHistoryComponent: Component {
     NotificationHistory {}

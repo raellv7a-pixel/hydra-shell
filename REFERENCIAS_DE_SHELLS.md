@@ -34,7 +34,7 @@ Não são shells completas — são projetos menores para extrair um módulo, um
 | ryoview | `/home/raell/Projetos/Uteis/ryoview` | Visualizador de imagens — padrões de UI para preview e navegação de mídia. |
 | ryoshot | `/home/raell/Projetos/Uteis/ryoshot` | Ferramenta de captura de tela — referência direta para o Screen Toolkit desta shell. |
 | Ricelin | `/home/raell/Projetos/Uteis/Ricelin` | Rice/tema de referência — paletas, acabamento visual e composição de painéis. |
-| noctodeus | `/home/raell/Projetos/Uteis/noctodeus` | Módulo/widget derivado do ecossistema Noctalia — comparar contra os módulos já portados aqui. |
+| noctodeus | `/home/raell/Projetos/Uteis/noctodeus` | Módulo/widget derivado do ecossistema Hydra — comparar contra os módulos já portados aqui. |
 
 Origens dos clones:
 

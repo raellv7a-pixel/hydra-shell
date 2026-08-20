@@ -27,13 +27,13 @@
       "locked": {
         "lastModified": 1780799499,
         "narHash": "sha256-YloRtLqJabzYUWvdLyh67zH4DZrR3kQj+dlQJwLPmPM=",
-        "owner": "noctalia-dev",
+        "owner": "hydra-dev",
         "repo": "noctalia-qs",
         "rev": "f308426239665e3bc3d624014e9295b2ae2f58ff",
         "type": "github"
       },
       "original": {
-        "owner": "noctalia-dev",
+        "owner": "hydra-dev",
         "repo": "noctalia-qs",
         "type": "github"
       }

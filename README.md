@@ -16,6 +16,36 @@ O instalador resolve todas as dependências (ver [`DEPENDENCIES.md`](./DEPENDENC
 
 ---
 
+## Atualizando de uma instalação pré-rebrand (Noctalia)
+
+O estado em disco mudou de nome junto com a shell:
+
+| Antes | Agora |
+| --- | --- |
+| `~/.config/noctalia` | `~/.config/hydra` |
+| `~/.cache/noctalia` | `~/.cache/hydra` |
+| `~/.config/hypr/noctalia` | `~/.config/hypr/hydra` |
+| `NOCTALIA_*` (env) | `HYDRA_*` |
+
+`Assets/Hyprland/modules/autostart.lua` roda
+[`Scripts/bash/migrate-noctalia-config.sh`](./Scripts/bash/migrate-noctalia-config.sh)
+antes de subir a shell: ele renomeia esses diretórios e reescreve as chaves de
+marca em `settings.json` (`noctaliaPerformance`, `showNoctaliaPerformance`,
+`followNoctaliaPerformanceMode`, widget `NoctaliaPerformance`, ícone `noctalia`,
+esquema `Noctalia (default)`), guardando um backup `settings.json.pre-hydra.bak`.
+É idempotente — rodar de novo não faz nada. Para migrar na hora, sem relogar:
+
+```bash
+~/.config/quickshell/hydra-shell/Scripts/bash/migrate-noctalia-config.sh
+```
+
+Os arquivos de tema já gerados dentro de configs de terceiros (kitty, foot,
+alacritty, GTK…) mantêm o nome antigo até os templates serem aplicados de novo
+(troque o esquema de cores ou rode `Scripts/bash/template-apply.sh`).
+
+---
+
+
 ## O que é diferente do Noctalia
 
 - **Configuração completa do Hyprland em Lua** (`Assets/Hyprland/`), com todos os atalhos já ligados à shell via IPC — nada para configurar na mão.

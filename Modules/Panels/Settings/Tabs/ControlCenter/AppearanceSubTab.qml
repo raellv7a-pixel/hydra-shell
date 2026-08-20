@@ -13,6 +13,10 @@ ColumnLayout {
   Layout.fillWidth: true
   Layout.fillHeight: true
 
+  function dtr(key) {
+    return I18n.tr("panels.dashboard." + key);
+  }
+
   ColumnLayout {
     spacing: Style.marginL
     Layout.fillWidth: true
@@ -44,6 +48,14 @@ ColumnLayout {
           "name": I18n.tr("positions.top-right")
         },
         {
+          "key": "center_left",
+          "name": I18n.tr("positions.center-left")
+        },
+        {
+          "key": "center_right",
+          "name": I18n.tr("positions.center-right")
+        },
+        {
           "key": "bottom_center",
           "name": I18n.tr("positions.bottom-center")
         },
@@ -63,6 +75,15 @@ ColumnLayout {
       defaultValue: Settings.getDefaultValue("controlCenter.position")
     }
 
+    NToggle {
+      Layout.fillWidth: true
+      label: root.dtr("settingsPanelDetached")
+      description: root.dtr("settingsPanelDetachedDesc")
+      checked: Settings.data.controlCenter.detached
+      onToggled: checked => Settings.data.controlCenter.detached = checked
+      defaultValue: Settings.getDefaultValue("controlCenter.detached")
+    }
+
     NComboBox {
       id: diskPathComboBox
       Layout.fillWidth: true
@@ -78,6 +99,49 @@ ColumnLayout {
       currentKey: Settings.data.controlCenter.diskPath || "/"
       onSelected: key => Settings.data.controlCenter.diskPath = key
       defaultValue: Settings.getDefaultValue("controlCenter.diskPath") || "/"
+    }
+
+    NHeader {
+      label: root.dtr("settingsDimensions")
+    }
+
+    NValueSlider {
+      Layout.fillWidth: true
+      label: root.dtr("settingsPanelWidth")
+      from: 800
+      to: 1400
+      stepSize: 20
+      showReset: true
+      value: Settings.data.controlCenter.panelWidth
+      onMoved: val => Settings.data.controlCenter.panelWidth = Math.round(val)
+      defaultValue: Settings.getDefaultValue("controlCenter.panelWidth")
+      text: Settings.data.controlCenter.panelWidth + "px"
+    }
+
+    NValueSlider {
+      Layout.fillWidth: true
+      label: root.dtr("settingsPanelHeight")
+      from: 500
+      to: 950
+      stepSize: 20
+      showReset: true
+      value: Settings.data.controlCenter.panelHeight
+      onMoved: val => Settings.data.controlCenter.panelHeight = Math.round(val)
+      defaultValue: Settings.getDefaultValue("controlCenter.panelHeight")
+      text: Settings.data.controlCenter.panelHeight + "px"
+    }
+
+    NValueSlider {
+      Layout.fillWidth: true
+      label: root.dtr("settingsPanelScale")
+      from: 0.7
+      to: 1.3
+      stepSize: 0.05
+      showReset: true
+      value: Settings.data.controlCenter.panelScale
+      onMoved: val => Settings.data.controlCenter.panelScale = Math.round(val * 100) / 100
+      defaultValue: Settings.getDefaultValue("controlCenter.panelScale")
+      text: Math.round(Settings.data.controlCenter.panelScale * 100) + "%"
     }
   }
 

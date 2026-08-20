@@ -363,7 +363,14 @@ Item {
             return;
           if (action === "controlCenter") {
             var controlCenterPanel = PanelService.getPanel("controlCenterPanel", screen);
-            controlCenterPanel?.toggle(null, followMouse ? mapToItem(null, mouse.x, mouse.y) : "ControlCenter");
+            if (followMouse) {
+              controlCenterPanel?.toggle(null, mapToItem(null, mouse.x, mouse.y));
+            } else if (Settings.data.controlCenter.position === "close_to_bar_button") {
+              // Will attempt to open the panel next to the bar button if any.
+              controlCenterPanel?.toggle(null, "ControlCenter");
+            } else {
+              controlCenterPanel?.toggle();
+            }
             mouse.accepted = true;
           } else if (action === "settings") {
             var settingsPanel = PanelService.getPanel("settingsPanel", screen);

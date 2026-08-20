@@ -218,9 +218,9 @@ Singleton {
 
   function addWallpaperTheming(lines, mode) {
     const homeDir = Quickshell.env("HOME");
-    // Noctalia colors JSON
-    lines.push("[templates.noctalia]");
-    lines.push('input_path = "' + Quickshell.shellDir + '/Assets/Templates/noctalia.json"');
+    // Hydra colors JSON
+    lines.push("[templates.hydra]");
+    lines.push('input_path = "' + Quickshell.shellDir + '/Assets/Templates/hydra.json"');
     lines.push('output_path = "' + Settings.configDir + 'colors.json"');
 
     // Terminal templates
@@ -260,7 +260,7 @@ Singleton {
                                                                                          lines.push(`\n[templates.discord_${themeSuffix}_${client.name}]`);
                                                                                          lines.push(`input_path = "${Quickshell.shellDir}/Assets/Templates/${inputFile}"`);
                                                                                          // First input uses legacy name for backward compatibility
-                                                                                         const outputFile = idx === 0 ? "noctalia.theme.css" : `noctalia-${themeSuffix}.theme.css`;
+                                                                                         const outputFile = idx === 0 ? "hydra.theme.css" : `hydra-${themeSuffix}.theme.css`;
                                                                                          const outputPath = client.path.replace("~", homeDir) + `/themes/${outputFile}`;
                                                                                          lines.push(`output_path = "${outputPath}"`);
                                                                                        }
@@ -288,7 +288,7 @@ Singleton {
                                                 ProgramCheckerService.availableEmacsClients.forEach(client => {
                                                                                                       lines.push(`\n[templates.emacs_${client.name}]`);
                                                                                                       lines.push(`input_path = "${Quickshell.shellDir}/Assets/Templates/${app.input}"`);
-                                                                                                      const expandedPath = client.path.replace("~", homeDir) + "/themes/noctalia-theme.el";
+                                                                                                      const expandedPath = client.path.replace("~", homeDir) + "/themes/hydra-theme.el";
                                                                                                       lines.push(`output_path = "${expandedPath}"`);
                                                                                                       if (app.postProcess) {
                                                                                                         const postHook = escapeTomlString(app.postProcess(mode));
@@ -340,7 +340,7 @@ Singleton {
   // PREVIEW — read-only palette computation, no templates/files touched
   // ================================================================================
   // Maps the snake_case keys template-processor.py returns to the "m*" keys that
-  // feed colors.json / Commons/Color.qml, per Assets/Templates/noctalia.json.
+  // feed colors.json / Commons/Color.qml, per Assets/Templates/hydra.json.
   // Only the roles that template actually consumes — the rest of Color.qml's
   // properties are derived locally (blend()) from these, not sourced from Python.
   readonly property var colorKeyMap: ({
@@ -449,7 +449,7 @@ Singleton {
     const wpDelimiter = "WALLPAPER_PATH_EOF_" + Math.random().toString(36).substr(2, 9);
 
     // Use heredoc for wallpaper path to avoid all escaping issues
-    let script = `NOCTALIA_WP_PATH=$(cat << '${wpDelimiter}'\n${wallpaper}\n${wpDelimiter}\n)\n`;
+    let script = `HYDRA_WP_PATH=$(cat << '${wpDelimiter}'\n${wallpaper}\n${wpDelimiter}\n)\n`;
 
     // Run built-in template processor only if there are templates configured
     if (content) {
@@ -460,10 +460,10 @@ Singleton {
       // Don't pass --mode so templates get both dark and light colors (e.g., zed.json needs both)
       // Pass --default-mode so "default" in templates resolves to the current theme mode
       const schemeType = getSchemeType();
-      script += `python3 "${templateProcessorScript}" "$NOCTALIA_WP_PATH" --scheme-type ${schemeType} --config '${pathEsc}' --default-mode ${mode}\n`;
+      script += `python3 "${templateProcessorScript}" "$HYDRA_WP_PATH" --scheme-type ${schemeType} --config '${pathEsc}' --default-mode ${mode}\n`;
     }
 
-    script += buildUserTemplateCommand("$NOCTALIA_WP_PATH", mode);
+    script += buildUserTemplateCommand("$HYDRA_WP_PATH", mode);
 
     return script + "\n";
   }

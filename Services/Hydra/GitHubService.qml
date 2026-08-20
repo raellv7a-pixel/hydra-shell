@@ -10,7 +10,7 @@ import qs.Services.UI
 Singleton {
   id: root
 
-  property string githubDataFile: Quickshell.env("NOCTALIA_GITHUB_FILE") || (Settings.cacheDir + "github.json")
+  property string githubDataFile: Quickshell.env("HYDRA_GITHUB_FILE") || (Settings.cacheDir + "github.json")
   property int githubUpdateFrequency: 60 * 60 // 1 hour expressed in seconds
   property bool isFetchingData: false
   readonly property alias data: adapter // Used to access via GitHubService.data.xxx.yyy
@@ -221,7 +221,7 @@ Singleton {
     property bool fetchSucceeded: false
     property bool wasRateLimited: false
 
-    command: ["curl", "-s", "https://api.github.com/repos/noctalia-dev/noctalia-shell/releases/latest"]
+    command: ["curl", "-s", "https://api.github.com/repos/raellv7a-pixel/hydra-shell/releases/latest"]
 
     stdout: StdioCollector {
       onStreamFinished: {
@@ -299,7 +299,9 @@ Singleton {
     property bool fetchSucceeded: false
     property bool wasRateLimited: false
 
-    command: ["curl", "-s", "https://api.github.com/repos/noctalia-dev/noctalia-shell/contributors?per_page=100"]
+    // Upstream contributors: noctalia-dev/noctalia-shell was renamed to
+    // noctalia-dev/noctalia, credit stays with the project this shell forks.
+    command: ["curl", "-sL", "https://api.github.com/repos/noctalia-dev/noctalia/contributors?per_page=100"]
 
     stdout: StdioCollector {
       onStreamFinished: {

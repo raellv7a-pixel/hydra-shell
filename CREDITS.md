@@ -1,15 +1,21 @@
 # Credits
 
-Noctalia Shell is made possible by the incredible work of many open-source projects and contributors.
+Hydra Shell is a fork of [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell)
+(MIT, Copyright (c) 2025 noctalia-dev) and is made possible by the incredible work of many
+open-source projects and contributors.
+
+## Upstream
+
+- **[noctalia-dev](https://github.com/noctalia-dev)** - Authors of Noctalia Shell, the upstream project this shell is built on
 
 ## Design & Branding
 
-- **MrDowntempo** - Creator of the Noctalia Owl and moon logo
+- **MrDowntempo** - Creator of the Noctalia Owl and moon logo (upstream branding, no longer shipped)
 - **[SaberJ2X](https://www.reddit.com/user/SaberJ64/)** - Creator of Talia, the Noctalia mascot
 
 ## Core Framework
 
-- **[Quickshell](https://github.com/outfoxxed/quickshell)** - The Qt/QML-based Wayland shell framework that powers Noctalia
+- **[Quickshell](https://github.com/outfoxxed/quickshell)** - The Qt/QML-based Wayland shell framework that powers Hydra Shell
 
 ## Runtime Dependencies
 
@@ -48,9 +54,9 @@ Noctalia Shell is made possible by the incredible work of many open-source proje
 ## Special Thanks
 - The **Wayland** community for building the future of Linux desktop graphics
 - The **Niri**, **Hyprland**, **Sway**, **Labwc**, and **MangoWC** teams for their excellent Wayland compositors
-- All the contributors and users who have helped make Noctalia better
+- All the contributors and users who have helped make Noctalia (and therefore Hydra Shell) better
 
 ## License
-Noctalia Shell is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+Hydra Shell is licensed under the MIT License, inherited from Noctalia Shell. See [LICENSE](LICENSE) for details.
 
 Each dependency listed above is governed by its own respective license. Please refer to their individual projects for licensing information.

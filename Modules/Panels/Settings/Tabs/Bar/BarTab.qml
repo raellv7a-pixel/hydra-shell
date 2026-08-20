@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
-import qs.Services.Noctalia
+import qs.Services.Hydra
 import qs.Services.UI
 import qs.Widgets
 
@@ -198,11 +198,6 @@ ColumnLayout {
       tabIndex: 3
       checked: subTabBar.currentIndex === 3
     }
-    NTabButton {
-      text: "Central de Controle"
-      tabIndex: 4
-      checked: subTabBar.currentIndex === 4
-    }
   }
 
   Item {
@@ -229,7 +224,6 @@ ColumnLayout {
       addMonitor: root.addMonitor
       removeMonitor: root.removeMonitor
     }
-    DashboardSubTab {}
   }
 
   NPluginSettingsPopup {

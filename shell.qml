@@ -1,5 +1,5 @@
 /*
-* Noctalia – made by https://github.com/noctalia-dev
+* Hydra – made by https://github.com/hydra-dev
 * Licensed under the MIT License.
 * Forks and modifications are allowed under the MIT License,
 * but proper credit must be given to the original author.
@@ -36,7 +36,7 @@ import qs.Services.Hardware
 import qs.Services.Keyboard
 import qs.Services.Location
 import qs.Services.Networking
-import qs.Services.Noctalia
+import qs.Services.Hydra
 import qs.Services.Power
 import qs.Services.System
 import qs.Services.Theming
@@ -51,7 +51,7 @@ ShellRoot {
 
   Component.onCompleted: {
     Logger.i("Shell", "---------------------------");
-    Logger.i("Shell", "Noctalia Hello!");
+    Logger.i("Shell", "Hydra Hello!");
 
     // Initialize plugin system early so Settings can validate plugin widgets
     PluginRegistry.init();

@@ -93,7 +93,7 @@ Item {
       exclusionMode: ExclusionMode.Ignore
       WlrLayershell.layer: WlrLayer.Overlay
       WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-      WlrLayershell.namespace: "noctalia-region-selector"
+      WlrLayershell.namespace: "hydra-region-selector"
       property real selX: 0
       property real selY: 0
       property real selW: 0

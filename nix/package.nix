@@ -75,7 +75,7 @@ let
   ];
 in
 stdenvNoCC.mkDerivation {
-  pname = "noctalia-shell";
+  pname = "hydra-shell";
   inherit version src;
 
   nativeBuildInputs = [
@@ -88,9 +88,9 @@ stdenvNoCC.mkDerivation {
   ];
 
   installPhase = ''
-    mkdir -p $out/share/noctalia-shell $out/bin
-    cp -r . $out/share/noctalia-shell
-    ln -s ${quickshell}/bin/qs $out/bin/noctalia-shell
+    mkdir -p $out/share/hydra-shell $out/bin
+    cp -r . $out/share/hydra-shell
+    ln -s ${quickshell}/bin/qs $out/bin/hydra-shell
   '';
 
   preFixup = ''
@@ -98,15 +98,15 @@ stdenvNoCC.mkDerivation {
       --prefix PATH : ${lib.makeBinPath (runtimeDeps ++ extraPackages)}
       --prefix XDG_DATA_DIRS : ${wayland-scanner}/share
       --prefix XDG_DATA_DIRS : ${adw-gtk3}/share
-      --set-default QS_CONFIG_PATH "$out/share/noctalia-shell"
+      --set-default QS_CONFIG_PATH "$out/share/hydra-shell"
       ${lib.optionalString calendarSupport "--prefix GI_TYPELIB_PATH : ${giTypelibPath}"}
     )
   '';
 
   meta = {
     description = "A sleek and minimal desktop shell thoughtfully crafted for Wayland, built with Quickshell.";
-    homepage = "https://github.com/noctalia-dev/noctalia-shell";
+    homepage = "https://github.com/raellv7a-pixel/hydra-shell";
     license = lib.licenses.mit;
-    mainProgram = "noctalia-shell";
+    mainProgram = "hydra-shell";
   };
 }

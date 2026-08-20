@@ -39,8 +39,8 @@ Singleton {
   property string wallpaperCacheFile: ""
 
   readonly property bool scanning: (scanningCount > 0)
-  readonly property string noctaliaDefaultWallpaper: Quickshell.shellDir + "/Assets/Wallpaper/noctalia.png"
-  property string defaultWallpaper: noctaliaDefaultWallpaper
+  readonly property string hydraDefaultWallpaper: Quickshell.shellDir + "/Assets/Wallpaper/hydra.png"
+  property string defaultWallpaper: hydraDefaultWallpaper
 
   // Signals for reactive UI updates
   signal wallpaperChanged(string screenName, string path)
@@ -1677,7 +1677,7 @@ Singleton {
   Timer {
     id: randomWallpaperTimer
     interval: Settings.data.wallpaper.randomIntervalSec * 1000
-    running: Settings.data.wallpaper.automationEnabled && !PowerProfileService.noctaliaPerformanceMode
+    running: Settings.data.wallpaper.automationEnabled && !PowerProfileService.hydraPerformanceMode
     repeat: true
     onTriggered: setNextWallpaper()
     triggeredOnStart: false
@@ -1694,7 +1694,7 @@ Singleton {
     adapter: JsonAdapter {
       id: wallpaperCacheAdapter
       property var wallpapers: ({})
-      property string defaultWallpaper: root.noctaliaDefaultWallpaper
+      property string defaultWallpaper: root.hydraDefaultWallpaper
       property var usedRandomWallpapers: ({})
     }
 
@@ -1710,13 +1710,13 @@ Singleton {
         root._syncWallpaperSlotsWhenLinking();
       }
 
-      // Load default wallpaper from cache if it exists, otherwise use Noctalia default
+      // Load default wallpaper from cache if it exists, otherwise use Hydra default
       if (wallpaperCacheAdapter.defaultWallpaper && wallpaperCacheAdapter.defaultWallpaper !== "") {
         root.defaultWallpaper = wallpaperCacheAdapter.defaultWallpaper;
         Logger.d("Wallpaper", "Loaded default wallpaper from cache:", wallpaperCacheAdapter.defaultWallpaper);
       } else {
-        root.defaultWallpaper = root.noctaliaDefaultWallpaper;
-        Logger.d("Wallpaper", "Using Noctalia default wallpaper");
+        root.defaultWallpaper = root.hydraDefaultWallpaper;
+        Logger.d("Wallpaper", "Using Hydra default wallpaper");
       }
 
       Logger.d("Wallpaper", "Loaded wallpapers from cache file:", Object.keys(root.currentWallpapers).length, "screens");

@@ -14,7 +14,7 @@ Singleton {
   property int profile: powerProfiles ? powerProfiles.profile : PowerProfile.Balanced
 
   // Not a power profile but a volatile property to quickly disable shadows, animations, etc..
-  property bool noctaliaPerformanceMode: false
+  property bool hydraPerformanceMode: false
 
   function getName(p) {
     if (!available)
@@ -110,23 +110,23 @@ Singleton {
     }
   }
 
-  // Noctalia Performance Mode
+  // Hydra Performance Mode
   // - Turning shadow off
   // - Turning animation off
   // - Do Not Disturb
-  function toggleNoctaliaPerformance() {
-    noctaliaPerformanceMode = !noctaliaPerformanceMode;
+  function toggleHydraPerformance() {
+    hydraPerformanceMode = !hydraPerformanceMode;
   }
 
-  function setNoctaliaPerformance(value) {
-    noctaliaPerformanceMode = value;
+  function setHydraPerformance(value) {
+    hydraPerformanceMode = value;
   }
 
-  onNoctaliaPerformanceModeChanged: {
-    if (noctaliaPerformanceMode) {
-      ToastService.showNotice(I18n.tr("toast.noctalia-performance.label"), I18n.tr("toast.noctalia-performance.enabled"), "rocket");
+  onHydraPerformanceModeChanged: {
+    if (hydraPerformanceMode) {
+      ToastService.showNotice(I18n.tr("toast.hydra-performance.label"), I18n.tr("toast.hydra-performance.enabled"), "rocket");
     } else {
-      ToastService.showNotice(I18n.tr("toast.noctalia-performance.label"), I18n.tr("toast.noctalia-performance.disabled"), "rocket-off");
+      ToastService.showNotice(I18n.tr("toast.hydra-performance.label"), I18n.tr("toast.hydra-performance.disabled"), "rocket-off");
     }
   }
 }

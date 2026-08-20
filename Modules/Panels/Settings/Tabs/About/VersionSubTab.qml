@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Services.Compositor
-import qs.Services.Noctalia
+import qs.Services.Hydra
 import qs.Services.System
 import qs.Services.UI
 import qs.Widgets
@@ -128,7 +128,7 @@ ColumnLayout {
   }
 
   function copyInfoToClipboard() {
-    let info = "Noctalia Shell: " + root.currentVersion;
+    let info = "Hydra Shell: " + root.currentVersion;
     if (root.isGitVersion && root.commitInfo) {
       info += " (" + root.commitInfo + ")";
     }
@@ -136,7 +136,7 @@ ColumnLayout {
 
     if (root.qsVersion) {
       let qsV = root.qsVersion.startsWith("v") ? root.qsVersion : "v" + root.qsVersion;
-      info += "Noctalia QS: " + qsV;
+      info += "Hydra QS: " + qsV;
       if (root.qsRevision) {
         info += " (" + root.qsRevision + ")";
       }
@@ -198,9 +198,9 @@ ColumnLayout {
         var shellDir = Quickshell.shellDir || "";
         Logger.d("VersionSubTab", "Component.onCompleted - NixOS detected, shellDir:", shellDir);
         if (shellDir) {
-          // Extract commit hash from path like: /nix/store/...-noctalia-shell-2025-11-30_225e6d3/share/noctalia-shell
-          // Pattern matches: noctalia-shell-YYYY-MM-DD_<commit_hash>
-          var match = shellDir.match(/noctalia-shell-\d{4}-\d{2}-\d{2}_([0-9a-f]{7,})/i);
+          // Extract commit hash from path like: /nix/store/...-hydra-shell-2025-11-30_225e6d3/share/hydra-shell
+          // Pattern matches: hydra-shell-YYYY-MM-DD_<commit_hash>
+          var match = shellDir.match(/hydra-shell-\d{4}-\d{2}-\d{2}_([0-9a-f]{7,})/i);
           if (match && match[1]) {
             // Use first 7 characters of the commit hash
             root.commitInfo = match[1].substring(0, 7);
@@ -324,9 +324,9 @@ ColumnLayout {
     Layout.alignment: Qt.AlignHCenter
     spacing: Style.marginXL
 
-    // Noctalia logo
+    // Hydra logo
     Image {
-      source: "../../../../../Assets/noctalia.svg"
+      source: "../../../../../Assets/hydra.svg"
       width: 96 * Style.uiScaleRatio
       height: width
       fillMode: Image.PreserveAspectFit
@@ -375,7 +375,7 @@ ColumnLayout {
 
     ColumnLayout {
       NHeader {
-        label: "Noctalia Shell"
+        label: "Hydra Shell"
       }
 
       // Versions
@@ -386,7 +386,7 @@ ColumnLayout {
 
         // Installed Version (Shell)
         NText {
-          text: "Noctalia Shell:"
+          text: "Hydra Shell:"
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
         }
@@ -422,7 +422,7 @@ ColumnLayout {
               onExited: TooltipService.hide()
               onClicked: {
                 if (root.commitInfo) {
-                  Quickshell.execDetached(["xdg-open", "https://github.com/noctalia-dev/noctalia-shell/commit/" + root.commitInfo]);
+                  Quickshell.execDetached(["xdg-open", "https://github.com/raellv7a-pixel/hydra-shell/commit/" + root.commitInfo]);
                 }
               }
             }
@@ -463,7 +463,7 @@ ColumnLayout {
         // Latest Version (Shell)
         NText {
           visible: root.updateAvailable
-          text: I18n.tr("panels.about.noctalia-available")
+          text: I18n.tr("panels.about.hydra-available")
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
         }
@@ -485,7 +485,7 @@ ColumnLayout {
         // Quickshell Version
         NText {
           visible: root.qsVersion !== ""
-          text: "Noctalia QS:"
+          text: "Hydra QS:"
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
         }
@@ -557,7 +557,7 @@ ColumnLayout {
         // Latest Quickshell Version
         NText {
           visible: root.qsUpdateAvailable
-          text: I18n.tr("panels.about.noctalia-available")
+          text: I18n.tr("panels.about.hydra-available")
           color: Color.mOnSurfaceVariant
           Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
         }
@@ -611,7 +611,7 @@ ColumnLayout {
       outlined: true
       Layout.alignment: Qt.AlignHCenter
       onClicked: {
-        Quickshell.execDetached(["xdg-open", "https://buymeacoffee.com/noctalia"]);
+        Quickshell.execDetached(["xdg-open", "https://buymeacoffee.com/hydra"]);
         ToastService.showNotice(I18n.tr("panels.about.support"), I18n.tr("toast.donation-opened"));
       }
     }

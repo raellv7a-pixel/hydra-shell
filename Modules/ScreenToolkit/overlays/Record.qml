@@ -220,7 +220,7 @@ Item {
       WlrLayershell.layer: WlrLayer.Top
       WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
       WlrLayershell.exclusionMode: ExclusionMode.Ignore
-      WlrLayershell.namespace: "noctalia-record"
+      WlrLayershell.namespace: "hydra-record"
       Item {
         id: stopBtnAnchor
         readonly property real btnW: 110
