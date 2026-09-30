@@ -200,5 +200,22 @@ Item {
         }
       }
     }
+
+    // Follow each panel's animated leading edge above its background shape,
+    // below SmartPanel content, for both background opacity modes.
+    Item {
+      anchors.fill: parent
+      opacity: Style.effectivePanelOpacity
+
+      Repeater {
+        model: PanelService.backgroundSlotAssignments.filter(panel => panel && panel.screen === root.windowRoot.screen)
+
+        delegate: PanelRevealSeam {
+          required property var modelData
+
+          assignedPanel: modelData
+        }
+      }
+    }
   }
 }
