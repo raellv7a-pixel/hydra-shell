@@ -28,8 +28,12 @@ if [[ -d "$ACTIVE_DIR/.git" ]]; then
     "$(git -C "$ACTIVE_DIR" log -1 --format=%s)"
   if [[ "$(git -C "$ACTIVE_DIR" branch --show-current)" == "$BRANCH" ]] &&
      [[ "$(git -C "$LAB_DIR" branch --show-current)" == "$BRANCH" ]]; then
-    read -r active_only lab_only < <(git -C "$ACTIVE_DIR" rev-list --left-right --count \
-      "$(git -C "$ACTIVE_DIR" rev-parse HEAD)...$(git -C "$LAB_DIR" rev-parse HEAD)")
+    # The checkouts have separate object databases; compare their revision sets
+    # rather than asking one repository to walk commits it does not contain.
+    lab_commits="$(git -C "$LAB_DIR" rev-list HEAD | LC_ALL=C sort)"
+    active_commits="$(git -C "$ACTIVE_DIR" rev-list HEAD | LC_ALL=C sort)"
+    lab_only="$(comm -23 <(printf '%s\n' "$lab_commits") <(printf '%s\n' "$active_commits") | wc -l | tr -d '[:space:]')"
+    active_only="$(comm -13 <(printf '%s\n' "$lab_commits") <(printf '%s\n' "$active_commits") | wc -l | tr -d '[:space:]')"
     printf 'Lab-only commits: %s; active-only commits: %s\n' "$lab_only" "$active_only"
   fi
 else
@@ -37,6 +41,7 @@ else
 fi
 
 section "Quickshell processes"
+pgrep -a -x qs || echo "No process named qs."
 pgrep -a -x quickshell || echo "No process named quickshell."
 preview_pid=
 if [[ -f "$STATE_DIR/preview.pid" ]]; then

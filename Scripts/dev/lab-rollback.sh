@@ -24,7 +24,7 @@ git -C "$ACTIVE_DIR" cat-file -e "$last_good^{commit}" 2>/dev/null ||
   die "Active checkout is not on legacy-v4."
 
 command -v qs >/dev/null 2>&1 || die "qs is required to reload the restored checkout."
-mapfile -t quickshell_pids < <(pgrep -x quickshell || true)
+mapfile -t quickshell_pids < <({ pgrep -x qs || true; pgrep -x quickshell || true; } | sort -un)
 active_pids=()
 for pid in "${quickshell_pids[@]}"; do
   args="$(ps -o args= -p "$pid" 2>/dev/null || true)"

@@ -12,7 +12,7 @@ hl.on("hyprland.start", function()
   -- before the shell reads them. The migration is a no-op once done.
   hl.exec_cmd(
     "{ test -x " .. migrate .. " && " .. migrate .. "; }; " ..
-    "pgrep -x quickshell >/dev/null 2>&1 || " ..
+    "(pgrep -x qs >/dev/null 2>&1 || pgrep -x quickshell >/dev/null 2>&1) || " ..
     "command -v qs >/dev/null 2>&1 && qs -c hydra-shell -d"
   )
 end)

@@ -71,7 +71,7 @@ git -C "$LAB_DIR" merge-base --is-ancestor "$last_good" "$candidate" ||
 command -v qs >/dev/null 2>&1 || die "qs is required to validate/reload the active shell."
 command -v prowl >/dev/null 2>&1 || die "prowl is required for the project doctor check."
 
-mapfile -t quickshell_pids < <(pgrep -x quickshell || true)
+mapfile -t quickshell_pids < <({ pgrep -x qs || true; pgrep -x quickshell || true; } | sort -un)
 active_pids=()
 for pid in "${quickshell_pids[@]}"; do
   args="$(ps -o args= -p "$pid" 2>/dev/null || true)"

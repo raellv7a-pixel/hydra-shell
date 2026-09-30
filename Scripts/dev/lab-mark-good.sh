@@ -15,7 +15,7 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 [[ "$(git -C "$ACTIVE_DIR" branch --show-current)" == "legacy-v4" ]] || die "Active checkout is not on legacy-v4."
 [[ -z "$(git -C "$ACTIVE_DIR" status --porcelain)" ]] || die "Active checkout is dirty."
 [[ "$(git -C "$ACTIVE_DIR" rev-parse HEAD)" == "$commit" ]] || die "Active HEAD does not match the supplied commit."
-mapfile -t quickshell_pids < <(pgrep -x quickshell || true)
+mapfile -t quickshell_pids < <({ pgrep -x qs || true; pgrep -x quickshell || true; } | sort -un)
 active_pids=()
 for pid in "${quickshell_pids[@]}"; do
   args="$(ps -o args= -p "$pid" 2>/dev/null || true)"
