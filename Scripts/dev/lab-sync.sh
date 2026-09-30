@@ -81,14 +81,11 @@ done
 ((${#active_pids[@]} == 1)) || die "Expected exactly one active qs -c hydra-shell process; found ${#active_pids[@]}."
 active_pid="${active_pids[0]}"
 
-mapfile -t changed_qml < <(git -C "$LAB_DIR" diff --name-only "$last_good..$candidate" -- '*.qml')
+mapfile -t changed_qml < <(git -C "$LAB_DIR" diff --name-only --diff-filter=ACMRT "$last_good..$candidate" -- '*.qml')
 if ((${#changed_qml[@]})); then
   log "Checking changed QML with pinned Qt formatter/parser"
   (cd "$LAB_DIR" && ./Scripts/dev/qmlfmt.sh --check "${changed_qml[@]}")
-  qml_lint="${HYDRA_QT_TOOLS_DIR:-$HOME/.cache/hydra-shell-tools/qt}/6.10.3/gcc_64/bin/qmllint"
-  [[ -x "$qml_lint" ]] || qml_lint="$(command -v qmllint || true)"
-  [[ -n "$qml_lint" ]] || die "Changed QML requires qmllint; install the pinned Qt tools."
-  (cd "$LAB_DIR" && "$qml_lint" -I "$LAB_DIR" "${changed_qml[@]}")
+  (cd "$LAB_DIR" && ./Scripts/dev/qmllint.sh "${changed_qml[@]}")
 fi
 
 log "Running Prowl structural doctor"
