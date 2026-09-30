@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "prowl-agent": {
+    "prowl": {
       "type": "stdio",
-      "command": "prowl-agent",
+      "command": "prowl",
       "args": [
         "serve",
         "--mcp-surface",

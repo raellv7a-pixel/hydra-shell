@@ -1,9 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    "prowl-agent": {
+    "prowl": {
       "command": [
-        "prowl-agent",
+        "prowl",
         "serve",
         "--mcp-surface",
         "core"
