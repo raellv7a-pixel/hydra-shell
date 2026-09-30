@@ -51,6 +51,8 @@ Item {
   // Track actual visibility (delayed until content is loaded and sized)
   property bool isPanelVisible: false
 
+  readonly property alias contentItem: contentLoader.item
+
   // Track close animation in progress
   property bool isClosing: false
   property bool closeFinalized: false // Prevent double-finalization
@@ -701,7 +703,6 @@ Item {
     repeat: false
     onTriggered: root.finalizeClose()
   }
-
 
   // ------------------------------------------------
   // Panel Content

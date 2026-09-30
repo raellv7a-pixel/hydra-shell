@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
+import qs.Services.System
 import qs.Services.UI
 import qs.Widgets
 
@@ -16,6 +17,32 @@ ColumnLayout {
 
   NHeader {
     label: root.dtr("settingsProfilePhoto")
+  }
+  NTextInputButton {
+    Layout.fillWidth: true
+    label: root.dtr("settingsProfileAvatarPath")
+    description: root.dtr("settingsProfileAvatarPathDesc")
+    text: Settings.data.controlCenter.avatarPath
+    placeholderText: Settings.preprocessPath(Settings.data.general.avatarImage) || "~/.face"
+    buttonIcon: "photo"
+    buttonTooltip: I18n.tr("panels.general.profile-tooltip")
+    onInputTextChanged: text => Settings.data.controlCenter.avatarPath = text
+    onButtonClicked: {
+      avatarPicker.openFilePicker();
+    }
+  }
+
+  NFilePicker {
+    id: avatarPicker
+    title: I18n.tr("panels.general.profile-select-avatar")
+    selectionMode: "files"
+    initialPath: Settings.preprocessPath(Settings.data.controlCenter.avatarPath || Settings.data.general.avatarImage).substr(0, Settings.preprocessPath(Settings.data.controlCenter.avatarPath || Settings.data.general.avatarImage).lastIndexOf("/")) || Quickshell.env("HOME")
+    nameFilters: ImageCacheService.basicImageFilters
+    onAccepted: paths => {
+                  if (paths && paths.length > 0) {
+                    Settings.data.controlCenter.avatarPath = paths[0];
+                  }
+                }
   }
 
   NComboBox {
@@ -264,7 +291,7 @@ ColumnLayout {
     visible: Settings.data.controlCenter.profileCoverBlurEnabled
     label: root.dtr("settingsBlur")
     from: 0
-    to: 64
+    to: 48
     stepSize: 1
     showReset: true
     value: Settings.data.controlCenter.profileCoverBlur

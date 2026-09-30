@@ -47,6 +47,10 @@ Singleton {
     running: false
     interval: 200
     onTriggered: {
+      if (!root._bootstrapComplete) {
+        root._pendingExternalReload = true;
+        return;
+      }
       if (settingsFileView.path !== undefined) {
         Logger.d("Settings", "Reloading settings after external change detection");
         reloadSettings = true;
@@ -57,6 +61,10 @@ Singleton {
 
   function scheduleExternalReload() {
     if (!directoriesCreated || settingsFileView.path === undefined) {
+      return;
+    }
+    if (!root._bootstrapComplete) {
+      root._pendingExternalReload = true;
       return;
     }
     externalReloadTimer.restart();
@@ -98,6 +106,9 @@ Singleton {
     running: false
     interval: 500
     onTriggered: {
+      if (!root._bootstrapComplete) {
+        return;
+      }
       root.saveImmediate();
     }
   }
@@ -107,10 +118,14 @@ Singleton {
     path: directoriesCreated ? settingsFile : undefined
     printErrors: false
     watchChanges: true
-    onAdapterUpdated: saveTimer.start()
+    onAdapterUpdated: {
+      if (!root._bootstrapComplete) {
+        return;
+      }
+      saveTimer.start();
+    }
 
     onFileChanged: scheduleExternalReload()
-
     // Trigger initial load when path changes from empty to actual path
     onPathChanged: {
       if (path !== undefined) {
@@ -123,10 +138,22 @@ Singleton {
 
         // Load raw JSON for migrations (adapter doesn't expose removed properties)
         var rawJson = null;
+        var rawParsed = false;
         try {
           rawJson = JSON.parse(settingsFileView.text());
+          rawParsed = true;
         } catch (e) {
           Logger.w("Settings", "Could not parse raw JSON for migrations");
+        }
+
+        root._rawInitialPersistedJson = rawJson;
+        root._rawInitialSettingsParsed = rawParsed;
+        if (rawParsed && rawJson && typeof rawJson === "object" && rawJson.controlCenter && typeof rawJson.controlCenter === "object") {
+          root._rawInitialControlCenter = JSON.parse(JSON.stringify(rawJson.controlCenter));
+        } else if (rawParsed) {
+          root._rawInitialControlCenter = {};
+        } else {
+          root._rawInitialControlCenter = null;
         }
 
         // Run versioned migrations immediately, don't move it in upgradeSettings
@@ -139,7 +166,7 @@ Singleton {
         root.isLoaded = true;
         root.settingsLoaded();
 
-        upgradeSettings();
+        upgradeSettings(rawJson);
       } else {
         Logger.d("Settings", "Settings reloaded from external file change");
         root.settingsReloaded();
@@ -153,6 +180,9 @@ Singleton {
       if (error.toString().includes("No such file") || error === 2) {
         // File doesn't exist, create it with default values
         root.isFreshInstall = true;
+        root._rawInitialPersistedJson = {};
+        root._rawInitialSettingsParsed = true;
+        root._rawInitialControlCenter = {};
         writeAdapter();
 
         // We started without settings, we should open the setupWizard
@@ -181,7 +211,14 @@ Singleton {
 
   // Cached default settings object
   property var _defaultSettings: null
-
+  property var _rawInitialPersistedJson: null
+  property var _rawInitialControlCenter: null
+  property bool _rawInitialSettingsParsed: false
+  property var _stagedLegacyControlCenter: null
+  property bool _legacyControlCenterLoadAttempted: false
+  property bool _bootstrapInProgress: false
+  property bool _bootstrapComplete: false
+  property bool _pendingExternalReload: false
   // Load default settings when file is loaded
   Connections {
     target: defaultSettingsFileView
@@ -204,9 +241,9 @@ Singleton {
   // ---------------------------------------------------------------------------
   FileView {
     id: legacyControlCenterFileView
-    // path is a QString, so the "not ready yet" sentinel must be "" and not
-    // undefined, which the scene graph rejects with a type warning.
-    path: isLoaded ? (configDir + "control-center.json") : ""
+    // Path is available once config directories exist so legacy store
+    // can load concurrently with native settings.
+    path: directoriesCreated ? (configDir + "control-center.json") : ""
     printErrors: false
     watchChanges: false
     onPathChanged: {
@@ -215,26 +252,58 @@ Singleton {
       }
     }
     onLoaded: {
-      if (root.data.controlCenter.legacyStoreImported)
-        return;
       try {
-        var legacy = JSON.parse(legacyControlCenterFileView.text());
-        if (legacy && typeof legacy === "object") {
-          root.importLegacyControlCenter(legacy);
-          Logger.i("Settings", "Imported legacy control-center.json into controlCenter settings");
+        var parsed = JSON.parse(legacyControlCenterFileView.text());
+        if (parsed && typeof parsed === "object") {
+          root._stagedLegacyControlCenter = parsed;
+        } else {
+          root._stagedLegacyControlCenter = null;
         }
       } catch (e) {
-        Logger.w("Settings", "Ignoring malformed legacy control-center.json: " + e);
+        Logger.w("Settings", "Failed to parse legacy control-center.json: " + e);
+        root._stagedLegacyControlCenter = null;
       }
-      root.data.controlCenter.legacyStoreImported = true;
-      // Flush now instead of letting saveTimer coalesce it: settingsFileView
-      // watches the file, and its external-reload pass would otherwise re-read
-      // the pre-import contents over the values we just set.
-      root.saveImmediate();
+      root._legacyControlCenterLoadAttempted = true;
+      root._checkAndRunBootstrapTransaction();
+    }
+    onLoadFailed: function (error) {
+      root._stagedLegacyControlCenter = null;
+      root._legacyControlCenterLoadAttempted = true;
+      root._checkAndRunBootstrapTransaction();
     }
   }
 
-  readonly property var _legacyControlCenterStringKeys: ["diskPath", "avatarPath", "avatarShape", "avatarMusicEffect", "profileCardShape", "profileDanceGifPath", "profileCoverMode", "profileCoverPath", "profileCoverFolder", "profileCoverBorderEffect", "profileCoverBorderColorMode", "profileCoverBorderAnimation", "profileCoverBorderColor1", "profileCoverBorderColor2", "profileCoverBorderColor3", "profileCoverBorderColor4", "profileCoverBorderColor5", "mediaVisualizerEffect", "audioSliderEffect", "microphoneSliderEffect"]
+  function _checkAndRunBootstrapTransaction() {
+    if (!root.isLoaded || root._bootstrapComplete || root._bootstrapInProgress) {
+      return;
+    }
+    upgradeSettings(root._rawInitialPersistedJson);
+  }
+
+  function _applyStagedLegacyControlCenter() {
+    if (root.data.controlCenter.legacyStoreImported) {
+      return;
+    }
+
+    if (!root._rawInitialSettingsParsed) {
+      Logger.w("Settings", "Raw native settings could not be reliably parsed; skipping legacy control-center import to prevent overwriting native settings");
+      root.data.controlCenter.legacyStoreImported = true;
+      return;
+    }
+
+    if (root._stagedLegacyControlCenter && typeof root._stagedLegacyControlCenter === "object") {
+      try {
+        root.importLegacyControlCenter(root._stagedLegacyControlCenter, root._rawInitialControlCenter);
+        Logger.i("Settings", "Imported legacy control-center.json into controlCenter settings");
+      } catch (e) {
+        Logger.w("Settings", "Failed to import legacy control-center.json: " + e);
+      }
+    }
+    root.data.controlCenter.legacyStoreImported = true;
+  }
+
+  readonly property var _legacyControlCenterStringKeys: ["diskPath", "avatarPath", "avatarShape", "avatarMusicEffect", "profileCardShape", "profileDanceGifPath", "profileCoverMode", "profileCoverPath", "profileCoverFolder", "profileCoverBorderEffect", "profileCoverBorderColorMode", "profileCoverBorderAnimation", "profileCoverBorderColor1",
+    "profileCoverBorderColor2", "profileCoverBorderColor3", "profileCoverBorderColor4", "profileCoverBorderColor5", "mediaVisualizerEffect", "audioSliderEffect", "microphoneSliderEffect"]
   readonly property var _legacyControlCenterIntKeys: ["panelWidth", "panelHeight", "profileCoverBlur", "profileCoverBorderWidth", "profileCoverBorderColorCount"]
   readonly property var _legacyControlCenterRealKeys: ["panelScale", "profileCoverOverlay", "profileCoverBorderSpeed"]
   readonly property var _legacyControlCenterBoolKeys: ["showProfileDanceGif", "showProfileWallpaper", "profileCoverOverlayEnabled", "profileCoverBlurEnabled", "profileCoverBorder", "followHydraPerformanceMode", "powerSaverPerformanceMode", "showNotifications", "showMedia", "showCalendar", "showRecordingCard"]
@@ -243,8 +312,12 @@ Singleton {
   // The legacy "left"/"right" meant vertically centred against that edge.
   readonly property var _legacyControlCenterPositions: ({
                                                           "center": "center",
+                                                          "top_center": "top_center",
+                                                          "top": "top_center",
                                                           "top_left": "top_left",
                                                           "top_right": "top_right",
+                                                          "bottom_center": "bottom_center",
+                                                          "bottom": "bottom_center",
                                                           "bottom_left": "bottom_left",
                                                           "bottom_right": "bottom_right",
                                                           "left": "center_left",
@@ -257,44 +330,51 @@ Singleton {
     return !!value;
   }
 
-  function importLegacyControlCenter(legacy) {
+  function importLegacyControlCenter(legacy, rawSnapshot) {
+    var snapshot = rawSnapshot !== undefined && rawSnapshot !== null ? rawSnapshot : (root._rawInitialControlCenter || {});
     var cc = root.data.controlCenter;
     var i;
     var key;
-    var value;
 
     // Coerce on the way in: a stringly-typed legacy file must not poison a
     // typed JsonObject property.
     for (i = 0; i < _legacyControlCenterStringKeys.length; i++) {
       key = _legacyControlCenterStringKeys[i];
-      value = legacy[key];
-      if (value !== undefined && value !== null)
-        cc[key] = String(value);
+      if (snapshot[key] === undefined && legacy[key] !== undefined && legacy[key] !== null) {
+        cc[key] = String(legacy[key]);
+      }
     }
 
     for (i = 0; i < _legacyControlCenterIntKeys.length; i++) {
       key = _legacyControlCenterIntKeys[i];
-      value = parseInt(legacy[key], 10);
-      if (!isNaN(value))
-        cc[key] = value;
+      if (snapshot[key] === undefined && legacy[key] !== undefined && legacy[key] !== null) {
+        var intVal = parseInt(legacy[key], 10);
+        if (!isNaN(intVal))
+          cc[key] = intVal;
+      }
     }
 
     for (i = 0; i < _legacyControlCenterRealKeys.length; i++) {
       key = _legacyControlCenterRealKeys[i];
-      value = parseFloat(legacy[key]);
-      if (!isNaN(value))
-        cc[key] = value;
+      if (snapshot[key] === undefined && legacy[key] !== undefined && legacy[key] !== null) {
+        var realVal = parseFloat(legacy[key]);
+        if (!isNaN(realVal))
+          cc[key] = realVal;
+      }
     }
 
-    for (i = 0; i < _legacyControlCenterBoolKeys.length; i++) {
-      key = _legacyControlCenterBoolKeys[i];
-      if (legacy[key] !== undefined)
+    var nonVisibilityBools = ["showProfileDanceGif", "showProfileWallpaper", "profileCoverOverlayEnabled", "profileCoverBlurEnabled", "profileCoverBorder", "followHydraPerformanceMode", "powerSaverPerformanceMode"];
+    for (i = 0; i < nonVisibilityBools.length; i++) {
+      key = nonVisibilityBools[i];
+      if (snapshot[key] === undefined && legacy[key] !== undefined && legacy[key] !== null) {
         cc[key] = _legacyBool(legacy[key]);
+      }
     }
 
     // The legacy store keyed styles by styleKey; the native store is a list of
     // entries carrying that styleKey in a "key" field.
-    if (legacy.componentStyles && typeof legacy.componentStyles === "object") {
+    // Preserve explicit empty list or map in native snapshot.
+    if (snapshot.componentStyles === undefined && legacy.componentStyles && typeof legacy.componentStyles === "object") {
       var entries = [];
       var styleKeys = Object.keys(legacy.componentStyles);
       for (i = 0; i < styleKeys.length; i++) {
@@ -310,19 +390,149 @@ Singleton {
 
     // Legacy panelDetached maps straight onto detached; followBarEdge only ever
     // meant "sit on the bar's edge", which is now position=close_to_bar_button.
-    if (legacy.panelDetached !== undefined)
+    if (snapshot.detached === undefined && legacy.panelDetached !== undefined) {
       cc.detached = _legacyBool(legacy.panelDetached);
+    }
 
-    if (legacy.panelDetached !== undefined || legacy.followBarEdge !== undefined || legacy.panelPosition !== undefined) {
-      var detached = legacy.panelDetached !== undefined ? _legacyBool(legacy.panelDetached) : true;
-      if (!detached && _legacyBool(legacy.followBarEdge)) {
-        cc.position = "close_to_bar_button";
-      } else {
-        var mapped = _legacyControlCenterPositions[String(legacy.panelPosition)];
-        if (mapped !== undefined)
-          cc.position = mapped;
+    if (snapshot.position === undefined) {
+      if (legacy.panelDetached !== undefined || legacy.followBarEdge !== undefined || legacy.panelPosition !== undefined) {
+        var detached = snapshot.detached !== undefined ? snapshot.detached : (legacy.panelDetached !== undefined ? _legacyBool(legacy.panelDetached) : true);
+        if (!detached && _legacyBool(legacy.followBarEdge)) {
+          cc.position = "close_to_bar_button";
+        } else if (legacy.panelPosition !== undefined) {
+          var mapped = _legacyControlCenterPositions[String(legacy.panelPosition)];
+          if (mapped !== undefined)
+            cc.position = mapped;
+        }
       }
     }
+
+    // Subcontrols: only import if absent from native snapshot
+    if (snapshot.audioControlsEnabled === undefined && legacy.audioControlsEnabled !== undefined) {
+      cc.audioControlsEnabled = _legacyBool(legacy.audioControlsEnabled);
+    }
+    if (snapshot.brightnessControlEnabled === undefined && legacy.brightnessControlEnabled !== undefined) {
+      cc.brightnessControlEnabled = _legacyBool(legacy.brightnessControlEnabled);
+    }
+
+    // Visibility precedence and cards:
+    // 1. Explicit native cards catalog in snapshot (authoritative; legacy cards/flags do not touch)
+    var hasNativeCards = Array.isArray(snapshot.cards) && snapshot.cards.length > 0;
+    if (hasNativeCards) {
+      // Legacy card rows already in settings.json win over conflicting plugin store values.
+      return;
+    }
+
+    // 2. If no native catalog:
+    // Visibility precedence:
+    //   explicit native visibility flags in snapshot,
+    //   then legacy store flags / legacy card states,
+    //   then defaults.
+    var legacyCardsById = Object.create(null);
+    if (Array.isArray(legacy.cards)) {
+      for (var lc = 0; lc < legacy.cards.length; lc++) {
+        var lcard = legacy.cards[lc];
+        if (lcard && typeof lcard === "object" && typeof lcard.id === "string") {
+          var normId = lcard.id.endsWith("-card") ? lcard.id.slice(0, -5) : lcard.id;
+          legacyCardsById[normId] = lcard;
+        }
+      }
+    }
+
+    function resolveVisibility(flagKey, legacyCardId, defaultVal) {
+      if (snapshot[flagKey] !== undefined)
+        return _legacyBool(snapshot[flagKey]);
+      if (legacy[flagKey] !== undefined)
+        return _legacyBool(legacy[flagKey]);
+      if (legacyCardId && legacyCardsById[legacyCardId] && legacyCardsById[legacyCardId].enabled !== undefined)
+        return _legacyBool(legacyCardsById[legacyCardId].enabled);
+      return defaultVal;
+    }
+
+    var showNotifs = resolveVisibility("showNotifications", "notifications", true);
+    var showMed = resolveVisibility("showMedia", "media", true);
+    var showCal = resolveVisibility("showCalendar", "calendar", true);
+    var showRec = resolveVisibility("showRecordingCard", "recording", true);
+
+    var audioSub = snapshot.audioControlsEnabled !== undefined ? _legacyBool(snapshot.audioControlsEnabled) : (legacy.audioControlsEnabled !== undefined ? _legacyBool(legacy.audioControlsEnabled) : (legacyCardsById.audio ? _legacyBool(legacyCardsById.audio.enabled) : true));
+    var brightSub = snapshot.brightnessControlEnabled !== undefined ? _legacyBool(snapshot.brightnessControlEnabled) : (legacy.brightnessControlEnabled !== undefined ? _legacyBool(legacy.brightnessControlEnabled) : (legacyCardsById.brightness ? _legacyBool(legacyCardsById.brightness.enabled) : true));
+
+    cc.audioControlsEnabled = audioSub;
+    cc.brightnessControlEnabled = brightSub;
+    cc.showNotifications = showNotifs;
+    cc.showMedia = showMed;
+    cc.showCalendar = showCal;
+    cc.showRecordingCard = showRec;
+
+    var perfEnabled = true;
+    if (legacyCardsById.performance && legacyCardsById.performance.enabled !== undefined) {
+      perfEnabled = _legacyBool(legacyCardsById.performance.enabled);
+    } else if (legacyCardsById["media-sysmon"] && legacyCardsById["media-sysmon"].enabled !== undefined) {
+      perfEnabled = _legacyBool(legacyCardsById["media-sysmon"].enabled);
+    }
+
+    var sysControlsEnabled = audioSub || brightSub;
+    var quickActionsEnabled = legacyCardsById["quick-actions"] && legacyCardsById["quick-actions"].enabled !== undefined ? _legacyBool(legacyCardsById["quick-actions"].enabled) : true;
+    var shortcutsCardEnabled = legacyCardsById.shortcuts && legacyCardsById.shortcuts.enabled !== undefined ? _legacyBool(legacyCardsById.shortcuts.enabled) : false;
+
+    var materializedCards = [
+          {
+            "id": "profile",
+            "zone": "left",
+            "enabled": true,
+            "locked": true
+          },
+          {
+            "id": "quick-actions",
+            "zone": "left",
+            "enabled": quickActionsEnabled,
+            "locked": false
+          },
+          {
+            "id": "recording",
+            "zone": "left",
+            "enabled": showRec,
+            "locked": false
+          },
+          {
+            "id": "shortcuts",
+            "zone": "left",
+            "enabled": shortcutsCardEnabled,
+            "locked": false
+          },
+          {
+            "id": "performance",
+            "zone": "center",
+            "enabled": perfEnabled,
+            "locked": false
+          },
+          {
+            "id": "system-controls",
+            "zone": "center",
+            "enabled": sysControlsEnabled,
+            "locked": false
+          },
+          {
+            "id": "notifications",
+            "zone": "right",
+            "enabled": showNotifs,
+            "locked": false
+          },
+          {
+            "id": "media",
+            "zone": "right",
+            "enabled": showMed,
+            "locked": false
+          },
+          {
+            "id": "calendar",
+            "zone": "right",
+            "enabled": showCal,
+            "locked": false
+          }
+        ];
+
+    replaceControlCenterCards(materializedCards);
   }
 
   JsonAdapter {
@@ -690,6 +900,10 @@ Singleton {
       property string audioSliderEffect: "wave"
       property string microphoneSliderEffect: "pulse"
 
+      // System controls subcontrols
+      property bool audioControlsEnabled: true
+      property bool brightnessControlEnabled: true
+
       // Performance
       property bool followHydraPerformanceMode: true
       property bool powerSaverPerformanceMode: true
@@ -743,28 +957,58 @@ Singleton {
       }
       property list<var> cards: [
         {
-          "id": "profile-card",
-          "enabled": true
+          "id": "profile",
+          "zone": "left",
+          "enabled": true,
+          "locked": true
         },
         {
-          "id": "shortcuts-card",
-          "enabled": true
+          "id": "quick-actions",
+          "zone": "left",
+          "enabled": true,
+          "locked": false
         },
         {
-          "id": "audio-card",
-          "enabled": true
+          "id": "recording",
+          "zone": "left",
+          "enabled": true,
+          "locked": false
         },
         {
-          "id": "brightness-card",
-          "enabled": false
+          "id": "shortcuts",
+          "zone": "left",
+          "enabled": false,
+          "locked": false
         },
         {
-          "id": "weather-card",
-          "enabled": true
+          "id": "performance",
+          "zone": "center",
+          "enabled": true,
+          "locked": false
         },
         {
-          "id": "media-sysmon-card",
-          "enabled": true
+          "id": "system-controls",
+          "zone": "center",
+          "enabled": true,
+          "locked": false
+        },
+        {
+          "id": "notifications",
+          "zone": "right",
+          "enabled": true,
+          "locked": false
+        },
+        {
+          "id": "media",
+          "zone": "right",
+          "enabled": true,
+          "locked": false
+        },
+        {
+          "id": "calendar",
+          "zone": "right",
+          "enabled": true,
+          "locked": false
         }
       ]
     }
@@ -1514,22 +1758,32 @@ Singleton {
   // -----------------------------------------------------
   // If the settings structure has changed, ensure
   // backward compatibility by upgrading the settings
-  function upgradeSettings() {
+  function upgradeSettings(persistedJson) {
+    if (root._bootstrapComplete || root._bootstrapInProgress) {
+      return;
+    }
+
+    // Wait for legacy control center store to load or finish attempt if pending
+    if (!root.data.controlCenter.legacyStoreImported && !root._legacyControlCenterLoadAttempted) {
+      Logger.d("Settings", "Legacy control center store load pending, deferring upgrade");
+      Qt.callLater(() => upgradeSettings(persistedJson));
+      return;
+    }
+
     // Wait for PluginService to finish loading plugins first
     // This prevents deleting plugin widgets during reload before plugins are registered
     if (!PluginService.initialized || !PluginService.pluginsFullyLoaded) {
       Logger.d("Settings", "Plugins not fully loaded yet, deferring upgrade");
-      Qt.callLater(upgradeSettings);
+      Qt.callLater(() => upgradeSettings(persistedJson));
       return;
     }
 
     // Wait for BarWidgetRegistry to be ready
     if (!BarWidgetRegistry.widgets || Object.keys(BarWidgetRegistry.widgets).length === 0) {
       Logger.d("Settings", "BarWidgetRegistry not ready, deferring upgrade");
-      Qt.callLater(upgradeSettings);
+      Qt.callLater(() => upgradeSettings(persistedJson));
       return;
     }
-
     // -----------------
     const sections = ["left", "center", "right"];
 
@@ -1557,9 +1811,11 @@ Singleton {
       const shortcuts = adapter.controlCenter.shortcuts[sectionName];
       for (var i = shortcuts.length - 1; i >= 0; i--) {
         var shortcut = shortcuts[i];
+        if (shortcut.id && shortcut.id.startsWith("plugin:")) {
+          continue;
+        }
         if (!ControlCenterWidgetRegistry.hasWidget(shortcut.id)) {
           Logger.w(`Settings`, `!!! Deleted invalid control center widget ${shortcut.id} !!!`);
-          shortcuts.splice(i, 1);
           removedWidget = true;
         }
       }
@@ -1599,6 +1855,636 @@ Singleton {
         }
       }
     }
+
+    root._bootstrapInProgress = true;
+    try {
+      // -----------------
+      // 5. legacy control-center import:
+      // Synchronously apply staged legacy preferences if not already imported
+      root._applyStagedLegacyControlCenter();
+
+      // -----------------
+      // 6. normalize and migrate control center cards
+      // JsonAdapter may retain schema defaults for values written by the old Dashboard.
+      // Reapply raw persisted values after registry readiness, before normalizing cards.
+      var rawCC = persistedJson && persistedJson.controlCenter ? persistedJson.controlCenter : (root._rawInitialControlCenter || {});
+      var hasPersistedCards = rawCC && Array.isArray(rawCC.cards) && rawCC.cards.length > 0;
+
+      if (!hasPersistedCards && rawCC) {
+        if (rawCC.audioControlsEnabled !== undefined)
+          adapter.controlCenter.audioControlsEnabled = rawCC.audioControlsEnabled;
+        if (rawCC.brightnessControlEnabled !== undefined)
+          adapter.controlCenter.brightnessControlEnabled = rawCC.brightnessControlEnabled;
+        var legacyVisibilityKeys = ["showNotifications", "showMedia", "showCalendar", "showRecordingCard"];
+        for (var v = 0; v < legacyVisibilityKeys.length; v++) {
+          var key = legacyVisibilityKeys[v];
+          if (rawCC[key] !== undefined)
+            adapter.controlCenter[key] = rawCC[key];
+        }
+      }
+
+      normalizeControlCenterCards(hasPersistedCards ? rawCC.cards : (rawCC && rawCC.cards !== undefined ? rawCC.cards : undefined));
+
+      // -----------------
+      // 7. Persist one final normalized adapter without yielding
+      root.saveImmediate();
+    } finally {
+      root._bootstrapInProgress = false;
+      root._bootstrapComplete = true;
+      if (root._pendingExternalReload) {
+        root._pendingExternalReload = false;
+        externalReloadTimer.restart();
+      }
+    }
+  }
+
+  // -----------------------------------------------------
+  // Control Center Cards helpers and migration
+
+  function getDefaultControlCenterCards() {
+    return [
+          {
+            "id": "profile",
+            "zone": "left",
+            "enabled": true,
+            "locked": true
+          },
+          {
+            "id": "quick-actions",
+            "zone": "left",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "recording",
+            "zone": "left",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "shortcuts",
+            "zone": "left",
+            "enabled": false,
+            "locked": false
+          },
+          {
+            "id": "performance",
+            "zone": "center",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "system-controls",
+            "zone": "center",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "notifications",
+            "zone": "right",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "media",
+            "zone": "right",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "calendar",
+            "zone": "right",
+            "enabled": true,
+            "locked": false
+          }
+        ];
+  }
+
+  function replaceControlCenterCards(nextCards) {
+    adapter.controlCenter.cards.length = 0;
+    for (var i = 0; i < nextCards.length; i++)
+      adapter.controlCenter.cards.push(nextCards[i]);
+  }
+
+  function normalizeControlCenterCards(rawCardsOverride) {
+    var blurValue = Number(adapter.controlCenter.profileCoverBlur);
+    if (!isFinite(blurValue))
+      blurValue = 0;
+    var normalizedBlur = Math.max(0, Math.min(48, Math.round(blurValue)));
+    var blurChanged = adapter.controlCenter.profileCoverBlur !== normalizedBlur;
+    if (blurChanged)
+      adapter.controlCenter.profileCoverBlur = normalizedBlur;
+
+    var rawCards = [];
+    if (Array.isArray(rawCardsOverride)) {
+      rawCards = rawCardsOverride.slice();
+    } else {
+      var currentCards = adapter.controlCenter.cards;
+      for (var c = 0; c < currentCards.length; c++)
+        rawCards.push(currentCards[c]);
+    }
+
+    var defaultCards = [
+          {
+            "id": "profile",
+            "zone": "left",
+            "enabled": true,
+            "locked": true
+          },
+          {
+            "id": "quick-actions",
+            "zone": "left",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "recording",
+            "zone": "left",
+            "enabled": adapter.controlCenter.showRecordingCard !== undefined ? adapter.controlCenter.showRecordingCard : true,
+            "locked": false
+          },
+          {
+            "id": "shortcuts",
+            "zone": "left",
+            "enabled": false,
+            "locked": false
+          },
+          {
+            "id": "performance",
+            "zone": "center",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "system-controls",
+            "zone": "center",
+            "enabled": true,
+            "locked": false
+          },
+          {
+            "id": "notifications",
+            "zone": "right",
+            "enabled": adapter.controlCenter.showNotifications !== undefined ? adapter.controlCenter.showNotifications : true,
+            "locked": false
+          },
+          {
+            "id": "media",
+            "zone": "right",
+            "enabled": adapter.controlCenter.showMedia !== undefined ? adapter.controlCenter.showMedia : true,
+            "locked": false
+          },
+          {
+            "id": "calendar",
+            "zone": "right",
+            "enabled": adapter.controlCenter.showCalendar !== undefined ? adapter.controlCenter.showCalendar : true,
+            "locked": false
+          }
+        ];
+
+    var isLegacy = false;
+    if (rawCards.length === 0) {
+      isLegacy = true;
+    } else {
+      for (var i = 0; i < rawCards.length; i++) {
+        var c = rawCards[i];
+        if (!c || typeof c !== "object" || !c.zone || (typeof c.id === "string" && c.id.endsWith("-card"))) {
+          isLegacy = true;
+          break;
+        }
+      }
+    }
+
+    if (isLegacy) {
+      Logger.i("Settings", "Migrating legacy Control Center card configuration (" + rawCards.length + " entries)");
+
+      var migrated = [];
+      var nativeCardsById = Object.create(null);
+      var explicitlyConfigured = Object.create(null);
+      for (var d = 0; d < defaultCards.length; d++) {
+        var defaultCard = Object.assign({}, defaultCards[d]);
+        migrated.push(defaultCard);
+        nativeCardsById[defaultCard.id] = defaultCard;
+      }
+
+      var hasLegacyAudio = false;
+      var legacyAudioEnabled = true;
+      var hasLegacyBrightness = false;
+      var legacyBrightnessEnabled = true;
+      var hasLegacyMediaSysmon = false;
+      var legacyMediaSysmonEnabled = true;
+
+      for (var r = 0; r < rawCards.length; r++) {
+        var rc = rawCards[r];
+        if (!rc || typeof rc !== "object" || !rc.id)
+          continue;
+
+        var rawId = String(rc.id);
+        if (nativeCardsById[rawId]) {
+          if (rc.enabled !== undefined) {
+            nativeCardsById[rawId].enabled = rc.enabled !== false;
+            explicitlyConfigured[rawId] = true;
+          }
+          continue;
+        }
+
+        if (rawId === "shortcuts-card") {
+          if (!explicitlyConfigured.shortcuts)
+            nativeCardsById.shortcuts.enabled = rc.enabled !== false;
+        } else if (rawId === "audio-card") {
+          hasLegacyAudio = true;
+          legacyAudioEnabled = rc.enabled !== false;
+        } else if (rawId === "brightness-card") {
+          hasLegacyBrightness = true;
+          legacyBrightnessEnabled = rc.enabled !== false;
+        } else if (rawId === "media-sysmon-card") {
+          hasLegacyMediaSysmon = true;
+          legacyMediaSysmonEnabled = rc.enabled !== false;
+        } else if (rawId !== "profile-card" && rawId !== "weather-card") {
+          migrated.push({
+                          "id": rawId,
+                          "zone": (rc.zone === "center" || rc.zone === "right") ? rc.zone : "left",
+                          "enabled": rc.enabled !== false,
+                          "locked": false
+                        });
+        }
+      }
+
+      // The old audio/brightness cards are now subcontrols of the System Controls card.
+      // Map each legacy child preference individually.
+      if (hasLegacyAudio) {
+        adapter.controlCenter.audioControlsEnabled = legacyAudioEnabled;
+      }
+      if (hasLegacyBrightness) {
+        adapter.controlCenter.brightnessControlEnabled = legacyBrightnessEnabled;
+      }
+
+      var finalAudio = hasLegacyAudio ? legacyAudioEnabled : (adapter.controlCenter.audioControlsEnabled !== undefined ? adapter.controlCenter.audioControlsEnabled : true);
+      var finalBrightness = hasLegacyBrightness ? legacyBrightnessEnabled : (adapter.controlCenter.brightnessControlEnabled !== undefined ? adapter.controlCenter.brightnessControlEnabled : true);
+      var bothLegacySubcontrolsDisabled = !finalAudio && !finalBrightness;
+
+      if (explicitlyConfigured["system-controls"]) {
+        // Explicit state wins, but if both subcontrols are disabled normalize parent disabled
+        if (bothLegacySubcontrolsDisabled) {
+          nativeCardsById["system-controls"].enabled = false;
+        }
+      } else {
+        nativeCardsById["system-controls"].enabled = finalAudio || finalBrightness;
+      }
+
+      // The former combined Media/System Monitor card became two real overview
+      // cards. Carry its enabled state to each unless a native card entry wins.
+      if (hasLegacyMediaSysmon) {
+        if (!explicitlyConfigured.media)
+          nativeCardsById.media.enabled = legacyMediaSysmonEnabled;
+        if (!explicitlyConfigured.performance)
+          nativeCardsById.performance.enabled = legacyMediaSysmonEnabled;
+      }
+
+      // Enforce nonempty center-zone invariant before replace/save:
+      // If no enabled center card, enable performance even if legacy media-sysmon disabled;
+      // do not re-enable system-controls when both children false.
+      var centerHasEnabled = false;
+      for (var ci = 0; ci < migrated.length; ci++) {
+        if (migrated[ci].zone === "center" && migrated[ci].enabled) {
+          centerHasEnabled = true;
+          break;
+        }
+      }
+      if (!centerHasEnabled) {
+        if (nativeCardsById.performance) {
+          nativeCardsById.performance.enabled = true;
+        } else {
+          var centerCandidate = migrated.find(function (c) {
+            return c.zone === "center" && (c.id !== "system-controls" || !bothLegacySubcontrolsDisabled);
+          });
+          if (centerCandidate) {
+            centerCandidate.enabled = true;
+          } else {
+            var anyCenter = migrated.find(function (c) {
+              return c.zone === "center";
+            });
+            if (anyCenter)
+              anyCenter.enabled = true;
+          }
+        }
+      }
+
+      // Enforce nonempty right-zone invariant:
+      var rightHasEnabled = false;
+      for (var ri = 0; ri < migrated.length; ri++) {
+        if (migrated[ri].zone === "right" && migrated[ri].enabled) {
+          rightHasEnabled = true;
+          break;
+        }
+      }
+      if (!rightHasEnabled) {
+        if (nativeCardsById.notifications) {
+          nativeCardsById.notifications.enabled = true;
+        } else {
+          var firstRight = migrated.find(function (c) {
+            return c.zone === "right";
+          });
+          if (firstRight)
+            firstRight.enabled = true;
+        }
+      }
+
+      // Profile card is mandatory, unique, and strictly anchored at index 0 left, enabled and locked
+      var otherMigrated = migrated.filter(function (c) {
+        return c.id !== "profile";
+      });
+      var finalMigrated = [
+            {
+              "id": "profile",
+              "zone": "left",
+              "enabled": true,
+              "locked": true
+            }
+          ].concat(otherMigrated);
+
+      replaceControlCenterCards(finalMigrated);
+      adapter.controlCenter.showNotifications = isControlCenterCardEnabled("notifications", true);
+      adapter.controlCenter.showMedia = isControlCenterCardEnabled("media", true);
+      adapter.controlCenter.showCalendar = isControlCenterCardEnabled("calendar", true);
+      adapter.controlCenter.showRecordingCard = isControlCenterCardEnabled("recording", true);
+      root.saveImmediate();
+      return;
+    }
+
+    // Modern / zone-based catalog normalization
+    var seenIds = Object.create(null);
+    seenIds.profile = true;
+    var leftCards = [];
+    var centerCards = [];
+    var rightCards = [];
+
+    for (var k = 0; k < rawCards.length; k++) {
+      var card = rawCards[k];
+      if (!card || typeof card !== "object" || typeof card.id !== "string" || !card.id)
+        continue;
+      if (card.id === "profile")
+        continue;
+      if (seenIds[card.id])
+        continue;
+      seenIds[card.id] = true;
+
+      var defaultEnabled = true;
+      for (var di = 0; di < defaultCards.length; di++) {
+        if (defaultCards[di].id === card.id) {
+          defaultEnabled = defaultCards[di].enabled;
+          break;
+        }
+      }
+
+      var normCard = {
+        "id": String(card.id),
+        "zone": (card.zone === "center" || card.zone === "right") ? card.zone : "left",
+        "enabled": card.enabled !== undefined ? (card.enabled !== false) : defaultEnabled,
+        "locked": false
+      };
+
+      if (normCard.zone === "center") {
+        centerCards.push(normCard);
+      } else if (normCard.zone === "right") {
+        rightCards.push(normCard);
+      } else {
+        leftCards.push(normCard);
+      }
+    }
+
+    // Ensure all canonical cards exist in their respective zones
+    for (var m = 0; m < defaultCards.length; m++) {
+      var defCard = defaultCards[m];
+      if (!seenIds[defCard.id]) {
+        var missingCard = {
+          "id": defCard.id,
+          "zone": defCard.zone,
+          "enabled": defCard.enabled,
+          "locked": false
+        };
+        seenIds[defCard.id] = true;
+        if (missingCard.zone === "center") {
+          centerCards.push(missingCard);
+        } else if (missingCard.zone === "right") {
+          rightCards.push(missingCard);
+        } else {
+          leftCards.push(missingCard);
+        }
+      }
+    }
+
+    // If parent system-controls is present but both subcontrols are false,
+    // normalize parent disabled without forcing either child back on.
+    var audioSubEnabled = adapter.controlCenter.audioControlsEnabled !== false;
+    var brightnessSubEnabled = adapter.controlCenter.brightnessControlEnabled !== false;
+    var bothSubcontrolsDisabled = !audioSubEnabled && !brightnessSubEnabled;
+
+    if (bothSubcontrolsDisabled) {
+      for (var sc = 0; sc < centerCards.length; sc++) {
+        if (centerCards[sc].id === "system-controls") {
+          centerCards[sc].enabled = false;
+          break;
+        }
+      }
+    }
+
+    // Invariant: At least one card must remain enabled in each zone.
+    // Deterministic single-zone fallback without unnecessary preference loss:
+    // Left: profile is always enabled and locked.
+    // Center: if no card is enabled, re-enable the first available center card
+    // (preference: performance, then system-controls if subcontrols permitted).
+    var centerEnabledCount = centerCards.filter(function (c) {
+      return c.enabled;
+    }).length;
+    if (centerEnabledCount === 0 && centerCards.length > 0) {
+      var candidate = centerCards.find(function (c) {
+        return c.id !== "system-controls" || (!bothSubcontrolsDisabled);
+      });
+      if (candidate) {
+        candidate.enabled = true;
+      } else {
+        centerCards[0].enabled = true;
+      }
+    }
+    // Right: if no card is enabled, re-enable the first available right card (preference: notifications).
+    var rightEnabledCount = rightCards.filter(function (c) {
+      return c.enabled;
+    }).length;
+    if (rightEnabledCount === 0 && rightCards.length > 0) {
+      rightCards[0].enabled = true;
+    }
+
+    // Profile card is mandatory, unique, and strictly anchored at index 0 left, enabled and locked
+    var profileCard = {
+      "id": "profile",
+      "zone": "left",
+      "enabled": true,
+      "locked": true
+    };
+    var normalized = [profileCard].concat(leftCards, centerCards, rightCards);
+    var changed = JSON.stringify(normalized) !== JSON.stringify(rawCards);
+    if (changed) {
+      Logger.i("Settings", "Normalized Control Center cards catalog");
+      replaceControlCenterCards(normalized);
+    }
+
+    var showNotifs = isControlCenterCardEnabled("notifications", true);
+    var showMed = isControlCenterCardEnabled("media", true);
+    var showCal = isControlCenterCardEnabled("calendar", true);
+    var showRec = isControlCenterCardEnabled("recording", true);
+
+    var flagsChanged = false;
+    if (adapter.controlCenter.showNotifications !== showNotifs) {
+      adapter.controlCenter.showNotifications = showNotifs;
+      flagsChanged = true;
+    }
+    if (adapter.controlCenter.showMedia !== showMed) {
+      adapter.controlCenter.showMedia = showMed;
+      flagsChanged = true;
+    }
+    if (adapter.controlCenter.showCalendar !== showCal) {
+      adapter.controlCenter.showCalendar = showCal;
+      flagsChanged = true;
+    }
+    if (adapter.controlCenter.showRecordingCard !== showRec) {
+      adapter.controlCenter.showRecordingCard = showRec;
+      flagsChanged = true;
+    }
+
+    if (changed || flagsChanged || blurChanged) {
+      root.saveImmediate();
+    }
+  }
+
+  function isControlCenterCardEnabled(cardId, defaultValue) {
+    var cards = adapter.controlCenter.cards;
+    if (!cards || cards.length === 0)
+      return defaultValue !== undefined ? defaultValue : true;
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].id === cardId) {
+        return cards[i].enabled !== false;
+      }
+    }
+    return defaultValue !== undefined ? defaultValue : true;
+  }
+
+  function setControlCenterCardEnabled(cardId, enabled) {
+    var cards = [];
+    for (var c = 0; c < adapter.controlCenter.cards.length; c++)
+      cards.push(adapter.controlCenter.cards[c]);
+    var found = false;
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].id === cardId) {
+        if (cards[i].locked)
+          return;
+        // Cannot enable system-controls when both subordinate controls are disabled
+        if (cardId === "system-controls" && enabled) {
+          var audioOn = adapter.controlCenter.audioControlsEnabled !== false;
+          var brightnessOn = adapter.controlCenter.brightnessControlEnabled !== false;
+          if (!audioOn && !brightnessOn) {
+            return;
+          }
+        }
+        // Enforce invariant: at least one card in the zone must remain enabled
+        if (!enabled) {
+          var targetZone = cards[i].zone;
+          var enabledInZone = 0;
+          for (var zi = 0; zi < cards.length; zi++) {
+            if (cards[zi].zone === targetZone && cards[zi].enabled) {
+              enabledInZone++;
+            }
+          }
+          if (enabledInZone <= 1) {
+            // Cannot disable the last remaining active card in this zone
+            return;
+          }
+        }
+        cards[i] = Object.assign({}, cards[i], {
+                                   "enabled": enabled
+                                 });
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      replaceControlCenterCards(cards);
+      if (cardId === "notifications")
+        adapter.controlCenter.showNotifications = enabled;
+      else if (cardId === "media")
+        adapter.controlCenter.showMedia = enabled;
+      else if (cardId === "calendar")
+        adapter.controlCenter.showCalendar = enabled;
+      else if (cardId === "recording")
+        adapter.controlCenter.showRecordingCard = enabled;
+      root.save();
+    }
+  }
+
+  function getControlCenterCardsForZone(zone) {
+    var cards = adapter.controlCenter.cards || [];
+    var result = [];
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].zone === zone) {
+        result.push(cards[i]);
+      }
+    }
+    return result;
+  }
+
+  function reorderControlCenterCards(zone, fromIndex, toIndex) {
+    var cards = [];
+    for (var c = 0; c < adapter.controlCenter.cards.length; c++)
+      cards.push(adapter.controlCenter.cards[c]);
+    var zoneIndices = [];
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].zone === zone) {
+        zoneIndices.push(i);
+      }
+    }
+    if (fromIndex < 0 || fromIndex >= zoneIndices.length || toIndex < 0 || toIndex >= zoneIndices.length)
+      return;
+    var fromGlobal = zoneIndices[fromIndex];
+    var toGlobal = zoneIndices[toIndex];
+    if (cards[fromGlobal].locked || cards[toGlobal].locked)
+      return;
+
+    var item = cards.splice(fromGlobal, 1)[0];
+    cards.splice(toGlobal, 0, item);
+    replaceControlCenterCards(cards);
+    root.save();
+  }
+
+  function setControlCenterAudioControlsEnabled(enabled) {
+    var parentEnabled = isControlCenterCardEnabled("system-controls", true);
+    var brightnessOn = adapter.controlCenter.brightnessControlEnabled !== false;
+    if (parentEnabled && !enabled && !brightnessOn) {
+      // At least one subordinate control must stay enabled while parent card is active
+      return;
+    }
+    adapter.controlCenter.audioControlsEnabled = enabled;
+    root.save();
+  }
+
+  function setControlCenterBrightnessControlEnabled(enabled) {
+    var parentEnabled = isControlCenterCardEnabled("system-controls", true);
+    var audioOn = adapter.controlCenter.audioControlsEnabled !== false;
+    if (parentEnabled && !enabled && !audioOn) {
+      // At least one subordinate control must stay enabled while parent card is active
+      return;
+    }
+    adapter.controlCenter.brightnessControlEnabled = enabled;
+    root.save();
+  }
+
+  function resetControlCenterCards() {
+    replaceControlCenterCards(getDefaultControlCenterCards());
+    adapter.controlCenter.audioControlsEnabled = true;
+    adapter.controlCenter.brightnessControlEnabled = true;
+    adapter.controlCenter.showNotifications = true;
+    adapter.controlCenter.showMedia = true;
+    adapter.controlCenter.showCalendar = true;
+    adapter.controlCenter.showRecordingCard = true;
+    root.save();
   }
 
   // -----------------------------------------------------

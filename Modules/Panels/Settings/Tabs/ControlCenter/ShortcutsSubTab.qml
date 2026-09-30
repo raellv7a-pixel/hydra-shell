@@ -22,11 +22,28 @@ ColumnLayout {
   signal moveWidgetBetweenSections(string fromSection, int index, string toSection)
   signal openPluginSettingsRequested(var manifest)
 
+  function dtr(key) {
+    return I18n.tr("panels.dashboard." + key);
+  }
+
   function getSectionIcons() {
     return {
       "left": "arrow-bar-to-up",
       "right": "arrow-bar-to-down"
     };
+  }
+
+  function getSectionLabels() {
+    return {
+      "left": root.dtr("shortcutsTopRow"),
+      "right": root.dtr("shortcutsBottomRow")
+    };
+  }
+
+  NHeader {
+    label: root.dtr("shortcutsTitle")
+    description: root.dtr("shortcutsDesc")
+    Layout.fillWidth: true
   }
 
   // Widgets Management Section
@@ -41,10 +58,12 @@ ColumnLayout {
       Layout.topMargin: Style.marginM
       spacing: Style.marginM
 
-      // Left
+      // Left (renders as Top Row)
       NSectionEditor {
-        sectionName: I18n.tr("positions.left")
+        sectionName: root.dtr("shortcutsTopRow")
+        sectionSubtitle: root.dtr("shortcutsTopRowDesc")
         sectionId: "left"
+        sectionLabels: root.getSectionLabels()
         settingsDialogComponent: Qt.resolvedUrl(Quickshell.shellDir + "/Modules/Panels/Settings/ControlCenter/ControlCenterWidgetSettingsDialog.qml")
         maxWidgets: Settings.data.controlCenter.shortcuts["right"].length > 5 ? 0 : (Settings.data.controlCenter.shortcuts["right"].length > 0 ? 5 : 10)
         widgetRegistry: ControlCenterWidgetRegistry
@@ -60,10 +79,12 @@ ColumnLayout {
         onOpenPluginSettingsRequested: manifest => root.openPluginSettingsRequested(manifest)
       }
 
-      // Right
+      // Right (renders as Bottom Row)
       NSectionEditor {
-        sectionName: I18n.tr("positions.right")
+        sectionName: root.dtr("shortcutsBottomRow")
+        sectionSubtitle: root.dtr("shortcutsBottomRowDesc")
         sectionId: "right"
+        sectionLabels: root.getSectionLabels()
         settingsDialogComponent: Qt.resolvedUrl(Quickshell.shellDir + "/Modules/Panels/Settings/ControlCenter/ControlCenterWidgetSettingsDialog.qml")
         maxWidgets: Settings.data.controlCenter.shortcuts["left"].length > 5 ? 0 : (Settings.data.controlCenter.shortcuts["left"].length > 0 ? 5 : 10)
         widgetRegistry: ControlCenterWidgetRegistry

@@ -189,8 +189,8 @@ Variants {
       if (brightnessPanel && brightnessPanel.isPanelOpen)
         return;
       if (controlCenterPanel && controlCenterPanel.isPanelOpen) {
-        var cards = Settings.data.controlCenter.cards || [];
-        if (cards.some(c => c.enabled && c.id === "brightness-card"))
+        var panelContent = controlCenterPanel.contentItem;
+        if (panelContent && panelContent.brightnessControlVisible)
           return;
       }
       showOSD(OSD.Type.Brightness);
@@ -215,15 +215,15 @@ Variants {
       if (!isTypeEnabled(type))
         return;
 
-      // Suppress Audio OSD if Audio Panel or Control Center (with audio card) is open
+      // Suppress audio OSD while the dedicated audio panel or visible Dashboard audio controls are open.
       if (type === OSD.Type.Volume || type === OSD.Type.InputVolume) {
         var audioPanel = PanelService.getPanel("audioPanel", root.modelData);
         if (audioPanel && audioPanel.isPanelOpen)
           return;
         var controlCenterPanel = PanelService.getPanel("controlCenterPanel", root.modelData);
         if (controlCenterPanel && controlCenterPanel.isPanelOpen) {
-          var cards = Settings.data.controlCenter.cards || [];
-          if (cards.some(c => c.enabled && c.id === "audio-card"))
+          var panelContent = controlCenterPanel.contentItem;
+          if (panelContent && panelContent.audioControlsVisible)
             return;
         }
       }

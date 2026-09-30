@@ -6,20 +6,19 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 import Quickshell.Widgets
+import "Cards"
 import qs.Commons
-import qs.Modules.Cards
 import qs.Modules.Panels.Settings
 import qs.Services.Compositor
 import qs.Services.Hardware
+import qs.Services.Hydra
 import qs.Services.Location
 import qs.Services.Media
 import qs.Services.Networking
-import qs.Services.Hydra
 import qs.Services.Power
 import qs.Services.System
 import qs.Services.UI
 import qs.Widgets
-import "Cards"
 
 Item {
   id: root
@@ -76,7 +75,7 @@ Item {
   readonly property bool powerSaverPerformanceMode: cfg.powerSaverPerformanceMode
   readonly property bool dashboardPerformanceMode: (followHydraPerformanceMode && PowerProfileService.hydraPerformanceMode) || (powerSaverPerformanceMode && PowerProfileService.available && PowerProfileService.profile === 0)
   readonly property bool musicActive: MediaService.currentPlayer !== null && MediaService.isPlaying
-  readonly property string panelSpectrumComponentId: "plugin:raell-dashboard:panel:" + (activeScreen?.name ?? "unknown")
+  readonly property string panelSpectrumComponentId: "panel:controlcenter:" + (activeScreen?.name ?? "unknown")
   readonly property bool needsMediaSpectrum: activeDetailView === "media" || (mediaVisualizerEffect !== "" && mediaVisualizerEffect !== "none")
   readonly property bool needsPanelSpectrum: !dashboardPerformanceMode && musicActive && needsMediaSpectrum
   readonly property real maxPanelWidth: Math.max(760, (activeScreen?.width ?? 1280) - Style.marginXL * 4)
@@ -109,6 +108,30 @@ Item {
   property var processAppMetadataCache: ({})
   readonly property bool centerDetailOpen: activeDetailView === "performance" || activeDetailView === "audio"
   readonly property bool rightDetailOpen: activeDetailView === "media" || activeDetailView === "notifications" || activeDetailView === "weather" || activeDetailView === "calendar" || activeDetailView === "screenUsage"
+  readonly property bool audioControlsEnabled: Settings.data.controlCenter.audioControlsEnabled !== false
+  readonly property bool brightnessControlEnabled: Settings.data.controlCenter.brightnessControlEnabled !== false
+  readonly property bool systemControlsCardVisible: {
+    if (root.centerDetailOpen)
+      return false;
+    return Settings.isControlCenterCardEnabled("system-controls", true);
+  }
+  readonly property bool audioControlsVisible: {
+    if (!root.audioControlsEnabled || !Settings.isControlCenterCardEnabled("system-controls", true))
+      return false;
+    if (root.activeDetailView === "audio")
+      return true;
+    return root.systemControlsCardVisible;
+  }
+  readonly property bool brightnessControlVisible: {
+    if (!root.brightnessControlEnabled || !Settings.isControlCenterCardEnabled("system-controls", true))
+      return false;
+    return root.systemControlsCardVisible;
+  }
+
+  function getZoneCards(zone) {
+    return Settings.getControlCenterCardsForZone(zone);
+  }
+
   property var pendingIpcCommand: []
   property string pendingNativePanelName: ""
   property string pendingCaptureAction: ""
@@ -120,8 +143,10 @@ Item {
   property string toolkitRecordState: ""
   property real localGpuUsage: -1
   property string localGpuName: ""
-  readonly property string screenUsageDirPath: (Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache") + "/raell-dashboard"
+  readonly property string screenUsageDirPath: Settings.cacheDir ? (Settings.cacheDir.endsWith("/") ? Settings.cacheDir.slice(0, -1) : Settings.cacheDir) : ((Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache") + "/hydra")
+  readonly property string legacyScreenUsageDirPath: (Quickshell.env("XDG_CACHE_HOME") || Quickshell.env("HOME") + "/.cache") + "/raell-dashboard"
   readonly property string screenUsageFilePath: screenUsageDirPath + "/screen-usage.json"
+  readonly property string legacyScreenUsageFilePath: legacyScreenUsageDirPath + "/screen-usage.json"
   property var screenUsageDays: ({})
   property string usageCurrentAppId: ""
   property string usageCurrentAppName: ""
@@ -154,7 +179,7 @@ Item {
   anchors.fill: parent
 
   Component.onCompleted: {
-    SystemStatService.registerComponent("raell-dashboard");
+    SystemStatService.registerComponent("panel-controlcenter");
     if (root.needsPanelSpectrum)
       SpectrumService.registerComponent(root.panelSpectrumComponentId);
     root.resetScreenUsageTracker();
@@ -164,7 +189,7 @@ Item {
   Component.onDestruction: {
     root.sampleScreenUsage();
     root.saveScreenUsage();
-    SystemStatService.unregisterComponent("raell-dashboard");
+    SystemStatService.unregisterComponent("panel-controlcenter");
     SpectrumService.unregisterComponent(root.panelSpectrumComponentId);
   }
 
@@ -252,7 +277,7 @@ Item {
     }
 
     randomCoverProcess.exec({
-                              command: ["bash", "-c", "dir=$1; find \"$dir\" -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \\) 2>/dev/null | shuf -n 1", "raell-dashboard", Settings.preprocessPath(root.profileCoverFolder)]
+                              command: ["bash", "-c", "dir=$1; find \"$dir\" -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.gif' \\) 2>/dev/null | shuf -n 1", "hydra-controlcenter", Settings.preprocessPath(root.profileCoverFolder)]
                             });
   }
 
@@ -1073,7 +1098,6 @@ Item {
     }
   }
 
-
   function showCaptureNotice(message, detail, icon) {
     const body = detail && String(detail).length > 0 ? message + "\n" + detail : message;
     ToastService.showNotice(root.tr("screenTools"), body, icon || "camera", 3000);
@@ -1355,10 +1379,22 @@ Item {
                 return;
 
                 const text = String(stdout.text || "").trim();
-                const parts = text.split("|");
-                const state = parts[0] || "";
-                const outputPath = parts[1] || "";
-                const format = parts[2] || "";
+                let state = "";
+                let outputPath = "";
+                let format = "";
+                if (text !== "") {
+                  const parts = text.split("|");
+                  if (parts.length >= 3) {
+                    state = parts[0] || "";
+                    format = parts[parts.length - 1] || "";
+                    outputPath = parts.slice(1, parts.length - 1).join("|");
+                  } else if (parts.length === 2) {
+                    state = parts[0] || "";
+                    outputPath = parts[1] || "";
+                  } else if (parts.length === 1) {
+                    state = parts[0] || "";
+                  }
+                }
                 const changed = state !== root.lastRecordStatus || outputPath !== root.lastRecordOutputPath;
 
                 if (changed && state === "done") {
@@ -1520,7 +1556,7 @@ Item {
   Process {
     id: screenUsageInitProcess
     running: false
-    command: ["bash", "-c", "mkdir -p '" + root.screenUsageDirPath + "' && if [ ! -f '" + root.screenUsageFilePath + "' ]; then printf '{\"days\":{}}' > '" + root.screenUsageFilePath + "'; fi"]
+    command: ["bash", "-c", "mkdir -p '" + root.screenUsageDirPath + "' && if [ ! -f '" + root.screenUsageFilePath + "' ]; then if [ -f '" + root.legacyScreenUsageFilePath + "' ]; then cp -n '" + root.legacyScreenUsageFilePath + "' '" + root.screenUsageFilePath + "'; else printf '{\"days\":{}}' > '" + root.screenUsageFilePath + "'; fi; fi"]
     onExited: code => {
                 if (code === 0)
                 screenUsageFileView.reload();
@@ -1577,6 +1613,99 @@ Item {
       root.sampleScreenUsage();
     }
   }
+  Connections {
+    target: Settings.data.controlCenter
+    function onCardsChanged() {
+      if (root.activeDetailView === "performance" && !Settings.isControlCenterCardEnabled("performance", true)) {
+        root.activeDetailView = "";
+      } else if (root.activeDetailView === "audio" && (!Settings.isControlCenterCardEnabled("system-controls", true) || !root.audioControlsEnabled)) {
+        root.activeDetailView = "";
+      } else if (root.activeDetailView === "notifications" && !Settings.isControlCenterCardEnabled("notifications", true)) {
+        root.activeDetailView = "";
+      } else if (root.activeDetailView === "media" && !Settings.isControlCenterCardEnabled("media", true)) {
+        root.activeDetailView = "";
+      } else if (root.activeDetailView === "calendar" && !Settings.isControlCenterCardEnabled("calendar", true)) {
+        root.activeDetailView = "";
+      }
+    }
+    function onAudioControlsEnabledChanged() {
+      if (root.activeDetailView === "audio" && !Settings.data.controlCenter.audioControlsEnabled) {
+        root.activeDetailView = "";
+      }
+    }
+  }
+
+  Component {
+    id: profileCardComp
+    ProfileCard {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
+
+  Component {
+    id: quickActionsCardComp
+    QuickActionsCard {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
+
+  Component {
+    id: recordingCardComp
+    RecordingCard {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
+
+  Component {
+    id: shortcutsCardComp
+    ShortcutsCard {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
+
+  Component {
+    id: performanceCardComp
+    PerformanceCard {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
+
+  Component {
+    id: systemControlsCardComp
+    SystemControlsCard {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
+
+  Component {
+    id: notificationsCardComp
+    NotificationsCard {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
+
+  Component {
+    id: mediaCardComp
+    MediaCard {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
+
+  Component {
+    id: calendarCardComp
+    CalendarShell {
+      anchors.fill: parent
+      panelRoot: root
+    }
+  }
 
   Item {
     id: panelContainer
@@ -1591,28 +1720,30 @@ Item {
       anchors.centerIn: parent
       spacing: Style.marginL
 
-        ColumnLayout {
-          Layout.preferredWidth: Math.round(300 * root.panelUnit)
-          Layout.fillHeight: true
-          spacing: Style.marginL
+      ColumnLayout {
+        Layout.preferredWidth: Math.round(300 * root.panelUnit)
+        Layout.fillHeight: true
+        spacing: Style.marginL
 
-          ProfileCard {
-            panelRoot: root
+        Repeater {
+          model: root.getZoneCards("left")
+          delegate: Loader {
+            required property var modelData
+            readonly property string cardId: modelData.id
+            readonly property bool isEnabled: modelData.enabled
+            visible: isEnabled
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(132 * root.panelUnit)
-          }
-
-          QuickActionsCard {
-            panelRoot: root
-            Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(368 * root.panelUnit)
-          }
-
-          RecordingCard {
-            panelRoot: root
-            visible: root.cfg.showRecordingCard
-            Layout.fillWidth: true
-            Layout.preferredHeight: Math.round((root.toolkitRecording ? 194 : 164) * root.panelUnit)
+            Layout.preferredHeight: {
+              if (cardId === "profile")
+                return Math.round(132 * root.panelUnit);
+              if (cardId === "quick-actions")
+                return Math.round(368 * root.panelUnit);
+              if (cardId === "recording")
+                return Math.round((root.toolkitRecording ? 194 : 164) * root.panelUnit);
+              if (cardId === "shortcuts")
+                return Math.round(128 * root.panelUnit);
+              return -1;
+            }
 
             Behavior on Layout.preferredHeight {
               NumberAnimation {
@@ -1620,140 +1751,168 @@ Item {
                 easing.type: Easing.OutCubic
               }
             }
-          }
-        }
 
-        ColumnLayout {
-          Layout.preferredWidth: Math.round(386 * root.panelUnit)
-          Layout.fillHeight: true
-          spacing: Style.marginL
-
-          PerformanceCard {
-            panelRoot: root
-            visible: !root.centerDetailOpen
-            Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(388 * root.panelUnit)
-          }
-
-          SystemControlsCard {
-            panelRoot: root
-            visible: !root.centerDetailOpen
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-          }
-
-          Loader {
-            active: root.activeDetailView === "performance"
-            visible: active
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            sourceComponent: Component {
-              PerformanceDetailsCard {
-                panelRoot: root
-              }
-            }
-          }
-
-          Loader {
-            active: root.activeDetailView === "audio"
-            visible: active
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            sourceComponent: Component {
-              AudioDetailsCard {
-                panelRoot: root
-              }
-            }
-          }
-        }
-
-        ColumnLayout {
-          Layout.preferredWidth: Math.round(392 * root.panelUnit)
-          Layout.fillHeight: true
-          spacing: Style.marginL
-
-          NotificationsCard {
-            panelRoot: root
-            visible: !root.rightDetailOpen && root.cfg.showNotifications
-            Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(272 * root.panelUnit)
-          }
-
-          MediaCard {
-            panelRoot: root
-            visible: !root.rightDetailOpen && root.cfg.showMedia
-            Layout.fillWidth: true
-            Layout.preferredHeight: visible ? Math.round(132 * root.panelUnit) : 0
-          }
-
-          CalendarShell {
-            panelRoot: root
-            visible: !root.rightDetailOpen && root.cfg.showCalendar
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-          }
-
-          Loader {
-            active: root.activeDetailView === "media"
-            visible: active
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            sourceComponent: Component {
-              MediaDetailsCard {
-                panelRoot: root
-              }
-            }
-          }
-
-          Loader {
-            active: root.activeDetailView === "notifications"
-            visible: active
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            sourceComponent: Component {
-              NotificationsDetailsCard {
-                panelRoot: root
-              }
-            }
-          }
-
-          Loader {
-            active: root.activeDetailView === "weather"
-            visible: active
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            sourceComponent: Component {
-              WeatherDetailsCard {
-                panelRoot: root
-              }
-            }
-          }
-
-          Loader {
-            active: root.activeDetailView === "calendar"
-            visible: active
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            sourceComponent: Component {
-              CalendarDetailsCard {
-                panelRoot: root
-              }
-            }
-          }
-
-          Loader {
-            active: root.activeDetailView === "screenUsage"
-            visible: active
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            sourceComponent: Component {
-              ScreenUsageDetailsCard {
-                panelRoot: root
-              }
+            sourceComponent: {
+              if (cardId === "profile")
+                return profileCardComp;
+              if (cardId === "quick-actions")
+                return quickActionsCardComp;
+              if (cardId === "recording")
+                return recordingCardComp;
+              if (cardId === "shortcuts")
+                return shortcutsCardComp;
+              return null;
             }
           }
         }
       }
+
+      ColumnLayout {
+        Layout.preferredWidth: Math.round(386 * root.panelUnit)
+        Layout.fillHeight: true
+        spacing: Style.marginL
+
+        Repeater {
+          model: root.getZoneCards("center")
+          delegate: Loader {
+            required property var modelData
+            readonly property string cardId: modelData.id
+            readonly property bool isEnabled: modelData.enabled
+            visible: !root.centerDetailOpen && isEnabled
+            Layout.fillWidth: true
+            Layout.preferredHeight: cardId === "performance" ? Math.round(388 * root.panelUnit) : -1
+            Layout.fillHeight: cardId === "system-controls"
+
+            sourceComponent: {
+              if (cardId === "performance")
+                return performanceCardComp;
+              if (cardId === "system-controls")
+                return systemControlsCardComp;
+              return null;
+            }
+          }
+        }
+
+        Loader {
+          active: root.activeDetailView === "performance"
+          visible: active
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          sourceComponent: Component {
+            PerformanceDetailsCard {
+              panelRoot: root
+            }
+          }
+        }
+
+        Loader {
+          active: root.activeDetailView === "audio" && root.audioControlsEnabled && Settings.isControlCenterCardEnabled("system-controls", true)
+          visible: active
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          sourceComponent: Component {
+            AudioDetailsCard {
+              panelRoot: root
+            }
+          }
+        }
+      }
+
+      ColumnLayout {
+        Layout.preferredWidth: Math.round(392 * root.panelUnit)
+        Layout.fillHeight: true
+        spacing: Style.marginL
+
+        Repeater {
+          model: root.getZoneCards("right")
+          delegate: Loader {
+            required property var modelData
+            readonly property string cardId: modelData.id
+            readonly property bool isEnabled: modelData.enabled
+            visible: !root.rightDetailOpen && isEnabled
+            Layout.fillWidth: true
+            Layout.preferredHeight: {
+              if (cardId === "notifications")
+                return Math.round(272 * root.panelUnit);
+              if (cardId === "media")
+                return Math.round(132 * root.panelUnit);
+              return -1;
+            }
+            Layout.fillHeight: cardId === "calendar"
+
+            sourceComponent: {
+              if (cardId === "notifications")
+                return notificationsCardComp;
+              if (cardId === "media")
+                return mediaCardComp;
+              if (cardId === "calendar")
+                return calendarCardComp;
+              return null;
+            }
+          }
+        }
+
+        Loader {
+          active: root.activeDetailView === "media"
+          visible: active
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          sourceComponent: Component {
+            MediaDetailsCard {
+              panelRoot: root
+            }
+          }
+        }
+
+        Loader {
+          active: root.activeDetailView === "notifications"
+          visible: active
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          sourceComponent: Component {
+            NotificationsDetailsCard {
+              panelRoot: root
+            }
+          }
+        }
+
+        Loader {
+          active: root.activeDetailView === "weather"
+          visible: active
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          sourceComponent: Component {
+            WeatherDetailsCard {
+              panelRoot: root
+            }
+          }
+        }
+
+        Loader {
+          active: root.activeDetailView === "calendar"
+          visible: active
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          sourceComponent: Component {
+            CalendarDetailsCard {
+              panelRoot: root
+            }
+          }
+        }
+
+        Loader {
+          active: root.activeDetailView === "screenUsage"
+          visible: active
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          sourceComponent: Component {
+            ScreenUsageDetailsCard {
+              panelRoot: root
+            }
+          }
+        }
+      }
+    }
   }
 
   NFilePicker {
@@ -1767,43 +1926,4 @@ Item {
                   }
                 }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

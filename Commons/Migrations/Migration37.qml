@@ -69,7 +69,6 @@ QtObject {
     migrateArray("controlCenter.shortcuts.right", rawRight, adRight, function (i, v) {
       adapter.controlCenter.shortcuts.right[i] = v;
     });
-
     if (!changed) {
       logger.i("Settings", "No WiFi widget IDs found to migrate; leaving settings unchanged");
     }

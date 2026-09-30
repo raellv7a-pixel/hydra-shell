@@ -1,9 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
-import qs.Widgets
-import qs.Services.Media
 import qs.Services.Hardware
+import qs.Services.Media
+import qs.Widgets
+
 DashboardCard {
   id: systemControlsCard
 
@@ -30,6 +31,7 @@ DashboardCard {
       }
 
       SubmoduleButton {
+        visible: panelRoot.audioControlsEnabled
         panelRoot: systemControlsCard.panelRoot
         targetView: "audio"
         tooltipText: panelRoot.tr("audioDetails")
@@ -37,8 +39,8 @@ DashboardCard {
     }
 
     ControlSlider {
+      visible: panelRoot.audioControlsEnabled
       panelRoot: systemControlsCard.panelRoot
-      iconName: AudioService.muted ? "volume-off" : "volume"
       labelText: panelRoot.tr("volume")
       valueText: Math.round(AudioService.volume * 100) + "%"
       value: AudioService.volume
@@ -52,8 +54,8 @@ DashboardCard {
     }
 
     ControlSlider {
+      visible: panelRoot.audioControlsEnabled
       panelRoot: systemControlsCard.panelRoot
-      iconName: AudioService.inputMuted ? "microphone-off" : "microphone"
       labelText: panelRoot.tr("microphone")
       valueText: Math.round(AudioService.inputVolume * 100) + "%"
       value: AudioService.inputVolume
@@ -66,8 +68,8 @@ DashboardCard {
     }
 
     ControlSlider {
+      visible: panelRoot.brightnessControlEnabled
       panelRoot: systemControlsCard.panelRoot
-      iconName: "brightness-up"
       labelText: panelRoot.tr("brightness")
       valueText: Math.round(panelRoot.currentBrightness() * 100) + "%"
       value: panelRoot.currentBrightness()
@@ -82,6 +84,9 @@ DashboardCard {
 
   TapHandler {
     acceptedButtons: Qt.RightButton
-    onTapped: panelRoot.activeDetailView = "audio"
+    onTapped: {
+      if (panelRoot.audioControlsEnabled)
+        panelRoot.activeDetailView = "audio";
+    }
   }
 }

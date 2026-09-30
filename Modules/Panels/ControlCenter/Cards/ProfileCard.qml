@@ -1,10 +1,11 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Effects
+import QtQuick.Layouts
 import qs.Commons
-import qs.Widgets
-import qs.Services.UI
 import qs.Services.System
+import qs.Services.UI
+import qs.Widgets
+
 DashboardCard {
   id: profileCard
   styleKey: "profile"
@@ -34,7 +35,7 @@ DashboardCard {
     layer.smooth: true
     layer.effect: MultiEffect {
       blurEnabled: true
-      blur: panelRoot.clamp(panelRoot.profileCoverBlur, 0, 1)
+      blur: panelRoot.clamp(panelRoot.profileCoverBlur / 48.0, 0, 1)
       blurMax: 48
       maskEnabled: true
       maskThresholdMin: 0.95

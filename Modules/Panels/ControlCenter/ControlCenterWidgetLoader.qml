@@ -64,7 +64,7 @@ Item {
       }
 
       // Set screen property
-      if (item.hasOwnProperty("screen")) {
+      if (widgetScreen && item.hasOwnProperty("screen")) {
         item.screen = widgetScreen;
       }
 

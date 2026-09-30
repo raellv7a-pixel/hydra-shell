@@ -326,6 +326,8 @@
     "mediaVisualizerEffect": "bars",
     "audioSliderEffect": "wave",
     "microphoneSliderEffect": "pulse",
+    "audioControlsEnabled": true,
+    "brightnessControlEnabled": true,
     "followHydraPerformanceMode": true,
     "powerSaverPerformanceMode": true,
     "showNotifications": true,
@@ -367,27 +369,57 @@
     "cards": [
       {
         "enabled": true,
-        "id": "profile-card"
+        "id": "profile",
+        "locked": true,
+        "zone": "left"
       },
       {
         "enabled": true,
-        "id": "shortcuts-card"
+        "id": "quick-actions",
+        "locked": false,
+        "zone": "left"
       },
       {
         "enabled": true,
-        "id": "audio-card"
+        "id": "recording",
+        "locked": false,
+        "zone": "left"
       },
       {
         "enabled": false,
-        "id": "brightness-card"
+        "id": "shortcuts",
+        "locked": false,
+        "zone": "left"
       },
       {
         "enabled": true,
-        "id": "weather-card"
+        "id": "performance",
+        "locked": false,
+        "zone": "center"
       },
       {
         "enabled": true,
-        "id": "media-sysmon-card"
+        "id": "system-controls",
+        "locked": false,
+        "zone": "center"
+      },
+      {
+        "enabled": true,
+        "id": "notifications",
+        "locked": false,
+        "zone": "right"
+      },
+      {
+        "enabled": true,
+        "id": "media",
+        "locked": false,
+        "zone": "right"
+      },
+      {
+        "enabled": true,
+        "id": "calendar",
+        "locked": false,
+        "zone": "right"
       }
     ]
   },

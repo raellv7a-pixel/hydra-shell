@@ -1,8 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
-import qs.Widgets
 import qs.Services.UI
+import qs.Widgets
+
 DashboardCard {
   id: actionTile
 
@@ -55,11 +56,10 @@ DashboardCard {
 
   HoverHandler {
     id: hoverHandler
-
     onHoveredChanged: {
-      const hasTooltip = actionTile.hoverTooltip !== null && actionTile.hoverTooltip !== "" && actionTile.hoverTooltip.length !== 0;
-      if (hovered && hasTooltip)
-        TooltipService.show(actionTile, actionTile.hoverTooltip, actionTile.hoverTooltipDirection);
+      const tooltipContent = actionTile.hoverTooltip !== null && actionTile.hoverTooltip !== "" && actionTile.hoverTooltip.length !== 0 ? actionTile.hoverTooltip : [actionTile.labelText, actionTile.detailText].filter(text => text !== "").join("\n");
+      if (hovered && tooltipContent !== "")
+        TooltipService.show(actionTile, tooltipContent, actionTile.hoverTooltipDirection);
       else
         TooltipService.hide(actionTile);
     }
@@ -92,7 +92,7 @@ DashboardCard {
         Layout.fillWidth: true
         text: labelText
         color: panelRoot.componentText(actionTile.styleKey, true)
-        pointSize: Style.fontSizeM
+        pointSize: Style.fontSizeS
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
       }

@@ -12,46 +12,6 @@ ColumnLayout {
   id: root
   spacing: 0
 
-  property list<var> cardsModel: []
-  property list<var> cardsDefault: [
-    {
-      "id": "profile-card",
-      "text": "Profile",
-      "enabled": true,
-      "required": true
-    },
-    {
-      "id": "shortcuts-card",
-      "text": "Shortcuts",
-      "enabled": true,
-      "required": false
-    },
-    {
-      "id": "audio-card",
-      "text": "Audio Sliders",
-      "enabled": true,
-      "required": false
-    },
-    {
-      "id": "brightness-card",
-      "text": "Brightness",
-      "enabled": false,
-      "required": false
-    },
-    {
-      "id": "weather-card",
-      "text": "Weather",
-      "enabled": true,
-      "required": false
-    },
-    {
-      "id": "media-sysmon-card",
-      "text": "Media and System Monitor",
-      "enabled": true,
-      "required": false
-    }
-  ]
-
   Component.onCompleted: {
     // Fill out availableWidgets ListModel
     availableWidgets.clear();
@@ -79,45 +39,6 @@ ColumnLayout {
                                                       "badges": badges
                                                     });
                           });
-    // Starts empty
-    cardsModel = [];
-
-    // Add the cards available in settings
-    for (var i = 0; i < Settings.data.controlCenter.cards.length; i++) {
-      const settingCard = Settings.data.controlCenter.cards[i];
-
-      for (var j = 0; j < cardsDefault.length; j++) {
-        if (settingCard.id === cardsDefault[j].id) {
-          var card = cardsDefault[j];
-          card.enabled = settingCard.enabled;
-          // Auto-disable weather card if weather is disabled
-          if (card.id === "weather-card" && !Settings.data.location.weatherEnabled) {
-            card.enabled = false;
-          }
-          cardsModel.push(card);
-        }
-      }
-    }
-
-    // Add any missing cards from default
-    for (var i = 0; i < cardsDefault.length; i++) {
-      var found = false;
-      for (var j = 0; j < cardsModel.length; j++) {
-        if (cardsModel[j].id === cardsDefault[i].id) {
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-        var card = cardsDefault[i];
-        // Auto-disable weather card if weather is disabled
-        if (card.id === "weather-card" && !Settings.data.location.weatherEnabled) {
-          card.enabled = false;
-        }
-        cardsModel.push(card);
-      }
-    }
   }
 
   NTabBar {
@@ -152,11 +73,6 @@ ColumnLayout {
       tabIndex: 4
       checked: subTabBar.currentIndex === 4
     }
-    NTabButton {
-      text: I18n.tr("common.sections")
-      tabIndex: 5
-      checked: subTabBar.currentIndex === 5
-    }
   }
 
   Item {
@@ -172,10 +88,7 @@ ColumnLayout {
 
     AppearanceSubTab {}
 
-    CardsSubTab {
-      cardsModel: root.cardsModel
-      cardsDefault: root.cardsDefault
-    }
+    CardsSubTab {}
 
     ShortcutsSubTab {
       availableWidgets: availableWidgets
@@ -190,13 +103,27 @@ ColumnLayout {
     ProfileSubTab {}
 
     EffectsSubTab {}
-
-    SectionsSubTab {}
   }
 
   // ---------------------------------
   // Signal functions
   // ---------------------------------
+  function _copyShortcutSection(section) {
+    var source = Settings.data.controlCenter.shortcuts[section];
+    var copy = [];
+    for (var i = 0; i < source.length; i++)
+      copy.push(source[i]);
+    return copy;
+  }
+
+  function _replaceShortcutSection(section, entries) {
+    var target = Settings.data.controlCenter.shortcuts[section];
+    target.length = 0;
+    for (var i = 0; i < entries.length; i++)
+      target.push(entries[i]);
+    Settings.saveImmediate();
+  }
+
   function _addWidgetToSection(widgetId, section) {
     var newWidget = {
       "id": widgetId
@@ -209,54 +136,46 @@ ColumnLayout {
         });
       }
     }
-    Settings.data.controlCenter.shortcuts[section].push(newWidget);
+    var newArray = _copyShortcutSection(section);
+    newArray.push(newWidget);
+    _replaceShortcutSection(section, newArray);
   }
 
   function _removeWidgetFromSection(section, index) {
-    if (index >= 0 && index < Settings.data.controlCenter.shortcuts[section].length) {
-      var newArray = Settings.data.controlCenter.shortcuts[section].slice();
+    var newArray = _copyShortcutSection(section);
+    if (index >= 0 && index < newArray.length) {
       newArray.splice(index, 1);
-      Settings.data.controlCenter.shortcuts[section] = newArray;
+      _replaceShortcutSection(section, newArray);
     }
   }
 
   function _reorderWidgetInSection(section, fromIndex, toIndex) {
-    if (fromIndex >= 0 && fromIndex < Settings.data.controlCenter.shortcuts[section].length && toIndex >= 0 && toIndex < Settings.data.controlCenter.shortcuts[section].length) {
-
-      // Create a new array to avoid modifying the original
-      var newArray = Settings.data.controlCenter.shortcuts[section].slice();
+    var newArray = _copyShortcutSection(section);
+    if (fromIndex >= 0 && fromIndex < newArray.length && toIndex >= 0 && toIndex < newArray.length) {
       var item = newArray[fromIndex];
       newArray.splice(fromIndex, 1);
       newArray.splice(toIndex, 0, item);
-
-      Settings.data.controlCenter.shortcuts[section] = newArray;
+      _replaceShortcutSection(section, newArray);
     }
   }
 
   function _moveWidgetBetweenSections(fromSection, index, toSection) {
-    // Get the widget from the source section
-    if (index >= 0 && index < Settings.data.controlCenter.shortcuts[fromSection].length) {
-      var widget = Settings.data.controlCenter.shortcuts[fromSection][index];
-
-      // Remove from source section
-      var sourceArray = Settings.data.controlCenter.shortcuts[fromSection].slice();
-      sourceArray.splice(index, 1);
-      Settings.data.controlCenter.shortcuts[fromSection] = sourceArray;
-
-      // Add to target section
-      var targetArray = Settings.data.controlCenter.shortcuts[toSection].slice();
+    var sourceArray = _copyShortcutSection(fromSection);
+    var targetArray = _copyShortcutSection(toSection);
+    if (index >= 0 && index < sourceArray.length) {
+      var widget = sourceArray.splice(index, 1)[0];
       targetArray.push(widget);
-      Settings.data.controlCenter.shortcuts[toSection] = targetArray;
+      _replaceShortcutSection(fromSection, sourceArray);
+      _replaceShortcutSection(toSection, targetArray);
     }
   }
 
   function _updateWidgetSettingsInSection(section, index, settings) {
-    // Create a new array to trigger QML's change detection for persistence.
-    // This is crucial for Settings.data to detect the change and persist it.
-    var newSectionArray = Settings.data.controlCenter.shortcuts[section].slice();
-    newSectionArray[index] = settings;
-    Settings.data.controlCenter.shortcuts[section] = newSectionArray;
-    Settings.saveImmediate();
+    var newArray = _copyShortcutSection(section);
+    if (index < 0 || index >= newArray.length)
+      return;
+    newArray[index] = settings;
+    _replaceShortcutSection(section, newArray);
   }
 
   // Base list model for all combo boxes
