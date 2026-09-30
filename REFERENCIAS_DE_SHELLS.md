@@ -68,18 +68,17 @@ Origens dos clones:
 - Não adicione uma dependência apenas porque uma referência a usa; justifique a necessidade no contexto deste projeto.
 - Não altere os repositórios em `/home/raell/Projetos/Exemplos` e `/home/raell/Projetos/Uteis`; eles são material de consulta local.
 
-## Lab de desenvolvimento e publicação
+## Lab de desenvolvimento, preview e rollback
 
-O desenvolvimento acontece em `/home/raell/Projetos/hydra-shell` (o "Lab", um checkout git completo em `legacy-v4`), nunca direto em `~/.config/quickshell/hydra-shell` (a "shell ativa", que é a instalação em uso no dia a dia, feita pelo `Scripts/bash/install.sh`). Os dois diretórios são clones independentes do mesmo `origin`.
+O desenvolvimento acontece em `~/Projetos/hydra-shell` (`legacy-v4`), não diretamente em `~/.config/quickshell/hydra-shell` (Hydra ativa). Prowl deve localizar código antes de leitura exploratória; Beads mantém o estado do trabalho.
 
-Fluxo:
+1. Edite e faça commits pequenos no Lab. `Scripts/dev/lab-status.sh` mostra estado Git local, instalação ativa, processos e refs de rollback; não busca a rede.
+2. `Scripts/dev/lab-preview.sh` executa `qs -p <Lab>` em primeiro plano, registra PID/log sob `$XDG_STATE_HOME/hydra-shell-lab` e encerra apenas essa instância com Ctrl+C.
+3. Revise o preview visual/funcional do commit exato. `Scripts/dev/lab-sync.sh --preview-validated <40-char-commit>` roda o formatter/parser QML, lint QML modificado quando disponível e `prowl doctor`; exige árvore limpa, processo Hydra ativo, estado LKG e fast-forward local. A publicação nunca faz push nem busca a internet.
+4. Quickshell observa alterações QML e faz reload automático. Depois de confirmar a shell ativa e os logs, registre o commit com `Scripts/dev/lab-mark-good.sh <commit> --visual-confirmed`.
+5. `Scripts/dev/lab-rollback.sh` retorna ao commit LKG registrado sem rede. Recusa árvore suja, HEAD inesperado ou alvo ausente.
 
-1. Edite e commit no Lab. Use o `prowl-agent` (obrigatório, ver `.prowl_instructions.md`/`AGENTS.md`) para localizar código antes de abrir arquivos inteiros.
-2. `Scripts/dev/lab-preview.sh` — sobe uma instância isolada (`qs -p`) a partir do Lab, sem tocar na shell ativa, para validar visualmente a mudança.
-3. `Scripts/dev/lab-status.sh` — mostra de relance se o Lab está à frente de `origin/legacy-v4` e se a shell ativa está atrás dele.
-4. `Scripts/dev/lab-sync.sh` — só roda com o Lab limpo em `legacy-v4`: formata QML, roda `prowl-agent doctor`, publica em `origin/legacy-v4`, pede confirmação de que o preview foi validado, dá fast-forward na shell ativa e reinicia o processo `qs -c hydra-shell`. Use `-y`/`--yes` para pular a confirmação em automação.
-
-Nenhum desses scripts descarta trabalho local não commitado, no Lab ou na shell ativa — eles param e avisam.
+O estado operacional fica em `$XDG_STATE_HOME/hydra-shell-lab` (por padrão `~/.local/state/hydra-shell-lab`). A instalação ativa deve permanecer limpa; nenhum script descarta trabalho local.
 
 ## Critério de qualidade
 

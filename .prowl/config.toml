@@ -3,8 +3,5 @@ ignore = [".mcp.json", "opencode.json", "*.log", "*.png", "*.jpg", "*.jpeg", "*.
 
 [ai]
   enabled = true
-  rerank_model = ""
-  assist_model = "gemma4:e2b"
-  ollama_url = "http://localhost:11434"
   provider = "agent"
-  agent_command = "omp -p --model haiku"
+  agent_command = "omp -p --model @smol"

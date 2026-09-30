@@ -1,135 +1,123 @@
-#!/usr/bin/env -S bash
+#!/usr/bin/env bash
 #
-# Sistema de atualização Lab -> shell ativa.
-#
-# Publica o que foi desenvolvido e validado no Lab
-# (/home/raell/Projetos/hydra-shell) para a instalação ativa em
-# ~/.config/quickshell/hydra-shell, e reinicia o processo em execução.
-# Espelha exatamente o passo 5 de Scripts/bash/install.sh (mesmo padrão de
-# fetch/checkout/reset usado para atualizar um checkout existente), então
-# reaproveita esse fluxo já auditado em vez de inventar um segundo.
-#
-# Passos:
-#   1. Exige o Lab limpo e em legacy-v4 (nunca decide por você o que commitar).
-#   2. Roda Scripts/dev/qmlfmt.sh (mesmo formatter do pre-commit hook) e falha
-#      se sobrar diff — força formatar e commitar antes de publicar. Pule com
-#      --skip-format só se o `qmlformat` instalado nesta máquina estiver
-#      quebrado (ex.: versão do qt6-declarative com regressão conhecida —
-#      visto com 6.11.1 do repo Arch, que falha silenciosamente, exit 1 sem
-#      stderr, em alguns arquivos, e reformata em massa os demais com um
-#      estilo diferente do commitado). Formate à mão os arquivos tocados
-#      nesse caso; nunca commit um reformat em massa sem revisar o diff.
-#   3. Roda `prowl-agent doctor` no Lab, se disponível (não bloqueia; é um
-#      relatório de saúde do projeto, não um linter estrito).
-#   4. git push do Lab para origin/legacy-v4.
-#   5. Pede confirmação de que o preview (lab-preview.sh) foi validado, a
-#      menos que -y/--yes seja passado.
-#   6. Fast-forward da instalação ativa para origin/legacy-v4 (nunca reescreve
-#      histórico nem descarta mudanças locais não commitadas nela).
-#   7. Reinicia o processo `qs -c hydra-shell` (mesmo comando do
-#      Assets/Hyprland/modules/autostart.lua) para a mudança entrar no ar.
-#
-# Uso: Scripts/dev/lab-sync.sh [-y|--yes] [--skip-format]
+# Validate and fast-forward the active Hydra from a clean, previewed Lab commit.
+# Never pushes to or fetches from the network remote.
 set -euo pipefail
 
 BRANCH="legacy-v4"
 LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ACTIVE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/hydra-shell"
-
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hydra-shell-lab"
+LKG_FILE="$STATE_DIR/last-known-good"
+PREVIEWED=
 YES=false
-SKIP_FORMAT=false
-for arg in "$@"; do
-  case "$arg" in
-    -y|--yes) YES=true ;;
-    --skip-format) SKIP_FORMAT=true ;;
+
+usage() {
+  echo "Usage: $0 --preview-validated <full-commit> [--yes]"
+}
+while (($#)); do
+  case "$1" in
+    --preview-validated)
+      (($# >= 2)) || { usage >&2; exit 2; }
+      PREVIEWED="$2"
+      shift 2
+      ;;
+    -y|--yes) YES=true; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) usage >&2; echo "Unknown option: $1" >&2; exit 2 ;;
   esac
 done
 
-log()  { printf '\n\033[1;36m==>\033[0m %s\n' "$*"; }
-warn() { printf '\033[1;33m!!\033[0m %s\n' "$*" >&2; }
-die()  { printf '\033[1;31mxx\033[0m %s\n' "$*" >&2; exit 1; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+log() { printf '\n==> %s\n' "$*"; }
+write_state() {
+  local key="$1" value="$2" tmp
+  tmp="$(mktemp "$STATE_DIR/.${key}.XXXXXX")"
+  printf '%s\n' "$value" >"$tmp"
+  chmod 600 "$tmp"
+  mv -f -- "$tmp" "$STATE_DIR/$key"
+}
 
-[ -d "$ACTIVE_DIR/.git" ] || die "Sem instalação ativa em $ACTIVE_DIR — rode Scripts/bash/install.sh primeiro."
+[[ "$PREVIEWED" =~ ^[0-9a-f]{40}$ ]] ||
+  die "Supply the full commit hash explicitly validated in lab-preview.sh."
+[[ ! -L "$ACTIVE_DIR" ]] || die "Active path is a symlink; refusing to deploy."
+[[ -d "$ACTIVE_DIR/.git" ]] || die "No active Git installation at $ACTIVE_DIR."
+[[ -d "$LAB_DIR/.git" ]] || die "Lab checkout has no Git metadata."
+[[ "$(git -C "$LAB_DIR" branch --show-current)" == "$BRANCH" ]] ||
+  die "Lab must be on $BRANCH."
+[[ -z "$(git -C "$LAB_DIR" status --porcelain)" ]] ||
+  die "Lab is dirty; commit or safely stash all changes before deploying."
+candidate="$(git -C "$LAB_DIR" rev-parse HEAD)"
+[[ "$candidate" == "$PREVIEWED" ]] ||
+  die "Preview confirmation is for $PREVIEWED, but Lab HEAD is $candidate."
+[[ "$(git -C "$ACTIVE_DIR" branch --show-current)" == "$BRANCH" ]] ||
+  die "Active checkout must be on $BRANCH."
+[[ -z "$(git -C "$ACTIVE_DIR" status --porcelain)" ]] ||
+  die "Active checkout is dirty; no files were changed."
+lab_remote="$(git -C "$LAB_DIR" remote get-url origin)"
+active_remote="$(git -C "$ACTIVE_DIR" remote get-url origin)"
+[[ "$lab_remote" == "$active_remote" ]] ||
+  die "Lab and active origin URLs differ; refusing to cross repositories."
+[[ -f "$LKG_FILE" ]] ||
+  die "No last-known-good recorded. Validate the active baseline, then run lab-mark-good.sh."
+last_good="$(<"$LKG_FILE")"
+active_head="$(git -C "$ACTIVE_DIR" rev-parse HEAD)"
+[[ "$active_head" == "$last_good" ]] ||
+  die "Active HEAD ($active_head) is not recorded last-known-good ($last_good); inspect/rollback first."
+[[ "$(git -C "$LAB_DIR" cat-file -t "$candidate" 2>/dev/null)" == commit ]] ||
+  die "Lab candidate is not a commit."
+git -C "$LAB_DIR" merge-base --is-ancestor "$last_good" "$candidate" ||
+  die "Candidate is not a fast-forward from last-known-good."
+command -v qs >/dev/null 2>&1 || die "qs is required to validate/reload the active shell."
+command -v prowl >/dev/null 2>&1 || die "prowl is required for the project doctor check."
 
-cd "$LAB_DIR"
-current_branch="$(git branch --show-current)"
-[ "$current_branch" = "$BRANCH" ] || die "Lab está em '$current_branch', não em '$BRANCH' — troque ou faça merge antes de sincronizar."
-[ -z "$(git status --porcelain)" ] || die "Lab tem mudanças não commitadas — commit ou stash antes de sincronizar."
+mapfile -t quickshell_pids < <(pgrep -x quickshell || true)
+active_pids=()
+for pid in "${quickshell_pids[@]}"; do
+  args="$(ps -o args= -p "$pid" 2>/dev/null || true)"
+  [[ "$args" =~ (^|[[:space:]])(-c|--config)[[:space:]]+hydra-shell($|[[:space:]]) ]] &&
+    active_pids+=("$pid")
+done
+((${#active_pids[@]} == 1)) || die "Expected exactly one active qs -c hydra-shell process; found ${#active_pids[@]}."
+active_pid="${active_pids[0]}"
 
-if $SKIP_FORMAT; then
-  warn "--skip-format: pulei o Scripts/dev/qmlfmt.sh. Garanta à mão que o que você tocou está formatado."
+mapfile -t changed_qml < <(git -C "$LAB_DIR" diff --name-only "$last_good..$candidate" -- '*.qml')
+if ((${#changed_qml[@]})); then
+  log "Checking changed QML with pinned Qt formatter/parser"
+  (cd "$LAB_DIR" && ./Scripts/dev/qmlfmt.sh --check "${changed_qml[@]}")
+  qml_lint="${HYDRA_QT_TOOLS_DIR:-$HOME/.cache/hydra-shell-tools/qt}/6.10.3/gcc_64/bin/qmllint"
+  [[ -x "$qml_lint" ]] || qml_lint="$(command -v qmllint || true)"
+  [[ -n "$qml_lint" ]] || die "Changed QML requires qmllint; install the pinned Qt tools."
+  (cd "$LAB_DIR" && "$qml_lint" -I "$LAB_DIR" "${changed_qml[@]}")
+fi
+
+log "Running Prowl structural doctor"
+(cd "$LAB_DIR" && prowl doctor --fail-on error)
+log "Recording rollback boundary and advancing active checkout locally"
+mkdir -p "$STATE_DIR"
+chmod 700 "$STATE_DIR"
+git -C "$ACTIVE_DIR" update-ref refs/hydra-shell/last-known-good "$last_good"
+git -C "$ACTIVE_DIR" fetch --no-tags "$LAB_DIR" "$BRANCH"
+git -C "$ACTIVE_DIR" merge --ff-only FETCH_HEAD
+deployed="$(git -C "$ACTIVE_DIR" rev-parse HEAD)"
+[[ "$deployed" == "$candidate" ]] || die "Active HEAD does not match validated Lab commit after fast-forward."
+write_state previous-commit "$last_good"
+write_state active-commit "$deployed"
+write_state deployed-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+write_state validation-pending "$deployed"
+
+sleep 2
+kill -0 "$active_pid" 2>/dev/null ||
+  die "Active Hydra PID $active_pid exited after file update. Rollback remains available."
+log "Lab commit $deployed is installed. Quickshell watches QML files and reloads on change."
+if $YES; then
+  echo "After visual/behavior validation run:"
+  echo "  Scripts/dev/lab-mark-good.sh $deployed --visual-confirmed"
 else
-  log "Formatando QML (Lab)"
-  ./Scripts/dev/qmlfmt.sh
-  [ -z "$(git status --porcelain)" ] || die "qmlfmt.sh alterou arquivos — revise e commit a formatação antes de sincronizar."
+  read -r -p "Did the active Hydra reload and pass visual/behavior validation? [y/N] " reply
+  [[ "$reply" =~ ^[Yy]$ ]] || {
+    echo "Not marked good. Roll back with Scripts/dev/lab-rollback.sh." >&2
+    exit 1
+  }
+  "$LAB_DIR/Scripts/dev/lab-mark-good.sh" "$deployed" --visual-confirmed
 fi
-
-if command -v prowl-agent >/dev/null 2>&1; then
-  log "prowl-agent doctor (Lab)"
-  prowl-agent doctor || warn "prowl-agent doctor reportou problemas acima — revise antes de prosseguir."
-else
-  warn "prowl-agent não encontrado no PATH — pulei o diagnóstico do projeto."
-fi
-
-log "Publicando $BRANCH em origin"
-git push origin "$BRANCH"
-
-if ! $YES; then
-  read -r -p "Já validou com Scripts/dev/lab-preview.sh? Confirmar publicação na shell ativa em $ACTIVE_DIR? [y/N] " reply
-  [[ "$reply" =~ ^[Yy]$ ]] || die "Cancelado — nada foi tocado em $ACTIVE_DIR."
-fi
-
-[ -z "$(git -C "$ACTIVE_DIR" status --porcelain)" ] || die "$ACTIVE_DIR tem mudanças locais — resolva manualmente (este script nunca descarta trabalho local)."
-
-log "Atualizando a instalação ativa"
-git -C "$ACTIVE_DIR" fetch origin "$BRANCH"
-git -C "$ACTIVE_DIR" checkout "$BRANCH"
-git -C "$ACTIVE_DIR" reset --hard "origin/$BRANCH"
-
-log "Reiniciando hydra-shell"
-if pgrep -x qs >/dev/null 2>&1; then
-  pkill -x qs
-  for _ in $(seq 1 20); do
-    pgrep -x qs >/dev/null 2>&1 || break
-    sleep 0.2
-  done
-  pgrep -x qs >/dev/null 2>&1 && { warn "qs não saiu a tempo, forçando"; pkill -9 -x qs; sleep 0.3; }
-fi
-
-# A shell é relançada aqui direto, sem passar pelo hook de
-# Assets/Hyprland/modules/autostart.lua, então a migração pré-rebrand
-# (~/.config/noctalia -> ~/.config/hydra) tem que rodar neste ponto: com a
-# shell antiga já morta e antes da nova ler os settings. No-op se já migrado.
-log "Migrando config pré-rebrand (Noctalia), se houver"
-bash "$ACTIVE_DIR/Scripts/bash/migrate-noctalia-config.sh"
-
-# O --no-duplicate padrão do qs decide se já há instância rodando checando o
-# PID gravado em $XDG_RUNTIME_DIR/quickshell/by-pid/<pid>; um lock deixado
-# por um processo morto sem limpeza (crash, SIGKILL) pode fazer o próximo
-# `qs -c hydra-shell -d` recusar a subir, ou pior, subir uma segunda
-# instância disputando os mesmos arquivos de settings/estado. Remove só as
-# entradas cujo PID está comprovadamente morto antes de relançar.
-QS_BYPID_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/quickshell/by-pid"
-if [ -d "$QS_BYPID_DIR" ]; then
-  for pidlink in "$QS_BYPID_DIR"/*; do
-    [ -e "$pidlink" ] || continue
-    pid="$(basename "$pidlink")"
-    if ! kill -0 "$pid" 2>/dev/null; then
-      rm -rf "$(readlink -f "$pidlink")" "$pidlink"
-    fi
-  done
-fi
-
-if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
-  command -v qs >/dev/null 2>&1 && qs -c hydra-shell -d
-  sleep 0.5
-  if pgrep -x qs >/dev/null 2>&1; then
-    log "hydra-shell reiniciada (PID $(pgrep -x qs | tr '\n' ' '))."
-  else
-    warn "qs -c hydra-shell -d rodou mas nenhum processo ficou de pé — confira \$XDG_RUNTIME_DIR/quickshell/by-id/*/log.log"
-  fi
-else
-  warn "Hyprland não detectado nesta sessão — inicie manualmente com: qs -c hydra-shell -d"
-fi
-
-log "Sincronizado: $ACTIVE_DIR agora está em $(git -C "$ACTIVE_DIR" rev-parse --short HEAD)"
