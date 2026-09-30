@@ -68,8 +68,15 @@ Rectangle {
     }
   }
 
+  TextMetrics {
+    id: iconMetrics
+    font: iconItem.font
+    text: iconItem.text
+  }
+
   // Icon
   NIcon {
+    id: iconItem
     icon: root.icon
     pointSize: Math.max(1, Math.round(root.width * 0.48))
     applyUiScale: root.applyUiScale
@@ -83,7 +90,7 @@ Rectangle {
       return colorFg;
     }
     // Center horizontally
-    x: (root.width - width) / 2
+    x: Math.round((root.width - iconMetrics.tightBoundingRect.width) / 2) - iconMetrics.tightBoundingRect.x
     // Center vertically accounting for font metrics
     y: (root.height - height) / 2 + (height - contentHeight) / 2
 

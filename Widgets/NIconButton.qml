@@ -67,13 +67,20 @@ Item {
       }
     }
 
+    TextMetrics {
+      id: iconMetrics
+      font: iconItem.font
+      text: iconItem.text
+    }
+
     NIcon {
+      id: iconItem
       icon: root.icon
       pointSize: Style.toOdd(visualButton.width * 0.48)
       applyUiScale: root.applyUiScale
       color: root.enabled && root.hovering ? colorFgHover : colorFg
       // Pixel-perfect centering
-      x: Style.pixelAlignCenter(visualButton.width, width)
+      x: Math.round((visualButton.width - iconMetrics.tightBoundingRect.width) / 2) - iconMetrics.tightBoundingRect.x
       y: Style.pixelAlignCenter(visualButton.height, contentHeight)
 
       Behavior on color {

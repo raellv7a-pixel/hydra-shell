@@ -498,8 +498,16 @@ SmartPanel {
                 radius: root.compactMode ? Style.iRadiusM : Style.iRadiusL
                 color: Color.mPrimary
 
+                TextMetrics {
+                  id: playPauseMetrics
+                  font: playPauseIcon.font
+                  text: playPauseIcon.text
+                }
+
                 NIcon {
-                  anchors.centerIn: parent
+                  id: playPauseIcon
+                  anchors.verticalCenter: parent.verticalCenter
+                  x: Math.round((parent.width - playPauseMetrics.tightBoundingRect.width) / 2) - playPauseMetrics.tightBoundingRect.x
                   icon: MediaService.isPlaying ? "media-pause" : "media-play"
                   pointSize: root.compactMode ? Style.fontSizeL : Style.fontSizeXXL
                   color: Color.mOnPrimary

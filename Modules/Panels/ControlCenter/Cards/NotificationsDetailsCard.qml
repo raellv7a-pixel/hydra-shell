@@ -1,8 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
-import qs.Widgets
 import qs.Services.System
+import qs.Widgets
+
 DashboardCard {
   id: notificationsDetailsCard
 
@@ -65,8 +66,16 @@ DashboardCard {
             Layout.preferredWidth: Math.round(24 * panelRoot.panelUnit)
             Layout.fillHeight: true
 
+            TextMetrics {
+              id: dndIconMetrics
+              font: dndIcon.font
+              text: dndIcon.text
+            }
+
             NIcon {
-              anchors.centerIn: parent
+              id: dndIcon
+              anchors.verticalCenter: parent.verticalCenter
+              x: Math.round((parent.width - dndIconMetrics.tightBoundingRect.width) / 2) - dndIconMetrics.tightBoundingRect.x
               icon: NotificationService.doNotDisturb ? "bell-off" : "bell"
               pointSize: Style.fontSizeL
               color: NotificationService.doNotDisturb ? Color.mError : Color.mPrimary
