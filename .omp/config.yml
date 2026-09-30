@@ -1,0 +1,22 @@
+# Hydra-specific settings only. Model roles and account routing stay global.
+memory:
+  backend: sharpshooter
+
+checkpoint:
+  enabled: true
+
+compaction:
+  methodOrder:
+    - shake
+    - snapcompact
+    - remote
+    - handoff
+    - soft
+
+task:
+  agentCompactionThresholdOverrides:
+    scout: 35000
+    planner: 60000
+    reviewer: 60000
+    executor: 100000
+    architect: 120000

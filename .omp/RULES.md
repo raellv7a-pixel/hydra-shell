@@ -1,8 +1,10 @@
 <!-- prowl-agent -->
-Prowl indexes this repo. To locate, read, trace, or understand code -- where a
+Prowl indexes this repo. For any semantic or structural question -- where a
 symbol, setting, or component is defined, who calls or imports it, how a feature
-works, or a change's blast radius -- use the Prowl MCP tools (search_context,
-find_references, read_symbol, outline, analyze_change) or the prowl-agent CLI
-before grep/glob and reading files. Use grep and glob only for literal-string or
-filename scans.
+works, or a change's blast radius -- run the read-only Prowl CLI first:
+`prowl overview`, `prowl find <name>`, `prowl def <name-or-id>`,
+`prowl outline <path>`, `prowl references <name-or-id>`, `prowl impact <path>`,
+`prowl search "<question>"`, or `prowl peek <file:start-end>`. It answers
+from a cited index (reindexed before each query) in one call. Use grep only for
+exact literal or regex text and glob only for filename patterns.
 <!-- /prowl-agent -->
