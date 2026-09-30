@@ -1,4 +1,4 @@
-# Hydra-specific settings only. Model roles and account routing stay global.
+# Hydra role selectors are overridden per project; account routing stays global.
 memory:
   backend: sharpshooter
 
@@ -20,3 +20,14 @@ task:
     reviewer: 60000
     executor: 100000
     architect: 120000
+
+modelRoles:
+  tiny: "google-antigravity/gemini-3.8-flash:low"
+  smol: "google-antigravity/gemini-3.8-flash:low"
+  default: "openai-codex/gpt-6-luna:medium"
+  task: "google-antigravity/gemini-3.8-flash:medium"
+  plan: "openai-codex/gpt-6-sol:high"
+  review: "openai-codex/gpt-6-sol:high"
+  vision: "google-antigravity/gemini-3.8-flash:medium"
+  commit: "openai-codex/gpt-6-luna:low"
+  slow: "openai-codex/gpt-6-astra:medium"

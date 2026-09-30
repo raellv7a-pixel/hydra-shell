@@ -3,7 +3,7 @@ name: scout
 description: MUST be used for exploratory codebase research, rapid code analysis, and broad pattern searches. Fast read-only scout returning compressed context for handoff.
 tools: read, grep, glob, web_search, mcp__prowl_agent_search_context, mcp__prowl_agent_find, mcp__prowl_agent_read_symbol, mcp__prowl_agent_outline, mcp__prowl_agent_find_references, mcp__prowl_agent_analyze_change
 model: "@smol"
-thinking-level: medium
+thinking-level: low
 read-summarize: false
 output:
   properties:
