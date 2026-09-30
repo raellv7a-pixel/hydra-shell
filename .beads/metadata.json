@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "hydra",
+  "project_id": "098c63c1-a635-447b-9d55-a58a35f3aab5"
+}

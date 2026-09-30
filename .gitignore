@@ -29,3 +29,10 @@ patch_*.py
 .prowl/setup-applies.json
 .prowl-setup.lock
 # /prowl-agent: derived state
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
