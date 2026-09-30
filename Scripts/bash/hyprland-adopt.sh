@@ -1,15 +1,16 @@
 #!/usr/bin/env -S bash
 #
-# Installs hydra-shell's own Hyprland Lua config as the user's
-# ~/.config/hypr/hyprland.lua, per PLANO_INTEGRACAO_HYPRMOD.md §4.
+# Installs Hydra's Hyprland Lua config and registers its ScreenCast picker with
+# XDPH, preserving unrelated user settings in ~/.config/hypr/xdph.conf.
 # Invoked by Modules/Panels/SetupWizard/SetupHyprlandStep.qml.
 #
 # Usage: hyprland-adopt.sh <path-to-Assets/Hyprland>
 #
-# Idempotent: safe to re-run. Only touches hyprland.lua and modules/ (backed
-# up first if they exist and aren't already our own symlinks) — everything
-# else already in ~/.config/hypr (hyprlock.conf, hypridle.conf, hyprpaper.conf,
-# monitors.lua, user's own colors.lua, ...) is left exactly as it is.
+# Idempotent: safe to re-run. Only touches hyprland.lua, modules/, and Hydra's
+# custom_picker_binary entry in ~/.config/hypr/xdph.conf (backing up the first
+# two if they exist and aren't already our own symlinks). Other settings/files
+# are left exactly as they are.
+#
 set -euo pipefail
 
 if [ "$#" -lt 1 ] || [ ! -d "$1" ]; then
@@ -18,6 +19,7 @@ if [ "$#" -lt 1 ] || [ ! -d "$1" ]; then
 fi
 
 SOURCE_DIR="$(cd "$1" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
 ENTRYPOINT="$HYPR_DIR/hyprland.lua"
 MODULES_LINK="$HYPR_DIR/modules"
@@ -26,6 +28,10 @@ USER_LUA="$HYPR_DIR/user.lua"
 BACKUP_DIR="$HYPR_DIR/hydra-shell-backup-$(date +%Y%m%d-%H%M%S)"
 
 mkdir -p "$HYPR_DIR"
+
+# XDPH reads this setting from ~/.config/hypr/xdph.conf. The helper changes
+# only the custom picker key and restarts XDPH when that file actually changes.
+"$SCRIPT_DIR/xdph-adopt.sh" "$SCRIPT_DIR/corvus-share-picker.sh"
 
 backed_up=false
 backup_if_real() {

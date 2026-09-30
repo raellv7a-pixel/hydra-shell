@@ -72,13 +72,19 @@ done
 
 # --- aciona a shell -----------------------------------------------------------
 
-# Atenção: `qs ipc call` sai com 0 mesmo quando o target não existe (imprime
-# "Target not found."). Por isso validamos o valor retornado pelo handler, e não
-# o código de saída.
+# `qs ipc call` exits 0 even when its target is missing; the handler response
+# is the reliable success signal. Include IPC diagnostics because fallback
+# otherwise makes an unavailable Hydra shell look like a normal picker launch.
 response=$(qs -c "$SHELL_CONFIG" ipc call screenshare open \
-  "$fifo" "$list_file" "$allow_token" 2>/dev/null)
+  "$fifo" "$list_file" "$allow_token" 2>&1)
 
 if [[ ${response//[[:space:]]/} != "ok" ]]; then
+  message="Hydra IPC failed (response: ${response:-<empty response>}); falling back to hyprland-share-picker"
+  if command -v logger >/dev/null 2>&1; then
+    logger --tag corvus-share-picker -- "$message"
+  else
+    printf 'corvus-share-picker: %s\n' "$message" >&2
+  fi
   fallback "$@"
 fi
 
