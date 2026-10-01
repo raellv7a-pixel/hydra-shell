@@ -1730,6 +1730,9 @@
     "hyprland": {
       "title": "Hyprland"
     },
+    "umbriel": {
+      "title": "Umbriel"
+    },
     "idle": {
       "custom-add": "Adicionar comando",
       "custom-description": "Executa um comando de shell após um período de inatividade.",

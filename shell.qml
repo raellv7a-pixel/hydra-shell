@@ -121,6 +121,8 @@ ShellRoot {
           CustomButtonIPCService.init();
           IPCService.init(screenDetector);
 
+          if (CompositorService.isUmbriel)
+            UmbrielKeybindStore.init();
           // Force ClipboardService initialization so clipboard watchers
           // start immediately instead of waiting for first launcher open
           if (Settings.data.appLauncher.enableClipboardHistory) {

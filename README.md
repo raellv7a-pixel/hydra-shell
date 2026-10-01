@@ -1,18 +1,26 @@
 # hydra-shell
 
-Fork pessoal e fortemente customizado do [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell) para **Hyprland**, com foco em zero fricção: a shell assume a configuração do Hyprland (atalhos, animações, regras de janela), cuida do primeiro login, e reinstala do zero com um comando.
+Fork pessoal e fortemente customizado do [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell). A integração nativa com **Umbriel** é o alvo atual; a configuração e o instalador legados do Hyprland ainda estão presentes durante a migração.
 
 ---
 
 ## Instalação
 
-Arch Linux / CachyOS, Hyprland já instalado, sessão já aberta:
+Arch Linux / CachyOS, com Umbriel já instalado, a partir de um checkout com
+as alterações commitadas desta linha de desenvolvimento:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/raellv7a-pixel/hydra-shell/legacy-v4/Scripts/bash/install.sh | bash
+bash Scripts/bash/install.sh
 ```
 
-O instalador resolve todas as dependências (ver [`DEPENDENCIES.md`](./DEPENDENCIES.md)), compila o motor Quickshell (`noctalia-qs`), habilita os serviços de sistema necessários, instala a configuração do Hyprland — com backup do que já existir — e sobe a shell na hora, sem precisar deslogar.
+O instalador usa a branch do checkout local quando executado dessa forma
+(alterações não commitadas não são copiadas), instala as dependências sem
+instalar Hyprland, provisiona as binds e mantém as opções existentes do
+compositor. A Hydra é iniciada imediatamente numa sessão Umbriel ativa ou pelo
+autostart idempotente no próximo login. O caminho legado de instalação
+Hyprland continua disponível quando Umbriel não está instalado. O comando
+remoto da branch `legacy-v4` só receberá este fluxo quando estas alterações
+forem publicadas nessa branch.
 
 ---
 
@@ -51,14 +59,34 @@ alacritty, GTK…) mantêm o nome antigo até os templates serem aplicados de no
 - **Configuração completa do Hyprland em Lua** (`Assets/Hyprland/`), com todos os atalhos já ligados à shell via IPC — nada para configurar na mão.
 - **Screen Toolkit nativo**: anotação, OCR, leitor de QR/código de barras, seletor de cores, gravação de tela.
 - **Widgets extras**: Tamagotchi de barra, controle do OBS, gerenciador de dispositivos USB, indicador de privacidade, OSD de teclas pressionadas.
-- **Escopo reduzido a Hyprland** — o Noctalia upstream também suporta Niri, Sway, Scroll, Labwc e MangoWC; esta shell não.
+- **Integração com Umbriel**: catálogo de atalhos da Hydra, ações nativas do compositor e editor com validação e gravação segura.
+
+## Atalhos na sessão Umbriel
+
+Na sessão Umbriel, a Hydra substitui as binds built-in por seu catálogo em
+`Scripts/python/umbriel_keybinds.py`. No primeiro boot da shell, ela adiciona
+`[include] files = ["hydra/keybinds.toml"]` a
+`~/.config/umbriel/config.toml` sem alterar as demais opções; a configuração
+gerada fica em `~/.config/umbriel/hydra/keybinds.toml` e os rebinds/custom binds
+em `~/.config/umbriel/hydra/keybinds.json`. Se o arquivo principal já define
+`[keybinds]` ou um include não puder ser editado com segurança, o
+provisionamento recusa a mudança e mostra o erro em **Configurações → Umbriel
+→ Atalhos**.
+
+O editor usa draft: **Salvar** valida com `umbriel config validate` antes de
+trocar os arquivos, **Reverter** descarta edições e **Restaurar padrões** volta
+ao catálogo original (ainda é preciso salvar). Atalhos nativos usam ações do
+compositor, ações da Hydra usam seu IPC e binds personalizadas também podem
+executar comandos. **Mod+Shift+Escape** alterna a inibição de atalhos mesmo
+quando a janela está com atalhos inibidos. Para reinstalar o catálogo sem
+apagar rebinds: `python3 Scripts/python/umbriel_keybinds.py provision`.
 
 ---
 
 ## Requisitos
 
 - Arch Linux ou derivada (CachyOS é o alvo testado)
-- Hyprland ≥ 0.55 (a configuração usa o suporte nativo a Lua do compositor)
+- Umbriel para a sessão nativa e o editor de atalhos; o instalador legado ainda requer Hyprland ≥ 0.55.
 - Lista completa de dependências: [`DEPENDENCIES.md`](./DEPENDENCIES.md)
 
 ---

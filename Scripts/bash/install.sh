@@ -28,10 +28,9 @@
 #   5. Clones/updates the hydra-shell repo itself into the path Quickshell's
 #      own convention expects (~/.config/quickshell/hydra-shell, matched by
 #      `qs -c hydra-shell` in Assets/Hyprland/modules/{autostart,binds}.lua).
-#   6. Runs the existing, idempotent Scripts/bash/hyprland-adopt.sh to install
-#      the Hyprland Lua config (backs up whatever was there first).
-#   7. Prints a doctor-style summary: Hyprland version check, and a pass/fail
-#      table of every binary the shell can call, required and optional.
+#   6. Provisions Hydra keybinds in Umbriel, or adopts the legacy Hyprland Lua
+#      config when Umbriel is not installed.
+#   7. Prints a doctor-style summary for the selected compositor.
 #
 # Idempotent: safe to re-run. By default it skips rebuilding the qs engine if
 # it's already on PATH (pass --force-engine to rebuild after an upstream
@@ -60,6 +59,21 @@ command -v sudo >/dev/null 2>&1 || die "sudo is required."
 REPO_URL="https://github.com/raellv7a-pixel/hydra-shell.git"
 BRANCH="legacy-v4" # the actual active hydra-shell branch; origin/main still tracks upstream noctalia, not this fork's work
 INSTALL_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/hydra-shell"
+# A local invocation installs its committed checkout, not the remote release.
+LOCAL_SOURCE=""
+if [[ "${BASH_SOURCE[0]}" == *Scripts/bash/install.sh ]]; then
+  source_dir="$(realpath "$(dirname "${BASH_SOURCE[0]}")/../..")"
+  if [ -d "$source_dir/.git" ]; then
+    LOCAL_SOURCE="$source_dir"
+    BRANCH="$(git -C "$source_dir" branch --show-current)"
+    [ -n "$BRANCH" ] || die "A local install requires a named git branch."
+  fi
+fi
+if command -v umbriel >/dev/null 2>&1; then
+  TARGET_UMBRIEL=true
+else
+  TARGET_UMBRIEL=false
+fi
 ENGINE_SRC_DIR="$(mktemp -d /tmp/noctalia-qs-build.XXXXXX)"
 trap 'rm -rf "$ENGINE_SRC_DIR"' EXIT
 
@@ -73,7 +87,7 @@ trap 'rm -rf "$ENGINE_SRC_DIR"' EXIT
 RUNTIME_PACMAN=(
   # Qt/QML runtime the shell itself needs
   qt6-base qt6-declarative qt6-wayland qt6-shadertools qt6-multimedia qt6-svg qt6ct
-  hyprland
+  # The compositor is selected below; don't install another compositor.
   # Screenshot / clipboard / OCR / QR / Screen Toolkit (Modules/ScreenToolkit)
   grim slurp hyprpicker wl-clipboard
   tesseract tesseract-data-eng tesseract-data-por
@@ -83,7 +97,7 @@ RUNTIME_PACMAN=(
   # Portals — xdg-desktop-portal alone is NOT enough on Hyprland: screen
   # share (Scripts/bash/corvus-share-picker.sh, xdph.conf) and the GTK file
   # chooser fallback need the compositor-specific backends explicitly.
-  xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
+  xdg-desktop-portal xdg-desktop-portal-gtk
   # Screen recording, OCR translation, GTK3 theming for @define-color overrides
   wf-recorder translate-shell adw-gtk-theme
   # Hardware: laptop/external brightness, night light, clipboard history,
@@ -121,6 +135,10 @@ ENGINE_BUILD_PACMAN=(
   cmake ninja pkgconf cli11 vulkan-headers spirv-tools
   libdrm cpptrace jemalloc wayland wayland-protocols libxcb glib2 pam base-devel
 )
+
+if ! $TARGET_UMBRIEL; then
+  RUNTIME_PACMAN+=(hyprland xdg-desktop-portal-hyprland)
+fi
 
 log "Installing runtime dependencies (pacman)"
 sudo pacman -S --needed --noconfirm "${RUNTIME_PACMAN[@]}"
@@ -185,16 +203,25 @@ sudo systemctl enable --now NetworkManager.service bluetooth.service power-profi
 # ── 5. clone/update the hydra-shell repo ────────────────────────────────────
 mkdir -p "$(dirname "$INSTALL_DIR")"
 if [ -d "$INSTALL_DIR/.git" ]; then
-  log "Updating existing checkout at $INSTALL_DIR"
-  if [ -n "$(git -C "$INSTALL_DIR" status --porcelain)" ]; then
-    die "$INSTALL_DIR has uncommitted changes — resolve/commit them before re-running (this script never discards local work)."
+  if [ "$LOCAL_SOURCE" = "$INSTALL_DIR" ]; then
+    log "Using the current checkout at $INSTALL_DIR"
+  else
+    log "Updating existing checkout at $INSTALL_DIR"
+    if [ -n "$(git -C "$INSTALL_DIR" status --porcelain)" ]; then
+      die "$INSTALL_DIR has uncommitted changes — resolve/commit them before re-running (this script never discards local work)."
+    fi
+    git -C "$INSTALL_DIR" fetch "${LOCAL_SOURCE:-origin}" "$BRANCH"
+    if [ -n "$LOCAL_SOURCE" ]; then
+      git -C "$INSTALL_DIR" checkout "$BRANCH" 2>/dev/null || git -C "$INSTALL_DIR" checkout -b "$BRANCH" FETCH_HEAD
+      git -C "$INSTALL_DIR" merge --ff-only FETCH_HEAD
+    else
+      git -C "$INSTALL_DIR" checkout "$BRANCH"
+      git -C "$INSTALL_DIR" reset --hard "origin/$BRANCH"
+    fi
   fi
-  git -C "$INSTALL_DIR" fetch origin "$BRANCH"
-  git -C "$INSTALL_DIR" checkout "$BRANCH"
-  git -C "$INSTALL_DIR" reset --hard "origin/$BRANCH"
 else
   log "Cloning hydra-shell into $INSTALL_DIR"
-  git clone --branch "$BRANCH" "$REPO_URL" "$INSTALL_DIR"
+  git clone --branch "$BRANCH" "${LOCAL_SOURCE:-$REPO_URL}" "$INSTALL_DIR"
 fi
 
 # ── 5b. migrate pre-rebrand Noctalia state before anything reads it ────────
@@ -202,27 +229,34 @@ fi
 log "Migrating pre-rebrand Noctalia config, if any"
 bash "$INSTALL_DIR/Scripts/bash/migrate-noctalia-config.sh"
 
-# ── 6. adopt the Hyprland config (existing, idempotent, backs up first) ────
-log "Installing Hyprland Lua config"
-bash "$INSTALL_DIR/Scripts/bash/hyprland-adopt.sh" "$INSTALL_DIR/Assets/Hyprland"
-
-# ── 6b. launch immediately if already inside a running Hyprland session ────
-# autostart.lua's exec-once fires on the "hyprland.start" event, which has
-# already happened if we're installing mid-session (e.g. right after a fresh
-# CachyOS+Hyprland install, logged in, running this script by hand) — a
-# `hyprctl reload` does NOT refire it. Without this, the shell would only
-# actually appear after the next logout/login, which fails the "instala e já
-# está rodando" bar this script is held to.
-if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1 && ! pgrep -x quickshell >/dev/null 2>&1; then
-  log "Hyprland already running — starting hydra-shell now"
-  setsid qs -c hydra-shell -d >/dev/null 2>&1 &
-  disown
+# ── 6. provision the selected compositor's existing config ────────────────
+if $TARGET_UMBRIEL; then
+  log "Installing Hydra keybinds for Umbriel"
+  python3 "$INSTALL_DIR/Scripts/python/umbriel_keybinds.py" provision
+  umbriel config validate
+  # Umbriel's config.toml already owns autostart. When installing mid-session,
+  # that event has passed; a running qs process will not be started twice.
+  if [ -n "${UMBRIEL_SOCKET:-}" ] && ! pgrep -f 'qs -c hydra-shell' >/dev/null 2>&1; then
+    setsid qs -c hydra-shell -d >/dev/null 2>&1 &
+    disown
+  fi
+else
+  log "Installing Hyprland Lua config"
+  bash "$INSTALL_DIR/Scripts/bash/hyprland-adopt.sh" "$INSTALL_DIR/Assets/Hyprland"
+  if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1 && ! pgrep -x quickshell >/dev/null 2>&1; then
+    log "Hyprland already running — starting hydra-shell now"
+    setsid qs -c hydra-shell -d >/dev/null 2>&1 &
+    disown
+  fi
 fi
 
 # ── 7. doctor summary ────────────────────────────────────────────────────
 log "Doctor summary"
 
-if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
+if $TARGET_UMBRIEL; then
+  umbriel config validate
+  echo "  Umbriel: config validated"
+elif command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
   hver="$(hyprctl version 2>/dev/null | grep -oP 'Hyprland \K[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)"
   smaller="$(printf '0.55\n%s\n' "${hver:-0.55}" | sort -V | head -1)"
   if [ -n "$hver" ] && [ "$smaller" != "0.55" ]; then
@@ -238,7 +272,12 @@ check() {
   if command -v "$1" >/dev/null 2>&1; then printf '  [ok]   %s\n' "$1"; else printf '  [miss] %s (%s)\n' "$1" "$2"; fi
 }
 echo "Required:"
-for b in qs hyprctl grim slurp hyprpicker wl-copy tesseract magick zbarimg curl ffmpeg jq \
+if $TARGET_UMBRIEL; then
+  compositor_tool=umbriel
+else
+  compositor_tool=hyprctl
+fi
+for b in qs "$compositor_tool" grim slurp hyprpicker wl-copy tesseract magick zbarimg curl ffmpeg jq \
          brightnessctl ddcutil wlsunset cliphist wlr-randr playerctl bluetoothctl nmcli \
          wpctl pkexec powerprofilesctl udisksctl git shelly wf-recorder trans; do
   check "$b" "runtime dependency"
@@ -248,4 +287,8 @@ for b in fastfetch evtest vulkaninfo waifu2x-ncnn-vulkan khal wl-screenrec papir
   check "$b" "optional feature"
 done
 
-log "Done. Log into Hyprland to start hydra-shell (autostart.lua launches it automatically)."
+if $TARGET_UMBRIEL; then
+  log "Done. Hydra keybinds installed; Umbriel autostarts the shell on the next session."
+else
+  log "Done. Log into Hyprland to start hydra-shell (autostart.lua launches it automatically)."
+fi

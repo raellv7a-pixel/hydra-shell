@@ -93,7 +93,8 @@ SmartPanel {
     UserInterface,
     Wallpaper,
     Security,
-    Hyprland
+    Hyprland,
+    Umbriel
   }
 
   property int requestedTab: SettingsPanel.Tab.General
