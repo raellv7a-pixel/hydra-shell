@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "MonitorGeometry.js" as MonitorGeometry
 import "backends/HyprlandBackend.js" as HyprlandBackend
 import "backends/SwayBackend.js" as SwayBackend
 import qs.Commons
@@ -287,6 +288,9 @@ Item {
       output.height = mode.height;
       output.refresh = mode.refresh;
       output.resolutionLabel = mode.label;
+      var size = MonitorGeometry.computeLogicalSize(output.width, output.height, output.scale, output.transform);
+      output.logicalWidth = size.width;
+      output.logicalHeight = size.height;
       draftOutputs = nextOutputs;
       selectedOutputId = outputId;
       statusText = pluginApi?.tr("status.dirty");
@@ -310,6 +314,9 @@ Item {
 
     var nextOutputs = cloneValue(draftOutputs);
     nextOutputs[index].scale = Math.round(clamped * 100) / 100;
+    var size = MonitorGeometry.computeLogicalSize(nextOutputs[index].width, nextOutputs[index].height, nextOutputs[index].scale, nextOutputs[index].transform);
+    nextOutputs[index].logicalWidth = size.width;
+    nextOutputs[index].logicalHeight = size.height;
     draftOutputs = nextOutputs;
     selectedOutputId = outputId;
     statusText = t("status.dirty");

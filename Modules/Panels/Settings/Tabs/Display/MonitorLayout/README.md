@@ -1,61 +1,37 @@
 # Monitor Layout
 
-Monitor Layout is a Hydra Shell plugin for visually arranging multiple monitors and changing their resolutions, with support for both Sway and Hyprland compositors.
+Monitor Layout is a Hydra Shell plugin and settings module for visually arranging multiple monitors and managing their display modes, scaling, and orientation, with native support for Hyprland and Sway compositors.
 
-## Features
+## Key Features
 
-- Auto-detects and supports both Sway (`swaymsg`) and Hyprland (`hyprctl`) backends
-- Drag monitors in a panel to change their positions
-- Change each monitor's resolution, scale, and transform from the inspector
-- Apply the draft layout back to your compositor from the same panel
-- Generate backend-specific config lines in the Configuration tab
-- Copy config lines directly to clipboard from the Configuration tab
-- Backend and command paths are configurable
+- **Magnetic Snapping & Flush Attachment**: Dragging monitors snaps to adjacent edges when their bounds overlap; far drops attach to the nearest edge so every active display stays connected.
+- **Frozen Canvas Dragging**: Canvas bounds, size, scale, and offsets stay fixed during a drag. Drop coordinates use that frozen transform, then normalize once on release.
+- **Explicit Primary Display**: Designate an active output as primary. The layout rebases it to `(0, 0)` while preserving every output's relative offsets.
+- **Resolution-Aware Discrete Scale Ladder**: Hyprland scale choices are bounded by resolution and limited to decimal factors that yield integral logical-pixel dimensions. Scale is coerced to the nearest valid step after resolution or orientation changes; Sway retains its existing slider.
+- **Strict Hyprland Mode Fidelity**: Resolution choices come only from Hyprland's advertised `availableModes`, including their actual refresh rates. Unadvertised modes are never synthesized.
+- **Transactional Apply & Verification**:
+  - Before apply, the compositor state is fetched again. If it changed outside this panel, the draft is discarded and the current layout is reloaded.
+  - Hyprland readback verifies output identity, mode, refresh, scale, transform, and position. Sway retains its previous active-output-count check.
+  - A 15-second confirmation countdown ("Keep" / "Revert") prevents an unconfirmed layout from being retained.
+  - Apply failures, mismatched readback, timeout, and manual cancellation trigger rollback; rollback readback is verified before success is reported.
+  - If rollback fails or cannot be verified, the snapshot stays in memory for retry.
+- **Dual Config Persistence**:
+  - Saves verified, confirmed layouts to `~/.config/hypr/hydra-shell/monitors.lua` (Hyprland 0.55+ Lua syntax).
+  - Generates legacy `hyprland.conf` snippets ready for clipboard export.
+  - Unconfirmed draft layouts are never persisted to disk.
+
+## VRR Note (Variable Refresh Rate)
+
+Live Hyprland (0.56.2+) exposes an effective boolean (`vrr: true|false`) in `hyprctl monitors -j`, whereas monitor configuration rules support policies `0` (off), `1` (on), `2` (fullscreen only), and `3`. Because the exact user policy cannot be losslessly round-tripped from compositor output, a per-monitor VRR toggle is intentionally omitted from this panel to avoid overwriting or corrupting advanced VRR rules.
 
 ## Usage
 
-1. Add the bar widget or control center widget to access the Monitor Layout panel.
-2. Open the Monitor Layout panel.
-3. Drag display tiles to rearrange them visually.
-4. Pick a resolution, scale, or transform for the selected output.
-5. Click **Apply** to send the layout to your compositor (Sway or Hyprland).
-
-## Make It Permanent
-
-Applying from the panel changes your current session only. To persist your layout across restarts:
-
-1. Open the Monitor Layout panel and set your layout.
-2. Open the **Configuration** tab.
-3. Click **Copy to Clipboard**.
-4. Paste the copied lines into your compositor config file:
-	- Sway: `~/.config/sway/config`
-	- Hyprland: `~/.config/hypr/hyprland.conf`
-5. Reload your compositor config (or restart your session).
-
-
-## Notes
-
-- Requires `swaymsg` for Sway or `hyprctl` for Hyprland to be available in PATH (or set custom command in settings)
-- Clipboard copy requires at least one of: `wl-copy`, `xclip`, or `xsel`
-- All user-facing text is translatable; see `i18n/`
-- The plugin applies position, resolution, scale, and transform values as reported by your compositor
-
-## Extending
-
-To add support for a new compositor:
-1. Implement a backend in `backends/` with the required interface (see SwayBackend.js, HyprlandBackend.js)
-2. Import and register the backend in `Main.qml`
-3. Add backend selection to settings if needed
-
-## Settings
-
-You can customize the plugin's behavior from the settings page:
-
-- **Backend**: Choose which compositor backend to use (`Auto detect`, `Sway`, or `Hyprland`).
-- **Sway command**: Path to the `swaymsg` command (for Sway users).
-- **Hyprctl command**: Path to the `hyprctl` command (for Hyprland users).
-- **Snap to grid**: Enable or disable snapping displays to a grid when dragging.
-- **Grid size**: Set the grid size (in layout pixels) for snapping.
-- **Icon color**: Choose the color for the bar/control center widget icon.
-
-Settings changes are saved automatically and persist across restarts. All settings have sensible defaults and can be reset at any time.
+1. Open **Settings** → **Monitores** (or the Monitor Layout widget).
+2. Drag monitor tiles on the canvas to rearrange them visually. Snapping and flush alignment engage automatically.
+3. Select any monitor to inspect its properties:
+   - Toggle output activation or mirroring.
+   - Click **Definir como Monitor Principal** to set origin `(0, 0)`.
+   - Select supported resolutions, refresh rates, discrete scale factors, or rotation.
+4. Click **Aplicar Agora** to preview live. A 15-second confirmation dialog will appear.
+5. Click **Manter** to confirm, or **Reverter** to restore the previous layout.
+6. Click **Salvar no Hyprland** to write the confirmed configuration permanently.

@@ -10,8 +10,8 @@ import qs.Services.UI
 Singleton {
   id: root
 
-  // Compositor detection
   property bool isHyprland: false
+  property bool isUmbriel: false
   property bool isNiri: false
   property bool isSway: false
   property bool isMango: false
@@ -67,13 +67,26 @@ Singleton {
     const hyprlandSignature = Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE");
     const niriSocket = Quickshell.env("NIRI_SOCKET");
     const swaySock = Quickshell.env("SWAYSOCK");
-    const currentDesktop = Quickshell.env("XDG_CURRENT_DESKTOP");
+    const currentDesktop = Quickshell.env("XDG_CURRENT_DESKTOP") || "";
+    const sessionDesktop = Quickshell.env("XDG_SESSION_DESKTOP") || "";
+    const umbrielSocket = Quickshell.env("UMBRIEL_SOCKET");
+    const umbrielDesktop = currentDesktop.toLowerCase() === "umbriel" || sessionDesktop.toLowerCase() === "umbriel";
+    const isUmbrielSession = !!umbrielSocket || umbrielDesktop;
     const labwcPid = Quickshell.env("LABWC_PID");
 
-    // Check for MangoWC using XDG_CURRENT_DESKTOP environment variable
-    // MangoWC sets XDG_CURRENT_DESKTOP=mango
-    if (currentDesktop && currentDesktop.toLowerCase().includes("mango")) {
+    if (isUmbrielSession) {
       isHyprland = false;
+      isUmbriel = true;
+      isNiri = false;
+      isSway = false;
+      isMango = false;
+      isLabwc = false;
+      isExtWorkspace = false;
+      backendLoader.sourceComponent = umbrielComponent;
+      Logger.i("CompositorService", "Detected Umbriel session");
+    } else if (currentDesktop && currentDesktop.toLowerCase().includes("mango")) {
+      isHyprland = false;
+      isUmbriel = false;
       isNiri = false;
       isSway = false;
       isMango = true;
@@ -82,6 +95,7 @@ Singleton {
       backendLoader.sourceComponent = mangoComponent;
     } else if (labwcPid && labwcPid.length > 0) {
       isHyprland = false;
+      isUmbriel = false;
       isNiri = false;
       isSway = false;
       isMango = false;
@@ -91,6 +105,7 @@ Singleton {
       Logger.i("CompositorService", "Detected LabWC with PID: " + labwcPid);
     } else if (niriSocket && niriSocket.length > 0) {
       isHyprland = false;
+      isUmbriel = false;
       isNiri = true;
       isSway = false;
       isMango = false;
@@ -99,6 +114,7 @@ Singleton {
       backendLoader.sourceComponent = niriComponent;
     } else if (hyprlandSignature && hyprlandSignature.length > 0) {
       isHyprland = true;
+      isUmbriel = false;
       isNiri = false;
       isSway = false;
       isMango = false;
@@ -107,6 +123,7 @@ Singleton {
       backendLoader.sourceComponent = hyprlandComponent;
     } else if (swaySock && swaySock.length > 0) {
       isHyprland = false;
+      isUmbriel = false;
       isNiri = false;
       isSway = true;
       isMango = false;
@@ -115,8 +132,8 @@ Singleton {
       isScroll = currentDesktop && currentDesktop.toLowerCase().includes("scroll");
       backendLoader.sourceComponent = swayComponent;
     } else {
-      // Always fallback to ext-workspace-v1
       isHyprland = false;
+      isUmbriel = false;
       isNiri = false;
       isSway = false;
       isMango = false;
@@ -167,6 +184,13 @@ Singleton {
     }
   }
 
+  // Umbriel backend
+  Component {
+    id: umbrielComponent
+    UmbrielService {
+      id: umbrielBackend
+    }
+  }
   // Niri backend component
   Component {
     id: niriComponent

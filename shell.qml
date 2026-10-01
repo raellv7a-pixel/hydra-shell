@@ -41,6 +41,7 @@ import qs.Services.Power
 import qs.Services.System
 import qs.Services.Theming
 import qs.Services.UI
+import qs.Services.Compositor
 
 ShellRoot {
   id: shellRoot
@@ -137,8 +138,12 @@ ShellRoot {
       Dock {}
       Notification {}
       ToastOverlay {}
-      ScreenToolkitNative {}
-      ScreenShareNative {}
+      Loader {
+        active: !CompositorService.isUmbriel
+        sourceComponent: Component {
+          ScreenShareNative {}
+        }
+      }
       PolkitNative {
         id: polkitAgent
       }
@@ -160,7 +165,7 @@ ShellRoot {
 
       // Workspace manager overlay
       Loader {
-        active: PanelService.workspaceManagerOpen
+        active: PanelService.workspaceManagerOpen && !CompositorService.isUmbriel
         sourceComponent: Component {
           WorkspaceManagerPanel {}
         }

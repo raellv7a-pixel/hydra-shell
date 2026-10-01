@@ -5,6 +5,7 @@ import Quickshell.Io
 import qs.Commons
 import qs.Services.Location
 import qs.Services.UI
+import qs.Services.Compositor
 import qs.Widgets
 
 ColumnLayout {
@@ -75,6 +76,7 @@ ColumnLayout {
     NTabButton {
       text: "Arranjo de Monitores"
       tabIndex: 2
+      visible: !CompositorService.isUmbriel
       checked: subTabBar.currentIndex === 2
     }
   }
@@ -93,6 +95,11 @@ ColumnLayout {
       timeOptions: timeOptions
       onCheckWlsunset: wlsunsetCheck.running = true
     }
-    MonitorLayoutSubTab {}
-  }
+    Loader {
+      active: !CompositorService.isUmbriel
+      sourceComponent: Component {
+        MonitorLayoutSubTab {}
+      }
+    }
+}
 }

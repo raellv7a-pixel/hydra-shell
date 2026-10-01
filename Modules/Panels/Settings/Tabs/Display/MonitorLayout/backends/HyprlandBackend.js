@@ -1,4 +1,5 @@
 .pragma library
+.import "../MonitorGeometry.js" as MonitorGeometry
 // --- Backend interface ---
 // Every backend module must export the following functions:
 //
@@ -32,6 +33,9 @@ function buildFetchCommand(cfg, defaults) {
 function parseOutputs(rawText) {
   try {
     var parsed = JSON.parse(rawText || "[]");
+    if (!Array.isArray(parsed)) {
+      return { "error": "Hyprland monitor data must be an array." };
+    }
     var outputs = [];
 
     for (var index = 0; index < parsed.length; index++) {
@@ -40,17 +44,27 @@ function parseOutputs(rawText) {
         continue;
       }
 
-      var width = monitor.width || 1920;
-      var height = monitor.height || 1080;
+      var width = Number(monitor.width);
+      var height = Number(monitor.height);
       var refresh = normalizeRefreshRate(monitor.refreshRate);
-      var scale = monitor.scale || 1;
-      var logicalWidth = Math.max(1, Math.round(width / scale));
-      var logicalHeight = Math.max(1, Math.round(height / scale));
-      var currentModeId = modeIdFromRes(width, height, refresh);
-      
-      // Hyprland doesn't expose per-output mode lists here, so seed the picker
-      // with the current mode plus a deduplicated set of common presets.
-      var modes = buildCommonModes(width, height, refresh);
+      var scale = Number(monitor.scale);
+      var transform = (monitor.transform !== undefined && monitor.transform !== null) ? Number(monitor.transform) : 0;
+      var x = Number(monitor.x);
+      var y = Number(monitor.y);
+      if (typeof monitor.name !== "string" || !monitor.name ||
+          !isFinite(width) || !isFinite(height) || width <= 0 || height <= 0 ||
+          !isFinite(refresh) || refresh <= 0 || !isFinite(scale) || scale <= 0 ||
+          !isFinite(transform) || !isFinite(x) || !isFinite(y)) {
+        return { "error": "Hyprland returned incomplete geometry for monitor " + (monitor.name || index) + "." };
+      }
+
+      var logicalSize = MonitorGeometry.computeLogicalSize(width, height, scale, transform);
+      var currentModeId = MonitorGeometry.canonicalizeModeId(width, height, refresh);
+
+      // Hyprland advertises monitor modes in availableModes. Parse only
+      // real modes, keeping the available-mode object shape
+      // (id, width, height, refresh, label, preferred) for consumers.
+      var modes = MonitorGeometry.parseAvailableModes(monitor.availableModes, width, height, refresh);
 
       outputs.push({
         "outputId": monitor.name,
@@ -58,16 +72,18 @@ function parseOutputs(rawText) {
         "make": monitor.make || "",
         "model": monitor.model || "",
         "serial": monitor.serial || "",
-        "active": !monitor.disabled,
+        "mirror": monitor.mirrorOf && monitor.mirrorOf !== "none" ? monitor.mirrorOf : "",
+        "active": true,
         "focused": !!monitor.focused,
-        "x": monitor.x || 0,
-        "y": monitor.y || 0,
+        "isPrimary": (x === 0 && y === 0),
+        "x": x,
+        "y": y,
         "width": width,
         "height": height,
-        "logicalWidth": logicalWidth,
-        "logicalHeight": logicalHeight,
+        "logicalWidth": logicalSize.width,
+        "logicalHeight": logicalSize.height,
         "scale": scale,
-        "transform": String(monitor.transform || 0),
+        "transform": String(transform),
         "refresh": refresh,
         "modeId": currentModeId,
         "resolutionLabel": modeLabel(width, height, refresh),
@@ -85,6 +101,7 @@ function parseOutputs(rawText) {
     };
   }
 }
+
 
 // Single hl.monitor({...}) block for one output — shared by buildApplyCommand
 // (live hyprctl eval) and buildLuaConfigFileContent (saved config) so the two
@@ -240,62 +257,6 @@ function buildLuaConfigFileContent(outputs) {
   return { "content": lines.join("\n\n") };
 }
 
-function buildCommonModes(currentWidth, currentHeight, currentRefresh) {
-  var normalizedRefresh = normalizeRefreshRate(currentRefresh);
-  var commonRes = [
-    { w: 1024, h: 768 },
-    { w: 1280, h: 720 },
-    { w: 1280, h: 800 },
-    { w: 1280, h: 1024 },
-    { w: 1366, h: 768 },
-    { w: 1600, h: 900 },
-    { w: 1680, h: 1050 },
-    { w: 1920, h: 1080 },
-    { w: 2560, h: 1440 },
-    { w: 3440, h: 1440 },
-    { w: 3840, h: 2160 },
-    { w: 5120, h: 2880 }
-  ];
-  var commonRefreshRates = [30, 50, 60, 75, 90, 100, 120, 144, 165, 180, 200, 240];
-
-  var modes = [];
-  var seen = {};
-
-  function pushMode(width, height, refresh, preferred) {
-    var normalized = normalizeRefreshRate(refresh);
-    var modeId = modeIdFromRes(width, height, normalized);
-    if (seen[modeId]) {
-      return;
-    }
-
-    seen[modeId] = true;
-    modes.push({
-      "id": modeId,
-      "width": width,
-      "height": height,
-      "refresh": normalized,
-      "label": modeLabel(width, height, normalized),
-      "preferred": !!preferred
-    });
-  }
-
-  pushMode(currentWidth, currentHeight, normalizedRefresh, true);
-
-  for (var i = 0; i < commonRes.length; i++) {
-    var res = commonRes[i];
-    for (var refreshIndex = 0; refreshIndex < commonRefreshRates.length; refreshIndex++) {
-      var hz = commonRefreshRates[refreshIndex];
-      pushMode(
-        res.w,
-        res.h,
-        hz,
-        res.w === currentWidth && res.h === currentHeight && Math.round(hz) === Math.round(normalizedRefresh)
-      );
-    }
-  }
-
-  return modes;
-}
 
 function modeIdFromRes(width, height, refresh) {
   return width + "x" + height + "@" + refresh;
@@ -316,7 +277,7 @@ function refreshToHzString(refresh) {
 function normalizeRefreshRate(refresh) {
   var numeric = Number(refresh);
   if (!isFinite(numeric) || numeric <= 0) {
-    return 60;
+    return 0;
   }
 
   if (numeric >= 1000) {
