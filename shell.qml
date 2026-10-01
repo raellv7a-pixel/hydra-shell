@@ -31,17 +31,17 @@ import qs.Modules.Polkit
 import qs.Modules.ScreenShare
 import qs.Modules.ScreenToolkit
 import qs.Modules.Toast
+import qs.Services.Compositor
 import qs.Services.Control
 import qs.Services.Hardware
+import qs.Services.Hydra
 import qs.Services.Keyboard
 import qs.Services.Location
 import qs.Services.Networking
-import qs.Services.Hydra
 import qs.Services.Power
 import qs.Services.System
 import qs.Services.Theming
 import qs.Services.UI
-import qs.Services.Compositor
 
 ShellRoot {
   id: shellRoot
@@ -90,6 +90,13 @@ ShellRoot {
       if (ShellState.isLoaded) {
         shellStateLoaded = true;
       }
+    }
+  }
+
+  Connections {
+    target: EdgeShelfService
+    function onErrorOccurred(message) {
+      ToastService.showError("Edge Shelf", message);
     }
   }
 

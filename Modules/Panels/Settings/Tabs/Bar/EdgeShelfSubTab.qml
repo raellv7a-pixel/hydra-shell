@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import qs.Commons
+import qs.Services.UI
 import qs.Widgets
 
 ColumnLayout {
@@ -26,17 +27,12 @@ ColumnLayout {
   function getAppIcon(appId) {
     if (!appId)
       return "";
-    return ThemeIcons.iconForAppId(appId.toLowerCase()) || "application-x-executable";
+    return ThemeIcons.iconForAppId(appId.toLowerCase()) || "";
   }
 
   function removeApp(index) {
-    if (!Settings.data.edgeShelf)
-      return;
-    let arr = root.pinnedApps.slice();
-    if (index >= 0 && index < arr.length) {
-      arr.splice(index, 1);
-      Settings.data.edgeShelf.pinnedApps = arr;
-    }
+    if (index >= 0 && index < root.pinnedApps.length)
+      EdgeShelfService.removePinnedApp(root.pinnedApps[index]);
   }
 
   function moveApp(fromIndex, toIndex) {
@@ -57,7 +53,7 @@ ColumnLayout {
     visible: !root.isFramed
     color: Color.mSurfaceVariant
     radius: Style.radiusM
-    border.color: Color.mOutlineVariant
+    border.color: Qt.alpha(Color.mOutline, 0.55)
     border.width: Style.borderS
 
     RowLayout {
@@ -102,31 +98,10 @@ ColumnLayout {
     checked: Settings.data.edgeShelf ? Settings.data.edgeShelf.enabled : false
     defaultValue: Settings.getDefaultValue("edgeShelf.enabled") ?? false
     onToggled: checked => {
-      if (Settings.data.edgeShelf) {
-        Settings.data.edgeShelf.enabled = checked;
-      }
-    }
-  }
-
-  // Trigger mode selection
-  NComboBox {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.bar.edge-shelf-trigger-mode-label") ?? "Modo de ativação"
-    description: I18n.tr("panels.bar.edge-shelf-trigger-mode-description") ?? "Como abrir o Edge Shelf a partir do handle na borda da tela"
-    model: [
-      {
-        "key": "click_or_drag",
-        "name": I18n.tr("panels.bar.edge-shelf-trigger-click-or-drag") ?? "Clique ou arrastar para a direita"
-      }
-    ]
-    currentKey: Settings.data.edgeShelf ? Settings.data.edgeShelf.triggerMode : "click_or_drag"
-    defaultValue: "click_or_drag"
-    enabled: Settings.data.edgeShelf && Settings.data.edgeShelf.enabled
-    onSelected: key => {
-      if (Settings.data.edgeShelf) {
-        Settings.data.edgeShelf.triggerMode = key;
-      }
-    }
+                 if (Settings.data.edgeShelf) {
+                   Settings.data.edgeShelf.enabled = checked;
+                 }
+               }
   }
 
   NDivider {
@@ -146,7 +121,7 @@ ColumnLayout {
     visible: root.pinnedApps.length === 0
     color: "transparent"
     radius: Style.radiusM
-    border.color: Color.mOutlineVariant
+    border.color: Qt.alpha(Color.mOutline, 0.55)
     border.width: Style.borderS
 
     RowLayout {
@@ -182,7 +157,7 @@ ColumnLayout {
         Layout.preferredHeight: 48
         radius: Style.radiusM
         color: Color.mSurfaceVariant
-        border.color: Color.mOutlineVariant
+        border.color: Qt.alpha(Color.mOutline, 0.55)
         border.width: Style.borderS
 
         RowLayout {

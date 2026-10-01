@@ -82,7 +82,6 @@
   },
   "edgeShelf": {
     "enabled": false,
-    "triggerMode": "click_or_drag",
     "pinnedApps": []
   },
   "workspaceManager": {

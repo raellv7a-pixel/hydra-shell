@@ -160,7 +160,7 @@ Singleton {
         runVersionedMigrations(rawJson);
 
         // Finally, update our local settings version
-        adapter.settingsVersion = settingsVersion;
+        adapter.settingsVersion = root.settingsVersion;
 
         // Emit the signal
         root.isLoaded = true;
@@ -642,7 +642,6 @@ Singleton {
     // edge shelf
     property JsonObject edgeShelf: JsonObject {
       property bool enabled: false
-      property string triggerMode: "click_or_drag"
       property list<string> pinnedApps: []
     }
 
@@ -1728,7 +1727,9 @@ Singleton {
       return;
     }
 
-    const currentVersion = adapter.settingsVersion;
+    const persistedVersion = rawJson?.settingsVersion;
+    // Invalid values cannot identify an upgrade; preserve explicit native settings.
+    const currentVersion = Number.isInteger(persistedVersion) && persistedVersion >= 0 && persistedVersion <= root.settingsVersion ? persistedVersion : root.settingsVersion;
     const migrations = MigrationRegistry.migrations;
 
     Logger.i("Settings", "adapter.settingsVersion:", adapter.settingsVersion);

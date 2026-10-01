@@ -23,6 +23,8 @@ Singleton {
   property bool loaded: false
   property bool busy: false
   property string error: ""
+  property var pendingEdgeApps: null
+  property string syncingEdgeApps: ""
   readonly property bool dirty: JSON.stringify(draft) !== JSON.stringify(committed)
   readonly property var rows: {
     const values = [];
@@ -130,15 +132,27 @@ Singleton {
   }
 
   function syncEdgeScratchpads(pinnedApps) {
+    const apps = Array.from(pinnedApps || []);
     if (busy) {
-      Qt.callLater(() => syncEdgeScratchpads(pinnedApps));
+      pendingEdgeApps = apps;
       return;
     }
+    const serialized = JSON.stringify(apps);
+    if (serialized === syncingEdgeApps && !error)
+      return;
     busy = true;
     error = "";
-    const appsArg = Array.isArray(pinnedApps) ? JSON.stringify(pinnedApps) : (pinnedApps ? JSON.stringify([].slice.call(pinnedApps)) : "[]");
-    syncProcess.command = ["python3", script, "sync", appsArg];
+    syncingEdgeApps = serialized;
+    syncProcess.command = ["python3", script, "sync", serialized];
     syncProcess.running = true;
+  }
+
+  function flushPendingEdgeSync() {
+    if (busy || pendingEdgeApps === null)
+      return;
+    const apps = pendingEdgeApps;
+    pendingEdgeApps = null;
+    syncEdgeScratchpads(apps);
   }
 
   Connections {
@@ -161,6 +175,7 @@ Singleton {
       root.error = provisionError.text.trim() || "Falha ao instalar atalhos Umbriel";
       else
       root.refresh();
+      root.flushPendingEdgeSync();
     }
   }
 
@@ -177,6 +192,7 @@ Singleton {
       root.busy = false;
       if (code !== 0) {
         root.error = loadError.text.trim() || "Falha ao carregar atalhos";
+        root.flushPendingEdgeSync();
         return;
       }
       try {
@@ -189,6 +205,7 @@ Singleton {
       } catch (e) {
         root.error = "Falha ao ler catálogo: " + e;
       }
+      root.flushPendingEdgeSync();
     }
   }
 
@@ -204,10 +221,12 @@ Singleton {
       root.busy = false;
       if (code !== 0) {
         root.error = saveError.text.trim() || "Falha na validação Umbriel";
+        root.flushPendingEdgeSync();
         return;
       }
       root.committed = JSON.parse(JSON.stringify(root.draft));
       root.error = "";
+      root.flushPendingEdgeSync();
     }
   }
 
@@ -223,6 +242,7 @@ Singleton {
       } else {
         root.error = "";
       }
+      root.flushPendingEdgeSync();
     }
   }
 }

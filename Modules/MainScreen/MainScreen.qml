@@ -53,20 +53,20 @@ PanelWindow {
   WlrLayershell.namespace: "hydra-background-" + (screen?.name || "unknown")
   WlrLayershell.exclusionMode: ExclusionMode.Ignore // Don't reserve space - BarExclusionZone handles that
   WlrLayershell.keyboardFocus: {
+    // The handle is pressed while the layer has no keyboard focus. Once open,
+    // take it so Escape works immediately without a second click on the rail.
+    if (root.edgeShelfOpen && !root.isAnyPanelOpen)
+      return WlrKeyboardFocus.Exclusive;
     // No panel open anywhere: no keyboard focus needed
-    if (!root.isAnyPanelOpen) {
+    if (!root.isAnyPanelOpen)
       return WlrKeyboardFocus.None;
-    }
     // Panel open on THIS screen: use panel's preferred focus mode
     if (root.isPanelOpen) {
       // Hyprland's Exclusive captures ALL input globally (including pointer),
       // preventing click-to-close from working on other monitors.
-      // Workaround: briefly use Exclusive when panel opens (for text input focus),
-      // then switch to OnDemand (for click-to-close on other screens).
-      if (CompositorService.isHyprland) {
+      if (CompositorService.isHyprland)
         return PanelService.isInitializingKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand;
-      }
-      return PanelService.activePanel.exclusiveKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand;
+      return PanelService.activePanel?.exclusiveKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand;
     }
     // Panel open on ANOTHER screen: OnDemand allows receiving pointer events for click-to-close
     return WlrKeyboardFocus.OnDemand;
@@ -89,6 +89,11 @@ PanelWindow {
   property bool isPanelOpen: hasOpenPanelHere || hasModalHere
   property bool isPanelClosing: (PanelService.activePanel !== null) && PanelService.activePanel.isClosing
   property bool isAnyPanelOpen: (PanelService.openedPanel !== null) || (PanelService.modalPanel !== null)
+  onIsAnyPanelOpenChanged: {
+    if (isAnyPanelOpen)
+      edgeShelf.closeShelf();
+  }
+  readonly property bool edgeShelfOpen: edgeShelf.available && edgeShelf.opened
 
   color: {
     if (dimmerOpacity > 0 && isPanelOpen && !isPanelClosing) {
@@ -140,7 +145,18 @@ PanelWindow {
 
     // Only include regions that are actually needed
     // panelRegions is handled by PanelService, bar is local to this screen
-    regions: [barMaskRegion, backgroundMaskRegion]
+    regions: [barMaskRegion, backgroundMaskRegion, handleMaskRegion]
+
+    // The Frame is a visual cutout in the existing mask. Reserve only the
+    // actual handle, not the full side or an invisible strip over app windows.
+    Region {
+      id: handleMaskRegion
+      x: 0
+      y: edgeShelf.shelfY + (edgeShelf.shelfHeight - height) / 2
+      width: edgeShelf.available ? edgeShelf.frameLeft : 0
+      height: edgeShelf.available ? Math.min(edgeShelf.shelfHeight, 128) : 0
+      intersection: Intersection.Subtract
+    }
 
     // Bar region - subtract bar area from mask (only if bar should be shown on this screen)
     Region {
@@ -206,8 +222,8 @@ PanelWindow {
       id: backgroundMaskRegion
       x: 0
       y: 0
-      width: root.isAnyPanelOpen ? root.width : 0
-      height: root.isAnyPanelOpen ? root.height : 0
+      width: (root.isAnyPanelOpen || root.edgeShelfOpen) ? root.width : 0
+      height: (root.isAnyPanelOpen || root.edgeShelfOpen) ? root.height : 0
       intersection: Intersection.Subtract
     }
   }
@@ -311,13 +327,14 @@ PanelWindow {
       anchors.fill: parent
       // A modal blocks click-to-close entirely: dismissing an authentication
       // prompt with a stray click would strand the request that is waiting on it.
-      enabled: root.isAnyPanelOpen && !PanelService.modalOpen
+      enabled: (root.isAnyPanelOpen || root.edgeShelfOpen) && !PanelService.modalOpen
       acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-      onClicked: mouse => {
-                   if (PanelService.openedPanel) {
-                     PanelService.openedPanel.close();
-                   }
-                 }
+      onClicked: {
+        if (root.edgeShelfOpen)
+          edgeShelf.closeShelf();
+        if (PanelService.openedPanel)
+          PanelService.openedPanel.close();
+      }
       z: 0 // Behind panels and bar
     }
 
@@ -611,6 +628,40 @@ PanelWindow {
     // Screen Corners
     ScreenCorners {}
 
+    EdgeShelf {
+      id: edgeShelf
+      anchors.fill: parent
+      z: 4
+      screen: root.screen
+      frameLeft: barPlaceholder.barPosition === "left" ? barPlaceholder.barHeight : barPlaceholder.frameThickness
+      available: CompositorService.isUmbriel && root.barShouldShow && Settings.data.edgeShelf.enabled && Settings.data.bar.barType === "framed"
+      onOpenedChanged: {
+        if (opened)
+          EdgeShelfService.openScreenName = root.screen?.name || "";
+        else if (EdgeShelfService.openScreenName === root.screen?.name)
+          EdgeShelfService.openScreenName = "";
+      }
+      onRequestLauncher: {
+        closeShelf();
+        PanelService.openLauncher(root.screen);
+      }
+    }
+
+    Connections {
+      target: EdgeShelfService
+      function onOpenScreenNameChanged() {
+        if (edgeShelf.opened && EdgeShelfService.openScreenName !== root.screen?.name)
+          edgeShelf.closeShelf();
+      }
+    }
+
+    Connections {
+      target: PanelService
+      function onWillOpen() {
+        edgeShelf.closeShelf();
+      }
+    }
+
     // Blur behind the bar and open panels
     // Helper object holding computed properties for blur regions
     QtObject {
@@ -681,6 +732,15 @@ PanelWindow {
       sequence: modelData
       enabled: root.isPanelOpen && (root.shortcutPanel?.onEscapePressed !== undefined) && !PanelService.isKeybindRecording
       onActivated: root.shortcutPanel?.onEscapePressed?.()
+    }
+  }
+
+  Instantiator {
+    model: Settings.data.general.keybinds.keyEscape || []
+    Shortcut {
+      sequence: modelData
+      enabled: root.edgeShelfOpen && !root.isAnyPanelOpen && !PanelService.isKeybindRecording
+      onActivated: edgeShelf.closeShelf()
     }
   }
 

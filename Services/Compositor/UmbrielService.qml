@@ -12,6 +12,7 @@ Item {
   property var workspaceCache: ({})
   property var outputCache: ({})
   property bool initialized: false
+  property bool windowsReceived: false
 
   signal workspaceChanged
   signal activeWindowChanged
@@ -147,6 +148,7 @@ Item {
                 });
     }
     windows = next;
+    windowsReceived = true;
     updateFocusedWindowIndex();
   }
 

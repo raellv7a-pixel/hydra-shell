@@ -967,6 +967,13 @@
       "volumes-volume-overdrive-label": "Permitir volume acima de 100%"
     },
     "bar": {
+      "edge-shelf-requires-frame-title": "Requer a barra emoldurada",
+      "edge-shelf-requires-frame-desc": "Selecione Emoldurado em Aparência para mostrar o Edge Shelf. Os favoritos permanecem ao trocar o estilo da barra.",
+      "edge-shelf-enable-label": "Ativar Edge Shelf",
+      "edge-shelf-enable-description": "Revele uma prateleira compacta de apps na borda esquerda da moldura.",
+      "edge-shelf-apps-label": "Apps favoritos",
+      "edge-shelf-apps-description": "Adicione apps pelo menu de contexto do Launcher. Reordene ou remova aqui.",
+      "edge-shelf-empty-hint": "Sem favoritos. Clique com o botão direito em um app no Launcher para adicioná-lo.",
       "appearance-auto-hide-delay-description": "Tempo até a Bar se ocultar depois que o rato a deixa.",
       "appearance-auto-hide-delay-label": "Atraso para Ocultar",
       "appearance-auto-hide-exclusive-note": "Nota: A zona exclusiva é automaticamente desativada quando o auto-ocultar está ativo.",

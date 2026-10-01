@@ -1013,11 +1013,10 @@ Item {
     const normalizedId = normalizeAppId(appId);
     let arr = ((Settings.data.edgeShelf && Settings.data.edgeShelf.pinnedApps) || []).slice();
     const idx = arr.findIndex(pinnedId => normalizeAppId(pinnedId) === normalizedId);
-    if (idx >= 0)
-      arr.splice(idx, 1);
-    else
+    if (idx >= 0) {
+      EdgeShelfService.removePinnedApp(arr[idx]);
+    } else if (Settings.data.edgeShelf) {
       arr.push(appId);
-    if (Settings.data.edgeShelf) {
       Settings.data.edgeShelf.pinnedApps = arr;
     }
   }

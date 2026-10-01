@@ -967,6 +967,13 @@
       "volumes-volume-overdrive-label": "Allow volume overdrive"
     },
     "bar": {
+      "edge-shelf-requires-frame-title": "Requires the framed bar",
+      "edge-shelf-requires-frame-desc": "Select Framed in Appearance to show the Edge Shelf. Your favorites remain saved when you change bar styles.",
+      "edge-shelf-enable-label": "Enable Edge Shelf",
+      "edge-shelf-enable-description": "Reveal a compact app shelf from the left edge of the frame.",
+      "edge-shelf-apps-label": "Favorite apps",
+      "edge-shelf-apps-description": "Add apps from their Launcher context menu. Reorder or remove them here.",
+      "edge-shelf-empty-hint": "No favorites yet. Right-click an app in the Launcher to add it.",
       "appearance-auto-hide-delay-description": "Time before bar hides after mouse leaves",
       "appearance-auto-hide-delay-label": "Hide Delay",
       "appearance-auto-hide-exclusive-note": "Note: Exclusive zone is automatically disabled when auto-hide is active",

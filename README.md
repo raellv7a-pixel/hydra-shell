@@ -81,6 +81,22 @@ executar comandos. **Mod+Shift+Escape** alterna a inibição de atalhos mesmo
 quando a janela está com atalhos inibidos. Para reinstalar o catálogo sem
 apagar rebinds: `python3 Scripts/python/umbriel_keybinds.py provision`.
 
+## Edge Shelf (Umbriel)
+
+Em **Configurações → Barra → Edge Shelf**, ative a prateleira com a barra
+**Emoldurada**. Ela fica oculta em outros estilos sem apagar os favoritos.
+Adicione ou remova apps pelo menu de contexto do Launcher; reordene ou remova
+em Configurações. Na moldura esquerda, passe o cursor para revelar o handle;
+clique ou arraste-o brevemente para a direita para abrir. O botão **+** abre o
+Launcher. Escape, clique fora ou outro clique no handle fecham a prateleira.
+
+O clique num app adota sua única janela existente ou lança uma nova instância.
+Com várias janelas, escolha explicitamente uma no menu junto ao ícone. A Hydra
+usa um scratchpad Umbriel `hydra-edge-<appId>` por favorito; antes de remover o
+favorito, devolve suas janelas ao workspace normal. O scratchpad convencional
+`hydra-default` e seus atalhos continuam separados. A posição da janela
+invocada segue o comportamento nativo do Umbriel, sem alinhamento X/Y forçado.
+
 ---
 
 ## Requisitos
