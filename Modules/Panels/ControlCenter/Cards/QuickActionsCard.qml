@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import qs.Commons
 import qs.Widgets
 import qs.Services.Media
@@ -11,10 +12,98 @@ DashboardCard {
   id: quickActionsCard
   styleKey: "quickActions"
   styleRoot: true
+  clip: true
 
   property int toolsTabIndex: 0
   readonly property var screenToolkitMain: ScreenToolkitService.mainInstance
 
+  readonly property var toolItems: [
+    {
+      labelText: panelRoot.tr("toolColorPicker"),
+      detailText: panelRoot.tr("openPanel"),
+      iconName: "color-picker",
+      active: false,
+      onTriggered: function () {
+        ScreenToolkitService.colorPicker();
+      }
+    },
+    {
+      labelText: panelRoot.tr("toolPalette"),
+      detailText: panelRoot.tr("openPanel"),
+      iconName: "palette",
+      active: false,
+      onTriggered: function () {
+        ScreenToolkitService.palette();
+      }
+    },
+    {
+      labelText: panelRoot.tr("toolOcr"),
+      detailText: panelRoot.tr("openPanel"),
+      iconName: "scan",
+      active: false,
+      onTriggered: function () {
+        ScreenToolkitService.ocr();
+      }
+    },
+    {
+      labelText: panelRoot.tr("toolQr"),
+      detailText: panelRoot.tr("openPanel"),
+      iconName: "qrcode",
+      active: false,
+      onTriggered: function () {
+        ScreenToolkitService.qr();
+      }
+    },
+    {
+      labelText: panelRoot.tr("toolLens"),
+      detailText: panelRoot.tr("openPanel"),
+      iconName: "world-search",
+      active: false,
+      onTriggered: function () {
+        ScreenToolkitService.lens();
+      }
+    },
+    {
+      labelText: panelRoot.tr("toolAnnotate"),
+      detailText: panelRoot.tr("openPanel"),
+      iconName: "brush",
+      active: false,
+      onTriggered: function () {
+        ScreenToolkitService.annotateFullscreen();
+      }
+    },
+    {
+      labelText: panelRoot.tr("toolMeasure"),
+      detailText: panelRoot.tr("openPanel"),
+      iconName: "ruler",
+      active: false,
+      onTriggered: function () {
+        ScreenToolkitService.measure();
+      }
+    },
+    {
+      labelText: panelRoot.tr("toolPin"),
+      detailText: panelRoot.tr("openPanel"),
+      iconName: "pin",
+      active: false,
+      onTriggered: function () {
+        ScreenToolkitService.pin();
+      }
+    },
+    {
+      labelText: panelRoot.tr("toolMirror"),
+      detailText: (quickActionsCard.screenToolkitMain?.mirrorVisible ?? false) ? panelRoot.tr("enabled") : panelRoot.tr("openPanel"),
+      iconName: "camera",
+      active: quickActionsCard.screenToolkitMain?.mirrorVisible ?? false,
+      onTriggered: function () {
+        ScreenToolkitService.mirror();
+      }
+    }
+  ]
+
+  readonly property int toolsPerPage: 8
+  readonly property int toolsPageCount: Math.max(1, Math.ceil(toolItems.length / toolsPerPage))
+  property int toolsCurrentPage: 0
   ColumnLayout {
     anchors.fill: parent
     anchors.margins: Style.marginL
@@ -154,84 +243,94 @@ DashboardCard {
       }
     }
 
-    GridLayout {
+    Item {
+      id: toolsContainer
       Layout.fillWidth: true
+      Layout.fillHeight: true
       visible: quickActionsCard.toolsTabIndex === 1
-      columns: 2
-      columnSpacing: Style.marginS
-      rowSpacing: Style.marginS
+      clip: true
 
-      ActionTile {
-        panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolColorPicker")
-        detailText: panelRoot.tr("openPanel")
-        iconName: "color-picker"
-        onTriggered: ScreenToolkitService.colorPicker()
+      SwipeView {
+        id: toolsSwipe
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: toolsDots.visible ? toolsDots.top : parent.bottom
+        anchors.bottomMargin: toolsDots.visible ? Math.round(4 * quickActionsCard.panelRoot.panelUnit) : 0
+        clip: true
+        currentIndex: quickActionsCard.toolsCurrentPage
+        onCurrentIndexChanged: quickActionsCard.toolsCurrentPage = currentIndex
+
+        Repeater {
+          model: quickActionsCard.toolsPageCount
+
+          Item {
+            id: pageWrapper
+            required property int index
+
+            GridLayout {
+              anchors.top: parent.top
+              anchors.left: parent.left
+              anchors.right: parent.right
+              columns: 2
+              columnSpacing: Style.marginS
+              rowSpacing: Math.round(4 * quickActionsCard.panelRoot.panelUnit)
+
+              Repeater {
+                model: {
+                  const start = pageWrapper.index * quickActionsCard.toolsPerPage;
+                  return quickActionsCard.toolItems.slice(start, start + quickActionsCard.toolsPerPage);
+                }
+
+                ActionTile {
+                  required property var modelData
+                  panelRoot: quickActionsCard.panelRoot
+                  Layout.fillWidth: true
+                  Layout.preferredHeight: Math.round(62 * panelRoot.panelUnit)
+                  labelText: modelData.labelText
+                  detailText: modelData.detailText
+                  iconName: modelData.iconName
+                  active: modelData.active
+                  onTriggered: modelData.onTriggered()
+                }
+              }
+
+              // Placeholder keeps 50% width per column if page has an odd number of items
+              Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.round(62 * quickActionsCard.panelRoot.panelUnit)
+                visible: {
+                  const start = pageWrapper.index * quickActionsCard.toolsPerPage;
+                  const countOnPage = Math.min(quickActionsCard.toolsPerPage, quickActionsCard.toolItems.length - start);
+                  return countOnPage % 2 !== 0;
+                }
+              }
+            }
+          }
+        }
       }
 
-      ActionTile {
-        panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolPalette")
-        detailText: panelRoot.tr("openPanel")
-        iconName: "palette"
-        onTriggered: ScreenToolkitService.palette()
+      WheelHandler {
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        enabled: quickActionsCard.toolsPageCount > 1
+        onWheel: event => {
+                   if (event.angleDelta.y < 0 || event.angleDelta.x < 0) {
+                     toolsSwipe.currentIndex = Math.min(quickActionsCard.toolsPageCount - 1, toolsSwipe.currentIndex + 1);
+                   } else if (event.angleDelta.y > 0 || event.angleDelta.x > 0) {
+                     toolsSwipe.currentIndex = Math.max(0, toolsSwipe.currentIndex - 1);
+                   }
+                   event.accepted = true;
+                 }
       }
 
-      ActionTile {
+      PageDots {
+        id: toolsDots
         panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolOcr")
-        detailText: panelRoot.tr("openPanel")
-        iconName: "scan"
-        onTriggered: ScreenToolkitService.ocr()
-      }
-
-      ActionTile {
-        panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolQr")
-        detailText: panelRoot.tr("openPanel")
-        iconName: "qrcode"
-        onTriggered: ScreenToolkitService.qr()
-      }
-
-      ActionTile {
-        panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolLens")
-        detailText: panelRoot.tr("openPanel")
-        iconName: "world-search"
-        onTriggered: ScreenToolkitService.lens()
-      }
-
-      ActionTile {
-        panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolAnnotate")
-        detailText: panelRoot.tr("openPanel")
-        iconName: "brush"
-        onTriggered: ScreenToolkitService.annotateFullscreen()
-      }
-
-      ActionTile {
-        panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolMeasure")
-        detailText: panelRoot.tr("openPanel")
-        iconName: "ruler"
-        onTriggered: ScreenToolkitService.measure()
-      }
-
-      ActionTile {
-        panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolPin")
-        detailText: panelRoot.tr("openPanel")
-        iconName: "pin"
-        onTriggered: ScreenToolkitService.pin()
-      }
-
-      ActionTile {
-        panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("toolMirror")
-        detailText: (quickActionsCard.screenToolkitMain?.mirrorVisible ?? false) ? panelRoot.tr("enabled") : panelRoot.tr("openPanel")
-        iconName: "camera"
-        active: quickActionsCard.screenToolkitMain?.mirrorVisible ?? false
-        onTriggered: ScreenToolkitService.mirror()
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        count: quickActionsCard.toolsPageCount
+        currentIndex: quickActionsCard.toolsCurrentPage
+        onSelected: index => quickActionsCard.toolsCurrentPage = index
       }
     }
   }
