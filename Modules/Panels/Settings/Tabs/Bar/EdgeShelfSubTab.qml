@@ -1,0 +1,250 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Quickshell
+import qs.Commons
+import qs.Widgets
+
+ColumnLayout {
+  id: root
+  spacing: Style.marginL
+  Layout.fillWidth: true
+
+  readonly property bool isFramed: Settings.data.bar.barType === "framed"
+  readonly property var pinnedApps: (Settings.data.edgeShelf && Settings.data.edgeShelf.pinnedApps) ? Settings.data.edgeShelf.pinnedApps : []
+
+  function getAppName(appId) {
+    if (!appId)
+      return "";
+    const entry = ThemeIcons.findAppEntry(appId);
+    if (entry && entry.name)
+      return entry.name;
+    let clean = appId.replace(/\.desktop$/i, "");
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  }
+
+  function getAppIcon(appId) {
+    if (!appId)
+      return "";
+    return ThemeIcons.iconForAppId(appId.toLowerCase()) || "application-x-executable";
+  }
+
+  function removeApp(index) {
+    if (!Settings.data.edgeShelf)
+      return;
+    let arr = root.pinnedApps.slice();
+    if (index >= 0 && index < arr.length) {
+      arr.splice(index, 1);
+      Settings.data.edgeShelf.pinnedApps = arr;
+    }
+  }
+
+  function moveApp(fromIndex, toIndex) {
+    if (!Settings.data.edgeShelf)
+      return;
+    let arr = root.pinnedApps.slice();
+    if (fromIndex >= 0 && fromIndex < arr.length && toIndex >= 0 && toIndex < arr.length) {
+      const item = arr.splice(fromIndex, 1)[0];
+      arr.splice(toIndex, 0, item);
+      Settings.data.edgeShelf.pinnedApps = arr;
+    }
+  }
+
+  // Notice when Framed mode is not active
+  Rectangle {
+    Layout.fillWidth: true
+    Layout.preferredHeight: frameNoticeLayout.implicitHeight + Style.marginM * 2
+    visible: !root.isFramed
+    color: Color.mSurfaceVariant
+    radius: Style.radiusM
+    border.color: Color.mOutlineVariant
+    border.width: Style.borderS
+
+    RowLayout {
+      id: frameNoticeLayout
+      anchors.fill: parent
+      anchors.margins: Style.marginM
+      spacing: Style.marginM
+
+      NIcon {
+        icon: "info-circle"
+        pointSize: Style.fontSizeL
+        color: Color.mPrimary
+        Layout.alignment: Qt.AlignVCenter
+      }
+
+      ColumnLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginXXS
+
+        NText {
+          text: I18n.tr("panels.bar.edge-shelf-requires-frame-title") ?? "O Edge Shelf requer a barra no estilo Emoldurado"
+          font.weight: Style.fontWeightBold
+          pointSize: Style.fontSizeM
+        }
+
+        NText {
+          text: I18n.tr("panels.bar.edge-shelf-requires-frame-desc") ?? "O Edge Shelf é uma superfície lateral integrada à moldura. Ative o estilo 'Emoldurado' na aba Aparência para utilizá-lo."
+          color: Color.mOnSurfaceVariant
+          pointSize: Style.fontSizeS
+          wrapMode: Text.WordWrap
+          Layout.fillWidth: true
+        }
+      }
+    }
+  }
+
+  // Edge Shelf Enable Toggle
+  NToggle {
+    Layout.fillWidth: true
+    label: I18n.tr("panels.bar.edge-shelf-enable-label") ?? "Ativar Edge Shelf"
+    description: I18n.tr("panels.bar.edge-shelf-enable-description") ?? "Superfície lateral recolhível na moldura para aplicativos rápidos"
+    checked: Settings.data.edgeShelf ? Settings.data.edgeShelf.enabled : false
+    defaultValue: Settings.getDefaultValue("edgeShelf.enabled") ?? false
+    onToggled: checked => {
+      if (Settings.data.edgeShelf) {
+        Settings.data.edgeShelf.enabled = checked;
+      }
+    }
+  }
+
+  // Trigger mode selection
+  NComboBox {
+    Layout.fillWidth: true
+    label: I18n.tr("panels.bar.edge-shelf-trigger-mode-label") ?? "Modo de ativação"
+    description: I18n.tr("panels.bar.edge-shelf-trigger-mode-description") ?? "Como abrir o Edge Shelf a partir do handle na borda da tela"
+    model: [
+      {
+        "key": "click_or_drag",
+        "name": I18n.tr("panels.bar.edge-shelf-trigger-click-or-drag") ?? "Clique ou arrastar para a direita"
+      }
+    ]
+    currentKey: Settings.data.edgeShelf ? Settings.data.edgeShelf.triggerMode : "click_or_drag"
+    defaultValue: "click_or_drag"
+    enabled: Settings.data.edgeShelf && Settings.data.edgeShelf.enabled
+    onSelected: key => {
+      if (Settings.data.edgeShelf) {
+        Settings.data.edgeShelf.triggerMode = key;
+      }
+    }
+  }
+
+  NDivider {
+    Layout.fillWidth: true
+  }
+
+  // Pinned Apps Header
+  NHeader {
+    label: I18n.tr("panels.bar.edge-shelf-apps-label") ?? "Aplicativos no Edge Shelf"
+    description: I18n.tr("panels.bar.edge-shelf-apps-description") ?? "Gerencie os aplicativos do Edge Shelf. Use o menu de contexto no Lançador para adicionar novos."
+  }
+
+  // Empty state
+  Rectangle {
+    Layout.fillWidth: true
+    Layout.preferredHeight: 70
+    visible: root.pinnedApps.length === 0
+    color: "transparent"
+    radius: Style.radiusM
+    border.color: Color.mOutlineVariant
+    border.width: Style.borderS
+
+    RowLayout {
+      anchors.centerIn: parent
+      spacing: Style.marginS
+
+      NIcon {
+        icon: "layout-sidebar-left"
+        pointSize: Style.fontSizeL
+        color: Color.mOnSurfaceVariant
+      }
+
+      NText {
+        text: I18n.tr("panels.bar.edge-shelf-empty-hint") ?? "Nenhum aplicativo adicionado. Abra o Lançador, clique com o botão direito em um app e selecione 'Adicionar ao Edge Shelf'."
+        color: Color.mOnSurfaceVariant
+        pointSize: Style.fontSizeS
+      }
+    }
+  }
+
+  // List of apps
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginS
+    visible: root.pinnedApps.length > 0
+
+    Repeater {
+      model: root.pinnedApps
+
+      delegate: Rectangle {
+        id: appRow
+        Layout.fillWidth: true
+        Layout.preferredHeight: 48
+        radius: Style.radiusM
+        color: Color.mSurfaceVariant
+        border.color: Color.mOutlineVariant
+        border.width: Style.borderS
+
+        RowLayout {
+          anchors.fill: parent
+          anchors.leftMargin: Style.marginM
+          anchors.rightMargin: Style.marginS
+          spacing: Style.marginM
+
+          // App Icon
+          Image {
+            Layout.preferredWidth: 28
+            Layout.preferredHeight: 28
+            Layout.alignment: Qt.AlignVCenter
+            source: root.getAppIcon(modelData)
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            asynchronous: true
+          }
+
+          // App Name and ID
+          ColumnLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 2
+
+            NText {
+              text: root.getAppName(modelData)
+              font.weight: Style.fontWeightMedium
+              pointSize: Style.fontSizeM
+            }
+
+            NText {
+              text: modelData
+              color: Color.mOnSurfaceVariant
+              pointSize: Style.fontSizeXS
+            }
+          }
+
+          // Move Up
+          NIconButton {
+            icon: "chevron-up"
+            tooltipText: I18n.tr("common.move-up")
+            enabled: index > 0
+            onClicked: root.moveApp(index, index - 1)
+          }
+
+          // Move Down
+          NIconButton {
+            icon: "chevron-down"
+            tooltipText: I18n.tr("common.move-down")
+            enabled: index < root.pinnedApps.length - 1
+            onClicked: root.moveApp(index, index + 1)
+          }
+
+          // Remove
+          NIconButton {
+            icon: "trash"
+            tooltipText: I18n.tr("common.remove")
+            onClicked: root.removeApp(index)
+          }
+        }
+      }
+    }
+  }
+}

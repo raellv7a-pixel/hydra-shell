@@ -930,6 +930,7 @@ Item {
     const packageInfo = getPackageForApp(app);
     const hidden = isAppHidden(app);
     const pinned = isAppPinned(app);
+    const inEdgeShelf = isAppInEdgeShelf(app);
     const busyHere = isOperationBusy(item);
     const canOperate = root.shellyAvailable && !shellyBusy && !operationState;
 
@@ -939,6 +940,12 @@ Item {
             "icon": pinned ? "unpin" : "pin",
             "label": pinned ? I18n.tr("common.unpin") : I18n.tr("common.pin"),
             "action": () => togglePin(item.appId)
+          },
+          {
+            "id": "edgeShelf",
+            "icon": inEdgeShelf ? "layout-sidebar-left-collapse" : "layout-sidebar-left-expand",
+            "label": inEdgeShelf ? I18n.tr("launcher.app-actions.edge-shelf-remove") : I18n.tr("launcher.app-actions.edge-shelf-add"),
+            "action": () => toggleEdgeShelf(item.appId)
           },
           {
             "id": "hide",
@@ -989,6 +996,30 @@ Item {
     else
       arr.push(appId);
     Settings.data.appLauncher.pinnedApps = arr;
+  }
+
+  function isAppInEdgeShelf(app) {
+    if (!app)
+      return false;
+    const pinnedApps = (Settings.data.edgeShelf && Settings.data.edgeShelf.pinnedApps) || [];
+    const appId = typeof app === "string" ? app : getAppKey(app);
+    const normalizedId = normalizeAppId(appId);
+    return pinnedApps.some(pinnedId => normalizeAppId(pinnedId) === normalizedId);
+  }
+
+  function toggleEdgeShelf(appId) {
+    if (!appId)
+      return;
+    const normalizedId = normalizeAppId(appId);
+    let arr = ((Settings.data.edgeShelf && Settings.data.edgeShelf.pinnedApps) || []).slice();
+    const idx = arr.findIndex(pinnedId => normalizeAppId(pinnedId) === normalizedId);
+    if (idx >= 0)
+      arr.splice(idx, 1);
+    else
+      arr.push(appId);
+    if (Settings.data.edgeShelf) {
+      Settings.data.edgeShelf.pinnedApps = arr;
+    }
   }
 
   // -------------------------

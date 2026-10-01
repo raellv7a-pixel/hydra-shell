@@ -129,6 +129,27 @@ Singleton {
     saveProcess.running = true;
   }
 
+  function syncEdgeScratchpads(pinnedApps) {
+    if (busy) {
+      Qt.callLater(() => syncEdgeScratchpads(pinnedApps));
+      return;
+    }
+    busy = true;
+    error = "";
+    const appsArg = Array.isArray(pinnedApps) ? JSON.stringify(pinnedApps) : (pinnedApps ? JSON.stringify([].slice.call(pinnedApps)) : "[]");
+    syncProcess.command = ["python3", script, "sync", appsArg];
+    syncProcess.running = true;
+  }
+
+  Connections {
+    target: (typeof Settings !== "undefined" && Settings.data && Settings.data.edgeShelf) ? Settings.data.edgeShelf : null
+    function onPinnedAppsChanged() {
+      if (typeof CompositorService !== "undefined" && CompositorService.isUmbriel && Settings.isLoaded) {
+        root.syncEdgeScratchpads(Settings.data.edgeShelf.pinnedApps);
+      }
+    }
+  }
+
   Process {
     id: provision
     stderr: StdioCollector {
@@ -187,6 +208,21 @@ Singleton {
       }
       root.committed = JSON.parse(JSON.stringify(root.draft));
       root.error = "";
+    }
+  }
+
+  Process {
+    id: syncProcess
+    stderr: StdioCollector {
+      id: syncError
+    }
+    onExited: code => {
+      root.busy = false;
+      if (code !== 0) {
+        root.error = syncError.text.trim() || "Falha ao sincronizar scratchpads Edge";
+      } else {
+        root.error = "";
+      }
     }
   }
 }

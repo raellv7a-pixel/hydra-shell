@@ -700,6 +700,8 @@
     },
     "app-actions": {
       "title": "App actions",
+      "edge-shelf-add": "Add to Edge Shelf",
+      "edge-shelf-remove": "Remove from Edge Shelf",
       "update-to": "Update to {value}",
       "update-available": "Update available",
       "up-to-date": "No update available",

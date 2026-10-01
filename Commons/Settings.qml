@@ -542,7 +542,7 @@ Singleton {
 
     // bar
     property JsonObject bar: JsonObject {
-      property string barType: "simple" // "simple", "floating", "framed"
+      property string barType: "framed" // "simple", "floating", "framed"
       property string position: "top" // "top", "bottom", "left", or "right"
       property list<string> monitors: [] // holds bar visibility per monitor
       property string density: "default" // "compact", "default", "comfortable"
@@ -637,6 +637,13 @@ Singleton {
       // Per-screen overrides for position and widgets
       // Format: [{ "name": "HDMI-1", "position": "left" }, { "name": "DP-1", "position": "bottom", "widgets": {...} }]
       property list<var> screenOverrides: []
+    }
+
+    // edge shelf
+    property JsonObject edgeShelf: JsonObject {
+      property bool enabled: false
+      property string triggerMode: "click_or_drag"
+      property list<string> pinnedApps: []
     }
 
     property JsonObject workspaceManager: JsonObject {

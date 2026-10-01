@@ -53,9 +53,9 @@ CATALOG = [
     entry("window.extent_back", "Janelas", "Ciclar largura para trás", "Mod+Shift+R", "umbriel", "window-cycle-primary-extent-back"),
     entry("umbriel.overview", "Umbriel", "Visão geral", "Mod+O", "umbriel", "overview-toggle"),
     entry("umbriel.layout", "Umbriel", "Alternar layout", "Mod+Shift+O", "umbriel", "workspace-set-layout:toggle"),
-    entry("umbriel.scratchpad", "Umbriel", "Mostrar scratchpad", "Mod+Alt+Space", "umbriel", "scratchpad-toggle"),
-    entry("umbriel.scratchpad_move", "Umbriel", "Mover ao scratchpad", "Mod+Shift+Space", "umbriel", "window-move-to-scratchpad"),
-    entry("umbriel.scratchpad_next", "Umbriel", "Próximo no scratchpad", "Mod+Tab", "umbriel", "scratchpad-focus-next"),
+    entry("umbriel.scratchpad", "Umbriel", "Mostrar scratchpad", "Mod+Alt+Space", "umbriel", "scratchpad-toggle:hydra-default"),
+    entry("umbriel.scratchpad_move", "Umbriel", "Mover ao scratchpad", "Mod+Shift+Space", "umbriel", "window-move-to-scratchpad:hydra-default"),
+    entry("umbriel.scratchpad_next", "Umbriel", "Próximo no scratchpad", "Mod+Tab", "umbriel", "scratchpad-focus-next:hydra-default"),
     entry("umbriel.inhibit", "Umbriel", "Atalhos inibidos: alternar", "Mod+Shift+Escape", "umbriel", "shortcuts-inhibit-toggle", inhibited=True),
     entry("workspace.next", "Workspaces", "Próximo workspace", "Mod+WheelDown", "umbriel", "workspace-next", cooldown=150),
     entry("workspace.previous", "Workspaces", "Workspace anterior", "Mod+WheelUp", "umbriel", "workspace-previous", cooldown=150),
@@ -168,9 +168,50 @@ def validate_state(state):
     return result
 
 
-def generate(state):
+def app_id_to_scratchpad_name(app_id):
+    slug = str(app_id or "").lower().strip()
+    if slug.endswith(".desktop"):
+        slug = slug[:-8]
+    slug = re.sub(r"[^a-z0-9_-]+", "-", slug).strip("-")
+    return f"hydra-edge-{slug}" if slug else "hydra-edge-app"
+
+
+def get_edge_apps():
+    config_home = Path(os.environ.get("HYDRA_CONFIG_DIR", os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config")) + "/hydra"))
+    settings_file = config_home / "settings.json"
+    if not settings_file.exists():
+        return []
+    try:
+        data = json.loads(settings_file.read_text(encoding="utf-8"))
+        pinned = data.get("edgeShelf", {}).get("pinnedApps", [])
+        return [str(p) for p in pinned if p]
+    except Exception:
+        return []
+
+
+def generate(state, edge_apps=None):
     rows = validate_state(state)
-    lines = ["# Gerado pela Hydra. Edite em Configurações → Umbriel → Atalhos.", "[keybinds]"]
+    if edge_apps is None:
+        edge_apps = get_edge_apps()
+
+    lines = ["# Gerado pela Hydra. Edite em Configurações → Umbriel → Atalhos.", ""]
+
+    # Always define hydra-default scratchpad
+    lines.append("[[scratchpad]]")
+    lines.append('name = "hydra-default"')
+    lines.append("")
+
+    # Emit each distinct edge app scratchpad
+    seen_scratchpads = {"hydra-default"}
+    for app_id in edge_apps:
+        sp_name = app_id_to_scratchpad_name(app_id)
+        if sp_name not in seen_scratchpads:
+            seen_scratchpads.add(sp_name)
+            lines.append("[[scratchpad]]")
+            lines.append(f'name = "{sp_name}"')
+            lines.append("")
+
+    lines.append("[keybinds]")
     for row in rows:
         action = row["action"] if row["type"] == "umbriel" else "spawn:" + ("qs -c hydra-shell ipc call " + row["action"] if row["type"] == "hydra" else row["action"])
         values = ["action = " + json.dumps(action, ensure_ascii=False),
@@ -266,8 +307,8 @@ def atomic(path, text):
         temp.unlink(missing_ok=True)
 
 
-def commit(state):
-    generated = generate(state)
+def commit(state, edge_apps=None):
+    generated = generate(state, edge_apps=edge_apps)
     had_master = MASTER.exists()
     old_master = MASTER.read_text() if had_master else '[general]\nautostart = ["qs -c hydra-shell -d"]\n'
     old_owned = OWNED.read_text() if OWNED.exists() else None
@@ -296,6 +337,7 @@ def commit(state):
         if not MASTER.exists() or final_master != old_master:
             atomic(MASTER, final_master)
         atomic(STATE, json.dumps(state, ensure_ascii=False, indent=2) + "\n")
+        subprocess.run(["umbriel", "msg", "config-reload"], capture_output=True)
     except Exception:
         if OWNED.exists() and OWNED.read_text() == generated:
             if old_owned is None:
@@ -333,6 +375,10 @@ def main():
             commit(state)
     elif command == "save":
         commit(json.loads(sys.argv[2]))
+    elif command == "sync":
+        edge_apps = json.loads(sys.argv[2]) if len(sys.argv) > 2 else None
+        state = current_state()
+        commit(state, edge_apps=edge_apps)
     elif command == "state":
         print(json.dumps({"catalog": CATALOG, "state": current_state(), "ipc": IPC}, ensure_ascii=False))
     else:

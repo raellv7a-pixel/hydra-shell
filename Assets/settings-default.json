@@ -1,7 +1,7 @@
 {
   "settingsVersion": 0,
   "bar": {
-    "barType": "simple",
+    "barType": "framed",
     "position": "top",
     "monitors": [],
     "density": "default",
@@ -79,6 +79,11 @@
     "rightClickFollowMouse": true,
     "rightClickCommand": "",
     "screenOverrides": []
+  },
+  "edgeShelf": {
+    "enabled": false,
+    "triggerMode": "click_or_drag",
+    "pinnedApps": []
   },
   "workspaceManager": {
     "presentationMode": "adaptive",
