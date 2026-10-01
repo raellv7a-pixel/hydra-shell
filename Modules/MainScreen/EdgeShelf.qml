@@ -110,6 +110,21 @@ Item {
   }
   readonly property real revealWidth: railWidth * revealProgress
 
+  // The Frame consumes this geometry in its own inner-hole ShapePath.
+  property real handleProgress: available && (opened || handleMouseArea.containsMouse || handleMouseArea.pressed) ? (handleMouseArea.pressed ? 0.85 : 1.0) : 0.0
+  Behavior on handleProgress {
+    NumberAnimation {
+      duration: Style.animationFast
+      easing.type: Easing.OutCubic
+    }
+  }
+  readonly property real handleDepth: Style.radiusM * handleProgress
+  readonly property real handleHeight: Math.min(shelfHeight, Style.baseWidgetSize * 3)
+  readonly property real handleHitWidth: frameLeft + handleDepth * (1 - revealProgress)
+  readonly property real frameBulgeDepth: available ? handleDepth * (1 - revealProgress) + revealWidth : 0
+  readonly property real frameBulgeHalfHeight: handleHeight / 2 * (1 - revealProgress) + (shelfHeight / 2 + Style.radiusL) * revealProgress
+  readonly property real frameBulgeShoulder: handleHeight * 0.425 * (1 - revealProgress) + Style.radiusL * 2 * revealProgress
+
   // --------------------------------------------------------------------------
   // Reactivity to Compositor & Windows
   // --------------------------------------------------------------------------
@@ -204,15 +219,15 @@ Item {
   }
 
   // --------------------------------------------------------------------------
-  // 1. Handle in Left Frame Strip (strictly within frameLeft, no broad strip)
+  // 1. Local Frame interaction area; only the revealed deformation extends inward.
   // --------------------------------------------------------------------------
   Item {
     id: handleHitBox
     visible: root.available
     x: 0
     y: root.shelfY + (root.shelfHeight - height) / 2
-    width: root.frameLeft
-    height: Math.min(root.shelfHeight, Math.max(96, 128))
+    width: root.handleHitWidth
+    height: root.handleHeight
     z: 10
 
     MouseArea {
@@ -254,42 +269,22 @@ Item {
       }
     }
 
-    // Visual indicator: hidden/subtle when resting, revealed on hover, fades when open
-    Rectangle {
-      id: handleIndicator
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.right: parent.right
-      anchors.rightMargin: Math.max(2, Math.floor((root.frameLeft - width) / 2))
-      width: Math.min(4, Math.max(2, root.frameLeft - 4))
-      height: handleMouseArea.containsMouse ? 64 : 40
-      radius: width / 2
-      color: handleMouseArea.containsMouse ? Color.mPrimary : Color.mOutline
-      opacity: {
-        if (root.opened)
-        return 0.0;
-        if (handleMouseArea.containsMouse)
-        return 1.0;
-        return 0.35;
-      }
+    // Only the glyph is drawn here; the material belongs to the Frame path.
+    NIcon {
+      id: handleGlyph
+      icon: "chevron-right"
+      pointSize: Style.fontSizeS
+      color: Color.mOnSurfaceVariant
+      opacity: root.handleProgress * (1 - root.revealProgress)
+      visible: opacity > 0
+      x: root.frameLeft + root.handleDepth / 2 - handleMetrics.tightBoundingRect.width / 2 - handleMetrics.tightBoundingRect.x
+      y: (parent.height - handleMetrics.tightBoundingRect.height) / 2 - handleMetrics.tightBoundingRect.y
+    }
 
-      Behavior on height {
-        NumberAnimation {
-          duration: Settings.data.general.animationDisabled ? 0 : Style.animationFast
-          easing.type: Easing.OutCubic
-        }
-      }
-
-      Behavior on opacity {
-        NumberAnimation {
-          duration: Settings.data.general.animationDisabled ? 0 : Style.animationFast
-        }
-      }
-
-      Behavior on color {
-        ColorAnimation {
-          duration: Settings.data.general.animationDisabled ? 0 : Style.animationFast
-        }
-      }
+    TextMetrics {
+      id: handleMetrics
+      font: handleGlyph.font
+      text: handleGlyph.text
     }
   }
 
@@ -305,36 +300,6 @@ Item {
     visible: root.available && (root.opened || root.revealProgress > 0)
     clip: true
     z: 5
-
-    // Surface fill using Color.mSurface with frame opacity; flush against frame
-    Rectangle {
-      id: surfaceFill
-      readonly property real outerRadius: Style.radiusL
-      x: -outerRadius // Flush against left frame; left side unrounded and seamless
-      y: 0
-      width: root.railWidth + outerRadius
-      height: root.shelfHeight
-      radius: outerRadius
-      color: Color.mSurface
-      opacity: root.frameOpacity
-      border.width: 0 // No border on fill rectangle
-    }
-
-    // Borders on top, right, and bottom only — strictly no border on left edge
-    // to avoid any 1px seam against the left frame
-    Rectangle {
-      id: surfaceOutline
-      readonly property real outerRadius: Style.radiusL
-      x: -outerRadius - 4 // Shifted left so left border is well outside clip boundary
-      y: 0
-      width: root.railWidth + outerRadius + 4
-      height: root.shelfHeight
-      radius: outerRadius
-      color: "transparent"
-      border.color: Color.mOutline
-      border.width: Style.borderS
-      opacity: 0.6
-    }
 
     // Seam gradient along moving edge (panels emerging from underneath desktop)
     Rectangle {
@@ -376,6 +341,7 @@ Item {
     Item {
       width: root.railWidth
       height: root.shelfHeight
+      opacity: root.revealProgress
 
       // Bounded scrollable pinned app list
       Flickable {

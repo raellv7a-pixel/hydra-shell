@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -98,10 +100,10 @@ ColumnLayout {
     checked: Settings.data.edgeShelf ? Settings.data.edgeShelf.enabled : false
     defaultValue: Settings.getDefaultValue("edgeShelf.enabled") ?? false
     onToggled: checked => {
-                 if (Settings.data.edgeShelf) {
-                   Settings.data.edgeShelf.enabled = checked;
-                 }
-               }
+      if (Settings.data.edgeShelf) {
+        Settings.data.edgeShelf.enabled = checked;
+      }
+    }
   }
 
   NDivider {
@@ -153,14 +155,18 @@ ColumnLayout {
 
       delegate: Rectangle {
         id: appRow
+        required property var modelData
+        required property int index
+
         Layout.fillWidth: true
-        Layout.preferredHeight: 48
+        Layout.preferredHeight: appRowContent.implicitHeight + Style.marginS * 2
         radius: Style.radiusM
         color: Color.mSurfaceVariant
         border.color: Qt.alpha(Color.mOutline, 0.55)
         border.width: Style.borderS
 
         RowLayout {
+          id: appRowContent
           anchors.fill: parent
           anchors.leftMargin: Style.marginM
           anchors.rightMargin: Style.marginS
@@ -168,10 +174,10 @@ ColumnLayout {
 
           // App Icon
           Image {
-            Layout.preferredWidth: 28
-            Layout.preferredHeight: 28
+            Layout.preferredWidth: Style.baseWidgetSize * 0.85 * Style.uiScaleRatio
+            Layout.preferredHeight: Layout.preferredWidth
             Layout.alignment: Qt.AlignVCenter
-            source: root.getAppIcon(modelData)
+            source: root.getAppIcon(appRow.modelData)
             fillMode: Image.PreserveAspectFit
             smooth: true
             asynchronous: true
@@ -181,42 +187,67 @@ ColumnLayout {
           ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 2
+            Layout.minimumWidth: 0
+            spacing: Style.marginXXS
 
             NText {
-              text: root.getAppName(modelData)
+              Layout.fillWidth: true
+              text: root.getAppName(appRow.modelData)
+              elide: Text.ElideRight
               font.weight: Style.fontWeightMedium
               pointSize: Style.fontSizeM
             }
 
             NText {
-              text: modelData
+              Layout.fillWidth: true
+              text: appRow.modelData
+              elide: Text.ElideRight
               color: Color.mOnSurfaceVariant
               pointSize: Style.fontSizeXS
             }
           }
 
-          // Move Up
-          NIconButton {
-            icon: "chevron-up"
-            tooltipText: I18n.tr("common.move-up")
-            enabled: index > 0
-            onClicked: root.moveApp(index, index - 1)
-          }
+          // A fixed, compact trailing group keeps all actions with their app.
+          RowLayout {
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+            Layout.fillWidth: false
+            spacing: Style.marginXXS
 
-          // Move Down
-          NIconButton {
-            icon: "chevron-down"
-            tooltipText: I18n.tr("common.move-down")
-            enabled: index < root.pinnedApps.length - 1
-            onClicked: root.moveApp(index, index + 1)
-          }
+            NIconButton {
+              icon: "chevron-up"
+              baseSize: Style.baseWidgetSize * 0.85
+              customRadius: Style.iRadiusS
+              colorBg: "transparent"
+              colorBorder: "transparent"
+              colorFg: Color.mOnSurfaceVariant
+              tooltipText: I18n.tr("common.move-up")
+              enabled: appRow.index > 0
+              onClicked: root.moveApp(appRow.index, appRow.index - 1)
+            }
 
-          // Remove
-          NIconButton {
-            icon: "trash"
-            tooltipText: I18n.tr("common.remove")
-            onClicked: root.removeApp(index)
+            NIconButton {
+              icon: "chevron-down"
+              baseSize: Style.baseWidgetSize * 0.85
+              customRadius: Style.iRadiusS
+              colorBg: "transparent"
+              colorBorder: "transparent"
+              colorFg: Color.mOnSurfaceVariant
+              tooltipText: I18n.tr("common.move-down")
+              enabled: appRow.index < root.pinnedApps.length - 1
+              onClicked: root.moveApp(appRow.index, appRow.index + 1)
+            }
+
+            NIconButton {
+              Layout.leftMargin: Style.marginS
+              icon: "trash"
+              baseSize: Style.baseWidgetSize * 0.85
+              customRadius: Style.iRadiusS
+              colorBg: "transparent"
+              colorBorder: "transparent"
+              colorFg: Color.mOnSurfaceVariant
+              tooltipText: I18n.tr("common.remove")
+              onClicked: root.removeApp(appRow.index)
+            }
           }
         }
       }

@@ -86,8 +86,10 @@ apagar rebinds: `python3 Scripts/python/umbriel_keybinds.py provision`.
 Em **Configurações → Barra → Edge Shelf**, ative a prateleira com a barra
 **Emoldurada**. Ela fica oculta em outros estilos sem apagar os favoritos.
 Adicione ou remova apps pelo menu de contexto do Launcher; reordene ou remova
-em Configurações. Na moldura esquerda, passe o cursor para revelar o handle;
-clique ou arraste-o brevemente para a direita para abrir. O botão **+** abre o
+em Configurações, onde cada app reúne ícone, nome, identificação e ações compactas.
+Na moldura esquerda, passe o cursor para revelar uma deformação suave da própria
+Frame, com um chevron discreto; hover não abre a prateleira. Clique ou arraste-o
+brevemente para a direita para expandir essa mesma superfície e abrir. O botão **+** abre o
 Launcher. Escape, clique fora ou outro clique no handle fecham a prateleira.
 
 O clique num app adota sua única janela existente ou lança uma nova instância.

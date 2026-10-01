@@ -94,6 +94,7 @@ PanelWindow {
       edgeShelf.closeShelf();
   }
   readonly property bool edgeShelfOpen: edgeShelf.available && edgeShelf.opened
+  readonly property Item edgeShelfVisual: edgeShelf
 
   color: {
     if (dimmerOpacity > 0 && isPanelOpen && !isPanelClosing) {
@@ -153,8 +154,8 @@ PanelWindow {
       id: handleMaskRegion
       x: 0
       y: edgeShelf.shelfY + (edgeShelf.shelfHeight - height) / 2
-      width: edgeShelf.available ? edgeShelf.frameLeft : 0
-      height: edgeShelf.available ? Math.min(edgeShelf.shelfHeight, 128) : 0
+      width: edgeShelf.available ? edgeShelf.handleHitWidth : 0
+      height: edgeShelf.available ? edgeShelf.handleHeight : 0
       intersection: Intersection.Subtract
     }
 

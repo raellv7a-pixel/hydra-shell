@@ -73,6 +73,17 @@ ShapePath {
   readonly property real holeWidth: screenWidth - (barPosition === "left" || barPosition === "right" ? (barWidth + frameThickness) : (frameThickness * 2))
   readonly property real holeHeight: screenHeight - (barPosition === "top" || barPosition === "bottom" ? (barHeight + frameThickness) : (frameThickness * 2))
 
+  // One continuous contour for the Frame, proximity handle and revealed rail.
+  // This is shared by both AllBackgrounds opacity modes; no overlapping fills.
+  readonly property var edgeShelf: windowRoot?.edgeShelfVisual ?? null
+  readonly property real leftEdgeX: isRenderable ? (isFramed ? holeX : _nhX) : -3
+  readonly property real bulgeDepth: isRenderable && isFramed ? (edgeShelf?.frameBulgeDepth ?? 0) : 0
+  readonly property real bulgeHalfHeight: isRenderable && isFramed ? Math.max(_minR, Math.min(edgeShelf?.frameBulgeHalfHeight ?? Style.baseWidgetSize * 1.5, (holeHeight - frameRadius * 2) / 2)) : 0.225
+  readonly property real bulgeCenterY: isRenderable ? (isFramed ? Math.max(holeY + frameRadius + bulgeHalfHeight, Math.min(holeY + holeHeight - frameRadius - bulgeHalfHeight, edgeShelf?.frameCenterY ?? (holeY + holeHeight / 2))) : _nhY + 0.375) : -2.625
+  readonly property real bulgeBottom: bulgeCenterY + bulgeHalfHeight
+  readonly property real bulgeTop: bulgeCenterY - bulgeHalfHeight
+  readonly property real bulgeShoulder: isRenderable && isFramed ? Math.min(bulgeHalfHeight * 0.9, edgeShelf?.frameBulgeShoulder ?? bulgeHalfHeight * 0.85) : 0.1
+
   // Flatten corners if bar is too small (handle null bar)
   readonly property bool shouldFlatten: bar ? ShapeCornerHelper.shouldFlatten(barWidth, barHeight, radius) : false
   readonly property real effectiveRadius: shouldFlatten ? (bar ? ShapeCornerHelper.getFlattenedRadius(Math.min(barWidth, barHeight), radius) : 0) : radius
@@ -264,6 +275,50 @@ ShapePath {
     radiusX: root.isRenderable ? (root.isFramed ? root.frameRadius : 0) : 0
     radiusY: root.isRenderable ? (root.isFramed ? root.frameRadius : 0) : 0
     direction: PathArc.Clockwise
+  }
+
+  // Bottom shoulder: vertical Frame tangent -> horizontal -> vertical rail.
+  // At rest depth is zero and these non-degenerate curves form a straight edge.
+  PathLine {
+    x: root.leftEdgeX
+    y: root.bulgeBottom
+  }
+  PathCubic {
+    x: root.leftEdgeX + root.bulgeDepth / 2
+    y: root.bulgeBottom - root.bulgeShoulder / 2
+    control1X: root.leftEdgeX
+    control1Y: root.bulgeBottom - root.bulgeShoulder / 3
+    control2X: root.leftEdgeX + root.bulgeDepth / 4
+    control2Y: root.bulgeBottom - root.bulgeShoulder / 2
+  }
+  PathCubic {
+    x: root.leftEdgeX + root.bulgeDepth
+    y: root.bulgeBottom - root.bulgeShoulder
+    control1X: root.leftEdgeX + root.bulgeDepth * 0.75
+    control1Y: root.bulgeBottom - root.bulgeShoulder / 2
+    control2X: root.leftEdgeX + root.bulgeDepth
+    control2Y: root.bulgeBottom - root.bulgeShoulder * 2 / 3
+  }
+  PathLine {
+    x: root.leftEdgeX + root.bulgeDepth
+    y: root.bulgeTop + root.bulgeShoulder
+  }
+  // Mirrored top shoulder rejoins the original straight Frame edge.
+  PathCubic {
+    x: root.leftEdgeX + root.bulgeDepth / 2
+    y: root.bulgeTop + root.bulgeShoulder / 2
+    control1X: root.leftEdgeX + root.bulgeDepth
+    control1Y: root.bulgeTop + root.bulgeShoulder * 2 / 3
+    control2X: root.leftEdgeX + root.bulgeDepth * 0.75
+    control2Y: root.bulgeTop + root.bulgeShoulder / 2
+  }
+  PathCubic {
+    x: root.leftEdgeX
+    y: root.bulgeTop
+    control1X: root.leftEdgeX + root.bulgeDepth / 4
+    control1Y: root.bulgeTop + root.bulgeShoulder / 2
+    control2X: root.leftEdgeX
+    control2Y: root.bulgeTop + root.bulgeShoulder / 3
   }
 
   // Left edge
