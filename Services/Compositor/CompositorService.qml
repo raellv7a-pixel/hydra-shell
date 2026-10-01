@@ -363,6 +363,25 @@ Singleton {
     }
     return null;
   }
+  // Get active window
+  function getActiveWindow() {
+    if (backend && typeof backend.getActiveWindow === "function") {
+      return backend.getActiveWindow();
+    }
+    return getFocusedWindow();
+  }
+
+  // Get raw window list (as plain array, useful for geometry/snapping)
+  function getWindowList() {
+    if (backend && Array.isArray(backend.windows)) {
+      return backend.windows;
+    }
+    const result = [];
+    for (let i = 0; i < windows.count; i++) {
+      result.push(windows.get(i));
+    }
+    return result;
+  }
 
   // Get focused screen from compositor
   function getFocusedScreen() {

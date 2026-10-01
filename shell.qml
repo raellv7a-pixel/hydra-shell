@@ -140,6 +140,7 @@ ShellRoot {
       Dock {}
       Notification {}
       ToastOverlay {}
+      ScreenToolkitNative {}
       Loader {
         active: !CompositorService.isUmbriel
         sourceComponent: Component {

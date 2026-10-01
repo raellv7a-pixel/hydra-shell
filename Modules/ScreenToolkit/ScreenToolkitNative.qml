@@ -28,9 +28,10 @@ Item {
   property var installedLangs: []
   property bool transAvailable: false
   property string detectedRecorder: ""
-  readonly property string detectedCompositor: CompositorService.isHyprland ? "hyprland" : CompositorService.isNiri ? "niri" : "other"
+  readonly property string detectedCompositor: CompositorService.isHyprland ? "hyprland" : CompositorService.isNiri ? "niri" : CompositorService.isUmbriel ? "umbriel" : "other"
   readonly property bool isNiri: CompositorService.isNiri
   readonly property bool isHyprland: CompositorService.isHyprland
+  readonly property bool isUmbriel: CompositorService.isUmbriel
   readonly property string resultHex: colorPickerOverlay.resultHex
   readonly property string resultRgb: colorPickerOverlay.resultRgb
   readonly property string resultHsv: colorPickerOverlay.resultHsv
@@ -524,6 +525,28 @@ Item {
     interval: 360
     repeat: false
     onTriggered: {
+      if (root.isUmbriel) {
+        var activeWin = CompositorService.getActiveWindow();
+        if (!activeWin || !activeWin.w || !activeWin.h) {
+          root.isRunning = false;
+          root.activeTool = "";
+          ToastService.showError(pluginApi ? pluginApi.tr("messages.capture-failed") : "Capture failed");
+          return;
+        }
+        var gx = Number(activeWin.x !== undefined ? activeWin.x : (activeWin.position?.x || 0));
+        var gy = Number(activeWin.y !== undefined ? activeWin.y : (activeWin.position?.y || 0));
+        var gw = Number(activeWin.w || activeWin.width || 0);
+        var gh = Number(activeWin.h || activeWin.height || 0);
+        var screen = root._findScreenForPoint(gx, gy);
+        var regionStr = (gx - (screen?.x ?? 0)) + "," + (gy - (screen?.y ?? 0)) + " " + gw + "x" + gh;
+        var geomStr = gx + "," + gy + " " + gw + "x" + gh;
+        annotateRegionState._pendingRegion = regionStr;
+        annotateRegionState._pendingScreen = screen;
+        annotateProc.exec({
+                            command: ["bash", "-c", "grim -g \"" + geomStr + "\" /tmp/screen-toolkit-annotate.png 2>/dev/null"]
+                          });
+        return;
+      }
       annotateWinProc.exec({
                              command: [root._scriptsDir + "capture.sh", "annotate-window"]
                            });
@@ -845,7 +868,7 @@ Item {
       root.runAnnotateFullscreen();
     }
     function annotateWindow() {
-      if (root.isHyprland)
+      if (root.isHyprland || root.isUmbriel)
         root.runAnnotateActiveWindow();
     }
     function pin() {

@@ -108,28 +108,42 @@ Item {
     const next = [];
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[i] || {};
-      const workspace = entry.workspace || {};
-      const workspaceHandle = workspace.id !== undefined ? workspace.id : (workspace.index !== undefined ? workspace.index : (entry.workspace_id !== undefined ? entry.workspace_id : -1));
+      const workspaceHandle = typeof entry.workspace === "string"
+        ? entry.workspace
+        : (entry.workspace?.id !== undefined ? entry.workspace.id : (entry.workspace?.index !== undefined ? entry.workspace.index : (entry.workspace_id !== undefined ? entry.workspace_id : "")));
       const workspaceInfo = workspaceCache[String(workspaceHandle)];
       const workspaceId = workspaceInfo ? workspaceInfo.id : (Number.isFinite(Number(workspaceHandle)) ? Number(workspaceHandle) : -1);
       const rect = entry.geometry || {};
       const position = rect.position || rect;
-      const output = entry.output || workspace.output || (workspaceInfo ? workspaceInfo.output : "");
+      const output = entry.output || (typeof entry.workspace === "object" ? entry.workspace.output : "") || (workspaceInfo ? workspaceInfo.output : "");
+      const isFocused = entry.focused === true || entry.is_focused === true;
+      const isActive = entry.active === true || entry.is_active === true;
+      const x = Number(entry.x !== undefined ? entry.x : (position.x !== undefined ? position.x : 0));
+      const y = Number(entry.y !== undefined ? entry.y : (position.y !== undefined ? position.y : 0));
+      const w = Number(entry.w !== undefined ? entry.w : (rect.width !== undefined ? rect.width : (entry.width !== undefined ? entry.width : 0)));
+      const h = Number(entry.h !== undefined ? entry.h : (rect.height !== undefined ? rect.height : (entry.height !== undefined ? entry.height : 0)));
       next.push({
                   id: String(entry.id !== undefined ? entry.id : ""),
                   title: entry.title || "",
                   appId: entry.app_id || entry.appId || entry.appid || "",
                   workspaceId: workspaceId,
                   workspaceHandle: String(workspaceHandle),
-                  isFocused: entry.focused === true || entry.is_focused === true,
+                  isFocused: isFocused,
+                  isActive: isActive,
                   output: output || "",
+                  x: x,
+                  y: y,
+                  w: w,
+                  h: h,
                   position: {
-                    x: Number(position.x || 0),
-                    y: Number(position.y || 0)
+                    x: x,
+                    y: y
                   },
-                  width: Number(rect.width || entry.width || 0),
-                  height: Number(rect.height || entry.height || 0),
-                  handle: String(entry.id !== undefined ? entry.id : "")
+                  width: w,
+                  height: h,
+                  handle: String(entry.id !== undefined ? entry.id : ""),
+                  floating: entry.floating === true,
+                  scratchpad: entry.scratchpad || ""
                 });
     }
     windows = next;
@@ -161,6 +175,24 @@ Item {
         return;
       }
     }
+    for (let i = 0; i < windows.length; i++) {
+      if (windows[i].isActive) {
+        focusedWindowIndex = i;
+        return;
+      }
+    }
+  }
+
+  function getActiveWindow() {
+    for (let i = 0; i < windows.length; i++) {
+      if (windows[i].isFocused)
+        return windows[i];
+    }
+    for (let i = 0; i < windows.length; i++) {
+      if (windows[i].isActive)
+        return windows[i];
+    }
+    return null;
   }
 
   function publishOutputs() {

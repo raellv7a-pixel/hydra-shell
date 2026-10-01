@@ -4,6 +4,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import qs.Commons
 import qs.Services.UI
+import qs.Services.Compositor
 import qs.Widgets
 
 Item {
@@ -25,6 +26,10 @@ Item {
     root.windowRegions = [];
     root.windowRegionsFetched = false;
     root.isVisible = true;
+    if (CompositorService.isUmbriel) {
+      loadUmbrielWindows();
+      return;
+    }
     if (!root._isNiriChecked) {
       root._isNiriChecked = true;
       _envCheckProc.exec({
@@ -40,6 +45,35 @@ Item {
   function hide() {
     root.isVisible = false;
     root.activeScreen = null;
+  }
+  function loadUmbrielWindows() {
+    var wins = CompositorService.backend ? CompositorService.backend.windows : CompositorService.getWindowList();
+    var regions = [];
+    for (var i = 0; i < wins.length; i++) {
+      var w = wins[i];
+      if (!w)
+        continue;
+      if (w.scratchpad && w.scratchpad !== "")
+        continue;
+      if (w.workspaceHandle && CompositorService.backend && CompositorService.backend.workspaceCache) {
+        var wsInfo = CompositorService.backend.workspaceCache[String(w.workspaceHandle)];
+        if (wsInfo && !wsInfo.isActive)
+          continue;
+      }
+      var rw = Number(w.w !== undefined ? w.w : (w.width !== undefined ? w.width : 0));
+      var rh = Number(w.h !== undefined ? w.h : (w.height !== undefined ? w.height : 0));
+      if (rw < 10 || rh < 10)
+        continue;
+      regions.push({
+                     x: Number(w.x !== undefined ? w.x : (w.position?.x || 0)),
+                     y: Number(w.y !== undefined ? w.y : (w.position?.y || 0)),
+                     w: rw,
+                     h: rh,
+                     title: (w.title || "").trim()
+                   });
+    }
+    root.windowRegions = regions;
+    root.windowRegionsFetched = true;
   }
   Process {
     id: _envCheckProc
@@ -146,7 +180,7 @@ Item {
       function _winAt(px, py) {
         var regions = root.windowRegions;
         var sx = win.screen?.x ?? 0, sy = win.screen?.y ?? 0;
-        for (var i = 0; i < regions.length; i++) {
+        for (var i = regions.length - 1; i >= 0; i--) {
           var r = regions[i];
           var lx = r.x - sx, ly = r.y - sy;
           if (px >= lx && px <= lx + r.w && py >= ly && py <= ly + r.h)
