@@ -27,11 +27,14 @@ Item {
   // unavailable (video — no frame extraction today), or on failure; paletteColor()
   // falls back to the live Color.* singleton in all those cases.
   property var candidatePalette: null
+  property int paletteRevision: 0
+  property var paletteOverride: null
 
   function paletteColor(key) {
     var mode = root.previewDarkMode ? "dark" : "light";
-    if (candidatePalette && candidatePalette[mode] && candidatePalette[mode][key] !== undefined) {
-      return candidatePalette[mode][key];
+    const palette = paletteOverride || candidatePalette;
+    if (palette && palette[mode] && palette[mode][key] !== undefined) {
+      return palette[mode][key];
     }
     return Color[key];
   }
@@ -53,6 +56,7 @@ Item {
   }
 
   function _requestCandidatePalette() {
+    const revision = ++paletteRevision;
     root.candidatePalette = null;
     if (root.isVideoPath || root.wallpaperPath === "") {
       return;
@@ -62,10 +66,10 @@ Item {
     if (!root.wallpaperPath.startsWith("/")) {
       return;
     }
-    TemplateProcessor.previewWallpaperPalette(root.wallpaperPath, TemplateProcessor.getSchemeType(), function (result) {
+    TemplateProcessor.previewWallpaperPalette(root.wallpaperPath, TemplateProcessor.getRecipe(), function (result) {
       // `root` may already be null here: the panel's content Loader can destroy
       // this item (e.g. panel closed) before the async palette read returns.
-      if (!root || !result || root.wallpaperPath === "") {
+      if (!root || revision !== root.paletteRevision || !result || root.wallpaperPath === "") {
         return;
       }
       root.candidatePalette = {
@@ -86,10 +90,31 @@ Item {
   }
 
   onWallpaperPathChanged: {
+    paletteRevision++;
     refreshVideoSource();
     paletteDebounceTimer.restart();
   }
   Component.onCompleted: refreshVideoSource()
+
+  Connections {
+    target: Settings.data.colorSchemes
+    function onGenerationMethodChanged() {
+      root.paletteRevision++;
+      paletteDebounceTimer.restart();
+    }
+    function onSeedIndexChanged() {
+      root.paletteRevision++;
+      paletteDebounceTimer.restart();
+    }
+    function onSurfaceStyleChanged() {
+      root.paletteRevision++;
+      paletteDebounceTimer.restart();
+    }
+    function onMaterialSpecChanged() {
+      root.paletteRevision++;
+      paletteDebounceTimer.restart();
+    }
+  }
 
   function refreshVideoSource() {
     videoSourceTimer.stop();

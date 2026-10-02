@@ -15,12 +15,15 @@ Singleton {
   // a generation call further down the same code path, so reacting to it too
   // would spawn a redundant, duplicate generation pass.
   property bool _applyingSmartDecision: false
+  property bool recipeUpdateInProgress: false
 
   Connections {
     target: WallpaperService
 
     // When the wallpaper changes, regenerate theme if necessary
     function onWallpaperChanged(screenName, path) {
+      if (root.recipeUpdateInProgress)
+        return;
       var effectiveMonitor = Settings.data.colorSchemes.monitorForColors;
       if (effectiveMonitor === "" || effectiveMonitor === undefined) {
         effectiveMonitor = Screen.name;
@@ -36,7 +39,7 @@ Singleton {
       if (Settings.data.colorSchemes.schedulingMode === "wallpaper") {
         const wp = WallpaperService.getWallpaper(effectiveMonitor);
         if (wp) {
-          TemplateProcessor.previewWallpaperPalette(wp, TemplateProcessor.getSchemeType(), function (result) {
+          TemplateProcessor.previewWallpaperPalette(wp, TemplateProcessor.getRecipe(), function (result) {
             if (result && result.recommendedMode) {
               root._applyingSmartDecision = true;
               Settings.data.colorSchemes.darkMode = (result.recommendedMode === "dark");
@@ -67,7 +70,7 @@ Singleton {
   Connections {
     target: Settings.data.colorSchemes
     function onDarkModeChanged() {
-      if (root._applyingSmartDecision)
+      if (root._applyingSmartDecision || root.recipeUpdateInProgress)
         return;
       Logger.d("AppThemeService", "Detected dark mode change");
       generate();
@@ -79,11 +82,23 @@ Singleton {
       }
     }
     function onGenerationMethodChanged() {
+      if (root.recipeUpdateInProgress)
+        return;
       Logger.d("AppThemeService", "Generation method changed to:", Settings.data.colorSchemes.generationMethod);
       generate();
     }
     function onSurfaceStyleChanged() {
+      if (root.recipeUpdateInProgress)
+        return;
       if (Settings.data.colorSchemes.useWallpaperColors)
+        generateFromWallpaper();
+    }
+    function onSeedIndexChanged() {
+      if (!root.recipeUpdateInProgress && Settings.data.colorSchemes.useWallpaperColors)
+        generateFromWallpaper();
+    }
+    function onMaterialSpecChanged() {
+      if (!root.recipeUpdateInProgress && Settings.data.colorSchemes.useWallpaperColors)
         generateFromWallpaper();
     }
   }
@@ -105,6 +120,8 @@ Singleton {
   }
 
   function generate() {
+    if (root.recipeUpdateInProgress)
+      return;
     if (Settings.data.colorSchemes.useWallpaperColors) {
       generateFromWallpaper();
     } else {
@@ -114,6 +131,8 @@ Singleton {
   }
 
   function generateFromWallpaper() {
+    if (root.recipeUpdateInProgress)
+      return;
     var effectiveMonitor = Settings.data.colorSchemes.monitorForColors;
     if (effectiveMonitor === "" || effectiveMonitor === undefined) {
       effectiveMonitor = Screen.name;

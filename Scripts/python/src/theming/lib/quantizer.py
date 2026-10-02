@@ -761,27 +761,15 @@ def score_colors(
     return [argb for argb, hct in chosen_colors]
 
 
-def extract_source_color(
+def extract_source_candidates(
     pixels: List[Tuple[int, int, int]],
     fallback_color: int = FALLBACK_COLOR_ARGB,
-) -> int:
-    """
-    Extract the primary source color from image pixels.
-
-    Uses Wu + WSMeans quantizer (QuantizerCelebi) + Score algorithm matching
-    matugen/material-color-utilities.
-
-    Args:
-        pixels: List of (R, G, B) tuples
-        fallback_color: Color to return if extraction fails
-
-    Returns:
-        Source color in ARGB format
-    """
+) -> List[int]:
+    """Return up to four real Wu/WSMeans candidates in Score ranking order."""
     from .hct import Cam16
 
     if not pixels:
-        return fallback_color
+        return [fallback_color]
 
     # Quantize using Wu + WSMeans (QuantizerCelebi pipeline like matugen)
     wu_result = quantize_wu(pixels, max_colors=128)
@@ -807,7 +795,15 @@ def extract_source_color(
     # Score and rank colors
     ranked = score_colors(filtered, desired=4, fallback_color=fallback_color)
 
-    return ranked[0] if ranked else fallback_color
+    return ranked or [fallback_color]
+
+
+def extract_source_color(
+    pixels: List[Tuple[int, int, int]],
+    fallback_color: int = FALLBACK_COLOR_ARGB,
+) -> int:
+    """Extract the highest-ranked Material source color."""
+    return extract_source_candidates(pixels, fallback_color)[0]
 
 
 def source_color_to_rgb(argb: int) -> Tuple[int, int, int]:

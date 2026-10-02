@@ -21,8 +21,8 @@
 #      — AUR only has "noctalia-git", which is the unrelated, incompatible
 #      Hydra v5 rewrite. Building from source is the only correct path
 #      (this is also what nix/package.nix does under Nix).
-#   3. Bootstraps an AUR helper (paru) only if genuinely needed, and installs
-#      the handful of polish packages that only exist on the AUR.
+#   3. Bootstraps an AUR helper (paru) if needed for the required Material 2025
+#      backend, then installs optional polish packages unless --skip-optional.
 #   4. Enables the system services the shell talks to over D-Bus
 #      (NetworkManager, bluetooth, power-profiles-daemon).
 #   5. Clones/updates the hydra-shell repo itself into the path Quickshell's
@@ -34,7 +34,7 @@
 #
 # Idempotent: safe to re-run. By default it skips rebuilding the qs engine if
 # it's already on PATH (pass --force-engine to rebuild after an upstream
-# update) and skips AUR/optional extras with --skip-optional.
+# update) and skips only optional AUR extras with --skip-optional.
 set -euo pipefail
 
 # ── flags ─────────────────────────────────────────────────────────────────
@@ -176,8 +176,13 @@ else
   sudo ln -sf /usr/local/bin/qs /usr/bin/qs
 fi
 
-# ── 3. AUR extras (paru bootstrap only if actually needed) ─────────────────
-if ! $SKIP_OPTIONAL; then
+# ── 3. Required Material 2025 backend and optional AUR extras ──────────────
+# materialyoucolor v2 does not implement the 2025 spec. This is required even
+# with --skip-optional; install-time downloads only, never during generation.
+material_backend_ready() {
+  python3 -c 'from importlib.metadata import version; from materialyoucolor.dynamiccolor.dynamic_scheme import DynamicScheme; from materialyoucolor.dynamiccolor.material_dynamic_colors import MaterialDynamicColors; v = tuple(map(int, version("materialyoucolor").split(".")[:3])); assert (3, 0, 2) <= v < (4, 0, 0)' 2>/dev/null
+}
+if ! material_backend_ready || ! $SKIP_OPTIONAL; then
   if ! command -v paru >/dev/null 2>&1 && ! command -v yay >/dev/null 2>&1; then
     log "No AUR helper found — bootstrapping paru"
     sudo pacman -S --needed --noconfirm base-devel git
@@ -187,13 +192,19 @@ if ! $SKIP_OPTIONAL; then
     rm -rf "$tmp"
   fi
   AUR_HELPER="$(command -v paru || command -v yay)"
-
-  AUR_PACKAGES=(wl-screenrec-git papirus-folders) # preferred recorder + optional icon color model
-  if lspci 2>/dev/null | grep -qi nvidia; then
-    AUR_PACKAGES+=(nvibrant-bin) # NVIDIA digital vibrance control
+  if ! material_backend_ready; then
+    log "Installing required Material 2025 backend"
+    "$AUR_HELPER" -S --needed --noconfirm python-materialyoucolor3
+    material_backend_ready || die "materialyoucolor >=3.0.2,<4 with Material 2025 support is required."
   fi
-  log "Installing AUR extras: ${AUR_PACKAGES[*]}"
-  "$AUR_HELPER" -S --needed --noconfirm "${AUR_PACKAGES[@]}"
+  if ! $SKIP_OPTIONAL; then
+    AUR_PACKAGES=(wl-screenrec-git papirus-folders) # preferred recorder + optional icon color model
+    if lspci 2>/dev/null | grep -qi nvidia; then
+      AUR_PACKAGES+=(nvibrant-bin) # NVIDIA digital vibrance control
+    fi
+    log "Installing AUR extras: ${AUR_PACKAGES[*]}"
+    "$AUR_HELPER" -S --needed --noconfirm "${AUR_PACKAGES[@]}"
+  fi
 fi
 
 # ── 4. system services the shell talks to over D-Bus ───────────────────────

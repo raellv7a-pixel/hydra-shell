@@ -51,13 +51,15 @@ from pathlib import Path
 
 # Import from lib package
 from lib import (
-    read_image, ImageReadError, extract_palette, generate_theme,
+    read_image, ImageReadError, extract_palette,
     TemplateRenderer, expand_predefined_scheme,
-    extract_source_color, source_color_to_rgb, Color, is_dark,
+    extract_source_candidates, source_color_to_rgb, Color, is_dark,
 )
 from lib.scheme import inject_terminal_colors
 from lib.image import read_grayscale_sample
 from lib.tinted import apply_surface_tint, grayscale_score, surface_tint_strength
+from lib.renderer import resolve_template_path
+from lib.terminal import derive_terminal_roles
 
 
 def parse_args() -> argparse.Namespace:
@@ -86,7 +88,7 @@ Examples:
     # Scheme type selection
     parser.add_argument(
         '--scheme-type',
-        choices=['tonal-spot', 'content', 'fruit-salad', 'rainbow', 'monochrome', 'vibrant', 'faithful', 'dysfunctional', 'muted'],
+        choices=['smart', 'tonal-spot', 'content', 'expressive', 'fidelity', 'neutral', 'm3-vibrant', 'fruit-salad', 'rainbow', 'monochrome', 'vibrant', 'faithful', 'dysfunctional', 'muted'],
         default='tonal-spot',
         help='Color scheme type (default: tonal-spot)'
     )
@@ -124,7 +126,7 @@ Examples:
 
     parser.add_argument(
         '--config', '-c',
-        type=Path,
+        type=resolve_template_path,
         help='Path to TOML configuration file with template definitions'
     )
     parser.add_argument(
@@ -152,6 +154,9 @@ Examples:
         default='classic',
         help='Surface finish for generated wallpaper palettes; authored schemes stay unchanged'
     )
+    parser.add_argument('--seed-index', default='0', help='Ranked Material seed index; invalid values use candidate 0')
+    parser.add_argument('--material-spec', choices=['2025', '2021'], default='2025',
+                        help='Material spec; unsupported 2025 variants retain Hydra 2021')
 
     return parser.parse_args()
 
@@ -179,6 +184,9 @@ def main() -> int:
         modes = ["dark", "light"]
 
     tint_applied = False
+    candidates = []
+    seed_index = 0
+    scheme_type = args.scheme_type
 
     # Path 1: Predefined scheme (--scheme flag)
     if args.scheme:
@@ -266,7 +274,7 @@ def main() -> int:
 
             # M3 schemes use Triangle filter (matches matugen), others use Box
             # (sharper downscale preserves distinct color regions for k-means)
-            m3_schemes = {"tonal-spot", "content", "fruit-salad", "rainbow", "monochrome"}
+            m3_schemes = {"smart", "tonal-spot", "content", "expressive", "fidelity", "neutral", "m3-vibrant", "fruit-salad", "rainbow", "monochrome"}
             resize_filter = "Triangle" if scheme_type in m3_schemes else "Box"
 
             try:
@@ -277,6 +285,20 @@ def main() -> int:
             except Exception as e:
                 print(f"Unexpected error reading image: {e}", file=sys.stderr)
                 return 1
+
+            score = None
+            if scheme_type == 'smart' or (args.surface_style == 'tinted' and surface_tint_strength(scheme_type) > 0):
+                try:
+                    analysis_pixels = (
+                        pixels if args.image.suffix.lower() in {'.mp4', '.webm', '.mkv', '.mov'}
+                        else read_grayscale_sample(args.image)
+                    )
+                    score = grayscale_score(analysis_pixels)
+                except ImageReadError as e:
+                    print(f"Error reading image: {e}", file=sys.stderr)
+                    return 1
+            if scheme_type == 'smart':
+                scheme_type = 'monochrome' if score <= 0.035 else 'content'
 
             # Extract palette based on scheme type:
             # - M3 schemes (tonal-spot, fruit-salad, rainbow, content): Use Wu quantizer + Score
@@ -302,7 +324,14 @@ def main() -> int:
                 palette = extract_palette(pixels, k=5, scoring="muted")
             else:
                 # Wu quantizer + Score algorithm (matches matugen)
-                source_argb = extract_source_color(pixels)
+                ranked = extract_source_candidates(pixels)
+                candidates = [{"index": i, "hex": f"#{argb & 0xffffff:06X}"} for i, argb in enumerate(ranked)]
+                try:
+                    requested_seed = int(args.seed_index)
+                    seed_index = requested_seed if 0 <= requested_seed < len(ranked) else 0
+                except (ValueError, TypeError):
+                    seed_index = 0
+                source_argb = ranked[seed_index]
                 r, g, b = source_color_to_rgb(source_argb)
                 palette = [Color(r, g, b)]
 
@@ -315,31 +344,29 @@ def main() -> int:
             # palette[0] is the dominant/source color for every scheme_type branch.
             recommended_mode = "light" if not is_dark(palette[0]) else "dark"
 
-            # Post-processing is orthogonal to the palette engine. Studio's
-            # grayscale guard uses a separate 128px RGBA Triangle thumbnail.
-            # Videos reuse Hydra's existing representative RGB frame.
-            score = None
-            if args.surface_style == 'tinted' and surface_tint_strength(scheme_type) > 0:
-                try:
-                    analysis_pixels = (
-                        pixels if args.image.suffix.lower() in {'.mp4', '.webm', '.mkv', '.mov'}
-                        else read_grayscale_sample(args.image)
-                    )
-                    score = grayscale_score(analysis_pixels)
-                except ImageReadError as e:
-                    print(f"Error reading image: {e}", file=sys.stderr)
-                    return 1
 
             # Generate theme for each mode
+            from lib.material_spec import generate_spec_palette, MaterialSpecError
             for mode in modes:
-                result[mode] = generate_theme(palette, mode, scheme_type)
+                try:
+                    result[mode] = generate_spec_palette(palette, mode, scheme_type, args.material_spec)
+                except MaterialSpecError as error:
+                    print(str(error), file=sys.stderr)
+                    return 1
                 tint_applied |= apply_surface_tint(result[mode], scheme_type, args.surface_style, score)
 
     # Output JSON. `_recommended_mode` is metadata, not a mode's color dict — keep it
     # out of `result` itself, since `result` is reused below as TemplateRenderer's
     # theme_data, which assumes every top-level value is a {color_name: hex} dict.
     effective_style = 'tinted' if tint_applied else 'classic'
-    output_data = dict(result, _surface_style=effective_style)
+    output_data = dict(result, _surface_style=effective_style,
+                       _source_candidates=candidates, _seed_index=seed_index,
+                       _effective_scheme_type=scheme_type)
+    from lib.material_spec import effective_material_spec
+    output_data['_material_spec'] = args.material_spec
+    output_data['_effective_material_spec'] = (
+        effective_material_spec(scheme_type, args.material_spec) if candidates else None
+    )
     if recommended_mode is not None:
         output_data['_recommended_mode'] = recommended_mode
     json_output = json.dumps(output_data, indent=2)
@@ -357,7 +384,11 @@ def main() -> int:
     # Process templates
     if args.render or args.config:
         image_path = str(args.image) if args.image else None
-        renderer = TemplateRenderer(result, default_mode=args.default_mode, image_path=image_path, scheme_type=args.scheme_type, surface_style=effective_style)
+        # Derive only for templates, after surfaces. Public Material JSON stays intact.
+        template_roles = {mode: derive_terminal_roles(roles, mode) for mode, roles in result.items()}
+        # Actual payload modes, not the argparse --both default, own this choice.
+        template_mode = next(iter(template_roles)) if len(template_roles) == 1 else args.default_mode
+        renderer = TemplateRenderer(template_roles, default_mode=template_mode, image_path=image_path, scheme_type=args.scheme_type, surface_style=effective_style)
 
         if args.render:
             for render_spec in args.render:
@@ -366,8 +397,8 @@ def main() -> int:
                     continue
 
                 input_str, output_str = render_spec.split(':', 1)
-                input_path = Path(input_str).expanduser()
-                output_path = Path(output_str).expanduser()
+                input_path = resolve_template_path(input_str)
+                output_path = resolve_template_path(output_str)
 
                 if not input_path.exists():
                     print(f"Error: Template not found: {input_path}", file=sys.stderr)

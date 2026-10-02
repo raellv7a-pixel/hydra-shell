@@ -61,12 +61,8 @@ Singleton {
     for (var i = 0; i < TemplateRegistry.discordClients.length; i++) {
       var client = TemplateRegistry.discordClients[i];
       var clientName = client.name;
-      var configPath = client.configPath;
-
-      // Use the actual config path from the client, removing ~ prefix
-      var checkPath = configPath.startsWith("~") ? configPath.substring(2) : configPath.substring(1);
-
-      scriptParts.push("if [ -d \"$HOME/" + checkPath + "\" ]; then available_clients=\"$available_clients " + clientName + "\"; fi;");
+      var checkPath = TemplateRegistry.resolvePath(client.configPath).replace(/'/g, "'\\''");
+      scriptParts.push("if [ -d '" + checkPath + "' ]; then available_clients=\"$available_clients " + clientName + "\"; fi;");
     }
 
     scriptParts.push("echo \"$available_clients\"");

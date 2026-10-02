@@ -18,6 +18,7 @@ Supports:
   {name}, on_{name}, {name}_container, on_{name}_container tokens
 """
 
+import os
 import re
 import sys
 from dataclasses import dataclass, field
@@ -31,6 +32,26 @@ except ImportError:
 
 from .color import Color, find_closest_color
 from .hct import Hct
+
+
+def resolve_template_path(value: Union[str, Path]) -> Path:
+    """Expand only a leading XDG home token and tilde; never evaluate shell text."""
+    text = os.fspath(value)
+    defaults = {
+        "XDG_CONFIG_HOME": ".config",
+        "XDG_DATA_HOME": ".local/share",
+        "XDG_STATE_HOME": ".local/state",
+        "XDG_CACHE_HOME": ".cache",
+    }
+    match = re.match(r'^\$(XDG_(?:CONFIG|DATA|STATE|CACHE)_HOME)(?=/|$)', text)
+    if match:
+        key = match.group(1)
+        root = os.environ.get(key, "")
+        # XDG requires absolute paths; empty or relative values use the default.
+        if not os.path.isabs(root):
+            root = str(Path.home() / defaults[key])
+        text = root + text[match.end():]
+    return Path(text).expanduser()
 
 
 # --- Node Types for the template AST ---
@@ -123,6 +144,7 @@ class TemplateRenderer:
         "set_alpha": 1,
         "set_lightness": 1,
         "set_hue": 1,
+        "rotate_hue": 1,
         "set_saturation": 1,
         "set_red": 1,
         "set_green": 1,
@@ -911,6 +933,9 @@ class TemplateRenderer:
         elif filter_name == "set_hue":
             new_h = num_arg % 360
             result = Color.from_hsl(new_h, s, l)
+        elif filter_name == "rotate_hue":
+            # Normalize first so equivalent angles don't differ by RGB rounding.
+            result = Color.from_hsl((h + num_arg % 360.0) % 360.0, s, l)
         elif filter_name == "set_saturation":
             new_s = max(0.0, min(1.0, num_arg / 100.0))
             result = Color.from_hsl(h, new_s, l)
@@ -983,13 +1008,13 @@ class TemplateRenderer:
         success = False
         wrote = False
         try:
-            template_text = input_path.read_text()
+            template_text = resolve_template_path(input_path).read_text()
             rendered_text = self.render(template_text)
 
             if self._error_count > 0:
                 print(f"Skipping {output_path}: template has {self._error_count} error(s)", file=sys.stderr)
             else:
-                out = Path(output_path).expanduser()
+                out = resolve_template_path(output_path)
                 out.parent.mkdir(parents=True, exist_ok=True)
                 skip_write = False
                 if out.is_file():
@@ -1149,7 +1174,7 @@ class TemplateRenderer:
             return
 
         try:
-            with open(config_path, "rb") as f:
+            with open(resolve_template_path(config_path), "rb") as f:
                 data = tomllib.load(f)
 
             # Apply custom colors before rendering templates
@@ -1167,6 +1192,11 @@ class TemplateRenderer:
                     print(f"Warning: Template '{name}' missing input_path or output_path", file=sys.stderr)
                     continue
 
+                # Check before rendering, mkdir or hooks. The guard is never created.
+                requires_path = template.get("requires_path")
+                if requires_path and not resolve_template_path(requires_path).exists():
+                    continue
+
                 # Handle closest_color if configured (matugen-compatible)
                 # Reset for each template to avoid state pollution between templates
                 self.closest_color = ""
@@ -1177,18 +1207,18 @@ class TemplateRenderer:
                     rendered_compare_to = self.render(compare_to)
                     self.closest_color = find_closest_color(rendered_compare_to, colors_to_compare)
 
-                ok, wrote = self.render_file(Path(input_path).expanduser(), Path(output_path).expanduser())
+                ok, wrote = self.render_file(resolve_template_path(input_path), resolve_template_path(output_path))
                 if not ok:
                     continue
 
-                out_path = Path(output_path).expanduser()
+                out_path = resolve_template_path(output_path)
                 # Hooks are skipped when the rendered file is unchanged (avoids mtime noise).
                 # Kitty setups often use `include ./current-theme.conf` pointing at the live
                 # theme; that file is created in the post_hook. If hydra.conf is unchanged
                 # (e.g. wallpaper palette tweak that doesn't affect terminal colors), the hook
                 # never ran and current-theme.conf never appears — while predefined schemes
                 # usually change bytes so hooks always run. Force hooks when that include is missing.
-                force_hooks = name == "kitty" and self._kitty_needs_current_theme_link(out_path)
+                force_hooks = (name == "kitty" and self._kitty_needs_current_theme_link(out_path)) or template.get("hook_on_unchanged", False)
                 if not wrote and not force_hooks:
                     continue
 
@@ -1213,7 +1243,16 @@ class TemplateRenderer:
                         post_hook = self._substitute_closest_color(post_hook)
                     post_hook = self.render(post_hook)
                     try:
-                        subprocess.run(post_hook, shell=True, check=False)
+                        if template.get("hook_async", False):
+                            # No inherited capture pipes: the palette process can exit now.
+                            process = subprocess.Popen(post_hook, shell=True, start_new_session=True,
+                                                       stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                                       stderr=subprocess.DEVNULL)
+                            # Reap detached children in long-lived renderer users, without waiting.
+                            import threading
+                            threading.Thread(target=process.wait, daemon=True).start()
+                        else:
+                            subprocess.run(post_hook, shell=True, check=False)
                     except Exception as e:
                         print(f"Error running post_hook for {name}: {e}", file=sys.stderr)
 

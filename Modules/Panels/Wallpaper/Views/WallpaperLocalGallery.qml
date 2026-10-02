@@ -304,8 +304,7 @@ Item {
   }
 
   function _applyWallpaper(path, screenName, appearance) {
-    WallpaperService.changeWallpaper(path, screenName, appearance);
-    WallpaperService.applyFavoriteTheme(path, screenName, appearance);
+    WallpaperService.changeWallpaperWithFavorite(path, screenName, appearance);
   }
 
   function toggleFavorite(path) {

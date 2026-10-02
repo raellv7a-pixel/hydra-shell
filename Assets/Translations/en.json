@@ -1061,6 +1061,9 @@
       "widgets-title": "Widgets positioning"
     },
     "color-scheme": {
+      "material-spec-label": "Material Spec",
+      "material-spec-description": "2025 uses updated Tonal Spot, M3 Vibrant, Expressive and Neutral. Other models retain the Hydra 2021 engine.",
+      "material-spec-fallback": "This model uses the historical Material 2021 engine under either spec.",
       "color-source-use-wallpaper-colors-description": "Generate color schemes from your wallpaper. Automatically extracts colors to create a cohesive theme.",
       "color-source-use-wallpaper-colors-label": "Use wallpaper colors",
       "dark-mode-mode-description": "Enables automatic switching between Light and Dark Mode.",
@@ -1089,6 +1092,11 @@
       "download-success-title": "Color scheme downloaded",
       "download-title": "Download Color Schemes",
       "method-description": {
+        "smart": "Automatically selects Content or Monochrome from the wallpaper.",
+        "expressive": "Creative Material hue rotations with colorful tonal palettes.",
+        "fidelity": "Preserves source hue and chroma with a temperature-complement tertiary.",
+        "neutral": "Low-chroma Material palettes without RGB desaturation.",
+        "m3-vibrant": "Maximum Material primary chroma with harmonious rotated accents.",
         "content": "Material Design scheme with high-fidelity color extraction that closely matches the source content's actual colors.",
         "dysfunctional": "Like Faithful but picks the second most dominant color family as primary.",
         "faithful": "Attempts to stay close to the source color while still generating a harmonious palette.",
@@ -2707,6 +2715,13 @@
   },
   "wallpaper": {
     "palette": {
+      "generation": "Generated recipe",
+      "seed": "Source color",
+      "generating": "Generating this wallpaper’s palette…",
+      "local-required": "Select or download a local wallpaper to generate its palette.",
+      "legacy-extraction": "Hydra legacy methods use their own extraction; Material seed selection is unavailable.",
+      "recipe-note": "Model builds the palette; surface style finishes its surfaces. Regenerating discards manual edits.",
+      "apply-recipe": "Use recipe on active wallpaper",
       "cancel-preview": "Cancel preview",
       "copied": "{label} ({color}) copied to the clipboard.",
       "copy-color": "Copy hexadecimal color",
@@ -2719,7 +2734,7 @@
       "preview-active": "Live preview is active. Cancel restores the colors that were in use before previewing.",
       "preview-inactive": "Preview is off. Changes are not applied until you preview or save.",
       "recalculate": "Recalculate colors",
-      "reset": "Reset from current scheme",
+      "reset": "Reset manual edits",
       "roles": {
         "error": "Error",
         "hover": "Hover",

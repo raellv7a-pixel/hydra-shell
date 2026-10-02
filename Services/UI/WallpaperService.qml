@@ -1445,6 +1445,9 @@ Singleton {
                   ,
       "useWallpaperColors": Settings.data.colorSchemes.useWallpaperColors,
       "generationMethod": Settings.data.colorSchemes.generationMethod,
+      "surfaceStyle": Settings.data.colorSchemes.surfaceStyle,
+      "seedIndex": Settings.data.colorSchemes.seedIndex,
+      "materialSpec": Settings.data.colorSchemes.materialSpec,
       "paletteColors": [Color.mPrimary.toString(), Color.mSecondary.toString(), Color.mTertiary.toString(), Color.mError.toString()]
     };
   }
@@ -1541,8 +1544,7 @@ Singleton {
       } else {
         scr = undefined;
       }
-      root.changeWallpaper(path, scr, slot);
-      root.applyFavoriteTheme(path, scr, slot);
+      root.changeWallpaperWithFavorite(path, scr, slot);
     }
 
     favoritesChanged(path);
@@ -1561,22 +1563,22 @@ Singleton {
       favApp = _favoriteAppearanceSlot(favorite);
     }
     var targetDark = favApp === "dark";
+    const previousBatch = AppThemeService.recipeUpdateInProgress;
 
-    var generationMethodChanging = Settings.data.colorSchemes.generationMethod !== favorite.generationMethod;
-    var darkModeChanging = Settings.data.colorSchemes.darkMode !== targetDark;
-    var useWallpaperColorsChanging = Settings.data.colorSchemes.useWallpaperColors !== favorite.useWallpaperColors;
-
-    Settings.data.colorSchemes.useWallpaperColors = favorite.useWallpaperColors;
-    Settings.data.colorSchemes.predefinedScheme = favorite.colorScheme;
-    Settings.data.colorSchemes.generationMethod = favorite.generationMethod;
-    Settings.data.colorSchemes.darkMode = targetDark;
-
-    // If nothing triggered AppThemeService via change handlers, regenerate once.
-    if (!generationMethodChanging && !darkModeChanging && !useWallpaperColorsChanging) {
-      AppThemeService.generate();
-    } else if (!generationMethodChanging && !darkModeChanging && useWallpaperColorsChanging) {
-      AppThemeService.generate();
+    AppThemeService.recipeUpdateInProgress = true;
+    try {
+      Settings.data.colorSchemes.useWallpaperColors = favorite.useWallpaperColors;
+      Settings.data.colorSchemes.predefinedScheme = favorite.colorScheme;
+      Settings.data.colorSchemes.generationMethod = favorite.generationMethod || Settings.data.colorSchemes.generationMethod;
+      Settings.data.colorSchemes.surfaceStyle = favorite.surfaceStyle === "classic" || favorite.surfaceStyle === "tinted" ? favorite.surfaceStyle : Settings.data.colorSchemes.surfaceStyle;
+      Settings.data.colorSchemes.seedIndex = Number.isInteger(favorite.seedIndex) && favorite.seedIndex >= 0 ? favorite.seedIndex : 0;
+      // Favorites authored before dual-spec used the historical Hydra 2021 engine.
+      Settings.data.colorSchemes.materialSpec = favorite.materialSpec === "2025" ? "2025" : "2021";
+      Settings.data.colorSchemes.darkMode = targetDark;
+    } finally {
+      AppThemeService.recipeUpdateInProgress = previousBatch;
     }
+    AppThemeService.generate();
   }
 
   // When light/dark changes (or on startup), re-load scheme from the favorite for the wallpaper now shown for that slot.
@@ -1598,6 +1600,23 @@ Singleton {
   }
 
   // -------------------------------------------------------------------
+  function changeWallpaperWithFavorite(path, screenName, appearanceSlot) {
+    const monitor = Settings.data.colorSchemes.monitorForColors || Screen.name;
+    if (!favoriteEntryForPath(path) || (screenName !== undefined && screenName !== monitor)) {
+      changeWallpaper(path, screenName, appearanceSlot);
+      return;
+    }
+    const previousBatch = AppThemeService.recipeUpdateInProgress;
+    AppThemeService.recipeUpdateInProgress = true;
+    try {
+      changeWallpaper(path, screenName, appearanceSlot);
+      applyFavoriteTheme(path, screenName, appearanceSlot);
+    } finally {
+      AppThemeService.recipeUpdateInProgress = previousBatch;
+    }
+    AppThemeService.generate();
+  }
+
   function applyFavoriteTheme(path, screenName, appearanceSlot) {
     // Only apply theme if the wallpaper is on the monitor driving colors
     var effectiveMonitor = Settings.data.colorSchemes.monitorForColors;

@@ -19,12 +19,12 @@ from typing import Literal
 
 from .color import Color, shift_hue, hue_distance, adjust_surface
 from .contrast import ensure_contrast
-from .material import SchemeTonalSpot, SchemeFruitSalad, SchemeRainbow, SchemeContent, SchemeMonochrome
+from .material import SchemeTonalSpot, SchemeFruitSalad, SchemeRainbow, SchemeContent, SchemeMonochrome, SchemeExpressive, SchemeFidelity, SchemeNeutral, SchemeVibrant
 from .palette import find_error_color
 
 # Type aliases
 ThemeMode = Literal["dark", "light"]
-SchemeType = Literal["tonal-spot", "fruit-salad", "rainbow", "content", "monochrome", "vibrant", "faithful", "muted"]
+SchemeType = Literal["tonal-spot", "fruit-salad", "rainbow", "content", "monochrome", "expressive", "fidelity", "neutral", "m3-vibrant", "vibrant", "faithful", "dysfunctional", "muted"]
 
 # Map scheme type strings to classes
 SCHEME_CLASSES = {
@@ -33,6 +33,10 @@ SCHEME_CLASSES = {
     "rainbow": SchemeRainbow,
     "content": SchemeContent,
     "monochrome": SchemeMonochrome,
+    "expressive": SchemeExpressive,
+    "fidelity": SchemeFidelity,
+    "neutral": SchemeNeutral,
+    "m3-vibrant": SchemeVibrant,
     # "vibrant", "faithful", and "muted" use generate_*_* functions, not a scheme class
 }
 

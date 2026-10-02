@@ -16,6 +16,10 @@ MATERIAL_SCHEMES = {
     "fruit-salad": "Fruit Salad",
     "rainbow": "Rainbow",
     "monochrome": "Monochrome",
+    "expressive": "Expressive",
+    "fidelity": "Fidelity",
+    "neutral": "Neutral",
+    "m3-vibrant": "Vibrant",
 }
 
 _STRENGTHS = {

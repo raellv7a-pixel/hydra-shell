@@ -68,6 +68,21 @@ do Hyprland) não têm `/usr/local/bin` no `PATH`.
 
 ## AUR (via `paru`/`yay`)
 
+O backend Material 2025 é obrigatório para os quatro modelos suportados:
+
+```bash
+paru -S --needed python-materialyoucolor3
+```
+
+O pacote Python é [`materialyoucolor`](https://pypi.org/project/materialyoucolor/)
+`>=3.0.2,<4`; a geração histórica 2021 permanece interna à Hydra. O instalador
+verifica essa dependência mesmo com `--skip-optional`. Nix fixa a versão 3.0.4
+e o hash em `nix/materialyoucolor.nix`, disponível no pacote e no devShell.
+Para desenvolvimento em um venv: `python -m pip install -r Scripts/python/requirements.txt`.
+Não há instalação ou download no caminho de geração/preview.
+
+Extras opcionais:
+
 ```bash
 paru -S --needed wl-screenrec-git papirus-folders
 # Só em máquinas com GPU NVIDIA:

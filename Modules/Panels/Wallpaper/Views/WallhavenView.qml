@@ -177,8 +177,7 @@ Item {
   }
 
   function _apply(path, screenName, appearance) {
-    WallpaperService.changeWallpaper(path, screenName, appearance);
-    WallpaperService.applyFavoriteTheme(path, screenName, appearance);
+    WallpaperService.changeWallpaperWithFavorite(path, screenName, appearance);
   }
 
   // -------------------------------------------------------------------

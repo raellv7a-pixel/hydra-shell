@@ -1061,6 +1061,9 @@
       "widgets-title": "Posicionamento dos widgets"
     },
     "color-scheme": {
+      "material-spec-label": "Material Spec",
+      "material-spec-description": "2025 usa Tonal Spot, M3 Vibrant, Expressive e Neutral atualizados. Os outros modelos mantêm o engine Hydra 2021.",
+      "material-spec-fallback": "Este modelo usa o engine Material 2021 histórico em ambos os specs.",
       "color-source-use-wallpaper-colors-description": "Gere esquemas de cores a partir do seu papel de parede. Extrai automaticamente as cores para criar um tema coeso.",
       "color-source-use-wallpaper-colors-label": "Usar cores do papel de parede",
       "dark-mode-mode-description": "Ativa a mudança automática entre o modo claro e o modo escuro.",
@@ -1089,6 +1092,11 @@
       "download-success-title": "Esquema de cores baixado",
       "download-title": "Baixar esquemas de cores",
       "method-description": {
+        "smart": "Escolhe Content ou Monochrome automaticamente a partir do wallpaper.",
+        "expressive": "Rotações criativas de hue Material com paletas tonais coloridas.",
+        "fidelity": "Preserva hue e chroma da fonte com terciária complementar por temperatura.",
+        "neutral": "Paletas Material de baixo chroma, sem dessaturação RGB.",
+        "m3-vibrant": "Chroma primário Material máximo com acentos rotacionados harmônicos.",
         "content": "Esquema de Material Design com extração de cores de alta fidelidade que corresponde de perto às cores reais do conteúdo de origem.",
         "dysfunctional": "Como Faithful, mas escolhe a segunda família de cores mais dominante como primária.",
         "faithful": "Tenta manter-se próximo da cor de origem, enquanto gera uma paleta harmoniosa.",
@@ -2707,6 +2715,13 @@
   },
   "wallpaper": {
     "palette": {
+      "generation": "Receita gerada",
+      "seed": "Cor base",
+      "generating": "Gerando a paleta deste wallpaper…",
+      "local-required": "Selecione ou baixe um wallpaper local para gerar sua paleta.",
+      "legacy-extraction": "Métodos Hydra legados usam extração própria; a seleção de seed Material não está disponível.",
+      "recipe-note": "O modelo constrói a paleta; o estilo finaliza suas superfícies. Regenerar descarta edições manuais.",
+      "apply-recipe": "Usar receita no wallpaper ativo",
       "cancel-preview": "Cancelar prévia",
       "copied": "{label} ({color}) copiada para a área de transferência.",
       "copy-color": "Copiar cor hexadecimal",
@@ -2719,7 +2734,7 @@
       "preview-active": "A prévia ao vivo está ativa. Cancelar restaura as cores usadas antes da visualização.",
       "preview-inactive": "A prévia está desativada. As alterações só serão aplicadas ao visualizar ou salvar.",
       "recalculate": "Recalcular cores",
-      "reset": "Restaurar esquema atual",
+      "reset": "Restaurar edições manuais",
       "roles": {
         "error": "Erro",
         "hover": "Destaque",

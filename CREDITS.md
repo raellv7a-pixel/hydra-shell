@@ -32,6 +32,17 @@ open-source projects and contributors.
 
 ### Utilities
 - **[cliphist](https://github.com/sentriz/cliphist)** - Clipboard history support
+- **[T-Dynamos/materialyoucolor-python](https://github.com/T-Dynamos/materialyoucolor-python)** (MIT) - Real Material 2025 DynamicScheme and color roles; the historical Hydra 2021 engine and quantizer remain independent.
+
+## Application Themes
+- **[refact0r/system24](https://github.com/refact0r/system24)** (MIT, Copyright (c) 2025 refact0r) - Discord System24 layout imported from upstream; `Assets/Templates/discord-system24.css` supplies Hydra palette mappings and retains the full MIT notice. No Noctalia community template or logo is incorporated.
+- Prism Launcher, Fastfetch, Claude Code, OpenCode, tmux and Fcitx5 templates are original Hydra mappings of their documented public formats, not copies of unlicensed community templates. Optional reload uses the application's existing `tmux` or `fcitx5-remote` executable.
+- Phase 2 uses original Hydra ANSI derivation, Neovim highlights, grouped Zellij KDL, TextMate syntax scopes, Fzf fragments, Obsidian snippets and app-local GTK CSS. No Noctalia community template or external stylesheet/plugin code was copied.
+- **[Neovim public API](https://neovim.io/doc/user/api.html)** and **[RRethy/base16-nvim](https://github.com/RRethy/base16-nvim)** (MIT) were inspected as references; the implementation uses native Neovim APIs and requires no Base16 plugin. Reload is an opt-in file watcher, not a process signal.
+- **[Zellij themes](https://zellij.dev/documentation/themes.html)**, **[Codex theme loader](https://github.com/openai/codex/blob/main/codex-rs/tui/src/render/highlight.rs)**, **[Bat themes](https://github.com/sharkdp/bat#adding-new-themes)** and **[Fzf options](https://github.com/junegunn/fzf/blob/master/man/man1/fzf.1)** supply public format/path contracts only; Hydra mappings are independently authored.
+- **[Antigravity CLI reference](https://antigravity.google/docs/cli/reference)** and **[Gemini migration notes](https://antigravity.google/docs/cli/gcli-migration)** define the current terminal scheme and settings path. Legacy custom seeds were deliberately not reused.
+- **[Obsidian CSS snippets](https://help.obsidian.md/snippets)**, **[Inkscape theme loader](https://gitlab.com/inkscape/inkscape/-/blob/INKSCAPE_1_4_2/src/ui/themes.cpp)** and **[GIMP theme loader](https://github.com/GNOME/gimp/blob/master/app/gui/themes.c)** were used to verify discovery/import locations. Existing user snippets/styles/configuration remain user-owned.
+- **[MaterialFox](https://github.com/muckSponge/MaterialFox)** was evaluated only; no CSS was incorporated and no optional export was added because its internal Firefox-variable contract is not versioned/stable for this integration.
 
 ## Icons
 - **[Tabler Icons](https://tabler.io/icons)** - Icon set used throughout the shell

@@ -15,7 +15,7 @@ from .material import MaterialScheme, SchemeContent, harmonize_color
 from .contrast import ensure_contrast, contrast_ratio, is_dark
 from .image import read_image, ImageReadError
 from .palette import extract_palette
-from .quantizer import extract_source_color, source_color_to_rgb
+from .quantizer import extract_source_color, extract_source_candidates, source_color_to_rgb
 from .theme import generate_theme
 from .renderer import TemplateRenderer
 from .scheme import expand_predefined_scheme, inject_terminal_colors
@@ -47,6 +47,7 @@ __all__ = [
     "extract_palette",
     # Quantizer (Wu + Score algorithm matching matugen)
     "extract_source_color",
+    "extract_source_candidates",
     "source_color_to_rgb",
     # Theme
     "generate_theme",

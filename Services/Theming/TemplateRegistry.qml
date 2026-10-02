@@ -18,6 +18,26 @@ Singleton {
   readonly property string kdeApplyScript: Quickshell.shellDir + '/Scripts/python/src/theming/kde-apply-scheme.py'
   readonly property string vscodeHelperScript: Quickshell.shellDir + '/Scripts/python/src/theming/vscode-helper.py'
   readonly property string cursorGenerateScript: Quickshell.shellDir + '/Scripts/python/src/theming/cursor-generate.py'
+  readonly property string appThemeApplyScript: Quickshell.shellDir + '/Scripts/python/src/theming/app-theme-apply.py'
+  readonly property string codexHome: Quickshell.env("CODEX_HOME") || "~/.codex"
+  readonly property string batConfigDir: Quickshell.env("BAT_CONFIG_DIR") || "$XDG_CONFIG_HOME/bat"
+
+  // Detection uses the same leading-token policy as the Python renderer.
+  function resolvePath(path) {
+    const home = Quickshell.env("HOME");
+    const defaults = {
+      "XDG_CONFIG_HOME": home + "/.config",
+      "XDG_DATA_HOME": home + "/.local/share",
+      "XDG_STATE_HOME": home + "/.local/state",
+      "XDG_CACHE_HOME": home + "/.cache"
+    };
+    const match = path.match(/^\$(XDG_(?:CONFIG|DATA|STATE|CACHE)_HOME)(?=\/|$)/);
+    if (match) {
+      const value = Quickshell.env(match[1]);
+      return (value && value.startsWith("/") ? value : defaults[match[1]]) + path.slice(match[0].length);
+    }
+    return path === "~" ? home : path.startsWith("~/") ? home + path.slice(1) : path;
+  }
 
   // Dynamically resolved VSCode extension theme paths (all matching hydra extensions)
   property var resolvedCodePaths: []
@@ -208,39 +228,47 @@ Singleton {
       "id": "discord",
       "name": "Discord",
       "category": "misc",
-      "input": ["discord-midnight.css", "discord-material.css"],
+      "input": ["discord-midnight.css", "discord-material.css", "discord-system24.css"],
       "clients": [
         {
           "name": "vesktop",
-          "path": "~/.config/vesktop"
+          "path": "$XDG_CONFIG_HOME/vesktop"
+        },
+        {
+          "name": "vesktop-flatpak",
+          "path": "~/.var/app/dev.vencord.Vesktop/config/vesktop"
+        },
+        {
+          "name": "legcord",
+          "path": "$XDG_CONFIG_HOME/legcord"
         },
         {
           "name": "webcord",
-          "path": "~/.config/webcord"
+          "path": "$XDG_CONFIG_HOME/webcord"
         },
         {
           "name": "armcord",
-          "path": "~/.config/armcord"
+          "path": "$XDG_CONFIG_HOME/armcord"
         },
         {
           "name": "equibop",
-          "path": "~/.config/equibop"
+          "path": "$XDG_CONFIG_HOME/equibop"
         },
         {
           "name": "equicord",
-          "path": "~/.config/Equicord"
+          "path": "$XDG_CONFIG_HOME/Equicord"
         },
         {
           "name": "lightcord",
-          "path": "~/.config/lightcord"
+          "path": "$XDG_CONFIG_HOME/lightcord"
         },
         {
           "name": "dorion",
-          "path": "~/.config/dorion"
+          "path": "$XDG_CONFIG_HOME/dorion"
         },
         {
           "name": "vencord",
-          "path": "~/.config/Vencord"
+          "path": "$XDG_CONFIG_HOME/Vencord"
         },
         {
           "name": "vencord-flatpak",
@@ -248,7 +276,7 @@ Singleton {
         },
         {
           "name": "betterdiscord",
-          "path": "~/.config/BetterDiscord"
+          "path": "$XDG_CONFIG_HOME/BetterDiscord"
         }
       ]
     },
@@ -481,7 +509,12 @@ Singleton {
       "input": "heroic.css",
       "outputs": [
         {
-          "path": "~/.config/heroic/themes/hydra.css"
+          "path": "$XDG_CONFIG_HOME/heroic/themes/hydra.css",
+          "requiresPath": "$XDG_CONFIG_HOME/heroic"
+        },
+        {
+          "path": "~/.var/app/com.heroicgameslauncher.hgl/config/heroic/themes/hydra.css",
+          "requiresPath": "~/.var/app/com.heroicgameslauncher.hgl/config/heroic"
         }
       ]
     },
@@ -492,7 +525,12 @@ Singleton {
       "input": "matugen.obt",
       "outputs": [
         {
-          "path": "~/.config/obs-studio/themes/hydra.obt"
+          "path": "$XDG_CONFIG_HOME/obs-studio/themes/hydra.obt",
+          "requiresPath": "$XDG_CONFIG_HOME/obs-studio"
+        },
+        {
+          "path": "~/.var/app/com.obsproject.Studio/config/obs-studio/themes/hydra.obt",
+          "requiresPath": "~/.var/app/com.obsproject.Studio/config/obs-studio"
         }
       ]
     },
@@ -632,13 +670,224 @@ Singleton {
       ]
     },
     {
+      "id": "gimp3",
+      "name": "GIMP 3",
+      "category": "editor",
+      "input": "gtk-app.css",
+      "outputs": [
+        {
+          "path": "$XDG_CONFIG_HOME/GIMP/3.0/hydra-colors.css",
+          "requiresPath": "$XDG_CONFIG_HOME/GIMP/3.0"
+        },
+        {
+          "path": "$XDG_CONFIG_HOME/GIMP/3.2/hydra-colors.css",
+          "requiresPath": "$XDG_CONFIG_HOME/GIMP/3.2"
+        },
+        {
+          "path": "~/.var/app/org.gimp.GIMP/config/GIMP/3.0/hydra-colors.css",
+          "requiresPath": "~/.var/app/org.gimp.GIMP/config/GIMP/3.0"
+        },
+        {
+          "path": "~/.var/app/org.gimp.GIMP/config/GIMP/3.2/hydra-colors.css",
+          "requiresPath": "~/.var/app/org.gimp.GIMP/config/GIMP/3.2"
+        }
+      ],
+      "postProcess": () => `python3 "${appThemeApplyScript}" gimp`
+    },
+    {
+      "id": "inkscape",
+      "name": "Inkscape",
+      "category": "editor",
+      "input": "gtk-app.css",
+      "outputs": [
+        {
+          "path": "$XDG_CONFIG_HOME/inkscape/ui/hydra-colors.css",
+          "requiresPath": "$XDG_CONFIG_HOME/inkscape"
+        },
+        {
+          "path": "~/.var/app/org.inkscape.Inkscape/config/inkscape/ui/hydra-colors.css",
+          "requiresPath": "~/.var/app/org.inkscape.Inkscape/config/inkscape"
+        }
+      ],
+      "postProcess": () => `python3 "${appThemeApplyScript}" inkscape`
+    },
+    {
+      "id": "fzf",
+      "name": "Fzf",
+      "category": "terminal",
+      "input": "fzf.sh",
+      "outputs": [
+        {
+          "path": "$XDG_CONFIG_HOME/fzf/hydra.sh"
+        },
+        {
+          "path": "$XDG_CONFIG_HOME/fzf/hydra.fish",
+          "input": "fzf.fish"
+        }
+      ]
+    },
+    {
+      "id": "bat",
+      "name": "Bat",
+      "category": "terminal",
+      "input": "syntax.tmTheme",
+      "outputs": [
+        {
+          "path": batConfigDir + "/themes/Hydra.tmTheme"
+        }
+      ],
+      "hookAsync": true,
+      "postProcess": () => `bash "${templateApplyScript}" bat`
+    },
+    {
+      "id": "obsidian",
+      "name": "Obsidian",
+      "category": "editor",
+      "input": "obsidian.css",
+      "outputs": [
+        {
+          "path": "$XDG_CACHE_HOME/hydra/obsidian.css"
+        }
+      ],
+      // Vault registration can change without a change in the palette.
+      "postProcessOnUnchanged": true,
+      "postProcess": () => `python3 "${appThemeApplyScript}" obsidian`
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "category": "editor",
+      "input": "syntax.tmTheme",
+      "outputs": [
+        {
+          "path": codexHome + "/themes/hydra.tmTheme",
+          "requiresPath": codexHome
+        }
+      ]
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity (Terminal)",
+      "category": "terminal",
+      "input": "antigravity.json",
+      "outputs": [
+        {
+          "path": "$XDG_CACHE_HOME/hydra/antigravity.json",
+          "requiresPath": "~/.gemini/antigravity-cli/settings.json"
+        }
+      ],
+      "postProcess": () => `python3 "${appThemeApplyScript}" antigravity`
+    },
+    {
+      "id": "zellij",
+      "name": "Zellij",
+      "category": "terminal",
+      "input": "zellij.kdl",
+      "outputs": [
+        {
+          "path": "$XDG_CONFIG_HOME/zellij/themes/hydra.kdl"
+        }
+      ]
+    },
+    {
+      "id": "neovim",
+      "name": "Neovim",
+      "category": "editor",
+      "input": "neovim.lua",
+      "outputs": [
+        {
+          "path": "$XDG_CONFIG_HOME/nvim/lua/hydra-colors.lua",
+          "requiresPath": "$XDG_CONFIG_HOME/nvim"
+        }
+      ]
+    },
+    {
+      "id": "fcitx5",
+      "name": "Fcitx5",
+      "category": "system",
+      "input": "fcitx5.conf",
+      "outputs": [
+        {
+          "path": "$XDG_DATA_HOME/fcitx5/themes/hydra/theme.conf"
+        }
+      ],
+      "postProcess": () => `bash "${templateApplyScript}" fcitx5`
+    },
+    {
+      "id": "tmux",
+      "name": "tmux",
+      "category": "terminal",
+      "input": "tmux.conf",
+      "outputs": [
+        {
+          "path": "$XDG_CONFIG_HOME/tmux/themes/hydra.conf"
+        }
+      ],
+      "postProcess": () => `bash "${templateApplyScript}" tmux`
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "category": "editor",
+      "input": "opencode.json",
+      "outputs": [
+        {
+          "path": "$XDG_CONFIG_HOME/opencode/themes/hydra.json"
+        }
+      ]
+    },
+    {
+      "id": "claudecode",
+      "name": "Claude Code",
+      "category": "editor",
+      "input": "claude-code.json",
+      "outputs": [
+        {
+          "path": "~/.claude/themes/hydra.json",
+          "requiresPath": "~/.claude"
+        }
+      ]
+    },
+    {
+      "id": "fastfetch",
+      "name": "Fastfetch",
+      "category": "terminal",
+      "input": "fastfetch-colors.jsonc",
+      "outputs": [
+        {
+          "path": "$XDG_CONFIG_HOME/fastfetch/themes/hydra.jsonc"
+        }
+      ]
+    },
+    {
+      "id": "prismlauncher",
+      "name": "Prism Launcher",
+      "category": "misc",
+      "input": "prismlauncher.json",
+      "outputs": [
+        {
+          "path": "$XDG_DATA_HOME/PrismLauncher/themes/Hydra/theme.json",
+          "requiresPath": "$XDG_DATA_HOME/PrismLauncher"
+        },
+        {
+          "path": "~/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/themes/Hydra/theme.json",
+          "requiresPath": "~/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher"
+        }
+      ]
+    },
+    {
       "id": "steam",
       "name": "Steam",
       "category": "misc",
       "input": "steam.css",
       "outputs": [
         {
-          "path": "~/.steam/steam/steamui/skins/Material-Theme/css/main/colors/matugen.css"
+          "path": "~/.steam/steam/steamui/skins/Material-Theme/css/main/colors/matugen.css",
+          "requiresPath": "~/.steam/steam/steamui/skins/Material-Theme"
+        },
+        {
+          "path": "~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamui/skins/Material-Theme/css/main/colors/matugen.css",
+          "requiresPath": "~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamui/skins/Material-Theme"
         }
       ]
     }

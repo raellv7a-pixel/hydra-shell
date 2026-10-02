@@ -1,0 +1,121 @@
+// Hydra Shell — select theme "hydra" in Zellij; no main config changes.
+themes {
+    hydra {
+        text_unselected {
+            base "{{colors.terminal_foreground.default.hex}}"
+            background "{{colors.terminal_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        text_selected {
+            base "{{colors.terminal_selection_foreground.default.hex}}"
+            background "{{colors.terminal_selection_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        ribbon_unselected {
+            base "{{colors.on_surface.default.hex}}"
+            background "{{colors.surface_container.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        ribbon_selected {
+            base "{{colors.on_primary.default.hex}}"
+            background "{{colors.primary.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        table_title {
+            base "{{colors.terminal_normal_green.default.hex}}"
+            background "{{colors.terminal_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        table_cell_unselected {
+            base "{{colors.terminal_foreground.default.hex}}"
+            background "{{colors.terminal_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        table_cell_selected {
+            base "{{colors.terminal_selection_foreground.default.hex}}"
+            background "{{colors.terminal_selection_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        list_unselected {
+            base "{{colors.terminal_foreground.default.hex}}"
+            background "{{colors.terminal_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        list_selected {
+            base "{{colors.terminal_selection_foreground.default.hex}}"
+            background "{{colors.terminal_selection_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        frame_selected {
+            base "{{colors.terminal_normal_green.default.hex}}"
+            background "{{colors.terminal_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        frame_highlight {
+            base "{{colors.terminal_normal_yellow.default.hex}}"
+            background "{{colors.terminal_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        exit_code_success {
+            base "{{colors.terminal_normal_green.default.hex}}"
+            background "{{colors.terminal_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        exit_code_error {
+            base "{{colors.terminal_normal_red.default.hex}}"
+            background "{{colors.terminal_background.default.hex}}"
+            emphasis_0 "{{colors.terminal_normal_yellow.default.hex}}"
+            emphasis_1 "{{colors.terminal_normal_cyan.default.hex}}"
+            emphasis_2 "{{colors.terminal_normal_green.default.hex}}"
+            emphasis_3 "{{colors.terminal_normal_magenta.default.hex}}"
+        }
+        multiplayer_user_colors {
+            player_1 "{{colors.terminal_normal_magenta.default.hex}}"
+            player_2 "{{colors.terminal_normal_blue.default.hex}}"
+            player_3 "{{colors.terminal_normal_green.default.hex}}"
+            player_4 "{{colors.terminal_normal_yellow.default.hex}}"
+            player_5 "{{colors.terminal_normal_cyan.default.hex}}"
+            player_6 "{{colors.terminal_normal_red.default.hex}}"
+            player_7 "{{colors.terminal_bright_magenta.default.hex | rotate_hue 30}}"
+            player_8 "{{colors.terminal_bright_blue.default.hex | rotate_hue -30}}"
+            player_9 "{{colors.terminal_bright_green.default.hex}}"
+            player_10 "{{colors.terminal_bright_yellow.default.hex}}"
+        }
+    }
+}

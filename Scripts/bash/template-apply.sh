@@ -4,7 +4,7 @@
 if [ "$#" -lt 1 ]; then
     # Print usage information to standard error.
     echo "Error: No application specified." >&2
-    echo "Usage: $0 {kitty|ghostty|foot|alacritty|wezterm|starship|fuzzel|walker|pywalfox|cava|yazi|labwc|niri|hyprland|sway|scroll|mango|btop|zathura} [dark|light]" >&2
+    echo "Usage: $0 {kitty|ghostty|foot|alacritty|wezterm|starship|fuzzel|walker|pywalfox|cava|yazi|labwc|niri|hyprland|sway|scroll|mango|btop|zathura|tmux|fcitx5|bat} [dark|light]" >&2
     exit 1
 fi
 
@@ -652,6 +652,33 @@ starship)
                 printf '%s\n' "$MARKER_END"
             } >> "$CONFIG_FILE"
             ;;
+
+tmux)
+    command -v tmux >/dev/null 2>&1 || exit 0
+    case "${XDG_CONFIG_HOME:-}" in
+        /*) CONFIG_HOME="$XDG_CONFIG_HOME" ;;
+        *) CONFIG_HOME="$HOME/.config" ;;
+    esac
+    THEME_FILE="$CONFIG_HOME/tmux/themes/hydra.conf"
+    [ -f "$THEME_FILE" ] || exit 0
+    # -N forbids server creation, including if it exits between these commands.
+    if tmux -N has-session >/dev/null 2>&1; then
+        tmux -N source-file "$THEME_FILE"
+    fi
+    ;;
+
+fcitx5)
+    # --check addresses only an existing owner, preventing DBus activation.
+    if command -v fcitx5-remote >/dev/null 2>&1; then
+        fcitx5-remote --check -r >/dev/null 2>&1 || true
+    fi
+    ;;
+
+bat)
+    if command -v bat >/dev/null 2>&1; then
+        bat cache --build
+    fi
+    ;;
 
 *)
     # Handle unknown application names.

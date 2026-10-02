@@ -300,7 +300,7 @@
     "diskPath": "/",
     "panelWidth": 1120,
     "panelHeight": 700,
-    "panelScale": 1.0,
+    "panelScale": 1,
     "avatarPath": "",
     "avatarShape": "circle",
     "avatarMusicEffect": "ring",
@@ -320,7 +320,7 @@
     "profileCoverBorderEffect": "primary",
     "profileCoverBorderColorMode": "auto",
     "profileCoverBorderAnimation": "static",
-    "profileCoverBorderSpeed": 1.0,
+    "profileCoverBorderSpeed": 1,
     "profileCoverBorderColorCount": 3,
     "profileCoverBorderColor1": "#fff59b",
     "profileCoverBorderColor2": "#8bd5ff",
@@ -626,6 +626,8 @@
     "manualSunset": "18:30",
     "generationMethod": "tonal-spot",
     "surfaceStyle": "classic",
+    "seedIndex": 0,
+    "materialSpec": "2025",
     "monitorForColors": "",
     "syncGsettings": true
   },
@@ -647,13 +649,6 @@
     "enabled": false,
     "vibranceValue": 512,
     "displayIndex": 1
-  },
-  "obsControl": {
-    "manualConfiguration": false,
-    "host": "127.0.0.1",
-    "port": 4455,
-    "password": "",
-    "pollInterval": 1500
   },
   "tamagotchi": {
     "hunger": 100,

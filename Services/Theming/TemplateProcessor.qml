@@ -22,43 +22,64 @@ Singleton {
   property var pendingWallpaperRequest: null
   property var pendingPredefinedRequest: null
 
+  readonly property var materialSchemeKeys: ["smart", "tonal-spot", "content", "expressive", "fidelity", "neutral", "m3-vibrant", "fruit-salad", "rainbow", "monochrome"]
   readonly property var schemeTypes: [
     {
+      "key": "smart",
+      "name": "Smart"
+    },
+    {
       "key": "tonal-spot",
-      "name": "M3-Tonal Spot" // Do not translate
+      "name": "M3-Tonal Spot"
     },
     {
       "key": "content",
-      "name": "M3-Content" // Do not translate
+      "name": "M3-Content"
+    },
+    {
+      "key": "expressive",
+      "name": "M3-Expressive"
+    },
+    {
+      "key": "fidelity",
+      "name": "M3-Fidelity"
+    },
+    {
+      "key": "neutral",
+      "name": "M3-Neutral"
+    },
+    {
+      "key": "m3-vibrant",
+      "name": "M3 Vibrant"
     },
     {
       "key": "fruit-salad",
-      "name": "M3-Fruit Salad" // Do not translate
+      "name": "M3-Fruit Salad"
     },
     {
       "key": "rainbow",
-      "name": "M3-Rainbow" // Do not translate
+      "name": "M3-Rainbow"
     },
     {
       "key": "monochrome",
-      "name": "M3-Monochrome" // Do not translate
-    },
-    {
-      "key": "vibrant",
-      "name": I18n.tr("common.vibrant")
+      "name": "M3-Monochrome"
     },
     {
       "key": "faithful",
-      "name": I18n.tr("common.faithful")
-    },
-    {
-      "key": "dysfunctional",
-      "name": I18n.tr("common.dysfunctional")
+      "name": I18n.tr("common.faithful") + " · Hydra"
     },
     {
       "key": "muted",
-      "name": I18n.tr("common.color-muted")
+      "name": I18n.tr("common.color-muted") + " · Hydra"
     },
+    {
+      "key": "dysfunctional",
+      "name": I18n.tr("common.dysfunctional") + " · Hydra"
+    },
+    {
+      "key": "vibrant",
+      "name": I18n.tr("common.vibrant") + " · Hydra"
+    }
   ]
 
   // Check if a template is enabled in the activeTemplates array
@@ -175,15 +196,13 @@ Singleton {
   */
   function buildPredefinedTemplateConfig(mode) {
     var lines = [];
-    const homeDir = Quickshell.env("HOME");
 
     // Add terminal templates
     TemplateRegistry.terminals.forEach(terminal => {
                                          if (isTemplateEnabled(terminal.id)) {
                                            lines.push(`\n[templates.${terminal.id}]`);
-                                           lines.push(`input_path = "${Quickshell.shellDir}/Assets/Templates/${terminal.predefinedTemplatePath}"`);
-                                           const outputPath = terminal.outputPath.replace("~", homeDir);
-                                           lines.push(`output_path = "${outputPath}"`);
+                                           lines.push(`input_path = "${escapeTomlString(Quickshell.shellDir + "/Assets/Templates/" + terminal.predefinedTemplatePath)}"`);
+                                           lines.push(`output_path = "${escapeTomlString(terminal.outputPath)}"`);
                                            const postHookEsc = escapeTomlString(terminal.postHook);
                                            lines.push(`post_hook = "${postHookEsc}"`);
                                          }
@@ -217,7 +236,6 @@ Singleton {
   }
 
   function addWallpaperTheming(lines, mode) {
-    const homeDir = Quickshell.env("HOME");
     // Hydra colors JSON
     lines.push("[templates.hydra]");
     lines.push('input_path = "' + Quickshell.shellDir + '/Assets/Templates/hydra.json"');
@@ -227,9 +245,8 @@ Singleton {
     TemplateRegistry.terminals.forEach(terminal => {
                                          if (isTemplateEnabled(terminal.id)) {
                                            lines.push(`\n[templates.${terminal.id}]`);
-                                           lines.push(`input_path = "${Quickshell.shellDir}/Assets/Templates/${terminal.templatePath}"`);
-                                           const outputPath = terminal.outputPath.replace("~", homeDir);
-                                           lines.push(`output_path = "${outputPath}"`);
+                                           lines.push(`input_path = "${escapeTomlString(Quickshell.shellDir + "/Assets/Templates/" + terminal.templatePath)}"`);
+                                           lines.push(`output_path = "${escapeTomlString(terminal.outputPath)}"`);
                                            const postHookEsc = escapeTomlString(terminal.postHook);
                                            lines.push(`post_hook = "${postHookEsc}"`);
                                          }
@@ -246,7 +263,6 @@ Singleton {
   }
 
   function addApplicationTheming(lines, mode) {
-    const homeDir = Quickshell.env("HOME");
     TemplateRegistry.applications.forEach(app => {
                                             if (app.id === "discord") {
                                               // Handle Discord clients specially - multiple CSS themes
@@ -258,11 +274,12 @@ Singleton {
                                                                  app.clients.forEach(client => {
                                                                                        if (isDiscordClientEnabled(client.name)) {
                                                                                          lines.push(`\n[templates.discord_${themeSuffix}_${client.name}]`);
-                                                                                         lines.push(`input_path = "${Quickshell.shellDir}/Assets/Templates/${inputFile}"`);
+                                                                                         lines.push(`input_path = "${escapeTomlString(Quickshell.shellDir + "/Assets/Templates/" + inputFile)}"`);
                                                                                          // First input uses legacy name for backward compatibility
                                                                                          const outputFile = idx === 0 ? "hydra.theme.css" : `hydra-${themeSuffix}.theme.css`;
-                                                                                         const outputPath = client.path.replace("~", homeDir) + `/themes/${outputFile}`;
-                                                                                         lines.push(`output_path = "${outputPath}"`);
+                                                                                         const outputPath = client.path + `/themes/${outputFile}`;
+                                                                                         lines.push(`output_path = "${escapeTomlString(outputPath)}"`);
+                                                                                         lines.push(`requires_path = "${escapeTomlString(client.path)}"`);
                                                                                        }
                                                                                      });
                                                                });
@@ -288,8 +305,8 @@ Singleton {
                                                 ProgramCheckerService.availableEmacsClients.forEach(client => {
                                                                                                       lines.push(`\n[templates.emacs_${client.name}]`);
                                                                                                       lines.push(`input_path = "${Quickshell.shellDir}/Assets/Templates/${app.input}"`);
-                                                                                                      const expandedPath = client.path.replace("~", homeDir) + "/themes/hydra-theme.el";
-                                                                                                      lines.push(`output_path = "${expandedPath}"`);
+                                                                                                      const expandedPath = client.path + "/themes/hydra-theme.el";
+                                                                                                      lines.push(`output_path = "${escapeTomlString(expandedPath)}"`);
                                                                                                       if (app.postProcess) {
                                                                                                         const postHook = escapeTomlString(app.postProcess(mode));
                                                                                                         lines.push(`post_hook = "${postHook}"`);
@@ -302,13 +319,19 @@ Singleton {
                                                 app.outputs.forEach((output, idx) => {
                                                                       lines.push(`\n[templates.${app.id}_${idx}]`);
                                                                       const inputFile = output.input || app.input;
-                                                                      lines.push(`input_path = "${Quickshell.shellDir}/Assets/Templates/${inputFile}"`);
-                                                                      const outputPath = output.path.replace("~", homeDir);
-                                                                      lines.push(`output_path = "${outputPath}"`);
+                                                                      lines.push(`input_path = "${escapeTomlString(Quickshell.shellDir + "/Assets/Templates/" + inputFile)}"`);
+                                                                      lines.push(`output_path = "${escapeTomlString(output.path)}"`);
+                                                                      if (output.requiresPath)
+                                                                      lines.push(`requires_path = "${escapeTomlString(output.requiresPath)}"`);
                                                                       addTemplateColorMatching(lines, app);
                                                                       if (app.postProcess && output.postProcess !== false) {
                                                                         const postHook = escapeTomlString(app.postProcess(mode));
                                                                         lines.push(`post_hook = "${postHook}"`);
+                                                                        const hookAsync = output.hookAsync !== undefined ? output.hookAsync : app.hookAsync;
+                                                                        if (hookAsync)
+                                                                        lines.push("hook_async = true");
+                                                                        if (app.postProcessOnUnchanged)
+                                                                        lines.push("hook_on_unchanged = true");
                                                                       }
                                                                     });
                                               }
@@ -407,7 +430,12 @@ Singleton {
               "dark": parsed.dark || null,
               "light": parsed.light || null,
               "surfaceStyle": parsed._surface_style || "classic",
-              "recommendedMode": parsed._recommended_mode || null
+              "recommendedMode": parsed._recommended_mode || null,
+              "candidates": parsed._source_candidates || [],
+              "seedIndex": parsed._seed_index || 0,
+              "effectiveModel": parsed._effective_scheme_type || "",
+              "materialSpec": parsed._material_spec || "2025",
+              "effectiveMaterialSpec": parsed._effective_material_spec || null
             };
           } catch (e) {
             Logger.w("TemplateProcessor", "previewWallpaperPalette: failed to parse output:", e);
@@ -433,7 +461,7 @@ Singleton {
   * callback receives { dark, light, recommendedMode } (Python's raw snake_case keys —
   * pass through mapToColorKeys() for the "m*" keys) or null on failure.
   */
-  function previewWallpaperPalette(wallpaperPath, schemeType, callback) {
+  function previewWallpaperPalette(wallpaperPath, recipe, callback) {
     if (!wallpaperPath) {
       callback(null);
       return;
@@ -445,8 +473,9 @@ Singleton {
       callback(null);
       return;
     }
-    process.command = ["python3", templateProcessorScript, wallpaperPath, "--scheme-type", schemeType, "--surface-style", getSurfaceStyle()];
+    process.command = ["python3", templateProcessorScript, wallpaperPath, "--scheme-type", recipe.generationMethod, "--seed-index", String(recipe.seedIndex), "--material-spec", recipe.materialSpec === "2021" ? "2021" : "2025", "--surface-style", recipe.surfaceStyle];
     process.running = true;
+    return process;
   }
 
   // Get scheme type, defaulting to tonal-spot if not a recognized value
@@ -458,6 +487,19 @@ Singleton {
 
   function getSurfaceStyle() {
     return Settings.data.colorSchemes.useWallpaperColors && Settings.data.colorSchemes.surfaceStyle === "tinted" ? "tinted" : "classic";
+  }
+
+  function getMaterialSpec() {
+    return Settings.data.colorSchemes.materialSpec === "2021" ? "2021" : "2025";
+  }
+
+  function getRecipe() {
+    return {
+      generationMethod: getSchemeType(),
+      surfaceStyle: Settings.data.colorSchemes.surfaceStyle === "tinted" ? "tinted" : "classic",
+      seedIndex: Math.max(0, Settings.data.colorSchemes.seedIndex),
+      materialSpec: getMaterialSpec()
+    };
   }
 
   function buildGenerationScript(content, wallpaper, mode) {
@@ -476,7 +518,7 @@ Singleton {
       // Don't pass --mode so templates get both dark and light colors (e.g., zed.json needs both)
       // Pass --default-mode so "default" in templates resolves to the current theme mode
       const schemeType = getSchemeType();
-      script += `python3 "${templateProcessorScript}" "$HYDRA_WP_PATH" --scheme-type ${schemeType} --surface-style ${getSurfaceStyle()} --config '${pathEsc}' --default-mode ${mode}\n`;
+      script += `python3 "${templateProcessorScript}" "$HYDRA_WP_PATH" --scheme-type ${schemeType} --seed-index ${getRecipe().seedIndex} --material-spec ${getMaterialSpec()} --surface-style ${getSurfaceStyle()} --config '${pathEsc}' --default-mode ${mode}\n`;
     }
 
     script += buildUserTemplateCommand("$HYDRA_WP_PATH", mode);
@@ -501,7 +543,7 @@ Singleton {
     const schemeType = getSchemeType();
     // Don't pass --mode so user templates get both dark and light colors
     // Pass --default-mode so "default" in templates resolves to the current theme mode
-    script += `  python3 "${templateProcessorScript}" ${inputQuoted} --scheme-type ${schemeType} --surface-style ${getSurfaceStyle()} --config '${userConfigPath}' --default-mode ${mode}\n`;
+    script += `  python3 "${templateProcessorScript}" ${inputQuoted} --scheme-type ${schemeType} --seed-index ${getRecipe().seedIndex} --material-spec ${getMaterialSpec()} --surface-style ${getSurfaceStyle()} --config '${userConfigPath}' --default-mode ${mode}\n`;
     script += "fi";
 
     return script;

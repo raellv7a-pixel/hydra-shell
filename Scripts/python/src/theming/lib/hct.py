@@ -911,25 +911,24 @@ class TemperatureCache:
         if self._complement is not None:
             return self._complement
 
-        input_temp = self._input_relative_temperature_value()
-        hcts_by_temp = self._get_hcts_by_temp()
-        temps = self._get_temps_by_hct()
-
-        # Target is opposite temperature
-        target_temp = 1.0 - input_temp
-
-        # Find closest match
-        best_hct = hcts_by_temp[0]
+        target_temp = 1.0 - self._input_relative_temperature_value()
+        sorted_colors = self._get_hcts_by_temp()
+        cold, warm = sorted_colors[0].hue, sorted_colors[-1].hue
+        # Search the opposite cold-to-warm arc, not the arc containing the source.
+        def between(hue, start, end):
+            return start <= hue <= end if start < end else hue >= start or hue <= end
+        start, end = (warm, cold) if between(self.input.hue, cold, warm) else (cold, warm)
+        colors = self._get_hcts_by_hue()
+        best_hct = colors[round(self.input.hue) % 360]
         best_diff = float('inf')
-
-        for hct in hcts_by_temp:
-            key = (hct.hue, hct.chroma, hct.tone)
-            raw = temps.get(key, self.raw_temperature(hct))
-            rel = self._relative_temperature(hct)
-            diff = abs(rel - target_temp)
+        for offset in range(361):
+            hue = (start + offset) % 360
+            if not between(hue, start, end):
+                continue
+            candidate = colors[int(hue + 0.5) % 360]
+            diff = abs(self._relative_temperature(candidate) - target_temp)
             if diff < best_diff:
-                best_diff = diff
-                best_hct = hct
+                best_diff, best_hct = diff, candidate
 
         self._complement = best_hct
         return best_hct
