@@ -187,8 +187,7 @@ SmartPanel {
     function applyWallpaper(path) {
       const target = applyTargetScreenName;
       const appearance = WallpaperService.wallpaperSelectionAppearance;
-      WallpaperService.changeWallpaper(path, target, appearance);
-      WallpaperService.applyFavoriteTheme(path, target, appearance);
+      WallpaperService.changeWallpaperWithFavorite(path, target, appearance);
     }
 
     // Commits the previewed wallpaper through its provider, so each source
@@ -447,6 +446,7 @@ SmartPanel {
 
             // Extracted palette (index 5)
             WallpaperPaletteSheet {
+              id: paletteSheet
               screen: root.screen
               wallpaperPath: panelContent.effectivePreviewWallpaperPath
               screenName: panelContent.currentScreenName
@@ -466,6 +466,7 @@ SmartPanel {
         candidate: panelContent.previewCandidate
         appliedWallpaperPath: panelContent.appliedWallpaperPath
         screenName: panelContent.currentScreenName
+        paletteOverride: header.mainTabIndex === 2 ? paletteSheet.editingScheme : null
         applying: {
           const candidate = panelContent.previewCandidate;
           if (!candidate) {

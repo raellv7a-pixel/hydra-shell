@@ -1,8 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
-import qs.Widgets
 import qs.Services.Media
+import qs.Widgets
+
 DashboardCard {
   id: playerRow
 

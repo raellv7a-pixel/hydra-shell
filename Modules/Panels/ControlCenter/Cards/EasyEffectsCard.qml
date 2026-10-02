@@ -1,8 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Io
 import qs.Commons
 import qs.Widgets
-import Quickshell.Io
+
 DashboardCard {
   id: easyEffectsCard
 

@@ -109,15 +109,17 @@ O padrão continua **Clássico**; Tinted é um pós-processamento que mistura
 sutilmente a primária nas superfícies, antes dos templates da Hydra e dos apps.
 A troca regenera `colors.json` e anima a UI sem reiniciar a shell.
 
-Tinted atua em `tonal-spot`, `content`, `fruit-salad` e `rainbow`; `monochrome`
-permanece neutro. Os métodos Wallust-like `vibrant`, `faithful`,
+Tinted atua em `tonal-spot`, `content`, `expressive`, `fidelity`, `neutral`,
+`m3-vibrant`, `fruit-salad` e `rainbow`; `monochrome` permanece neutro.
+Os métodos Wallust-like `vibrant`, `faithful`,
 `dysfunctional` e `muted` mantêm suas superfícies originais, sem mapear
 intensidades Material não equivalentes. Temas predefinidos e JSON importados
 não são tingidos.
 
-O Smart Monochrome usa o critério do Studio: média de
-`max(R,G,B) - min(R,G,B)` normalizada ≤ 0,035 suprime a tonalização sem trocar
-o engine nem os acentos. Imagens usam thumbnail RGBA Triangle de até 128px,
+O modelo `smart` usa o critério do Studio: média de
+`max(R,G,B) - min(R,G,B)` normalizada ≤ 0,035 escolhe Monochrome; acima disso,
+escolhe Content. A mesma análise protege Tinted em imagens quase monocromáticas.
+Imagens usam thumbnail RGBA Triangle de até 128px,
 ignorando pixels totalmente transparentes; vídeos usam o frame representativo
 já extraído pela Hydra. O redimensionador é ImageMagick, não a crate Rust
 `image`; amostras no limiar podem diferir entre os decoders.
@@ -134,6 +136,41 @@ painéis em container, grupos/NBox e superfícies flutuantes em container alto,
 controles elevados/hover em container máximo e seleção em containers de accent.
 Ações primárias mantêm `primary/on_primary`; scrims e transparência configurável
 continuam independentes dessa hierarquia.
+
+Em **Wallpaper → Paleta de Cores**, a receita contextual combina o arquivo
+selecionado, modelo, Material Spec, até quatro seeds ranqueadas e Classic/Tinted.
+Trocar a receita recalcula a base e descarta edits manuais; Reset restaura a base
+gerada. O mock preview acompanha essa paleta sem aplicar o tema à sessão.
+
+O cálculo via `previewWallpaperPalette(path, recipe, callback)` é read-only.
+Preview ao vivo altera temporariamente `colors.json`; Cancel restaura todos os
+roles anteriores. Salvar mantém ambas as variantes e as cores ANSI. “Usar receita
+no wallpaper ativo” persiste a receita somente quando a imagem dirige as cores
+globais; candidates não alteram a sessão sem Preview ou Save.
+
+`--seed-index N` escolhe uma seed Material; valores inválidos usam índice 0.
+`--material-spec 2025|2021` controla o backend depois da seleção da seed, antes
+do Tinted e dos templates. O padrão é **2025**: Tonal Spot, M3 Vibrant,
+Expressive e Neutral usam os construtores reais de
+[materialyoucolor](https://github.com/T-Dynamos/materialyoucolor-python), com
+`spec_version="2025"` e plataforma `phone`. Não há download durante geração.
+O caminho **2021** preserva o engine Hydra já validado; Content, Fidelity,
+Fruit Salad, Rainbow, Monochrome e métodos Hydra também o mantêm quando 2025 é
+selecionado. Smart mantém seu seletor Content/Monochrome e usa esse fallback.
+O preview informa separadamente o spec solicitado e o efetivo.
+
+Os mesmos seletores estão em **Configurações → Cores** e na receita contextual.
+Favoritos novos guardam modelo, estilo, seed e spec; antigos sem spec usam 2021
+para preservar sua aparência, sem seed usam 0 e sem estilo mantêm o atual.
+`m3-vibrant` continua separado da heurística Hydra legada `vibrant`.
+O backend 2025 recebe contraste neutro; reduções internas de contraste são
+limitadas a zero. Não há sliders Contrast/Chroma/Tone nesta UI.
+
+Instalações Arch precisam de `python-materialyoucolor3 >= 3.0.2` (não v2),
+inclusive com `--skip-optional`. Nix empacota `materialyoucolor 3.0.4` com hash
+fixo no runtime e no devShell. Em um venv de desenvolvimento, instale
+`Scripts/python/requirements.txt`; sem a dependência, pedir 2025 falha
+explicitamente, não substitui silenciosamente o spec por 2021.
 
 ---
 

@@ -32,6 +32,7 @@ open-source projects and contributors.
 
 ### Utilities
 - **[cliphist](https://github.com/sentriz/cliphist)** - Clipboard history support
+- **[T-Dynamos/materialyoucolor-python](https://github.com/T-Dynamos/materialyoucolor-python)** (MIT) - Real Material 2025 DynamicScheme and color roles; the historical Hydra 2021 engine and quantizer remain independent.
 
 ## Icons
 - **[Tabler Icons](https://tabler.io/icons)** - Icon set used throughout the shell

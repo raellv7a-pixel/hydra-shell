@@ -288,6 +288,41 @@ ColumnLayout {
         color: Color.mOnSurfaceVariant
       }
 
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+        NLabel {
+          Layout.fillWidth: true
+          label: I18n.tr("panels.color-scheme.material-spec-label")
+        }
+        NTabBar {
+          Layout.preferredWidth: 220 * Style.uiScaleRatio
+          distributeEvenly: true
+          enabled: TemplateProcessor.materialSchemeKeys.includes(Settings.data.colorSchemes.generationMethod)
+          opacity: enabled ? 1.0 : 0.6
+          currentIndex: TemplateProcessor.getMaterialSpec() === "2025" ? 0 : 1
+          NTabButton {
+            text: "2025"
+            tabIndex: 0
+            checked: TemplateProcessor.getMaterialSpec() === "2025"
+            onClicked: Settings.data.colorSchemes.materialSpec = "2025"
+          }
+          NTabButton {
+            text: "2021"
+            tabIndex: 1
+            checked: TemplateProcessor.getMaterialSpec() === "2021"
+            onClicked: Settings.data.colorSchemes.materialSpec = "2021"
+          }
+        }
+      }
+      NText {
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+        text: I18n.tr("panels.color-scheme.material-spec-description")
+        pointSize: Style.fontSizeS
+        color: Color.mOnSurfaceVariant
+      }
+
       NDivider {
         Layout.fillWidth: true
       }
@@ -305,7 +340,7 @@ ColumnLayout {
           id: surfaceStyleSelector
           Layout.preferredWidth: 220 * Style.uiScaleRatio
           distributeEvenly: true
-          enabled: ["tonal-spot", "content", "fruit-salad", "rainbow", "monochrome"].includes(Settings.data.colorSchemes.generationMethod)
+          enabled: TemplateProcessor.materialSchemeKeys.includes(Settings.data.colorSchemes.generationMethod)
           opacity: enabled ? 1.0 : 0.6
           currentIndex: Settings.data.colorSchemes.surfaceStyle === "tinted" ? 1 : 0
 

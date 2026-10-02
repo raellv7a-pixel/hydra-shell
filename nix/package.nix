@@ -10,7 +10,7 @@
     wlr-randr
     imagemagick
     wget
-    (python3.withPackages (pp: lib.optional calendarSupport pp.pygobject3))
+    (python3.withPackages (pp: [ materialyoucolor ] ++ lib.optional calendarSupport pp.pygobject3))
   ],
 
   lib,
@@ -33,6 +33,7 @@
   # it ships no binary, only share/themes/adw-gtk3{,-dark}.
   adw-gtk3,
   python3,
+  materialyoucolor ? python3.pkgs.callPackage ./materialyoucolor.nix { },
   wayland-scanner,
   # calendar support
   calendarSupport ? false,

@@ -1,0 +1,2 @@
+# Material 2025 backend; 2021 remains Hydra's historical in-tree implementation.
+materialyoucolor>=3.0.2,<4

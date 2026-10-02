@@ -22,43 +22,64 @@ Singleton {
   property var pendingWallpaperRequest: null
   property var pendingPredefinedRequest: null
 
+  readonly property var materialSchemeKeys: ["smart", "tonal-spot", "content", "expressive", "fidelity", "neutral", "m3-vibrant", "fruit-salad", "rainbow", "monochrome"]
   readonly property var schemeTypes: [
     {
+      "key": "smart",
+      "name": "Smart"
+    },
+    {
       "key": "tonal-spot",
-      "name": "M3-Tonal Spot" // Do not translate
+      "name": "M3-Tonal Spot"
     },
     {
       "key": "content",
-      "name": "M3-Content" // Do not translate
+      "name": "M3-Content"
+    },
+    {
+      "key": "expressive",
+      "name": "M3-Expressive"
+    },
+    {
+      "key": "fidelity",
+      "name": "M3-Fidelity"
+    },
+    {
+      "key": "neutral",
+      "name": "M3-Neutral"
+    },
+    {
+      "key": "m3-vibrant",
+      "name": "M3 Vibrant"
     },
     {
       "key": "fruit-salad",
-      "name": "M3-Fruit Salad" // Do not translate
+      "name": "M3-Fruit Salad"
     },
     {
       "key": "rainbow",
-      "name": "M3-Rainbow" // Do not translate
+      "name": "M3-Rainbow"
     },
     {
       "key": "monochrome",
-      "name": "M3-Monochrome" // Do not translate
-    },
-    {
-      "key": "vibrant",
-      "name": I18n.tr("common.vibrant")
+      "name": "M3-Monochrome"
     },
     {
       "key": "faithful",
-      "name": I18n.tr("common.faithful")
-    },
-    {
-      "key": "dysfunctional",
-      "name": I18n.tr("common.dysfunctional")
+      "name": I18n.tr("common.faithful") + " · Hydra"
     },
     {
       "key": "muted",
-      "name": I18n.tr("common.color-muted")
+      "name": I18n.tr("common.color-muted") + " · Hydra"
     },
+    {
+      "key": "dysfunctional",
+      "name": I18n.tr("common.dysfunctional") + " · Hydra"
+    },
+    {
+      "key": "vibrant",
+      "name": I18n.tr("common.vibrant") + " · Hydra"
+    }
   ]
 
   // Check if a template is enabled in the activeTemplates array
@@ -407,7 +428,12 @@ Singleton {
               "dark": parsed.dark || null,
               "light": parsed.light || null,
               "surfaceStyle": parsed._surface_style || "classic",
-              "recommendedMode": parsed._recommended_mode || null
+              "recommendedMode": parsed._recommended_mode || null,
+              "candidates": parsed._source_candidates || [],
+              "seedIndex": parsed._seed_index || 0,
+              "effectiveModel": parsed._effective_scheme_type || "",
+              "materialSpec": parsed._material_spec || "2025",
+              "effectiveMaterialSpec": parsed._effective_material_spec || null
             };
           } catch (e) {
             Logger.w("TemplateProcessor", "previewWallpaperPalette: failed to parse output:", e);
@@ -433,7 +459,7 @@ Singleton {
   * callback receives { dark, light, recommendedMode } (Python's raw snake_case keys —
   * pass through mapToColorKeys() for the "m*" keys) or null on failure.
   */
-  function previewWallpaperPalette(wallpaperPath, schemeType, callback) {
+  function previewWallpaperPalette(wallpaperPath, recipe, callback) {
     if (!wallpaperPath) {
       callback(null);
       return;
@@ -445,8 +471,9 @@ Singleton {
       callback(null);
       return;
     }
-    process.command = ["python3", templateProcessorScript, wallpaperPath, "--scheme-type", schemeType, "--surface-style", getSurfaceStyle()];
+    process.command = ["python3", templateProcessorScript, wallpaperPath, "--scheme-type", recipe.generationMethod, "--seed-index", String(recipe.seedIndex), "--material-spec", recipe.materialSpec === "2021" ? "2021" : "2025", "--surface-style", recipe.surfaceStyle];
     process.running = true;
+    return process;
   }
 
   // Get scheme type, defaulting to tonal-spot if not a recognized value
@@ -458,6 +485,19 @@ Singleton {
 
   function getSurfaceStyle() {
     return Settings.data.colorSchemes.useWallpaperColors && Settings.data.colorSchemes.surfaceStyle === "tinted" ? "tinted" : "classic";
+  }
+
+  function getMaterialSpec() {
+    return Settings.data.colorSchemes.materialSpec === "2021" ? "2021" : "2025";
+  }
+
+  function getRecipe() {
+    return {
+      generationMethod: getSchemeType(),
+      surfaceStyle: Settings.data.colorSchemes.surfaceStyle === "tinted" ? "tinted" : "classic",
+      seedIndex: Math.max(0, Settings.data.colorSchemes.seedIndex),
+      materialSpec: getMaterialSpec()
+    };
   }
 
   function buildGenerationScript(content, wallpaper, mode) {
@@ -476,7 +516,7 @@ Singleton {
       // Don't pass --mode so templates get both dark and light colors (e.g., zed.json needs both)
       // Pass --default-mode so "default" in templates resolves to the current theme mode
       const schemeType = getSchemeType();
-      script += `python3 "${templateProcessorScript}" "$HYDRA_WP_PATH" --scheme-type ${schemeType} --surface-style ${getSurfaceStyle()} --config '${pathEsc}' --default-mode ${mode}\n`;
+      script += `python3 "${templateProcessorScript}" "$HYDRA_WP_PATH" --scheme-type ${schemeType} --seed-index ${getRecipe().seedIndex} --material-spec ${getMaterialSpec()} --surface-style ${getSurfaceStyle()} --config '${pathEsc}' --default-mode ${mode}\n`;
     }
 
     script += buildUserTemplateCommand("$HYDRA_WP_PATH", mode);
@@ -501,7 +541,7 @@ Singleton {
     const schemeType = getSchemeType();
     // Don't pass --mode so user templates get both dark and light colors
     // Pass --default-mode so "default" in templates resolves to the current theme mode
-    script += `  python3 "${templateProcessorScript}" ${inputQuoted} --scheme-type ${schemeType} --surface-style ${getSurfaceStyle()} --config '${userConfigPath}' --default-mode ${mode}\n`;
+    script += `  python3 "${templateProcessorScript}" ${inputQuoted} --scheme-type ${schemeType} --seed-index ${getRecipe().seedIndex} --material-spec ${getMaterialSpec()} --surface-style ${getSurfaceStyle()} --config '${userConfigPath}' --default-mode ${mode}\n`;
     script += "fi";
 
     return script;

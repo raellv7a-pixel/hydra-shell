@@ -177,9 +177,6 @@
       "showDiskAvailable": false,
       "diskPath": "/"
     },
-    "Tamagotchi": {
-      "showPercentage": false
-    },
     "Taskbar": {
       "onlySameOutput": true,
       "onlyActiveWorkspaces": true,
@@ -231,6 +228,9 @@
     },
     "PrivacyIndicator": {
       "hideInactive": false
+    },
+    "Tamagotchi": {
+      "showPercentage": false
     },
     "UsbDriveManager": {
       "hideWhenEmpty": false,

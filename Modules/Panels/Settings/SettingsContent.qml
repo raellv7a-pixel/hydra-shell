@@ -14,7 +14,6 @@ import qs.Modules.Panels.Settings.Tabs.Display
 import qs.Modules.Panels.Settings.Tabs.Dock
 import qs.Modules.Panels.Settings.Tabs.Hooks
 import qs.Modules.Panels.Settings.Tabs.Hyprland
-import qs.Modules.Panels.Settings.Tabs.Umbriel
 import qs.Modules.Panels.Settings.Tabs.Idle
 import qs.Modules.Panels.Settings.Tabs.Launcher
 import qs.Modules.Panels.Settings.Tabs.LockScreen
@@ -25,6 +24,7 @@ import qs.Modules.Panels.Settings.Tabs.Region
 import qs.Modules.Panels.Settings.Tabs.Security
 import qs.Modules.Panels.Settings.Tabs.SessionMenu
 import qs.Modules.Panels.Settings.Tabs.SystemMonitor
+import qs.Modules.Panels.Settings.Tabs.Umbriel
 import qs.Modules.Panels.Settings.Tabs.UserInterface
 import qs.Modules.Panels.Settings.Tabs.Wallpaper
 import qs.Services.Compositor
@@ -671,8 +671,7 @@ Item {
     // Hyprland tab only makes sense with Hyprland as the active compositor
     // (PLANO_INTEGRACAO_HYPRMOD.md §5) — every other tab is compositor-
     // agnostic and always shown.
-    newTabs = newTabs.filter(t => (t.id !== SettingsPanel.Tab.Hyprland || CompositorService.isHyprland)
-                             && (t.id !== SettingsPanel.Tab.Umbriel || CompositorService.isUmbriel));
+    newTabs = newTabs.filter(t => (t.id !== SettingsPanel.Tab.Hyprland || CompositorService.isHyprland) && (t.id !== SettingsPanel.Tab.Umbriel || CompositorService.isUmbriel));
 
     root.tabsModel = newTabs;
   }

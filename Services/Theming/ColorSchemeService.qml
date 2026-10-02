@@ -331,6 +331,12 @@ Singleton {
     // Force a rewrite by updating the path
     colorsWriter.path = "";
     colorsWriter.path = colorsJsonFilePath;
-    colorsWriter.writeAdapter();
+    const colors = {};
+    for (const key of ["mPrimary", "mOnPrimary", "mSecondary", "mOnSecondary", "mTertiary", "mOnTertiary", "mError", "mOnError", "mSurface", "mOnSurface", "mSurfaceVariant", "mOnSurfaceVariant", "mOutline", "mShadow", "mHover", "mOnHover"])
+      colors[key] = out[key].toString();
+    for (const key of ["mSurfaceContainerLowest", "mSurfaceContainerLow", "mSurfaceContainer", "mSurfaceContainerHigh", "mSurfaceContainerHighest", "mPrimaryContainer", "mOnPrimaryContainer", "mSecondaryContainer", "mOnSecondaryContainer", "mTertiaryContainer", "mOnTertiaryContainer"])
+      if (obj && obj[key] !== undefined)
+        colors[key] = obj[key].toString();
+    colorsWriter.setText(JSON.stringify(colors));
   }
 }

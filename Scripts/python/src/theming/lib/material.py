@@ -378,6 +378,74 @@ class SchemeContent(_BaseScheme):
         self.neutral_variant_palette = TonalPalette(source_color.hue, neutral_variant_chroma)
 
 
+def _rotated_hue(hue: float, breaks: tuple, rotations: tuple) -> float:
+    for start, end, rotation in zip(breaks, breaks[1:], rotations):
+        if start <= hue < end:
+            return (hue + rotation) % 360.0
+    return hue
+
+
+# Palette formulas: Material Color Utilities, DynamicScheme 2021.
+# Existing Hydra schemes and their role tone maps remain unchanged.
+class SchemeExpressive(_BaseScheme):
+    def __init__(self, source_color: Hct):
+        super().__init__(source_color)
+        hue = source_color.hue
+        breaks = (0, 21, 51, 121, 151, 191, 271, 321, 360)
+        self.primary_palette = TonalPalette((hue + 240) % 360, 40)
+        self.secondary_palette = TonalPalette(_rotated_hue(hue, breaks, (45, 95, 45, 20, 45, 90, 45, 45, 45)), 24)
+        self.tertiary_palette = TonalPalette(_rotated_hue(hue, breaks, (120, 120, 20, 45, 20, 15, 20, 120, 120)), 32)
+        self.neutral_palette = TonalPalette((hue + 15) % 360, 8)
+        self.neutral_variant_palette = TonalPalette((hue + 15) % 360, 12)
+
+
+class SchemeFidelity(_BaseScheme):
+    def __init__(self, source_color: Hct):
+        super().__init__(source_color)
+        self.primary_palette = TonalPalette(source_color.hue, source_color.chroma)
+        self.secondary_palette = TonalPalette(source_color.hue, max(source_color.chroma - 32, source_color.chroma * 0.5))
+        complement = fix_if_disliked(TemperatureCache(source_color).complement())
+        self.tertiary_palette = TonalPalette.from_hct(complement)
+        self.neutral_palette = TonalPalette(source_color.hue, source_color.chroma / 8)
+        self.neutral_variant_palette = TonalPalette(source_color.hue, source_color.chroma / 8 + 4)
+
+    def _generate_scheme(self, is_dark: bool) -> dict[str, str]:
+        from .color import Color
+        from .contrast import contrast_ratio
+        scheme = super()._generate_scheme(is_dark)
+        # Preserve source/complement tone, with readable HCT foregrounds.
+        for role, palette in (("primary", self.primary_palette), ("tertiary", self.tertiary_palette)):
+            background = palette.get_hex(self.source.tone)
+            bg = Color.from_hex(background)
+            preferred = range(100, -1, -1) if self.source.tone < 60 else range(101)
+            tone = next(t for t in preferred if contrast_ratio(Color.from_hex(palette.get_hex(t)), bg) >= 4.5)
+            scheme[role + "_container"] = background
+            scheme["on_" + role + "_container"] = palette.get_hex(tone)
+        return scheme
+
+
+class SchemeNeutral(_BaseScheme):
+    def __init__(self, source_color: Hct):
+        super().__init__(source_color)
+        self.primary_palette = TonalPalette(source_color.hue, 12)
+        self.secondary_palette = TonalPalette(source_color.hue, 8)
+        self.tertiary_palette = TonalPalette(source_color.hue, 16)
+        self.neutral_palette = TonalPalette(source_color.hue, 2)
+        self.neutral_variant_palette = TonalPalette(source_color.hue, 2)
+
+
+class SchemeVibrant(_BaseScheme):
+    def __init__(self, source_color: Hct):
+        super().__init__(source_color)
+        hue = source_color.hue
+        breaks = (0, 41, 61, 101, 131, 181, 251, 301, 360)
+        self.primary_palette = TonalPalette(hue, 200)
+        self.secondary_palette = TonalPalette(_rotated_hue(hue, breaks, (18, 15, 10, 12, 15, 18, 15, 12, 12)), 24)
+        self.tertiary_palette = TonalPalette(_rotated_hue(hue, breaks, (35, 30, 20, 25, 30, 35, 30, 25, 25)), 32)
+        self.neutral_palette = TonalPalette(hue, 10)
+        self.neutral_variant_palette = TonalPalette(hue, 12)
+
+
 class SchemeMonochrome(_BaseScheme):
     """
     Material Design 3 Monochrome scheme.

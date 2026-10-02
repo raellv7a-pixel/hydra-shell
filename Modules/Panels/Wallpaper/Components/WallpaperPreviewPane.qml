@@ -22,6 +22,7 @@ NBox {
   // Wallpaper applied to the current screen, shown when there is no candidate.
   property string appliedWallpaperPath: ""
   property string screenName: ""
+  property var paletteOverride: null
   // True while the candidate is being downloaded/applied.
   property bool applying: false
 
@@ -167,6 +168,7 @@ NBox {
 
       wallpaperPath: root.previewPath
       screenName: root.screenName
+      paletteOverride: root.paletteOverride
     }
 
     Item {
@@ -220,7 +222,7 @@ NBox {
           Layout.topMargin: Style.marginXS
           Layout.preferredHeight: visible ? implicitHeight : 0
           currentPalette: mockPreview.colorSnapshot()
-          candidatePalette: mockPreview.candidatePalette ? mockPreview.candidatePalette[mockPreview.previewDarkMode ? "dark" : "light"] : null
+          candidatePalette: (root.paletteOverride || mockPreview.candidatePalette)?.[mockPreview.previewDarkMode ? "dark" : "light"] ?? null
         }
 
         // The theme this wallpaper would produce, next to the count of roles
@@ -228,7 +230,7 @@ NBox {
         RowLayout {
           id: candidateSwatches
 
-          readonly property var palette: mockPreview.candidatePalette ? mockPreview.candidatePalette[mockPreview.previewDarkMode ? "dark" : "light"] : null
+          readonly property var palette: (root.paletteOverride || mockPreview.candidatePalette)?.[mockPreview.previewDarkMode ? "dark" : "light"] ?? null
           readonly property var roles: ["mPrimary", "mSecondary", "mTertiary", "mSurface", "mSurfaceVariant", "mOnSurface"]
           readonly property int diameter: Math.round(18 * Style.uiScaleRatio)
 

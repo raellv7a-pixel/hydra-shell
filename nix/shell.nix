@@ -9,11 +9,13 @@
   lefthook,
   kdePackages,
   mkShellNoCC,
+  python3,
 }:
 mkShellNoCC {
   #it's faster than mkDerivation / mkShell
   packages = [
     quickshell
+    (python3.withPackages (pp: [ (pp.callPackage ./materialyoucolor.nix { }) ]))
 
     # nix
     nixfmt # formatter

@@ -385,7 +385,6 @@ NBox {
                       _userChanging = true;
                       if (Settings.data.colorSchemes.useWallpaperColors) {
                         Settings.data.colorSchemes.generationMethod = key;
-                        AppThemeService.generate();
                       } else {
                         ColorSchemeService.setPredefinedScheme(key);
                       }

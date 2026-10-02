@@ -1,8 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Commons
-import qs.Widgets
 import qs.Services.System
+import qs.Widgets
+
 Item {
   id: screenUsagePage
 
