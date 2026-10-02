@@ -20,7 +20,7 @@ NBox {
   property real detailOffset: 0
   readonly property bool borderEffectVisible: panelRoot.componentBorderVisible(styleKey, styleRoot)
 
-  color: styleKey !== "" ? panelRoot.componentBackground(styleKey) : panelRoot.m3SurfaceContainer
+  color: styleKey !== "" ? panelRoot.componentBackground(styleKey) : panelRoot.m3SurfaceContainerHigh
   radius: styleRoot ? Style.radiusL : Style.radiusM
   border.color: borderEffectVisible ? Qt.alpha(panelRoot.componentAccent(styleKey), 0.42) : (styleRoot ? "transparent" : Qt.alpha(Color.mOutline, 0.10))
   border.width: borderEffectVisible ? Math.max(1, Style.borderS) : Style.borderS

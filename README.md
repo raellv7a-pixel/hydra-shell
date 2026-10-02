@@ -101,6 +101,42 @@ invocada segue o comportamento nativo do Umbriel, sem alinhamento X/Y forçado.
 
 ---
 
+## Superfícies Tinted
+
+Em **Configurações → Esquema de cores → Cores**, ative cores do papel de
+parede e escolha **Clássico** ou **Tinted** junto ao método de geração.
+O padrão continua **Clássico**; Tinted é um pós-processamento que mistura
+sutilmente a primária nas superfícies, antes dos templates da Hydra e dos apps.
+A troca regenera `colors.json` e anima a UI sem reiniciar a shell.
+
+Tinted atua em `tonal-spot`, `content`, `fruit-salad` e `rainbow`; `monochrome`
+permanece neutro. Os métodos Wallust-like `vibrant`, `faithful`,
+`dysfunctional` e `muted` mantêm suas superfícies originais, sem mapear
+intensidades Material não equivalentes. Temas predefinidos e JSON importados
+não são tingidos.
+
+O Smart Monochrome usa o critério do Studio: média de
+`max(R,G,B) - min(R,G,B)` normalizada ≤ 0,035 suprime a tonalização sem trocar
+o engine nem os acentos. Imagens usam thumbnail RGBA Triangle de até 128px,
+ignorando pixels totalmente transparentes; vídeos usam o frame representativo
+já extraído pela Hydra. O redimensionador é ImageMagick, não a crate Rust
+`image`; amostras no limiar podem diferir entre os decoders.
+
+O processor aceita `--surface-style classic|tinted`. Os cinco containers de
+superfície e os containers primário, secundário e terciário, com seus respectivos
+foregrounds, passam explicitamente para `colors.json` em ambos os estilos.
+`mSurfaceVariant` usa o papel Material `surface_variant`, não `surface_container`.
+JSONs antigos e temas autorados sem esses campos preservam os blends legados;
+trocar de uma paleta moderna para um tema antigo também limpa os roles opcionais.
+
+A UI usa a mesma hierarquia em Clássico e Tinted: frame/barra em container baixo,
+painéis em container, grupos/NBox e superfícies flutuantes em container alto,
+controles elevados/hover em container máximo e seleção em containers de accent.
+Ações primárias mantêm `primary/on_primary`; scrims e transparência configurável
+continuam independentes dessa hierarquia.
+
+---
+
 ## Requisitos
 
 - Arch Linux ou derivada (CachyOS é o alvo testado)
@@ -115,4 +151,9 @@ Este projeto é um fork do [Noctalia Shell](https://github.com/noctalia-dev/noct
 
 ## Licença
 
-MIT — ver [LICENSE](./LICENSE).
+Código original sob MIT — ver [LICENSE](./LICENSE).
+O port do Tinted de [Matugen Studio](https://github.com/raellx22/Matugen-Studio/blob/cad6db3b178ee73c73bbd1facb869e3aaa16e49a/src-tauri/src/commands/color.rs)
+(`Scripts/python/src/theming/lib/tinted.py`) mantém GPL-2.0-or-later — ver
+[LICENSE.tinted](./Scripts/python/src/theming/lib/LICENSE.tinted).
+A distribuição do pipeline combinado deve respeitar os termos GPL; este port
+não é uma relicença MIT do código do Studio.

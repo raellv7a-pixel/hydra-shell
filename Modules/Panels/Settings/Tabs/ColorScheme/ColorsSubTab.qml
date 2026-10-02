@@ -258,26 +258,12 @@ ColumnLayout {
                 }
   }
 
-  NComboBox {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.color-scheme.wallpaper-method-label")
-    description: I18n.tr("panels.color-scheme.wallpaper-method-description")
-    enabled: Settings.data.colorSchemes.useWallpaperColors
-    model: TemplateProcessor.schemeTypes
-    currentKey: Settings.data.colorSchemes.generationMethod
-    onSelected: key => {
-                  Settings.data.colorSchemes.generationMethod = key;
-                  AppThemeService.generate();
-                }
-  }
-
   NBox {
     visible: Settings.data.colorSchemes.useWallpaperColors
     Layout.fillWidth: true
     implicitHeight: descriptionColumn.implicitHeight + Style.margin2L
-    color: Color.mSurface
 
-    Column {
+    ColumnLayout {
       id: descriptionColumn
       anchors.left: parent.left
       anchors.right: parent.right
@@ -285,10 +271,64 @@ ColumnLayout {
       anchors.margins: Style.marginL
       spacing: Style.marginM
 
+      NComboBox {
+        Layout.fillWidth: true
+        label: I18n.tr("panels.color-scheme.wallpaper-method-label")
+        description: I18n.tr("panels.color-scheme.wallpaper-method-description")
+        model: TemplateProcessor.schemeTypes
+        currentKey: Settings.data.colorSchemes.generationMethod
+        onSelected: key => Settings.data.colorSchemes.generationMethod = key
+      }
+
       NText {
-        width: parent.width
+        Layout.fillWidth: true
         wrapMode: Text.WordWrap
         text: I18n.tr("panels.color-scheme.method-description." + Settings.data.colorSchemes.generationMethod)
+        pointSize: Style.fontSizeS
+        color: Color.mOnSurfaceVariant
+      }
+
+      NDivider {
+        Layout.fillWidth: true
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+
+        NLabel {
+          Layout.fillWidth: true
+          label: I18n.tr("panels.color-scheme.surface-style-label")
+        }
+
+        NTabBar {
+          id: surfaceStyleSelector
+          Layout.preferredWidth: 220 * Style.uiScaleRatio
+          distributeEvenly: true
+          enabled: ["tonal-spot", "content", "fruit-salad", "rainbow", "monochrome"].includes(Settings.data.colorSchemes.generationMethod)
+          opacity: enabled ? 1.0 : 0.6
+          currentIndex: Settings.data.colorSchemes.surfaceStyle === "tinted" ? 1 : 0
+
+          NTabButton {
+            text: I18n.tr("panels.color-scheme.surface-style-classic")
+            tabIndex: 0
+            checked: Settings.data.colorSchemes.surfaceStyle !== "tinted"
+            onClicked: Settings.data.colorSchemes.surfaceStyle = "classic"
+          }
+
+          NTabButton {
+            text: "Tinted"
+            tabIndex: 1
+            checked: Settings.data.colorSchemes.surfaceStyle === "tinted"
+            onClicked: Settings.data.colorSchemes.surfaceStyle = "tinted"
+          }
+        }
+      }
+
+      NText {
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+        text: I18n.tr(surfaceStyleSelector.enabled ? "panels.color-scheme.surface-style-description" : "panels.color-scheme.surface-style-unsupported")
         pointSize: Style.fontSizeS
         color: Color.mOnSurfaceVariant
       }

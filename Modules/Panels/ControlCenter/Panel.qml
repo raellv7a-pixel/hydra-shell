@@ -393,7 +393,7 @@ Item {
   }
 
   function componentBackground(componentKey) {
-    return root.componentColor(componentKey, "background", root.m3SurfaceContainerLow);
+    return root.componentColor(componentKey, "background", root.m3SurfaceContainerHigh);
   }
 
   function componentText(componentKey, strong) {

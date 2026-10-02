@@ -135,7 +135,6 @@ ColumnLayout {
       visible: Settings.data.wallpaper.enableMultiMonitorDirectories
       Layout.fillWidth: true
       radius: Style.radiusM
-      color: Color.mSurface
       border.color: Color.mOutline
       border.width: Style.borderS
       implicitHeight: contentCol.implicitHeight + Style.margin2L

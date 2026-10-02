@@ -24,9 +24,9 @@ ColumnLayout {
     id: headerContainer
     Layout.fillWidth: true
     Layout.preferredHeight: headerContent.implicitHeight + Style.margin2M
-    color: root.expanded ? Color.mSecondary : Color.mPrimary
+    color: headerArea.containsMouse ? Color.mSurfaceContainerHighest : (root.expanded ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh)
     radius: Style.iRadiusM
-    border.color: root.expanded ? Color.mOnSecondary : Color.mOutline
+    border.color: Color.mOutline
     border.width: Style.borderS
 
     // Smooth color transitions
@@ -57,20 +57,6 @@ ColumnLayout {
         root.expanded = !root.expanded;
         root.toggled(root.expanded);
       }
-
-      // Hover effect overlay
-      Rectangle {
-        anchors.fill: parent
-        color: headerArea.containsMouse ? Color.mOnSurface : "transparent"
-        opacity: headerArea.containsMouse ? 0.08 : 0
-        radius: headerContainer.radius // Reference the container's radius directly
-
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
-          }
-        }
-      }
     }
 
     RowLayout {
@@ -84,7 +70,7 @@ ColumnLayout {
         id: chevronIcon
         icon: "chevron-right"
         pointSize: Style.fontSizeL
-        color: root.expanded ? Color.mOnSecondary : Color.mOnPrimary
+        color: Color.mPrimary
         Layout.alignment: Qt.AlignVCenter
 
         rotation: root.expanded ? 90 : 0
@@ -114,7 +100,7 @@ ColumnLayout {
           text: root.label
           pointSize: Style.fontSizeL
           font.weight: Style.fontWeightSemiBold
-          color: root.expanded ? Color.mOnSecondary : Color.mOnPrimary
+          color: root.expanded && !headerArea.containsMouse ? Color.mOnSecondaryContainer : Color.mOnSurface
           wrapMode: Text.WordWrap
 
           Behavior on color {
@@ -129,7 +115,7 @@ ColumnLayout {
           text: root.description
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightRegular
-          color: root.expanded ? Color.mOnSecondary : Color.mOnPrimary
+          color: root.expanded && !headerArea.containsMouse ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
           Layout.fillWidth: true
           wrapMode: Text.WordWrap
           visible: root.description !== ""
@@ -153,7 +139,7 @@ ColumnLayout {
     Layout.topMargin: Style.marginS
 
     visible: root.expanded
-    color: Color.mSurface
+    color: Color.mSurfaceContainerHigh
     radius: Style.iRadiusL
     border.color: Color.mOutline
     border.width: Style.borderS

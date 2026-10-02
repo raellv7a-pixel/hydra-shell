@@ -41,14 +41,14 @@ DashboardCard {
         baseSize: Math.round(28 * panelRoot.panelUnit)
         tooltipText: panelRoot.tr("refresh")
         onClicked: panelRoot.refreshEasyEffects()
-        colorBg: Qt.alpha(Color.mSurfaceVariant, 0.4)
+        colorBg: Color.mSurfaceContainerHighest
       }
     }
 
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.round(54 * panelRoot.panelUnit)
-      color: Qt.alpha(Color.mSurfaceVariant, 0.3)
+      color: Color.mSurfaceContainerHighest
       radius: Style.radiusS
 
       RowLayout {
@@ -135,7 +135,7 @@ DashboardCard {
       icon: "chevron-down"
       fontSize: Style.fontSizeS
       horizontalAlignment: Qt.AlignLeft
-      backgroundColor: Qt.alpha(Color.mSurfaceVariant, 0.5)
+      backgroundColor: Color.mSurfaceContainerHighest
       textColor: Color.mOnSurface
       onClicked: {
         var items = [];

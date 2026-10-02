@@ -143,13 +143,14 @@ class TemplateRenderer:
     # Regex for expression tags: {{ ... }}
     _EXPR_RE = re.compile(r"\{\{([^}\n]+?)\}\}")
 
-    def __init__(self, theme_data: dict[str, dict[str, str]], verbose: bool = True, default_mode: str = "dark", image_path: Optional[str] = None, scheme_type: str = "content"):
+    def __init__(self, theme_data: dict[str, dict[str, str]], verbose: bool = True, default_mode: str = "dark", image_path: Optional[str] = None, scheme_type: str = "content", surface_style: str = "classic"):
         self.theme_data = theme_data
         self.closest_color = ""
         self.verbose = verbose
         self.default_mode = default_mode
         self.image_path = image_path
         self.scheme_type = scheme_type
+        self.surface_style = surface_style
         self._current_file: Optional[str] = None
         self._error_count = 0
         self._colors_map: Optional[dict[str, dict[str, str]]] = None
@@ -955,8 +956,10 @@ class TemplateRenderer:
         # Parse template into node tree
         nodes = self._parse_template(template_text)
 
-        # Evaluate with empty scope
+        # Output templates may opt into exact containers only for active Tinted.
+        # Classic preserves Hydra's legacy blends and existing appearance.
         scope = VariableScope()
+        scope.push({"is_tinted": self.surface_style == "tinted"})
         result = self._evaluate_nodes(nodes, scope)
 
         if self.closest_color:

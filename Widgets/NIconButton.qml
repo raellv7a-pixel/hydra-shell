@@ -17,10 +17,10 @@ Item {
   property bool handleWheel: false
   property bool hovering: false
 
-  property color colorBg: Color.smartAlpha(Color.mSurfaceVariant)
+  property color colorBg: Color.smartAlpha(Color.mSurfaceContainerHigh)
   property color colorFg: Color.mPrimary
-  property color colorBgHover: Color.mHover
-  property color colorFgHover: Color.mOnHover
+  property color colorBgHover: Color.mSurfaceContainerHighest
+  property color colorFgHover: Color.mOnSurface
   property color colorBorder: Color.mOutline
   property color colorBorderHover: Color.mOutline
   property real customRadius: -1 // -1 means use default (iRadiusL), otherwise use this value

@@ -11,7 +11,7 @@ DashboardCard {
   readonly property bool selected: playerIndex === MediaService.selectedPlayerIndex
 
   Layout.preferredHeight: Math.round(52 * panelRoot.panelUnit)
-  color: selected ? Qt.alpha(Color.mPrimary, 0.14) : Qt.alpha(Color.mSurface, 0.32)
+  color: selected ? Color.mPrimaryContainer : Color.mSurfaceContainerHighest
   radius: Style.radiusS
   border.color: selected ? Qt.alpha(Color.mPrimary, 0.38) : "transparent"
 
@@ -23,7 +23,7 @@ DashboardCard {
     NIcon {
       icon: selected ? "circle-filled" : "music"
       pointSize: Style.fontSizeM
-      color: selected ? Color.mPrimary : Color.mOnSurfaceVariant
+      color: selected ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
     }
 
     ColumnLayout {
@@ -33,7 +33,7 @@ DashboardCard {
       NText {
         Layout.fillWidth: true
         text: panelRoot.playerLabel(playerRow.playerData)
-        color: Color.mOnSurface
+        color: selected ? Color.mOnPrimaryContainer : Color.mOnSurface
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
       }
@@ -41,7 +41,7 @@ DashboardCard {
       NText {
         Layout.fillWidth: true
         text: (playerRow.playerData?.trackTitle || panelRoot.tr("nothingPlaying"))
-        color: Color.mOnSurfaceVariant
+        color: selected ? Qt.alpha(Color.mOnPrimaryContainer, 0.78) : Color.mOnSurfaceVariant
         pointSize: Style.fontSizeXS
         elide: Text.ElideRight
       }

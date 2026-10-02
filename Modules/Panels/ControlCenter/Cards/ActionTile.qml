@@ -22,7 +22,7 @@ DashboardCard {
 
   Layout.fillWidth: true
   Layout.preferredHeight: Math.round(64 * panelRoot.panelUnit)
-  color: active ? panelRoot.m3PrimaryContainer : panelRoot.componentColor(styleKey, "buttonBackground", panelRoot.m3SurfaceContainerHigh)
+  color: active ? panelRoot.m3PrimaryContainer : panelRoot.componentColor(styleKey, "buttonBackground", hoverHandler.hovered ? panelRoot.m3SurfaceContainerHighest : panelRoot.m3SurfaceContainerHigh)
   radius: Style.iRadiusL
   border.color: activeFocus ? panelRoot.componentAccent(styleKey) : "transparent"
   border.width: activeFocus ? Style.borderM : 0
@@ -76,7 +76,7 @@ DashboardCard {
 
       NIcon {
         icon: iconName
-        color: active ? panelRoot.componentAccent(actionTile.styleKey) : panelRoot.componentText(actionTile.styleKey, false)
+        color: active ? Color.mOnPrimaryContainer : panelRoot.componentText(actionTile.styleKey, false)
         pointSize: Style.fontSizeXL
         scale: active ? 1.08 : 1
 
@@ -91,7 +91,7 @@ DashboardCard {
       NText {
         Layout.fillWidth: true
         text: labelText
-        color: panelRoot.componentText(actionTile.styleKey, true)
+        color: active ? panelRoot.componentColor(actionTile.styleKey, "text", Color.mOnPrimaryContainer) : panelRoot.componentText(actionTile.styleKey, true)
         pointSize: Style.fontSizeS
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
@@ -108,7 +108,7 @@ DashboardCard {
         Layout.fillWidth: true
         text: detailText
         pointSize: Style.fontSizeXS
-        color: panelRoot.componentText(actionTile.styleKey, false)
+        color: active ? panelRoot.componentColor(actionTile.styleKey, "subtext", Qt.alpha(Color.mOnPrimaryContainer, 0.78)) : panelRoot.componentText(actionTile.styleKey, false)
         elide: Text.ElideRight
       }
 
@@ -119,9 +119,9 @@ DashboardCard {
         baseSize: Math.round(24 * panelRoot.panelUnit)
         tooltipText: secondaryTooltip
         colorBg: "transparent"
-        colorBgHover: panelRoot.componentButtonBackground(actionTile.styleKey)
-        colorFg: panelRoot.componentText(actionTile.styleKey, false)
-        colorFgHover: panelRoot.componentButtonText(actionTile.styleKey)
+        colorBgHover: panelRoot.componentColor(actionTile.styleKey, "buttonBackground", Color.mSurfaceContainerHighest)
+        colorFg: active ? Color.mOnPrimaryContainer : panelRoot.componentText(actionTile.styleKey, false)
+        colorFgHover: panelRoot.componentColor(actionTile.styleKey, "buttonText", Color.mOnSurface)
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: actionTile.secondaryTriggered()

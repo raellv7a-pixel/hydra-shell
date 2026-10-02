@@ -29,7 +29,6 @@ ColumnLayout {
       id: monitorCard
       Layout.fillWidth: true
       implicitHeight: cardContent.implicitHeight + Style.margin2L
-      color: Color.mSurface
 
       required property var modelData
       readonly property string screenName: modelData.name || "Unknown"

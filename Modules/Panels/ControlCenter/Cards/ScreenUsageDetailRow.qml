@@ -9,7 +9,7 @@ DashboardCard {
   property int maxSeconds: 1
 
   Layout.preferredHeight: Math.round(66 * panelRoot.panelUnit)
-  color: Qt.alpha(Color.mSurface, 0.34)
+  color: Color.mSurfaceContainerHighest
   radius: Style.radiusS
 
   ColumnLayout {
@@ -63,7 +63,7 @@ DashboardCard {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.max(5, Math.round(6 * panelRoot.panelUnit))
       radius: height / 2
-      color: Qt.alpha(Color.mSurfaceVariant, 0.24)
+      color: Color.mSurfaceContainerLow
 
       Rectangle {
         anchors.left: parent.left

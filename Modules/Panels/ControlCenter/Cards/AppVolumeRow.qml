@@ -12,7 +12,7 @@ DashboardCard {
   readonly property real streamVolume: streamNode?.audio?.volume ?? 0
 
   Layout.preferredHeight: Math.round(72 * panelRoot.panelUnit)
-  color: Qt.alpha(Color.mSurface, 0.34)
+  color: Color.mSurfaceContainerHighest
   radius: Style.radiusS
 
   ColumnLayout {

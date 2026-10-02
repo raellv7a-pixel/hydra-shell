@@ -10,7 +10,7 @@ DashboardCard {
   detailTransition: true
   detailTransitionDirection: "left"
 
-  color: panelRoot.componentColor("media", "background", panelRoot.musicActive ? panelRoot.m3PrimaryContainer : panelRoot.m3SurfaceContainerLow)
+  color: panelRoot.componentColor("media", "background", panelRoot.musicActive ? panelRoot.m3PrimaryContainer : panelRoot.m3SurfaceContainerHigh)
   border.color: borderEffectVisible ? Qt.alpha(panelRoot.componentAccent("media"), 0.42) : "transparent"
   clip: true
 
@@ -105,7 +105,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: MediaService.trackTitle || panelRoot.tr("nothingPlaying")
-          color: Color.mOnSurface
+          color: panelRoot.componentColor("media", "text", panelRoot.musicActive ? Color.mOnPrimaryContainer : Color.mOnSurface)
           font.weight: Style.fontWeightSemiBold
           elide: Text.ElideRight
         }
@@ -113,7 +113,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: MediaService.trackArtist || MediaService.playerIdentity || ""
-          color: Color.mOnSurfaceVariant
+          color: panelRoot.componentColor("media", "subtext", panelRoot.musicActive ? Qt.alpha(Color.mOnPrimaryContainer, 0.78) : Color.mOnSurfaceVariant)
           pointSize: Style.fontSizeS
           elide: Text.ElideRight
         }

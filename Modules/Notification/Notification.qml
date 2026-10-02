@@ -551,7 +551,7 @@ Variants {
                 radius: Style.radiusL
                 border.color: Qt.alpha(Color.mOutline, Color.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
                 border.width: Style.borderS
-                color: Qt.alpha(Color.mSurface, Color.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
+                color: Qt.alpha(Color.mSurfaceContainerHigh, Color.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
 
                 // Progress bar
                 Rectangle {
@@ -725,8 +725,8 @@ Variants {
                           }
                           fontSize: Style.fontSizeS
                           backgroundColor: Color.mPrimary
-                          textColor: hovered ? Color.mOnHover : Color.mOnPrimary
-                          hoverColor: Color.mHover
+                          textColor: Color.mOnPrimary
+                          hoverColor: Color.mSurfaceContainerHighest
                           outlined: false
                           implicitHeight: 24
                           onClicked: {

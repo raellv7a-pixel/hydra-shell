@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
+
 // Square capture-tool button used by RecordingCard's GIF/MP4/screenshot grid.
 DashboardCard {
   id: toolkitButton
@@ -16,7 +17,7 @@ DashboardCard {
 
   Layout.fillWidth: true
   Layout.preferredHeight: Math.round(32 * panelRoot.panelUnit)
-  color: destructive ? Qt.alpha(Color.mError, 0.14) : (active ? panelRoot.m3PrimaryContainer : panelRoot.componentColor(styleKey, "buttonBackground", panelRoot.m3SurfaceContainerHigh))
+  color: destructive ? Qt.alpha(Color.mError, 0.14) : (active ? panelRoot.m3PrimaryContainer : panelRoot.componentColor(styleKey, "buttonBackground", mouseArea.containsMouse ? panelRoot.m3SurfaceContainerHighest : panelRoot.m3SurfaceContainerHigh))
   radius: height / 2
   border.color: activeFocus ? (destructive ? Color.mError : panelRoot.componentAccent(styleKey)) : "transparent"
   border.width: activeFocus ? Style.borderM : 0
@@ -48,13 +49,13 @@ DashboardCard {
     NIcon {
       icon: iconName
       pointSize: Style.fontSizeM
-      color: destructive ? Color.mError : panelRoot.componentAccent(toolkitButton.styleKey)
+      color: destructive ? Color.mError : (active ? Color.mOnPrimaryContainer : panelRoot.componentAccent(toolkitButton.styleKey))
     }
 
     NText {
       Layout.fillWidth: true
       text: labelText
-      color: panelRoot.componentText(toolkitButton.styleKey, true)
+      color: active && !destructive ? panelRoot.componentColor(toolkitButton.styleKey, "text", Color.mOnPrimaryContainer) : panelRoot.componentText(toolkitButton.styleKey, true)
       pointSize: Style.fontSizeS
       font.weight: Style.fontWeightSemiBold
       elide: Text.ElideRight

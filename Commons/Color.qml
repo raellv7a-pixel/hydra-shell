@@ -81,21 +81,116 @@ Singleton {
   property color mHover: defaultColors.mHover
   property color mOnHover: defaultColors.mOnHover
 
-  // --- Material 3 container roles derived from the active dynamic scheme
-  readonly property color mSurfaceContainerLow: blend(mSurface, mSurfaceVariant, 0.18)
-  readonly property color mSurfaceContainer: blend(mSurface, mSurfaceVariant, 0.36)
-  readonly property color mSurfaceContainerHigh: blend(mSurface, mSurfaceVariant, 0.56)
-  readonly property color mSurfaceContainerHighest: blend(mSurface, mSurfaceVariant, 0.76)
-  readonly property color mPrimaryContainer: blend(mSurfaceContainerHigh, mPrimary, 0.22)
-  readonly property color mOnPrimaryContainer: mOnSurface
-  readonly property color mSecondaryContainer: blend(mSurfaceContainerHigh, mSecondary, 0.20)
-  readonly property color mOnSecondaryContainer: mOnSurface
+  // Optional engine roles. Replaced on EVERY load so a later legacy/predefined
+  // file cannot retain containers from the previous wallpaper palette.
+  property var surfaceContainerRoles: ({})
+  property color _surfaceContainerLowest: surfaceContainerRoles.mSurfaceContainerLowest ?? mSurface
+  property color _surfaceContainerLow: surfaceContainerRoles.mSurfaceContainerLow ?? blend(mSurface, mSurfaceVariant, 0.18)
+  property color _surfaceContainer: surfaceContainerRoles.mSurfaceContainer ?? blend(mSurface, mSurfaceVariant, 0.36)
+  property color _surfaceContainerHigh: surfaceContainerRoles.mSurfaceContainerHigh ?? blend(mSurface, mSurfaceVariant, 0.56)
+  property color _surfaceContainerHighest: surfaceContainerRoles.mSurfaceContainerHighest ?? blend(mSurface, mSurfaceVariant, 0.76)
+  readonly property color mSurfaceContainerLowest: _surfaceContainerLowest
+  readonly property color mSurfaceContainerLow: _surfaceContainerLow
+  readonly property color mSurfaceContainer: _surfaceContainer
+  readonly property color mSurfaceContainerHigh: _surfaceContainerHigh
+  readonly property color mSurfaceContainerHighest: _surfaceContainerHighest
+  property color _primaryContainer: surfaceContainerRoles.mPrimaryContainer ?? blend(mSurfaceContainerHigh, mPrimary, 0.22)
+  property color _onPrimaryContainer: surfaceContainerRoles.mOnPrimaryContainer ?? mOnSurface
+  property color _secondaryContainer: surfaceContainerRoles.mSecondaryContainer ?? blend(mSurfaceContainerHigh, mSecondary, 0.20)
+  property color _onSecondaryContainer: surfaceContainerRoles.mOnSecondaryContainer ?? mOnSurface
+  property color _tertiaryContainer: surfaceContainerRoles.mTertiaryContainer ?? blend(mSurfaceContainerHigh, mTertiary, 0.20)
+  property color _onTertiaryContainer: surfaceContainerRoles.mOnTertiaryContainer ?? mOnSurface
+  readonly property color mPrimaryContainer: _primaryContainer
+  readonly property color mOnPrimaryContainer: _onPrimaryContainer
+  readonly property color mSecondaryContainer: _secondaryContainer
+  readonly property color mOnSecondaryContainer: _onSecondaryContainer
+  readonly property color mTertiaryContainer: _tertiaryContainer
+  readonly property color mOnTertiaryContainer: _onTertiaryContainer
   readonly property color mErrorContainer: blend(mSurfaceContainerHigh, mError, 0.22)
   readonly property color mOnErrorContainer: mOnSurface
 
   function blend(base, accent, amount) {
     const ratio = Math.max(0, Math.min(1, Number(amount || 0)));
     return Qt.rgba(base.r + (accent.r - base.r) * ratio, base.g + (accent.g - base.g) * ratio, base.b + (accent.b - base.b) * ratio, base.a + (accent.a - base.a) * ratio);
+  }
+
+  Behavior on _surfaceContainerLowest {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _surfaceContainerLow {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _surfaceContainer {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _surfaceContainerHigh {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _surfaceContainerHighest {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+
+  Behavior on _primaryContainer {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _onPrimaryContainer {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _secondaryContainer {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _onSecondaryContainer {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _tertiaryContainer {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
+  }
+  Behavior on _onTertiaryContainer {
+    enabled: !root.skipTransition
+    ColorAnimation {
+      duration: Style.animationSlowest
+      easing.type: Easing.OutCubic
+    }
   }
 
   // --- Color transition animations ---
@@ -446,12 +541,20 @@ Singleton {
     printErrors: false
     watchChanges: true
     onFileChanged: scheduleExternalColorReload()
-    onAdapterUpdated: {
-      Logger.d("Color", "Writing colors to disk");
-      writeAdapter();
-    }
 
     onLoaded: {
+      // Keep optional keys out of JsonAdapter: absent fields must reset, not
+      // stick across loads. This FileView is read-only except ENOENT defaults.
+      try {
+        const next = JSON.parse(text());
+        const optionalKeys = ["mSurfaceContainerLowest", "mSurfaceContainerLow", "mSurfaceContainer", "mSurfaceContainerHigh", "mSurfaceContainerHighest", "mPrimaryContainer", "mOnPrimaryContainer", "mSecondaryContainer", "mOnSecondaryContainer", "mTertiaryContainer", "mOnTertiaryContainer"];
+        const containersChanged = optionalKeys.some(key => next[key] !== root.surfaceContainerRoles[key]);
+        root.surfaceContainerRoles = next;
+        if (!root.skipTransition && containersChanged)
+        root.startTransition();
+      } catch (error) {
+        Logger.w("Color", "Failed to parse surface container roles:", error);
+      }
       if (root.skipTransition) {
         Qt.callLater(function () {
           root.skipTransition = false;

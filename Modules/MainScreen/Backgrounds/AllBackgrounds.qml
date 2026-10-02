@@ -23,7 +23,7 @@ Item {
   // Reference to MainScreen (for panel access)
   required property var windowRoot
 
-  readonly property color panelBackgroundColor: Color.mSurface
+  readonly property color panelBackgroundColor: Color.mSurfaceContainer
 
   anchors.fill: parent
 
@@ -58,7 +58,7 @@ Item {
           bar: root.bar
           shapeContainer: unifiedBackgroundsShape
           windowRoot: root.windowRoot
-          backgroundColor: panelBackgroundColor
+          backgroundColor: Color.mSurfaceContainerLow
         }
 
         /**
@@ -190,7 +190,7 @@ Item {
             bar: root.bar
             shapeContainer: barBackgroundShape
             windowRoot: root.windowRoot
-            backgroundColor: panelBackgroundColor
+            backgroundColor: Color.mSurfaceContainerLow
           }
         }
 

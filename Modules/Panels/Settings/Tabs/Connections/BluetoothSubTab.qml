@@ -145,7 +145,6 @@ Item {
       visible: !root.showOnlyLists
       Layout.fillWidth: true
       Layout.preferredHeight: masterControlCol.implicitHeight + Style.margin2L
-      color: Color.mSurface
 
       ColumnLayout {
         id: masterControlCol
@@ -308,7 +307,6 @@ Item {
       visible: !root.showOnlyLists && BluetoothService.enabled
       Layout.fillWidth: true
       Layout.preferredHeight: miscSettingsCol.implicitHeight + Style.margin2XL
-      color: Color.mSurface
 
       ColumnLayout {
         id: miscSettingsCol

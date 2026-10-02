@@ -10,7 +10,7 @@ DashboardCard {
   property var dailyData: null
 
   Layout.preferredHeight: Math.round(54 * panelRoot.panelUnit)
-  color: Qt.alpha(Color.mSurface, 0.32)
+  color: Color.mSurfaceContainerHighest
   radius: Style.radiusS
 
   RowLayout {

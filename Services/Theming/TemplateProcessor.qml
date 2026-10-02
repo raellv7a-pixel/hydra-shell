@@ -341,8 +341,8 @@ Singleton {
   // ================================================================================
   // Maps the snake_case keys template-processor.py returns to the "m*" keys that
   // feed colors.json / Commons/Color.qml, per Assets/Templates/hydra.json.
-  // Only the roles that template actually consumes — the rest of Color.qml's
-  // properties are derived locally (blend()) from these, not sourced from Python.
+  // Surface containers are transported explicitly; accent containers remain
+  // derived locally in Commons/Color.qml.
   readonly property var colorKeyMap: ({
                                         "mPrimary": "primary",
                                         "mOnPrimary": "on_primary",
@@ -354,7 +354,18 @@ Singleton {
                                         "mOnError": "on_error",
                                         "mSurface": "surface",
                                         "mOnSurface": "on_surface",
-                                        "mSurfaceVariant": "surface_container",
+                                        "mSurfaceVariant": "surface_variant",
+                                        "mSurfaceContainerLowest": "surface_container_lowest",
+                                        "mSurfaceContainerLow": "surface_container_low",
+                                        "mSurfaceContainer": "surface_container",
+                                        "mSurfaceContainerHigh": "surface_container_high",
+                                        "mSurfaceContainerHighest": "surface_container_highest",
+                                        "mPrimaryContainer": "primary_container",
+                                        "mOnPrimaryContainer": "on_primary_container",
+                                        "mSecondaryContainer": "secondary_container",
+                                        "mOnSecondaryContainer": "on_secondary_container",
+                                        "mTertiaryContainer": "tertiary_container",
+                                        "mOnTertiaryContainer": "on_tertiary_container",
                                         "mOnSurfaceVariant": "on_surface_variant",
                                         "mOutline": "outline_variant",
                                         "mShadow": "shadow",
@@ -395,6 +406,7 @@ Singleton {
             result = {
               "dark": parsed.dark || null,
               "light": parsed.light || null,
+              "surfaceStyle": parsed._surface_style || "classic",
               "recommendedMode": parsed._recommended_mode || null
             };
           } catch (e) {
@@ -433,7 +445,7 @@ Singleton {
       callback(null);
       return;
     }
-    process.command = ["python3", templateProcessorScript, wallpaperPath, "--scheme-type", schemeType];
+    process.command = ["python3", templateProcessorScript, wallpaperPath, "--scheme-type", schemeType, "--surface-style", getSurfaceStyle()];
     process.running = true;
   }
 
@@ -442,6 +454,10 @@ Singleton {
     const method = Settings.data.colorSchemes.generationMethod;
     const validKeys = root.schemeTypes.map(scheme => scheme.key);
     return validKeys.includes(method) ? method : "tonal-spot";
+  }
+
+  function getSurfaceStyle() {
+    return Settings.data.colorSchemes.useWallpaperColors && Settings.data.colorSchemes.surfaceStyle === "tinted" ? "tinted" : "classic";
   }
 
   function buildGenerationScript(content, wallpaper, mode) {
@@ -460,7 +476,7 @@ Singleton {
       // Don't pass --mode so templates get both dark and light colors (e.g., zed.json needs both)
       // Pass --default-mode so "default" in templates resolves to the current theme mode
       const schemeType = getSchemeType();
-      script += `python3 "${templateProcessorScript}" "$HYDRA_WP_PATH" --scheme-type ${schemeType} --config '${pathEsc}' --default-mode ${mode}\n`;
+      script += `python3 "${templateProcessorScript}" "$HYDRA_WP_PATH" --scheme-type ${schemeType} --surface-style ${getSurfaceStyle()} --config '${pathEsc}' --default-mode ${mode}\n`;
     }
 
     script += buildUserTemplateCommand("$HYDRA_WP_PATH", mode);
@@ -485,7 +501,7 @@ Singleton {
     const schemeType = getSchemeType();
     // Don't pass --mode so user templates get both dark and light colors
     // Pass --default-mode so "default" in templates resolves to the current theme mode
-    script += `  python3 "${templateProcessorScript}" ${inputQuoted} --scheme-type ${schemeType} --config '${userConfigPath}' --default-mode ${mode}\n`;
+    script += `  python3 "${templateProcessorScript}" ${inputQuoted} --scheme-type ${schemeType} --surface-style ${getSurfaceStyle()} --config '${userConfigPath}' --default-mode ${mode}\n`;
     script += "fi";
 
     return script;

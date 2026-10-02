@@ -67,7 +67,7 @@ Item {
       panelRoot: screenUsagePage.panelRoot
       Layout.fillWidth: true
       Layout.preferredHeight: Math.round(76 * panelRoot.panelUnit)
-      color: Qt.alpha(Color.mSurface, 0.34)
+      color: Color.mSurfaceContainerHighest
       radius: Style.radiusS
 
       RowLayout {

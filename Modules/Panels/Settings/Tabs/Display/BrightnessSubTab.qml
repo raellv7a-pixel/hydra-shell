@@ -20,7 +20,6 @@ ColumnLayout {
       delegate: NBox {
         Layout.fillWidth: true
         implicitHeight: Math.round(contentCol.implicitHeight + Style.margin2L)
-        color: Color.mSurface
 
         property var brightnessMonitor: BrightnessService.getMonitorForScreen(modelData)
         property real localBrightness: 0.5

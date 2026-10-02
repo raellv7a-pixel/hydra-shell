@@ -169,10 +169,10 @@ DashboardCard {
           icon: modelData.identifier === "default" ? "external-link" : ""
           fontSize: Style.fontSizeS
           implicitHeight: Math.round(26 * panelRoot.panelUnit)
-          backgroundColor: Qt.alpha(Color.mPrimary, 0.16)
-          textColor: Color.mOnSurface
-          hoverColor: Color.mHover
-          textHoverColor: Color.mOnHover
+          backgroundColor: Color.mPrimaryContainer
+          textColor: Color.mOnPrimaryContainer
+          hoverColor: Color.mSurfaceContainerHighest
+          textHoverColor: Color.mOnSurface
           onClicked: NotificationService.invokeAction(notificationData.id, modelData.identifier)
         }
       }

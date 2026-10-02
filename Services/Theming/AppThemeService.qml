@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.Commons
 import qs.Services.System
+import qs.Services.Theming
 import qs.Services.UI
 
 Singleton {
@@ -80,6 +81,10 @@ Singleton {
     function onGenerationMethodChanged() {
       Logger.d("AppThemeService", "Generation method changed to:", Settings.data.colorSchemes.generationMethod);
       generate();
+    }
+    function onSurfaceStyleChanged() {
+      if (Settings.data.colorSchemes.useWallpaperColors)
+        generateFromWallpaper();
     }
   }
 

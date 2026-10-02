@@ -402,6 +402,33 @@ def _parse_ppm(data: bytes) -> list[RGB]:
     return pixels
 
 
+def read_grayscale_sample(path: Path) -> list[tuple[int, int, int, int]]:
+    """128px aspect-preserving Triangle RGBA thumbnail for Smart Monochrome.
+
+    Mirrors Studio's analysis dimensions/filter and retains alpha so invisible
+    pixels cannot influence the grayscale score. Extraction stays independent.
+    """
+    args = [str(path) + "[0]", '-filter', 'Triangle', '-resize', '128x128',
+            '-depth', '8', '-colorspace', 'sRGB', '-strip', 'rgba:-']
+    try:
+        try:
+            result = subprocess.run(
+                ['magick', *args], capture_output=True, check=True,
+                timeout=_PROCESS_TIMEOUT_SECONDS,
+            )
+        except FileNotFoundError:
+            result = subprocess.run(
+                ['convert', *args], capture_output=True, check=True,
+                timeout=_PROCESS_TIMEOUT_SECONDS,
+            )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+        raise ImageReadError(f"Smart Monochrome image analysis failed: {e}") from e
+    data = result.stdout
+    if not data or len(data) % 4:
+        raise ImageReadError("Invalid RGBA thumbnail for Smart Monochrome")
+    return [tuple(data[i:i + 4]) for i in range(0, len(data), 4)]
+
+
 def read_image(path: Path, resize_filter: str = "Triangle") -> list[RGB]:
     """
     Read an image file and return its pixels as RGB tuples.

@@ -176,7 +176,6 @@ ColumnLayout {
         Layout.leftMargin: Style.borderS
         Layout.rightMargin: Style.borderS
         implicitHeight: Math.round(contentColumn.implicitHeight + Style.margin2L)
-        color: Color.mSurface
 
         ColumnLayout {
           id: contentColumn

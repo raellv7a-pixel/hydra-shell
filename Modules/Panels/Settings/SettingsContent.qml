@@ -1245,7 +1245,7 @@ Item {
         Layout.fillHeight: true
         Layout.alignment: Qt.AlignTop
         radius: Style.radiusL
-        color: Color.mSurfaceContainerLow
+        color: Color.mSurfaceContainer
         border.color: "transparent"
 
         ColumnLayout {

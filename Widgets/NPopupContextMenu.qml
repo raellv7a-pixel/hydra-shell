@@ -208,7 +208,7 @@ PopupWindow {
   Rectangle {
     id: menuBackground
     anchors.fill: parent
-    color: Color.mSurface
+    color: Color.mSurfaceContainerHigh
     border.color: Color.mOutline
     border.width: Style.borderS
     radius: Style.radiusM
@@ -258,7 +258,7 @@ PopupWindow {
           Rectangle {
             id: innerRect
             anchors.fill: parent
-            color: mouseArea.containsMouse ? Color.mHover : "transparent"
+            color: mouseArea.containsMouse ? Color.mSurfaceContainerHighest : "transparent"
             radius: Style.radiusS
             opacity: modelData.enabled !== false ? 1.0 : 0.5
 
@@ -279,7 +279,7 @@ PopupWindow {
                 icon: modelData.icon || ""
                 pointSize: Style.fontSizeS
                 applyUiScale: false
-                color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                color: Color.mOnSurface
                 verticalAlignment: Text.AlignVCenter
 
                 Behavior on color {
@@ -292,7 +292,7 @@ PopupWindow {
               NText {
                 text: modelData.label || modelData.text || ""
                 pointSize: Style.fontSizeS
-                color: mouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                color: Color.mOnSurface
                 verticalAlignment: Text.AlignVCenter
                 Layout.fillWidth: true
 

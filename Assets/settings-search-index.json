@@ -579,7 +579,22 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
-    "subTabLabel": "common.colors"
+    "subTabLabel": "common.colors",
+    "visibleWhen": [
+      "Settings.data.colorSchemes.useWallpaperColors"
+    ]
+  },
+  {
+    "labelKey": "panels.color-scheme.surface-style-label",
+    "descriptionKey": null,
+    "widget": "NLabel",
+    "tab": 2,
+    "tabLabel": "panels.color-scheme.title",
+    "subTab": 0,
+    "subTabLabel": "common.colors",
+    "visibleWhen": [
+      "Settings.data.colorSchemes.useWallpaperColors"
+    ]
   },
   {
     "labelKey": "panels.color-scheme.templates-misc-user-templates-label",

@@ -1237,6 +1237,7 @@ Singleton {
       property string manualSunrise: "06:30"
       property string manualSunset: "18:30"
       property string generationMethod: "tonal-spot"
+      property string surfaceStyle: "classic"
       property string monitorForColors: ""
       property bool syncGsettings: true
     }

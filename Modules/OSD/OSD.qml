@@ -575,7 +575,7 @@ Variants {
           anchors.fill: parent
           anchors.margins: Style.marginM * 1.5
           radius: Style.radiusL
-          color: Qt.alpha(Color.mSurface, Color.adaptiveOpacity(Settings.data.osd.backgroundOpacity) || 1.0)
+          color: Qt.alpha(Color.mSurfaceContainerHigh, Color.adaptiveOpacity(Settings.data.osd.backgroundOpacity) || 1.0)
           border.color: Qt.alpha(Color.mOutline, Color.adaptiveOpacity(Settings.data.osd.backgroundOpacity) || 1.0)
           border.width: {
             const bw = Math.max(2, Style.borderM);
@@ -646,7 +646,7 @@ Variants {
               Layout.alignment: Qt.AlignVCenter
               height: panel.barThickness
               radius: Math.min(Style.iRadiusL, panel.barThickness / 2)
-              color: Color.mSurfaceVariant
+              color: Color.mSurfaceContainerHighest
 
               Rectangle {
                 anchors.left: parent.left
@@ -777,7 +777,7 @@ Variants {
                 anchors.bottom: parent.bottom
                 width: panel.barThickness
                 radius: Math.min(Style.iRadiusL, panel.barThickness / 2)
-                color: Color.mSurfaceVariant
+                color: Color.mSurfaceContainerHighest
 
                 Rectangle {
                   anchors.left: parent.left

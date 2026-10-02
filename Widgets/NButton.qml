@@ -13,8 +13,8 @@ Item {
   property var tooltipText
   property color backgroundColor: Color.mPrimary
   property color textColor: Color.mOnPrimary
-  property color hoverColor: Color.mHover
-  property color textHoverColor: Color.mOnHover
+  property color hoverColor: Color.mSurfaceContainerHighest
+  property color textHoverColor: Color.mOnSurface
   property real fontSize: Style.fontSizeM
   property int fontWeight: Style.fontWeightSemiBold
   property real iconSize: Style.fontSizeL

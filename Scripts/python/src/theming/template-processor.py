@@ -56,6 +56,8 @@ from lib import (
     extract_source_color, source_color_to_rgb, Color, is_dark,
 )
 from lib.scheme import inject_terminal_colors
+from lib.image import read_grayscale_sample
+from lib.tinted import apply_surface_tint, grayscale_score, surface_tint_strength
 
 
 def parse_args() -> argparse.Namespace:
@@ -144,6 +146,13 @@ Examples:
         help='Theme mode to use for "default" in templates (default: dark)'
     )
 
+    parser.add_argument(
+        '--surface-style',
+        choices=['classic', 'tinted'],
+        default='classic',
+        help='Surface finish for generated wallpaper palettes; authored schemes stay unchanged'
+    )
+
     return parser.parse_args()
 
 
@@ -168,6 +177,8 @@ def main() -> int:
         modes = ["light"]
     else:
         modes = ["dark", "light"]
+
+    tint_applied = False
 
     # Path 1: Predefined scheme (--scheme flag)
     if args.scheme:
@@ -304,16 +315,33 @@ def main() -> int:
             # palette[0] is the dominant/source color for every scheme_type branch.
             recommended_mode = "light" if not is_dark(palette[0]) else "dark"
 
+            # Post-processing is orthogonal to the palette engine. Studio's
+            # grayscale guard uses a separate 128px RGBA Triangle thumbnail.
+            # Videos reuse Hydra's existing representative RGB frame.
+            score = None
+            if args.surface_style == 'tinted' and surface_tint_strength(scheme_type) > 0:
+                try:
+                    analysis_pixels = (
+                        pixels if args.image.suffix.lower() in {'.mp4', '.webm', '.mkv', '.mov'}
+                        else read_grayscale_sample(args.image)
+                    )
+                    score = grayscale_score(analysis_pixels)
+                except ImageReadError as e:
+                    print(f"Error reading image: {e}", file=sys.stderr)
+                    return 1
+
             # Generate theme for each mode
             for mode in modes:
                 result[mode] = generate_theme(palette, mode, scheme_type)
+                tint_applied |= apply_surface_tint(result[mode], scheme_type, args.surface_style, score)
 
     # Output JSON. `_recommended_mode` is metadata, not a mode's color dict — keep it
     # out of `result` itself, since `result` is reused below as TemplateRenderer's
     # theme_data, which assumes every top-level value is a {color_name: hex} dict.
-    output_data = result
+    effective_style = 'tinted' if tint_applied else 'classic'
+    output_data = dict(result, _surface_style=effective_style)
     if recommended_mode is not None:
-        output_data = dict(result, _recommended_mode=recommended_mode)
+        output_data['_recommended_mode'] = recommended_mode
     json_output = json.dumps(output_data, indent=2)
 
     if args.output:
@@ -329,7 +357,7 @@ def main() -> int:
     # Process templates
     if args.render or args.config:
         image_path = str(args.image) if args.image else None
-        renderer = TemplateRenderer(result, default_mode=args.default_mode, image_path=image_path, scheme_type=args.scheme_type)
+        renderer = TemplateRenderer(result, default_mode=args.default_mode, image_path=image_path, scheme_type=args.scheme_type, surface_style=effective_style)
 
         if args.render:
             for render_spec in args.render:
