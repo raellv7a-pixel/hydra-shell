@@ -117,7 +117,7 @@ Item {
   property int windowRevision: 0
 
   property ListModel localWorkspaces: ListModel {}
-  property int lastFocusedWorkspaceId: -1
+  property string lastFocusedWorkspaceId: ""
   property real masterProgress: 0.0
   property bool effectsActive: false
   property color effectColor: Color.mPrimary
@@ -129,7 +129,7 @@ Item {
   property int wheelAccumulatedDelta: 0
   property bool wheelCooldown: false
 
-  signal workspaceChanged(int workspaceId, color accentColor)
+  signal workspaceChanged(string workspaceId, color accentColor)
 
   property bool isHovered: false
 
@@ -339,8 +339,7 @@ Item {
       const screenName = screen.name.toLowerCase();
       for (var i = 0; i < CompositorService.workspaces.count; i++) {
         const ws = CompositorService.workspaces.get(i);
-        // For global workspaces (e.g., LabWC), show all workspaces on all screens
-        const matchesScreen = CompositorService.globalWorkspaces || (followFocusedScreen && ws.output.toLowerCase() == focusedOutput) || (!followFocusedScreen && ws.output.toLowerCase() == screenName);
+        const matchesScreen = (followFocusedScreen && ws.output.toLowerCase() == focusedOutput) || (!followFocusedScreen && ws.output.toLowerCase() == screenName);
 
         if (!matchesScreen)
           continue;
@@ -351,6 +350,8 @@ Item {
         var workspaceData = {
           id: ws.id,
           idx: ws.idx,
+          index: ws.index,
+          named: ws.named,
           name: ws.name,
           output: ws.output,
           isFocused: ws.isFocused,
@@ -407,7 +408,7 @@ Item {
     for (var i = 0; i < localWorkspaces.count; i++) {
       const ws = localWorkspaces.get(i);
       if (ws.isFocused === true) {
-        if (root.lastFocusedWorkspaceId !== -1 && root.lastFocusedWorkspaceId !== ws.id) {
+        if (root.lastFocusedWorkspaceId !== "" && root.lastFocusedWorkspaceId !== ws.id) {
           root.triggerUnifiedWave();
         }
         root.lastFocusedWorkspaceId = ws.id;

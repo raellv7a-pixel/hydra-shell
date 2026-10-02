@@ -65,14 +65,14 @@ Sharpshooter is for decisions learned through real testing (architecture, UX con
 
 ## Lab, preview, deploy, rollback
 
-- Lab/source: `~/Projetos/hydra-shell`, branch `legacy-v4`.
+- Lab/source: `~/Projetos/hydra-shell`, on the named feature branch being validated.
 - Active shell: `~/.config/quickshell/hydra-shell`; edit only the Lab.
 - State records: `$XDG_STATE_HOME/hydra-shell-lab`, default `~/.local/state/hydra-shell-lab`.
 - `Scripts/dev/lab-status.sh` is local-only and does not fetch the Git remote.
 - `Scripts/dev/lab-preview.sh` runs `qs -p <Lab>` in the foreground, records its PID and log, and terminates only that preview when stopped.
 - Run pinned QML formatting/parser checks and QML lint for changed QML; `lab-sync.sh` excludes deleted QML paths and calls `qmllint.sh` with Quickshell's generated QML modules and Hydra's `qs.*` source modules. Set `HYDRA_QUICKSHELL_QML_MODULES_DIR` to the directory containing `Quickshell/qmldir` when automatic discovery cannot identify the active modules. Run `prowl doctor --fail-on error`.
 - Repository-wide `qmlfmt.sh --check` currently reports 45 existing QML files needing formatting under pinned Qt 6.10.3. Format/check only changed QML paths; do not mass-format the baseline during infrastructure work.
-- Visually/behaviorally validate the exact preview commit. Deploy with `Scripts/dev/lab-sync.sh --preview-validated <full-40-character-commit>`. It requires a clean Lab/active checkout, exactly one active `qs -c hydra-shell` process, recorded LKG, checks, and a fast-forward from the local Lab only. It never pushes or fetches from the network remote.
+- Visually/behaviorally validate the exact preview snapshot. Deploy with `Scripts/dev/lab-sync.sh --preview-validated <full-40-character-commit> --source-branch <validated-branch>`. The source branch defaults to the current named Lab branch; the active checkout stays on `legacy-v4` so existing rollback/mark-good guards remain valid. It requires clean Lab/active checkouts, exactly one active `qs -c hydra-shell` process, recorded LKG, pinned parser/QML import checks, and a fast-forward from the local Lab only. Parser checks use temporary copies (`qmlfmt.sh --parse-only`) and never reformat approved source. It never pushes or fetches from the network remote.
 - Quickshell's file watcher reloads changed source. Check the active UI/logs; only then record success with `Scripts/dev/lab-mark-good.sh <commit> --visual-confirmed`.
 - `Scripts/dev/lab-rollback.sh` restores the recorded LKG offline. It refuses dirty state or an unexpected active HEAD. Do not manually overwrite the active tree to bypass these guards.
 

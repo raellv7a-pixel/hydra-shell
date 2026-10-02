@@ -1,6 +1,6 @@
 # hydra-shell
 
-Fork pessoal e fortemente customizado do [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell). A integração nativa com **Umbriel** é o alvo atual; a configuração e o instalador legados do Hyprland ainda estão presentes durante a migração.
+Fork pessoal e fortemente customizado do [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell), com sessão nativa **Umbriel**. A Hydra mantém protocolos Wayland genéricos para captura/idle, mas estado e ações de compositor vêm exclusivamente da Umbriel.
 
 ---
 
@@ -15,12 +15,10 @@ bash Scripts/bash/install.sh
 
 O instalador usa a branch do checkout local quando executado dessa forma
 (alterações não commitadas não são copiadas), instala as dependências sem
-instalar Hyprland, provisiona as binds e mantém as opções existentes do
+instalar outro compositor, provisiona as binds e mantém as opções existentes do
 compositor. A Hydra é iniciada imediatamente numa sessão Umbriel ativa ou pelo
-autostart idempotente no próximo login. O caminho legado de instalação
-Hyprland continua disponível quando Umbriel não está instalado. O comando
-remoto da branch `legacy-v4` só receberá este fluxo quando estas alterações
-forem publicadas nessa branch.
+autostart idempotente no próximo login. Sem Umbriel, o instalador recusa a operação;
+o runtime registra sessão não suportada e não seleciona backends alternativos.
 
 ---
 
@@ -35,9 +33,9 @@ O estado em disco mudou de nome junto com a shell:
 | `~/.config/hypr/noctalia` | `~/.config/hypr/hydra` |
 | `NOCTALIA_*` (env) | `HYDRA_*` |
 
-`Assets/Hyprland/modules/autostart.lua` roda
-[`Scripts/bash/migrate-noctalia-config.sh`](./Scripts/bash/migrate-noctalia-config.sh)
-antes de subir a shell: ele renomeia esses diretórios e reescreve as chaves de
+Antes de subir a shell, execute manualmente
+[`Scripts/bash/migrate-noctalia-config.sh`](./Scripts/bash/migrate-noctalia-config.sh):
+ele renomeia esses diretórios e reescreve as chaves de
 marca em `settings.json` (`noctaliaPerformance`, `showNoctaliaPerformance`,
 `followNoctaliaPerformanceMode`, widget `NoctaliaPerformance`, ícone `noctalia`,
 esquema `Noctalia (default)`), guardando um backup `settings.json.pre-hydra.bak`.
@@ -56,7 +54,7 @@ alacritty, GTK…) mantêm o nome antigo até os templates serem aplicados de no
 
 ## O que é diferente do Noctalia
 
-- **Configuração completa do Hyprland em Lua** (`Assets/Hyprland/`), com todos os atalhos já ligados à shell via IPC — nada para configurar na mão.
+- **Uma fonte de estado Umbriel**: barra, Taskbar, Dock, Launcher e painéis usam a fachada `CompositorService → UmbrielService`.
 - **Screen Toolkit nativo**: anotação, OCR, leitor de QR/código de barras, seletor de cores, gravação de tela.
 - **Widgets extras**: Tamagotchi de barra, controle do OBS, gerenciador de dispositivos USB, indicador de privacidade, OSD de teclas pressionadas.
 - **Integração com Umbriel**: catálogo de atalhos da Hydra, ações nativas do compositor e editor com validação e gravação segura.
@@ -80,6 +78,32 @@ compositor, ações da Hydra usam seu IPC e binds personalizadas também podem
 executar comandos. **Mod+Shift+Escape** alterna a inibição de atalhos mesmo
 quando a janela está com atalhos inibidos. Para reinstalar o catálogo sem
 apagar rebinds: `python3 Scripts/python/umbriel_keybinds.py provision`.
+
+### Configuração nativa da sessão
+
+Um processo `umbriel subscribe workspaces,windows,overview,keyboard_layout`
+consome snapshots completos. IDs de workspace são opacos; o monitor focado vem
+do workspace focado, inclusive quando vazio. Queries de outputs ocorrem no startup,
+quando aparece um output desconhecido e após alterações feitas pela Hydra, sem polling.
+
+Arquivos gerenciados ficam em `$XDG_CONFIG_HOME/umbriel/hydra/`:
+`keybinds.toml`, `outputs.toml`, `visual.toml`, `theme.toml` e, quando gerado,
+`cursor.toml`. Includes pessoais são preservados; fragments visuais/tema/outputs
+usam includes opcionais. O candidato completo é validado com
+`umbriel config validate -c ...` antes de substituir arquivos atomicamente e
+executar `umbriel msg config-reload`. Falhas deixam a configuração anterior intacta.
+
+A aba **Tela → Arranjo de Monitores** usa outputs, modos e escalas reais da
+Umbriel. Mantém confirmação e rollback do layout. O template Umbriel consome
+roles já resolvidos de Material/Classic/Tinted; não altera o engine de paletas.
+
+**Blur por trás** continua controlando a opção da Hydra. Regras específicas
+casam background/popupmenu/dock/notificações/OSD/toast/launcher-overlay e
+`hydra-show-keys`; o Dock usa nomes de outputs exatos para excluir peek/indicator.
+A Settings usa app-id e título exatos. Wallpaper, exclusões, sensores e ferramentas
+de screenshot nunca entram nessas regras. A avaliação visual no desktop instalado
+é separada da validação headless e exige autorização de deploy.
+
 
 ## Edge Shelf (Umbriel)
 
@@ -277,7 +301,7 @@ perfis, `prefs.js` ou Native Messaging.
 ## Requisitos
 
 - Arch Linux ou derivada (CachyOS é o alvo testado)
-- Umbriel para a sessão nativa e o editor de atalhos; o instalador legado ainda requer Hyprland ≥ 0.55.
+- Umbriel para a sessão, estados/actions nativos e configuração validada.
 - Lista completa de dependências: [`DEPENDENCIES.md`](./DEPENDENCIES.md)
 
 ---

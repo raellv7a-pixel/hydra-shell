@@ -41,13 +41,6 @@ Loader {
         }
       }
 
-      // Update dock apps when toplevels change
-      Connections {
-        target: ToplevelManager ? ToplevelManager.toplevels : null
-        function onValuesChanged() {
-          updateDockApps();
-        }
-      }
 
       // Update dock apps when pinned apps change
       Connections {
@@ -64,11 +57,7 @@ Loader {
       }
 
       // Initial update when component is ready
-      Component.onCompleted: {
-        if (ToplevelManager) {
-          updateDockApps();
-        }
-      }
+      Component.onCompleted: updateDockApps()
 
       // Refresh icons and names when DesktopEntries becomes available (or updates)
       Connections {
@@ -235,9 +224,9 @@ Loader {
           return appData.appId;
         }
 
-        // prefer toplevel object identity for unpinned running apps to distinguish instances
+        // Snapshots replace objects; the native window ID keeps instance ordering stable.
         if (appData.toplevel)
-          return appData.toplevel;
+          return appData.toplevel.id;
 
         // fallback to appId
         return appData.appId;
@@ -399,13 +388,13 @@ Loader {
           return [];
 
         if (appData.toplevels && appData.toplevels.length > 0) {
-          return appData.toplevels.filter(toplevel => toplevel && (!Settings.data.dock.onlySameOutput || !toplevel.screens || toplevel.screens.includes(modelData)));
+          return appData.toplevels.filter(window => window && (!Settings.data.dock.onlySameOutput || window.output === modelData.name));
         }
 
         if (!appData.toplevel)
           return [];
 
-        if (Settings.data.dock.onlySameOutput && appData.toplevel.screens && !appData.toplevel.screens.includes(modelData))
+        if (Settings.data.dock.onlySameOutput && appData.toplevel.output !== modelData.name)
           return [];
 
         return [appData.toplevel];
@@ -416,10 +405,7 @@ Loader {
         if (toplevels.length === 0)
           return null;
 
-        if (ToplevelManager && ToplevelManager.activeToplevel && toplevels.includes(ToplevelManager.activeToplevel))
-          return ToplevelManager.activeToplevel;
-
-        return toplevels[0];
+        return toplevels.find(window => window.isFocused) || toplevels[0];
       }
 
       // Build grouped render model without mutating the raw toplevel list.
@@ -481,7 +467,7 @@ Loader {
 
       // Function to update the combined dock apps model
       function updateDockApps() {
-        const runningApps = ToplevelManager ? (ToplevelManager.toplevels.values || []) : [];
+        const runningApps = CompositorService.getWindowList().filter(window => !window.scratchpad);
         const pinnedApps = Settings.data.dock.pinnedApps || [];
         const combined = [];
         const processedToplevels = new Set();
@@ -497,7 +483,7 @@ Loader {
             if (processedToplevels.has(toplevel)) {
               return; // Already processed this toplevel instance
             }
-            if (Settings.data.dock.onlySameOutput && toplevel.screens && !toplevel.screens.includes(modelData)) {
+            if (Settings.data.dock.onlySameOutput && toplevel.output !== modelData.name) {
               return; // Filtered out by onlySameOutput setting
             }
             combined.push({
@@ -832,7 +818,7 @@ Loader {
 
       Loader {
         id: dockWindowLoader
-        active: Settings.data.dock.enabled && !isAttachedMode && (barIsReady || !hasBar) && modelData && (Settings.data.dock.monitors.length === 0 || Settings.data.dock.monitors.includes(modelData.name)) && dockLoaded && ToplevelManager && (dockApps.length > 0)
+        active: Settings.data.dock.enabled && !isAttachedMode && (barIsReady || !hasBar) && modelData && (Settings.data.dock.monitors.length === 0 || Settings.data.dock.monitors.includes(modelData.name)) && dockLoaded && (dockApps.length > 0)
 
         sourceComponent: PanelWindow {
           id: dockWindow
@@ -861,18 +847,6 @@ Loader {
           readonly property real slideX: dockPosition === "left" ? -slideOffset : dockPosition === "right" ? slideOffset : 0
           readonly property real slideY: dockPosition === "top" ? -slideOffset : dockPosition === "bottom" ? slideOffset : 0
 
-          // Blur behind dock — offset by slide so it follows the content
-          BackgroundEffect.blurRegion: Settings.data.general.enableBlurBehind ? dockBlurRegion : null
-          Region {
-            id: dockBlurRegion
-            Region {
-              x: Math.round(dockContainerWrapper.x + dockContent.dockContainer.x + dockWindow.slideX)
-              y: Math.round(dockContainerWrapper.y + dockContent.dockContainer.y + dockWindow.slideY)
-              width: Math.round(dockContent.dockContainer.width)
-              height: Math.round(dockContent.dockContainer.height)
-              radius: Style.radiusL
-            }
-          }
 
           // Window sized to fit content + slide distance so content can slide off-edge.
           // When auto-hide is disabled, slideDistance is 0 so the window (and thus

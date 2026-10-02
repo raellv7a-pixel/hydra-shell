@@ -464,57 +464,6 @@ function canonicalizeModeId(width, height, refresh) {
   return w + "x" + h + "@" + hzStr;
 }
 
-function parseAvailableModes(rawModes, currentWidth, currentHeight, currentRefresh) {
-  var modes = [];
-  var seen = {};
-
-  if (!rawModes || !Array.isArray(rawModes)) {
-    return modes;
-  }
-
-  for (var i = 0; i < rawModes.length; i++) {
-    var raw = rawModes[i];
-    if (!raw) continue;
-
-    var w = 0;
-    var h = 0;
-    var refresh = 0;
-    var preferred = false;
-
-    if (typeof raw === "string") {
-      var match = raw.match(/^(\d+)x(\d+)@([\d.]+)Hz?$/);
-      if (!match) continue;
-      w = parseInt(match[1], 10);
-      h = parseInt(match[2], 10);
-      refresh = parseFloat(match[3]);
-    } else if (typeof raw === "object") {
-      w = parseInt(raw.width, 10) || 0;
-      h = parseInt(raw.height, 10) || 0;
-      refresh = parseFloat(raw.refresh !== undefined ? raw.refresh : raw.refreshRate);
-      preferred = !!raw.preferred;
-    }
-
-    if (w <= 0 || h <= 0 || !isFinite(refresh) || refresh <= 0) continue;
-
-    var modeId = canonicalizeModeId(w, h, refresh);
-    if (!modeId || seen[modeId]) continue;
-    seen[modeId] = true;
-
-    var isCurrent = (w === currentWidth && h === currentHeight && Math.abs(refresh - currentRefresh) < 0.05);
-    var hzFormatted = refresh.toFixed(2).replace(/\.00$/, "").replace(/(\.\d*[1-9])0+$/, "$1");
-
-    modes.push({
-      "id": modeId,
-      "width": w,
-      "height": h,
-      "refresh": refresh,
-      "label": w + "x" + h + " @ " + hzFormatted + " Hz",
-      "preferred": preferred || isCurrent
-    });
-  }
-
-  return modes;
-}
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
@@ -532,7 +481,6 @@ if (typeof module !== "undefined" && module.exports) {
     derivePrimary: derivePrimary,
     rebaseToPrimary: rebaseToPrimary,
     canonicalizeModeId: canonicalizeModeId,
-    parseAvailableModes: parseAvailableModes,
     layoutsMatch: layoutsMatch
   };
 }

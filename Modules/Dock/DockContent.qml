@@ -119,20 +119,18 @@ Item {
       }
 
       function getValidToplevels(appData) {
-        if (!appData || !ToplevelManager || !ToplevelManager.toplevels)
+        if (!appData)
           return [];
         const source = appData.toplevels && appData.toplevels.length > 0 ? appData.toplevels : (appData.toplevel ? [appData.toplevel] : []);
-        const allToplevels = ToplevelManager.toplevels.values || [];
-        return source.filter(toplevel => toplevel && allToplevels.includes(toplevel));
+        const allToplevels = CompositorService.getWindowList();
+        return source.map(window => allToplevels.find(current => current.id === window.id)).filter(Boolean);
       }
 
       function getPrimaryToplevel(appData) {
         const toplevels = getValidToplevels(appData);
         if (toplevels.length === 0)
           return null;
-        if (ToplevelManager && ToplevelManager.activeToplevel && toplevels.includes(ToplevelManager.activeToplevel))
-          return ToplevelManager.activeToplevel;
-        return toplevels[0];
+        return toplevels.find(window => window.isFocused) || toplevels[0];
       }
 
       function launchAppById(appId) {
@@ -423,15 +421,11 @@ Item {
             Layout.alignment: Qt.AlignCenter
 
             property var toplevels: dock.getValidToplevels(modelData)
-            property bool isActive: ToplevelManager && ToplevelManager.activeToplevel && toplevels.includes(ToplevelManager.activeToplevel)
+            property bool isActive: toplevels.some(window => window.isFocused)
             property bool hovered: appMouseArea.containsMouse
             property string appId: modelData ? modelData.appId : ""
             property int groupedCount: toplevels.length
-            property int focusedWindowIndex: {
-              if (!ToplevelManager || !ToplevelManager.activeToplevel)
-                return -1;
-              return toplevels.indexOf(ToplevelManager.activeToplevel);
-            }
+            property int focusedWindowIndex: toplevels.findIndex(window => window.isFocused)
             property string groupedIndicatorText: focusedWindowIndex >= 0 ? (focusedWindowIndex + 1) + "/" + groupedCount : groupedCount.toString()
             property string appTitle: {
               if (!modelData)
@@ -479,13 +473,6 @@ Item {
               }
             }
 
-            // Listen for the toplevel being closed
-            Connections {
-              target: modelData?.toplevel
-              function onClosed() {
-                Qt.callLater(dockRoot.updateDockApps);
-              }
-            }
 
             // Draggable container for the icon
             Item {
@@ -735,8 +722,8 @@ Item {
                            const primaryToplevel = dock.getPrimaryToplevel(modelData);
 
                            if (mouse.button === Qt.MiddleButton) {
-                             if (primaryToplevel && primaryToplevel.close) {
-                               primaryToplevel.close();
+                             if (primaryToplevel) {
+                               CompositorService.closeWindow(primaryToplevel);
                                Qt.callLater(dockRoot.updateDockApps);
                              }
                            } else if (mouse.button === Qt.LeftButton) {
@@ -746,8 +733,8 @@ Item {
                              }
 
                              if (!Settings.data.dock.groupApps || runningToplevels.length <= 1) {
-                               if (primaryToplevel && primaryToplevel.activate) {
-                                 primaryToplevel.activate();
+                               if (primaryToplevel) {
+                                 CompositorService.focusWindow(primaryToplevel);
                                }
                                return;
                              }
@@ -763,8 +750,8 @@ Item {
                                const state = dockRoot.groupCycleIndices || {};
                                const nextIndex = (state[appKey] || 0) % runningToplevels.length;
                                const nextToplevel = runningToplevels[nextIndex];
-                               if (nextToplevel && nextToplevel.activate) {
-                                 nextToplevel.activate();
+                               if (nextToplevel) {
+                                 CompositorService.focusWindow(nextToplevel);
                                }
                                state[appKey] = (nextIndex + 1) % runningToplevels.length;
                                dockRoot.groupCycleIndices = Object.assign({}, state);

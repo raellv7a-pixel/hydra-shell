@@ -137,20 +137,6 @@ Singleton {
   }
 
   function getCompositorType() {
-    if (CompositorService.isHyprland)
-      return "Hyprland";
-    if (CompositorService.isNiri)
-      return "Niri";
-    if (CompositorService.isScroll)
-      return "Scroll";
-    if (CompositorService.isSway)
-      return "Sway";
-    if (CompositorService.isMango)
-      return "MangoWC";
-    if (CompositorService.isLabwc)
-      return "LabWC";
-    if (CompositorService.isExtWorkspace)
-      return "ExtWorkspace";
-    return "Unknown";
+    return CompositorService.isUmbriel ? "Umbriel" : "Unsupported";
   }
 }

@@ -14,19 +14,23 @@ está certo — abra uma issue.
 ```bash
 sudo pacman -S --needed \
     qt6-base qt6-declarative qt6-wayland qt6-shadertools qt6-multimedia qt6-svg qt6ct \
-    hyprland \
+    umbriel \
     grim slurp hyprpicker wl-clipboard \
     tesseract tesseract-data-eng tesseract-data-por \
     imagemagick zbar curl ffmpeg jq gifski \
     python python-gobject \
-    xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
+    xdg-desktop-portal xdg-desktop-portal-gtk \
     wf-recorder translate-shell adw-gtk-theme \
-    brightnessctl ddcutil wlsunset cliphist wlr-randr wget playerctl \
+    brightnessctl ddcutil wlsunset cliphist wget playerctl \
     bluez bluez-utils networkmanager \
     pipewire pipewire-pulse pipewire-alsa wireplumber \
     polkit power-profiles-daemon udisks2 git \
     shelly shelly-flatpak-backend
 ```
+
+O compositor Umbriel deve estar instalado antes do instalador da Hydra.
+Use `xdg-desktop-portal-umbriel` para compartilhamento de tela externo; não
+instale o backend Hyprland para uma sessão Umbriel.
 
 ## Arch Linux / CachyOS (`pacman`) — opcionais (funcionalidades específicas)
 

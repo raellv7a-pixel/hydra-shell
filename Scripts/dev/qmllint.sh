@@ -81,7 +81,7 @@ while IFS= read -r -d '' source_path; do
       fi
     fi
   fi
-done < <(git -C "$LAB_DIR" ls-files -z -- '*.qml' '*.js')
+done < <(git -C "$LAB_DIR" ls-files -z --cached --others --exclude-standard -- '*.qml' '*.js')
 
 printf 'Checking QML imports with Quickshell and Hydra module metadata...\n'
 (cd "$LAB_DIR" && "$qml_lint" --import error \

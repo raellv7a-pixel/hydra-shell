@@ -14,10 +14,17 @@ Singleton {
   property string previousLayout: ""
   property bool isInitialized: false
 
-  // Updates current layout from various format strings. Called by compositors
+  // Consume the compositor contract; the backend never imports the keyboard service.
   function setCurrentLayout(layoutString) {
     root.fullLayoutName = layoutString || I18n.tr("common.unknown");
     root.currentLayout = extractLayoutCode(layoutString);
+  }
+
+  Connections {
+    target: CompositorService
+    function onKeyboardLayoutChanged() {
+      root.setCurrentLayout(CompositorService.keyboardLayout);
+    }
   }
 
   // Extract layout code from various format strings
@@ -88,6 +95,7 @@ Singleton {
 
   Component.onCompleted: {
     Logger.i("KeyboardLayout", "Service started");
+    setCurrentLayout(CompositorService.keyboardLayout);
     // Mark as initialized after a delay to allow first layout update to complete
     // This prevents showing a toast on the initial load
     initializationTimer.start();

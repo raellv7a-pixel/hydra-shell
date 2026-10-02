@@ -1,37 +1,33 @@
 # Monitor Layout
 
-Monitor Layout is a Hydra Shell plugin and settings module for visually arranging multiple monitors and managing their display modes, scaling, and orientation, with native support for Hyprland and Sway compositors.
+Native Umbriel monitor controls used by **Settings → Tela → Arranjo de Monitores**.
+`Services/Hardware/MonitorService.qml` owns the existing draft/apply/verify/confirm/rollback state machine; `backends/UmbrielBackend.js` adapts native output snapshots and builds writer commands.
 
-## Key Features
+## Geometry and modes
 
-- **Magnetic Snapping & Flush Attachment**: Dragging monitors snaps to adjacent edges when their bounds overlap; far drops attach to the nearest edge so every active display stays connected.
-- **Frozen Canvas Dragging**: Canvas bounds, size, scale, and offsets stay fixed during a drag. Drop coordinates use that frozen transform, then normalize once on release.
-- **Explicit Primary Display**: Designate an active output as primary. The layout rebases it to `(0, 0)` while preserving every output's relative offsets.
-- **Resolution-Aware Discrete Scale Ladder**: Hyprland scale choices are bounded by resolution and limited to decimal factors that yield integral logical-pixel dimensions. Scale is coerced to the nearest valid step after resolution or orientation changes; Sway retains its existing slider.
-- **Strict Hyprland Mode Fidelity**: Resolution choices come only from Hyprland's advertised `availableModes`, including their actual refresh rates. Unadvertised modes are never synthesized.
-- **Transactional Apply & Verification**:
-  - Before apply, the compositor state is fetched again. If it changed outside this panel, the draft is discarded and the current layout is reloaded.
-  - Hyprland readback verifies output identity, mode, refresh, scale, transform, and position. Sway retains its previous active-output-count check.
-  - A 15-second confirmation countdown ("Keep" / "Revert") prevents an unconfirmed layout from being retained.
-  - Apply failures, mismatched readback, timeout, and manual cancellation trigger rollback; rollback readback is verified before success is reported.
-  - If rollback fails or cannot be verified, the snapshot stays in memory for retry.
-- **Dual Config Persistence**:
-  - Saves verified, confirmed layouts to `~/.config/hypr/hydra-shell/monitors.lua` (Hyprland 0.55+ Lua syntax).
-  - Generates legacy `hyprland.conf` snippets ready for clipboard export.
-  - Unconfirmed draft layouts are never persisted to disk.
+- `umbriel outputs --json` supplies identity, current/advertised modes, refresh, enabled state, position, scale and transform.
+- Fractional scales are preserved; there is no Hyprland scale coercion or invented mode/scale.
+- Dragging freezes the canvas transform until drop. Snapping, flush attachment and gap cleanup use logical monitor rectangles.
+- Selecting a primary display rebases it to `(0, 0)` while preserving relative offsets.
+- Adaptive-sync policy remains user-owned and is not changed by this panel.
 
-## VRR Note (Variable Refresh Rate)
+## Apply and persistence
 
-Live Hyprland (0.56.2+) exposes an effective boolean (`vrr: true|false`) in `hyprctl monitors -j`, whereas monitor configuration rules support policies `0` (off), `1` (on), `2` (fullscreen only), and `3`. Because the exact user policy cannot be losslessly round-tripped from compositor output, a per-monitor VRR toggle is intentionally omitted from this panel to avoid overwriting or corrupting advanced VRR rules.
+1. Fetch native state before applying. External changes invalidate the old draft.
+2. Generate `$XDG_CONFIG_HOME/umbriel/hydra/outputs.toml` through `Scripts/python/umbriel_config.py`.
+3. Validate a complete staged configuration, atomically replace owned files, then `umbriel msg config-reload`.
+4. Verify identity, mode, refresh, scale, transform and position through a new query.
+5. Keep the layout or revert within the existing 15-second countdown. Revert writes and validates the previous snapshot; failed rollback retains the snapshot for retry.
 
-## Usage
+Because Umbriel applies output settings through configuration, preview uses the owned output fragment too; it remains provisional until Keep or rollback. The Save action writes confirmed outputs, not the edited draft. The clipboard action exports native TOML. Personal options and includes are preserved; optional Hydra includes are not duplicated.
 
-1. Open **Settings** → **Monitores** (or the Monitor Layout widget).
-2. Drag monitor tiles on the canvas to rearrange them visually. Snapping and flush alignment engage automatically.
-3. Select any monitor to inspect its properties:
-   - Toggle output activation or mirroring.
-   - Click **Definir como Monitor Principal** to set origin `(0, 0)`.
-   - Select supported resolutions, refresh rates, discrete scale factors, or rotation.
-4. Click **Aplicar Agora** to preview live. A 15-second confirmation dialog will appear.
-5. Click **Manter** to confirm, or **Reverter** to restore the previous layout.
-6. Click **Salvar no Hyprland** to write the confirmed configuration permanently.
+Queries run on initialization, user refresh and transaction boundaries, not continuous polling.
+
+## Verification
+
+```bash
+node --test Modules/Panels/Settings/Tabs/Display/MonitorLayout/MonitorGeometry.test.mjs
+python3 -m unittest discover -s Scripts/python/tests -p 'test_umbriel*.py' -v
+```
+
+Configuration tests use temporary HOME/XDG roots. Actual layout smoke uses isolated headless Umbriel, never the active desktop.

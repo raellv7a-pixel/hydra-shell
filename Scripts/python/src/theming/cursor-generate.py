@@ -17,9 +17,8 @@ builds:
 Both are installed under the same theme directory so a single theme name
 works everywhere: ~/.local/share/icons/<THEME_NAME>/.
 
-Applies the result live via `hyprctl setcursor` and `gsettings` (both
-best-effort, silently skipped when unavailable) — same dual-apply approach
-Material Bibata Cursor's own README recommends.
+Applies the result through Hydra's validated Umbriel cursor fragment and
+gsettings for applications that use toolkit settings.
 
 Usage: cursor-generate.py <primary-hex> [size]
 Invoked by the "cursor" template's post_hook (Services/Theming/TemplateRegistry.qml),
@@ -309,8 +308,9 @@ def build_xcursor(out_dir, body, outline, watch, size):
 # Apply (best-effort, silent when the relevant tool/session is absent)
 # ----------------------------------------------------------------------------
 def apply_theme(size):
-    subprocess.run(["hyprctl", "setcursor", THEME_NAME, str(size)],
-                    check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    config_script = SCRIPT_DIR.parents[1] / "umbriel_config.py"
+    subprocess.run([sys.executable, str(config_script), "cursor", str(size)],
+                   check=True)
     subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "cursor-theme", THEME_NAME],
                     check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     subprocess.run(["gsettings", "set", "org.gnome.desktop.interface", "cursor-size", str(size)],

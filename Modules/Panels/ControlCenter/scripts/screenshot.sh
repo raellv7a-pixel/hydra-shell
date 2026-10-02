@@ -13,17 +13,6 @@ copy_region() {
   grim -g "$region" - | wl-copy --type image/png
 }
 
-if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && command -v hyprshot >/dev/null 2>&1; then
-  if [ "$mode" = "active-screen" ] || [ "$mode" = "screen" ] || [ "$mode" = "fullscreen" ]; then
-    exec hyprshot -m output -m active --clipboard-only --silent
-  fi
-
-  exec hyprshot --freeze --clipboard-only --mode region --silent
-fi
-
-if [ -n "${NIRI_SOCKET:-}" ] && command -v niri >/dev/null 2>&1; then
-  exec niri msg action screenshot
-fi
 
 if [ "$mode" = "active-screen" ] || [ "$mode" = "screen" ] || [ "$mode" = "fullscreen" ]; then
   copy_fullscreen

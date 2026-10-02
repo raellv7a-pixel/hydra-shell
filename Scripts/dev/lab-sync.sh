@@ -4,7 +4,8 @@
 # Never pushes to or fetches from the network remote.
 set -euo pipefail
 
-BRANCH="legacy-v4"
+ACTIVE_BRANCH="legacy-v4"
+SOURCE_BRANCH=
 LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ACTIVE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/hydra-shell"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hydra-shell-lab"
@@ -13,13 +14,18 @@ PREVIEWED=
 YES=false
 
 usage() {
-  echo "Usage: $0 --preview-validated <full-commit> [--yes]"
+  echo "Usage: $0 --preview-validated <full-commit> [--source-branch <branch>] [--yes]"
 }
 while (($#)); do
   case "$1" in
     --preview-validated)
       (($# >= 2)) || { usage >&2; exit 2; }
       PREVIEWED="$2"
+      shift 2
+      ;;
+    --source-branch)
+      (($# >= 2)) || { usage >&2; exit 2; }
+      SOURCE_BRANCH="$2"
       shift 2
       ;;
     -y|--yes) YES=true; shift ;;
@@ -43,15 +49,19 @@ write_state() {
 [[ ! -L "$ACTIVE_DIR" ]] || die "Active path is a symlink; refusing to deploy."
 [[ -d "$ACTIVE_DIR/.git" ]] || die "No active Git installation at $ACTIVE_DIR."
 [[ -d "$LAB_DIR/.git" ]] || die "Lab checkout has no Git metadata."
-[[ "$(git -C "$LAB_DIR" branch --show-current)" == "$BRANCH" ]] ||
-  die "Lab must be on $BRANCH."
+[[ -n "$SOURCE_BRANCH" ]] || SOURCE_BRANCH="$(git -C "$LAB_DIR" branch --show-current)"
+[[ -n "$SOURCE_BRANCH" ]] || die "Lab must be on a named branch."
+git check-ref-format --branch "$SOURCE_BRANCH" >/dev/null ||
+  die "Invalid source branch: $SOURCE_BRANCH."
+[[ "$(git -C "$LAB_DIR" branch --show-current)" == "$SOURCE_BRANCH" ]] ||
+  die "Lab must be on $SOURCE_BRANCH."
 [[ -z "$(git -C "$LAB_DIR" status --porcelain)" ]] ||
   die "Lab is dirty; commit or safely stash all changes before deploying."
 candidate="$(git -C "$LAB_DIR" rev-parse HEAD)"
 [[ "$candidate" == "$PREVIEWED" ]] ||
   die "Preview confirmation is for $PREVIEWED, but Lab HEAD is $candidate."
-[[ "$(git -C "$ACTIVE_DIR" branch --show-current)" == "$BRANCH" ]] ||
-  die "Active checkout must be on $BRANCH."
+[[ "$(git -C "$ACTIVE_DIR" branch --show-current)" == "$ACTIVE_BRANCH" ]] ||
+  die "Active checkout must be on $ACTIVE_BRANCH."
 [[ -z "$(git -C "$ACTIVE_DIR" status --porcelain)" ]] ||
   die "Active checkout is dirty; no files were changed."
 lab_remote="$(git -C "$LAB_DIR" remote get-url origin)"
@@ -83,8 +93,8 @@ active_pid="${active_pids[0]}"
 
 mapfile -t changed_qml < <(git -C "$LAB_DIR" diff --name-only --diff-filter=ACMRT "$last_good..$candidate" -- '*.qml')
 if ((${#changed_qml[@]})); then
-  log "Checking changed QML with pinned Qt formatter/parser"
-  (cd "$LAB_DIR" && ./Scripts/dev/qmlfmt.sh --check "${changed_qml[@]}")
+  log "Checking changed QML with pinned parser without rewriting validated source"
+  (cd "$LAB_DIR" && ./Scripts/dev/qmlfmt.sh --parse-only "${changed_qml[@]}")
   (cd "$LAB_DIR" && ./Scripts/dev/qmllint.sh "${changed_qml[@]}")
 fi
 
@@ -94,7 +104,7 @@ log "Recording rollback boundary and advancing active checkout locally"
 mkdir -p "$STATE_DIR"
 chmod 700 "$STATE_DIR"
 git -C "$ACTIVE_DIR" update-ref refs/hydra-shell/last-known-good "$last_good"
-git -C "$ACTIVE_DIR" fetch --no-tags "$LAB_DIR" "$BRANCH"
+git -C "$ACTIVE_DIR" fetch --no-tags "$LAB_DIR" "$SOURCE_BRANCH"
 git -C "$ACTIVE_DIR" merge --ff-only FETCH_HEAD
 deployed="$(git -C "$ACTIVE_DIR" rev-parse HEAD)"
 [[ "$deployed" == "$candidate" ]] || die "Active HEAD does not match validated Lab commit after fast-forward."

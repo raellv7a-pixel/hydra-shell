@@ -26,11 +26,10 @@
 #   4. Enables the system services the shell talks to over D-Bus
 #      (NetworkManager, bluetooth, power-profiles-daemon).
 #   5. Clones/updates the hydra-shell repo itself into the path Quickshell's
-#      own convention expects (~/.config/quickshell/hydra-shell, matched by
-#      `qs -c hydra-shell` in Assets/Hyprland/modules/{autostart,binds}.lua).
-#   6. Provisions Hydra keybinds in Umbriel, or adopts the legacy Hyprland Lua
-#      config when Umbriel is not installed.
-#   7. Prints a doctor-style summary for the selected compositor.
+#      own convention expects (~/.config/quickshell/hydra-shell, used by
+#      Umbriel autostart and Hydra keybind actions).
+#   6. Provisions Hydra keybinds in Umbriel, preserving personal configuration.
+#   7. Prints a doctor-style summary for the native session.
 #
 # Idempotent: safe to re-run. By default it skips rebuilding the qs engine if
 # it's already on PATH (pass --force-engine to rebuild after an upstream
@@ -69,11 +68,7 @@ if [[ "${BASH_SOURCE[0]}" == *Scripts/bash/install.sh ]]; then
     [ -n "$BRANCH" ] || die "A local install requires a named git branch."
   fi
 fi
-if command -v umbriel >/dev/null 2>&1; then
-  TARGET_UMBRIEL=true
-else
-  TARGET_UMBRIEL=false
-fi
+command -v umbriel >/dev/null 2>&1 || die "Hydra requires an installed Umbriel compositor."
 ENGINE_SRC_DIR="$(mktemp -d /tmp/noctalia-qs-build.XXXXXX)"
 trap 'rm -rf "$ENGINE_SRC_DIR"' EXIT
 
@@ -87,16 +82,14 @@ trap 'rm -rf "$ENGINE_SRC_DIR"' EXIT
 RUNTIME_PACMAN=(
   # Qt/QML runtime the shell itself needs
   qt6-base qt6-declarative qt6-wayland qt6-shadertools qt6-multimedia qt6-svg qt6ct
-  # The compositor is selected below; don't install another compositor.
+  # Umbriel is provided by the session; don't install another compositor.
   # Screenshot / clipboard / OCR / QR / Screen Toolkit (Modules/ScreenToolkit)
   grim slurp hyprpicker wl-clipboard
   tesseract tesseract-data-eng tesseract-data-por
   imagemagick zbar curl ffmpeg jq gifski
   # File pickers or scripted tooling (python3 for EDS calendar + pick-file.sh)
   python python-gobject
-  # Portals — xdg-desktop-portal alone is NOT enough on Hyprland: screen
-  # share (Scripts/bash/corvus-share-picker.sh, xdph.conf) and the GTK file
-  # chooser fallback need the compositor-specific backends explicitly.
+  # Generic portal/file chooser support; screen sharing uses the Umbriel backend.
   xdg-desktop-portal xdg-desktop-portal-gtk
   # Screen recording, OCR translation, GTK3 theming for @define-color overrides
   wf-recorder translate-shell adw-gtk-theme
@@ -136,9 +129,6 @@ ENGINE_BUILD_PACMAN=(
   libdrm cpptrace jemalloc wayland wayland-protocols libxcb glib2 pam base-devel
 )
 
-if ! $TARGET_UMBRIEL; then
-  RUNTIME_PACMAN+=(hyprland xdg-desktop-portal-hyprland)
-fi
 
 log "Installing runtime dependencies (pacman)"
 sudo pacman -S --needed --noconfirm "${RUNTIME_PACMAN[@]}"
@@ -240,8 +230,7 @@ fi
 log "Migrating pre-rebrand Noctalia config, if any"
 bash "$INSTALL_DIR/Scripts/bash/migrate-noctalia-config.sh"
 
-# ── 6. provision the selected compositor's existing config ────────────────
-if $TARGET_UMBRIEL; then
+# ── 6. provision native Umbriel configuration ────────────────────────────
   log "Installing Hydra keybinds for Umbriel"
   python3 "$INSTALL_DIR/Scripts/python/umbriel_keybinds.py" provision
   umbriel config validate
@@ -251,43 +240,18 @@ if $TARGET_UMBRIEL; then
     setsid qs -c hydra-shell -d >/dev/null 2>&1 &
     disown
   fi
-else
-  log "Installing Hyprland Lua config"
-  bash "$INSTALL_DIR/Scripts/bash/hyprland-adopt.sh" "$INSTALL_DIR/Assets/Hyprland"
-  if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1 && ! pgrep -x quickshell >/dev/null 2>&1; then
-    log "Hyprland already running — starting hydra-shell now"
-    setsid qs -c hydra-shell -d >/dev/null 2>&1 &
-    disown
-  fi
-fi
 
 # ── 7. doctor summary ────────────────────────────────────────────────────
 log "Doctor summary"
 
-if $TARGET_UMBRIEL; then
-  umbriel config validate
-  echo "  Umbriel: config validated"
-elif command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
-  hver="$(hyprctl version 2>/dev/null | grep -oP 'Hyprland \K[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)"
-  smaller="$(printf '0.55\n%s\n' "${hver:-0.55}" | sort -V | head -1)"
-  if [ -n "$hver" ] && [ "$smaller" != "0.55" ]; then
-    warn "Running Hyprland $hver — hydra-shell's config is Lua-native (Hyprland >=0.55 required). Update Hyprland."
-  else
-    echo "  Hyprland version: ${hver:-unknown} (OK)"
-  fi
-else
-  warn "Hyprland is not currently running — version check skipped, will apply on next login."
-fi
+umbriel config validate
+echo "  Umbriel: config validated"
 
 check() {
   if command -v "$1" >/dev/null 2>&1; then printf '  [ok]   %s\n' "$1"; else printf '  [miss] %s (%s)\n' "$1" "$2"; fi
 }
 echo "Required:"
-if $TARGET_UMBRIEL; then
-  compositor_tool=umbriel
-else
-  compositor_tool=hyprctl
-fi
+compositor_tool=umbriel
 for b in qs "$compositor_tool" grim slurp hyprpicker wl-copy tesseract magick zbarimg curl ffmpeg jq \
          brightnessctl ddcutil wlsunset cliphist wlr-randr playerctl bluetoothctl nmcli \
          wpctl pkexec powerprofilesctl udisksctl git shelly wf-recorder trans; do

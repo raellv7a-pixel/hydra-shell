@@ -84,19 +84,6 @@
     "enabled": false,
     "pinnedApps": []
   },
-  "workspaceManager": {
-    "presentationMode": "adaptive",
-    "livePreviews": true,
-    "dimBackground": true,
-    "privateWorkspaces": [],
-    "customOrder": [],
-    "pinnedSpecials": [],
-    "gameMode": false,
-    "hideSpecials": false,
-    "showOnlyActiveSpecial": false,
-    "borderOnlyPrivacy": false,
-    "presentationModePerMonitor": {}
-  },
   "general": {
     "sddmTheme": "",
     "avatarImage": "",
@@ -702,42 +689,5 @@
     "gridSnap": false,
     "gridSnapScale": false,
     "monitorWidgets": []
-  },
-  "hyprland": {
-    "rebinds": {},
-    "ownershipAdopted": false,
-    "ownershipDeclined": false,
-    "adoptedModulesVersion": "",
-    "appearance": {
-      "gapsIn": 5,
-      "gapsOut": 10,
-      "borderSize": 2,
-      "layout": "dwindle",
-      "resizeOnBorder": true,
-      "allowTearing": false,
-      "rounding": 10,
-      "roundingPower": 2,
-      "activeOpacity": 1,
-      "inactiveOpacity": 1,
-      "shadowEnabled": true,
-      "shadowRange": 4,
-      "shadowRenderPower": 3,
-      "blurEnabled": true,
-      "blurSize": 8,
-      "blurPasses": 2,
-      "blurXray": false,
-      "animationsEnabled": true
-    },
-    "envVars": [],
-    "autostart": [],
-    "windowRules": [],
-    "layerRules": [],
-    "animCurves": [],
-    "animItems": [],
-    "keybinds": [],
-    "cursor": {
-      "theme": "",
-      "size": 24
-    }
   }
 }

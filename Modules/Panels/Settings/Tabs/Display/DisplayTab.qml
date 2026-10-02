@@ -76,7 +76,7 @@ ColumnLayout {
     NTabButton {
       text: "Arranjo de Monitores"
       tabIndex: 2
-      visible: !CompositorService.isUmbriel
+      visible: CompositorService.isUmbriel
       checked: subTabBar.currentIndex === 2
     }
   }
@@ -96,7 +96,7 @@ ColumnLayout {
       onCheckWlsunset: wlsunsetCheck.running = true
     }
     Loader {
-      active: !CompositorService.isUmbriel
+      active: CompositorService.isUmbriel
       sourceComponent: Component {
         MonitorLayoutSubTab {}
       }

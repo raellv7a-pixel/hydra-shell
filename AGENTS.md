@@ -31,9 +31,9 @@ there; the CLI needs no server and is the first choice.
 
 Auto-generated from the Prowl index, refreshed on each `overview`/`init`. Prefer retrieving from Prowl (and reading the cited files) over grepping or relying on training memory; this is the current shape of the repo.
 
-- size: 783 files, 82524 symbols, 5230 edges (resolved 4120, external deps 114, unresolved 996)
-- languages: qml:568 json:74 bash:36 python:28 javascript:14 markdown:14 css:10 lua:10
-- subsystems: Modules/Panels(277,qml) · Widgets(53,qml) · Modules/Bar(44,qml) · Commons/Migrations(27,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(17,qml) · Services/System(15,qml) · Commons(12,qml)
+- size: 821 files, 83488 symbols, 5475 edges (resolved 4206, external deps 260, unresolved 1009)
+- languages: qml:574 json:78 python:43 bash:39 javascript:18 markdown:14 css:13 lua:11
+- subsystems: Modules/Panels(279,qml) · Widgets(53,qml) · Modules/Bar(44,qml) · Commons/Migrations(27,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(18,qml) · Services/System(15,qml) · Modules/MainScreen(14,qml)
 - entrypoints: shell.qml · Modules/Cards/MediaCard.qml · Modules/Panels/Settings/Bar/WidgetSettings/CustomButtonSettings.qml · Modules/Panels/Settings/DesktopWidgets/WidgetSettings/ClockSettings.qml · Modules/Panels/SessionMenu/SessionMenu.qml · Modules/Panels/Settings/Bar/WidgetSettings/ClockSettings.qml · Modules/Panels/Wallpaper/WallhavenSettingsPopup.qml · Modules/Cards/ProfileCard.qml · (+76 more)
 - central files (most depended-on): Commons/Settings.qml · Commons/Logger.qml · Commons/Time.qml · Commons/Style.qml · Commons/Color.qml
 - read these guides first: README.md · AGENTS.md · docs/AI_DEVELOPMENT.md

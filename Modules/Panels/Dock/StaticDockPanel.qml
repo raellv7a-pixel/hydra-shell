@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Modules.Dock
 import qs.Modules.MainScreen
+import qs.Services.Compositor
 
 SmartPanel {
   id: root
@@ -114,9 +115,9 @@ SmartPanel {
       return appData.appId;
     }
 
-    // prefer toplevel object identity for unpinned running apps to distinguish instances
+    // Window IDs survive replacement snapshots.
     if (appData.toplevel)
-      return appData.toplevel;
+      return appData.toplevel.id;
 
     // fallback to appId
     return appData.appId;
@@ -276,13 +277,13 @@ SmartPanel {
       return [];
 
     if (appData.toplevels && appData.toplevels.length > 0) {
-      return appData.toplevels.filter(toplevel => toplevel && (!Settings.data.dock.onlySameOutput || !toplevel.screens || toplevel.screens.includes(screen)));
+      return appData.toplevels.filter(window => window && (!Settings.data.dock.onlySameOutput || window.output === screen.name));
     }
 
     if (!appData.toplevel)
       return [];
 
-    if (Settings.data.dock.onlySameOutput && appData.toplevel.screens && !appData.toplevel.screens.includes(screen))
+    if (Settings.data.dock.onlySameOutput && appData.toplevel.output !== screen.name)
       return [];
 
     return [appData.toplevel];
@@ -293,10 +294,7 @@ SmartPanel {
     if (toplevels.length === 0)
       return null;
 
-    if (ToplevelManager && ToplevelManager.activeToplevel && toplevels.includes(ToplevelManager.activeToplevel))
-      return ToplevelManager.activeToplevel;
-
-    return toplevels[0];
+    return toplevels.find(window => window.isFocused) || toplevels[0];
   }
 
   // Build grouped render model without mutating the raw toplevel list.
@@ -358,7 +356,7 @@ SmartPanel {
 
   // Function to update the combined dock apps model
   function updateDockApps() {
-    const runningApps = ToplevelManager ? (ToplevelManager.toplevels.values || []) : [];
+    const runningApps = CompositorService.getWindowList().filter(window => !window.scratchpad);
     const pinnedApps = Settings.data.dock.pinnedApps || [];
     const combined = [];
     const processedToplevels = new Set();
@@ -374,7 +372,7 @@ SmartPanel {
         if (processedToplevels.has(toplevel)) {
           return;
         }
-        if (Settings.data.dock.onlySameOutput && toplevel.screens && !toplevel.screens.includes(screen)) {
+        if (Settings.data.dock.onlySameOutput && toplevel.output !== screen.name) {
           return;
         }
         combined.push({
@@ -494,10 +492,10 @@ SmartPanel {
     }
   }
 
-  // Update dock apps when toplevels change
+  // Both dock presentations share the compositor window authority.
   Connections {
-    target: ToplevelManager ? ToplevelManager.toplevels : null
-    function onValuesChanged() {
+    target: CompositorService
+    function onWindowListChanged() {
       updateDockApps();
     }
   }
@@ -517,11 +515,7 @@ SmartPanel {
   }
 
   // Initial update when component is ready
-  Component.onCompleted: {
-    if (ToplevelManager) {
-      updateDockApps();
-    }
-  }
+  Component.onCompleted: updateDockApps()
 
   // Refresh icons when DesktopEntries becomes available
   Connections {

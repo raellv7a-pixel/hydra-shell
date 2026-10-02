@@ -13,7 +13,6 @@ import qs.Modules.Panels.Settings.Tabs.ControlCenter
 import qs.Modules.Panels.Settings.Tabs.Display
 import qs.Modules.Panels.Settings.Tabs.Dock
 import qs.Modules.Panels.Settings.Tabs.Hooks
-import qs.Modules.Panels.Settings.Tabs.Hyprland
 import qs.Modules.Panels.Settings.Tabs.Umbriel
 import qs.Modules.Panels.Settings.Tabs.Idle
 import qs.Modules.Panels.Settings.Tabs.Launcher
@@ -506,10 +505,6 @@ Item {
     SecurityTab {}
   }
   Component {
-    id: hyprlandTab
-    HyprlandTab {}
-  }
-  Component {
     id: umbrielTab
     UmbrielTab {}
   }
@@ -649,12 +644,6 @@ Item {
             "source": hooksTab
           },
           {
-            "id": SettingsPanel.Tab.Hyprland,
-            "label": "panels.hyprland.title",
-            "icon": "keyboard",
-            "source": hyprlandTab
-          },
-          {
             "id": SettingsPanel.Tab.Umbriel,
             "label": "panels.umbriel.title",
             "icon": "keyboard",
@@ -668,11 +657,7 @@ Item {
           }
         ];
 
-    // Hyprland tab only makes sense with Hyprland as the active compositor
-    // (PLANO_INTEGRACAO_HYPRMOD.md §5) — every other tab is compositor-
-    // agnostic and always shown.
-    newTabs = newTabs.filter(t => (t.id !== SettingsPanel.Tab.Hyprland || CompositorService.isHyprland)
-                             && (t.id !== SettingsPanel.Tab.Umbriel || CompositorService.isUmbriel));
+    newTabs = newTabs.filter(t => t.id !== SettingsPanel.Tab.Umbriel || CompositorService.isUmbriel);
 
     root.tabsModel = newTabs;
   }

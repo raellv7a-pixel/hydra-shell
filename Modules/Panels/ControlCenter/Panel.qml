@@ -239,17 +239,7 @@ Item {
   }
 
   function compositorName() {
-    if (CompositorService.isHyprland)
-      return "Hyprland";
-    if (CompositorService.isNiri)
-      return "Niri";
-    if (CompositorService.isSway)
-      return "Sway";
-    if (CompositorService.isLabwc)
-      return "Labwc";
-    if (CompositorService.isMango)
-      return "MangoWC";
-    return "Wayland";
+    return CompositorService.isUmbriel ? "Umbriel" : "Unavailable";
   }
 
   function formatBytes(value) {

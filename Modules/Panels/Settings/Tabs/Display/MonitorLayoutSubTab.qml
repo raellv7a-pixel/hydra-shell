@@ -639,7 +639,6 @@ ColumnLayout {
         Layout.fillWidth: true
         label: "Escala do Monitor"
         description: "Selecione o fator de escala discreto (DPI) baseado na resolução desta tela"
-        visible: !CompositorService.isSway
         enabled: !MonitorService.isBusy
         currentKey: String(root.selectedOutput ? (root.selectedOutput.scale || 1.0) : 1.0)
         model: {
@@ -670,24 +669,6 @@ ColumnLayout {
                                                     });
                       }
                     }
-      }
-      NValueSlider {
-        visible: CompositorService.isSway
-        Layout.fillWidth: true
-        label: "Escala do Monitor"
-        description: "Ajusta o fator de escala (DPI) para elementos e fontes nesta tela"
-        enabled: !MonitorService.isBusy
-        from: 0.8
-        to: 2.0
-        stepSize: 0.05
-        value: root.selectedOutput ? (root.selectedOutput.scale || 1.0) : 1.0
-        onMoved: val => {
-                   if (root.selectedOutput) {
-                     MonitorService.updateOutput(root.selectedOutput.outputId, {
-                                                   "scale": Math.round(val * 100) / 100
-                                                 });
-                   }
-                 }
       }
 
       NComboBox {
@@ -775,16 +756,16 @@ ColumnLayout {
       }
 
       NButton {
-        text: "Salvar no Hyprland"
+        text: "Salvar na Umbriel"
         icon: "device-floppy"
         backgroundColor: Color.mPrimary
         textColor: Color.mOnPrimary
         enabled: !MonitorService.isBusy && MonitorService.transactionState === "idle"
-        onClicked: MonitorService.saveToHyprlandConfig()
+        onClicked: MonitorService.saveToUmbrielConfig()
       }
 
       NButton {
-        text: "Copiar Configuração do Hyprland"
+        text: "Copiar TOML"
         icon: "copy"
         backgroundColor: Color.mSurfaceVariant
         textColor: Color.mOnSurfaceVariant
@@ -828,47 +809,16 @@ ColumnLayout {
     }
 
     NText {
-      text: "Confira abaixo os códigos gerados para salvar o layout de monitores permanentemente no Hyprland (Lua ou conf):"
+      text: "Configuração gerada para o arquivo Hydra-owned hydra/outputs.toml. A aplicação valida o TOML antes de recarregar a Umbriel."
       pointSize: Style.fontSizeS
       color: Color.mOnSurfaceVariant
       wrapMode: Text.WordWrap
       Layout.fillWidth: true
     }
 
-    NText {
-      text: "Sintaxe Lua (Hyprland 0.55+ em ~/.config/hypr/hydra-shell/monitors.lua):"
-      pointSize: Style.fontSizeS
-      font.weight: Style.fontWeightBold
-      color: Color.mPrimary
-    }
-
-    Rectangle {
-      Layout.fillWidth: true
-      Layout.preferredHeight: 140
-      color: Qt.alpha(Color.mSurface, 0.9)
-      border.color: Color.mOutline
-      border.width: Style.borderS
-      radius: Style.radiusM
-
-      Flickable {
-        anchors.fill: parent
-        anchors.margins: Style.marginM
-        contentWidth: luaCodeText.implicitWidth
-        contentHeight: luaCodeText.implicitHeight
-        clip: true
-
-        NText {
-          id: luaCodeText
-          text: MonitorService.generateLuaConfigSnippet() || "-- Nenhum monitor"
-          font.family: "monospace"
-          pointSize: Style.fontSizeS
-          color: Color.mPrimary
-        }
-      }
-    }
 
     NText {
-      text: "Sintaxe Legada (para ~/.config/hypr/hyprland.conf):"
+      text: "Umbriel — hydra/outputs.toml:"
       pointSize: Style.fontSizeS
       font.weight: Style.fontWeightBold
       color: Color.mOnSurfaceVariant
@@ -904,24 +854,24 @@ ColumnLayout {
       spacing: Style.marginM
 
       NButton {
-        text: "Salvar em monitors.lua"
+        text: "Salvar em outputs.toml"
         icon: "device-floppy"
         backgroundColor: Color.mPrimary
         textColor: Color.mOnPrimary
         enabled: !MonitorService.isBusy && MonitorService.transactionState === "idle"
-        onClicked: MonitorService.saveToHyprlandConfig()
+        onClicked: MonitorService.saveToUmbrielConfig()
       }
 
       NButton {
-        text: "Copiar Código Lua"
+        text: "Copiar TOML"
         icon: "copy"
         backgroundColor: Color.mSurfaceVariant
         textColor: Color.mOnSurfaceVariant
         onClicked: {
-          var snippet = MonitorService.generateLuaConfigSnippet();
+          var snippet = MonitorService.generateConfigSnippet();
           if (snippet) {
             Quickshell.execDetached(["bash", "-c", "printf '%s' " + JSON.stringify(snippet) + " | wl-copy"]);
-            ToastService.showNotice("Configuração Copiada", "Código Lua salvo na área de transferência!", "copy");
+            ToastService.showNotice("Configuração Copiada", "TOML salvo na área de transferência!", "copy");
           }
         }
       }

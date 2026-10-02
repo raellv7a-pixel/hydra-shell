@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import Quickshell.Widgets
 import qs.Commons
 import qs.Modules.Panels.Settings
+import qs.Services.Compositor
 import qs.Services.UI
 import qs.Widgets
 
@@ -110,20 +111,18 @@ PopupWindow {
   }
 
   function getValidToplevels() {
-    if (!ToplevelManager || !ToplevelManager.toplevels)
+    if (!appData && !toplevel)
       return [];
     const source = appData?.toplevels && appData.toplevels.length > 0 ? appData.toplevels : (toplevel ? [toplevel] : []);
-    const allToplevels = ToplevelManager.toplevels.values || [];
-    return source.filter(window => window && allToplevels.includes(window));
+    const allToplevels = CompositorService.getWindowList();
+    return source.map(window => allToplevels.find(current => current.id === window.id)).filter(Boolean);
   }
 
   function getPrimaryToplevel() {
     const windows = getValidToplevels();
     if (windows.length === 0)
       return null;
-    if (ToplevelManager && ToplevelManager.activeToplevel && windows.includes(ToplevelManager.activeToplevel))
-      return ToplevelManager.activeToplevel;
-    return windows[0];
+    return windows.find(window => window.isFocused) || windows[0];
   }
 
   function isItemActionable(index) {
@@ -212,7 +211,7 @@ PopupWindow {
       windows.forEach((window, index) => {
                         const windowTitle = (window.title && window.title.trim() !== "") ? window.title : (appId || ("Window " + (index + 1)));
                         next.push({
-                                    "icon": window === ToplevelManager?.activeToplevel ? "circle-filled" : "square-rounded",
+                                    "icon": window.isFocused ? "circle-filled" : "square-rounded",
                                     "text": windowTitle,
                                     "action": function () {
                                       handleFocus(window);
@@ -495,9 +494,8 @@ PopupWindow {
   }
 
   function handleFocus(targetToplevel) {
-    if (targetToplevel?.activate) {
-      targetToplevel.activate();
-    }
+    if (targetToplevel)
+      CompositorService.focusWindow(targetToplevel);
     closeAndReset();
   }
 
@@ -509,10 +507,10 @@ PopupWindow {
   }
 
   function handleClose(targetToplevel) {
-    const isValidToplevel = targetToplevel && ToplevelManager && ToplevelManager.toplevels.values.includes(targetToplevel);
+    const isValidToplevel = targetToplevel && CompositorService.getWindowList().some(window => window.id === targetToplevel.id);
 
-    if (isValidToplevel && targetToplevel.close) {
-      targetToplevel.close();
+    if (isValidToplevel) {
+      CompositorService.closeWindow(targetToplevel);
       if (root.onAppClosed && typeof root.onAppClosed === "function") {
         Qt.callLater(root.onAppClosed);
       }
@@ -522,8 +520,8 @@ PopupWindow {
 
   function handleCloseAll(windows) {
     windows.forEach(window => {
-                      if (window && ToplevelManager && ToplevelManager.toplevels.values.includes(window) && window.close) {
-                        window.close();
+                      if (window && CompositorService.getWindowList().some(current => current.id === window.id)) {
+                        CompositorService.closeWindow(window);
                       }
                     });
     if (root.onAppClosed && typeof root.onAppClosed === "function") {

@@ -29,7 +29,7 @@ vm.runInContext(source, sandbox);
 const mg = sandbox.module.exports;
 const toPlain = value => JSON.parse(JSON.stringify(value));
 const backendSource = fs.readFileSync(
-  path.join(__dirname, 'backends', 'HyprlandBackend.js'),
+  path.join(__dirname, 'backends', 'UmbrielBackend.js'),
   'utf8'
 ).replace(/^\.pragma\s+library\s*;?/m, '').replace(/^\.import\s+.*$/m, '');
 const backendSandbox = { MonitorGeometry: mg };
@@ -235,47 +235,6 @@ describe('MonitorGeometry - Primary Derivation & Rebase', () => {
   });
 });
 
-describe('MonitorGeometry - Mode Parsing Contract', () => {
-  it('parses Hyprland advertised mode strings into exact shape', () => {
-    const rawModes = [
-      '1920x1080@60.00Hz',
-      '1920x1080@144.00Hz',
-      '1280x720@60.00Hz'
-    ];
-    const parsed = mg.parseAvailableModes(rawModes, 1920, 1080, 144);
-    assert.strictEqual(parsed.length, 3);
-
-    assert.strictEqual(parsed[0].id, '1920x1080@60');
-    assert.strictEqual(parsed[0].width, 1920);
-    assert.strictEqual(parsed[0].height, 1080);
-    assert.strictEqual(parsed[0].refresh, 60);
-    assert.strictEqual(parsed[0].label, '1920x1080 @ 60 Hz');
-    assert.strictEqual(parsed[0].preferred, false);
-
-    assert.strictEqual(parsed[1].id, '1920x1080@144');
-    assert.strictEqual(parsed[1].preferred, true); // matches current 1920x1080@144
-  });
-
-  it('deduplicates duplicate mode strings', () => {
-    const rawModes = [
-      '1920x1080@60.00Hz',
-      '1920x1080@60.00Hz'
-    ];
-    const parsed = mg.parseAvailableModes(rawModes, 1920, 1080, 60);
-    assert.strictEqual(parsed.length, 1);
-  });
-
-  it('does not invent selectable modes when active mode is absent from advertised modes', () => {
-    const rawModes = ['1920x1080@60.00Hz'];
-    // Active is 2560x1440@120, not in advertised modes
-    const parsed = mg.parseAvailableModes(rawModes, 2560, 1440, 120);
-    assert.strictEqual(parsed.length, 1);
-    assert.strictEqual(parsed[0].id, '1920x1080@60');
-    // None invented
-    const found = parsed.find(m => m.width === 2560);
-    assert.strictEqual(found, undefined);
-  });
-});
 describe('MonitorGeometry - Live Geometry & Apply Readback', () => {
   it('derives rectangles from physical mode data instead of stale cached logical sizes', () => {
     const rect = mg.getRect({
@@ -321,60 +280,31 @@ describe('MonitorGeometry - Live Geometry & Apply Readback', () => {
     assert.strictEqual(mg.layoutsMatch([mirrorWanted], [{ outputId: 'DP-2', mirror: 'DP-3' }]), false);
   });
 
-  it('rejects advertised mode strings without their real refresh rate', () => {
-    const parsed = mg.parseAvailableModes(
-      ['1920x1080', '1920x1080@60.00Hz'],
-      1920,
-      1080,
-      60
-    );
-    assert.strictEqual(parsed.length, 1);
-    assert.strictEqual(parsed[0].id, '1920x1080@60');
-  });
 });
-describe('Hyprland monitor normalization', () => {
-  it('preserves live mirror identity and advertised modes while deriving transformed geometry', () => {
+describe('Umbriel monitor normalization', () => {
+  it('preserves native scales, refresh and transformed geometry across monitors', () => {
     const parsed = backendSandbox.parseOutputs(JSON.stringify([{
-      name: 'DP-1',
-      width: 1920,
-      height: 1080,
-      refreshRate: 59.94,
-      x: -1080,
-      y: 0,
-      scale: 1.25,
-      transform: 1,
-      mirrorOf: 'none',
-      availableModes: ['1920x1080@59.94Hz', '1920x1080@59.94Hz']
+      name: 'DP-1', enabled: true, position: { x: -864, y: 0 },
+      scale: 1.25, transform: '90',
+      modes: [{ width: 1920, height: 1080, refresh_mhz: 59940, current: true, preferred: true }]
     }, {
-      name: 'DP-2',
-      width: 1920,
-      height: 1080,
-      refreshRate: 60,
-      x: 0,
-      y: 0,
-      scale: 1,
-      transform: 0,
-      mirrorOf: 'DP-1',
-      availableModes: ['1920x1080@60.00Hz']
+      name: 'DP-2', enabled: true, position: { x: 0, y: 0 },
+      scale: 1.5, transform: 'normal',
+      modes: [{ width: 1920, height: 1080, refresh_mhz: 60000, current: true }]
     }]));
-
     assert.strictEqual(parsed.error, undefined);
     assert.strictEqual(parsed.outputs[0].logicalWidth, 864);
     assert.strictEqual(parsed.outputs[0].logicalHeight, 1536);
-    assert.strictEqual(parsed.outputs[0].availableModes.length, 1);
     assert.strictEqual(parsed.outputs[0].modeId, '1920x1080@59.94');
-    assert.strictEqual(parsed.outputs[1].mirror, 'DP-1');
+    assert.strictEqual(parsed.outputs[1].logicalWidth, 1280);
+    assert.strictEqual(parsed.outputs[1].scale, 1.5);
+    assert.strictEqual(parsed.outputs[1].isPrimary, true);
   });
 
-  it('rejects incomplete monitor geometry instead of inventing a 1080p mode', () => {
+  it('rejects incomplete monitor geometry rather than inventing a mode or scale', () => {
     const parsed = backendSandbox.parseOutputs(JSON.stringify([{
-      name: 'DP-1',
-      height: 1080,
-      refreshRate: 60,
-      x: 0,
-      y: 0,
-      scale: 1,
-      transform: 0
+      name: 'DP-1', enabled: true, position: { x: 0, y: 0 },
+      transform: 'normal', modes: []
     }]));
     assert.ok(parsed.error);
     assert.strictEqual(parsed.outputs, undefined);

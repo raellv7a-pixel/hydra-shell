@@ -26,9 +26,7 @@ import qs.Modules.OSD
 
 import qs.Modules.Panels.Launcher
 import qs.Modules.Panels.Settings
-import qs.Modules.Panels.WorkspaceManager
 import qs.Modules.Polkit
-import qs.Modules.ScreenShare
 import qs.Modules.ScreenToolkit
 import qs.Modules.Toast
 import qs.Services.Compositor
@@ -148,12 +146,6 @@ ShellRoot {
       Notification {}
       ToastOverlay {}
       ScreenToolkitNative {}
-      Loader {
-        active: !CompositorService.isUmbriel
-        sourceComponent: Component {
-          ScreenShareNative {}
-        }
-      }
       PolkitNative {
         id: polkitAgent
       }
@@ -173,13 +165,6 @@ ShellRoot {
       // Settings window mode (single window across all monitors)
       SettingsPanelWindow {}
 
-      // Workspace manager overlay
-      Loader {
-        active: PanelService.workspaceManagerOpen && !CompositorService.isUmbriel
-        sourceComponent: Component {
-          WorkspaceManagerPanel {}
-        }
-      }
 
       // Shared screen detector for IPC and plugins
       CurrentScreenDetector {

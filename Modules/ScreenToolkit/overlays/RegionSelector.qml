@@ -16,8 +16,6 @@ Item {
   property var windowRegions: []
   property var pluginApi: null
   property bool windowRegionsFetched: false
-  property bool isNiri: false
-  property bool _isNiriChecked: false
   function show(screen) {
     var target = screen || null;
     if (!target && Quickshell.screens.length > 0)
@@ -26,21 +24,8 @@ Item {
     root.windowRegions = [];
     root.windowRegionsFetched = false;
     root.isVisible = true;
-    if (CompositorService.isUmbriel) {
+    if (CompositorService.isUmbriel)
       loadUmbrielWindows();
-      return;
-    }
-    if (!root._isNiriChecked) {
-      root._isNiriChecked = true;
-      _envCheckProc.exec({
-                           command: ["bash", "-c", "[ -n \"$NIRI_SOCKET\" ] && echo 1 || echo 0"]
-                         });
-    }
-    _winFetchProc.exec({
-                         command: ["bash", "-c", "if [ -n \"$HYPRLAND_INSTANCE_SIGNATURE\" ]; then" + "  hyprctl clients -j 2>/dev/null | jq -r '" + "    .[] | select(.mapped == true) | " + "    \"\\(.at[0]),\\(.at[1]) \\(.size[0])x\\(.size[1]) \\(.title)\"' 2>/dev/null;" + "elif [ -n \"$NIRI_SOCKET\" ]; then"
-                           + "  OUT=$(niri msg --json focused-output 2>/dev/null);" + "  OX=$(printf '%s' \"$OUT\" | jq -r '(.logical.x // 0)' 2>/dev/null);" + "  OY=$(printf '%s' \"$OUT\" | jq -r '(.logical.y // 0)' 2>/dev/null);" + "  niri msg --json windows 2>/dev/null | jq -r --argjson ox \"$OX\" --argjson oy \"$OY\" '"
-                           + "    .[] | select(.layout.tile_pos_in_workspace_view != null) | " + "    \"\\(($ox + .layout.tile_pos_in_workspace_view[0]) | floor)," + "      \\(($oy + .layout.tile_pos_in_workspace_view[1]) | floor) " + "      \\(.layout.tile_size[0] | floor)x\\(.layout.tile_size[1] | floor) " + "      \\(.title)\"' 2>/dev/null;" + "fi"]
-                       });
   }
   function hide() {
     root.isVisible = false;
@@ -74,41 +59,6 @@ Item {
     }
     root.windowRegions = regions;
     root.windowRegionsFetched = true;
-  }
-  Process {
-    id: _envCheckProc
-    stdout: StdioCollector {}
-    onExited: {
-      root.isNiri = _envCheckProc.stdout.text.trim() === "1";
-    }
-  }
-  Process {
-    id: _winFetchProc
-    stdout: StdioCollector {}
-    onExited: {
-      var lines = _winFetchProc.stdout.text.trim().split("\n");
-      var regions = [];
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i].trim();
-        if (line === "")
-          continue;
-        var m = line.match(/^(-?\d+),\s*(-?\d+)\s+(\d+)x(\d+)\s*(.*)$/);
-        if (!m)
-          continue;
-        var rw = parseInt(m[3]), rh = parseInt(m[4]);
-        if (rw < 10 || rh < 10)
-          continue;
-        regions.push({
-                       x: parseInt(m[1]),
-                       y: parseInt(m[2]),
-                       w: rw,
-                       h: rh,
-                       title: m[5].trim()
-                     });
-      }
-      root.windowRegions = regions;
-      root.windowRegionsFetched = true;
-    }
   }
   Variants {
     model: Quickshell.screens
@@ -380,32 +330,27 @@ Item {
           Item {
             width: Style.marginL
             height: 1
-            visible: !root.isNiri
           }
           Rectangle {
             width: Style.borderS
             height: 14
             color: Qt.rgba(1, 1, 1, 0.25)
             anchors.verticalCenter: parent.verticalCenter
-            visible: !root.isNiri
           }
           Item {
             width: Style.marginL
             height: 1
-            visible: !root.isNiri
           }
           NText {
             text: pluginApi?.tr("regionSelector.clickWindow")
             color: Qt.rgba(1, 1, 1, 0.7)
             pointSize: Style.fontSizeXS
             font.weight: Font.Bold
-            visible: !root.isNiri
           }
           NText {
             text: pluginApi?.tr("regionSelector.toSnap")
             color: Qt.rgba(1, 1, 1, 0.4)
             pointSize: Style.fontSizeXS
-            visible: !root.isNiri
           }
           Item {
             width: Style.marginL
@@ -474,7 +419,7 @@ Item {
                       return;
                       win.dragging = false;
                       if (win.selW < 5 && win.selH < 5) {
-                        if (!root.isNiri && root.windowRegionsFetched) {
+                        if (root.windowRegionsFetched) {
                           var hi = win._winAt(mouse.x, mouse.y);
                           if (hi >= 0) {
                             var region = root.windowRegions[hi];

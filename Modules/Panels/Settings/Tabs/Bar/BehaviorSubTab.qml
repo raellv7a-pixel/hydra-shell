@@ -33,12 +33,6 @@ ColumnLayout {
               "name": I18n.tr("panels.bar.behavior-workspace-scroll-option-workspace")
             }
           ];
-      if (CompositorService.isNiri) {
-        items.push({
-                     "key": "content",
-                     "name": I18n.tr("panels.bar.behavior-workspace-scroll-option-content")
-                   });
-      }
       return items;
     }
     currentKey: root.effectiveWheelAction

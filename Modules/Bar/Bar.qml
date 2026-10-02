@@ -325,7 +325,7 @@ Item {
           var candidates = [];
           for (var i = 0; i < CompositorService.workspaces.count; i++) {
             var ws = CompositorService.workspaces.get(i);
-            var matchesScreen = CompositorService.globalWorkspaces || (ws.output && ws.output.toLowerCase() === screenName);
+            var matchesScreen = ws.output && ws.output.toLowerCase() === screenName;
             if (matchesScreen)
               candidates.push(ws);
           }
@@ -498,8 +498,6 @@ Item {
                 direction *= -1;
               if (bar.barWheelAction === "workspace") {
                 bar.switchWorkspaceByOffset(direction);
-              } else if (bar.barWheelAction === "content") {
-                CompositorService.scrollWorkspaceContent(direction);
               }
               bar.barWheelCooldown = true;
               barWheelDebounce.restart();

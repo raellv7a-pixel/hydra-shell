@@ -210,11 +210,11 @@ ColumnLayout {
 
   NDivider {
     Layout.fillWidth: true
-    visible: CompositorService.isNiri
+    visible: CompositorService.isUmbriel
   }
 
   ColumnLayout {
-    visible: CompositorService.isNiri
+    visible: CompositorService.isUmbriel
     enabled: Settings.data.wallpaper.enabled
     spacing: Style.marginL
     Layout.fillWidth: true

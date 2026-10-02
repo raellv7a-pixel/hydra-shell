@@ -4,10 +4,10 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "../../Modules/Panels/Settings/Tabs/Display/MonitorLayout/MonitorGeometry.js" as MonitorGeometry
-import "../../Modules/Panels/Settings/Tabs/Display/MonitorLayout/backends/HyprlandBackend.js" as HyprBackend
-import "../../Modules/Panels/Settings/Tabs/Display/MonitorLayout/backends/SwayBackend.js" as SwayBackend
+import "../../Modules/Panels/Settings/Tabs/Display/MonitorLayout/backends/UmbrielBackend.js" as UmbrielBackend
 import qs.Commons
 import qs.Services.Compositor
+import qs.Services.UI
 
 Singleton {
   id: root
@@ -28,26 +28,12 @@ Singleton {
 
   readonly property bool isBusy: transactionState !== "idle" || fetchProc.running || snapshotProc.running || applyProc.running || rollbackProc.running || verifyProc.running
 
+  readonly property var backendConfig: ({ script: Quickshell.shellDir + "/Scripts/python/umbriel_config.py" })
   Component.onCompleted: {
-    if (!isUmbrielSession())
-      fetchOutputs();
+    if (CompositorService.isUmbriel)
+      Qt.callLater(fetchOutputs);
   }
-
-  function isUmbrielSession() {
-    const current = (Quickshell.env("XDG_CURRENT_DESKTOP") || "").toLowerCase();
-    const session = (Quickshell.env("XDG_SESSION_DESKTOP") || "").toLowerCase();
-    return !!Quickshell.env("UMBRIEL_SOCKET") || current === "umbriel" || session === "umbriel";
-  }
-
-  function activeBackend() {
-    if (isUmbrielSession())
-      return null;
-    if (CompositorService.isHyprland)
-      return HyprBackend;
-    if (CompositorService.isSway)
-      return SwayBackend;
-    return HyprBackend;
-  }
+  function activeBackend() { return UmbrielBackend; }
   function replaceOutputs(outputs) {
     root.originalOutputs = JSON.parse(JSON.stringify(outputs));
     root.draftOutputs = JSON.parse(JSON.stringify(outputs));
@@ -66,13 +52,7 @@ Singleton {
   }
 
   function outputsMatch(expected, actual) {
-    // Sway's backend retains its legacy count-based readback contract.
-    if (CompositorService.isSway) {
-      var expectedActiveCount = (expected || []).filter(function (output) {
-        return output && output.active !== false && !output.disabled;
-      }).length;
-      return !!actual && actual.length >= expectedActiveCount;
-    }
+    // Verify full geometry, scales and modes before asking the user to keep the layout.
     return MonitorGeometry.layoutsMatch(expected, actual);
   }
   function startApply(outputs, tx) {
@@ -85,7 +65,7 @@ Singleton {
       ToastService.showError("Erro no Layout", "Mantenha pelo menos uma tela ativa.");
       return;
     }
-    var res = root.activeBackend().buildApplyCommand(outputs, {}, {});
+    var res = root.activeBackend().buildApplyCommand(outputs, root.backendConfig);
     if (res && res.script) {
       root.transactionState = "applying";
       applyProc.activeTx = tx;
@@ -175,10 +155,11 @@ Singleton {
       }
 
       if (code === 0) {
+        CompositorService.updateDisplayScales();
         // Step 2: Fetch and verify actual outputs after apply
         root.transactionState = "verifying";
         verifyProc.activeTx = activeTx;
-        var cmd = root.activeBackend().buildFetchCommand({}, {});
+        var cmd = root.activeBackend().buildFetchCommand();
         verifyProc.exec({
                           command: cmd
                         });
@@ -242,10 +223,11 @@ Singleton {
       }
 
       if (code === 0) {
+        CompositorService.updateDisplayScales();
         root.transactionState = "rollback_verifying";
         root.verifyingRollback = true;
         verifyProc.activeTx = activeTx;
-        var cmd = root.activeBackend().buildFetchCommand({}, {});
+        var cmd = root.activeBackend().buildFetchCommand();
         verifyProc.exec({
                           command: cmd
                         });
@@ -259,15 +241,11 @@ Singleton {
   }
 
   function fetchOutputs() {
-    if (isUmbrielSession()) {
-      root.replaceOutputs([]);
-      return;
-    }
     if (root.isBusy) {
       Logger.w("MonitorService", "fetchOutputs blocked while monitor state is busy");
       return;
     }
-    var cmd = root.activeBackend().buildFetchCommand({}, {});
+    var cmd = root.activeBackend().buildFetchCommand();
     fetchProc.exec({
                      command: cmd
                    });
@@ -308,10 +286,7 @@ Singleton {
       if (arr[i].outputId === outputId) {
         arr[i] = Object.assign({}, arr[i], changes);
 
-        if (CompositorService.isHyprland && (changes.width !== undefined || changes.height !== undefined || changes.transform !== undefined)) {
-          var ladder = MonitorGeometry.getScaleLadder(arr[i].width, arr[i].height, arr[i].transform);
-          arr[i].scale = MonitorGeometry.coerceScale(arr[i].scale, ladder);
-        }
+        // Umbriel accepts fractional scale directly; do not coerce to a Hyprland ladder.
 
         var size = MonitorGeometry.computeLogicalSize(arr[i].width, arr[i].height, arr[i].scale, arr[i].transform);
         arr[i].logicalWidth = size.width;
@@ -405,7 +380,7 @@ Singleton {
     root.transactionState = "preparing";
     snapshotProc.activeTx = tx;
     snapshotProc.exec({
-                        command: root.activeBackend().buildFetchCommand({}, {})
+                        command: root.activeBackend().buildFetchCommand()
                       });
   }
 
@@ -430,7 +405,7 @@ Singleton {
     var tx = root.transactionId;
     root.transactionState = "reverting";
 
-    var res = root.activeBackend().buildApplyCommand(root.rollbackSnapshot, {}, {});
+    var res = root.activeBackend().buildApplyCommand(root.rollbackSnapshot, root.backendConfig);
     if (res && res.script) {
       rollbackProc.activeTx = tx;
       rollbackProc.exec({
@@ -454,45 +429,24 @@ Singleton {
     return (res && res.content) ? res.content : "";
   }
 
-  function generateLuaConfigSnippet(outputsList) {
-    var target = outputsList || root.originalOutputs;
-    var backend = root.activeBackend();
-    if (backend && typeof backend.buildLuaConfigFileContent === "function") {
-      var res = backend.buildLuaConfigFileContent(target);
-      return (res && res.content) ? res.content : "";
-    }
-    return generateConfigSnippet(target);
-  }
-
-  Connections {
-    target: HyprlandLuaWriter
-    function onMonitorsSaved() {
-      reloadProc.running = true;
-      ToastService.showNotice("Salvo no Hyprland", "Configuração de monitores salva em ~/.config/hypr/hydra-shell/monitors.lua!", "display");
-    }
-    function onMonitorsSaveFailed(error) {
-      ToastService.showError("Erro ao Salvar", "Não foi possível salvar a configuração de telas: " + error);
-    }
+  function saveToUmbrielConfig() {
+    if (root.isBusy)
+      return;
+    const result = root.activeBackend().buildApplyCommand(root.originalOutputs, root.backendConfig);
+    if (result.script)
+      saveProc.exec({ command: ["bash", "-c", result.script] });
   }
 
   Process {
-    id: reloadProc
-    running: false
-    command: ["hyprctl", "reload"]
-  }
-
-  function saveToHyprlandConfig() {
-    if (root.isBusy) {
-      ToastService.showError("Ação Bloqueada", "Aguarde a operação de monitores terminar antes de salvar.");
-      return;
-    }
-
-    // Persist only confirmed outputs after Keep, never unconfirmed draft!
-    var luaContent = generateLuaConfigSnippet(root.originalOutputs);
-    if (luaContent && luaContent.length > 0) {
-      HyprlandLuaWriter.writeMonitors(luaContent);
-    } else {
-      ToastService.showError("Erro ao Salvar", "Não foi possível gerar a configuração de telas.");
+    id: saveProc
+    stderr: StdioCollector {}
+    onExited: code => {
+      if (code === 0) {
+        CompositorService.updateDisplayScales();
+        ToastService.showNotice("Salvo na Umbriel", "Configuração validada em hydra/outputs.toml.", "display");
+      } else {
+        ToastService.showError("Erro ao Salvar", saveProc.stderr.text);
+      }
     }
   }
 }

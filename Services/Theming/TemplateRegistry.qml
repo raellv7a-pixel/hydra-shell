@@ -391,69 +391,19 @@ Singleton {
       "postProcess": () => `emacsclient -e "(load-theme 'hydra t)"`
     },
     {
-      "id": "labwc",
-      "name": "Labwc",
+      "id": "umbriel",
+      "name": "Umbriel",
       "category": "compositor",
-      "input": "labwc.conf",
+      "input": "umbriel.toml",
       "outputs": [
         {
-          "path": "~/.config/labwc/themerc-override"
+          "path": "$XDG_CACHE_HOME/hydra/umbriel-theme.toml",
+          "requiresPath": "$XDG_CONFIG_HOME/umbriel"
         }
       ],
-      "postProcess": () => `${templateApplyScript} labwc`
-    },
-    {
-      "id": "niri",
-      "name": "Niri",
-      "category": "compositor",
-      "input": "niri.kdl",
-      "outputs": [
-        {
-          "path": "~/.config/niri/hydra.kdl"
-        }
-      ],
-      "postProcess": () => `${templateApplyScript} niri`
-    },
-    {
-      "id": "sway",
-      "name": "Sway",
-      "category": "compositor",
-      "input": "sway",
-      "outputs": [
-        {
-          "path": "~/.config/sway/hydra"
-        }
-      ],
-      "postProcess": () => `${templateApplyScript} sway`
-    },
-    {
-      "id": "scroll",
-      "name": "Scroll",
-      "category": "compositor",
-      "input": "scroll",
-      "outputs": [
-        {
-          "path": "~/.config/scroll/hydra"
-        }
-      ],
-      "postProcess": () => `${templateApplyScript} scroll`
-    },
-    {
-      "id": "hyprland",
-      "name": "Hyprland",
-      "category": "compositor",
-      "input": "hyprland.conf",
-      "outputs": [
-        {
-          "path": "~/.config/hypr/hydra/hydra-colors.conf",
-          "postProcess": false
-        },
-        {
-          "path": "~/.config/hypr/hydra/hydra-colors.lua",
-          "input": "hyprland.lua"
-        },
-      ],
-      "postProcess": () => `${templateApplyScript} hyprland`
+      // Renderer writes a candidate, never the live compositor config.
+      "postProcessOnUnchanged": true,
+      "postProcess": () => `bash "${templateApplyScript}" umbriel`
     },
     {
       "id": "hyprtoolkit",
@@ -465,18 +415,6 @@ Singleton {
           "path": "~/.config/hypr/hyprtoolkit.conf"
         }
       ]
-    },
-    {
-      "id": "mango",
-      "name": "Mango",
-      "category": "compositor",
-      "input": "mango.conf",
-      "outputs": [
-        {
-          "path": "~/.config/mango/hydra.conf"
-        }
-      ],
-      "postProcess": () => `${templateApplyScript} mango`
     },
     {
       "id": "btop",
@@ -654,7 +592,7 @@ Singleton {
       // Recolors the vendored Bibata "Modern" cursor set (Assets/Cursor/Bibata)
       // from the live primary accent and installs it as a hyprcursor +
       // Xcursor theme (Scripts/python/src/theming/cursor-generate.py), then
-      // applies it live via hyprctl/gsettings. Backgrounded like
+      // applies it through validated Umbriel config/gsettings. Backgrounded like
       // papirusFolders above so the generation pipeline never blocks on it.
       "postProcess": () => `nohup python3 ${cursorGenerateScript} '{{ colors.primary.default.hex }}' ${Settings.data.templates.cursorSize} >> ${Settings.cacheDir}cursor-generate.log 2>&1 &`
     },

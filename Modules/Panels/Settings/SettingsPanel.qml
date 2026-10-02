@@ -93,7 +93,6 @@ SmartPanel {
     UserInterface,
     Wallpaper,
     Security,
-    Hyprland,
     Umbriel
   }
 

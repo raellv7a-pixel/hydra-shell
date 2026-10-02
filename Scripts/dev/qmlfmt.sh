@@ -10,6 +10,7 @@ set -euo pipefail
 #   Scripts/dev/qmlfmt.sh                  # format every QML file
 #   Scripts/dev/qmlfmt.sh --check          # fail if formatting would change
 #   Scripts/dev/qmlfmt.sh [--check] PATH…  # limit to files/directories
+#   Scripts/dev/qmlfmt.sh --parse-only PATH…  # parse temporary copies; preserve validated source
 
 export QT_LOGGING_RULES="qt.qmldom.*=false"
 
@@ -36,10 +37,12 @@ if [ -z "$QMLFORMAT" ]; then
 fi
 
 CHECK=false
+PARSE_ONLY=false
 targets=()
 for arg in "$@"; do
   case "$arg" in
     --check) CHECK=true ;;
+    --parse-only) PARSE_ONLY=true ;;
     -h|--help)
       sed -n '5,12p' "$0"
       exit 0
@@ -93,6 +96,11 @@ if ! printf '%s\0' "${all_files[@]}" |
   xargs -0 -P "${QMLFMT_JOBS:-$(nproc)}" -I {} bash -c 'format_copy "$1"' _ {}; then
   echo "Errors occurred; working tree left untouched." >&2
   exit 1
+fi
+
+if $PARSE_ONLY; then
+  echo "Done; parsed ${#all_files[@]} QML files without changing source."
+  exit 0
 fi
 
 changed=()

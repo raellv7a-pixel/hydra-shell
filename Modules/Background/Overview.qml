@@ -8,7 +8,7 @@ import qs.Services.Power
 import qs.Services.UI
 
 Loader {
-  active: CompositorService.isNiri && Settings.data.wallpaper.enabled && Settings.data.wallpaper.overviewEnabled && (!PowerProfileService.hydraPerformanceMode || !Settings.data.hydraPerformance.disableWallpaper)
+  active: CompositorService.isUmbriel && Settings.data.wallpaper.enabled && Settings.data.wallpaper.overviewEnabled && (!PowerProfileService.hydraPerformanceMode || !Settings.data.hydraPerformance.disableWallpaper)
 
   sourceComponent: Variants {
     model: Quickshell.screens
@@ -23,11 +23,12 @@ Loader {
       property color solidColor: Settings.data.wallpaper.solidColor
       property color tintColor: Settings.data.colorSchemes.darkMode ? Color.mSurface : Color.mOnSurface
 
-      visible: wallpaper !== "" || isSolidColor
+      visible: CompositorService.overviewActive && (wallpaper !== "" || isSolidColor)
 
       Component.onCompleted: {
         if (modelData) {
-          Logger.d("Overview", "Loading overview for Niri on", modelData.name);
+          wallpaper = WallpaperService.getWallpaper(modelData.name);
+          Logger.d("Overview", "Loading overview for Umbriel on", modelData.name);
         }
       }
 

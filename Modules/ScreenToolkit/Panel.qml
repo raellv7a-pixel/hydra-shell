@@ -77,8 +77,7 @@ Item {
   property string recordPath: ""
   property string _thumbBust: ""
   readonly property bool hasResult: activeTool !== "" && !isRunning
-  readonly property bool _isNiri: mainInstance?.isNiri ?? false
-  readonly property bool _isHyprland: mainInstance?.isHyprland ?? false
+  readonly property bool _isUmbriel: mainInstance?.isUmbriel ?? false
   readonly property string _savedHex: mainInstance?.resultHex ?? ""
   readonly property string _savedOcr: mainInstance?.ocrResult ?? ""
   readonly property string _savedQr: mainInstance?.qrResult ?? ""
@@ -620,7 +619,7 @@ Item {
           width: (parent.width - Style.marginS * 2) / 3
           height: 38
           radius: Style.radiusM
-          enabled: root._isHyprland
+          enabled: root._isUmbriel
           color: !enabled ? Color.mSurfaceVariant : (annotWinBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface)
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
@@ -647,7 +646,7 @@ Item {
             cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked: if (parent.enabled)
                          root.mainInstance?.runAnnotateActiveWindow()
-            onEntered: TooltipService.show(annotWinBtn, parent.enabled ? pluginApi?.tr("annotate.windowTooltip") : pluginApi?.tr("annotate.windowHyprlandOnly"))
+            onEntered: TooltipService.show(annotWinBtn, pluginApi?.tr("annotate.windowTooltip"))
             onExited: TooltipService.hide()
           }
         }

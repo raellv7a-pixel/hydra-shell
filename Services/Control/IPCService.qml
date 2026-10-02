@@ -107,7 +107,6 @@ Singleton {
                                             "wallpaper": SettingsPanel.Tab.Wallpaper,
                                             "security": SettingsPanel.Tab.Security,
                                             "idle": SettingsPanel.Tab.Idle,
-                                            "hyprland": SettingsPanel.Tab.Hyprland,
                                             "umbriel": SettingsPanel.Tab.Umbriel
                                           })
 
@@ -596,83 +595,12 @@ Singleton {
     }
   }
 
-  // Workspace Manager IPC
+  // Native overview replaces the inaccessible Hyprland-only workspace manager.
   IpcHandler {
-    target: "workspaces"
-    function toggle() {
-      root.screenDetector.withCurrentScreen(screen => {
-                                              PanelService.toggleWorkspaceManager(screen);
-                                            });
-    }
-    function open() {
-      root.screenDetector.withCurrentScreen(screen => {
-                                              PanelService.openWorkspaceManager(screen);
-                                            });
-    }
-    function close() {
-      PanelService.closeWorkspaceManager();
-    }
-    function mode(mode: string): string {
-      if (mode === "adaptive" || mode === "floating")
-        Settings.data.workspaceManager.presentationMode = mode;
-      return Settings.data.workspaceManager.presentationMode;
-    }
-    function privacy(workspace: string, state: string): string {
-      const key = workspace.trim();
-      if (!key)
-        return "invalid-workspace";
-      const privateWorkspaces = Array.from(Settings.data.workspaceManager.privateWorkspaces || []);
-      const currentlyPrivate = privateWorkspaces.includes(key);
-      const normalizedState = (state || "toggle").trim().toLowerCase();
-      if (normalizedState !== "on" && normalizedState !== "off" && normalizedState !== "toggle")
-        return "invalid-state";
-      const enabled = normalizedState === "on" ? true : (normalizedState === "off" ? false : !currentlyPrivate);
-      const workspaceRef = /^\d+$/.test(key) ? {
-                                                 "idx": parseInt(key)
-                                               } : {
-        "name": key
-      };
-      CompositorService.setWorkspacePrivate(workspaceRef, enabled);
-      return enabled ? "private" : "public";
-    }
-    function overview(action: string): string {
-      const act = (action || "toggle").trim().toLowerCase();
-      if (act === "open") {
-        root.screenDetector.withCurrentScreen(screen => {
-                                                PanelService.openWorkspaceManager(screen, true);
-                                              });
-        return "opened";
-      } else if (act === "close") {
-        PanelService.closeWorkspaceManager();
-        return "closed";
-      } else {
-        root.screenDetector.withCurrentScreen(screen => {
-                                                if (PanelService.workspaceManagerOpen)
-                                                PanelService.closeWorkspaceManager();
-                                                else
-                                                PanelService.openWorkspaceManager(screen, true);
-                                              });
-        return PanelService.workspaceManagerOpen ? "opened" : "closed";
-      }
-    }
-    function focusRecent(): string {
-      if (CompositorService.backend && CompositorService.backend.focusRecentWorkspace) {
-        CompositorService.backend.focusRecentWorkspace();
-        return "ok";
-      }
-      return "unsupported";
-    }
-    function createSpecial(name: string, isPrivate: string, command: string): string {
-      const cleanName = (name || "").trim();
-      if (!cleanName)
-        return "invalid-name";
-      const priv = isPrivate === "true" || isPrivate === "1" || isPrivate === "private";
-      if (CompositorService.backend && CompositorService.backend.createSpecialWorkspace) {
-        CompositorService.backend.createSpecialWorkspace(cleanName, priv, command || "");
-        return "created";
-      }
-      return "unsupported";
-    }
+    target: "overview"
+    function open() { CompositorService.openOverview(); }
+    function close() { CompositorService.closeOverview(); }
+    function toggle() { CompositorService.toggleOverview(); }
   }
 
   // Wallpaper IPC: trigger a new random wallpaper

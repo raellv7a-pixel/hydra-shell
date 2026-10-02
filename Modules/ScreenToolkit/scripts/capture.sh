@@ -2,7 +2,7 @@
 # capture.sh <action> [args...]
 #
 # Actions:
-#   annotate-window          — capture the focused Hyprland window with grim
+#   annotate-window          — capture the active Umbriel window with grim
 #                              output: /tmp/screen-toolkit-annotate.png
 #                              stdout: "X,Y WxH" geometry string
 #   pin       <geometry>     — capture a region at 2× scale with grim
@@ -15,7 +15,7 @@
 # Exit codes:
 #   1 — missing / invalid arguments
 #   2 — capture or decode failed
-#   3 — missing dependency (hyprctl, jq, grim, magick, zbarimg)
+#   3 — missing dependency (umbriel, jq, grim, magick, zbarimg)
 #
 # Used by: Main.qml (annotateWinProc, pinGrimProc, paletteProc, qrProc)
 
@@ -33,19 +33,11 @@ case "$ACTION" in
   annotate-window)
     _require grim
     _require jq
-    if [ -n "${UMBRIEL_SOCKET:-}" ] || [ "${XDG_CURRENT_DESKTOP:-}" = "umbriel" ]; then
-      _require umbriel
-      WIN=$(umbriel windows --json 2>/dev/null) \
-      || { echo "ERROR: umbriel windows failed" >&2; exit 2; }
-      GEOM=$(printf '%s' "$WIN" \
-      | jq -r '.[] | select(.focused == true or .active == true) | "\(.x),\(.y) \(.w)x\(.h)"' 2>/dev/null | head -1)
-    else
-      _require hyprctl
-      WIN=$(hyprctl activewindow -j 2>/dev/null) \
-      || { echo "ERROR: hyprctl failed" >&2; exit 2; }
-      GEOM=$(printf '%s' "$WIN" \
-      | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"' 2>/dev/null)
-    fi
+    _require umbriel
+    WIN=$(umbriel windows --json 2>/dev/null) \
+    || { echo "ERROR: umbriel windows failed" >&2; exit 2; }
+    GEOM=$(printf '%s' "$WIN" \
+    | jq -r 'first(.[] | select(.active == true) | "\(.x),\(.y) \(.w)x\(.h)") // empty' 2>/dev/null)
     [ -n "$GEOM" ] \
     || { echo "ERROR: could not parse window geometry" >&2; exit 2; }
     grim -g "$GEOM" /tmp/screen-toolkit-annotate.png 2>/dev/null \

@@ -28,9 +28,7 @@ Item {
   property var installedLangs: []
   property bool transAvailable: false
   property string detectedRecorder: ""
-  readonly property string detectedCompositor: CompositorService.isHyprland ? "hyprland" : CompositorService.isNiri ? "niri" : CompositorService.isUmbriel ? "umbriel" : "other"
-  readonly property bool isNiri: CompositorService.isNiri
-  readonly property bool isHyprland: CompositorService.isHyprland
+  readonly property string detectedCompositor: CompositorService.isUmbriel ? "umbriel" : "unsupported"
   readonly property bool isUmbriel: CompositorService.isUmbriel
   readonly property string resultHex: colorPickerOverlay.resultHex
   readonly property string resultRgb: colorPickerOverlay.resultRgb
@@ -868,7 +866,7 @@ Item {
       root.runAnnotateFullscreen();
     }
     function annotateWindow() {
-      if (root.isHyprland || root.isUmbriel)
+      if (root.isUmbriel)
         root.runAnnotateActiveWindow();
     }
     function pin() {

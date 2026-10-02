@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.Commons
+import "UmbrielSnapshots.js" as Snapshots
 
 Item {
   id: root
@@ -10,9 +11,15 @@ Item {
   property var windows: []
   property int focusedWindowIndex: -1
   property var workspaceCache: ({})
+  property var outputs: []
   property var outputCache: ({})
+  property string focusedOutputName: ""
+  property bool overviewActive: false
+  property string keyboardLayout: ""
   property bool initialized: false
   property bool windowsReceived: false
+  property bool outputsRefreshPending: false
+  property string appliedVisualConfig: ""
 
   signal workspaceChanged
   signal activeWindowChanged
@@ -24,42 +31,43 @@ Item {
       return;
     initialized = true;
     subscription.running = true;
-    Logger.i("UmbrielService", "Subscribing to workspaces and windows");
+    queryDisplayScales();
+    Qt.callLater(applyVisualConfig);
   }
 
   Process {
     id: subscription
-    command: ["umbriel", "subscribe", "workspaces,windows"]
-
-    stdout: SplitParser {
-      onRead: function (line) {
-        root.handleEvent(line);
-      }
-    }
-
-    stderr: SplitParser {
-      onRead: function (line) {
-        Logger.w("UmbrielService", "IPC subscription:", line);
-      }
-    }
-
-    onExited: function (exitCode) {
-      Logger.w("UmbrielService", "IPC subscription ended with exit code", exitCode);
-    }
+    command: ["umbriel", "subscribe", "workspaces,windows,overview,keyboard_layout"]
+    stdout: SplitParser { onRead: line => root.handleEvent(line) }
+    stderr: SplitParser { onRead: line => Logger.w("UmbrielService", "IPC subscription:", line) }
+    onExited: exitCode => Logger.w("UmbrielService", "IPC subscription ended:", exitCode)
   }
 
   function handleEvent(line) {
     try {
       const event = JSON.parse(line);
-      if (!event || !Array.isArray(event.data))
-        return;
-      if (event.event === "workspaces") {
-        updateWorkspaces(event.data);
-        workspaceChanged();
-      } else if (event.event === "windows") {
-        updateWindows(event.data);
-        windowListChanged();
-        activeWindowChanged();
+      switch (event.event) {
+      case "workspaces":
+        if (Array.isArray(event.data))
+          updateWorkspaces(event.data);
+        break;
+      case "windows":
+        if (Array.isArray(event.data)) {
+          windows = Snapshots.windows(event.data, workspaceCache);
+          windowsReceived = true;
+          updateFocusedWindowIndex();
+          windowListChanged();
+          activeWindowChanged();
+        }
+        break;
+      case "overview":
+        if (typeof event.data?.open === "boolean")
+          overviewActive = event.data.open;
+        break;
+      case "keyboard_layout":
+        if (event.data)
+          keyboardLayout = Snapshots.keyboardLayout(event.data);
+        break;
       }
     } catch (error) {
       Logger.e("UmbrielService", "Failed to parse IPC event:", error);
@@ -67,203 +75,156 @@ Item {
   }
 
   function updateWorkspaces(entries) {
-    workspaceCache = ({});
-    outputCache = ({});
+    const next = Snapshots.workspaces(entries);
+    const cache = {};
     workspaces.clear();
-
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i] || {};
-      const rawId = entry.id !== undefined ? String(entry.id) : String(entry.index);
-      const indexValue = Number(entry.index);
-      const index = Number.isFinite(indexValue) && indexValue > 0 ? indexValue : i + 1;
-      const output = entry.output || "";
-      const ws = {
-        id: index,
-        idx: index,
-        index: index,
-        handle: rawId,
-        name: entry.name || rawId,
-        output: output,
-        layout: entry.layout || "",
-        isActive: entry.active === true || entry.is_active === true,
-        isFocused: entry.focused === true || entry.is_focused === true,
-        isUrgent: false,
-        isOccupied: entry.occupied === true || entry.is_occupied === true,
-        named: entry.named === true
-      };
+    for (const ws of next) {
       workspaces.append(ws);
-      workspaceCache[rawId] = ws;
-      workspaceCache[String(index)] = ws;
-      if (output)
-        outputCache[output] = {
-          name: output,
-          scale: 1.0
-        };
+      cache[ws.id] = ws;
     }
-
-    refreshWindowOutputs();
-    publishOutputs();
+    workspaceCache = cache;
+    focusedOutputName = Snapshots.focusedOutput(next);
+    // Subscription snapshots may arrive in either order; resolve window outputs again.
+    windows = windows.map(window => Object.assign({}, window, {
+      output: cache[window.workspaceId]?.output || ""
+    }));
+    workspaceChanged();
+    windowListChanged();
+    if (next.some(ws => ws.output && !outputCache[ws.output]))
+      queryDisplayScales();
   }
 
-  function updateWindows(entries) {
-    const next = [];
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i] || {};
-      const workspaceHandle = typeof entry.workspace === "string"
-        ? entry.workspace
-        : (entry.workspace?.id !== undefined ? entry.workspace.id : (entry.workspace?.index !== undefined ? entry.workspace.index : (entry.workspace_id !== undefined ? entry.workspace_id : "")));
-      const workspaceInfo = workspaceCache[String(workspaceHandle)];
-      const workspaceId = workspaceInfo ? workspaceInfo.id : (Number.isFinite(Number(workspaceHandle)) ? Number(workspaceHandle) : -1);
-      const rect = entry.geometry || {};
-      const position = rect.position || rect;
-      const output = entry.output || (typeof entry.workspace === "object" ? entry.workspace.output : "") || (workspaceInfo ? workspaceInfo.output : "");
-      const isFocused = entry.focused === true || entry.is_focused === true;
-      const isActive = entry.active === true || entry.is_active === true;
-      const x = Number(entry.x !== undefined ? entry.x : (position.x !== undefined ? position.x : 0));
-      const y = Number(entry.y !== undefined ? entry.y : (position.y !== undefined ? position.y : 0));
-      const w = Number(entry.w !== undefined ? entry.w : (rect.width !== undefined ? rect.width : (entry.width !== undefined ? entry.width : 0)));
-      const h = Number(entry.h !== undefined ? entry.h : (rect.height !== undefined ? rect.height : (entry.height !== undefined ? entry.height : 0)));
-      next.push({
-                  id: String(entry.id !== undefined ? entry.id : ""),
-                  title: entry.title || "",
-                  appId: entry.app_id || entry.appId || entry.appid || "",
-                  workspaceId: workspaceId,
-                  workspaceHandle: String(workspaceHandle),
-                  isFocused: isFocused,
-                  isActive: isActive,
-                  output: output || "",
-                  x: x,
-                  y: y,
-                  w: w,
-                  h: h,
-                  position: {
-                    x: x,
-                    y: y
-                  },
-                  width: w,
-                  height: h,
-                  handle: String(entry.id !== undefined ? entry.id : ""),
-                  floating: entry.floating === true,
-                  scratchpad: entry.scratchpad || ""
-                });
-    }
-    windows = next;
-    windowsReceived = true;
-    updateFocusedWindowIndex();
-  }
-
-  function refreshWindowOutputs() {
-    if (!windows.length)
+  function queryDisplayScales() {
+    if (outputsQuery.running) {
+      outputsRefreshPending = true;
       return;
-    windows = windows.map(window => {
-                            const workspace = workspaceCache[window.workspaceHandle] || workspaceCache[String(window.workspaceId)];
-                            return Object.assign({}, window, {
-                                                   workspaceId: workspace ? workspace.id : window.workspaceId,
-                                                   output: window.output || (workspace ? workspace.output : "")
-                                                 });
-                          });
+    }
+    outputsQuery.running = true;
+  }
+
+  Process {
+    id: outputsQuery
+    command: ["umbriel", "outputs", "--json"]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        try {
+          root.outputs = Snapshots.outputs(JSON.parse(text));
+          const cache = {};
+          for (const output of root.outputs)
+            cache[output.name] = output;
+          root.outputCache = cache;
+          root.displayScalesChanged();
+        } catch (error) {
+          Logger.e("UmbrielService", "Failed to parse outputs:", error);
+        }
+      }
+    }
+    stderr: SplitParser { onRead: line => Logger.w("UmbrielService", "Outputs:", line) }
+    onExited: {
+      if (root.outputsRefreshPending) {
+        root.outputsRefreshPending = false;
+        Qt.callLater(root.queryDisplayScales);
+      }
+    }
   }
 
   function outputForWorkspace(workspaceId) {
-    const ws = workspaceCache[String(workspaceId)];
-    return ws ? ws.output : "";
+    return workspaceCache[String(workspaceId)]?.output || "";
   }
 
   function updateFocusedWindowIndex() {
-    focusedWindowIndex = -1;
-    for (let i = 0; i < windows.length; i++) {
-      if (windows[i].isFocused) {
-        focusedWindowIndex = i;
-        return;
-      }
-    }
-    for (let i = 0; i < windows.length; i++) {
-      if (windows[i].isActive) {
-        focusedWindowIndex = i;
-        return;
-      }
-    }
+    focusedWindowIndex = windows.findIndex(window => window.isActive);
   }
 
   function getActiveWindow() {
-    for (let i = 0; i < windows.length; i++) {
-      if (windows[i].isFocused)
-        return windows[i];
-    }
-    for (let i = 0; i < windows.length; i++) {
-      if (windows[i].isActive)
-        return windows[i];
-    }
-    return null;
-  }
-
-  function publishOutputs() {
-    if (CompositorService && CompositorService.onDisplayScalesUpdated)
-      CompositorService.onDisplayScalesUpdated(outputCache);
+    return focusedWindowIndex >= 0 ? windows[focusedWindowIndex] : null;
   }
 
   function action(name, argument) {
-    const args = ["umbriel", "msg", argument === undefined ? name : name + ":" + String(argument)];
-    Quickshell.execDetached(args);
+    if (!initialized) {
+      Logger.w("UmbrielService", "Compositor action unavailable outside Umbriel:", name);
+      return;
+    }
+    Quickshell.execDetached(["umbriel", "msg", argument === undefined ? name : name + ":" + String(argument)]);
   }
 
   function switchToWorkspace(workspace) {
-    if (!workspace)
-      return;
-    const selector = workspace.named === true ? workspace.name : String(workspace.index || workspace.idx || workspace.id);
-    const output = workspace.output ? "/" + workspace.output : "";
-    action("workspace-switch", selector + output);
+    if (workspace)
+      action("workspace-switch", Snapshots.workspaceSelector(workspace));
   }
 
   function focusWindow(window) {
-    if (window && window.id !== undefined)
+    if (window?.id)
       action("window-focus", window.id);
   }
 
   function closeWindow(window) {
-    if (window && window.id !== undefined)
+    if (window?.id)
       action("window-close", window.id);
   }
 
-  function focusWindowByAddress(id) {
-    action("window-focus", id);
-  }
-
-  function closeWindowByAddress(id) {
-    action("window-close", id);
-  }
+  function focusWindowByAddress(id) { action("window-focus", id); }
+  function closeWindowByAddress(id) { action("window-close", id); }
 
   function moveWindowToWorkspace(id, workspace) {
-    const selector = workspace && typeof workspace === "object" ? (workspace.named ? workspace.name : (workspace.index || workspace.idx || workspace.id)) : workspace;
-    action("window-move-to-workspace", String(selector));
+    // Native action moves the currently focused window, so select the requested ID first.
+    const selector = typeof workspace === "object" ? Snapshots.workspaceSelector(workspace) : String(workspace);
+    Quickshell.execDetached(["sh", "-c", 'umbriel msg "window-focus:$1" && umbriel msg "window-move-to-workspace:$2"', "hydra", String(id), selector]);
   }
 
   function spawn(command) {
     const parts = Array.isArray(command) ? command : [command];
-    const escaped = parts.map(part => "'" + String(part).replace(/'/g, "'\\''") + "'").join(" ");
-    action("spawn", escaped);
+    action("spawn", parts.map(part => "'" + String(part).replace(/'/g, "'\\''") + "'").join(" "));
   }
 
-  function turnOffMonitors() {
-    action("dpms-off");
-  }
-
-  function turnOnMonitors() {
-    action("dpms-on");
-  }
-
-  function logout() {
-    action("session-quit");
-  }
+  function turnOffMonitors() { action("dpms-off"); }
+  function turnOnMonitors() { action("dpms-on"); }
+  function logout() { action("session-quit", "skip-confirmation"); }
+  function cycleKeyboardLayout() { action("keyboard-layout-next"); }
 
   function getFocusedScreen() {
-    const focused = focusedWindowIndex >= 0 ? windows[focusedWindowIndex] : null;
-    const output = focused ? focused.output : "";
     const screens = Quickshell.screens || [];
-    for (let i = 0; i < screens.length; i++) {
-      if (screens[i].name === output)
-        return screens[i];
+    return screens.find(screen => screen.name === focusedOutputName) || screens[0] || null;
+  }
+
+  function applyVisualConfig() {
+    if (!initialized || !Settings.isLoaded || visualConfig.running)
+      return;
+    const value = JSON.stringify({
+      enabled: Settings.data.general.enableBlurBehind,
+      outputs: (Quickshell.screens || []).map(screen => screen.name)
+    });
+    if (value === appliedVisualConfig)
+      return;
+    visualConfig.request = value;
+    visualConfig.command = ["python3", Quickshell.shellDir + "/Scripts/python/umbriel_config.py", "visual", value];
+    visualConfig.running = true;
+  }
+
+  Connections {
+    target: Settings
+    function onSettingsLoaded() { Qt.callLater(root.applyVisualConfig); }
+  }
+  Connections {
+    target: Settings.data.general
+    function onEnableBlurBehindChanged() { Qt.callLater(root.applyVisualConfig); }
+  }
+  Connections {
+    target: Quickshell
+    function onScreensChanged() { Qt.callLater(root.applyVisualConfig); }
+  }
+
+  Process {
+    id: visualConfig
+    property string request: ""
+    stderr: StdioCollector {}
+    onExited: code => {
+      if (code === 0) {
+        root.appliedVisualConfig = request;
+        Qt.callLater(root.applyVisualConfig);
+      } else {
+        Logger.e("UmbrielService", "Visual configuration rejected:", visualConfig.stderr.text);
+      }
     }
-    return screens.length ? screens[0] : null;
   }
 }
