@@ -1,9 +1,10 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import "MonitorLayout/MonitorGeometry.js" as MonitorGeometry
 import qs.Commons
-import qs.Services.Compositor
 import qs.Services.Hardware
 import qs.Services.UI
 import qs.Widgets
@@ -21,102 +22,42 @@ ColumnLayout {
   property int activeSubTab: 0
 
   property real scenePadding: 20 * Style.uiScaleRatio
-  property bool isDragging: false
-  property var frozenCanvasSize: null
-  property real frozenSceneScale: 1
-  property real frozenSceneOffsetX: 0
-  property real frozenSceneOffsetY: 0
-  property real dragStartCanvasX: 0
-  property real dragStartCanvasY: 0
+  property var dragState: null
+  property var dragPosition: null
+  property bool dragMoved: false
+  readonly property bool isDragging: dragState !== null
+  readonly property real sceneFitFraction: 0.72
+  readonly property real minimumSceneScale: 0.02 * Style.uiScaleRatio
+  // Cap a 1920-wide tile at 480 UI pixels, including fully overlapping layouts.
+  readonly property real maximumSceneScale: 0.25 * Style.uiScaleRatio
+  readonly property var sceneBounds: MonitorGeometry.computeSceneBounds(root.outputs)
+  readonly property real viewportWidth: sceneScrollWrapper.availableWidth
+  readonly property real viewportHeight: root.isDragging ? root.dragState.viewportHeight :
+                                         Math.max(280 * Style.uiScaleRatio, Math.min(560 * Style.uiScaleRatio,
+                                         root.viewportWidth * sceneBounds.height / sceneBounds.width + scenePadding * 2))
+  readonly property var viewport: MonitorGeometry.fitViewport(sceneBounds, viewportWidth, viewportHeight,
+                                                            scenePadding, minimumSceneScale, maximumSceneScale, sceneFitFraction)
+  readonly property var activeSceneBounds: root.isDragging ? root.dragState.bounds : root.sceneBounds
+  readonly property real activeSceneScale: root.isDragging ? root.dragState.scale : root.viewport.scale
+  readonly property real activeSceneOffsetX: root.isDragging ? root.dragState.offsetX : root.viewport.offsetX
+  readonly property real activeSceneOffsetY: root.isDragging ? root.dragState.offsetY : root.viewport.offsetY
+  readonly property var requiredSceneSize: root.isDragging ? root.dragState.canvasSize : root.computeRequiredSceneSize()
 
   function clearDragState() {
-    root.isDragging = false;
-    root.frozenSceneBounds = null;
-    root.frozenCanvasSize = null;
-  }
-
-  readonly property var sceneBounds: computeSceneBounds(outputs)
-  readonly property real viewportWidth: sceneScrollWrapper ? sceneScrollWrapper.availableWidth : 0
-  readonly property real sceneScale: computeSceneScale()
-  readonly property var requiredSceneSize: (root.isDragging && root.frozenCanvasSize) ? root.frozenCanvasSize : root.computeRequiredSceneSize()
-
-  readonly property var activeSceneBounds: (root.isDragging && root.frozenSceneBounds) ? root.frozenSceneBounds : root.sceneBounds
-  readonly property real activeSceneScale: (root.isDragging && root.frozenSceneBounds) ? root.frozenSceneScale : root.sceneScale
-  readonly property real activeSceneOffsetX: (root.isDragging && root.frozenSceneBounds) ? root.frozenSceneOffsetX : root.sceneOffsetX
-  readonly property real activeSceneOffsetY: (root.isDragging && root.frozenSceneBounds) ? root.frozenSceneOffsetY : root.sceneOffsetY
-
-  function computeSceneBounds(list) {
-    if (!list || list.length === 0) {
-      return {
-        "minX": 0,
-        "minY": 0,
-        "maxX": 1920,
-        "maxY": 1080,
-        "width": 1920,
-        "height": 1080
-      };
-    }
-    var firstRect = MonitorGeometry.getRect(list[0]);
-    var minX = list[0].x;
-    var minY = list[0].y;
-    var maxX = list[0].x + firstRect.width;
-    var maxY = list[0].y + firstRect.height;
-
-    for (var i = 1; i < list.length; i++) {
-      var output = list[i];
-      var rect = MonitorGeometry.getRect(output);
-      minX = Math.min(minX, output.x);
-      minY = Math.min(minY, output.y);
-      maxX = Math.max(maxX, output.x + rect.width);
-      maxY = Math.max(maxY, output.y + rect.height);
-    }
-
-    return {
-      "minX": minX,
-      "minY": minY,
-      "maxX": maxX,
-      "maxY": maxY,
-      "width": Math.max(1, maxX - minX),
-      "height": Math.max(1, maxY - minY)
-    };
-  }
-
-  readonly property real sceneFitFraction: 0.72
-
-  readonly property real viewportHeight: {
-    var usableWidth = (root.viewportWidth - scenePadding * 2) * sceneFitFraction;
-    if (usableWidth <= 0)
-      return 280;
-    var arrangementHeight = usableWidth * (sceneBounds.height / sceneBounds.width);
-    return Math.max(280, Math.min(560, arrangementHeight / sceneFitFraction + scenePadding * 2));
-  }
-
-  readonly property real sceneOffsetX: Math.max(scenePadding, (root.viewportWidth - sceneBounds.width * sceneScale) / 2)
-  readonly property real sceneOffsetY: Math.max(scenePadding, (root.viewportHeight - sceneBounds.height * sceneScale) / 2)
-
-  function computeSceneScale() {
-    var availableWidth = (root.viewportWidth - (scenePadding * 2)) * sceneFitFraction;
-    var availableHeight = (root.viewportHeight - (scenePadding * 2)) * sceneFitFraction;
-    if (availableWidth <= 0 || availableHeight <= 0)
-      return 1;
-    return Math.max(0.02, Math.min(availableWidth / sceneBounds.width, availableHeight / sceneBounds.height));
+    root.dragState = null;
+    root.dragPosition = null;
+    root.dragMoved = false;
   }
 
   function computeRequiredSceneSize() {
     var maxX = root.viewportWidth;
     var maxY = root.viewportHeight;
     for (var i = 0; i < outputs.length; i++) {
-      var output = outputs[i];
-      var rect = MonitorGeometry.getRect(output);
-      var tileRight = layoutToCanvasX(output.x) + Math.max(90, rect.width * sceneScale);
-      var tileBottom = layoutToCanvasY(output.y) + Math.max(55, rect.height * sceneScale);
-      maxX = Math.max(maxX, tileRight + scenePadding);
-      maxY = Math.max(maxY, tileBottom + scenePadding);
+      var rect = MonitorGeometry.getRect(outputs[i]);
+      maxX = Math.max(maxX, layoutToCanvasX(rect.x + rect.width) + scenePadding);
+      maxY = Math.max(maxY, layoutToCanvasY(rect.y + rect.height) + scenePadding);
     }
-    return {
-      "width": maxX,
-      "height": maxY
-    };
+    return { width: maxX, height: maxY };
   }
 
   function layoutToCanvasX(val) {
@@ -130,6 +71,64 @@ ColumnLayout {
   }
   function canvasToLayoutY(val) {
     return activeSceneBounds.minY + ((val - activeSceneOffsetY) / activeSceneScale);
+  }
+
+  function beginDrag(mouseX, mouseY) {
+    var outputId = MonitorGeometry.outputAtPoint(root.outputs, canvasToLayoutX(mouseX), canvasToLayoutY(mouseY), root.selectedOutputId);
+    if (!outputId)
+      return;
+    MonitorService.selectOutput(outputId);
+    var output = root.selectedOutput;
+    if (!output)
+      return;
+    root.dragState = {
+      outputId: outputId, x: output.x, y: output.y, mouseX: mouseX, mouseY: mouseY,
+      bounds: root.sceneBounds, scale: root.viewport.scale,
+      offsetX: root.viewport.offsetX, offsetY: root.viewport.offsetY,
+      canvasSize: root.requiredSceneSize, viewportHeight: root.viewportHeight
+    };
+    root.dragPosition = { x: output.x, y: output.y };
+    root.dragMoved = false;
+  }
+
+  function moveDrag(mouseX, mouseY) {
+    if (!root.isDragging)
+      return;
+    if (!root.dragMoved && Math.max(Math.abs(mouseX - root.dragState.mouseX), Math.abs(mouseY - root.dragState.mouseY)) < canvasPointer.drag.threshold)
+      return;
+    root.dragMoved = true;
+    root.dragPosition = MonitorGeometry.dragPosition(root.dragState, mouseX, mouseY);
+  }
+
+  function finishDrag() {
+    if (!root.isDragging)
+      return;
+    var outputId = root.dragState.outputId;
+    var position = root.dragPosition;
+    var moved = root.dragMoved;
+    // Replacing draftOutputs destroys delegates. Clear the canvas-owned gesture first.
+    root.clearDragState();
+    if (!moved)
+      return;
+    var currentOutputs = JSON.parse(JSON.stringify(root.outputs));
+    var activeTile = currentOutputs.find(output => output.outputId === outputId);
+    if (!activeTile)
+      return;
+    activeTile.x = position.x;
+    activeTile.y = position.y;
+    var otherOutputs = currentOutputs.filter(output => output.outputId !== outputId && output.active !== false && !output.disabled);
+    if (otherOutputs.length > 0 && activeTile.active !== false && !activeTile.disabled) {
+      var snapped = MonitorGeometry.snapToNearestEdge(activeTile, otherOutputs, 32);
+      activeTile.x = snapped.x;
+      activeTile.y = snapped.y;
+      if (!MonitorGeometry.touchesAny(activeTile, otherOutputs)) {
+        var attached = MonitorGeometry.attachFlush(activeTile, otherOutputs);
+        activeTile.x = attached.x;
+        activeTile.y = attached.y;
+      }
+      currentOutputs = MonitorGeometry.tidyGaps(currentOutputs, 24);
+    }
+    MonitorService.commitLayout(currentOutputs, MonitorService.primaryOutputId);
   }
 
   function resolutionModel(output) {
@@ -168,7 +167,7 @@ ColumnLayout {
       onClicked: root.activeSubTab = 0
     }
     NTabButton {
-      text: "Linhas do hyprland.conf"
+      text: "Configuração outputs.toml"
       tabIndex: 1
       checked: root.activeSubTab === 1
       onClicked: root.activeSubTab = 1
@@ -350,14 +349,17 @@ ColumnLayout {
 
           delegate: Rectangle {
             id: monitorTile
+            required property var modelData
             readonly property var output: modelData
             readonly property bool isSelected: output.outputId === root.selectedOutputId
             readonly property var logicalRect: MonitorGeometry.getRect(output)
+            readonly property bool isDragged: root.isDragging && root.dragState.outputId === output.outputId
 
-            x: root.layoutToCanvasX(output.x)
-            y: root.layoutToCanvasY(output.y)
-            width: Math.max(90, logicalRect.width * root.activeSceneScale)
-            height: Math.max(55, logicalRect.height * root.activeSceneScale)
+            x: root.layoutToCanvasX(isDragged && root.dragPosition ? root.dragPosition.x : logicalRect.x)
+            y: root.layoutToCanvasY(isDragged && root.dragPosition ? root.dragPosition.y : logicalRect.y)
+            width: logicalRect.width * root.activeSceneScale
+            height: logicalRect.height * root.activeSceneScale
+            z: isSelected ? 1 : 0
 
             color: isSelected ? Qt.alpha(Color.mPrimary, 0.28) : Qt.alpha(Color.mSurfaceVariant, 0.65)
             border.color: isSelected ? Color.mPrimary : Color.mOutline
@@ -365,13 +367,13 @@ ColumnLayout {
             radius: Style.radiusM
 
             Behavior on x {
-              enabled: !dragArea.drag.active && !root.isDragging
+              enabled: !root.isDragging
               NumberAnimation {
                 duration: 120
               }
             }
             Behavior on y {
-              enabled: !dragArea.drag.active && !root.isDragging
+              enabled: !root.isDragging
               NumberAnimation {
                 duration: 120
               }
@@ -379,7 +381,7 @@ ColumnLayout {
 
             // Primary Monitor Badge
             Rectangle {
-              visible: !!output.isPrimary
+              visible: !!monitorTile.output.isPrimary
               anchors.top: parent.top
               anchors.left: parent.left
               anchors.margins: 6
@@ -406,102 +408,12 @@ ColumnLayout {
               }
             }
 
-            MouseArea {
-              id: dragArea
-              anchors.fill: parent
-              preventStealing: true
-              drag.target: parent
-              drag.axis: Drag.XAndYAxis
-              drag.minimumX: root.scenePadding
-              drag.minimumY: root.scenePadding
-              drag.maximumX: sceneCanvas.width - monitorTile.width - root.scenePadding
-              drag.maximumY: sceneCanvas.height - monitorTile.height - root.scenePadding
-
-              onPressed: {
-                root.dragStartCanvasX = monitorTile.x;
-                root.dragStartCanvasY = monitorTile.y;
-                root.frozenCanvasSize = {
-                  "width": root.requiredSceneSize.width,
-                  "height": root.requiredSceneSize.height
-                };
-                root.frozenSceneBounds = JSON.parse(JSON.stringify(root.sceneBounds));
-                root.frozenSceneScale = root.sceneScale;
-                root.frozenSceneOffsetX = root.sceneOffsetX;
-                root.frozenSceneOffsetY = root.sceneOffsetY;
-                root.isDragging = true;
-                MonitorService.selectOutput(output.outputId);
-              }
-
-              onReleased: {
-                if (Math.abs(monitorTile.x - root.dragStartCanvasX) <= 1 && Math.abs(monitorTile.y - root.dragStartCanvasY) <= 1) {
-                  root.clearDragState();
-                  return;
-                }
-                var snapScale = root.frozenSceneScale;
-                var snapOffsetX = root.frozenSceneOffsetX;
-                var snapOffsetY = root.frozenSceneOffsetY;
-                var snapBounds = root.frozenSceneBounds || root.sceneBounds;
-
-                var droppedX = snapBounds.minX + ((monitorTile.x - snapOffsetX) / snapScale);
-                var droppedY = snapBounds.minY + ((monitorTile.y - snapOffsetY) / snapScale);
-
-                var currentOutputs = JSON.parse(JSON.stringify(root.outputs));
-                var activeIndex = -1;
-                for (var i = 0; i < currentOutputs.length; i++) {
-                  if (currentOutputs[i].outputId === output.outputId) {
-                    activeIndex = i;
-                    break;
-                  }
-                }
-
-                if (activeIndex >= 0) {
-                  var activeTile = currentOutputs[activeIndex];
-                  activeTile.x = Math.round(droppedX);
-                  activeTile.y = Math.round(droppedY);
-
-                  var otherOutputs = [];
-                  for (var j = 0; j < currentOutputs.length; j++) {
-                    if (j !== activeIndex && currentOutputs[j].active !== false && !currentOutputs[j].disabled) {
-                      otherOutputs.push(currentOutputs[j]);
-                    }
-                  }
-
-                  if (otherOutputs.length > 0) {
-                    // 1. Magnetic snap to nearest edge requiring overlap
-                    var snapped = MonitorGeometry.snapToNearestEdge(activeTile, otherOutputs, 32);
-                    activeTile.x = snapped.x;
-                    activeTile.y = snapped.y;
-
-                    // 2. Far drop attached flush: ensure no enabled monitor is disconnected
-                    if (!MonitorGeometry.touchesAny(activeTile, otherOutputs)) {
-                      var attached = MonitorGeometry.attachFlush(activeTile, otherOutputs);
-                      activeTile.x = attached.x;
-                      activeTile.y = attached.y;
-                    }
-
-                    // 3. Tidy gaps
-                    currentOutputs[activeIndex] = activeTile;
-                    currentOutputs = MonitorGeometry.tidyGaps(currentOutputs, 24);
-                  }
-
-                  // 4. Rebase chosen main to (0,0) preserving relative positions
-                  var primaryId = MonitorService.primaryOutputId || (root.selectedOutput && root.selectedOutput.isPrimary ? root.selectedOutput.outputId : "");
-                  currentOutputs = MonitorGeometry.rebaseToPrimary(currentOutputs, primaryId);
-
-                  MonitorService.commitLayout(currentOutputs, primaryId);
-                }
-
-                root.clearDragState();
-              }
-              onCanceled: root.clearDragState()
-            }
-
             ColumnLayout {
               anchors.centerIn: parent
               spacing: 2
 
               NText {
-                text: output.name
+                text: monitorTile.output.name
                 pointSize: Style.fontSizeS
                 font.weight: Style.fontWeightBold
                 color: monitorTile.isSelected ? Color.mPrimary : Color.mOnSurface
@@ -509,13 +421,28 @@ ColumnLayout {
               }
 
               NText {
-                text: output.width + "x" + output.height + (output.refresh ? ("@" + Math.round(output.refresh) + "Hz") : "")
+                text: monitorTile.output.width + "x" + monitorTile.output.height + (monitorTile.output.refresh ? ("@" + Math.round(monitorTile.output.refresh) + "Hz") : "")
                 pointSize: Style.fontSizeXS
                 color: Color.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignHCenter
               }
             }
           }
+        }
+
+        MouseArea {
+          id: canvasPointer
+          anchors.fill: parent
+          z: 2
+          enabled: !MonitorService.isBusy
+          preventStealing: true
+          onPressed: mouse => root.beginDrag(mouse.x, mouse.y)
+          onPositionChanged: mouse => {
+            if (pressed)
+              root.moveDrag(mouse.x, mouse.y);
+          }
+          onReleased: root.finishDrag()
+          onCanceled: root.clearDragState()
         }
       }
     }
@@ -794,7 +721,7 @@ ColumnLayout {
   }
 
   // ==========================================
-  // TAB 1: CONFIGURAÇÃO DO HYPRLAND
+  // TAB 1: CONFIGURAÇÃO DA UMBRIEL
   // ==========================================
   ColumnLayout {
     id: tab1Layout

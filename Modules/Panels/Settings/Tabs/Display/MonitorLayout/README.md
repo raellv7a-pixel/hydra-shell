@@ -6,9 +6,11 @@ Native Umbriel monitor controls used by **Settings → Tela → Arranjo de Monit
 ## Geometry and modes
 
 - `umbriel outputs --json` supplies identity, current/advertised modes, refresh, enabled state, position, scale and transform.
-- Fractional scales are preserved; there is no Hyprland scale coercion or invented mode/scale.
-- Dragging freezes the canvas transform until drop. Snapping, flush attachment and gap cleanup use logical monitor rectangles.
-- Selecting a primary display rebases it to `(0, 0)` while preserving relative offsets.
+- Fractional scales are preserved without coercion or invented mode/scale. Tile dimensions come from the rotated physical mode divided by output scale; all tiles share one viewport scale.
+- The canvas owns pointer gestures outside the monitor delegates. Press captures logical origin, pointer origin, scale, offsets, bounds and viewport/canvas size; drag previews logical deltas without mutating the draft or recalculating zoom. Release snaps and commits the draft before fitting again; cancel leaves the draft unchanged.
+- Auto-fit uses enabled outputs, 20 UI-pixel padding and the existing 72% fit fraction. Its scale is limited to `0.02–0.25 × uiScaleRatio` (a 1920-wide tile is at most 480 UI pixels), with scrolling for layouts that exceed the minimum-scale viewport.
+- Selection uses stable native output names, independently of session focus and layout origin. The selected tile is raised; repeated clicks in overlapping areas cycle the outputs, including complete overlap.
+- “Primary” in this editor means the logical layout origin, not an Umbriel focused-output flag. Choosing it rebases the layout to `(0, 0)` while preserving relative offsets; it never disables tile selection or dragging.
 - Adaptive-sync policy remains user-owned and is not changed by this panel.
 
 ## Apply and persistence

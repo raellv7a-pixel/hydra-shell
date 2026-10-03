@@ -79,6 +79,119 @@ describe('MonitorGeometry - Logical Footprint & Transforms', () => {
   });
 });
 
+describe('MonitorGeometry - Stable Canvas Viewport', () => {
+  const monA = { outputId: 'DP-1', name: 'DP-1', x: 0, y: 0, width: 1920, height: 1080, scale: 1, transform: 0 };
+  const fit = outputs => mg.fitViewport(mg.computeSceneBounds(outputs), 1000, 400, 20, 0.02, 0.25, 0.72);
+
+  it('fits enabled logical rectangles including negative coordinates, not disabled outliers', () => {
+    const outputs = [
+      monA,
+      { ...monA, outputId: 'DP-2', x: -1920, y: -100 },
+      { ...monA, outputId: 'DP-3', x: 50000, active: false },
+      { ...monA, outputId: 'DP-4', y: 50000, disabled: true }
+    ];
+    assert.deepStrictEqual(toPlain(mg.computeSceneBounds(outputs)), {
+      minX: -1920, minY: -100, maxX: 1920, maxY: 1080, width: 3840, height: 1180
+    });
+  });
+
+  it('fits side-by-side equal displays with padding and one shared scale', () => {
+    const viewport = fit([monA, { ...monA, outputId: 'DP-2', x: 1920 }]);
+    assert.ok(Math.abs(viewport.scale - 0.18) < 1e-12);
+    assert.ok(Math.abs(viewport.offsetX - 154.4) < 1e-9);
+    assert.ok(Math.abs(viewport.offsetY - 102.8) < 1e-9);
+    assert.ok(Math.abs(mg.getRect(monA).width * viewport.scale - 345.6) < 1e-9);
+  });
+
+  it('caps zoom for tiny or overlapping layouts and retains a finite scale before layout', () => {
+    const overlap = [monA, { ...monA, outputId: 'DP-2' }];
+    const viewport = mg.fitViewport(mg.computeSceneBounds(overlap), 1600, 900, 20, 0.02, 0.25, 0.72);
+    assert.strictEqual(viewport.scale, 0.25);
+    const tiny = mg.fitViewport({ width: 100, height: 100 }, 1000, 400, 20, 0.02, 0.25, 0.72);
+    assert.strictEqual(tiny.scale, 0.25);
+    const unlaid = mg.fitViewport(mg.computeSceneBounds([]), 0, 0, 20, 0.02, 0.25, 0.72);
+    assert.strictEqual(unlaid.scale, 0.02);
+    assert.strictEqual(unlaid.offsetX, 20);
+    assert.strictEqual(unlaid.offsetY, 20);
+  });
+
+  it('limits zoom-out for distant displays instead of collapsing tiles to zero size', () => {
+    const viewport = fit([monA, { ...monA, outputId: 'DP-2', x: 100000 }]);
+    assert.strictEqual(viewport.scale, 0.02);
+  });
+
+  it('uses the same footprint for 1080p@1x and 4K@2x, including rotated geometry', () => {
+    const hidpi = { ...monA, outputId: 'DP-2', x: 1920, width: 3840, height: 2160, scale: 2 };
+    assert.deepStrictEqual(toPlain(mg.computeSceneBounds([monA, hidpi])),
+      { minX: 0, minY: 0, maxX: 3840, maxY: 1080, width: 3840, height: 1080 });
+    assert.strictEqual(mg.getRect(hidpi).width, mg.getRect(monA).width);
+    assert.strictEqual(mg.getRect(hidpi).height, mg.getRect(monA).height);
+    const fractional = mg.getRect({ ...hidpi, width: 2560, height: 1440, scale: 1.25 });
+    assert.strictEqual(fractional.width, 2048);
+    assert.strictEqual(fractional.height, 1152);
+    const rotated = mg.getRect({ ...monA, transform: '90' });
+    assert.strictEqual(rotated.width, 1080);
+    assert.strictEqual(rotated.height, 1920);
+    const rotatedHidpi = mg.getRect({ ...hidpi, transform: '90' });
+    assert.strictEqual(rotatedHidpi.width, rotated.width);
+    assert.strictEqual(rotatedHidpi.height, rotated.height);
+  });
+});
+
+describe('MonitorGeometry - Captured Logical Drag', () => {
+  it('converts every pointer position from its captured origin and scale without accumulating deltas', () => {
+    const start = { x: 1920, y: -100, mouseX: 500, mouseY: 200, scale: 0.2 };
+    assert.deepStrictEqual(toPlain(mg.dragPosition(start, 400, 210)), { x: 1420, y: -50 });
+    assert.deepStrictEqual(toPlain(mg.dragPosition(start, 120, 250)), { x: 20, y: 150 });
+    assert.deepStrictEqual(toPlain(mg.dragPosition(start, 500, 200)), { x: 1920, y: -100 });
+    assert.deepStrictEqual(start, { x: 1920, y: -100, mouseX: 500, mouseY: 200, scale: 0.2 });
+  });
+
+  it('keeps drag conversion independent of overlap auto-fit and snaps HiDPI edges logically', () => {
+    const monA = { outputId: 'DP-1', x: 0, y: 0, width: 1920, height: 1080, scale: 1, transform: 0 };
+    const monB = { ...monA, outputId: 'DP-2', x: 1920, width: 3840, height: 2160, scale: 2 };
+    const start = { x: monB.x, y: monB.y, mouseX: 500, mouseY: 200, scale: 0.18 };
+    const position = mg.dragPosition(start, 501.8, 201.8);
+    const snapped = mg.snapToNearestEdge({ ...monB, ...position }, [monA], 32);
+    assert.strictEqual(snapped.x, 1920);
+    assert.strictEqual(snapped.y, 0);
+    const overlapPosition = mg.dragPosition(start, 327.2, 200);
+    assert.strictEqual(overlapPosition.x, 960);
+    const overlappingBounds = mg.computeSceneBounds([monA, { ...monB, ...overlapPosition }]);
+    assert.ok(mg.fitViewport(overlappingBounds, 1000, 400, 20, 0.02, 0.25, 0.72).scale > start.scale);
+    assert.strictEqual(mg.dragPosition(start, 327.2, 200).x, 960);
+  });
+});
+
+describe('MonitorGeometry - Output Selection and Overlap', () => {
+  const monA = { name: 'DP-1', isPrimary: true, focused: false, x: 0, y: 0, width: 1920, height: 1080, scale: 1, transform: 0 };
+  const monB = { ...monA, name: 'DP-2', isPrimary: false, focused: true, x: 1920 };
+
+  it('selects stable names, including the principal output, independent of array order and session focus', () => {
+    for (const outputs of [[monA, monB], [monB, monA]]) {
+      assert.strictEqual(mg.outputAtPoint(outputs, 100, 100, 'DP-2'), 'DP-1');
+      assert.strictEqual(mg.outputAtPoint(outputs, 2000, 100, 'DP-1'), 'DP-2');
+      assert.strictEqual(mg.outputAtPoint(outputs, 5000, 100, 'DP-1'), '');
+      assert.strictEqual(mg.outputAtPoint(outputs, 1920, 100, 'DP-1'), 'DP-2');
+    }
+  });
+
+  it('cycles partially and completely overlapping outputs instead of trapping selection on the top tile', () => {
+    for (const x of [0, 960]) {
+      const outputs = [monA, { ...monB, x }];
+      assert.strictEqual(mg.outputAtPoint(outputs, 1000, 100, 'DP-1'), 'DP-2');
+      assert.strictEqual(mg.outputAtPoint(outputs, 1000, 100, 'DP-2'), 'DP-1');
+      assert.strictEqual(mg.outputAtPoint(outputs, 1000, 100, ''), 'DP-2');
+    }
+  });
+
+  it('hit-tests logical HiDPI and rotated extents rather than physical mode dimensions', () => {
+    const outputs = [monA, { ...monB, width: 3840, height: 2160, scale: 2, transform: '90' }];
+    assert.strictEqual(mg.outputAtPoint(outputs, 2500, 1500, ''), 'DP-2');
+    assert.strictEqual(mg.outputAtPoint(outputs, 3100, 100, ''), '');
+  });
+});
+
 describe('MonitorGeometry - Resolution-Aware Scale Ladder', () => {
   it('offers only decimal scales with exact logical-pixel dimensions', () => {
     const cases = [

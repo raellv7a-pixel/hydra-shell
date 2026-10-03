@@ -86,6 +86,60 @@ function getRect(output) {
   };
 }
 
+function computeSceneBounds(outputs) {
+  var minX = Infinity;
+  var minY = Infinity;
+  var maxX = -Infinity;
+  var maxY = -Infinity;
+  for (var i = 0; i < outputs.length; i++) {
+    var output = outputs[i];
+    if (output.active === false || output.disabled)
+      continue;
+    var rect = getRect(output);
+    minX = Math.min(minX, rect.x);
+    minY = Math.min(minY, rect.y);
+    maxX = Math.max(maxX, rect.x + rect.width);
+    maxY = Math.max(maxY, rect.y + rect.height);
+  }
+  if (minX === Infinity)
+    return { minX: 0, minY: 0, maxX: 1920, maxY: 1080, width: 1920, height: 1080 };
+  return { minX: minX, minY: minY, maxX: maxX, maxY: maxY,
+           width: Math.max(1, maxX - minX), height: Math.max(1, maxY - minY) };
+}
+
+function fitViewport(bounds, width, height, padding, minimumScale, maximumScale, fitFraction) {
+  var availableWidth = Math.max(0, width - padding * 2) * fitFraction;
+  var availableHeight = Math.max(0, height - padding * 2) * fitFraction;
+  var scale = Math.max(minimumScale, Math.min(maximumScale,
+                    availableWidth / bounds.width, availableHeight / bounds.height));
+  return {
+    scale: scale,
+    offsetX: Math.max(padding, (width - bounds.width * scale) / 2),
+    offsetY: Math.max(padding, (height - bounds.height * scale) / 2)
+  };
+}
+
+function dragPosition(start, mouseX, mouseY) {
+  return {
+    x: Math.round(start.x + (mouseX - start.mouseX) / start.scale),
+    y: Math.round(start.y + (mouseY - start.mouseY) / start.scale)
+  };
+}
+
+// Match the painted stacking order; repeated clicks cycle even fully covered outputs.
+function outputAtPoint(outputs, x, y, selectedOutputId) {
+  var hits = [];
+  for (var i = outputs.length - 1; i >= 0; i--) {
+    var rect = getRect(outputs[i]);
+    if (x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height)
+      hits.push(rect.outputId);
+  }
+  if (hits.length === 0)
+    return "";
+  var selectedIndex = hits.indexOf(selectedOutputId);
+  return hits[(selectedIndex + 1) % hits.length];
+}
+
 function rectanglesOverlap(r1, r2) {
   return r1.x < (r2.x + r2.width) &&
          (r1.x + r1.width) > r2.x &&
@@ -472,6 +526,10 @@ if (typeof module !== "undefined" && module.exports) {
     getScaleLadder: getScaleLadder,
     coerceScale: coerceScale,
     getRect: getRect,
+    computeSceneBounds: computeSceneBounds,
+    fitViewport: fitViewport,
+    dragPosition: dragPosition,
+    outputAtPoint: outputAtPoint,
     rectanglesOverlap: rectanglesOverlap,
     touches: touches,
     touchesAny: touchesAny,
