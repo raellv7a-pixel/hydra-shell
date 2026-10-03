@@ -18,6 +18,8 @@ Item {
 
   // Configuration for shared use (e.g. by NetworkPanel)
   property bool showOnlyLists: false
+  property bool dashboardMode: false
+  property real panelUnit: 1.0
 
   // State properties
   property string passwordSsid: ""
@@ -125,7 +127,7 @@ Item {
     id: mainLayout
     anchors.left: parent.left
     anchors.right: parent.right
-    spacing: root.showOnlyLists ? Style.marginM : Style.marginL
+    spacing: root.dashboardMode ? Style.marginS : (root.showOnlyLists ? Style.marginM : Style.marginL)
 
     // Master Control Section
     NBox {
@@ -181,22 +183,22 @@ Item {
       visible: root.connectedNetworks.length > 0 && NetworkService.wifiEnabled
       Layout.fillWidth: true
       Layout.preferredHeight: connectedCol.implicitHeight + Style.margin2M
-      border.color: showOnlyLists ? Style.boxBorderColor : "transparent"
-      color: showOnlyLists ? Color.mSurfaceVariant : "transparent"
+      border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: connectedCol
         anchors.fill: parent
-        anchors.topMargin: Style.marginM
-        anchors.bottomMargin: Style.marginM
-        anchors.leftMargin: showOnlyLists ? Style.marginL : 0
-        anchors.rightMargin: showOnlyLists ? Style.marginL : 0
-        spacing: Style.marginM
+        anchors.topMargin: root.dashboardMode ? 0 : Style.marginM
+        anchors.bottomMargin: root.dashboardMode ? Style.marginXS : Style.marginM
+        anchors.leftMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        anchors.rightMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        spacing: root.dashboardMode ? Style.marginS : Style.marginM
 
         NLabel {
           label: I18n.tr("common.connected")
           Layout.fillWidth: true
-          Layout.leftMargin: Style.marginS
+          Layout.leftMargin: root.dashboardMode ? Style.marginXS : Style.marginS
         }
 
         Repeater {
@@ -212,22 +214,22 @@ Item {
       visible: root.savedNetworks.length > 0 && NetworkService.wifiEnabled
       Layout.fillWidth: true
       Layout.preferredHeight: savedCol.implicitHeight + Style.margin2M
-      border.color: showOnlyLists ? Style.boxBorderColor : "transparent"
-      color: showOnlyLists ? Color.mSurfaceVariant : "transparent"
+      border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: savedCol
         anchors.fill: parent
-        anchors.topMargin: Style.marginM
-        anchors.bottomMargin: Style.marginM
-        anchors.leftMargin: showOnlyLists ? Style.marginL : 0
-        anchors.rightMargin: showOnlyLists ? Style.marginL : 0
-        spacing: Style.marginM
+        anchors.topMargin: root.dashboardMode ? 0 : Style.marginM
+        anchors.bottomMargin: root.dashboardMode ? Style.marginXS : Style.marginM
+        anchors.leftMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        anchors.rightMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        spacing: root.dashboardMode ? Style.marginS : Style.marginM
 
         NLabel {
           label: I18n.tr("wifi.panel.known-networks")
           Layout.fillWidth: true
-          Layout.leftMargin: Style.marginS
+          Layout.leftMargin: root.dashboardMode ? Style.marginXS : Style.marginS
         }
 
         Repeater {
@@ -243,21 +245,21 @@ Item {
       visible: root.availableNetworks.length > 0 && NetworkService.wifiEnabled
       Layout.fillWidth: true
       Layout.preferredHeight: availableCol.implicitHeight + Style.margin2M
-      border.color: showOnlyLists ? Style.boxBorderColor : "transparent"
-      color: showOnlyLists ? Color.mSurfaceVariant : "transparent"
+      border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: availableCol
         anchors.fill: parent
-        anchors.topMargin: Style.marginM
-        anchors.bottomMargin: Style.marginM
-        anchors.leftMargin: showOnlyLists ? Style.marginL : 0
-        anchors.rightMargin: showOnlyLists ? Style.marginL : 0
-        spacing: Style.marginM
+        anchors.topMargin: root.dashboardMode ? 0 : Style.marginM
+        anchors.bottomMargin: root.dashboardMode ? Style.marginXS : Style.marginM
+        anchors.leftMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        anchors.rightMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        spacing: root.dashboardMode ? Style.marginS : Style.marginM
 
         RowLayout {
           Layout.fillWidth: true
-          Layout.leftMargin: Style.marginS
+          Layout.leftMargin: root.dashboardMode ? Style.marginXS : Style.marginS
           spacing: Style.marginS
 
           NLabel {
@@ -654,30 +656,65 @@ Item {
       }
 
       Layout.fillWidth: true
-      Layout.preferredHeight: deviceColumn.implicitHeight + (Style.marginXL)
+      Layout.preferredHeight: deviceColumn.implicitHeight + (root.dashboardMode ? Style.marginM : Style.marginXL)
       radius: Style.radiusM
       clip: true
       forceOpaque: true
-      color: networkItem.getContentColors()[0]
+      color: {
+        if (root.dashboardMode) {
+          if (networkItem.isBusy)
+            return Qt.alpha(Color.mPrimaryContainer, 0.7);
+          if (modelData.connected)
+            return Color.mPrimaryContainer;
+          return hoverArea.hovered ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh;
+        }
+        return networkItem.getContentColors()[0];
+      }
+      border.color: root.dashboardMode ? "transparent" : Style.boxBorderColor
+      border.width: root.dashboardMode ? 0 : Style.borderS
+
+      HoverHandler {
+        id: hoverArea
+      }
 
       ColumnLayout {
         id: deviceColumn
         anchors.fill: parent
-        anchors.margins: Style.marginM
+        anchors.margins: root.dashboardMode ? Style.marginS : Style.marginM
         spacing: Style.marginS
 
         RowLayout {
           id: deviceLayout
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: root.dashboardMode ? Style.marginS : Style.marginM
           Layout.alignment: Qt.AlignVCenter
 
-          NIcon {
+          Rectangle {
+            id: iconContainer
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-            horizontalAlignment: Text.AlignLeft
-            icon: NetworkService.getSignalInfo(modelData.signal, modelData.connected).icon
-            pointSize: Style.fontSizeXXL
-            color: networkItem.getContentColors()[1]
+            Layout.preferredWidth: Math.round((root.dashboardMode ? 32 : 36) * (root.panelUnit || 1.0))
+            Layout.preferredHeight: Layout.preferredWidth
+            radius: root.dashboardMode ? Style.radiusS : Style.radiusM
+            color: {
+              if (root.dashboardMode) {
+                if (modelData.connected)
+                  return Qt.alpha(Color.mPrimary, 0.16);
+                return Color.mSurfaceContainerHighest;
+              }
+              return "transparent";
+            }
+
+            NIcon {
+              anchors.centerIn: parent
+              icon: NetworkService.getSignalInfo(modelData.signal, modelData.connected).icon
+              pointSize: root.dashboardMode ? Style.fontSizeM : Style.fontSizeXXL
+              color: {
+                if (root.dashboardMode) {
+                  return modelData.connected ? Color.mPrimary : Color.mOnSurface;
+                }
+                return networkItem.getContentColors()[1];
+              }
+            }
 
             MouseArea {
               anchors.fill: parent
@@ -694,9 +731,14 @@ Item {
             NText {
               text: modelData.ssid
               pointSize: Style.fontSizeM
-              font.weight: modelData.connected ? Style.fontWeightBold : Style.fontWeightMedium
+              font.weight: modelData.connected ? Style.fontWeightSemiBold : Style.fontWeightMedium
               elide: Text.ElideRight
-              color: networkItem.getContentColors()[1]
+              color: {
+                if (root.dashboardMode) {
+                  return modelData.connected ? Color.mOnPrimaryContainer : Color.mOnSurface;
+                }
+                return networkItem.getContentColors()[1];
+              }
               Layout.fillWidth: true
             }
 
@@ -706,7 +748,12 @@ Item {
               NIcon {
                 icon: NetworkService.isSecured(modelData.security) ? "lock" : "lock-open"
                 pointSize: Style.fontSizeXXS
-                color: Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy)
+                color: {
+                  if (root.dashboardMode) {
+                    return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                  }
+                  return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
+                }
                 visible: !modelData.connected && NetworkService.disconnectingFrom !== modelData.ssid && NetworkService.forgettingNetwork !== modelData.ssid
               }
 
@@ -733,7 +780,12 @@ Item {
                   return NetworkService.isSecured(modelData.security) ? modelData.security : I18n.tr("wifi.panel.security-open");
                 }
                 pointSize: Style.fontSizeXXS
-                color: Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy)
+                color: {
+                  if (root.dashboardMode) {
+                    return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                  }
+                  return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
+                }
               }
 
               // Network speed indicators (visible when connected and speed > 0)
@@ -747,14 +799,24 @@ Item {
                   visible: SystemStatService.rxSpeed > 0
                   icon: "arrow-down"
                   pointSize: Style.fontSizeXXS
-                  color: Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy)
+                  color: {
+                    if (root.dashboardMode) {
+                      return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                    }
+                    return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
+                  }
                 }
 
                 NText {
                   visible: SystemStatService.rxSpeed > 0
                   text: SystemStatService.formatSpeed(SystemStatService.rxSpeed)
                   pointSize: Style.fontSizeXXS
-                  color: Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy)
+                  color: {
+                    if (root.dashboardMode) {
+                      return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                    }
+                    return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
+                  }
                   elide: Text.ElideNone
                 }
 
@@ -768,14 +830,24 @@ Item {
                   visible: SystemStatService.txSpeed > 0
                   icon: "arrow-up"
                   pointSize: Style.fontSizeXXS
-                  color: Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy)
+                  color: {
+                    if (root.dashboardMode) {
+                      return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                    }
+                    return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
+                  }
                 }
 
                 NText {
                   visible: SystemStatService.txSpeed > 0
                   text: SystemStatService.formatSpeed(SystemStatService.txSpeed)
                   pointSize: Style.fontSizeXXS
-                  color: Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy)
+                  color: {
+                    if (root.dashboardMode) {
+                      return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                    }
+                    return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
+                  }
                   elide: Text.ElideNone
                 }
               }
@@ -792,16 +864,16 @@ Item {
             NBusyIndicator {
               visible: networkItem.isBusy
               running: visible && root.effectivelyVisible
-              color: networkItem.getContentColors()[1]
-              size: Style.baseWidgetSize * 0.5
+              color: root.dashboardMode ? (modelData.connected ? Color.mOnPrimaryContainer : Color.mPrimary) : networkItem.getContentColors()[1]
+              size: Math.round((root.dashboardMode ? 20 : Style.baseWidgetSize * 0.5) * (root.panelUnit || 1.0))
             }
 
             NIconButton {
               visible: modelData.connected && NetworkService.disconnectingFrom !== modelData.ssid
               icon: "info"
               tooltipText: I18n.tr("common.info")
-              baseSize: Style.baseWidgetSize * 0.75
-              colorBg: Color.mSurfaceVariant
+              baseSize: Math.round((root.dashboardMode ? 28 : Style.baseWidgetSize * 0.75) * (root.panelUnit || 1.0))
+              colorBg: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
               colorFg: Color.mOnSurface
               colorBorder: "transparent"
               colorBorderHover: "transparent"
@@ -816,12 +888,12 @@ Item {
             }
 
             NIconButton {
-              visible: !root.showOnlyLists && modelData.existing && !modelData.connected && !networkItem.isBusy
+              visible: (root.dashboardMode || !root.showOnlyLists) && modelData.existing && !modelData.connected && !networkItem.isBusy
               icon: "trash"
               tooltipText: I18n.tr("tooltips.forget-network")
-              baseSize: Style.baseWidgetSize * 0.75
-              colorBg: Color.mPrimary
-              colorFg: Color.mOnPrimary
+              baseSize: Math.round((root.dashboardMode ? 28 : Style.baseWidgetSize * 0.75) * (root.panelUnit || 1.0))
+              colorBg: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mPrimary
+              colorFg: root.dashboardMode ? Color.mError : Color.mOnPrimary
               colorBorder: "transparent"
               colorBorderHover: "transparent"
               onClicked: root.requestForget(modelData.ssid)
@@ -849,7 +921,7 @@ Item {
               visible: modelData.connected && NetworkService.disconnectingFrom !== modelData.ssid
               text: I18n.tr("common.disconnect")
               fontSize: Style.fontSizeS
-              backgroundColor: Color.mSurfaceVariant
+              backgroundColor: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
               textColor: Color.mOnSurface
               onClicked: NetworkService.disconnect(modelData.ssid)
             }
@@ -861,10 +933,10 @@ Item {
           visible: networkItem.isExpanded
           Layout.fillWidth: true
           implicitHeight: infoColumn.implicitHeight + Style.margin2S
-          radius: Style.radiusXS
-          color: Color.mSurfaceVariant
-          border.width: Style.borderS
-          border.color: Style.boxBorderColor
+          radius: root.dashboardMode ? Style.radiusM : Style.radiusXS
+          color: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
+          border.width: root.dashboardMode ? 0 : Style.borderS
+          border.color: root.dashboardMode ? "transparent" : Style.boxBorderColor
           clip: true
 
           onVisibleChanged: {
@@ -1131,10 +1203,10 @@ Item {
           visible: root.passwordSsid === modelData.ssid && !networkItem.isBusy
           Layout.fillWidth: true
           height: passwordLayout.implicitHeight + Style.margin2S
-          color: Color.mSurfaceVariant
-          border.color: Color.mOutline
-          border.width: Style.borderS
-          radius: Style.iRadiusXS
+          color: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
+          border.color: root.dashboardMode ? "transparent" : Color.mOutline
+          border.width: root.dashboardMode ? 0 : Style.borderS
+          radius: root.dashboardMode ? Style.radiusM : Style.iRadiusXS
 
           ColumnLayout {
             id: passwordLayout
@@ -1384,10 +1456,10 @@ Item {
           visible: root.expandedSsid === modelData.ssid && !networkItem.isBusy
           Layout.fillWidth: true
           height: forgetRow.implicitHeight + Style.margin2S
-          color: Color.mSurfaceVariant
-          radius: Style.radiusS
-          border.width: Style.borderS
-          border.color: Color.mOutline
+          color: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
+          radius: root.dashboardMode ? Style.radiusM : Style.radiusS
+          border.width: root.dashboardMode ? 0 : Style.borderS
+          border.color: root.dashboardMode ? "transparent" : Color.mOutline
 
           RowLayout {
             id: forgetRow

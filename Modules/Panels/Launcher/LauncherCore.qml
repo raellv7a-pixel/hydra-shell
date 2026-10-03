@@ -49,7 +49,7 @@ Rectangle {
   // Resolved once here instead of once per row delegate: every row needs to know
   // whether the open panel belongs to it, and results can hold hundreds of items.
   readonly property int appPanelIndex: appPanelItem ? results.indexOf(appPanelItem) : -1
-  property bool ignoreMouseHover: true // Transient flag, should always be true on init
+  property bool ignoreMouseHover: true // Keyboard owns the primary highlight until genuine pointer motion.
 
   Connections {
     target: PanelService
@@ -58,23 +58,10 @@ Rectangle {
         root.applyPendingAppPanel();
     }
   }
-  // Global mouse tracking for movement detection across delegates
+  // Screen coordinates do not move when SmartPanel animates beneath a stationary cursor.
   property real globalLastMouseX: 0
   property real globalLastMouseY: 0
   property bool globalMouseInitialized: false
-  property bool mouseTrackingReady: false // Delay tracking until panel is settled
-
-  readonly property bool animationsDisabled: Settings.data.general.animationDisabled
-
-  Timer {
-    id: mouseTrackingDelayTimer
-    interval: root.animationsDisabled ? 0 : (Style.animationNormal + 50) // Wait for panel animation to complete + safety margin
-    repeat: false
-    onTriggered: {
-      root.mouseTrackingReady = true;
-      root.globalMouseInitialized = false; // Reset so we get fresh initial position
-    }
-  }
 
   readonly property var defaultProvider: appsProvider
   readonly property var currentProvider: activeProvider || defaultProvider
@@ -237,8 +224,6 @@ Rectangle {
   function onOpened() {
     ignoreMouseHover = true;
     globalMouseInitialized = false;
-    mouseTrackingReady = false;
-    mouseTrackingDelayTimer.restart();
     pickRandomCover();
     // Show launcher immediately, results will populate asynchronously
     resultsReady = true;
@@ -278,8 +263,6 @@ Rectangle {
     if (!provider || !provider.getContextMenuActions)
       return;
 
-    const index = results.indexOf(item);
-    selectedIndex = index >= 0 ? index : 0;
     appPanelItem = item;
     appPanelActions = provider.getContextMenuActions(item);
     appPanelShowingProperties = false;
@@ -611,7 +594,6 @@ Rectangle {
     }
 
     appPanelItem = rebound;
-    selectedIndex = results.indexOf(rebound);
     refreshAppPanelActions();
   }
 
@@ -958,23 +940,20 @@ Rectangle {
     enabled: !Settings.data.appLauncher.ignoreMouseInput
 
     onPointChanged: {
-      if (!root.mouseTrackingReady) {
-        return;
-      }
-
+      const position = point.globalPosition;
       if (!root.globalMouseInitialized) {
-        root.globalLastMouseX = point.position.x;
-        root.globalLastMouseY = point.position.y;
+        root.globalLastMouseX = position.x;
+        root.globalLastMouseY = position.y;
         root.globalMouseInitialized = true;
         return;
       }
 
-      const deltaX = Math.abs(point.position.x - root.globalLastMouseX);
-      const deltaY = Math.abs(point.position.y - root.globalLastMouseY);
+      const deltaX = Math.abs(position.x - root.globalLastMouseX);
+      const deltaY = Math.abs(position.y - root.globalLastMouseY);
       if (deltaX + deltaY >= 5) {
         root.ignoreMouseHover = false;
-        root.globalLastMouseX = point.position.x;
-        root.globalLastMouseY = point.position.y;
+        root.globalLastMouseX = position.x;
+        root.globalLastMouseY = position.y;
       }
     }
   }

@@ -30,9 +30,32 @@ SmartPanel {
   preferredWidth: Math.round(Settings.data.controlCenter.panelWidth * Style.uiScaleRatio * Settings.data.controlCenter.panelScale)
   preferredHeight: Math.round(Settings.data.controlCenter.panelHeight * Style.uiScaleRatio * Settings.data.controlCenter.panelScale)
 
+  property string requestedQuickAction: "main"
+  property string requestedDetail: ""
+
+  function showView(view, anchor) {
+    requestedQuickAction = view === "network" || view === "bluetooth" ? view : "main";
+    requestedDetail = view === "audio" ? "audio" : "";
+    if (isPanelOpen) {
+      if (contentItem) {
+        contentItem.quickActionsPage = requestedQuickAction;
+        contentItem.activeDetailView = requestedDetail;
+      }
+    } else {
+      open(anchor);
+    }
+  }
+
+  onClosed: {
+    requestedQuickAction = "main";
+    requestedDetail = "";
+  }
+
   panelContent: Component {
     Panel {
       anchors.fill: parent
+      quickActionsPage: root.requestedQuickAction
+      activeDetailView: root.requestedDetail
     }
   }
 }

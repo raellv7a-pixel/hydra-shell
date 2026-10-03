@@ -179,6 +179,21 @@ else:sys.exit(1)
         self.assertFalse(state["hoveredStyle"])
         self.assertFalse(state["contextTarget"])
 
+    def test_pointer_keyboard_and_context_have_one_primary_target(self):
+        self.call("prepare")
+        time.sleep(.15)
+        self.call("interaction", "keyboard")
+        self.wait(lambda: "firstPrimary" in self.call("interaction", "probe")
+                  and "secondPrimary" in self.call("interaction", "probe"))
+        keyboard = self.call("interaction", "probe")
+        self.assertEqual((keyboard["selected"], keyboard["firstPrimary"], keyboard["secondPrimary"]), (0, True, False))
+        pointer = self.call("interaction", "pointer")
+        self.assertEqual((pointer["selected"], pointer["firstPrimary"], pointer["secondPrimary"]), (0, False, False))
+        context = self.call("interaction", "context")
+        self.assertEqual((context["selected"], context["firstPrimary"], context["secondPrimary"], context["context"]), (0, False, True, True))
+        return_to_keyboard = self.call("interaction", "keyboard")
+        self.assertEqual((return_to_keyboard["firstPrimary"], return_to_keyboard["secondPrimary"]), (True, False))
+
     def test_removal_requires_real_owner_or_installed_flatpak_identity(self):
         code = self.call("mapping", 0)
         self.assertEqual(code["package"]["name"], "visual-studio-code-bin")

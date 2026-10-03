@@ -3,15 +3,24 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 import Quickshell.Services.Pipewire
+import Quickshell.Widgets
+import "../../../../Helpers/AudioStreamMetadata.js" as StreamMetadata
 import qs.Services.Media
 DashboardCard {
   id: appVolumeRow
 
   property var streamNode: null
-  readonly property bool streamMuted: streamNode?.audio?.muted ?? false
-  readonly property real streamVolume: streamNode?.audio?.volume ?? 0
+  readonly property PwNodeAudio nodeAudio: streamNode?.audio ?? null
+  readonly property bool streamMuted: nodeAudio?.muted ?? false
+  readonly property real streamVolume: nodeAudio?.volume ?? 0
+  readonly property string appName: StreamMetadata.name(streamNode, ThemeIcons)
+  readonly property string streamTitle: StreamMetadata.title(streamNode, appName)
 
-  Layout.preferredHeight: Math.round(72 * panelRoot.panelUnit)
+  PwObjectTracker {
+    objects: appVolumeRow.streamNode ? [appVolumeRow.streamNode] : []
+  }
+
+  Layout.preferredHeight: Math.round((streamTitle ? 94 : 76) * panelRoot.panelUnit)
   color: Color.mSurfaceContainerHighest
   radius: Style.radiusS
 
@@ -24,19 +33,28 @@ DashboardCard {
       Layout.fillWidth: true
       spacing: Style.marginS
 
-      NIcon {
-        icon: appVolumeRow.streamMuted ? "volume-off" : "volume"
-        pointSize: Style.fontSizeM
-        color: appVolumeRow.streamMuted ? Color.mError : Color.mPrimary
+      IconImage {
+        id: appIcon
+        Layout.preferredWidth: Math.round(24 * panelRoot.panelUnit)
+        Layout.preferredHeight: Layout.preferredWidth
+        source: StreamMetadata.icon(appVolumeRow.streamNode, ThemeIcons)
+        asynchronous: true
+        NIcon {
+          anchors.fill: parent
+          icon: "apps"
+          visible: appIcon.status === Image.Error || appIcon.status === Image.Null
+          color: Color.mPrimary
+        }
       }
 
       NText {
         Layout.fillWidth: true
-        text: panelRoot.nodeLabel(appVolumeRow.streamNode)
+        text: appVolumeRow.appName
         color: Color.mOnSurface
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
       }
+
 
       NText {
         text: Math.round(appVolumeRow.streamVolume * 100) + "%"
@@ -50,6 +68,14 @@ DashboardCard {
         onClicked: AudioService.setPanelAppStreamMuted(appVolumeRow.streamNode, !appVolumeRow.streamMuted)
       }
     }
+    NText {
+      visible: appVolumeRow.streamTitle !== ""
+      Layout.fillWidth: true
+      text: appVolumeRow.streamTitle
+      color: Color.mOnSurfaceVariant
+      elide: Text.ElideRight
+      pointSize: Style.fontSizeXS
+    }
 
     NSlider {
       Layout.fillWidth: true
@@ -57,7 +83,7 @@ DashboardCard {
       to: AudioService.maxVolume
       stepSize: 0.01
       value: appVolumeRow.streamVolume
-      enabled: appVolumeRow.streamNode !== null && appVolumeRow.streamNode.audio !== undefined
+      enabled: appVolumeRow.streamNode?.ready === true && appVolumeRow.nodeAudio !== null
       onMoved: AudioService.setPanelAppStreamVolume(appVolumeRow.streamNode, value)
     }
   }

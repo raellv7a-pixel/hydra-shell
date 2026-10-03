@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
+import "../../Helpers/AudioStreamMetadata.js" as StreamMetadata
 import qs.Commons
 import qs.Services.System
 
@@ -220,129 +221,13 @@ Singleton {
     objects: root.source ? [root.source] : []
   }
 
-  // Track links to the default sink to find active streams
-  PwNodeLinkTracker {
-    id: sinkLinkTracker
-  }
-
-  onSinkChanged: {
-    if (root.sink) {
-      sinkLinkTracker.node = root.sink;
-    }
-  }
 
   // Track all streams globally to prevent binding loops for filtered out streams
   readonly property var streamNodes: Pipewire.ready ? Pipewire.nodes.values.filter(n => n && n.isStream) : []
 
-  // Find application streams that are connected to the default sink
-  readonly property var appStreams: {
-    if (!Pipewire.ready || !root.sink) {
-      return [];
-    }
-
-    var connectedStreamIds = {};
-    var connectedStreams = [];
-
-    // Use PwNodeLinkTracker to get properly bound link groups
-    if (!sinkLinkTracker.linkGroups) {
-      return [];
-    }
-
-    var linkGroupsCount = 0;
-    if (sinkLinkTracker.linkGroups.length !== undefined) {
-      linkGroupsCount = sinkLinkTracker.linkGroups.length;
-    } else if (sinkLinkTracker.linkGroups.count !== undefined) {
-      linkGroupsCount = sinkLinkTracker.linkGroups.count;
-    } else {
-      return [];
-    }
-
-    if (linkGroupsCount === 0) {
-      return [];
-    }
-
-    var intermediateNodeIds = {};
-    var nodesToCheck = [];
-
-    for (var i = 0; i < linkGroupsCount; i++) {
-      var linkGroup;
-      if (sinkLinkTracker.linkGroups.get) {
-        linkGroup = sinkLinkTracker.linkGroups.get(i);
-      } else {
-        linkGroup = sinkLinkTracker.linkGroups[i];
-      }
-
-      if (!linkGroup || !linkGroup.source) {
-        continue;
-      }
-
-      var sourceNode = linkGroup.source;
-
-      // Filter out quickshell
-      const name = sourceNode.name || "";
-      const mediaName = (sourceNode.properties && sourceNode.properties["media.name"]) || "";
-      if (name === "quickshell" || mediaName === "quickshell") {
-        continue;
-      }
-
-      // Filter out filter (intermediate) streams
-      const isVirtual = (sourceNode.properties && sourceNode.properties["node.virtual"]) || "";
-      // If it's an application stream node, add it directly
-      if (sourceNode.isStream && sourceNode.audio && !isVirtual) {
-        if (!connectedStreamIds[sourceNode.id]) {
-          connectedStreamIds[sourceNode.id] = true;
-          connectedStreams.push(sourceNode);
-        }
-      } else {
-        // Not a stream - this is an intermediate node, track it
-        intermediateNodeIds[sourceNode.id] = true;
-        nodesToCheck.push(sourceNode);
-      }
-    }
-
-    // If we found intermediate nodes, we need to find streams connected to them
-    if (nodesToCheck.length > 0 || connectedStreams.length === 0) {
-      try {
-        var allNodes = Pipewire.nodes.values || [];
-
-        // Find all stream nodes
-        for (var j = 0; j < allNodes.length; j++) {
-          var node = allNodes[j];
-          if (!node || !node.isStream || !node.audio) {
-            continue;
-          }
-
-          // Filter out quickshell
-          const nodeName = node.name || "";
-          const nodeMediaName = (node.properties && node.properties["media.name"]) || "";
-          if (nodeName === "quickshell" || nodeMediaName === "quickshell") {
-            continue;
-          }
-
-          // Filter out filter streams
-          const nodeIsVirtual = (node.properties && node.properties["node.virtual"]) || "";
-          if (nodeIsVirtual) {
-            continue;
-          }
-
-          var streamId = node.id;
-          if (connectedStreamIds[streamId]) {
-            continue;
-          }
-
-          if (Object.keys(intermediateNodeIds).length > 0) {
-            connectedStreamIds[streamId] = true;
-            connectedStreams.push(node);
-          } else if (connectedStreams.length === 0) {
-            connectedStreamIds[streamId] = true;
-            connectedStreams.push(node);
-          }
-        }
-      } catch (e) {}
-    }
-
-    return connectedStreams;
-  }
+  // The sink link graph omits streams routed through filters or another sink.
+  // PipeWire's tracked playback nodes are the source of truth for app controls.
+  readonly property var appStreams: root.streamNodes.filter(StreamMetadata.isPlayback)
 
   // Bind all devices to ensure their properties are available
   PwObjectTracker {
@@ -380,29 +265,23 @@ Singleton {
           target: modelData?.audio ?? null
 
           function onVolumeChanged() {
-            if (root._isApplyingAppOverride || !modelData?.audio) {
+            if (root._isApplyingAppOverride || !modelData?.audio)
               return;
-            }
-            if (root._skipPipewireVolumeSyncForNode(modelData)) {
-              return;
-            }
+            if (root._skipPipewireVolumeSyncForNode(modelData))
+              root._writePanelStickyVolume(modelData, modelData.audio.volume);
             var key = root.getAppKey(modelData);
-            if (key) {
+            if (key)
               root.setAppStreamVolume(key, modelData.audio.volume);
-            }
           }
 
           function onMutedChanged() {
-            if (root._isApplyingAppOverride || !modelData?.audio) {
+            if (root._isApplyingAppOverride || !modelData?.audio)
               return;
-            }
-            if (root._skipPipewireMuteSyncForNode(modelData)) {
-              return;
-            }
+            if (root._skipPipewireMuteSyncForNode(modelData))
+              root._writePanelStickyMute(modelData, modelData.audio.muted);
             var key = root.getAppKey(modelData);
-            if (key) {
+            if (key)
               root.setAppStreamMuted(key, modelData.audio.muted);
-            }
           }
         }
       }
@@ -479,19 +358,23 @@ Singleton {
   }
 
   function setPanelAppStreamVolume(node, volume: real): void {
+    if (!node?.audio)
+      return;
     _writePanelStickyVolume(node, volume);
     var key = getAppKey(node);
-    if (key) {
+    if (key)
       setAppStreamVolume(key, volume);
-    }
+    node.audio.volume = volume;
   }
 
   function setPanelAppStreamMuted(node, muted: bool): void {
+    if (!node?.audio)
+      return;
     _writePanelStickyMute(node, muted);
     var key = getAppKey(node);
-    if (key) {
+    if (key)
       setAppStreamMuted(key, muted);
-    }
+    node.audio.muted = muted;
   }
 
   function setAppStreamVolume(appKey: string, volume: real): void {

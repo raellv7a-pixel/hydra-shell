@@ -150,6 +150,7 @@ ShellRoot {
     core.updateResults();
   }
     function panel(index: int): void {
+    core.selectedIndex = index;
     core.openAppPanel(core.results[index]);
     core.showAppProperties(core.results[index]);
   }
@@ -202,6 +203,27 @@ ShellRoot {
                                                 accepted: false
                                               }, core.results.length);
                         }
+    function interaction(mode: string): string {
+      if (mode === "keyboard") {
+        core.closeAppPanel();
+        core.selectedIndex = 0;
+        core.ignoreMouseHover = true;
+        core.resultsView.positionViewAtBeginning();
+      } else if (mode === "pointer") {
+        core.ignoreMouseHover = false;
+      } else if (mode === "context") {
+        core.openAppPanel(core.results[1]);
+        core.ignoreMouseHover = false;
+      }
+      const first = root.findItem(core.resultsView.itemAtIndex(0), "keyboardCurrent");
+      const second = root.findItem(core.resultsView.itemAtIndex(1), "keyboardCurrent");
+      return JSON.stringify({
+                              selected: core.selectedIndex,
+                              firstPrimary: first?.isSelected,
+                              secondPrimary: second?.isSelected,
+                              context: second?.isContextMenuTarget
+                            });
+    }
     function snapshot(): string {
       const row = core.resultsView.currentItem;
       const entry = root.findItem(row, "badgeState");

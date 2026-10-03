@@ -101,16 +101,12 @@ Item {
     autoHide: false
     forceOpen: !isBarVertical && root.displayMode === "alwaysShow"
     forceClose: isBarVertical || root.displayMode === "alwaysHide" || text === ""
-    onClicked: {
-      var p = PanelService.getPanel("bluetoothPanel", screen);
-      if (p)
-        p.toggle(this);
-    }
+    onClicked: PanelService.openDashboardView(screen, "bluetooth", this)
     onRightClicked: {
       PanelService.showContextMenu(contextMenu, pill, screen);
     }
     tooltipText: {
-      if (PanelService.getPanel("bluetoothPanel", screen)?.isPanelOpen) {
+      if (PanelService.getPanel("controlCenterPanel", screen, false)?.isPanelOpen) {
         return "";
       }
       if (pill.text !== "") {

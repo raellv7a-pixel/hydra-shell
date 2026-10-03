@@ -215,11 +215,8 @@ Variants {
       if (!isTypeEnabled(type))
         return;
 
-      // Suppress audio OSD while the dedicated audio panel or visible Dashboard audio controls are open.
+      // Suppress audio OSD only when Dashboard controls are actually visible.
       if (type === OSD.Type.Volume || type === OSD.Type.InputVolume) {
-        var audioPanel = PanelService.getPanel("audioPanel", root.modelData);
-        if (audioPanel && audioPanel.isPanelOpen)
-          return;
         var controlCenterPanel = PanelService.getPanel("controlCenterPanel", root.modelData);
         if (controlCenterPanel && controlCenterPanel.isPanelOpen) {
           var panelContent = controlCenterPanel.contentItem;

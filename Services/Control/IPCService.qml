@@ -530,21 +530,16 @@ Singleton {
       AudioService.setInputMuted(!AudioService.inputMuted);
     }
     function togglePanel() {
-      root.screenDetector.withCurrentScreen(screen => {
-                                              var panel = PanelService.getPanel("audioPanel", screen);
-                                              panel?.toggle(null, "Volume");
-                                            });
+      root.screenDetector.withCurrentScreen(screen => PanelService.openDashboardView(screen, "audio", null, true));
     }
     function openPanel() {
-      root.screenDetector.withCurrentScreen(screen => {
-                                              var panel = PanelService.getPanel("audioPanel", screen);
-                                              panel?.open(null, "Volume");
-                                            });
+      root.screenDetector.withCurrentScreen(screen => PanelService.openDashboardView(screen, "audio", null));
     }
     function closePanel() {
       root.screenDetector.withCurrentScreen(screen => {
-                                              var panel = PanelService.getPanel("audioPanel", screen);
-                                              panel?.close(null, "Volume");
+                                              const panel = PanelService.getPanel("controlCenterPanel", screen, false);
+                                              if (panel?.contentItem?.activeDetailView === "audio")
+                                                panel.close();
                                             });
     }
   }
@@ -678,10 +673,7 @@ Singleton {
   IpcHandler {
     target: "network"
     function togglePanel() {
-      root.screenDetector.withCurrentScreen(screen => {
-                                              var networkPanel = PanelService.getPanel("networkPanel", screen);
-                                              networkPanel?.toggle(null, "Network");
-                                            });
+      root.screenDetector.withCurrentScreen(screen => PanelService.openDashboardView(screen, "network", null, true));
     }
   }
 
@@ -697,10 +689,7 @@ Singleton {
       BluetoothService.setBluetoothEnabled(false);
     }
     function togglePanel() {
-      root.screenDetector.withCurrentScreen(screen => {
-                                              var bluetoothPanel = PanelService.getPanel("bluetoothPanel", screen);
-                                              bluetoothPanel?.toggle(null, "Bluetooth");
-                                            });
+      root.screenDetector.withCurrentScreen(screen => PanelService.openDashboardView(screen, "bluetooth", null, true));
     }
     function toggleAutoConnect() {
       Settings.data.network.bluetoothAutoConnect = !Settings.data.network.bluetoothAutoConnect;

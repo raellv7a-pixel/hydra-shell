@@ -6,7 +6,6 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import qs.Commons
-import qs.Modules.Bar.Extras
 import qs.Services.UI
 import qs.Widgets
 
@@ -15,26 +14,6 @@ Item {
 
   property ShellScreen screen
 
-  // Trigger re-evaluation when window is registered
-  property int popupMenuUpdateTrigger: 0
-
-  // Get shared popup menu window from PanelService (reactive to trigger changes)
-  readonly property var popupMenuWindow: {
-    // Reference trigger to force re-evaluation
-    var popupMenuUpdateTriggerRef = popupMenuUpdateTrigger;
-    return PanelService.getPopupMenuWindow(screen);
-  }
-
-  readonly property var trayMenu: popupMenuWindow ? popupMenuWindow.trayMenuLoader : null
-
-  Connections {
-    target: PanelService
-    function onPopupMenuWindowRegistered(registeredScreen) {
-      if (registeredScreen === screen) {
-        root.popupMenuUpdateTrigger++;
-      }
-    }
-  }
 
   // Widget properties passed from Bar.qml for per-instance settings
   property string widgetId: ""
@@ -245,24 +224,13 @@ Item {
 
   function toggleDrawer(button) {
     TooltipService.hideImmediately();
-
-    // Close the popup menu if it's open
-    if (popupMenuWindow && popupMenuWindow.visible) {
-      popupMenuWindow.close();
-    }
-
-    const panel = PanelService.getPanel("trayDrawerPanel", root.screen);
+    const panel = PanelService.getPanel("trayDrawerPanel", root.screen, false);
     if (panel) {
       panel.widgetSection = root.section;
       panel.widgetIndex = root.sectionWidgetIndex;
-      panel.toggle(this);
-    }
-  }
-
-  function onLoaded() {
-    // When the widget is fully initialized with its props set the screen for the trayMenu
-    if (trayMenu && trayMenu.item) {
-      trayMenu.item.screen = screen;
+      if (!panel.isPanelOpen)
+        panel.showGrid();
+      panel.toggle(button);
     }
   }
 
@@ -466,9 +434,6 @@ Item {
           acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
           onContainsMouseChanged: {
             if (containsMouse) {
-              if (popupMenuWindow) {
-                popupMenuWindow.close();
-              }
               root.hoveredItemIndex = trayDelegate.index;
               TooltipService.show(tooltipAnchor, modelData.tooltipTitle || modelData.name || modelData.id || "Tray Item", BarService.getTooltipDirection(root.screen?.name));
             } else if (root.hoveredItemIndex === trayDelegate.index) {
@@ -482,63 +447,15 @@ Item {
                        }
 
                        if (mouse.button === Qt.LeftButton) {
-                         // Close any open menu first
-                         if (popupMenuWindow) {
-                           popupMenuWindow.close();
-                         }
-
-                         if (!modelData.onlyMenu) {
+                         if (!modelData.onlyMenu)
                            modelData.activate();
-                         }
                        } else if (mouse.button === Qt.MiddleButton) {
-                         // Close the menu if it was visible
-                         if (popupMenuWindow && popupMenuWindow.visible) {
-                           popupMenuWindow.close();
-                           return;
-                         }
                          modelData.secondaryActivate && modelData.secondaryActivate();
                        } else if (mouse.button === Qt.RightButton) {
                          TooltipService.hideImmediately();
-
-                         // Close the menu if it was visible
-                         if (popupMenuWindow && popupMenuWindow.visible) {
-                           popupMenuWindow.close();
-                           return;
-                         }
-
-                         // Close any opened panel
-                         if ((PanelService.openedPanel !== null) && !PanelService.openedPanel.isClosing) {
-                           PanelService.openedPanel.close();
-                         }
-
-                         if (modelData.hasMenu && modelData.menu && trayMenu && trayMenu.item) {
-                           // Calculate menu position after ensuring menu is loaded
-                           const calculateAndShow = () => {
-                             // Position menu based on bar position, using tooltipAnchor for proper positioning
-                             // Increased spacing for better alignment with other context menus
-                             let menuX, menuY;
-                             if (barPosition === "left") {
-                               // For left bar: position menu to the right of the visual area
-                               menuX = tooltipAnchor.width + Style.marginL;
-                               menuY = 0;
-                             } else if (barPosition === "right") {
-                               // For right bar: position menu to the left of the visual area
-                               menuX = -trayMenu.item.implicitWidth - Style.marginL;
-                               menuY = 0;
-                             } else {
-                               // For horizontal bars: center horizontally and position below visual area
-                               menuX = (tooltipAnchor.width / 2) - (trayMenu.item.implicitWidth / 2);
-                               menuY = tooltipAnchor.height + Style.marginS;
-                             }
-
-                             PanelService.showTrayMenu(root.screen, modelData, trayMenu.item, tooltipAnchor, menuX, menuY, root.section, root.sectionWidgetIndex);
-                           };
-
-                           // Use Qt.callLater to ensure menu dimensions are calculated
-                           Qt.callLater(calculateAndShow);
-                         } else {
-                           Logger.d("Tray", "No menu available for", modelData.id, "or trayMenu not set");
-                         }
+                         const panel = PanelService.getPanel("trayDrawerPanel", root.screen, false);
+                         if (panel)
+                           panel.showItemMenu(modelData, root.section, root.sectionWidgetIndex, root);
                        }
                      }
         }

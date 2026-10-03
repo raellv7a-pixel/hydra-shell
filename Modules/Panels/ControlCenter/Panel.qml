@@ -101,6 +101,7 @@ Item {
   // extra space is distributed as centered margin, not a lopsided gap.
   property real contentPreferredWidth: Math.min(Math.max(panelBaseWidth * panelUnit, dashboardLayout.implicitWidth + Style.margin2L), maxPanelWidth)
   property real contentPreferredHeight: Math.min(Math.max(panelBaseHeight * panelUnit, dashboardLayout.implicitHeight + Style.margin2L), maxPanelHeight)
+  property string quickActionsPage: "main"
   property string expandedNotificationId: ""
   property string activeDetailView: ""
   property string processUsageMetric: "cpu"

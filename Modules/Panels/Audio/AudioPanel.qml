@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Pipewire
 import Quickshell.Widgets
+import "../../../Helpers/AudioStreamMetadata.js" as StreamMetadata
 import qs.Commons
 import qs.Modules.MainScreen
 import qs.Services.Media
@@ -404,7 +405,6 @@ SmartPanel {
                 required property PwNode modelData
                 Layout.fillWidth: true
                 Layout.preferredHeight: appRow.implicitHeight + Style.margin2M
-                visible: !isCaptureStream
 
                 // Track individual node to ensure properties are bound
                 PwObjectTracker {
@@ -415,210 +415,10 @@ SmartPanel {
                 property real appVolume: (nodeAudio && nodeAudio.volume !== undefined) ? nodeAudio.volume : 0.0
                 property bool appMuted: (nodeAudio && nodeAudio.muted !== undefined) ? nodeAudio.muted : false
 
-                // Check if this is a capture stream (after node is bound)
-                readonly property bool isCaptureStream: {
-                  if (!modelData || !modelData.properties)
-                    return false;
-                  const props = modelData.properties;
-                  // Exclude capture streams - check for stream.capture.sink property
-                  if (props["stream.capture.sink"] !== undefined) {
-                    return true;
-                  }
-                  const mediaClass = props["media.class"] || "";
-                  // Exclude Stream/Input (capture) but allow Stream/Output (playback)
-                  if (mediaClass.includes("Capture") || mediaClass === "Stream/Input" || mediaClass === "Stream/Input/Audio") {
-                    return true;
-                  }
-                  const mediaRole = props["media.role"] || "";
-                  if (mediaRole === "Capture") {
-                    return true;
-                  }
-                  return false;
-                }
 
-                // Helper function to validate if a fuzzy match is actually related
-                function isValidMatch(searchTerm, entry) {
-                  if (!entry)
-                    return false;
-                  var search = searchTerm.toLowerCase();
-                  var id = (entry.id || "").toLowerCase();
-                  var name = (entry.name || "").toLowerCase();
-                  var icon = (entry.icon || "").toLowerCase();
-                  // Match is valid if search term appears in entry or entry appears in search
-                  return id.includes(search) || name.includes(search) || icon.includes(search) || search.includes(id.split('.').pop()) || search.includes(name.replace(/\s+/g, ''));
-                }
-
-                readonly property string appName: {
-                  if (!modelData)
-                    return "Unknown App";
-
-                  var props = modelData.properties;
-                  var desc = modelData.description || "";
-                  var name = modelData.name || "";
-
-                  if (!props) {
-                    if (desc)
-                      return desc;
-                    if (name) {
-                      var nameParts = name.split(/[-_]/);
-                      if (nameParts.length > 0 && nameParts[0])
-                        return nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
-                      return name;
-                    }
-                    return "Unknown App";
-                  }
-
-                  var binaryName = props["application.process.binary"] || "";
-
-                  // Try binary name first (fixes Electron apps like vesktop)
-                  if (binaryName) {
-                    var binParts = binaryName.split("/");
-                    if (binParts.length > 0) {
-                      var binName = binParts[binParts.length - 1].toLowerCase();
-                      var entry = ThemeIcons.findAppEntry(binName);
-                      // Only use entry if it's actually related to binary name
-                      if (entry && entry.name && isValidMatch(binName, entry))
-                        return entry.name;
-                    }
-                  }
-
-                  var computedAppName = props["application.name"] || "";
-                  var mediaName = props["media.name"] || "";
-                  var mediaTitle = props["media.title"] || "";
-                  var appId = props["application.id"] || "";
-
-                  if (appId) {
-                    var entry = ThemeIcons.findAppEntry(appId);
-                    if (entry && entry.name && isValidMatch(appId, entry))
-                      return entry.name;
-                    if (!computedAppName) {
-                      var parts = appId.split(".");
-                      if (parts.length > 0 && parts[0])
-                        computedAppName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-                    }
-                  }
-
-                  if (!computedAppName && binaryName) {
-                    var binParts = binaryName.split("/");
-                    if (binParts.length > 0 && binParts[binParts.length - 1])
-                      computedAppName = binParts[binParts.length - 1].charAt(0).toUpperCase() + binParts[binParts.length - 1].slice(1);
-                  }
-
-                  var result = computedAppName || mediaTitle || mediaName || binaryName || desc || name;
-
-                  if (!result || result === "" || result === "Unknown App") {
-                    if (name) {
-                      var nameParts = name.split(/[-_]/);
-                      if (nameParts.length > 0 && nameParts[0])
-                        result = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
-                    }
-                  }
-
-                  return result || "Unknown App";
-                }
-
-                // Tab / page / track label (browsers: media.title/name; players: artist+title when PW exposes it).
-                // Many apps (notably some Spotify builds) only set a generic media.name — then there is nothing useful to show.
-                readonly property string appStreamTitle: {
-                  if (!modelData) {
-                    return "";
-                  }
-                  var props = modelData.properties;
-                  var artist = "";
-                  var title = "";
-                  var mediaName = "";
-                  if (props) {
-                    artist = (props["media.artist"] || "").trim();
-                    title = (props["media.title"] || "").trim();
-                    mediaName = (props["media.name"] || "").trim();
-                  }
-                  var raw = "";
-                  if (title && artist) {
-                    raw = artist + " — " + title;
-                  } else if (title) {
-                    raw = title;
-                  } else if (artist) {
-                    raw = artist;
-                  } else if (mediaName) {
-                    raw = mediaName;
-                  }
-                  if (!raw) {
-                    raw = (modelData.description || "").trim();
-                  }
-                  if (!raw) {
-                    return "";
-                  }
-                  var norm = raw.toLowerCase();
-                  var mainNorm = appName.trim().toLowerCase();
-                  if (norm === mainNorm) {
-                    return "";
-                  }
-                  return raw;
-                }
-
-                readonly property string appIcon: {
-                  if (!modelData)
-                    return ThemeIcons.iconFromName("application-x-executable", "application-x-executable");
-
-                  var props = modelData.properties;
-
-                  if (!props) {
-                    var name = modelData.name || "";
-                    if (name) {
-                      var nameParts = name.split(/[-_]/);
-                      if (nameParts.length > 0) {
-                        var entry = ThemeIcons.findAppEntry(nameParts[0].toLowerCase());
-                        if (entry && entry.icon && isValidMatch(nameParts[0].toLowerCase(), entry))
-                          return ThemeIcons.iconFromName(entry.icon, "application-x-executable");
-                      }
-                    }
-                    return ThemeIcons.iconFromName("application-x-executable", "application-x-executable");
-                  }
-
-                  var binaryName = props["application.process.binary"] || "";
-                  if (binaryName) {
-                    var binParts = binaryName.split("/");
-                    if (binParts.length > 0) {
-                      var binName = binParts[binParts.length - 1].toLowerCase();
-                      var entry = ThemeIcons.findAppEntry(binName);
-                      if (entry && entry.icon && isValidMatch(binName, entry))
-                        return ThemeIcons.iconFromName(entry.icon, "");
-                    }
-                  }
-
-                  var iconName = props["application.icon-name"] || "";
-                  if (iconName && ThemeIcons.iconExists(iconName)) {
-                    var iconPath = ThemeIcons.iconFromName(iconName, "");
-                    if (iconPath && iconPath !== "")
-                      return iconPath;
-                  }
-
-                  var appId = props["application.id"] || "";
-                  if (appId) {
-                    var entry = ThemeIcons.findAppEntry(appId);
-                    if (entry && entry.icon && isValidMatch(appId, entry))
-                      return ThemeIcons.iconFromName(entry.icon, "");
-                  }
-
-                  var appName = props["application.name"] || "";
-                  if (appName) {
-                    var entry = ThemeIcons.findAppEntry(appName.toLowerCase());
-                    if (entry && entry.icon && isValidMatch(appName.toLowerCase(), entry))
-                      return ThemeIcons.iconFromName(entry.icon, "");
-                  }
-
-                  var name = modelData.name || "";
-                  if (name) {
-                    var nameParts = name.split(/[-_]/);
-                    if (nameParts.length > 0) {
-                      var entry = ThemeIcons.findAppEntry(nameParts[0].toLowerCase());
-                      if (entry && entry.icon && isValidMatch(nameParts[0].toLowerCase(), entry))
-                        return ThemeIcons.iconFromName(entry.icon, "");
-                    }
-                  }
-
-                  return ThemeIcons.iconFromName("application-x-executable", "application-x-executable");
-                }
+                readonly property string appName: StreamMetadata.name(modelData, ThemeIcons)
+                readonly property string appStreamTitle: StreamMetadata.title(modelData, appName)
+                readonly property string appIcon: StreamMetadata.icon(modelData, ThemeIcons)
 
                 RowLayout {
                   id: appRow

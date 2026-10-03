@@ -15,12 +15,10 @@ NBox {
   required property int entryIndex
   required property var launcher
 
-  property bool isContextMenuTarget: launcher.appPanelItem === modelData
-  // An open panel owns the highlight: hovering other entries must not steal it,
-  // or the panel would end up hanging off an entry that no longer looks selected.
-  property bool hoverActive: !launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse
-  property bool isSelected: isContextMenuTarget || (launcher.ignoreMouseHover && entryIndex === launcher.selectedIndex)
-  property bool isHovered: hoverActive && !isSelected
+  readonly property bool isContextMenuTarget: launcher.appPanelItem === modelData
+  readonly property bool keyboardCurrent: launcher.ignoreMouseHover && entryIndex === launcher.selectedIndex
+  readonly property bool isSelected: isContextMenuTarget || (!launcher.appPanelOpen && keyboardCurrent)
+  readonly property bool isHovered: !launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse && !isSelected
   readonly property var badgeState: modelData.provider && modelData.provider.packageStateForItem ? modelData.provider.packageStateForItem(modelData) : modelData
   // In a single-column list the inline panel expands right underneath this entry,
   // so the two are fused into one Material 3 connected group: tight facing
@@ -52,7 +50,7 @@ NBox {
 
   Behavior on color {
     ColorAnimation {
-      duration: (entry.isSelected || entry.isHovered) ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+      duration: entry.isSelected ? Style.hoverEnterDuration : (entry.isHovered ? Style.hoverEnterDuration : 0)
       easing.type: Easing.OutCubic
     }
   }
@@ -87,7 +85,7 @@ NBox {
     }
     Behavior on opacity {
       OpacityAnimator {
-        duration: entry.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+        duration: entry.isSelected ? Style.hoverEnterDuration : 0
         easing.type: Easing.OutCubic
       }
     }
@@ -332,16 +330,12 @@ NBox {
     cursorShape: Qt.PointingHandCursor
     enabled: !Settings.data.appLauncher.ignoreMouseInput
     acceptedButtons: Qt.LeftButton | Qt.RightButton
-    onEntered: {
-      if (!launcher.ignoreMouseHover && !launcher.appPanelOpen)
-        launcher.selectedIndex = entry.entryIndex;
-    }
     onClicked: mouse => {
-                 launcher.selectedIndex = entry.entryIndex;
                  if (mouse.button === Qt.RightButton) {
                    launcher.toggleAppPanel(modelData);
                    mouse.accepted = true;
                  } else if (mouse.button === Qt.LeftButton) {
+                   launcher.selectedIndex = entry.entryIndex;
                    launcher.activate();
                    mouse.accepted = true;
                  }

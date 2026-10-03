@@ -17,8 +17,9 @@ Item {
   Layout.fillWidth: true
   implicitHeight: mainLayout.implicitHeight
 
-  // Configuration for shared use (e.g. by BluetoothPanel)
   property bool showOnlyLists: false
+  property bool dashboardMode: false
+  property real panelUnit: 1.0
 
   readonly property bool isScanningActive: BluetoothService.scanningActive
   readonly property bool isDiscoverable: BluetoothService.discoverable
@@ -138,7 +139,7 @@ Item {
     id: mainLayout
     anchors.left: parent.left
     anchors.right: parent.right
-    spacing: root.showOnlyLists ? Style.marginM : Style.marginL
+    spacing: root.dashboardMode ? Style.marginS : (root.showOnlyLists ? Style.marginM : Style.marginL)
 
     // Master Control Section
     NBox {
@@ -196,22 +197,22 @@ Item {
       visible: root.connectedDevices.length > 0 && BluetoothService.enabled
       Layout.fillWidth: true
       Layout.preferredHeight: connectedDevicesCol.implicitHeight + Style.margin2M
-      border.color: showOnlyLists ? Style.boxBorderColor : "transparent"
-      color: showOnlyLists ? Color.mSurfaceVariant : "transparent"
+      border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: connectedDevicesCol
         anchors.fill: parent
-        anchors.topMargin: Style.marginM
-        anchors.bottomMargin: Style.marginM
-        anchors.leftMargin: showOnlyLists ? Style.marginL : 0
-        anchors.rightMargin: showOnlyLists ? Style.marginL : 0
-        spacing: Style.marginM
+        anchors.topMargin: root.dashboardMode ? 0 : Style.marginM
+        anchors.bottomMargin: root.dashboardMode ? Style.marginXS : Style.marginM
+        anchors.leftMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        anchors.rightMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        spacing: root.dashboardMode ? Style.marginS : Style.marginM
 
         NLabel {
           label: I18n.tr("bluetooth.panel.connected-devices")
           Layout.fillWidth: true
-          Layout.leftMargin: Style.marginS
+          Layout.leftMargin: root.dashboardMode ? Style.marginXS : Style.marginS
         }
 
         Repeater {
@@ -227,22 +228,22 @@ Item {
       visible: root.pairedDevices.length > 0 && BluetoothService.enabled
       Layout.fillWidth: true
       Layout.preferredHeight: pairedDevicesCol.implicitHeight + Style.margin2M
-      border.color: showOnlyLists ? Style.boxBorderColor : "transparent"
-      color: showOnlyLists ? Color.mSurfaceVariant : "transparent"
+      border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: pairedDevicesCol
         anchors.fill: parent
-        anchors.topMargin: Style.marginM
-        anchors.bottomMargin: Style.marginM
-        anchors.leftMargin: showOnlyLists ? Style.marginL : 0
-        anchors.rightMargin: showOnlyLists ? Style.marginL : 0
-        spacing: Style.marginM
+        anchors.topMargin: root.dashboardMode ? 0 : Style.marginM
+        anchors.bottomMargin: root.dashboardMode ? Style.marginXS : Style.marginM
+        anchors.leftMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        anchors.rightMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        spacing: root.dashboardMode ? Style.marginS : Style.marginM
 
         NLabel {
           label: I18n.tr("bluetooth.panel.paired-devices")
           Layout.fillWidth: true
-          Layout.leftMargin: Style.marginS
+          Layout.leftMargin: root.dashboardMode ? Style.marginXS : Style.marginS
         }
 
         Repeater {
@@ -255,22 +256,24 @@ Item {
     // Device List [3] (Available)
     NBox {
       id: availableDevicesBox
-      visible: !root.showOnlyLists && root.unnamedAvailableDevices.length > 0 && BluetoothService.enabled
+      visible: (root.dashboardMode || !root.showOnlyLists) && root.unnamedAvailableDevices.length > 0 && BluetoothService.enabled
       Layout.fillWidth: true
       Layout.preferredHeight: availableDevicesCol.implicitHeight + Style.margin2M
       border.color: "transparent"
-      color: showOnlyLists ? Color.mSurfaceVariant : "transparent"
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: availableDevicesCol
         anchors.fill: parent
-        anchors.topMargin: Style.marginM
-        anchors.bottomMargin: Style.marginM
-        spacing: Style.marginM
+        anchors.topMargin: root.dashboardMode ? 0 : Style.marginM
+        anchors.bottomMargin: root.dashboardMode ? Style.marginXS : Style.marginM
+        anchors.leftMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        anchors.rightMargin: root.dashboardMode ? 0 : (showOnlyLists ? Style.marginL : 0)
+        spacing: root.dashboardMode ? Style.marginS : Style.marginM
 
         RowLayout {
           Layout.fillWidth: true
-          Layout.leftMargin: Style.marginS
+          Layout.leftMargin: root.dashboardMode ? Style.marginXS : Style.marginS
           spacing: Style.marginS
 
           NLabel {
@@ -388,30 +391,65 @@ Item {
       }
 
       Layout.fillWidth: true
-      Layout.preferredHeight: deviceColumn.implicitHeight + (Style.marginXL)
+      Layout.preferredHeight: deviceColumn.implicitHeight + (root.dashboardMode ? Style.marginM : Style.marginXL)
       radius: Style.radiusM
       clip: true
       forceOpaque: true
-      color: device.getContentColors()[0]
+      color: {
+        if (root.dashboardMode) {
+          if (device.isBusy)
+            return Qt.alpha(Color.mPrimaryContainer, 0.7);
+          if (modelData.connected)
+            return Color.mPrimaryContainer;
+          return hoverArea.hovered ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh;
+        }
+        return device.getContentColors()[0];
+      }
+      border.color: root.dashboardMode ? "transparent" : Style.boxBorderColor
+      border.width: root.dashboardMode ? 0 : Style.borderS
+
+      HoverHandler {
+        id: hoverArea
+      }
 
       ColumnLayout {
         id: deviceColumn
         anchors.fill: parent
-        anchors.margins: Style.marginM
+        anchors.margins: root.dashboardMode ? Style.marginS : Style.marginM
         spacing: Style.marginS
 
         RowLayout {
           id: deviceLayout
           Layout.fillWidth: true
-          spacing: Style.marginM
+          spacing: root.dashboardMode ? Style.marginS : Style.marginM
           Layout.alignment: Qt.AlignVCenter
 
-          NIcon {
+          Rectangle {
+            id: iconContainer
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-            horizontalAlignment: Text.AlignLeft
-            icon: BluetoothService.getDeviceIcon(modelData)
-            pointSize: Style.fontSizeXXL
-            color: device.getContentColors()[1]
+            Layout.preferredWidth: Math.round((root.dashboardMode ? 32 : 36) * (root.panelUnit || 1.0))
+            Layout.preferredHeight: Layout.preferredWidth
+            radius: root.dashboardMode ? Style.radiusS : Style.radiusM
+            color: {
+              if (root.dashboardMode) {
+                if (modelData.connected)
+                  return Qt.alpha(Color.mPrimary, 0.16);
+                return Color.mSurfaceContainerHighest;
+              }
+              return "transparent";
+            }
+
+            NIcon {
+              anchors.centerIn: parent
+              icon: BluetoothService.getDeviceIcon(modelData)
+              pointSize: root.dashboardMode ? Style.fontSizeM : Style.fontSizeXXL
+              color: {
+                if (root.dashboardMode) {
+                  return modelData.connected ? Color.mPrimary : Color.mOnSurface;
+                }
+                return device.getContentColors()[1];
+              }
+            }
           }
 
           ColumnLayout {
@@ -421,9 +459,14 @@ Item {
             NText {
               text: modelData.name || modelData.deviceName
               pointSize: Style.fontSizeM
-              font.weight: modelData.connected ? Style.fontWeightBold : Style.fontWeightMedium
+              font.weight: modelData.connected ? Style.fontWeightSemiBold : Style.fontWeightMedium
               elide: Text.ElideRight
-              color: device.getContentColors()[1]
+              color: {
+                if (root.dashboardMode) {
+                  return modelData.connected ? Color.mOnPrimaryContainer : Color.mOnSurface;
+                }
+                return device.getContentColors()[1];
+              }
               Layout.fillWidth: true
             }
 
@@ -442,7 +485,12 @@ Item {
               }
               visible: text !== ""
               pointSize: Style.fontSizeXS
-              color: Qt.alpha(device.getContentColors([Color.mSurfaceVariant, Color.mOnSurfaceVariant])[1], Style.opacityHeavy)
+              color: {
+                if (root.dashboardMode) {
+                  return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                }
+                return Qt.alpha(device.getContentColors([Color.mSurfaceVariant, Color.mOnSurfaceVariant])[1], Style.opacityHeavy);
+              }
             }
 
             RowLayout {
@@ -454,7 +502,12 @@ Item {
                   return BatteryService.getIcon(b !== null ? b : 0, false, false, b !== null);
                 }
                 pointSize: Style.fontSizeXS
-                color: Qt.alpha(device.getContentColors()[1], Style.opacityHeavy)
+                color: {
+                  if (root.dashboardMode) {
+                    return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                  }
+                  return Qt.alpha(device.getContentColors()[1], Style.opacityHeavy);
+                }
               }
               NText {
                 text: {
@@ -462,7 +515,12 @@ Item {
                   return b === null ? "-" : (b + "%");
                 }
                 pointSize: Style.fontSizeXS
-                color: Qt.alpha(device.getContentColors([Color.mSurfaceVariant, Color.mOnSurfaceVariant])[1], Style.opacityHeavy)
+                color: {
+                  if (root.dashboardMode) {
+                    return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                  }
+                  return Qt.alpha(device.getContentColors([Color.mSurfaceVariant, Color.mOnSurfaceVariant])[1], Style.opacityHeavy);
+                }
               }
             }
           }
@@ -477,16 +535,16 @@ Item {
             NBusyIndicator {
               visible: isBusy
               running: visible && root.effectivelyVisible
-              color: device.getContentColors()[1]
-              size: Style.baseWidgetSize * 0.5
+              color: root.dashboardMode ? (modelData.connected ? Color.mOnPrimaryContainer : Color.mPrimary) : device.getContentColors()[1]
+              size: Math.round((root.dashboardMode ? 20 : Style.baseWidgetSize * 0.5) * (root.panelUnit || 1.0))
             }
 
             NIconButton {
               visible: modelData.connected && modelData.state !== BluetoothDeviceState.Disconnecting
               icon: "info"
               tooltipText: I18n.tr("common.info")
-              baseSize: Style.baseWidgetSize * 0.75
-              colorBg: Color.mSurfaceVariant
+              baseSize: Math.round((root.dashboardMode ? 28 : Style.baseWidgetSize * 0.75) * (root.panelUnit || 1.0))
+              colorBg: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
               colorFg: Color.mOnSurface
               colorBorder: "transparent"
               colorBorderHover: "transparent"
@@ -497,12 +555,12 @@ Item {
             }
 
             NIconButton {
-              visible: !root.showOnlyLists && (modelData.paired || modelData.trusted) && !modelData.connected && !isBusy && !modelData.blocked
+              visible: (root.dashboardMode || !root.showOnlyLists) && (modelData.paired || modelData.trusted) && !modelData.connected && !isBusy && !modelData.blocked
               icon: "trash"
               tooltipText: I18n.tr("common.unpair")
-              baseSize: Style.baseWidgetSize * 0.75
-              colorBg: Color.mPrimary
-              colorFg: Color.mOnPrimary
+              baseSize: Math.round((root.dashboardMode ? 28 : Style.baseWidgetSize * 0.75) * (root.panelUnit || 1.0))
+              colorBg: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mPrimary
+              colorFg: root.dashboardMode ? Color.mError : Color.mOnPrimary
               colorBorder: "transparent"
               colorBorderHover: "transparent"
               onClicked: BluetoothService.unpairDevice(modelData)
@@ -511,9 +569,9 @@ Item {
             NButton {
               id: button
               visible: modelData.state !== BluetoothDeviceState.Connecting && modelData.state !== BluetoothDeviceState.Disconnecting
-              enabled: (canConnect || canDisconnect || (root.showOnlyLists ? false : canPair)) && !isBusy
+              enabled: (canConnect || canDisconnect || (root.dashboardMode ? canPair : (root.showOnlyLists ? false : canPair))) && !isBusy
               fontSize: Style.fontSizeS
-              backgroundColor: modelData.connected ? Color.mSurfaceVariant : Color.mPrimary
+              backgroundColor: modelData.connected ? (root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant) : Color.mPrimary
               textColor: modelData.connected ? Color.mOnSurface : Color.mOnPrimary
               text: {
                 if (modelData.pairing)
@@ -522,7 +580,7 @@ Item {
                   return I18n.tr("bluetooth.panel.blocked");
                 if (modelData.connected)
                   return I18n.tr("common.disconnect");
-                if (!root.showOnlyLists && device.canPair)
+                if ((root.dashboardMode || !root.showOnlyLists) && device.canPair)
                   return I18n.tr("common.pair");
                 return I18n.tr("common.connect");
               }
@@ -530,7 +588,7 @@ Item {
                 if (modelData.connected) {
                   BluetoothService.disconnectDevice(modelData);
                 } else {
-                  if (!root.showOnlyLists && device.canPair) {
+                  if ((root.dashboardMode || !root.showOnlyLists) && device.canPair) {
                     BluetoothService.pairDevice(modelData);
                   } else {
                     BluetoothService.connectDeviceWithTrust(modelData);
@@ -546,10 +604,10 @@ Item {
           visible: device.isExpanded
           Layout.fillWidth: true
           implicitHeight: infoColumn.implicitHeight + Style.margin2S
-          radius: Style.radiusXS
-          color: Color.mSurfaceVariant
-          border.width: Style.borderS
-          border.color: Style.boxBorderColor
+          radius: root.dashboardMode ? Style.radiusM : Style.radiusXS
+          color: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
+          border.width: root.dashboardMode ? 0 : Style.borderS
+          border.color: root.dashboardMode ? "transparent" : Style.boxBorderColor
           clip: true
 
           NIconButton {
@@ -696,14 +754,14 @@ Item {
   // PIN Authentication Overlay (This part needs some love :P)
   Rectangle {
     id: pinOverlay
-    visible: !root.showOnlyLists && BluetoothService.pinRequired
+    visible: (root.dashboardMode || !root.showOnlyLists) && BluetoothService.pinRequired
     anchors.centerIn: parent
     width: Math.min(parent.width * 0.9, 400)
     height: pinCol.implicitHeight + Style.margin2L
     color: Color.mSurface
     radius: Style.radiusM
-    border.color: Style.boxBorderColor
-    border.width: Style.borderS
+    border.color: root.dashboardMode ? "transparent" : Style.boxBorderColor
+    border.width: root.dashboardMode ? 0 : Style.borderS
     z: 1000
 
     MouseArea {

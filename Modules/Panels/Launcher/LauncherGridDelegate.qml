@@ -15,10 +15,10 @@ Item {
   required property int entryIndex
   required property var launcher
 
-  property bool isContextMenuTarget: launcher.appPanelItem === modelData
-  // An open panel owns the highlight: hovering other cards must not steal it.
-  property bool isSelected: isContextMenuTarget || (launcher.ignoreMouseHover && entryIndex === launcher.selectedIndex)
-  property bool isHovered: !launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse && !isSelected
+  readonly property bool isContextMenuTarget: launcher.appPanelItem === modelData
+  readonly property bool keyboardCurrent: launcher.ignoreMouseHover && entryIndex === launcher.selectedIndex
+  readonly property bool isSelected: isContextMenuTarget || (!launcher.appPanelOpen && keyboardCurrent)
+  readonly property bool isHovered: !launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse && !isSelected
   readonly property var badgeState: modelData.provider && modelData.provider.packageStateForItem ? modelData.provider.packageStateForItem(modelData) : modelData
   z: isContextMenuTarget ? 10 : 0
   Accessible.role: Accessible.ListItem
@@ -55,13 +55,13 @@ Item {
 
     Behavior on color {
       ColorAnimation {
-        duration: (gridEntryContainer.isSelected || gridEntryContainer.isHovered) ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+        duration: gridEntryContainer.isSelected || gridEntryContainer.isHovered ? Style.hoverEnterDuration : 0
         easing.type: Easing.OutCubic
       }
     }
     Behavior on border.color {
       ColorAnimation {
-        duration: gridEntryContainer.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+        duration: gridEntryContainer.isSelected ? Style.hoverEnterDuration : 0
         easing.type: Easing.OutCubic
       }
     }
@@ -267,16 +267,12 @@ Item {
     cursorShape: Qt.PointingHandCursor
     enabled: !Settings.data.appLauncher.ignoreMouseInput
     acceptedButtons: Qt.LeftButton | Qt.RightButton
-    onEntered: {
-      if (!launcher.ignoreMouseHover && !launcher.appPanelOpen)
-        launcher.selectedIndex = gridEntryContainer.entryIndex;
-    }
     onClicked: mouse => {
-                 launcher.selectedIndex = gridEntryContainer.entryIndex;
                  if (mouse.button === Qt.RightButton) {
                    launcher.toggleAppPanel(modelData);
                    mouse.accepted = true;
                  } else if (mouse.button === Qt.LeftButton) {
+                   launcher.selectedIndex = gridEntryContainer.entryIndex;
                    launcher.activate();
                    mouse.accepted = true;
                  }

@@ -23,7 +23,7 @@ DashboardCard {
 
       NText {
         Layout.fillWidth: true
-        text: panelRoot.tr("system")
+        text: panelRoot.tr("audio")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
         color: panelRoot.componentText("systemControls", true)

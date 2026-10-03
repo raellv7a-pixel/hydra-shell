@@ -10,11 +10,7 @@ NIconButtonHot {
 
   icon: !BluetoothService.enabled ? "bluetooth-off" : ((BluetoothService.connectedDevices && BluetoothService.connectedDevices.length > 0) ? "bluetooth-connected" : "bluetooth")
   tooltipText: I18n.tr("common.bluetooth")
-  onClicked: {
-    var p = PanelService.getPanel("bluetoothPanel", screen);
-    if (p)
-      p.toggle(this);
-  }
+  onClicked: PanelService.openDashboardView(screen, "bluetooth", this)
   onRightClicked: {
     if (!NetworkService.airplaneModeEnabled) {
       BluetoothService.setBluetoothEnabled(!BluetoothService.enabled);

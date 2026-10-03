@@ -115,38 +115,19 @@ Singleton {
     }
   }
 
-  // Show a tray menu with proper handling for all compositors
-  // Returns true if menu was shown successfully
-  function showTrayMenu(screen, trayItem, trayMenu, anchorItem, menuX, menuY, widgetSection, widgetIndex) {
-    if (!trayItem || !trayMenu || !anchorItem)
+
+  // Native Dashboard entry point for bar widgets and IPC; never opens a legacy panel.
+  function openDashboardView(screen, view, anchor, toggle = false) {
+    const panel = getPanel("controlCenterPanel", screen, false);
+    if (!panel)
       return false;
-
-    // Close any previously opened menu first
-    closeContextMenu(screen);
-
-    trayMenu.trayItem = trayItem;
-    trayMenu.widgetSection = widgetSection;
-    trayMenu.widgetIndex = widgetIndex;
-
-    var popupMenuWindow = getPopupMenuWindow(screen);
-    if (popupMenuWindow) {
-      popupMenuWindow.open();
-      trayMenu.showAt(anchorItem, menuX, menuY);
+    if (toggle && panel.isPanelOpen && panel.contentItem && (view === "audio" ? panel.contentItem.activeDetailView === "audio" : panel.contentItem.quickActionsPage === view)) {
+      panel.close();
     } else {
-      return false;
+      panel.showView(view, anchor);
     }
     return true;
   }
-
-  // Close tray menu
-  function closeTrayMenu(screen) {
-    var popupMenuWindow = getPopupMenuWindow(screen);
-    if (popupMenuWindow) {
-      // This closes both the window and calls hideMenu on the tray menu
-      popupMenuWindow.close();
-    }
-  }
-
   // Find a fallback screen, prioritizing 0x0 position (primary)
   function findFallbackScreen() {
     let primaryCandidate = null;

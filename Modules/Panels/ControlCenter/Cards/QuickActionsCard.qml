@@ -14,6 +14,7 @@ DashboardCard {
   styleRoot: true
   clip: true
 
+  readonly property string currentPage: panelRoot.quickActionsPage
   property int toolsTabIndex: 0
   readonly property var screenToolkitMain: ScreenToolkitService.mainInstance
 
@@ -112,12 +113,14 @@ DashboardCard {
     HeaderRow {
       panelRoot: quickActionsCard.panelRoot
       title: panelRoot.tr("controls")
+      visible: quickActionsCard.currentPage === "main"
       subtitle: panelRoot.tr("quick")
     }
 
     NTabBar {
       id: quickActionsTabs
       Layout.fillWidth: true
+      visible: quickActionsCard.currentPage === "main"
       tabHeight: Math.round(28 * panelRoot.panelUnit)
       distributeEvenly: true
       currentIndex: quickActionsCard.toolsTabIndex
@@ -142,7 +145,7 @@ DashboardCard {
 
     GridLayout {
       Layout.fillWidth: true
-      visible: quickActionsCard.toolsTabIndex === 0
+      visible: quickActionsCard.currentPage === "main" && quickActionsCard.toolsTabIndex === 0
       columns: 2
       columnSpacing: Style.marginS
       rowSpacing: Style.marginS
@@ -156,7 +159,7 @@ DashboardCard {
         iconName: NetworkService.wifiEnabled ? "wifi" : "wifi-off"
         active: NetworkService.wifiEnabled
         onTriggered: NetworkService.setWifiEnabled(!NetworkService.wifiEnabled)
-        onSecondaryTriggered: panelRoot.toggleNativePanel("networkPanel")
+        onSecondaryTriggered: panelRoot.quickActionsPage = "network"
       }
 
       ActionTile {
@@ -169,19 +172,20 @@ DashboardCard {
         iconName: !BluetoothService.enabled ? "bluetooth-off" : ((BluetoothService.connectedDevices && BluetoothService.connectedDevices.length > 0) ? "bluetooth-connected" : "bluetooth")
         active: BluetoothService.enabled
         onTriggered: BluetoothService.setBluetoothEnabled(!BluetoothService.enabled)
-        onSecondaryTriggered: panelRoot.toggleNativePanel("bluetoothPanel")
+        onSecondaryTriggered: panelRoot.quickActionsPage = "bluetooth"
       }
 
       ActionTile {
         panelRoot: quickActionsCard.panelRoot
-        labelText: panelRoot.tr("dnd")
-        detailText: panelRoot.tr("clearNotifications")
-        secondaryIcon: "trash"
-        secondaryTooltip: panelRoot.tr("clearNotifications")
-        iconName: NotificationService.doNotDisturb ? "bell-off" : "bell"
-        active: NotificationService.doNotDisturb
-        onTriggered: NotificationService.doNotDisturb = !NotificationService.doNotDisturb
-        onSecondaryTriggered: NotificationService.clearHistory()
+        labelText: I18n.tr("common.night-light")
+        detailText: !ProgramCheckerService.wlsunsetAvailable ? panelRoot.tr("disabled") : (Settings.data.nightLight.enabled ? panelRoot.tr("enabled") : panelRoot.tr("disabled"))
+        iconName: Settings.data.nightLight.enabled ? "nightlight-on" : "nightlight-off"
+        active: ProgramCheckerService.wlsunsetAvailable && Settings.data.nightLight.enabled
+        enabled: ProgramCheckerService.wlsunsetAvailable
+        onTriggered: {
+          Settings.data.nightLight.enabled = !Settings.data.nightLight.enabled;
+          Settings.data.nightLight.forced = Settings.data.nightLight.enabled;
+        }
       }
 
       ActionTile {
@@ -193,7 +197,7 @@ DashboardCard {
         iconName: AudioService.inputMuted ? "microphone-off" : "microphone"
         active: !AudioService.inputMuted
         onTriggered: AudioService.setInputMuted(!AudioService.inputMuted)
-        onSecondaryTriggered: panelRoot.toggleNativePanel("audioPanel")
+        onSecondaryTriggered: panelRoot.activeDetailView = "audio"
       }
 
       ActionTile {
@@ -243,11 +247,27 @@ DashboardCard {
       }
     }
 
+    BluetoothQuickDetails {
+      visible: quickActionsCard.currentPage === "bluetooth"
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      panelRoot: quickActionsCard.panelRoot
+      onBack: panelRoot.quickActionsPage = "main"
+    }
+
+    NetworkQuickDetails {
+      visible: quickActionsCard.currentPage === "network"
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      panelRoot: quickActionsCard.panelRoot
+      onBack: panelRoot.quickActionsPage = "main"
+    }
+
     Item {
       id: toolsContainer
       Layout.fillWidth: true
       Layout.fillHeight: true
-      visible: quickActionsCard.toolsTabIndex === 1
+      visible: quickActionsCard.currentPage === "main" && quickActionsCard.toolsTabIndex === 1
       clip: true
 
       SwipeView {

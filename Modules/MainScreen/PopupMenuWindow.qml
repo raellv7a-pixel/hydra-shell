@@ -6,10 +6,8 @@ import qs.Services.Compositor
 import qs.Services.UI
 import qs.Widgets
 
-// Generic full-screen popup window for menus and context menus
-// This is a top-level PanelWindow (sibling to MainScreen, not nested inside it)
-// Provides click-outside-to-close functionality for any popup content
-// Loads TrayMenu by default but can show context menus via showContextMenu()
+// Shared top-level window for non-Tray context menus and dialogs.
+// Tray menus are rendered inside the attached TrayDrawerPanel instead.
 PanelWindow {
   id: root
 
@@ -19,8 +17,6 @@ PanelWindow {
   // Content item to display (set by the popup that uses this window)
   property var contentItem: null
 
-  // Expose the trayMenu Loader directly (for backward compatibility)
-  readonly property alias trayMenuLoader: trayMenuLoader
 
   // Dynamic context menu callback for items in other windows (e.g., desktop widgets)
   property var dynamicMenuCallback: null
@@ -53,18 +49,6 @@ PanelWindow {
     PanelService.unregisterPopupMenuWindow(screen);
   }
 
-  // Load TrayMenu as the default content
-  Loader {
-    id: trayMenuLoader
-    source: Quickshell.shellDir + "/Modules/Bar/Extras/TrayMenu.qml"
-    onLoaded: {
-      if (item) {
-        item.screen = root.screen;
-        // Set the loaded item as default content
-        root.contentItem = item;
-      }
-    }
-  }
 
   // Dynamic context menu - created as child of this window (Top layer) so input works correctly
   // Used for items in other windows like desktop widgets (bottom layer)
@@ -92,7 +76,7 @@ PanelWindow {
     BarService.popupOpen = true;
   }
 
-  // Show a context menu (temporarily replaces TrayMenu as content)
+  // Show a context menu as content.
   function showContextMenu(menu) {
     if (menu) {
       contentItem = menu;
@@ -143,10 +127,6 @@ PanelWindow {
     // Hide dynamic menu
     dynamicMenu.visible = false;
     dynamicMenuCallback = null;
-    // Restore TrayMenu as default content
-    if (trayMenuLoader.item) {
-      contentItem = trayMenuLoader.item;
-    }
   }
 
   // Full-screen click catcher - click anywhere outside content closes the window

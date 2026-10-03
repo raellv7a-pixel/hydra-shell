@@ -88,15 +88,12 @@ Item {
     autoHide: false
     forceOpen: !isBarVertical && root.displayMode === "alwaysShow"
     forceClose: isBarVertical || root.displayMode === "alwaysHide" || text === ""
-    onClicked: {
-      var panel = PanelService.getPanel("networkPanel", screen);
-      panel?.toggle(this);
-    }
+    onClicked: PanelService.openDashboardView(screen, "network", this)
     onRightClicked: {
       PanelService.showContextMenu(contextMenu, pill, screen);
     }
     tooltipText: {
-      if (PanelService.getPanel("networkPanel", screen)?.isPanelOpen) {
+      if (PanelService.getPanel("controlCenterPanel", screen, false)?.isPanelOpen) {
         return "";
       }
       return NetworkService.getStatusText(true);

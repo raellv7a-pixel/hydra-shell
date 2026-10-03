@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 import qs.Services.Media
+import Quickshell.Services.Pipewire
 DashboardCard {
   id: audioDetailsCard
 
@@ -11,6 +12,10 @@ DashboardCard {
   detailTransition: true
   detailTransitionDirection: "right"
   clip: true
+
+  PwObjectTracker {
+    objects: AudioService.appStreams
+  }
 
   ColumnLayout {
     anchors.fill: parent

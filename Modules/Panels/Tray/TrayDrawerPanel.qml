@@ -12,12 +12,69 @@ import qs.Widgets
 SmartPanel {
   id: root
 
-  // Do not give exclusive focus to the TrayDrawer or it will prevent the dropdown menu to request it.
+  // Keep pointer interaction inside this SmartPanel surface for grid and menus.
   exclusiveKeyboard: false
 
   // Widget info for menu functionality (set by Tray widget when opening)
   property string widgetSection: ""
   property int widgetIndex: -1
+  property var selectedTrayItem: null
+  property var menuPath: []
+  readonly property bool menuOpen: selectedTrayItem !== null
+
+  function showGrid() {
+    selectedTrayItem = null;
+    menuPath = [];
+  }
+
+  function showItemMenu(item, section, index, anchor) {
+    if (!item?.hasMenu || !item.menu)
+      return;
+    widgetSection = section;
+    widgetIndex = index;
+    selectedTrayItem = item;
+    menuPath = [];
+    if (!isPanelOpen)
+      open(anchor);
+  }
+
+  function menuBack() {
+    if (menuPath.length)
+      menuPath = menuPath.slice(0, -1);
+    else
+      showGrid();
+  }
+
+  function togglePinned() {
+    if (!selectedTrayItem || !widgetSection || widgetIndex < 0)
+      return;
+    const name = selectedTrayItem.tooltipTitle || selectedTrayItem.name || selectedTrayItem.id || "";
+    if (!name)
+      return;
+    const screenName = screen?.name || "";
+    const widgets = Settings.getBarWidgetsForScreen(screenName)[widgetSection];
+    const current = widgets?.[widgetIndex];
+    if (!current || current.id !== "Tray")
+      return;
+    const pinned = (current.pinned || []).slice();
+    const match = pinned.indexOf(name);
+    if (match >= 0)
+      pinned.splice(match, 1);
+    else
+      pinned.push(name);
+    widgets[widgetIndex] = Object.assign({}, current, { pinned: pinned });
+    if (Settings.hasScreenOverride(screenName, "widgets")) {
+      const perScreen = Settings.getBarWidgetsForScreen(screenName);
+      perScreen[widgetSection] = widgets;
+      Settings.setScreenOverride(screenName, "widgets", perScreen);
+    } else {
+      Settings.data.bar.widgets[widgetSection] = widgets;
+    }
+    Settings.saveImmediate();
+    showGrid();
+    if (trayValues.length === 0)
+      close();
+  }
 
   // Sizing properties must stay at root for preferredWidth/Height
   readonly property int maxColumns: 8
@@ -35,22 +92,23 @@ SmartPanel {
   readonly property int columns: Math.max(1, Math.min(maxColumns, itemCount))
   readonly property int rows: Math.max(1, Math.ceil(itemCount / Math.max(1, columns)))
 
-  preferredWidth: (columns * cellSize) + ((columns - 1) * innerSpacing) + (2 * outerPadding)
-  preferredHeight: (rows * cellSize) + ((rows - 1) * innerSpacing) + (2 * outerPadding)
+  readonly property real gridPreferredWidth: (columns * cellSize) + ((columns - 1) * innerSpacing) + (2 * outerPadding)
+  readonly property real gridPreferredHeight: (rows * cellSize) + ((rows - 1) * innerSpacing) + (2 * outerPadding)
+
+  preferredWidth: (menuOpen && contentItem?.menuPreferredWidth) ? contentItem.menuPreferredWidth : gridPreferredWidth
+  preferredHeight: (menuOpen && contentItem?.menuPreferredHeight) ? contentItem.menuPreferredHeight : gridPreferredHeight
 
   // Auto-close drawer when all items are pinned (drawer becomes empty)
   onTrayValuesChanged: {
-    if (visible && trayValues.length === 0) {
+    if (visible && trayValues.length === 0 && !menuOpen)
       close();
-    }
   }
 
-  // Force refresh panelContent settings when drawer opens
   onOpened: {
-    if (panelContent && panelContent.settingsVersion !== undefined) {
-      panelContent.settingsVersion++;
-    }
+    if (contentItem)
+      contentItem.settingsVersion++;
   }
+  onClosed: showGrid()
 
   panelContent: Item {
     id: panelContent
@@ -136,19 +194,11 @@ SmartPanel {
       return false;
     }
 
-    // Popup menu state (lazy-loaded with panelContent)
-    property int popupMenuUpdateTrigger: 0
-
-    readonly property var popupMenuWindow: {
-      void (popupMenuUpdateTrigger);
-      return PanelService.getPopupMenuWindow(screen);
-    }
-
-    readonly property var trayMenu: popupMenuWindow ? popupMenuWindow.trayMenuLoader : null
-
-    // Dynamic content sizing
-    property real contentPreferredWidth: (root.columns * root.cellSize) + ((root.columns - 1) * root.innerSpacing) + (2 * root.outerPadding)
-    property real contentPreferredHeight: (root.rows * root.cellSize) + ((root.rows - 1) * root.innerSpacing) + (2 * root.outerPadding)
+    // SmartPanel reads these from its loaded content as well as from the root.
+    readonly property real menuPreferredWidth: menuPage.implicitWidth
+    readonly property real menuPreferredHeight: menuPage.implicitHeight
+    property real contentPreferredWidth: root.menuOpen ? menuPreferredWidth : root.gridPreferredWidth
+    property real contentPreferredHeight: root.menuOpen ? menuPreferredHeight : root.gridPreferredHeight
 
     // Connections (lazy-loaded with panelContent)
     Connections {
@@ -158,17 +208,10 @@ SmartPanel {
       }
     }
 
-    Connections {
-      target: PanelService
-      function onPopupMenuWindowRegistered(registeredScreen) {
-        if (registeredScreen === screen) {
-          panelContent.popupMenuUpdateTrigger++;
-        }
-      }
-    }
 
     Grid {
       id: grid
+      visible: !root.menuOpen
       anchors.fill: parent
       anchors.margins: root.outerPadding
       spacing: root.innerSpacing
@@ -233,36 +276,7 @@ SmartPanel {
                              }
                            } else if (mouse.button === Qt.RightButton) {
                              TooltipService.hideImmediately();
-
-                             if (panelContent.popupMenuWindow && panelContent.popupMenuWindow.visible) {
-                               panelContent.popupMenuWindow.close();
-                               return;
-                             }
-
-                             if (modelData.hasMenu && modelData.menu && panelContent.trayMenu && panelContent.trayMenu.item) {
-                               const barPosition = Settings.getBarPositionForScreen(root.screen?.name);
-                               // Increased spacing for better alignment with other context menus
-                               let menuX, menuY;
-
-                               if (barPosition === "left") {
-                                 menuX = trayIcon.width + Style.marginL;
-                                 menuY = 0;
-                               } else if (barPosition === "right") {
-                                 menuX = -panelContent.trayMenu.item.width - Style.marginL;
-                                 menuY = 0;
-                               } else if (barPosition === "bottom") {
-                                 // For bottom bar: let TrayMenu handle positioning by passing anchorY >= 0
-                                 // TrayMenu will position above the anchor item
-                                 menuX = (trayIcon.width / 2) - (panelContent.trayMenu.item.width / 2);
-                                 menuY = trayIcon.height + Style.marginL;
-                               } else {
-                                 // For top bar: position menu below the icon with more spacing
-                                 menuX = (trayIcon.width / 2) - (panelContent.trayMenu.item.width / 2);
-                                 menuY = trayIcon.height + Style.marginL;
-                               }
-
-                               PanelService.showTrayMenu(root.screen, modelData, panelContent.trayMenu.item, trayIcon, menuX, menuY, root.widgetSection, root.widgetIndex);
-                             }
+                             root.showItemMenu(modelData, root.widgetSection, root.widgetIndex, trayIcon);
                            }
                          }
 
@@ -273,17 +287,25 @@ SmartPanel {
                          modelData?.scrollDown();
                        }
 
-              onEntered: {
-                if (panelContent.popupMenuWindow) {
-                  panelContent.popupMenuWindow.close();
-                }
-                TooltipService.show(trayIcon, modelData.tooltipTitle || modelData.name || modelData.id || "Tray Item", BarService.getTooltipDirection(root.screen?.name));
-              }
+              onEntered: TooltipService.show(trayIcon, modelData.tooltipTitle || modelData.name || modelData.id || "Tray Item", BarService.getTooltipDirection(root.screen?.name))
               onExited: TooltipService.hide()
             }
           }
         }
       }
+    }
+    TrayMenuPage {
+      id: menuPage
+      anchors.fill: parent
+      visible: root.menuOpen
+      trayItem: root.selectedTrayItem
+      menuPath: root.menuPath
+      pinned: panelContent.isPinned(root.selectedTrayItem)
+      canPin: root.widgetSection !== "" && root.widgetIndex >= 0
+      onBack: root.menuBack()
+      onSubmenu: entry => root.menuPath = root.menuPath.concat([entry])
+      onActivated: root.close()
+      onPinToggled: root.togglePinned()
     }
   }
 }

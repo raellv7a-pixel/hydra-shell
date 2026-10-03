@@ -83,12 +83,34 @@ O blur Umbriel usa a cena corrente (`blur_optimized = false`) e máscara alpha
 `0.5` para excluir a franja da sombra cliente; pixels abaixo desse alpha não
 recebem blur. Sombras e políticas de opacidade continuam intactas. A costura de
 reveal só aparece durante a transição geométrica, nunca no painel aberto estável.
-Hover compartilhado usa entrada de 100 ms e saída de 30 ms, respeitando a
-velocidade/desativação de animações e o modo de performance.
+
+No Launcher, posição do teclado, hover do ponteiro e alvo do menu contextual são
+estados independentes: movimento real do ponteiro muda apenas o feedback sutil;
+o destaque tonal principal do item anterior sai imediatamente.
 
 Regressões: `python3 -m unittest discover -s Scripts/python/tests -v`.
 Os testes nativos exigem Umbriel, Quickshell e D-Bus; usam XDG/bus privados e
 fixtures de Shelly/ALPM, sem instalar ou remover pacotes reais.
+
+## Dashboard e Tray
+
+As engrenagens de Bluetooth e Rede abrem listas compactas dentro do card Quick
+Actions: cabeçalho e seletor Wi-Fi/Ethernet ficam fixos enquanto dispositivos
+e redes rolam; estados conectados usam tons da paleta, inclusive Classic e
+Tinted. Voltar retorna aos controles sem fechar a Dashboard. A engrenagem do
+microfone e os widgets de volume abrem os detalhes de áudio da própria
+Dashboard. DND e limpar notificações ficam apenas em
+Notifications; Quick Actions usa Luz Noturna quando `wlsunset` está disponível.
+O card de volume tem o título público **Áudio**, mantendo o ID interno
+`system-controls` para preservar configurações existentes.
+
+A lista de volumes de aplicativos acompanha os streams de reprodução PipeWire
+e usa metadados da aplicação, não o nome do dispositivo de saída. O menu de
+itens da Tray é uma página do drawer acoplado à barra: largura/altura acompanham
+o conteúdo e só o excedente rola; Voltar retorna da pilha de submenus sem
+recriar seus modelos QsMenu. Os outros menus contextuais ainda usam a
+janela genérica. Painéis legados de Bluetooth, Rede e Áudio permanecem nos
+arquivos até confirmar paridade funcional e ausência de consumidores.
 
 ## Atalhos na sessão Umbriel
 

@@ -144,7 +144,7 @@ Item {
     forceOpen: displayMode === "alwaysShow"
     forceClose: displayMode === "alwaysHide"
     tooltipText: {
-      if (PanelService.getPanel("audioPanel", screen)?.isPanelOpen) {
+      if (PanelService.getPanel("controlCenterPanel", screen, false)?.isPanelOpen) {
         return "";
       } else {
         const nick = AudioService.source?.nickname ?? "";
@@ -172,9 +172,7 @@ Item {
         AudioService.setInputVolume(AudioService.inputVolume - AudioService.stepVolume);
       }
     }
-    onClicked: {
-      PanelService.getPanel("audioPanel", screen)?.toggle(this);
-    }
+    onClicked: PanelService.openDashboardView(screen, "audio", this)
     onRightClicked: {
       PanelService.showContextMenu(contextMenu, pill, screen);
     }
