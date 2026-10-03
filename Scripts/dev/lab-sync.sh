@@ -11,10 +11,11 @@ ACTIVE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/hydra-shell"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/hydra-shell-lab"
 LKG_FILE="$STATE_DIR/last-known-good"
 PREVIEWED=
+REPLACE_PENDING=
 YES=false
 
 usage() {
-  echo "Usage: $0 --preview-validated <full-commit> [--source-branch <branch>] [--yes]"
+  echo "Usage: $0 --preview-validated <full-commit> [--source-branch <branch>] [--replace-pending <full-active-commit>] [--yes]"
 }
 while (($#)); do
   case "$1" in
@@ -26,6 +27,11 @@ while (($#)); do
     --source-branch)
       (($# >= 2)) || { usage >&2; exit 2; }
       SOURCE_BRANCH="$2"
+      shift 2
+      ;;
+    --replace-pending)
+      (($# >= 2)) || { usage >&2; exit 2; }
+      REPLACE_PENDING="$2"
       shift 2
       ;;
     -y|--yes) YES=true; shift ;;
@@ -72,12 +78,23 @@ active_remote="$(git -C "$ACTIVE_DIR" remote get-url origin)"
   die "No last-known-good recorded. Validate the active baseline, then run lab-mark-good.sh."
 last_good="$(<"$LKG_FILE")"
 active_head="$(git -C "$ACTIVE_DIR" rev-parse HEAD)"
-[[ "$active_head" == "$last_good" ]] ||
-  die "Active HEAD ($active_head) is not recorded last-known-good ($last_good); inspect/rollback first."
+if [[ -n "$REPLACE_PENDING" ]]; then
+  [[ "$REPLACE_PENDING" =~ ^[0-9a-f]{40}$ && "$active_head" == "$REPLACE_PENDING" ]] ||
+    die "Pending replacement must name the exact active commit."
+  [[ -f "$STATE_DIR/active-commit" && "$(<"$STATE_DIR/active-commit")" == "$active_head" &&
+     -f "$STATE_DIR/validation-pending" && "$(<"$STATE_DIR/validation-pending")" == "$active_head" ]] ||
+    die "Active commit is not the recorded pending deployment."
+  log "Replacing explicitly named pending deploy; last-known-good remains $last_good"
+else
+  [[ "$active_head" == "$last_good" ]] ||
+    die "Active HEAD ($active_head) is not recorded last-known-good ($last_good); inspect/rollback first or explicitly replace its recorded pending deploy."
+fi
 [[ "$(git -C "$LAB_DIR" cat-file -t "$candidate" 2>/dev/null)" == commit ]] ||
   die "Lab candidate is not a commit."
 git -C "$LAB_DIR" merge-base --is-ancestor "$last_good" "$candidate" ||
   die "Candidate is not a fast-forward from last-known-good."
+git -C "$LAB_DIR" merge-base --is-ancestor "$active_head" "$candidate" ||
+  die "Candidate is not a fast-forward from the active deployment."
 command -v qs >/dev/null 2>&1 || die "qs is required to validate/reload the active shell."
 command -v prowl >/dev/null 2>&1 || die "prowl is required for the project doctor check."
 
@@ -91,7 +108,7 @@ done
 ((${#active_pids[@]} == 1)) || die "Expected exactly one active qs -c hydra-shell process; found ${#active_pids[@]}."
 active_pid="${active_pids[0]}"
 
-mapfile -t changed_qml < <(git -C "$LAB_DIR" diff --name-only --diff-filter=ACMRT "$last_good..$candidate" -- '*.qml')
+mapfile -t changed_qml < <(git -C "$LAB_DIR" diff --name-only --diff-filter=ACMRT "$active_head..$candidate" -- '*.qml')
 if ((${#changed_qml[@]})); then
   log "Checking changed QML with pinned parser without rewriting validated source"
   (cd "$LAB_DIR" && ./Scripts/dev/qmlfmt.sh --parse-only "${changed_qml[@]}")
@@ -108,7 +125,7 @@ git -C "$ACTIVE_DIR" fetch --no-tags "$LAB_DIR" "$SOURCE_BRANCH"
 git -C "$ACTIVE_DIR" merge --ff-only FETCH_HEAD
 deployed="$(git -C "$ACTIVE_DIR" rev-parse HEAD)"
 [[ "$deployed" == "$candidate" ]] || die "Active HEAD does not match validated Lab commit after fast-forward."
-write_state previous-commit "$last_good"
+write_state previous-commit "$active_head"
 write_state active-commit "$deployed"
 write_state deployed-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 write_state validation-pending "$deployed"
