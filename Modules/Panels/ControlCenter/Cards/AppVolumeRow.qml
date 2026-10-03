@@ -9,7 +9,8 @@ import qs.Services.Media
 DashboardCard {
   id: appVolumeRow
 
-  property var streamNode: null
+  required property var modelData
+  readonly property var streamNode: modelData
   readonly property PwNodeAudio nodeAudio: streamNode?.audio ?? null
   readonly property bool streamMuted: nodeAudio?.muted ?? false
   readonly property real streamVolume: nodeAudio?.volume ?? 0

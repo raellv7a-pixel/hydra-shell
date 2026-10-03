@@ -192,7 +192,6 @@ DashboardCard {
               AppVolumeRow {
                 panelRoot: audioDetailsCard.panelRoot
                 Layout.fillWidth: true
-                streamNode: modelData
               }
             }
           }
