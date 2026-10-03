@@ -210,6 +210,10 @@ def output_config(outputs):
 BLUR_NAMESPACES = [r'^hydra-(background|popupmenu|notifications|osd|toast|launcher-overlay)-.+$',
                    r'^hydra-show-keys$']
 
+# Client shadows share the layer buffer. Keep their translucent fringe out of
+# the blur mask and sample the live scene rather than only the wallpaper layer.
+BLUR_IGNORE_ALPHA = 0.5
+
 
 def visual_config(enabled, output_names):
     lines = ['# Hydra-owned shell surface effects.']
@@ -218,9 +222,11 @@ def visual_config(enabled, output_names):
     ]
     for namespace in namespaces:
         lines += ['', '[[layer_rule]]', 'match = { namespace = ' + json.dumps(namespace) + ' }',
-                  'blur = ' + str(enabled).lower(), 'blur_optimized = true', 'blur_ignore_alpha = 0.2']
+                  'blur = ' + str(enabled).lower(), 'blur_optimized = false',
+                  'blur_ignore_alpha = ' + str(BLUR_IGNORE_ALPHA)]
     lines += ['', '[[window_rule]]', 'match = { app_id = "^dev\\\\.noctalia\\\\.noctalia-qs$", title = "^Hydra$" }',
-              'blur = ' + str(enabled).lower(), 'blur_ignore_alpha = 0.2']
+              'blur = ' + str(enabled).lower(), 'blur_optimized = false',
+              'blur_ignore_alpha = ' + str(BLUR_IGNORE_ALPHA)]
     return '\n'.join(lines) + '\n'
 
 

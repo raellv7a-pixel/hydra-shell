@@ -6,115 +6,189 @@ import Quickshell.Io
 import qs.Commons
 import qs.Services.UI
 
-// Runs Shelly's privileged operations (update, uninstall) for the launcher.
-//
-// This lives at shell level rather than inside ApplicationsProvider because a
-// SmartPanel unloads its content when it closes (`contentLoader.active:
-// isPanelOpen`): running the process from the provider meant the launcher
-// closing — which is exactly what used to happen the moment the polkit prompt
-// appeared — destroyed the Process mid-transaction and killed the package
-// operation. Owning it here lets an update outlive the panel that started it.
+// Package reads and writes outlive Launcher delegates. A single scanner/cache is
+// shared by every screen; a mutation cancels/reaps the scanner before starting.
 Singleton {
   id: root
 
-  property string operationAppId: ""
-  property string operationAppName: ""
-  property string operationState: "" // "update" | "remove" | ""
-  property string lastError: ""
-
-  readonly property bool busy: operationState !== ""
-
-  // Shelly escalates privileges on its own and picks the helper from
-  // SHELLY_ELEVATOR. Its default is sudo, which cannot work here: the shell
-  // spawns processes without a TTY, so sudo has no way to ask for a password and
-  // dies with "a terminal is required to read the password".
-  //
-  // The helper routes through pkexec so the prompt reaches the session's polkit
-  // agent — the shell's own native one, when it is enabled — and the password
-  // field shows up on screen. It has to be the wrapper rather than plain pkexec:
-  // see Scripts/bash/polkit-elevate.sh for why the bare binary aborts without a
-  // controlling terminal. Shelly resolves the invoking user back from PKEXEC_UID,
-  // so AUR builds and per-user Flatpaks still run unprivileged.
   readonly property string privilegeElevator: Quickshell.shellDir + "/Scripts/bash/polkit-elevate.sh"
-  // Short name for messages — the full path is noise in a toast.
-  readonly property string elevatorLabel: "pkexec"
+  readonly property string metadataHelper: Quickshell.shellDir + "/Scripts/python/launcher_packages.py"
+  readonly property string cacheFile: Settings.cacheDir + "shelly-updates.json"
+  readonly property int cacheTtlMs: 30 * 60 * 1000
+  readonly property bool scanRunning: metadataProcess.running
+  property bool metadataReady: false
+  property bool available: false
+  property var updateRecords: []
+  property var installedPackages: ({
+                                     "native": {},
+                                     "flatpak": {},
+                                     "appimages": []
+                                   })
+  property real lastScanTimestamp: 0
+  property int metadataRevision: 0
+  property string scanError: ""
+  property bool scanCancelled: false
+  property bool refreshRequested: false
 
-  // appId is the launcher entry's id, echoed back so the caller can re-anchor.
+  property bool busy: false
+  property string operationAppId: ""
+  property string operationState: "idle" // idle | waiting | update | remove
+  property string operationName: ""
+  property string lastError: ""
+  property var pendingOperation: null
+
   signal operationFinished(string appId, string operation, bool success)
 
-  function isBusyFor(appId) {
-    return busy && appId !== "" && operationAppId === appId;
+  Component.onCompleted: {
+    metadataProcess.command = ["python3", metadataHelper, "bootstrap", cacheFile];
+    metadataProcess.running = true;
   }
 
-  function run(operation, appId, appName, command) {
-    if (busy || !command || command.length === 0)
-      return false;
+  function refresh(force) {
+    if (!metadataReady || busy || metadataProcess.running) {
+      refreshRequested = refreshRequested || !!force;
+      return;
+    }
+    if (!force && Date.now() - lastScanTimestamp < cacheTtlMs)
+      return;
+    refreshRequested = false;
+    scanError = "";
+    metadataProcess.command = ["python3", metadataHelper, "scan", cacheFile];
+    metadataProcess.running = true;
+    metadataRevision++;
+  }
 
-    operationAppId = String(appId || "");
-    operationAppName = String(appName || appId || "");
-    operationState = operation;
+  Timer {
+    id: refreshTimer
+    interval: root.cacheTtlMs
+    repeat: false
+    onTriggered: root.refresh(true)
+  }
+
+  Process {
+    id: metadataProcess
+    stdout: StdioCollector {
+      id: metadataOut
+    }
+    stderr: StdioCollector {
+      id: metadataErr
+    }
+    onExited: code => {
+      root.metadataReady = true;
+      if (root.scanCancelled) {
+        root.scanCancelled = false;
+        root.beginOperation();
+        return;
+      }
+      if (code === 0) {
+        try {
+          const data = JSON.parse(metadataOut.text);
+          root.available = data.available;
+          root.updateRecords = data.updates;
+          root.installedPackages = data.installed;
+          root.lastScanTimestamp = data.timestamp * 1000;
+          root.scanError = "";
+        } catch (error) {
+          root.scanError = String(error);
+        }
+      } else {
+        root.scanError = String(metadataErr.text || I18n.tr("launcher.app-actions.operation-failed")).trim();
+      }
+      root.metadataRevision++;
+      // Bootstrap may publish an expired cache immediately, then refresh once.
+      if (code === 0 && (root.refreshRequested || Date.now() - root.lastScanTimestamp >= root.cacheTtlMs))
+      Qt.callLater(() => root.refresh(root.refreshRequested));
+      // A warm cache may be close to expiry at startup; schedule the remaining
+      // lifetime, not another complete TTL. Failures retain the normal retry.
+      refreshTimer.interval = code === 0 ? Math.max(1, Math.ceil(root.cacheTtlMs - (Date.now() - root.lastScanTimestamp))) : root.cacheTtlMs;
+      refreshTimer.restart();
+    }
+  }
+
+  function reject(message) {
+    lastError = message;
+    metadataRevision++;
+    return false;
+  }
+
+  function describeFailure(stdoutText, stderrText) {
+    const lowered = `${stdoutText}\n${stderrText}`.toLowerCase();
+    if (lowered.includes("unable to elevate") || lowered.includes("request dismissed") || lowered.includes("authentication failed") || lowered.includes("not authorized") || lowered.includes("authorization required")) {
+      if (lowered.includes("filenotfound") || lowered.includes("no such file"))
+        return I18n.tr("launcher.app-actions.elevator-missing", {
+                         "value": "pkexec"
+                       });
+      return I18n.tr("launcher.app-actions.auth-denied");
+    }
+    return String(stderrText || "").trim() || String(stdoutText || "").trim() || I18n.tr("launcher.app-actions.operation-failed");
+  }
+
+  function run(operation, appId, name, command) {
+    if (busy)
+      return reject(I18n.tr("launcher.app-actions.operation-in-progress"));
+    if (!available || !command || command.length === 0)
+      return reject(I18n.tr("launcher.app-actions.unavailable"));
+    operationAppId = appId;
+    operationName = name;
     lastError = "";
-
-    Logger.d("PackageManager", `Running: ${command.join(" ")} (elevator: ${elevatorLabel})`);
-    operationProcess.exec({
-                            command: command
-                          });
+    busy = true;
+    pendingOperation = {
+      "operation": operation,
+      "command": command
+    };
+    if (metadataProcess.running) {
+      operationState = "waiting";
+      scanCancelled = true;
+      metadataProcess.signal(15);
+    } else {
+      beginOperation();
+    }
+    metadataRevision++;
     return true;
+  }
+
+  function beginOperation() {
+    if (!pendingOperation)
+      return;
+    operationState = pendingOperation.operation;
+    operationProcess.command = pendingOperation.command;
+    pendingOperation = null;
+    operationProcess.running = true;
+    metadataRevision++;
   }
 
   Process {
     id: operationProcess
-    running: false
     environment: ({
                     "SHELLY_ELEVATOR": root.privilegeElevator
                   })
-    stdout: StdioCollector {}
-    stderr: StdioCollector {}
-
-    onExited: exitCode => {
-      const operation = root.operationState;
+    stdout: StdioCollector {
+      id: operationOut
+    }
+    stderr: StdioCollector {
+      id: operationErr
+    }
+    onExited: code => {
       const appId = root.operationAppId;
-      const appName = root.operationAppName;
-      const success = exitCode === 0;
+      const operation = root.operationState;
+      const name = root.operationName;
+      const success = code === 0;
+      root.busy = false;
+      root.operationState = "idle";
+      root.lastError = success ? "" : root.describeFailure(operationOut.text, operationErr.text);
+      root.metadataRevision++;
 
-      root.lastError = success ? "" : root.describeFailure(String(stdout.text || ""), String(stderr.text || ""));
-      root.operationState = "";
-
-      // A package operation easily outlives the launcher, so the outcome has to
-      // be reported somewhere that does not depend on the panel still being up.
       if (success) {
-        ToastService.showNotice(operation === "update" ? I18n.tr("launcher.app-actions.toast-updated") : I18n.tr("launcher.app-actions.toast-removed"), appName);
+        // DesktopEntries watches its applications model; this build has no
+        // reload() API. Its valuesChanged signal handles real desktop changes.
+        ToastService.showNotice(I18n.tr(operation === "update" ? "launcher.app-actions.toast-updated" : "launcher.app-actions.toast-removed"), name, operation === "update" ? "refresh" : "trash");
       } else {
-        ToastService.showError(operation === "update" ? I18n.tr("launcher.app-actions.toast-update-failed") : I18n.tr("launcher.app-actions.toast-remove-failed"), `${appName} — ${root.lastError}`);
+        ToastService.showError(I18n.tr(operation === "update" ? "launcher.app-actions.toast-update-failed" : "launcher.app-actions.toast-remove-failed"), root.lastError);
       }
-
-      root.operationFinished(appId, operation, success);
-
-      // Bring the launcher back on the app that was acted on, with its inline
-      // panel open, so the result lands where the action was started. Uninstall
-      // removes the entry, so there is nothing left to anchor to.
       if (!(success && operation === "remove"))
       PanelService.openLauncherWithAppPanel(appId);
-
-      root.operationAppId = "";
-      root.operationAppName = "";
+      root.operationFinished(appId, operation, success);
+      root.refresh(true);
     }
-  }
-
-  // Turns a failed operation's raw output into something worth showing.
-  function describeFailure(stdoutText, stderrText) {
-    const lowered = `${stdoutText}\n${stderrText}`.toLowerCase();
-
-    // pkexec: dismissed dialog, wrong password, or no agent to ask with.
-    if (lowered.includes("unable to elevate") || lowered.includes("request dismissed") || lowered.includes("authentication failed") || lowered.includes("not authorized") || lowered.includes("authorization required")) {
-      if (lowered.includes("filenotfound") || lowered.includes("no such file"))
-        return I18n.tr("launcher.app-actions.elevator-missing", {
-                         "value": elevatorLabel
-                       });
-      return I18n.tr("launcher.app-actions.auth-denied");
-    }
-
-    const trimmed = String(stderrText || "").trim() || String(stdoutText || "").trim();
-    return trimmed || I18n.tr("launcher.app-actions.operation-failed");
   }
 }

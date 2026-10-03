@@ -264,7 +264,7 @@ PopupWindow {
 
             Behavior on color {
               ColorAnimation {
-                duration: Style.animationFast
+                duration: mouseArea.containsMouse ? Style.hoverEnterDuration : Style.hoverLeaveDuration
               }
             }
 

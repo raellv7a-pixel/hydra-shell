@@ -98,6 +98,9 @@ Singleton {
   readonly property int animationNormal: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(300 / Settings.data.general.animationSpeed)
   readonly property int animationSlow: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(450 / Settings.data.general.animationSpeed)
   readonly property int animationSlowest: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(750 / Settings.data.general.animationSpeed)
+  // Pointer feedback settles quickly on leave so rapid traversal never trails.
+  readonly property int hoverEnterDuration: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(100 / Settings.data.general.animationSpeed)
+  readonly property int hoverLeaveDuration: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(30 / Settings.data.general.animationSpeed)
 
   // Delays
   readonly property int tooltipDelay: 300

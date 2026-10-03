@@ -20,18 +20,22 @@ Rectangle {
   readonly property real panelWidth: panelBg?.width ?? 0
   readonly property real panelHeight: panelBg?.height ?? 0
   readonly property real revealLength: revealHorizontally ? panelWidth : panelHeight
+  readonly property real targetLength: revealHorizontally ? (panelBg?.targetWidth ?? 0) : (panelBg?.targetHeight ?? 0)
+  // Follow actual animated geometry in both directions; cached direction flags
+  // remain set after opening and are not an animation-lifetime signal.
+  readonly property bool revealing: revealLength > 0 && revealLength < targetLength
   readonly property real seamLength: Math.min(24, revealLength)
   readonly property real cornerInset: Math.min(Style.radiusL, (revealHorizontally ? panelHeight : panelWidth) / 2)
   readonly property color seamShadow: Qt.rgba(Color.mShadow.r, Color.mShadow.g, Color.mShadow.b, Color.mShadow.a * 0.34)
   readonly property color seamMidShadow: Qt.rgba(Color.mShadow.r, Color.mShadow.g, Color.mShadow.b, Color.mShadow.a * 0.10)
   readonly property bool shadowAtStart: fromRight || fromBottom
 
-  visible: assignedPanel && panelBg && seamLength > 0 && (fromLeft || fromRight || fromTop || fromBottom)
+  visible: assignedPanel && panelBg && revealing && seamLength > 0 && (fromLeft || fromRight || fromTop || fromBottom)
   x: panelX + (revealHorizontally ? (fromLeft ? panelWidth - seamLength : 0) : cornerInset)
   y: panelY + (revealVertically ? (fromTop ? panelHeight - seamLength : 0) : cornerInset)
   width: revealHorizontally ? seamLength : Math.max(0, panelWidth - cornerInset * 2)
   height: revealVertically ? seamLength : Math.max(0, panelHeight - cornerInset * 2)
-  opacity: Math.min(1, revealLength / 24)
+  opacity: Math.min(1, revealLength / 24) * Math.min(1, Math.max(0, targetLength - revealLength) / 24)
   color: "transparent"
   antialiasing: true
 

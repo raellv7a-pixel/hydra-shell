@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import "../../../../Helpers/LauncherPackage.js" as LauncherPackage
 import qs.Commons
 import qs.Services.Compositor
 import qs.Services.System
@@ -17,68 +17,15 @@ Item {
   property bool isDefaultProvider: true // This provider handles empty search
   property bool ignoreDensity: false // Apps should scale with launcher density
   property bool trackUsage: true // Track usage frequency for "most used" sorting
-  property int updateRevision: 0
-  property bool shellyAvailable: false
-  property bool shellyBusy: false
-  property string shellyError: ""
-  // Normalized package id -> { name, type, version, desktopName }
-  property var availableUpdates: ({})
-  // `shelly list-updates all --json` answers with one array per backend. Each
-  // backend uses its own record shape, so the bucket key is the only reliable
-  // source for the package type we later hand back to install/remove.
-  readonly property var updateBuckets: ({
-                                          "Packages": "standard",
-                                          "Aur": "aur",
-                                          "AppImage": "appimage",
-                                          "Flatpak": "flatpak"
-                                        })
-
-  Process {
-    id: shellyUpdatesProcess
-    running: false
-    stdout: StdioCollector {}
-    stderr: StdioCollector {}
-    onExited: exitCode => {
-                root.shellyBusy = false;
-                if (exitCode !== 0) {
-                  root.shellyAvailable = false;
-                  root.shellyError = String(stderr.text || "").trim();
-                  root.updateRevision++;
-                  return;
-                }
-
-                try {
-                  const parsed = JSON.parse(String(stdout.text || "{}"));
-                  const nextUpdates = {};
-
-                  for (const bucket in root.updateBuckets) {
-                    const packages = Array.isArray(parsed) ? (bucket === "Packages" ? parsed : []) : (parsed[bucket] || []);
-                    if (!Array.isArray(packages))
-                    continue;
-
-                    for (const pkg of packages) {
-                      const update = root.buildUpdateRecord(pkg, root.updateBuckets[bucket]);
-                      if (!update)
-                      continue;
-                      // Index under every alias the desktop entry could match on.
-                      for (const alias of update.aliases)
-                      nextUpdates[alias] = update;
-                    }
-                  }
-
-                  root.availableUpdates = nextUpdates;
-                  root.shellyAvailable = true;
-                  root.shellyError = "";
-                  root.updateRevision++;
-                  if (root.launcher && root.launcher.isOpen)
-                  root.launcher.updateResults();
-                } catch (error) {
-                  root.shellyAvailable = false;
-                  root.shellyError = String(error);
-                  root.updateRevision++;
-                }
-              }
+  readonly property int updateRevision: PackageManagerService.metadataRevision
+  onUpdateRevisionChanged: {
+    if (launcher && launcher.isOpen)
+      launcher.refreshAppPanelActions();
   }
+  readonly property bool shellyAvailable: PackageManagerService.available
+  readonly property string shellyError: PackageManagerService.lastError || PackageManagerService.scanError
+  readonly property var availableUpdates: LauncherPackage.indexRecords(PackageManagerService.updateRecords)
+  readonly property var appImagePackages: LauncherPackage.indexRecords(PackageManagerService.installedPackages.appimages)
   // The privileged work runs in PackageManagerService so it survives the
   // launcher panel being unloaded; these mirror its state for the action rows.
   readonly property string operationAppId: PackageManagerService.operationAppId
@@ -88,63 +35,11 @@ Item {
     target: PackageManagerService
 
     function onOperationFinished(appId, operation, success) {
-      root.shellyBusy = false;
-      root.shellyError = success ? "" : PackageManagerService.lastError;
       if (success && operation === "remove")
         root.loadApplications();
-      if (success)
-        root.refreshShellyUpdates();
-      root.updateRevision++;
-      if (root.launcher && root.launcher.isOpen)
+      if (success && operation === "remove" && root.launcher && root.launcher.isOpen)
         root.launcher.updateResults();
     }
-  }
-
-  function buildUpdateRecord(pkg, type) {
-    if (!pkg)
-      return null;
-
-    // AppImages are keyed by their file name but carry the .desktop name too.
-    const name = String(pkg.Name || pkg.ApplicationId || pkg.PackageBase || "").trim();
-    if (!name)
-      return null;
-
-    const aliases = [];
-    const addAlias = value => {
-      const normalized = normalizeAppId(String(value || "").replace(/\.desktop$/i, ""));
-      if (normalized && !aliases.includes(normalized))
-      aliases.push(normalized);
-    };
-
-    addAlias(name);
-    addAlias(pkg.DesktopName);
-    addAlias(pkg.PackageBase);
-    addAlias(pkg.ApplicationId);
-    addAlias(pkg.AppId);
-    if (type === "appimage") {
-      // "Ghost-Downloader-v4.2.5-Linux-x86_64" also has to match "ghost-downloader".
-      addAlias(name.replace(/[-_]v?\d[\w.\-]*$/i, ""));
-      addAlias(String(pkg.DesktopName || "").replace(/\s+/g, "-"));
-    }
-
-    return {
-      "name": name,
-      "type": type,
-      // Shelly reports the target version as NewVersion; reading `Version` left
-      // this empty, so the action row read "Update to " with nothing after it.
-      "version": String(pkg.NewVersion || pkg.Version || "").trim(),
-      "currentVersion": String(pkg.CurrentVersion || "").trim(),
-      "desktopName": String(pkg.DesktopName || ""),
-      "aliases": aliases
-    };
-  }
-
-  Timer {
-    id: shellyUpdatesTimer
-    interval: 30 * 60 * 1000
-    repeat: true
-    running: true
-    onTriggered: root.refreshShellyUpdates()
   }
 
   // Category support
@@ -194,7 +89,6 @@ Item {
   function init() {
     loadApplications();
     migrateLegacyUsageKeys();
-    Qt.callLater(() => root.refreshShellyUpdates());
   }
 
   function onOpened() {
@@ -216,6 +110,8 @@ Item {
     function onValuesChanged() {
       Logger.d("ApplicationsProvider", "Desktop entries changed, reloading applications");
       loadApplications();
+      if (launcher && launcher.isOpen)
+        launcher.updateResults();
     }
   }
 
@@ -676,10 +572,7 @@ Item {
   }
 
   function createResultEntry(app, score) {
-    const update = getUpdateForApp(app);
-    const revision = updateRevision;
     const appKey = getAppKey(app);
-    const busy = !!operationState && operationAppId === appKey;
     return {
       "appId": appKey,
       "usageKey": appKey,
@@ -687,15 +580,8 @@ Item {
       "description": app.genericName || app.comment || "",
       "icon": app.icon || "application-x-executable",
       "isImage": false,
-      "hasUpdate": !!update,
-      "isBusy": busy,
-      "badgeIcon": busy ? "refresh" : (update ? "refresh-dot" : ""),
-      "badgeTooltip": busy ? I18n.tr(`launcher.app-actions.busy-${operationState}`) : (update ? I18n.tr("launcher.app-actions.update-to", {
-                                                                                                          "value": update.version
-                                                                                                        }) : ""),
       "appData": app,
       "_score": (score !== undefined ? score : 0),
-      "_updateRevision": revision,
       "provider": root,
       "onActivate": function () {
         // Ensures we are not preventing the future focusing of the app
@@ -761,6 +647,20 @@ Item {
     };
   }
 
+  // Metadata is read by bindings, not copied into result entries. Arrival of a
+  // scan can change badges/actions without touching rows, selection or scroll.
+  function packageStateForItem(item) {
+    const app = item.appData || item;
+    const update = getUpdateForApp(app);
+    const busy = isOperationBusy(item);
+    return {
+      "hasUpdate": !!update,
+      "isBusy": busy,
+      "badgeIcon": busy ? "refresh" : (update ? "refresh-dot" : ""),
+      "badgeTooltip": busy ? I18n.tr(`launcher.app-actions.busy-${operationState}`) : (update ? describeUpdateAction(update, false) : "")
+    };
+  }
+
   function appAliases(app) {
     if (!app)
       return [];
@@ -776,8 +676,6 @@ Item {
     addAlias(app.id);
     addAlias(getExecutableName(app));
     addAlias(String(getExecutableName(app)).replace(/\.appimage$/i, ""));
-    addAlias(app.name);
-    addAlias(String(app.name || "").replace(/\s+/g, "-"));
     return aliases;
   }
 
@@ -785,72 +683,34 @@ Item {
     if (!app || !availableUpdates)
       return null;
 
-    for (const alias of appAliases(app)) {
-      if (availableUpdates[alias])
-        return availableUpdates[alias];
+    const info = getPackageForApp(app);
+    return info ? (availableUpdates["package:" + info.type + ":" + info.name] || null) : null;
+  }
+
+  // Native removals require the ALPM owner of the winning XDG desktop file.
+  // Never infer a native package from a binary name or a display-name alias.
+  function getPackageForApp(app) {
+    if (!app)
+      return null;
+    const flatpak = LauncherPackage.flatpakId(app.command);
+    if (flatpak)
+      return PackageManagerService.installedPackages.flatpak[flatpak] || null;
+    const nativePackages = PackageManagerService.installedPackages.native;
+    const identity = normalizeAppId(getAppKey(app));
+    if (Object.prototype.hasOwnProperty.call(nativePackages, identity))
+      return nativePackages[identity];
+    if (String(getExecutableName(app)).toLowerCase().endsWith(".appimage")) {
+      for (const alias of appAliases(app)) {
+        const info = appImagePackages["alias:" + alias] || availableUpdates["alias:" + alias];
+        if (info && info.type === "appimage")
+          return info;
+      }
     }
     return null;
   }
 
-  function refreshShellyUpdates() {
-    if (shellyUpdatesProcess.running || PackageManagerService.busy)
-      return;
-    shellyBusy = true;
-    shellyUpdatesProcess.exec({
-                                command: ["shelly", "list-updates", "all", "--json"]
-                              });
-  }
-
-  // Resolves the package Shelly should act on. Prefers the record coming from
-  // list-updates (authoritative type), otherwise infers the backend from how
-  // the desktop entry launches the app.
-  function getPackageForApp(app) {
-    const update = getUpdateForApp(app);
-    if (update)
-      return update;
-
-    const command = Array.isArray(app?.command) ? app.command.map(value => String(value)) : [];
-    const flatpakIndex = command.indexOf("flatpak");
-    if (flatpakIndex >= 0 && command[flatpakIndex + 1] === "run" && command[flatpakIndex + 2]) {
-      return {
-        "name": command[flatpakIndex + 2],
-        "type": "flatpak",
-        "version": ""
-      };
-    }
-
-    const executable = getExecutableName(app) || String(app?.id || "").replace(/\.desktop$/i, "");
-    if (executable.toLowerCase().endsWith(".appimage")) {
-      return {
-        "name": executable.replace(/\.AppImage$/i, ""),
-        "type": "appimage",
-        "version": ""
-      };
-    }
-
-    // Repository and AUR packages are both ALPM packages, so `standard` removes
-    // either one.
-    return executable ? {
-                          "name": executable,
-                          "type": "standard",
-                          "version": ""
-                        } : null;
-  }
-
-  // Shelly has no per-package "update" verb: repository and AUR packages are
-  // upgraded by installing them again, while Flatpak and AppImage only expose a
-  // whole-backend upgrade.
   function updateCommandFor(update) {
-    switch (update.type) {
-    case "aur":
-      return ["shelly", "install", "aur", update.name, "--no-confirm"];
-    case "flatpak":
-      return ["shelly", "upgrade", "flatpak", "--no-confirm"];
-    case "appimage":
-      return ["shelly", "upgrade", "appimage", "--no-confirm"];
-    default:
-      return ["shelly", "install", "standard", update.name, "--no-confirm"];
-    }
+    return LauncherPackage.updateCommand(update);
   }
 
   function removeCommandFor(packageInfo) {
@@ -858,25 +718,20 @@ Item {
   }
 
   function runShellyOperation(item, operation) {
-    if (!item || shellyUpdatesProcess.running || PackageManagerService.busy)
+    if (!item)
       return;
 
     const app = item.appData || item;
     const packageInfo = operation === "update" ? getUpdateForApp(app) : getPackageForApp(app);
-    if (!packageInfo)
+    if (!packageInfo) {
+      PackageManagerService.reject(I18n.tr("launcher.app-actions.package-unverified"));
       return;
+    }
 
     const command = operation === "update" ? updateCommandFor(packageInfo) : removeCommandFor(packageInfo);
     const appId = item.appId || getAppKey(app);
 
-    shellyError = "";
-    if (!PackageManagerService.run(operation, appId, item.name || app?.name || appId, command))
-      return;
-
-    shellyBusy = true;
-    updateRevision++;
-    if (root.launcher && root.launcher.isOpen)
-      root.launcher.updateResults();
+    PackageManagerService.run(operation, appId, item.name || app?.name || appId, command);
   }
 
   function updateApp(item) {
@@ -889,7 +744,7 @@ Item {
 
   // True while this specific app has a Shelly operation in flight.
   function isOperationBusy(item) {
-    if (!item || !operationState)
+    if (!item || !PackageManagerService.busy)
       return false;
     return operationAppId === (item.appId || getAppKey(item.appData || item));
   }
@@ -912,6 +767,8 @@ Item {
   function describeUpdateAction(update, busy) {
     if (busy)
       return I18n.tr("launcher.app-actions.busy-update");
+    if (update && update.type === "appimage")
+      return I18n.tr("launcher.app-actions.update-all-appimages");
     if (!update)
       return I18n.tr("launcher.app-actions.up-to-date");
     if (!update.version)
@@ -932,7 +789,8 @@ Item {
     const pinned = isAppPinned(app);
     const inEdgeShelf = isAppInEdgeShelf(app);
     const busyHere = isOperationBusy(item);
-    const canOperate = root.shellyAvailable && !shellyBusy && !operationState;
+    const canOperate = root.shellyAvailable && !PackageManagerService.busy;
+    const waiting = busyHere && operationState === "waiting";
 
     return [
           {
@@ -956,10 +814,10 @@ Item {
           {
             "id": "update",
             "icon": "download",
-            "label": I18n.tr("common.update"),
-            "description": describeUpdateAction(update, busyHere && operationState === "update"),
+            "label": update?.type === "appimage" ? I18n.tr("launcher.app-actions.update-all-appimages") : I18n.tr("common.update"),
+            "description": waiting ? I18n.tr("launcher.app-actions.busy-waiting") : describeUpdateAction(update, busyHere && operationState === "update"),
             "enabled": !!update && canOperate,
-            "busy": busyHere && operationState === "update",
+            "busy": busyHere && (operationState === "update" || waiting),
             "keepOpen": true,
             "action": () => updateApp(item)
           },
@@ -967,9 +825,9 @@ Item {
             "id": "uninstall",
             "icon": "trash",
             "label": I18n.tr("common.uninstall"),
-            "description": (busyHere && operationState === "remove") ? I18n.tr("launcher.app-actions.busy-remove") : (packageInfo ? I18n.tr(`launcher.app-actions.backend-${packageInfo.type}`) : ""),
+            "description": waiting ? I18n.tr("launcher.app-actions.busy-waiting") : ((busyHere && operationState === "remove") ? I18n.tr("launcher.app-actions.busy-remove") : (packageInfo ? I18n.tr(`launcher.app-actions.backend-${packageInfo.type}`) : I18n.tr("launcher.app-actions.package-unverified"))),
             "enabled": !!packageInfo && canOperate,
-            "busy": busyHere && operationState === "remove",
+            "busy": busyHere && (operationState === "remove" || waiting),
             "destructive": true,
             "confirm": true,
             "keepOpen": true,

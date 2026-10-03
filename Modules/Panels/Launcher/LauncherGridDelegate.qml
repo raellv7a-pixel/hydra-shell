@@ -17,7 +17,9 @@ Item {
 
   property bool isContextMenuTarget: launcher.appPanelItem === modelData
   // An open panel owns the highlight: hovering other cards must not steal it.
-  property bool isSelected: isContextMenuTarget || (!launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse) || (entryIndex === launcher.selectedIndex)
+  property bool isSelected: isContextMenuTarget || (launcher.ignoreMouseHover && entryIndex === launcher.selectedIndex)
+  property bool isHovered: !launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse && !isSelected
+  readonly property var badgeState: modelData.provider && modelData.provider.packageStateForItem ? modelData.provider.packageStateForItem(modelData) : modelData
   z: isContextMenuTarget ? 10 : 0
   Accessible.role: Accessible.ListItem
   Accessible.name: modelData.name || ""
@@ -37,7 +39,7 @@ Item {
     anchors.fill: parent
     anchors.margins: Style.marginXXS
     radius: Style.radiusL
-    color: gridEntryContainer.isSelected ? Color.mPrimaryContainer : Color.mSurfaceContainerLow
+    color: gridEntryContainer.isSelected ? Color.mPrimaryContainer : (gridEntryContainer.isHovered ? Color.mSurfaceContainerHigh : Color.mSurfaceContainerLow)
     forceOpaque: false
     border.color: gridEntryContainer.isContextMenuTarget ? Color.mPrimary : (gridEntryContainer.isSelected ? Color.mPrimary : "transparent")
     border.width: gridEntryContainer.isContextMenuTarget ? Style.borderM : (gridEntryContainer.isSelected ? Style.borderS : 0)
@@ -53,14 +55,14 @@ Item {
 
     Behavior on color {
       ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuint
+        duration: (gridEntryContainer.isSelected || gridEntryContainer.isHovered) ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+        easing.type: Easing.OutCubic
       }
     }
     Behavior on border.color {
       ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutQuint
+        duration: gridEntryContainer.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+        easing.type: Easing.OutCubic
       }
     }
 
@@ -81,15 +83,15 @@ Item {
 
         Behavior on scale {
           NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+            duration: gridEntryContainer.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+            easing.type: Easing.OutCubic
           }
         }
 
         Behavior on opacity {
           NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+            duration: gridEntryContainer.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+            easing.type: Easing.OutCubic
           }
         }
 
@@ -205,7 +207,7 @@ Item {
 
         // Badge icon overlay (generic indicator for any provider)
         Rectangle {
-          visible: !!modelData.badgeIcon
+          visible: !!gridEntryContainer.badgeState.badgeIcon
           anchors.bottom: parent.bottom
           anchors.right: parent.right
           anchors.margins: 2
@@ -215,7 +217,7 @@ Item {
           radius: Style.radiusXXS
           NIcon {
             anchors.centerIn: parent
-            icon: modelData.badgeIcon || ""
+            icon: gridEntryContainer.badgeState.badgeIcon || ""
             pointSize: Style.fontSizeS
             color: Color.mOnSurfaceVariant
           }
@@ -249,8 +251,8 @@ Item {
 
         Behavior on color {
           ColorAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+            duration: gridEntryContainer.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+            easing.type: Easing.OutCubic
           }
         }
       }

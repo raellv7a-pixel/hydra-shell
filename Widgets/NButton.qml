@@ -79,7 +79,7 @@ Item {
     Behavior on color {
       enabled: !Color.isTransitioning
       ColorAnimation {
-        duration: Style.animationFast
+        duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
         easing.type: Easing.OutCubic
       }
     }
@@ -87,7 +87,7 @@ Item {
     Behavior on border.color {
       enabled: !Color.isTransitioning
       ColorAnimation {
-        duration: Style.animationFast
+        duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
         easing.type: Easing.OutCubic
       }
     }
@@ -112,7 +112,7 @@ Item {
         Behavior on color {
           enabled: !Color.isTransitioning
           ColorAnimation {
-            duration: Style.animationFast
+            duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
             easing.type: Easing.OutCubic
           }
         }
@@ -130,7 +130,7 @@ Item {
         Behavior on color {
           enabled: !Color.isTransitioning
           ColorAnimation {
-            duration: Style.animationFast
+            duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
             easing.type: Easing.OutCubic
           }
         }

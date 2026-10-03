@@ -208,12 +208,12 @@ Item {
         Repeater {
           // A closed panel must not materialize any action rows: every row
           // delegate in the results list owns a panel instance.
-          model: (root.contentAlive && !root.showingProperties) ? root.shownActions : []
+          model: (root.contentAlive && !root.showingProperties) ? root.shownActions.length : 0
 
           delegate: Item {
             id: actionRow
 
-            required property var modelData
+            readonly property var modelData: root.shownActions[index]
             required property int index
 
             readonly property bool isEnabled: modelData.enabled !== false && !modelData.busy
@@ -259,7 +259,7 @@ Item {
 
               Behavior on color {
                 ColorAnimation {
-                  duration: Style.animationFast
+                  duration: (actionRow.isConfirming || (actionRow.isActive && actionRow.isEnabled)) ? Style.hoverEnterDuration : Style.hoverLeaveDuration
                   easing.type: Easing.OutCubic
                 }
               }
@@ -468,10 +468,11 @@ Item {
         // directly above and already carries the name and description.
 
         Repeater {
-          model: root.showingProperties ? root.propertyRows : []
+          model: root.showingProperties ? root.propertyRows.length : 0
 
           delegate: RowLayout {
-            required property var modelData
+            required property int index
+            readonly property var modelData: root.propertyRows[index]
 
             Layout.fillWidth: true
             // Matches the action rows' leading column, so switching views keeps
@@ -582,11 +583,11 @@ Item {
                   "label": I18n.tr("launcher.app-properties.backend"),
                   "value": backendText
                 });
-    if (packageInfo && packageInfo.version)
+    if (packageInfo && packageInfo.currentVersion)
       rows.push({
                   "icon": "tag",
                   "label": I18n.tr("launcher.app-properties.version"),
-                  "value": String(packageInfo.version)
+                  "value": String(packageInfo.currentVersion)
                 });
     return rows;
   }

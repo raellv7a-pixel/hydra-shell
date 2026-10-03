@@ -51,6 +51,13 @@ Rectangle {
   readonly property int appPanelIndex: appPanelItem ? results.indexOf(appPanelItem) : -1
   property bool ignoreMouseHover: true // Transient flag, should always be true on init
 
+  Connections {
+    target: PanelService
+    function onPendingLauncherAppPanelIdChanged() {
+      if (root.isOpen)
+        root.applyPendingAppPanel();
+    }
+  }
   // Global mouse tracking for movement detection across delegates
   property real globalLastMouseX: 0
   property real globalLastMouseY: 0
@@ -485,7 +492,7 @@ Rectangle {
 
   // Search handling
   function updateResults() {
-    results = [];
+    let nextResults = [];
     var newActiveProvider = null;
 
     // Check for command mode
@@ -493,7 +500,7 @@ Rectangle {
       for (let provider of providers) {
         if (provider.handleCommand && provider.handleCommand(searchText)) {
           newActiveProvider = provider;
-          results = provider.getResults(searchText);
+          nextResults = provider.getResults(searchText);
           break;
         }
       }
@@ -506,7 +513,7 @@ Rectangle {
             allCommands = allCommands.concat(provider.commands());
         }
         if (searchText === ">") {
-          results = allCommands;
+          nextResults = allCommands;
         } else if (searchText.length > 1) {
           const query = searchText.substring(1);
           if (typeof FuzzySort !== 'undefined') {
@@ -514,10 +521,10 @@ Rectangle {
                                                 "keys": ["name"],
                                                 "limit": 50
                                               });
-            results = fuzzyResults.map(result => result.obj);
+            nextResults = fuzzyResults.map(result => result.obj);
           } else {
             const queryLower = query.toLowerCase();
-            results = allCommands.filter(cmd => (cmd.name || "").toLowerCase().includes(queryLower));
+            nextResults = allCommands.filter(cmd => (cmd.name || "").toLowerCase().includes(queryLower));
           }
         }
       }
@@ -553,9 +560,10 @@ Rectangle {
                           return sb - sa;
                         });
       }
-      results = allResults;
+      nextResults = allResults;
     }
 
+    results = nextResults;
     // Update activeProvider only after computing new state to avoid UI flicker
     activeProvider = newActiveProvider;
     selectedIndex = 0;
@@ -568,17 +576,25 @@ Rectangle {
   // parked until there is something to anchor to.
   function applyPendingAppPanel() {
     const wanted = PanelService.pendingLauncherAppPanelId;
-    if (!wanted || results.length === 0)
+    if (!wanted || !isOpen || providers.length === 0 || appsProvider.entries.length === 0)
       return;
 
     const normalize = id => appsProvider.normalizeAppId ? appsProvider.normalizeAppId(String(id || "")) : String(id || "");
     const target = normalize(wanted);
-    const entry = results.find(item => item && item.appId && normalize(item.appId) === target);
-    if (!entry)
-      return;
-
+    let entry = results.find(item => item && item.appId && normalize(item.appId) === target);
     PanelService.pendingLauncherAppPanelId = "";
-    openAppPanel(entry);
+    if (!entry && appsProvider.entries.some(app => normalize(appsProvider.getAppKey(app)) === target && !appsProvider.isAppHidden(app))) {
+      // An operation can finish after closing a filtered launcher. Resolve its
+      // still-installed app now, rather than parking a request for later search.
+      appsProvider.selectedCategory = "all";
+      searchText = "";
+      updateResults();
+      entry = results.find(item => item && item.appId && normalize(item.appId) === target);
+    }
+    // Completion must not reopen an unchanged panel or leave a request that
+    // unexpectedly targets a later, unrelated search.
+    if (entry && appPanelItem !== entry)
+      openAppPanel(entry);
   }
 
   // Results are rebuilt from scratch on every refresh, so an open panel has to
@@ -736,6 +752,10 @@ Rectangle {
 
   // Keyboard handler
   function handleKeyPress(event) {
+    // Keyboard intent restores the primary current-item indication. Mouse
+    // traversal keeps its own subtle hover state while preserving Enter's target.
+    ignoreMouseHover = true;
+    globalMouseInitialized = false;
     // The inline app panel grabs navigation keys while it is open.
     if (appPanelOpen && handleAppPanelKeyPress(event))
       return;

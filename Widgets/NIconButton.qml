@@ -62,7 +62,7 @@ Item {
     Behavior on color {
       enabled: !Color.isTransitioning
       ColorAnimation {
-        duration: Style.animationFast
+        duration: root.hovering ? Style.hoverEnterDuration : Style.hoverLeaveDuration
         easing.type: Easing.InOutQuad
       }
     }
@@ -86,7 +86,7 @@ Item {
       Behavior on color {
         enabled: !Color.isTransitioning
         ColorAnimation {
-          duration: Style.animationFast
+          duration: root.hovering ? Style.hoverEnterDuration : Style.hoverLeaveDuration
           easing.type: Easing.InOutQuad
         }
       }

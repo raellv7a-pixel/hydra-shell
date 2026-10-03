@@ -19,8 +19,9 @@ NBox {
   // An open panel owns the highlight: hovering other entries must not steal it,
   // or the panel would end up hanging off an entry that no longer looks selected.
   property bool hoverActive: !launcher.ignoreMouseHover && !launcher.appPanelOpen && mouseArea.containsMouse
-  property bool isSelected: isContextMenuTarget || hoverActive || (entryIndex === launcher.selectedIndex)
+  property bool isSelected: isContextMenuTarget || (launcher.ignoreMouseHover && entryIndex === launcher.selectedIndex)
   property bool isHovered: hoverActive && !isSelected
+  readonly property var badgeState: modelData.provider && modelData.provider.packageStateForItem ? modelData.provider.packageStateForItem(modelData) : modelData
   // In a single-column list the inline panel expands right underneath this entry,
   // so the two are fused into one Material 3 connected group: tight facing
   // corners, no outline, and the tonal fills carry the grouping instead.
@@ -51,8 +52,8 @@ NBox {
 
   Behavior on color {
     ColorAnimation {
-      duration: Style.animationNormal
-      easing.type: Easing.OutQuint
+      duration: (entry.isSelected || entry.isHovered) ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+      easing.type: Easing.OutCubic
     }
   }
 
@@ -86,7 +87,7 @@ NBox {
     }
     Behavior on opacity {
       OpacityAnimator {
-        duration: Style.animationFast
+        duration: entry.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
         easing.type: Easing.OutCubic
       }
     }
@@ -116,15 +117,15 @@ NBox {
 
         Behavior on scale {
           NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+            duration: entry.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+            easing.type: Easing.OutCubic
           }
         }
 
         Behavior on opacity {
           NumberAnimation {
-            duration: Style.animationNormal
-            easing.type: Easing.OutQuint
+            duration: entry.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+            easing.type: Easing.OutCubic
           }
         }
         // Icon background
@@ -263,7 +264,7 @@ NBox {
 
         // Badge icon overlay (generic indicator for any provider)
         Rectangle {
-          visible: !!modelData.badgeIcon
+          visible: !!entry.badgeState.badgeIcon
           anchors.bottom: parent.bottom
           anchors.right: parent.right
           anchors.margins: 2
@@ -273,7 +274,7 @@ NBox {
           radius: Style.radiusXXS
           NIcon {
             anchors.centerIn: parent
-            icon: modelData.badgeIcon || ""
+            icon: entry.badgeState.badgeIcon || ""
             pointSize: Style.fontSizeS
             color: Color.mOnSurfaceVariant
           }
@@ -297,8 +298,8 @@ NBox {
 
           Behavior on color {
             ColorAnimation {
-              duration: Style.animationNormal
-              easing.type: Easing.OutQuint
+              duration: entry.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+              easing.type: Easing.OutCubic
             }
           }
         }
@@ -314,8 +315,8 @@ NBox {
 
           Behavior on color {
             ColorAnimation {
-              duration: Style.animationNormal
-              easing.type: Easing.OutQuint
+              duration: entry.isSelected ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+              easing.type: Easing.OutCubic
             }
           }
         }

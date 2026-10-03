@@ -58,6 +58,37 @@ alacritty, GTK…) mantêm o nome antigo até os templates serem aplicados de no
 - **Screen Toolkit nativo**: anotação, OCR, leitor de QR/código de barras, seletor de cores, gravação de tela.
 - **Widgets extras**: Tamagotchi de barra, controle do OBS, gerenciador de dispositivos USB, indicador de privacidade, OSD de teclas pressionadas.
 - **Integração com Umbriel**: catálogo de atalhos da Hydra, ações nativas do compositor e editor com validação e gravação segura.
+- **Launcher com Shelly**: badges e informações de pacote reativas, sem reconstruir a lista ou perder scroll, seleção e painel contextual.
+
+## Launcher e efeitos visuais
+
+O Launcher usa os comandos granulares de update do Shelly 3.1.6 para pacotes de
+repositório, AUR e Flatpak. AppImage só permite upgrade global nessa versão:
+a ação informa explicitamente **Atualizar todos os AppImages gerenciados**.
+A remoção nativa exige o proprietário ALPM do arquivo `.desktop` efetivamente
+selecionado por XDG; executáveis e aplicações locais não viram nomes de pacote.
+Flatpaks são identificados pelos argumentos de `flatpak run` e pela lista instalada.
+
+O cache de updates fica em `$XDG_CACHE_HOME/hydra/shelly-updates.json` (fallback
+XDG padrão), respeitando `HYDRA_CACHE_DIR`. Guarda apenas schema, timestamp e
+metadata, com validade de 30 minutos. Um cache expirado continua exibindo badges
+durante o refresh; dados inválidos são ignorados. O próximo scan respeita o tempo
+restante do cache carregado, não adiciona outros 30 minutos no startup. O scanner
+é compartilhado pela shell, não reinicia a cada abertura do Launcher e é
+cancelado/recolhido antes de uma operação de pacote. Espera, operação em curso e
+falhas têm feedback visual. Pedidos de reabertura são consumidos sem recriar um
+painel já aberto; remoções concluídas não reabrem o app removido.
+
+O blur Umbriel usa a cena corrente (`blur_optimized = false`) e máscara alpha
+`0.5` para excluir a franja da sombra cliente; pixels abaixo desse alpha não
+recebem blur. Sombras e políticas de opacidade continuam intactas. A costura de
+reveal só aparece durante a transição geométrica, nunca no painel aberto estável.
+Hover compartilhado usa entrada de 100 ms e saída de 30 ms, respeitando a
+velocidade/desativação de animações e o modo de performance.
+
+Regressões: `python3 -m unittest discover -s Scripts/python/tests -v`.
+Os testes nativos exigem Umbriel, Quickshell e D-Bus; usam XDG/bus privados e
+fixtures de Shelly/ALPM, sem instalar ou remover pacotes reais.
 
 ## Atalhos na sessão Umbriel
 

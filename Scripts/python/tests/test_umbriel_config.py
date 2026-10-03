@@ -81,9 +81,14 @@ scale = 1.25
             self.assertTrue(all(any(p.fullmatch(name) for p in patterns) for name in included))
             self.assertFalse(any(p.fullmatch(name) for p in patterns for name in excluded))
             self.assertTrue(all(rule['blur'] is enabled for rule in data['layer_rule']))
+            self.assertTrue(all(rule['blur_ignore_alpha'] == 0.5 for rule in data['layer_rule']))
+            self.assertTrue(all(rule['blur_optimized'] is False for rule in data['layer_rule']))
+            self.assertTrue(all('blur_popups' not in rule for rule in data['layer_rule']))
             rule = data['window_rule'][0]
             self.assertTrue(re.fullmatch(rule['match']['app_id'], 'dev.noctalia.noctalia-qs'))
             self.assertFalse(re.fullmatch(rule['match']['title'], 'Hydra Docs - Firefox'))
+            self.assertEqual(rule['blur_ignore_alpha'], 0.5)
+            self.assertFalse(rule['blur_optimized'])
 
     def test_output_fractional_scales_and_transform_native_schema(self):
         outputs = [dict(name=f'DP-{i}', width=1920,height=1080,refresh=59.94,x=i*1920,y=0,scale=scale,transform=str(i),active=True) for i,scale in enumerate([1,1.25,1.5,2])]

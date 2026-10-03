@@ -70,7 +70,9 @@ while IFS= read -r -d '' source_path; do
   if [[ ! -f "$module_dir/qmldir" ]]; then
     printf 'module %s\n' "$module_uri" >"$module_dir/qmldir"
   fi
-  ln -s -- "$source_file" "$module_dir/$source_name"
+  # Lint real files inside their generated module, not symlinks whose source
+  # directory lacks qmldir singleton declarations (notably Commons/Style.qml).
+  cp -- "$source_file" "$module_dir/$source_name"
   if [[ "$source_name" == *.qml ]]; then
     type_name="${source_name%.qml}"
     if [[ "$type_name" =~ ^[A-Z][A-Za-z0-9_]*$ ]]; then
@@ -83,6 +85,11 @@ while IFS= read -r -d '' source_path; do
   fi
 done < <(git -C "$LAB_DIR" ls-files -z --cached --others --exclude-standard -- '*.qml' '*.js')
 
+lint_paths=()
+for qml_path in "${changed_qml[@]}"; do
+  lint_paths+=("$qml_import_root/qs/$qml_path")
+done
+
 printf 'Checking QML imports with Quickshell and Hydra module metadata...\n'
 (cd "$LAB_DIR" && "$qml_lint" --import error \
-  -I "$quickshell_qml_modules" -I "$qml_import_root" -I "$LAB_DIR" "${changed_qml[@]}")
+  -I "$quickshell_qml_modules" -I "$qml_import_root" -I "$LAB_DIR" "${lint_paths[@]}")
