@@ -134,12 +134,18 @@ write_state validation-pending "$deployed"
 
 # The active checkout needs its own Qt ABI build and filesystem plugin path.
 bash "$ACTIVE_DIR/Scripts/dev/build-native.sh"
-touch "$ACTIVE_DIR/shell.qml"
+# A checkout can trigger a scan before added QML singletons arrive. A timestamp
+# touch is ignored by Quickshell when content hashes are unchanged.
+log "Rescanning the completed active checkout through the exact config IPC"
+reload_response="$(timeout 5s qs -p "$ACTIVE_DIR" ipc call shell reload)" ||
+  die "Active Hydra did not accept the post-install rescan. Deployment stays pending."
+[[ "$reload_response" == "ok" ]] ||
+  die "Active Hydra did not acknowledge the post-install rescan: $reload_response"
 
 sleep 2
 kill -0 "$active_pid" 2>/dev/null ||
   die "Active Hydra PID $active_pid exited after file update. Rollback remains available."
-log "Lab commit $deployed is installed. Quickshell watches QML files and reloads on change."
+log "Lab commit $deployed is installed; post-install soft rescan requested."
 if $YES; then
   echo "After visual/behavior validation run:"
   echo "  Scripts/dev/lab-mark-good.sh $deployed --visual-confirmed"

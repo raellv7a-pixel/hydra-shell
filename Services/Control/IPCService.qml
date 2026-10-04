@@ -25,6 +25,15 @@ Singleton {
   readonly property var screenShareBridge: ScreenShareService
 
   IpcHandler {
+    target: "shell"
+    function reload(): string {
+      // Rescan only after the complete checkout is installed; never restart the process.
+      Qt.callLater(() => Quickshell.reload(false));
+      return "ok";
+    }
+  }
+
+  IpcHandler {
     target: "screenshare"
     function open(path: string, token: string): string {
       return ScreenShareService.open(path, token);
