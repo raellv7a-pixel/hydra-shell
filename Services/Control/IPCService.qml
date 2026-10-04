@@ -22,6 +22,14 @@ import qs.Services.UI
 Singleton {
   id: root
 
+  readonly property var screenShareBridge: ScreenShareService
+
+  IpcHandler {
+    target: "screenshare"
+    function open(path: string, token: string): string {
+      return ScreenShareService.open(path, token);
+    }
+  }
   // Screen detector, set via init()
   property var screenDetector: null
 

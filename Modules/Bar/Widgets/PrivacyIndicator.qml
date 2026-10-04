@@ -157,14 +157,17 @@ Item {
 
   MouseArea {
     anchors.fill: parent
-    acceptedButtons: Qt.RightButton
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: true
 
     onClicked: mouse => {
-                 if (mouse.button === Qt.RightButton) {
-                   PanelService.showContextMenu(contextMenu, root, screen);
-                 }
-               }
+      if (mouse.button === Qt.RightButton) {
+        PanelService.showContextMenu(contextMenu, root, screen);
+      } else if (root.scrActive && Settings.data.umbriel.showSharingControls) {
+        TooltipService.hide();
+        PanelService.getPanel("screenSharePrivacyPanel", screen)?.toggle(root);
+      }
+    }
 
     onEntered: {
       var tooltipText = root.buildTooltip();

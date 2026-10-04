@@ -65,6 +65,17 @@ class UmbrielSettingsTests(unittest.TestCase):
         self.assertEqual(master.read_bytes(), original)
         self.assertFalse((self.directory / 'hydra' / 'settings.toml').exists())
 
+    def test_screencast_external_ownership_preserves_native_confirmation(self):
+        master = self.directory / 'config.toml'
+        original = '[screencast]\ndisable_dynamic_confirmation = false # native protection\n'
+        master.write_text(original)
+        update = umbriel_settings.defaults()
+        update['screencast']['disable_dynamic_confirmation'] = True
+        with self.assertRaisesRegex(ValueError, 'controlada externamente'):
+            umbriel_config.commit('settings', umbriel_settings.generate(update))
+        self.assertEqual(master.read_text(), original)
+        self.assertFalse((self.directory / 'hydra' / 'settings.toml').exists())
+
     def test_invalid_values_and_incomplete_actions_are_rejected(self):
         for section, key, value in [('overview', 'zoom', 0.01),
                                     ('overview', 'shortcut_keys', 'Aa'),

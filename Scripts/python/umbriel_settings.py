@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validated Overview and Hot Corners settings in Hydra's owned Umbriel include."""
+"""Validated native settings in Hydra's owned Umbriel include."""
 import json
 import re
 import sys
@@ -19,12 +19,17 @@ CORNER = {'enabled': False, 'delay_ms': 500, 'action': ''}
 
 def defaults():
     return {'overview': dict(OVERVIEW),
+            'screencast': {'disable_dynamic_confirmation': False},
             'hot_corners': {corner: dict(CORNER) for corner in CORNERS}}
 
 
 def validate(state):
-    if not isinstance(state, dict) or set(state) != {'overview', 'hot_corners'}:
+    if not isinstance(state, dict) or set(state) != {'overview', 'hot_corners', 'screencast'}:
         raise ValueError('Estado Umbriel inválido')
+    screencast = state['screencast']
+    if (not isinstance(screencast, dict) or set(screencast) != {'disable_dynamic_confirmation'}
+            or type(screencast['disable_dynamic_confirmation']) is not bool):
+        raise ValueError('Confirmação de compartilhamento inválida')
     overview = state['overview']
     corners = state['hot_corners']
     if not isinstance(overview, dict) or set(overview) != set(OVERVIEW):
@@ -64,6 +69,8 @@ def generate(state):
     lines = ['# Configuração nativa Umbriel gerenciada pela Hydra.', '', '[overview]']
     for field in OVERVIEW:
         lines.append(field + ' = ' + json.dumps(state['overview'][field], ensure_ascii=False))
+    lines += ['', '[screencast]', 'disable_dynamic_confirmation = ' +
+              json.dumps(state['screencast']['disable_dynamic_confirmation'])]
     for name in CORNERS:
         corner = state['hot_corners'][name]
         lines += ['', '[hot_corners.' + name + ']',
@@ -85,6 +92,7 @@ def current():
     if owned_text is not None:
         stored = tomllib.loads(owned_text)
         state['overview'].update(stored.get('overview', {}))
+        state['screencast'].update(stored.get('screencast', {}))
         for name in CORNERS:
             state['hot_corners'][name].update(stored.get('hot_corners', {}).get(name, {}))
         validate(state)

@@ -14,7 +14,8 @@ ColumnLayout {
     { key: "overview", title: "Visão Geral", icon: "layout-dashboard" },
     { key: "switcher", title: "Alternador de Janelas", icon: "layout-dashboard" },
     { key: "interaction", title: "Interação Hydra", icon: "keyboard" },
-    { key: "corners", title: "Cantos Ativos", icon: "focus-2" }
+    { key: "corners", title: "Cantos Ativos", icon: "focus-2" },
+    { key: "sharing", title: "Compartilhamento", icon: "screen-share" }
   ]
   readonly property var expandedGroups: SettingsPanelService.umbrielGroupState
   Layout.fillWidth: true
@@ -37,7 +38,8 @@ ColumnLayout {
       overview: key === "overview",
       switcher: key === "switcher",
       interaction: key === "interaction",
-      corners: key === "corners"
+      corners: key === "corners",
+      sharing: key === "sharing"
     };
   }
 
@@ -53,7 +55,7 @@ ColumnLayout {
     if (!root.scrollView) return;
     const flick = root.scrollView.contentItem;
     const card = {keybinds: keybindsGroup, overview: overviewGroup, switcher: switcherGroup,
-      interaction: interactionGroup, corners: cornersGroup}[key];
+      interaction: interactionGroup, corners: cornersGroup, sharing: sharingGroup}[key];
     const y = card.mapToItem(flick.contentItem, 0, 0).y;
     flick.contentY = Math.max(0, Math.min(y, flick.contentHeight - flick.height));
   }
@@ -160,5 +162,14 @@ ColumnLayout {
     expanded: root.expandedGroups.corners
     onToggled: open => root.toggle("corners", open)
     UmbrielHotCornersCard { Layout.fillWidth: true }
+  }
+  NSettingsGroupCard {
+    id: sharingGroup
+    title: "Compartilhamento"
+    description: "Seletor de fontes e proteção ao trocar o compartilhamento"
+    icon: "screen-share"
+    expanded: root.expandedGroups.sharing ?? false
+    onToggled: open => root.toggle("sharing", open)
+    UmbrielSharingCard { Layout.fillWidth: true }
   }
 }

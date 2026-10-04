@@ -21,6 +21,18 @@ Singleton {
   readonly property string keyboardLayout: backend.keyboardLayout
   readonly property string activeSubmap: backend.activeSubmap
   readonly property string focusedOutputName: backend.focusedOutputName
+  readonly property var screencastCommand: backend.screencastCommand
+  readonly property bool screencastEventsAvailable: backend.screencastEventsAvailable
+  // Current upstream has no query/event for active sessions or changeability.
+  readonly property string screencastCapability: "unknown"
+  readonly property string screencastTargetLabel: {
+    const command = screencastCommand;
+    if (command.targetKind === "window")
+      return backend.windows.find(window => window.id === command.targetValue)?.title || command.targetValue;
+    if (command.targetKind === "output")
+      return backend.outputCache[command.targetValue]?.name || command.targetValue;
+    return "";
+  }
 
   signal workspaceChanged
   signal activeWindowChanged
@@ -93,6 +105,12 @@ Singleton {
   function openOverview() { backend.action("overview-open"); }
   function closeOverview() { backend.action("overview-close"); }
   function toggleOverview() { backend.action("overview-toggle"); }
+  function screencastSetWindow(id) { backend.action("screencast-set-window", id || ""); }
+  function screencastSetOutput(name) { backend.action("screencast-set-output", name || ""); }
+  function screencastFollowWindow() { backend.action("screencast-follow-window"); }
+  function screencastFollowOutput() { backend.action("screencast-follow-output"); }
+  function screencastFollowStop() { backend.action("screencast-follow-stop"); }
+  function screencastPause() { backend.action("screencast-clear"); }
   function navigateOverview(direction) {
     if (!overviewActive) return;
     const action = {left: "window-focus-left", right: "window-focus-right",

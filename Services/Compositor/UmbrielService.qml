@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import "UmbrielSnapshots.js" as Snapshots
+import "ScreencastState.js" as Screencast
 
 Item {
   id: root
@@ -21,6 +22,8 @@ Item {
   property bool windowsReceived: false
   property bool outputsRefreshPending: false
   property string appliedVisualConfig: ""
+  property var screencastCommand: Screencast.empty()
+  property bool screencastEventsAvailable: false
 
   signal workspaceChanged
   signal activeWindowChanged
@@ -38,16 +41,27 @@ Item {
 
   Process {
     id: subscription
-    command: ["umbriel", "subscribe", "workspaces,windows,overview,keyboard_layout,submap"]
+    command: ["umbriel", "subscribe", "workspaces,windows,overview,keyboard_layout,submap,screencast"]
     stdout: SplitParser { onRead: line => root.handleEvent(line) }
     stderr: SplitParser { onRead: line => Logger.w("UmbrielService", "IPC subscription:", line) }
-    onExited: exitCode => Logger.w("UmbrielService", "IPC subscription ended:", exitCode)
+    onExited: exitCode => {
+      root.screencastEventsAvailable = false;
+      root.screencastCommand = Screencast.empty();
+      Logger.w("UmbrielService", "IPC subscription ended:", exitCode);
+      reconnect.restart();
+    }
   }
+
+  Timer { id: reconnect; interval: 1500; onTriggered: subscription.running = root.initialized }
 
   function handleEvent(line) {
     try {
       const event = JSON.parse(line);
       switch (event.event) {
+      case "screencast":
+        screencastCommand = Screencast.reduce(screencastCommand, event.data);
+        screencastEventsAvailable = screencastCommand.serial >= 0;
+        break;
       case "workspaces":
         if (Array.isArray(event.data))
           updateWorkspaces(event.data);

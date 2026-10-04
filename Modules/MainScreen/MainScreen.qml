@@ -34,6 +34,7 @@ import qs.Modules.Panels.UsbDriveManager
 import qs.Modules.Panels.Wallpaper
 import qs.Modules.Polkit
 import qs.Modules.ScreenToolkit
+import qs.Modules.ScreenShare
 import qs.Services.Compositor
 import qs.Services.Power
 import qs.Services.UI
@@ -401,6 +402,16 @@ PanelWindow {
     ScreenToolkitPanel {
       id: screenToolkitPanel
       objectName: "screenToolkitPanel-" + (root.screen?.name || "unknown")
+      screen: root.screen
+    }
+
+    ScreenSharePanel {
+      objectName: "screenSharePanel-" + (root.screen?.name || "unknown")
+      screen: root.screen
+    }
+
+    ScreenSharePrivacyPanel {
+      objectName: "screenSharePrivacyPanel-" + (root.screen?.name || "unknown")
       screen: root.screen
     }
 

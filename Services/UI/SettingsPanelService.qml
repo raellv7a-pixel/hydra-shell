@@ -24,7 +24,7 @@ Singleton {
   property var requestedEntry: null
 
   // Session-only expansion state survives page loaders being destroyed.
-  property var umbrielGroupState: ({ keybinds: true, overview: false, switcher: false, interaction: false, corners: false })
+  property var umbrielGroupState: ({ keybinds: true, overview: false, switcher: false, interaction: false, corners: false, sharing: false })
 
   // Grouped pages retain their open sections while category loaders come and go.
   property var settingsGroupStates: ({})

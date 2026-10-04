@@ -35,6 +35,12 @@ Singleton {
     updated.hot_corners[corner][field] = value;
     draft = updated;
   }
+  function updateSharingConfirmation(confirmed) {
+    if (!loaded || busy || externallyOwned) return;
+    const updated = JSON.parse(JSON.stringify(draft));
+    updated.screencast.disable_dynamic_confirmation = !confirmed;
+    draft = updated;
+  }
   function revert() {
     if (busy) return;
     draft = JSON.parse(JSON.stringify(committed));

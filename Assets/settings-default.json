@@ -693,6 +693,7 @@
   "umbriel": {
     "typeToLaunch": true,
     "showSubmapIndicator": true,
+    "showSharingControls": true,
     "windowSwitcher": {
       "style": "compact",
       "mru": true,

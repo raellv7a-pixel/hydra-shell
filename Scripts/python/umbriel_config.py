@@ -129,7 +129,7 @@ def config_dir():
     return (Path(value) if value.startswith('/') else Path.home() / '.config') / 'umbriel'
 
 
-def settings_sources(master_text, directory, managed=('overview', 'hot_corners'), owned='settings.toml'):
+def settings_sources(master_text, directory, managed=('overview', 'hot_corners', 'screencast'), owned='settings.toml'):
     """Identify competing native settings and snapshot every personal include."""
     owners = []
     sources = {}

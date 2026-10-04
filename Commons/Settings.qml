@@ -649,6 +649,7 @@ Singleton {
     property JsonObject umbriel: JsonObject {
       property bool typeToLaunch: true
       property bool showSubmapIndicator: true
+      property bool showSharingControls: true
       property JsonObject windowSwitcher: JsonObject {
         property string style: "compact"
         property bool mru: true

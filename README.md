@@ -40,6 +40,41 @@ o runtime registra sessão não suportada e não seleciona backends alternativos
 Para executar um checkout manualmente, compile primeiro a ponte Qt/Wayland:
 `bash Scripts/dev/build-native.sh`. Installer e preview fazem esse build.
 
+## Compartilhamento de tela
+
+Em **Settings → Umbriel → Compartilhamento**, habilite **Usar seletor da
+Hydra**. O portal oficial chama `Scripts/python/hydra_share_picker.py`, que
+conversa por IPC e socket privado com a shell já aberta. O seletor usa
+`SmartPanel` acoplado ao centro-esquerda da moldura em Framed; monitores exibem
+metadados, janelas exibem ícone/título/app_id, sem streaming de previews.
+Setas navegam, Espaço seleciona, Enter confirma e Escape cancela. Seleções
+múltiplas são oferecidas somente quando solicitadas pelo portal.
+
+O helper descobre o picker oficial instalado. Falha de abertura, conexão
+perdida ou ausência de heartbeat da Hydra encaminha o stdin original ao
+fallback. Cancelar a request encerra o painel e limpa o socket temporário.
+No fallback, o cancelamento sinaliza apenas o filho criado pelo helper, nunca
+grupos de processos ou serviços da sessão gráfica.
+Nenhum processo implementa captura ou protocolo de portal próprio.
+
+O toggle altera apenas `screencast.chooser_cmd` em
+`$XDG_CONFIG_HOME/xdg-desktop-portal-umbriel/config.toml`, atomicamente e sem
+reescrever outras opções/comentários. O valor anterior fica registrado em
+`$XDG_STATE_HOME/hydra/portal-picker.json` e é restaurado ao desativar, desde
+que não tenha sido alterado externamente. O portal aplica hot reload; não é
+reiniciado. **Confirmar antes de trocar a fonte** usa o include Umbriel já
+validado pela Hydra e mantém a proteção nativa habilitada por padrão.
+
+O clique esquerdo no indicador de screen sharing abre controles ancorados
+ao widget; o direito mantém as configurações. PipeWire continua sendo a
+fonte de atividade de mic/câmera/tela. Eventos Umbriel representam o **último
+comando**, não confirmam sessão ativa nem fonte aplicada. A versão atual não
+informa capability single-source/changeable: os controles ficam desabilitados
+com explicação, sem heurísticas. As ações nativas continuam disponíveis pelos
+atalhos da Umbriel. `screencast-clear` pausa a transmissão; não encerra a sessão.
+Seguir janelas pode expor outra janela ao trocar foco; não há `no_screen_share`.
+Portal Screenshot e Color Picker não fazem parte desta integração.
+
 ---
 
 ## Atualizando de uma instalação pré-rebrand (Noctalia)
