@@ -136,6 +136,9 @@ Singleton {
       const link = links[i];
       if (!link)
         continue;
+      // Link state is unavailable until the link itself is bound.
+      if (objects.indexOf(link) === -1)
+        objects.push(link);
       if (link.source && objects.indexOf(link.source) === -1)
         objects.push(link.source);
       if (link.target && objects.indexOf(link.target) === -1)
@@ -191,7 +194,7 @@ Singleton {
       if (!node || !node.isStream || !node.audio || node.isSink || !node.properties)
         continue;
 
-      const mediaClass = String(node.type || node.properties["media.class"] || "");
+      const mediaClass = String(node.properties["media.class"] || "");
       if (mediaClass !== "Stream/Input/Audio" || !hasActiveNodeLinks(node, links))
         continue;
 
@@ -215,7 +218,7 @@ Singleton {
       return false;
 
     const properties = node.properties;
-    const mediaClass = String(node.type || properties["media.class"] || "");
+    const mediaClass = String(properties["media.class"] || "");
     const deviceApi = String(properties["device.api"] || "").toLowerCase();
     const devicePath = String(properties["api.v4l2.path"] || "");
     return mediaClass.indexOf("Video/Source") !== -1 && (deviceApi === "v4l2" || devicePath.indexOf("/dev/video") === 0);
@@ -261,7 +264,7 @@ Singleton {
       return false;
 
     const properties = node.properties;
-    const mediaClass = String(node.type || properties["media.class"] || "");
+    const mediaClass = String(properties["media.class"] || "");
     if (mediaClass.indexOf("Video") === -1 || mediaClass.indexOf("Audio") !== -1)
       return false;
 

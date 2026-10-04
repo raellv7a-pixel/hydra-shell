@@ -75,6 +75,11 @@ atalhos da Umbriel. `screencast-clear` pausa a transmissão; não encerra a sess
 Seguir janelas pode expor outra janela ao trocar foco; não há `no_screen_share`.
 Portal Screenshot e Color Picker não fazem parte desta integração.
 
+O indicador acompanha **fontes de captura ativas**, não o botão de gravação do
+OBS: uma fonte usada no preview já pode ativá-lo. Nós e links são acompanhados
+para receber as mudanças de estado do PipeWire; a classificação usa a
+propriedade textual `media.class`, não os flags numéricos de tipo do Quickshell.
+
 ---
 
 ## Atualizando de uma instalação pré-rebrand (Noctalia)
