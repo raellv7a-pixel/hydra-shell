@@ -1,14 +1,14 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Services.UI
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
+  pageKey: "wallpaper"
 
   property var screen
 
@@ -23,49 +23,22 @@ ColumnLayout {
 
   property string specificFolderMonitorName: ""
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
+  groups: [
+    { key: "general", labelKey: "common.general", icon: "image", content: generalContent },
+    { key: "look", labelKey: "common.look", icon: "palette", content: lookContent },
+    { key: "automation", labelKey: "common.automation", icon: "settings-automation", content: automationContent }
+  ]
 
-    NTabButton {
-      text: I18n.tr("common.general")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.look")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-    NTabButton {
-      text: I18n.tr("common.automation")
-      tabIndex: 2
-      checked: subTabBar.currentIndex === 2
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
+  Component {
+    id: generalContent
     GeneralSubTab {
       screen: root.screen
       onOpenMainFolderPicker: root.openMainFolderPicker()
       onOpenMonitorFolderPicker: monitorName => root.openMonitorFolderPicker(monitorName)
     }
-    LookAndFeelSubTab {
-      screen: root.screen
-    }
-    AutomationSubTab {}
   }
+  Component { id: lookContent; LookAndFeelSubTab { screen: root.screen } }
+  Component { id: automationContent; AutomationSubTab {} }
 
   NFilePicker {
     id: mainFolderPicker

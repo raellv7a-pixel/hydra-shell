@@ -3,6 +3,7 @@
 import argparse
 import copy
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -128,8 +129,60 @@ def config_dir():
     return (Path(value) if value.startswith('/') else Path.home() / '.config') / 'umbriel'
 
 
-def commit(kind, content, *, reload=True):
-    if kind not in ('outputs', 'visual', 'theme', 'cursor'):
+def settings_sources(master_text, directory, managed=('overview', 'hot_corners'), owned='settings.toml'):
+    """Identify competing native settings and snapshot every personal include."""
+    owners = []
+    sources = {}
+
+    def scan(text, path):
+        key = path.resolve()
+        if key in sources:
+            return
+        sources[key] = text
+        data = tomllib.loads(text)
+        for name in managed:
+            if name in data:
+                owners.append(str(path) + ': [' + name + ']')
+        includes = data.get('include', {})
+        if not isinstance(includes, dict):
+            raise ValueError('Invalid Umbriel include table')
+        required = includes.get('files', [])
+        optional = includes.get('optional', {})
+        if not isinstance(required, list) or not isinstance(optional, dict):
+            raise ValueError('Invalid Umbriel include declaration')
+        extra = optional.get('files', [])
+        if not isinstance(extra, list):
+            raise ValueError('Invalid Umbriel optional includes')
+        for entry in required + extra:
+            if not isinstance(entry, str):
+                raise ValueError('Invalid Umbriel include path')
+            target = Path(os.path.expandvars(os.path.expanduser(entry)))
+            if not target.is_absolute():
+                target = path.parent / target
+            if target.resolve() == (directory / 'hydra' / owned).resolve():
+                continue
+            if target.exists():
+                scan(target.read_text(), target)
+            elif entry in required:
+                raise ValueError('Arquivo include obrigatório ausente: ' + str(target))
+    scan(master_text, directory / 'config.toml')
+    return owners, sources
+
+
+def settings_owners(master_text, directory):
+    return settings_sources(master_text, directory)[0]
+
+
+def settings_revision(master_text, owned_text, sources):
+    payload = json.dumps({
+        'master': master_text, 'owned': owned_text,
+        'includes': [(str(path), text) for path, text in sorted(sources.items())]
+    }, ensure_ascii=False, sort_keys=True)
+    return hashlib.sha256(payload.encode('utf-8')).hexdigest()
+
+
+def commit(kind, content, *, reload=True, expected_revision=None):
+    if kind not in ('outputs', 'visual', 'theme', 'cursor', 'settings'):
         raise ValueError('Unknown Hydra fragment')
     tomllib.loads(content)
     directory = config_dir()
@@ -143,6 +196,13 @@ def commit(kind, content, *, reload=True):
         old_master = master.read_text() if master.exists() else ''
         old_owned = owned.read_text() if owned.exists() else None
         relative = 'hydra/' + owned.name
+        if kind == 'settings':
+            owners, sources = settings_sources(old_master, directory)
+            if owners:
+                raise ValueError('Configuração Umbriel controlada externamente: ' + ', '.join(owners))
+            if (expected_revision is not None
+                    and settings_revision(old_master, old_owned, sources) != expected_revision):
+                raise ValueError('Configuração Umbriel mudou desde a leitura; recarregue a página')
         final_master = with_includes(old_master, {relative: relative})
         if content == old_owned and old_master == final_master:
             return
@@ -162,6 +222,8 @@ def commit(kind, content, *, reload=True):
                 raise ValueError((result.stderr or result.stdout).strip())
             if (master.read_text() if master.exists() else '') != old_master or (owned.read_text() if owned.exists() else None) != old_owned:
                 raise ValueError('Umbriel config changed during validation')
+            if kind == 'settings' and settings_sources(old_master, directory) != (owners, sources):
+                raise ValueError('Um include Umbriel foi alterado durante a validação')
             atomic(owned, content)
             installed = True
             if final_master != old_master:

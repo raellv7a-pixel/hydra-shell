@@ -1,12 +1,11 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import qs.Commons
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
+  pageKey: "osd"
 
   // Helper functions to update arrays immutably
   function addMonitor(list, name) {
@@ -32,38 +31,20 @@ ColumnLayout {
     });
   }
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
+  groups: [
+    { key: "general", labelKey: "common.general", icon: "settings", content: generalContent },
+    { key: "events", labelKey: "common.events", icon: "bell", content: eventsContent }
+  ]
 
-    NTabButton {
-      text: I18n.tr("common.general")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.events")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
+  Component {
+    id: generalContent
     GeneralSubTab {
       addMonitor: root.addMonitor
       removeMonitor: root.removeMonitor
     }
+  }
+  Component {
+    id: eventsContent
     EventsSubTab {
       addType: root.addType
       removeType: root.removeType

@@ -41,9 +41,10 @@ FloatingWindow {
         settingsContent._pendingSubTab = subTabId;
       settingsContent.initialize();
       isInitialized = true;
-      // Tab content persists in window mode; if no subtab specified and the
-      // tab content is still loaded (same tab), reset to first subtab
-      if (subTabId < 0 && settingsContent.activeTabContent)
+      // Legacy tab bars reset to their first subtab. Grouped pages own their
+      // expansion state and must not jump past their navigation chips on open.
+      if (subTabId < 0 && settingsContent.activeTabContent
+          && !settingsContent.activeTabContent.navigateToSettingsGroup)
         settingsContent.setSubTabIndex(0);
     }
   }
@@ -79,13 +80,13 @@ FloatingWindow {
   }
 
   Shortcut {
-    sequence: "Tab"
+    sequence: "Ctrl+Tab"
     enabled: !PanelService.isKeybindRecording
     onActivated: settingsContent.selectNextTab()
   }
 
   Shortcut {
-    sequence: "Backtab"
+    sequence: "Ctrl+Shift+Tab"
     enabled: !PanelService.isKeybindRecording
     onActivated: settingsContent.selectPreviousTab()
   }

@@ -1,14 +1,13 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell
 import qs.Commons
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
-
+  pageKey: "notifications"
   // Helper functions to update arrays immutably
   function addMonitor(list, name) {
     const arr = (list || []).slice();
@@ -36,69 +35,35 @@ ColumnLayout {
     criticalSoundFilePicker.open();
   }
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: false // this is too cramped on this tab to split evenly
-    currentIndex: tabView.currentIndex
+  groups: [
+    { key: "appearance", labelKey: "common.appearance", icon: "palette", content: appearanceContent },
+    { key: "duration", labelKey: "common.duration", icon: "clock", content: durationContent },
+    { key: "history", labelKey: "common.history", icon: "history", content: historyContent },
+    { key: "sound", labelKey: "common.sound", icon: "volume", content: soundContent },
+    { key: "toast", labelKey: "common.toast", icon: "bell", content: toastContent },
+    { key: "rules", labelKey: "panels.notifications.rules-tab", icon: "list-check", content: rulesContent }
+  ]
 
-    NTabButton {
-      text: I18n.tr("common.appearance")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.duration")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-    NTabButton {
-      text: I18n.tr("common.history")
-      tabIndex: 2
-      checked: subTabBar.currentIndex === 2
-    }
-    NTabButton {
-      text: I18n.tr("common.sound")
-      tabIndex: 3
-      checked: subTabBar.currentIndex === 3
-    }
-    NTabButton {
-      text: I18n.tr("common.toast")
-      tabIndex: 4
-      checked: subTabBar.currentIndex === 4
-    }
-    NTabButton {
-      text: I18n.tr("panels.notifications.rules-tab")
-      tabIndex: 5
-      checked: subTabBar.currentIndex === 5
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
+  Component {
+    id: appearanceContent
     GeneralSubTab {
       addMonitor: root.addMonitor
       removeMonitor: root.removeMonitor
     }
-    DurationSubTab {}
-    HistorySubTab {}
+  }
+  Component { id: durationContent; DurationSubTab {} }
+  Component { id: historyContent; HistorySubTab {} }
+  Component {
+    id: soundContent
     SoundSubTab {
       onOpenUnifiedPicker: root.openUnifiedSoundPicker()
       onOpenLowPicker: root.openLowSoundPicker()
       onOpenNormalPicker: root.openNormalSoundPicker()
       onOpenCriticalPicker: root.openCriticalSoundPicker()
     }
-    ToastSubTab {}
-    RulesSubTab {}
   }
+  Component { id: toastContent; ToastSubTab {} }
+  Component { id: rulesContent; RulesSubTab {} }
 
   // File Pickers for Sound Files
   NFilePicker {

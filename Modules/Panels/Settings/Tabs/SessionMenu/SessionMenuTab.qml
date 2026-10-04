@@ -1,14 +1,14 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell
 import qs.Commons
-import qs.Services.UI
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
+  pageKey: "session-menu"
 
   property var _activeDialog: null
   property list<var> entriesModel: []
@@ -227,35 +227,14 @@ ColumnLayout {
     saveEntries();
   }
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
+  groups: [
+    { key: "general", labelKey: "common.general", icon: "settings", content: generalContent },
+    { key: "actions", labelKey: "common.actions", icon: "bolt", content: actionsContent }
+  ]
 
-    NTabButton {
-      text: I18n.tr("common.general")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.actions")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
-    GeneralSubTab {}
+  Component { id: generalContent; GeneralSubTab {} }
+  Component {
+    id: actionsContent
     ActionsSubTab {
       entriesModel: root.entriesModel
       updateEntry: root.updateEntry

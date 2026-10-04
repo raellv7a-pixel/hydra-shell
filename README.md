@@ -112,25 +112,54 @@ recriar seus modelos QsMenu. Os outros menus contextuais ainda usam a
 janela genérica. Painéis legados de Bluetooth, Rede e Áudio permanecem nos
 arquivos até confirmar paridade funcional e ausência de consumidores.
 
-## Atalhos na sessão Umbriel
+## Configurações → Umbriel
 
-Na sessão Umbriel, a Hydra substitui as binds built-in por seu catálogo em
-`Scripts/python/umbriel_keybinds.py`. No primeiro boot da shell, ela adiciona
-`[include] files = ["hydra/keybinds.toml"]` a
-`~/.config/umbriel/config.toml` sem alterar as demais opções; a configuração
-gerada fica em `~/.config/umbriel/hydra/keybinds.toml` e os rebinds/custom binds
-em `~/.config/umbriel/hydra/keybinds.json`. Se o arquivo principal já define
-`[keybinds]` ou um include não puder ser editado com segurança, o
-provisionamento recusa a mudança e mostra o erro em **Configurações → Umbriel
-→ Atalhos**.
+A página Umbriel reúne **Atalhos**, **Visão Geral** e **Cantos Ativos** em um
+scroll único. Os chips superiores abrem o grupo correspondente e saltam até ele;
+os cards também podem ser expandidos individualmente. A expansão permanece
+durante a navegação no Settings. **Ctrl+Tab** e **Ctrl+Shift+Tab** alternam as
+categorias; Tab/Shift+Tab percorrem os controles e Enter/Espaço acionam
+chips/cards. Resultados da busca global abrem seu grupo antes de destacar o campo.
 
-O editor usa draft: **Salvar** valida com `umbriel config validate` antes de
-trocar os arquivos, **Reverter** descarta edições e **Restaurar padrões** volta
-ao catálogo original (ainda é preciso salvar). Atalhos nativos usam ações do
-compositor, ações da Hydra usam seu IPC e binds personalizadas também podem
-executar comandos. **Mod+Shift+Escape** alterna a inibição de atalhos mesmo
-quando a janela está com atalhos inibidos. Para reinstalar o catálogo sem
-apagar rebinds: `python3 Scripts/python/umbriel_keybinds.py provision`.
+Os grupos e controles usam superfícies tonais do tema Material da Hydra, sem
+bordas permanentes. A lista de atalhos destaca cada linha e mostra a combinação
+original apenas quando ela foi alterada. Cantos Ativos organiza os quatro cantos
+em duas colunas ou uma em espaço estreito; cada ação exibe um resumo compacto e
+abre a busca e a entrada avançada somente quando necessário.
+
+O ícone da categoria usa o glifo Tabler `app-window` já empacotado pela Hydra:
+o glifo oficial Umbriel `U+F066` existe apenas na fonte personalizada da
+Noctalia V5, e a Hydra não distribui uma fonte adicional por um único ícone.
+
+O editor de atalhos mantém o catálogo da Hydra em
+`Scripts/python/umbriel_keybinds.py`. Qualquer atalho original pode editar
+combinação, tipo, ação e opções; **Restaurar** em uma linha remove todos os seus
+overrides, enquanto **Restaurar padrões** zera overrides e atalhos personalizados
+(é preciso salvar). O estado V1 (`rebinds`) é migrado para V2 (`overrides`) sem
+apagar os personalizados. **Reverter** descarta edições ainda não salvas.
+O seletor pesquisável consulta as ações da versão instalada via
+`umbriel msg --help`; aplicativos instalados vêm das entradas `.desktop` e são
+executados via `gtk-launch <id>`. **Executar comando** mantém a edição avançada.
+
+O catálogo provisionado fica em
+`~/.config/umbriel/hydra/keybinds.toml`, incluído por
+`~/.config/umbriel/config.toml`; overrides e atalhos personalizados ficam em
+`hydra/keybinds.json`. O gerador preserva `hydra-default` e scratchpads do
+Edge Shelf. Se `[keybinds]` existir no arquivo principal ou em outro include,
+o editor recusa substituir o atalho do usuário. O provisionamento seguro pode
+ser repetido com `python3 Scripts/python/umbriel_keybinds.py provision`.
+
+Visão Geral edita os campos nativos `zoom`, fatores de rolagem, blur,
+wallpaper e teclas/indicadores de atalhos. Cantos Ativos edita ativação,
+atraso e ação para os quatro cantos. Ambas as seções compartilham um draft
+com **Salvar**/**Reverter**; o arquivo gerenciado é
+`~/.config/umbriel/hydra/settings.toml`, via include opcional. Se
+`[overview]` ou `[hot_corners]` estiverem no `config.toml` ou em includes
+pessoais, os controles ficam bloqueados e indicam o arquivo conflitante;
+a Hydra não sobrescreve as preferências existentes. Configurações da própria
+shell para a Overview, como ocultar a barra, continuam em suas páginas originais.
+Mudanças externas após abrir o editor são detectadas no salvamento; recarregue
+a página para incorporá-las antes de salvar novamente.
 
 ### Configuração nativa da sessão
 
@@ -140,11 +169,12 @@ do workspace focado, inclusive quando vazio. Queries de outputs ocorrem no start
 quando aparece um output desconhecido e após alterações feitas pela Hydra, sem polling.
 
 Arquivos gerenciados ficam em `$XDG_CONFIG_HOME/umbriel/hydra/`:
-`keybinds.toml`, `outputs.toml`, `visual.toml`, `theme.toml` e, quando gerado,
-`cursor.toml`. Includes pessoais são preservados; fragments visuais/tema/outputs
-usam includes opcionais. O candidato completo é validado com
-`umbriel config validate -c ...` antes de substituir arquivos atomicamente e
-executar `umbriel msg config-reload`. Falhas deixam a configuração anterior intacta.
+`keybinds.toml`, `settings.toml`, `outputs.toml`, `visual.toml`, `theme.toml`
+e, quando gerado, `cursor.toml`. Includes pessoais são preservados;
+`settings.toml`, visual/tema/outputs usam includes opcionais.
+O candidato completo é validado com `umbriel config validate -c ...`
+antes da troca atômica e de `umbriel msg config-reload`; se validar ou recarregar
+falhar, o conteúdo anterior é restaurado.
 
 A aba **Tela → Arranjo de Monitores** usa outputs, modos e escalas reais da
 Umbriel. Mantém confirmação e rollback do layout. O template Umbriel consome

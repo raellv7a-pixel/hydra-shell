@@ -3,18 +3,20 @@
     "labelKey": "panels.about.changelog-on-startup",
     "descriptionKey": "panels.about.changelog-on-startup-desc",
     "widget": "NToggle",
-    "tab": 22,
+    "tab": 23,
     "tabLabel": "panels.about.title",
     "subTab": 0,
+    "group": "info",
     "subTabLabel": "common.info"
   },
   {
     "labelKey": "panels.about.telemetry-enabled",
     "descriptionKey": "panels.about.telemetry-desc",
     "widget": "NToggle",
-    "tab": 22,
+    "tab": 23,
     "tabLabel": "panels.about.title",
     "subTab": 0,
+    "group": "info",
     "subTabLabel": "common.info"
   },
   {
@@ -24,6 +26,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 1,
+    "group": "devices",
     "subTabLabel": "common.devices"
   },
   {
@@ -33,6 +36,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 1,
+    "group": "devices",
     "subTabLabel": "common.devices"
   },
   {
@@ -42,6 +46,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 2,
+    "group": "media",
     "subTabLabel": "common.media"
   },
   {
@@ -51,6 +56,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 2,
+    "group": "media",
     "subTabLabel": "common.media"
   },
   {
@@ -60,6 +66,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 3,
+    "group": "visualizer",
     "subTabLabel": "common.visualizer"
   },
   {
@@ -69,6 +76,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 3,
+    "group": "visualizer",
     "subTabLabel": "common.visualizer"
   },
   {
@@ -78,6 +86,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 3,
+    "group": "visualizer",
     "subTabLabel": "common.visualizer"
   },
   {
@@ -87,6 +96,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 0,
+    "group": "volumes",
     "subTabLabel": "common.volumes"
   },
   {
@@ -96,6 +106,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 0,
+    "group": "volumes",
     "subTabLabel": "common.volumes"
   },
   {
@@ -105,6 +116,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 0,
+    "group": "volumes",
     "subTabLabel": "common.volumes"
   },
   {
@@ -114,6 +126,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 0,
+    "group": "volumes",
     "subTabLabel": "common.volumes"
   },
   {
@@ -123,6 +136,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 0,
+    "group": "volumes",
     "subTabLabel": "common.volumes"
   },
   {
@@ -132,6 +146,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 0,
+    "group": "volumes",
     "subTabLabel": "common.volumes"
   },
   {
@@ -141,6 +156,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 0,
+    "group": "volumes",
     "subTabLabel": "common.volumes"
   },
   {
@@ -150,6 +166,7 @@
     "tab": 15,
     "tabLabel": "panels.audio.title",
     "subTab": 0,
+    "group": "volumes",
     "subTabLabel": "common.volumes"
   },
   {
@@ -159,6 +176,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -168,6 +186,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -177,6 +196,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -186,6 +206,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -195,6 +216,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -204,6 +226,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.useSeparateOpacity"
@@ -216,6 +239,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -225,6 +249,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -234,6 +259,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -243,6 +269,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -252,6 +279,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -261,6 +289,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.showCapsule"
@@ -273,6 +302,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.showCapsule"
@@ -285,6 +315,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -294,9 +325,10 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
-      "CompositorService.isNiri"
+      "CompositorService.isUmbriel"
     ]
   },
   {
@@ -306,6 +338,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.barType === \"simple\""
@@ -318,6 +351,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.barType === \"framed\""
@@ -330,6 +364,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.barType === \"framed\""
@@ -342,6 +377,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.barType === \"framed\""
@@ -354,6 +390,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.barType === \"floating\""
@@ -366,6 +403,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.barType === \"floating\""
@@ -378,6 +416,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.displayMode === \"auto_hide\""
@@ -390,6 +429,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.displayMode === \"auto_hide\""
@@ -402,6 +442,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.bar.displayMode === \"auto_hide\""
@@ -414,6 +455,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior"
   },
   {
@@ -423,6 +465,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior",
     "visibleWhen": [
       "Settings.data.bar.mouseWheelAction !== \"none\""
@@ -435,6 +478,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior",
     "visibleWhen": [
       "Settings.data.bar.mouseWheelAction === \"workspace\""
@@ -447,6 +491,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior"
   },
   {
@@ -456,6 +501,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior",
     "visibleWhen": [
       "Settings.data.bar.middleClickAction === \"command\""
@@ -468,6 +514,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior",
     "visibleWhen": [
       "Settings.data.bar.middleClickAction !== \"none\" && Settings.data.bar.middleClickAction !== \"command\" && !(Settings.data.bar.middleClickAction === \"settings\" && Settings.data.ui.settingsPanelMode === \"window\")"
@@ -480,6 +527,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior"
   },
   {
@@ -489,6 +537,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior",
     "visibleWhen": [
       "Settings.data.bar.rightClickAction === \"command\""
@@ -501,10 +550,21 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 2,
+    "group": "behavior",
     "subTabLabel": "common.behavior",
     "visibleWhen": [
       "Settings.data.bar.rightClickAction !== \"none\" && Settings.data.bar.rightClickAction !== \"command\" && !(Settings.data.bar.rightClickAction === \"settings\" && Settings.data.ui.settingsPanelMode === \"window\")"
     ]
+  },
+  {
+    "labelKey": "panels.bar.edge-shelf-enable-label",
+    "descriptionKey": "panels.bar.edge-shelf-enable-description",
+    "widget": "NToggle",
+    "tab": 4,
+    "tabLabel": "panels.bar.title",
+    "subTab": 4,
+    "group": "edge-shelf",
+    "subTabLabel": "panels.bar.edge-shelf-group"
   },
   {
     "labelKey": "panels.bar.monitor-override-settings",
@@ -513,6 +573,7 @@
     "tab": 4,
     "tabLabel": "panels.bar.title",
     "subTab": 3,
+    "group": "monitors",
     "subTabLabel": "common.monitors"
   },
   {
@@ -522,6 +583,7 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
+    "group": "colors",
     "subTabLabel": "common.colors"
   },
   {
@@ -531,6 +593,7 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
+    "group": "colors",
     "subTabLabel": "common.colors"
   },
   {
@@ -540,6 +603,7 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
+    "group": "colors",
     "subTabLabel": "common.colors"
   },
   {
@@ -549,6 +613,7 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
+    "group": "colors",
     "subTabLabel": "common.colors",
     "visibleWhen": [
       "Settings.data.colorSchemes.schedulingMode === \"manual\""
@@ -561,6 +626,7 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
+    "group": "colors",
     "subTabLabel": "common.colors"
   },
   {
@@ -570,6 +636,7 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
+    "group": "colors",
     "subTabLabel": "common.colors"
   },
   {
@@ -579,6 +646,20 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
+    "group": "colors",
+    "subTabLabel": "common.colors",
+    "visibleWhen": [
+      "Settings.data.colorSchemes.useWallpaperColors"
+    ]
+  },
+  {
+    "labelKey": "panels.color-scheme.material-spec-label",
+    "descriptionKey": null,
+    "widget": "NLabel",
+    "tab": 2,
+    "tabLabel": "panels.color-scheme.title",
+    "subTab": 0,
+    "group": "colors",
     "subTabLabel": "common.colors",
     "visibleWhen": [
       "Settings.data.colorSchemes.useWallpaperColors"
@@ -591,10 +672,21 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 0,
+    "group": "colors",
     "subTabLabel": "common.colors",
     "visibleWhen": [
       "Settings.data.colorSchemes.useWallpaperColors"
     ]
+  },
+  {
+    "labelKey": "panels.color-scheme.templates-cursor-size-label",
+    "descriptionKey": "panels.color-scheme.templates-cursor-size-description",
+    "widget": "NComboBox",
+    "tab": 2,
+    "tabLabel": "panels.color-scheme.title",
+    "subTab": 1,
+    "group": "templates",
+    "subTabLabel": "common.templates"
   },
   {
     "labelKey": "panels.color-scheme.templates-misc-user-templates-label",
@@ -603,6 +695,7 @@
     "tab": 2,
     "tabLabel": "panels.color-scheme.title",
     "subTab": 1,
+    "group": "templates",
     "subTabLabel": "common.templates"
   },
   {
@@ -612,6 +705,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth"
   },
   {
@@ -621,6 +715,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth"
   },
   {
@@ -630,6 +725,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth"
   },
   {
@@ -639,6 +735,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth"
   },
   {
@@ -648,6 +745,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth"
   },
   {
@@ -657,6 +755,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth"
   },
   {
@@ -666,6 +765,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth"
   },
   {
@@ -675,6 +775,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth"
   },
   {
@@ -684,6 +785,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth",
     "visibleWhen": [
       "Settings.data.network.bluetoothRssiPollingEnabled"
@@ -696,6 +798,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 1,
+    "group": "bluetooth",
     "subTabLabel": "common.bluetooth",
     "visibleWhen": [
       "Settings.data.network.bluetoothAutoConnect"
@@ -708,6 +811,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi"
   },
   {
@@ -717,6 +821,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi"
   },
   {
@@ -726,6 +831,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi"
   },
   {
@@ -735,6 +841,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi"
   },
   {
@@ -744,6 +851,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi"
   },
   {
@@ -753,6 +861,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -765,6 +874,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -777,6 +887,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -789,6 +900,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -801,6 +913,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -813,6 +926,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -825,6 +939,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -837,6 +952,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -849,6 +965,7 @@
     "tab": 17,
     "tabLabel": "panels.connections.title",
     "subTab": 0,
+    "group": "wifi",
     "subTabLabel": "common.wifi",
     "visibleWhen": [
       "false"
@@ -860,7 +977,9 @@
     "widget": "NComboBox",
     "tab": 7,
     "tabLabel": "panels.control-center.title",
-    "subTab": null
+    "subTab": 0,
+    "group": "appearance",
+    "subTabLabel": "common.appearance"
   },
   {
     "labelKey": "panels.control-center.system-monitor-disk-path-label",
@@ -868,7 +987,9 @@
     "widget": "NComboBox",
     "tab": 7,
     "tabLabel": "panels.control-center.title",
-    "subTab": null
+    "subTab": 0,
+    "group": "appearance",
+    "subTabLabel": "common.appearance"
   },
   {
     "labelKey": "panels.desktop-widgets.enabled-label",
@@ -893,6 +1014,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 0,
+    "group": "brightness",
     "subTabLabel": "common.brightness"
   },
   {
@@ -902,6 +1024,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 0,
+    "group": "brightness",
     "subTabLabel": "common.brightness"
   },
   {
@@ -911,6 +1034,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 0,
+    "group": "brightness",
     "subTabLabel": "common.brightness"
   },
   {
@@ -920,6 +1044,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 0,
+    "group": "brightness",
     "subTabLabel": "common.brightness"
   },
   {
@@ -929,6 +1054,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 1,
+    "group": "night-light",
     "subTabLabel": "common.night-light"
   },
   {
@@ -938,6 +1064,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 1,
+    "group": "night-light",
     "subTabLabel": "common.night-light"
   },
   {
@@ -947,6 +1074,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 1,
+    "group": "night-light",
     "subTabLabel": "common.night-light"
   },
   {
@@ -956,6 +1084,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 1,
+    "group": "night-light",
     "subTabLabel": "common.night-light"
   },
   {
@@ -965,6 +1094,7 @@
     "tab": 16,
     "tabLabel": "panels.display.title",
     "subTab": 1,
+    "group": "night-light",
     "subTabLabel": "common.night-light"
   },
   {
@@ -974,6 +1104,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -983,6 +1114,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -992,6 +1124,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1001,6 +1134,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.dockType === \"floating\""
@@ -1013,6 +1147,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.dockType === \"attached\" && Settings.data.bar.barType === \"framed\""
@@ -1025,6 +1160,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1034,6 +1170,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.showDockIndicator"
@@ -1046,6 +1183,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.showDockIndicator"
@@ -1058,6 +1196,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.showDockIndicator"
@@ -1070,6 +1209,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1079,6 +1219,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1088,6 +1229,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.dockType === \"floating\""
@@ -1100,6 +1242,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1109,6 +1252,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.dockType === \"floating\" && Settings.data.dock.displayMode === \"auto_hide\""
@@ -1121,6 +1265,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1130,6 +1275,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1139,6 +1285,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1148,6 +1295,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.groupApps"
@@ -1160,6 +1308,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.groupApps"
@@ -1172,6 +1321,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.groupApps"
@@ -1184,6 +1334,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1193,6 +1344,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1202,6 +1354,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1211,6 +1364,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.showLauncherIcon"
@@ -1223,6 +1377,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.showLauncherIcon"
@@ -1235,6 +1390,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.showLauncherIcon"
@@ -1247,6 +1403,7 @@
     "tab": 5,
     "tabLabel": "panels.dock.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.dock.showLauncherIcon"
@@ -1258,7 +1415,9 @@
     "widget": "NTextInputButton",
     "tab": 0,
     "tabLabel": "common.general",
-    "subTab": null
+    "subTab": 0,
+    "group": "basics",
+    "subTabLabel": "panels.general.tab-basics"
   },
   {
     "labelKey": "panels.general.fonts-default-label",
@@ -1266,7 +1425,9 @@
     "widget": "NSearchableComboBox",
     "tab": 0,
     "tabLabel": "common.general",
-    "subTab": null
+    "subTab": 0,
+    "group": "basics",
+    "subTabLabel": "panels.general.tab-basics"
   },
   {
     "labelKey": "panels.general.fonts-monospace-label",
@@ -1274,7 +1435,9 @@
     "widget": "NSearchableComboBox",
     "tab": 0,
     "tabLabel": "common.general",
-    "subTab": null
+    "subTab": 0,
+    "group": "basics",
+    "subTabLabel": "panels.general.tab-basics"
   },
   {
     "labelKey": "panels.general.fonts-default-scale-label",
@@ -1282,7 +1445,9 @@
     "widget": "NValueSlider",
     "tab": 0,
     "tabLabel": "common.general",
-    "subTab": null
+    "subTab": 0,
+    "group": "basics",
+    "subTabLabel": "panels.general.tab-basics"
   },
   {
     "labelKey": "panels.general.fonts-monospace-scale-label",
@@ -1290,7 +1455,9 @@
     "widget": "NValueSlider",
     "tab": 0,
     "tabLabel": "common.general",
-    "subTab": null
+    "subTab": 0,
+    "group": "basics",
+    "subTabLabel": "panels.general.tab-basics"
   },
   {
     "labelKey": "panels.general.smooth-scrolling-label",
@@ -1298,7 +1465,9 @@
     "widget": "NToggle",
     "tab": 0,
     "tabLabel": "common.general",
-    "subTab": null
+    "subTab": 0,
+    "group": "basics",
+    "subTabLabel": "panels.general.tab-basics"
   },
   {
     "labelKey": "panels.general.keybinds-title",
@@ -1306,7 +1475,9 @@
     "widget": "NLabel",
     "tab": 0,
     "tabLabel": "common.general",
-    "subTab": null
+    "subTab": 1,
+    "group": "keybinds",
+    "subTabLabel": "panels.general.tab-keybinds"
   },
   {
     "labelKey": "panels.hooks.system-hooks-enable-label",
@@ -1315,6 +1486,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1324,6 +1496,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1333,6 +1506,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1342,6 +1516,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1351,6 +1526,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1360,6 +1536,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1369,6 +1546,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1378,6 +1556,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1387,6 +1566,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1396,6 +1576,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1405,6 +1586,7 @@
     "tab": 21,
     "tabLabel": "panels.hooks.title",
     "subTab": 1,
+    "group": "hooks",
     "subTabLabel": "panels.hooks.title"
   },
   {
@@ -1414,6 +1596,7 @@
     "tab": 14,
     "tabLabel": "panels.idle.title",
     "subTab": 0,
+    "group": "behavior",
     "subTabLabel": "panels.idle.tab-behavior"
   },
   {
@@ -1423,6 +1606,7 @@
     "tab": 14,
     "tabLabel": "panels.idle.title",
     "subTab": 0,
+    "group": "behavior",
     "subTabLabel": "panels.idle.tab-behavior",
     "visibleWhen": [
       "IdleService.nativeIdleMonitorAvailable"
@@ -1435,6 +1619,7 @@
     "tab": 14,
     "tabLabel": "panels.idle.title",
     "subTab": 0,
+    "group": "behavior",
     "subTabLabel": "panels.idle.tab-behavior"
   },
   {
@@ -1444,6 +1629,7 @@
     "tab": 14,
     "tabLabel": "panels.idle.title",
     "subTab": 0,
+    "group": "behavior",
     "subTabLabel": "panels.idle.tab-behavior"
   },
   {
@@ -1453,6 +1639,7 @@
     "tab": 14,
     "tabLabel": "panels.idle.title",
     "subTab": 1,
+    "group": "custom",
     "subTabLabel": "panels.idle.tab-custom"
   },
   {
@@ -1462,6 +1649,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 1,
+    "group": "clipboard",
     "subTabLabel": "common.clipboard"
   },
   {
@@ -1471,6 +1659,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 1,
+    "group": "clipboard",
     "subTabLabel": "common.clipboard"
   },
   {
@@ -1480,6 +1669,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 1,
+    "group": "clipboard",
     "subTabLabel": "common.clipboard"
   },
   {
@@ -1489,6 +1679,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 1,
+    "group": "clipboard",
     "subTabLabel": "common.clipboard"
   },
   {
@@ -1498,6 +1689,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 1,
+    "group": "clipboard",
     "subTabLabel": "common.clipboard"
   },
   {
@@ -1507,6 +1699,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 1,
+    "group": "clipboard",
     "subTabLabel": "common.clipboard"
   },
   {
@@ -1516,6 +1709,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 1,
+    "group": "clipboard",
     "subTabLabel": "common.clipboard",
     "visibleWhen": [
       "Settings.data.appLauncher.enableClipboardHistory"
@@ -1528,6 +1722,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 1,
+    "group": "clipboard",
     "subTabLabel": "common.clipboard",
     "visibleWhen": [
       "Settings.data.appLauncher.enableClipboardHistory"
@@ -1540,6 +1735,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 2,
+    "group": "execute",
     "subTabLabel": "common.execute"
   },
   {
@@ -1549,6 +1745,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 2,
+    "group": "execute",
     "subTabLabel": "common.execute"
   },
   {
@@ -1558,6 +1755,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 2,
+    "group": "execute",
     "subTabLabel": "common.execute",
     "visibleWhen": [
       "Settings.data.appLauncher.customLaunchPrefixEnabled"
@@ -1570,6 +1768,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 2,
+    "group": "execute",
     "subTabLabel": "common.execute"
   },
   {
@@ -1579,6 +1778,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1588,6 +1788,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1597,6 +1798,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1606,6 +1808,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general",
     "visibleWhen": [
       "(Settings.data.appLauncher.coverMode || \"auto\") === \"custom\""
@@ -1618,6 +1821,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general",
     "visibleWhen": [
       "(Settings.data.appLauncher.coverMode || \"auto\") === \"random\""
@@ -1630,6 +1834,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general",
     "visibleWhen": [
       "(Settings.data.appLauncher.coverMode || \"auto\") !== \"none\""
@@ -1642,6 +1847,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general",
     "visibleWhen": [
       "(Settings.data.appLauncher.coverMode || \"auto\") !== \"none\""
@@ -1654,6 +1860,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1663,6 +1870,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1672,6 +1880,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1681,6 +1890,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1690,6 +1900,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1699,6 +1910,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1708,6 +1920,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1717,6 +1930,7 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -1726,157 +1940,8 @@
     "tab": 9,
     "tabLabel": "panels.launcher.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
-  },
-  {
-    "labelKey": "panels.lock-screen.clock-style-label",
-    "descriptionKey": "panels.lock-screen.clock-style-description",
-    "widget": "NComboBox",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 0,
-    "subTabLabel": "common.appearance"
-  },
-  {
-    "labelKey": "panels.lock-screen.clock-format-label",
-    "descriptionKey": "panels.lock-screen.clock-format-description",
-    "widget": "NTextInput",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 0,
-    "subTabLabel": "common.appearance",
-    "visibleWhen": [
-      "Settings.data.general.clockStyle === \"custom\""
-    ]
-  },
-  {
-    "labelKey": "panels.lock-screen.password-chars-label",
-    "descriptionKey": "panels.lock-screen.password-chars-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 0,
-    "subTabLabel": "common.appearance"
-  },
-  {
-    "labelKey": "panels.lock-screen.compact-lockscreen-label",
-    "descriptionKey": "panels.lock-screen.compact-lockscreen-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 0,
-    "subTabLabel": "common.appearance"
-  },
-  {
-    "labelKey": "panels.lock-screen.enable-lockscreen-media-controls-label",
-    "descriptionKey": "panels.lock-screen.enable-lockscreen-media-controls-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 0,
-    "subTabLabel": "common.appearance",
-    "visibleWhen": [
-      "!Settings.data.general.compactLockScreen"
-    ]
-  },
-  {
-    "labelKey": "panels.lock-screen.lock-screen-animations-label",
-    "descriptionKey": "panels.lock-screen.lock-screen-animations-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 0,
-    "subTabLabel": "common.appearance"
-  },
-  {
-    "labelKey": "panels.lock-screen.lock-screen-blur-strength-label",
-    "descriptionKey": "panels.lock-screen.lock-screen-blur-strength-description",
-    "widget": "NValueSlider",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 0,
-    "subTabLabel": "common.appearance"
-  },
-  {
-    "labelKey": "panels.lock-screen.lock-screen-tint-strength-label",
-    "descriptionKey": "panels.lock-screen.lock-screen-tint-strength-description",
-    "widget": "NValueSlider",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 0,
-    "subTabLabel": "common.appearance"
-  },
-  {
-    "labelKey": "panels.lock-screen.lock-on-suspend-label",
-    "descriptionKey": "panels.lock-screen.lock-on-suspend-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 1,
-    "subTabLabel": "common.behavior"
-  },
-  {
-    "labelKey": "panels.lock-screen.auto-start-auth-label",
-    "descriptionKey": "panels.lock-screen.auto-start-auth-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 1,
-    "subTabLabel": "common.behavior"
-  },
-  {
-    "labelKey": "panels.lock-screen.allow-password-with-fprintd-label",
-    "descriptionKey": "panels.lock-screen.allow-password-with-fprintd-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 1,
-    "subTabLabel": "common.behavior"
-  },
-  {
-    "labelKey": "panels.lock-screen.show-session-buttons-label",
-    "descriptionKey": "panels.lock-screen.show-session-buttons-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 1,
-    "subTabLabel": "common.behavior"
-  },
-  {
-    "labelKey": "panels.lock-screen.show-hibernate-label",
-    "descriptionKey": "panels.lock-screen.show-hibernate-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 1,
-    "subTabLabel": "common.behavior",
-    "visibleWhen": [
-      "Settings.data.general.showSessionButtonsOnLockScreen"
-    ]
-  },
-  {
-    "labelKey": "panels.session-menu.enable-countdown-label",
-    "descriptionKey": "panels.session-menu.enable-countdown-description",
-    "widget": "NToggle",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 1,
-    "subTabLabel": "common.behavior",
-    "visibleWhen": [
-      "Settings.data.general.showSessionButtonsOnLockScreen"
-    ]
-  },
-  {
-    "labelKey": "panels.session-menu.countdown-duration-label",
-    "descriptionKey": "panels.session-menu.countdown-duration-description",
-    "widget": "NValueSlider",
-    "tab": 12,
-    "tabLabel": "panels.lock-screen.title",
-    "subTab": 1,
-    "subTabLabel": "common.behavior",
-    "visibleWhen": [
-      "Settings.data.general.showSessionButtonsOnLockScreen && Settings.data.general.enableLockScreenCountdown"
-    ]
   },
   {
     "labelKey": "panels.notifications.duration-respect-expire-label",
@@ -1885,6 +1950,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 1,
+    "group": "duration",
     "subTabLabel": "common.duration"
   },
   {
@@ -1894,6 +1960,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 1,
+    "group": "duration",
     "subTabLabel": "common.duration"
   },
   {
@@ -1903,6 +1970,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 1,
+    "group": "duration",
     "subTabLabel": "common.duration"
   },
   {
@@ -1912,6 +1980,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 1,
+    "group": "duration",
     "subTabLabel": "common.duration"
   },
   {
@@ -1921,6 +1990,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1930,6 +2000,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1939,6 +2010,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1948,6 +2020,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -1957,6 +2030,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 2,
+    "group": "history",
     "subTabLabel": "common.history"
   },
   {
@@ -1966,6 +2040,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 2,
+    "group": "history",
     "subTabLabel": "common.history"
   },
   {
@@ -1975,6 +2050,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 2,
+    "group": "history",
     "subTabLabel": "common.history"
   },
   {
@@ -1984,6 +2060,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 2,
+    "group": "history",
     "subTabLabel": "common.history"
   },
   {
@@ -1993,6 +2070,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 2,
+    "group": "history",
     "subTabLabel": "common.history"
   },
   {
@@ -2002,6 +2080,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 5,
+    "group": "rules",
     "subTabLabel": "panels.notifications.rules-tab"
   },
   {
@@ -2011,6 +2090,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound",
     "visibleWhen": [
       "!SoundService.multimediaAvailable"
@@ -2023,6 +2103,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound"
   },
   {
@@ -2032,6 +2113,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound"
   },
   {
@@ -2041,6 +2123,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound"
   },
   {
@@ -2050,6 +2133,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound",
     "visibleWhen": [
       "!(Settings.data.notifications?.sounds?.separateSounds ?? false)"
@@ -2062,6 +2146,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound",
     "visibleWhen": [
       "SoundService.multimediaAvailable && (Settings.data.notifications?.sounds?.enabled ?? false) && (Settings.data.notifications?.sounds?.separateSounds ?? false)"
@@ -2074,6 +2159,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound",
     "visibleWhen": [
       "SoundService.multimediaAvailable && (Settings.data.notifications?.sounds?.enabled ?? false) && (Settings.data.notifications?.sounds?.separateSounds ?? false)"
@@ -2086,6 +2172,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound",
     "visibleWhen": [
       "SoundService.multimediaAvailable && (Settings.data.notifications?.sounds?.enabled ?? false) && (Settings.data.notifications?.sounds?.separateSounds ?? false)"
@@ -2098,6 +2185,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 3,
+    "group": "sound",
     "subTabLabel": "common.sound"
   },
   {
@@ -2107,6 +2195,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 4,
+    "group": "toast",
     "subTabLabel": "common.toast"
   },
   {
@@ -2116,6 +2205,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 4,
+    "group": "toast",
     "subTabLabel": "common.toast"
   },
   {
@@ -2125,6 +2215,7 @@
     "tab": 10,
     "tabLabel": "common.notifications",
     "subTab": 4,
+    "group": "toast",
     "subTabLabel": "common.toast"
   },
   {
@@ -2134,6 +2225,7 @@
     "tab": 11,
     "tabLabel": "panels.osd.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2143,6 +2235,47 @@
     "tab": 11,
     "tabLabel": "panels.osd.title",
     "subTab": 0,
+    "group": "general",
+    "subTabLabel": "common.general"
+  },
+  {
+    "labelKey": "panels.osd.show-keys-enabled-label",
+    "descriptionKey": "panels.osd.show-keys-enabled-description",
+    "widget": "NToggle",
+    "tab": 11,
+    "tabLabel": "panels.osd.title",
+    "subTab": 0,
+    "group": "general",
+    "subTabLabel": "common.general"
+  },
+  {
+    "labelKey": "panels.osd.show-keys-device-label",
+    "descriptionKey": "panels.osd.show-keys-device-description",
+    "widget": "NTextInput",
+    "tab": 11,
+    "tabLabel": "panels.osd.title",
+    "subTab": 0,
+    "group": "general",
+    "subTabLabel": "common.general"
+  },
+  {
+    "labelKey": "panels.osd.show-keys-position-label",
+    "descriptionKey": null,
+    "widget": "NComboBox",
+    "tab": 11,
+    "tabLabel": "panels.osd.title",
+    "subTab": 0,
+    "group": "general",
+    "subTabLabel": "common.general"
+  },
+  {
+    "labelKey": "panels.osd.show-keys-hide-delay-label",
+    "descriptionKey": null,
+    "widget": "NValueSlider",
+    "tab": 11,
+    "tabLabel": "panels.osd.title",
+    "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2152,6 +2285,7 @@
     "tab": 20,
     "tabLabel": "panels.plugins.title",
     "subTab": 1,
+    "group": "available",
     "subTabLabel": "common.available"
   },
   {
@@ -2161,6 +2295,7 @@
     "tab": 20,
     "tabLabel": "panels.plugins.title",
     "subTab": 0,
+    "group": "installed",
     "subTabLabel": "common.installed"
   },
   {
@@ -2170,6 +2305,7 @@
     "tab": 20,
     "tabLabel": "panels.plugins.title",
     "subTab": 0,
+    "group": "installed",
     "subTabLabel": "common.installed"
   },
   {
@@ -2179,6 +2315,7 @@
     "tab": 20,
     "tabLabel": "panels.plugins.title",
     "subTab": 0,
+    "group": "installed",
     "subTabLabel": "common.installed"
   },
   {
@@ -2188,6 +2325,7 @@
     "tab": 20,
     "tabLabel": "panels.plugins.title",
     "subTab": 2,
+    "group": "sources",
     "subTabLabel": "common.sources"
   },
   {
@@ -2197,6 +2335,7 @@
     "tab": 20,
     "tabLabel": "panels.plugins.title",
     "subTab": 2,
+    "group": "sources",
     "subTabLabel": "common.sources"
   },
   {
@@ -2206,6 +2345,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 2,
+    "group": "calendar",
     "subTabLabel": "common.calendar-panel"
   },
   {
@@ -2215,6 +2355,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 2,
+    "group": "calendar",
     "subTabLabel": "common.calendar-panel"
   },
   {
@@ -2224,6 +2365,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 2,
+    "group": "calendar",
     "subTabLabel": "common.calendar-panel"
   },
   {
@@ -2233,6 +2375,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 1,
+    "group": "date",
     "subTabLabel": "common.date"
   },
   {
@@ -2242,6 +2385,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 1,
+    "group": "date",
     "subTabLabel": "common.date"
   },
   {
@@ -2251,6 +2395,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location"
   },
   {
@@ -2260,6 +2405,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location"
   },
   {
@@ -2269,6 +2415,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location",
     "visibleWhen": [
       "!Settings.data.location.autoLocate"
@@ -2281,6 +2428,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location"
   },
   {
@@ -2290,6 +2438,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location"
   },
   {
@@ -2299,6 +2448,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location"
   },
   {
@@ -2308,6 +2458,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location"
   },
   {
@@ -2317,6 +2468,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location"
   },
   {
@@ -2326,6 +2478,7 @@
     "tab": 18,
     "tabLabel": "panels.region.title",
     "subTab": 0,
+    "group": "location",
     "subTabLabel": "common.location"
   },
   {
@@ -2335,6 +2488,7 @@
     "tab": 13,
     "tabLabel": "session-menu.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2344,6 +2498,7 @@
     "tab": 13,
     "tabLabel": "session-menu.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2353,6 +2508,7 @@
     "tab": 13,
     "tabLabel": "session-menu.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2362,6 +2518,7 @@
     "tab": 13,
     "tabLabel": "session-menu.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general",
     "visibleWhen": [
       "(Settings.data.sessionMenu.coverCardMode || \"auto\") === \"custom\""
@@ -2374,7 +2531,31 @@
     "tab": 13,
     "tabLabel": "session-menu.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
+  },
+  {
+    "labelKey": "panels.session-menu.enable-countdown-label",
+    "descriptionKey": "panels.session-menu.enable-countdown-description",
+    "widget": "NToggle",
+    "tab": 13,
+    "tabLabel": "session-menu.title",
+    "subTab": 0,
+    "group": "general",
+    "subTabLabel": "common.general"
+  },
+  {
+    "labelKey": "panels.session-menu.countdown-duration-label",
+    "descriptionKey": "panels.session-menu.countdown-duration-description",
+    "widget": "NValueSlider",
+    "tab": 13,
+    "tabLabel": "session-menu.title",
+    "subTab": 0,
+    "group": "general",
+    "subTabLabel": "common.general",
+    "visibleWhen": [
+      "Settings.data.sessionMenu.enableCountdown"
+    ]
   },
   {
     "labelKey": "panels.system-monitor.enable-dgpu-monitoring-label",
@@ -2383,6 +2564,7 @@
     "tab": 19,
     "tabLabel": "panels.system.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "system-monitor.title"
   },
   {
@@ -2392,6 +2574,7 @@
     "tab": 19,
     "tabLabel": "panels.system.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "system-monitor.title"
   },
   {
@@ -2401,6 +2584,7 @@
     "tab": 19,
     "tabLabel": "panels.system.title",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "system-monitor.title"
   },
   {
@@ -2410,6 +2594,7 @@
     "tab": 19,
     "tabLabel": "panels.system.title",
     "subTab": 2,
+    "group": "performance",
     "subTabLabel": "common.performance"
   },
   {
@@ -2419,7 +2604,98 @@
     "tab": 19,
     "tabLabel": "panels.system.title",
     "subTab": 2,
+    "group": "performance",
     "subTabLabel": "common.performance"
+  },
+  {
+    "labelKey": "panels.umbriel.hot-delay",
+    "descriptionKey": "panels.umbriel.hot-delay-description",
+    "widget": "NValueSlider",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "corners"
+  },
+  {
+    "labelKey": "panels.umbriel.hot-action",
+    "descriptionKey": null,
+    "widget": "UmbrielActionPicker",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "corners"
+  },
+  {
+    "labelKey": "panels.umbriel.keybind-search",
+    "descriptionKey": null,
+    "widget": "UmbrielSearchField",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "keybinds"
+  },
+  {
+    "labelKey": "panels.umbriel.overview-zoom",
+    "descriptionKey": "panels.umbriel.overview-zoom-description",
+    "widget": "NValueSlider",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "overview"
+  },
+  {
+    "labelKey": "panels.umbriel.overview-horizontal",
+    "descriptionKey": "panels.umbriel.overview-horizontal-description",
+    "widget": "NValueSlider",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "overview"
+  },
+  {
+    "labelKey": "panels.umbriel.overview-vertical",
+    "descriptionKey": "panels.umbriel.overview-vertical-description",
+    "widget": "NValueSlider",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "overview"
+  },
+  {
+    "labelKey": "panels.umbriel.overview-blur",
+    "descriptionKey": "panels.umbriel.overview-blur-description",
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "overview"
+  },
+  {
+    "labelKey": "panels.umbriel.overview-wallpaper",
+    "descriptionKey": "panels.umbriel.overview-wallpaper-description",
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "overview"
+  },
+  {
+    "labelKey": "panels.umbriel.overview-shortcuts",
+    "descriptionKey": "panels.umbriel.overview-shortcuts-description",
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "overview"
+  },
+  {
+    "labelKey": "panels.umbriel.overview-keys",
+    "descriptionKey": "panels.umbriel.overview-keys-description",
+    "widget": "NTextInput",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "overview"
   },
   {
     "labelKey": "panels.user-interface.tooltips-label",
@@ -2428,6 +2704,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2437,6 +2714,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2446,6 +2724,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2455,6 +2734,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2464,6 +2744,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2473,6 +2754,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2482,6 +2764,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "Settings.data.general.enableShadows"
@@ -2494,6 +2777,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2503,6 +2787,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2512,6 +2797,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2521,6 +2807,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance"
   },
   {
@@ -2530,6 +2817,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 0,
+    "group": "appearance",
     "subTabLabel": "common.appearance",
     "visibleWhen": [
       "!Settings.data.general.animationDisabled"
@@ -2542,6 +2830,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 1,
+    "group": "panels",
     "subTabLabel": "common.panels"
   },
   {
@@ -2551,6 +2840,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 1,
+    "group": "panels",
     "subTabLabel": "common.panels",
     "visibleWhen": [
       "(Quickshell.screens.length > 1)"
@@ -2563,6 +2853,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 1,
+    "group": "panels",
     "subTabLabel": "common.panels"
   },
   {
@@ -2572,6 +2863,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 1,
+    "group": "panels",
     "subTabLabel": "common.panels"
   },
   {
@@ -2581,6 +2873,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 1,
+    "group": "panels",
     "subTabLabel": "common.panels"
   },
   {
@@ -2590,6 +2883,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 1,
+    "group": "panels",
     "subTabLabel": "common.panels"
   },
   {
@@ -2599,6 +2893,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 2,
+    "group": "corners",
     "subTabLabel": "common.screen-corners"
   },
   {
@@ -2608,6 +2903,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 2,
+    "group": "corners",
     "subTabLabel": "common.screen-corners"
   },
   {
@@ -2617,6 +2913,7 @@
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
     "subTab": 2,
+    "group": "corners",
     "subTabLabel": "common.screen-corners"
   },
   {
@@ -2626,6 +2923,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 2,
+    "group": "automation",
     "subTabLabel": "common.automation"
   },
   {
@@ -2635,6 +2933,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 2,
+    "group": "automation",
     "subTabLabel": "common.automation"
   },
   {
@@ -2644,6 +2943,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 2,
+    "group": "automation",
     "subTabLabel": "common.automation"
   },
   {
@@ -2653,6 +2953,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2662,6 +2963,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2671,6 +2973,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2680,6 +2983,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2689,6 +2993,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2698,6 +3003,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2707,6 +3013,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general"
   },
   {
@@ -2716,9 +3023,10 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general",
     "visibleWhen": [
-      "CompositorService.isNiri"
+      "CompositorService.isUmbriel"
     ]
   },
   {
@@ -2728,9 +3036,10 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general",
     "visibleWhen": [
-      "CompositorService.isNiri",
+      "CompositorService.isUmbriel",
       "Settings.data.wallpaper.overviewEnabled"
     ]
   },
@@ -2741,9 +3050,10 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 0,
+    "group": "general",
     "subTabLabel": "common.general",
     "visibleWhen": [
-      "CompositorService.isNiri",
+      "CompositorService.isUmbriel",
       "Settings.data.wallpaper.overviewEnabled"
     ]
   },
@@ -2754,6 +3064,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 1,
+    "group": "look",
     "subTabLabel": "common.look"
   },
   {
@@ -2763,6 +3074,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 1,
+    "group": "look",
     "subTabLabel": "common.look"
   },
   {
@@ -2772,6 +3084,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 1,
+    "group": "look",
     "subTabLabel": "common.look"
   },
   {
@@ -2781,6 +3094,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 1,
+    "group": "look",
     "subTabLabel": "common.look"
   },
   {
@@ -2790,6 +3104,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 1,
+    "group": "look",
     "subTabLabel": "common.look"
   },
   {
@@ -2799,6 +3114,7 @@
     "tab": 3,
     "tabLabel": "common.wallpaper",
     "subTab": 1,
+    "group": "look",
     "subTabLabel": "common.look"
   }
 ]

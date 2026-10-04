@@ -34,6 +34,8 @@ WIDGET_TYPES = (
     "NLabel",
     "NColorChoice",
     "HookRow",
+    "UmbrielActionPicker",
+    "UmbrielSearchField",
 )
 
 # Regex patterns
@@ -131,17 +133,25 @@ def build_tab_mappings(content: str) -> tuple[dict[str, int], dict[str, str]]:
     return type_to_index, type_to_label
 
 
-def get_subtab_info(parent_tab_file: Path) -> tuple[list[str], list[str | None]]:
-    """
-    Parse a parent tab file to get subtab order and labels.
-
-    Returns: (subtab_type_names, subtab_label_keys)
-      - subtab_type_names: list of component names like ["VolumesSubTab", ...]
-      - subtab_label_keys: list of i18n keys like ["common.volumes", ...] (same order)
-    """
+def get_subtab_info(parent_tab_file: Path) -> tuple[list[str], list[str | None], list[str | None]]:
+    """Return content type, label key, and group key in page order."""
     content = parent_tab_file.read_text()
 
-    # Extract NTabButton labels in order from NTabBar
+    if "NSettingsGroupPage {" in content:
+        components = dict(re.findall(
+            r"Component\s*\{\s*id:\s*(\w+)\s*;?\s*(\w+SubTab)\s*\{", content
+        ))
+        groups = re.findall(
+            r'\{\s*key:\s*"([^"]+)",\s*labelKey:\s*"([^"]+)",\s*icon:\s*"[^"]+",\s*content:\s*(\w+)',
+            content,
+        )
+        mapped = [(components[component], label, key) for key, label, component in groups
+                  if component in components]
+        return ([type_name for type_name, _, _ in mapped],
+                [label for _, label, _ in mapped],
+                [key for _, _, key in mapped])
+
+    # Legacy NTabBar/NTabView pages remain readable during block migrations.
     labels = []
     in_tabbar = False
     tabbar_depth = 0
@@ -195,19 +205,15 @@ def get_subtab_info(parent_tab_file: Path) -> tuple[list[str], list[str | None]]
     while len(labels) < len(subtabs):
         labels.append(None)
 
-    return subtabs, labels[:len(subtabs)]
+    return subtabs, labels[:len(subtabs)], [None] * len(subtabs)
 
 
 def resolve_tab_info(
     qml_file: Path,
     type_to_index: dict[str, int],
     type_to_label: dict[str, str],
-) -> tuple[int | None, str | None, int | None, str | None]:
-    """
-    Determine the tab index, tab label, sub-tab index, and sub-tab label for a QML file.
-
-    Returns (tab_index, tab_label_key, sub_tab_index, sub_tab_label_key)
-    """
+) -> tuple[int | None, str | None, int | None, str | None, str | None]:
+    """Return tab index, title key, subtab index, title key, and optional group."""
     parent = qml_file.parent
     stem = qml_file.stem
 
@@ -215,7 +221,7 @@ def resolve_tab_info(
     if parent == TABS_DIR:
         tab_index = type_to_index.get(stem)
         tab_label = type_to_label.get(stem)
-        return tab_index, tab_label, None, None
+        return tab_index, tab_label, None, None, None
 
     # Sub-directory files
     dir_name = parent.name  # e.g. "Audio", "Bar"
@@ -224,29 +230,30 @@ def resolve_tab_info(
     tab_label = type_to_label.get(parent_type)
 
     if tab_index is None:
-        return None, None, None, None
+        return None, None, None, None, None
 
     # Skip the parent tab file itself (e.g. AudioTab.qml) — still scan for widgets
     if stem.endswith("Tab") and not stem.endswith("SubTab"):
-        return tab_index, tab_label, None, None
+        return tab_index, tab_label, None, None, None
 
     # Determine sub-tab index and label from parent tab's NTabBar/NTabView
     parent_tab_file = parent / f"{dir_name}Tab.qml"
     if not parent_tab_file.exists():
-        return tab_index, tab_label, None, None
+        parent_tab_file = TABS_DIR / f"{dir_name}Tab.qml"
+    if not parent_tab_file.exists():
+        return tab_index, tab_label, None, None, None
 
-    subtab_names, subtab_labels = get_subtab_info(parent_tab_file)
+    subtab_names, subtab_labels, group_keys = get_subtab_info(parent_tab_file)
     try:
         idx = subtab_names.index(stem)
-        sub_label = subtab_labels[idx] if idx < len(subtab_labels) else None
-        return tab_index, tab_label, idx, sub_label
+        return tab_index, tab_label, idx, subtab_labels[idx], group_keys[idx]
     except ValueError:
         # File doesn't map to any subtab (e.g. a dialog). If the parent tab
         # has subtabs, the focus ring can't reach widgets inside dialogs, so
         # exclude them from the index.
         if subtab_names:
-            return None, None, None, None
-        return tab_index, tab_label, None, None
+            return None, None, None, None, None
+        return tab_index, tab_label, None, None, None
 
 
 def is_resolvable_condition(cond: str) -> bool:
@@ -343,7 +350,11 @@ def extract_entries(
     type_to_label: dict[str, str],
 ) -> list[dict]:
     """Extract all searchable settings entries from a QML file."""
-    tab_index, tab_label, sub_tab, sub_tab_label = resolve_tab_info(
+    # Picker internals are transient, shared by keybinds and corners, and have
+    # no stable Settings card or highlight target in the global search.
+    if qml_file.name == "UmbrielActionPicker.qml":
+        return []
+    tab_index, tab_label, sub_tab, sub_tab_label, group_key = resolve_tab_info(
         qml_file, type_to_index, type_to_label
     )
     if tab_index is None:
@@ -383,6 +394,16 @@ def extract_entries(
             "tabLabel": tab_label,
             "subTab": sub_tab,
         }
+        # A grouped settings page has one scroll, not an NTabView. Its
+        # search results must reveal the card before the highlight scroll.
+        if group_key:
+            entry["group"] = group_key
+        elif qml_file.parent.name == "Umbriel":
+            entry["group"] = {
+                "UmbrielKeybindsCard": "keybinds",
+                "UmbrielOverviewCard": "overview",
+                "UmbrielHotCornersCard": "corners",
+            }.get(qml_file.stem, "keybinds")
         if sub_tab_label is not None:
             entry["subTabLabel"] = sub_tab_label
         if conditions:

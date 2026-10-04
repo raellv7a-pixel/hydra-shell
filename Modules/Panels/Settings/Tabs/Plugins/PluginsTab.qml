@@ -1,48 +1,15 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import qs.Commons
 import qs.Widgets
 
-ColumnLayout {
-  id: root
-  spacing: 0
+NSettingsGroupPage {
+  pageKey: "plugins"
+  groups: [
+    { key: "installed", labelKey: "common.installed", icon: "plugin", content: installedContent },
+    { key: "available", labelKey: "common.available", icon: "download", content: availableContent },
+    { key: "sources", labelKey: "common.sources", icon: "world", content: sourcesContent }
+  ]
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
-
-    NTabButton {
-      text: I18n.tr("common.installed")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.available")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-    NTabButton {
-      text: I18n.tr("common.sources")
-      tabIndex: 2
-      checked: subTabBar.currentIndex === 2
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
-    InstalledSubTab {}
-    AvailableSubTab {}
-    SourcesSubTab {}
-  }
+  Component { id: installedContent; InstalledSubTab {} }
+  Component { id: availableContent; AvailableSubTab {} }
+  Component { id: sourcesContent; SourcesSubTab {} }
 }

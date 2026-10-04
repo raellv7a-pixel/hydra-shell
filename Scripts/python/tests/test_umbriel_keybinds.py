@@ -1,4 +1,5 @@
 import json
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -21,6 +22,14 @@ class UmbrielKeybindsTests(unittest.TestCase):
             replacing = patch.object(binds, name, path)
             replacing.start()
             self.addCleanup(replacing.stop)
+        real_run = subprocess.run
+        def validate_only(command, *args, **kwargs):
+            if command[:3] == ["umbriel", "msg", "config-reload"]:
+                return subprocess.CompletedProcess(command, 0, "", "")
+            return real_run(command, *args, **kwargs)
+        reload_patch = patch.object(binds.subprocess, "run", side_effect=validate_only)
+        reload_patch.start()
+        self.addCleanup(reload_patch.stop)
 
     def test_provision_preserves_user_config_and_rebind_survives_reload(self):
         binds.MASTER.write_text('[general]\nautostart = ["qs -c hydra-shell -d"]\nshow_cheatsheet = false\n')
@@ -29,7 +38,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         self.assertIn('show_cheatsheet = false', before)
         self.assertEqual(before.count('"hydra/keybinds.toml"'), 1)
         state = binds.current_state()
-        state['rebinds']['shell.launcher'] = 'Mod+Y'
+        state['overrides']['shell.launcher'] = {'chord': 'Mod+Y'}
         state['custom'].append(dict(label='Ação local', chord='Mod+Alt+Y', type='umbriel', action='overview-toggle'))
         binds.commit(state)
         self.assertEqual(binds.MASTER.read_text(), before)
@@ -41,7 +50,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         binds.commit(binds.defaults())
         original = binds.OWNED.read_bytes()
         state = binds.defaults()
-        state['rebinds']['window.close'] = 'Super+Space'
+        state['overrides']['window.close'] = {'chord': 'Super+Space'}
         with self.assertRaisesRegex(ValueError, 'Conflito'):
             binds.commit(state)
         self.assertEqual(binds.OWNED.read_bytes(), original)
@@ -72,7 +81,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         before = binds.MASTER.read_text()
         self.assertIn('"another.toml", "hydra/keybinds.toml"', before)
         state = binds.defaults()
-        state['rebinds']['window.close'] = 'Mod+Y'
+        state['overrides']['window.close'] = {'chord': 'Mod+Y'}
         binds.commit(state)
         binds.commit(binds.defaults())
         self.assertEqual(binds.current_state(), binds.defaults())
@@ -95,6 +104,104 @@ class UmbrielKeybindsTests(unittest.TestCase):
             binds.commit(binds.defaults())
         self.assertEqual(binds.MASTER.read_text(), '[keybinds]\n')
 
+
+    def test_v1_migration_preserves_rebind_and_custom_actions(self):
+        old = {'version': 1, 'rebinds': {'app.files': 'Mod+D'},
+               'custom': [{'label': 'Visão', 'chord': 'Mod+Alt+Y',
+                           'type': 'umbriel', 'action': 'overview-toggle'}]}
+        binds.STATE.parent.mkdir(parents=True)
+        binds.STATE.write_text(json.dumps(old))
+        migrated = binds.current_state()
+        self.assertEqual(migrated['overrides']['app.files'], {'chord': 'Mod+D'})
+        self.assertEqual(migrated['custom'], old['custom'])
+        binds.commit(migrated)
+        self.assertEqual(json.loads(binds.STATE.read_text())['version'], 2)
+        self.assertIn('\"Mod+D\" = { action = \"spawn:xdg-open ~\"', binds.OWNED.read_text())
+
+    def test_catalog_action_and_options_can_be_overridden_and_restored(self):
+        original = binds.generate(binds.defaults())
+        state = binds.defaults()
+        state['overrides']['app.files'] = {'type': 'command', 'action': 'gtk-launch org.kde.dolphin.desktop',
+                                          'repeat': True, 'cooldown_ms': 250}
+        binds.commit(state)
+        self.assertIn('spawn:gtk-launch org.kde.dolphin.desktop', binds.OWNED.read_text())
+        self.assertIn('repeat = true', binds.OWNED.read_text())
+        self.assertIn('cooldown_ms = 250', binds.OWNED.read_text())
+        state['overrides'].pop('app.files')
+        binds.commit(state)
+        self.assertEqual(binds.OWNED.read_text(), original)
+
+    def test_official_bind_can_change_type_action_and_permission_flags(self):
+        state = binds.defaults()
+        state['overrides']['app.files'] = {
+            'type': 'umbriel', 'action': 'overview-toggle',
+            'allow_when_inhibited': True, 'allow_when_locked': True}
+        binds.commit(state)
+        rendered = binds.OWNED.read_text()
+        self.assertIn('"Mod+E" = { action = "overview-toggle"', rendered)
+        self.assertIn('allow_when_locked = true', rendered)
+        self.assertIn('allow_when_inhibited = true', rendered)
+        self.assertEqual(binds.current_state(), state)
+
+    def test_catalog_override_conflict_and_invalid_action_do_not_modify_files(self):
+        binds.commit(binds.defaults())
+        original = binds.OWNED.read_bytes()
+        for override in ({'chord': 'Mod+Space'}, {'action': ''},
+                         {'type': 'umbriel', 'action': 'overview-toggle:'}):
+            state = binds.defaults()
+            state['overrides']['app.files'] = override
+            with self.assertRaises(ValueError):
+                binds.commit(state)
+            self.assertEqual(binds.OWNED.read_bytes(), original)
+
+    def test_edge_scratchpads_survive_v2_overrides(self):
+        state = binds.defaults()
+        state['overrides']['app.files'] = {'action': 'gtk-launch org.kde.dolphin.desktop'}
+        binds.commit(state, edge_apps=['org.kde.dolphin.desktop', 'org.kde.dolphin.desktop'])
+        text = binds.OWNED.read_text()
+        self.assertEqual(text.count('name = \"hydra-default\"'), 1)
+        self.assertEqual(text.count('name = \"hydra-edge-org-kde-dolphin\"'), 1)
+        self.assertIn('spawn:gtk-launch org.kde.dolphin.desktop', text)
+
+    def test_external_keybind_include_blocks_override_without_changes(self):
+        personal = self.config_dir / 'personal.toml'
+        personal.write_text('[keybinds]\n"Mod+Y" = { action = "overview-toggle" }\n')
+        binds.MASTER.write_text('[include]\nfiles = ["personal.toml"]\n')
+        original = binds.MASTER.read_bytes()
+        with self.assertRaisesRegex(ValueError, 'controlados externamente'):
+            binds.commit(binds.defaults())
+        self.assertEqual(binds.MASTER.read_bytes(), original)
+        self.assertFalse(binds.OWNED.exists())
+
+    def test_external_state_change_between_load_and_save_is_preserved(self):
+        initial = binds.defaults()
+        binds.commit(initial)
+        changed = binds.defaults()
+        changed['overrides']['app.files'] = {'chord': 'Mod+D'}
+        binds.commit(changed)
+        original = binds.STATE.read_bytes()
+        new = binds.defaults()
+        new['overrides']['app.files'] = {'action': 'gtk-launch org.kde.dolphin.desktop'}
+        with self.assertRaisesRegex(ValueError, 'mudaram desde a leitura'):
+            binds.commit(new, expected_state=initial)
+        self.assertEqual(binds.STATE.read_bytes(), original)
+        self.assertEqual(binds.current_state(), changed)
+
+    def test_reload_failure_restores_keybinds_state_and_master(self):
+        binds.commit(binds.defaults())
+        previous = (binds.MASTER.read_bytes(), binds.OWNED.read_bytes(), binds.STATE.read_bytes())
+        change = binds.defaults()
+        change['overrides']['app.files'] = {'action': 'gtk-launch org.kde.dolphin'}
+        real_run = binds.subprocess.run
+        def fail_reload(command, *args, **kwargs):
+            if command[:3] == ['umbriel', 'msg', 'config-reload']:
+                return subprocess.CompletedProcess(command, 1, '', 'reload refused')
+            return real_run(command, *args, **kwargs)
+        with patch.object(binds.subprocess, 'run', side_effect=fail_reload):
+            with self.assertRaisesRegex(ValueError, 'reload refused'):
+                binds.commit(change)
+        self.assertEqual((binds.MASTER.read_bytes(), binds.OWNED.read_bytes(), binds.STATE.read_bytes()),
+                         previous)
 
 if __name__ == '__main__':
     unittest.main()

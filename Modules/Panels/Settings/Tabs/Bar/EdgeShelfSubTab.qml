@@ -131,7 +131,7 @@ ColumnLayout {
       spacing: Style.marginS
 
       NIcon {
-        icon: "layout-sidebar-left"
+        icon: "layout-sidebar-right"
         pointSize: Style.fontSizeL
         color: Color.mOnSurfaceVariant
       }

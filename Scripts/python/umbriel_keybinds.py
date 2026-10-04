@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Hydra-owned Umbriel keybind catalogue, validated config writer and CLI for Settings."""
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -9,7 +10,7 @@ import sys
 import tempfile
 import tomllib
 
-VERSION = 1
+VERSION = 2
 IPC = {
     "launcher": ("toggle", "clipboard"),
     "settings": ("toggle", "open"),
@@ -123,20 +124,40 @@ def chord(value):
 
 
 def defaults():
-    return {"version": VERSION, "rebinds": {}, "custom": []}
+    return {"version": VERSION, "overrides": {}, "custom": []}
+
+
+EDITABLE = {"chord", "type", "action", "repeat", "allow_when_locked",
+            "allow_when_inhibited", "cooldown_ms"}
+
+
+def migrate_state(state):
+    if isinstance(state, dict) and state.get("version") == 1:
+        rebinds = state.get("rebinds")
+        if not isinstance(rebinds, dict) or not isinstance(state.get("custom"), list):
+            raise ValueError("Estado de atalhos V1 inválido")
+        state = {"version": VERSION,
+                 "overrides": {key: {"chord": value} for key, value in rebinds.items()},
+                 "custom": state["custom"]}
+    return state
 
 
 def validate_state(state):
-    if not isinstance(state, dict) or state.get("version") != VERSION or not isinstance(state.get("rebinds"), dict) or not isinstance(state.get("custom"), list):
+    if (not isinstance(state, dict) or state.get("version") != VERSION
+            or not isinstance(state.get("overrides"), dict)
+            or not isinstance(state.get("custom"), list)
+            or set(state) != {"version", "overrides", "custom"}):
         raise ValueError("Estado de atalhos incompatível ou inválido")
     ids = {row["id"] for row in CATALOG}
-    if set(state["rebinds"]) - ids:
-        raise ValueError("Atalho original desconhecido: " + repr(set(state["rebinds"]) - ids))
+    if set(state["overrides"]) - ids:
+        raise ValueError("Atalho original desconhecido: " + repr(set(state["overrides"]) - ids))
     used = {}
     result = []
     for row in CATALOG:
-        current = chord(state["rebinds"].get(row["id"], row["chord"]))
-        result.append(dict(row, chord=current))
+        override = state["overrides"].get(row["id"], {})
+        if not isinstance(override, dict) or set(override) - EDITABLE:
+            raise ValueError("Override de atalho inválido: " + row["id"])
+        result.append(dict(row, **override))
     for custom in state["custom"]:
         if not isinstance(custom, dict):
             raise ValueError("Atalho personalizado inválido")
@@ -155,7 +176,8 @@ def validate_state(state):
             if not isinstance(action, str) or not action.strip() or "\n" in action or "\r" in action:
                 raise ValueError("Comando vazio ou com quebras de linha")
         elif kind == "umbriel":
-            if not isinstance(action, str) or not re.fullmatch(r"[a-z][a-z0-9-]*(?::[a-zA-Z0-9_./-]+)?", action):
+            if (not isinstance(action, str) or not re.fullmatch(r"[a-z][a-z0-9-]*(?::[^\r\n]+)?", action)
+                    or action.endswith((':', '/'))):
                 raise ValueError("Ação Umbriel inválida: " + str(action))
         else:
             raise ValueError("Tipo de ação inválido: " + str(kind))
@@ -307,59 +329,86 @@ def atomic(path, text):
         temp.unlink(missing_ok=True)
 
 
-def commit(state, edge_apps=None):
+def commit(state, edge_apps=None, expected_state=None):
     generated = generate(state, edge_apps=edge_apps)
+    if MASTER.is_symlink() or OWNED.is_symlink() or STATE.is_symlink():
+        raise ValueError("Recusando substituir configuração Umbriel por link simbólico")
+    OWNED.parent.mkdir(parents=True, exist_ok=True)
+    with (OWNED.parent / ".config.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        _commit_locked(state, generated, expected_state)
+
+
+def _commit_locked(state, generated, expected_state):
     had_master = MASTER.exists()
     old_master = MASTER.read_text() if had_master else '[general]\nautostart = ["qs -c hydra-shell -d"]\n'
     old_owned = OWNED.read_text() if OWNED.exists() else None
-    # Validate a staged root and staged include in their real parent directories.
+    old_state = STATE.read_text() if STATE.exists() else None
+    if expected_state is not None:
+        current = migrate_state(json.loads(old_state)) if old_state is not None else defaults()
+        if current != expected_state:
+            raise ValueError("Atalhos Umbriel mudaram desde a leitura; recarregue a página")
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    OWNED.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=OWNED.parent, prefix=".hydra-binds-", suffix=".toml", delete=False) as binds_stream:
-        staged_binds = Path(binds_stream.name)
-        binds_stream.write(generated)
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=OWNED.parent, prefix=".hydra-binds-", suffix=".toml", delete=False) as stream:
+        staged_binds = Path(stream.name)
+        stream.write(generated)
     staged_master = None
     final_master = old_master
+    saved_state = json.dumps(state, ensure_ascii=False, indent=2) + "\n"
     try:
         final_master = with_include(old_master, INCLUDE)
+        from umbriel_config import settings_sources
+        owners, sources = settings_sources(old_master, CONFIG_DIR, ('keybinds',), 'keybinds.toml')
+        if owners:
+            raise ValueError("Atalhos Umbriel controlados externamente: " + ", ".join(owners))
         staged_text = with_include(old_master, "hydra/" + staged_binds.name)
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=CONFIG_DIR, prefix=".hydra-check-", suffix=".toml", delete=False) as master_stream:
-            staged_master = Path(master_stream.name)
-            master_stream.write(staged_text)
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=CONFIG_DIR, prefix=".hydra-check-", suffix=".toml", delete=False) as stream:
+            staged_master = Path(stream.name)
+            stream.write(staged_text)
         result = subprocess.run(["umbriel", "config", "validate", "-c", str(staged_master)], capture_output=True, text=True)
         if result.returncode:
             raise ValueError((result.stderr or result.stdout).strip() or "umbriel config validate falhou")
-        if MASTER.exists() and MASTER.read_text() != old_master:
+        if (MASTER.read_text() if MASTER.exists() else None) != (old_master if had_master else None):
             raise ValueError("config.toml mudou durante a validação; tente novamente")
-        if old_owned is not None and OWNED.read_text() != old_owned:
+        if (OWNED.read_text() if OWNED.exists() else None) != old_owned:
             raise ValueError("keybinds.toml mudou durante a validação; tente novamente")
+        if settings_sources(old_master, CONFIG_DIR, ('keybinds',), 'keybinds.toml') != (owners, sources):
+            raise ValueError("Um include Umbriel mudou durante a validação; tente novamente")
+        if (STATE.read_text() if STATE.exists() else None) != old_state:
+            raise ValueError("keybinds.json mudou durante a validação; tente novamente")
         atomic(OWNED, generated)
-        if not MASTER.exists() or final_master != old_master:
+        if not had_master or final_master != old_master:
             atomic(MASTER, final_master)
-        atomic(STATE, json.dumps(state, ensure_ascii=False, indent=2) + "\n")
-        subprocess.run(["umbriel", "msg", "config-reload"], capture_output=True)
+        atomic(STATE, saved_state)
+        result = subprocess.run(["umbriel", "msg", "config-reload"], capture_output=True, text=True)
+        if result.returncode:
+            raise ValueError((result.stderr or result.stdout).strip() or "Umbriel reload falhou")
     except Exception:
         if OWNED.exists() and OWNED.read_text() == generated:
             if old_owned is None:
                 OWNED.unlink()
             else:
                 atomic(OWNED, old_owned)
-        if MASTER.exists() and MASTER.read_text() == final_master and final_master != old_master:
+        if MASTER.exists() and MASTER.read_text() == final_master and (not had_master or final_master != old_master):
             if had_master:
                 atomic(MASTER, old_master)
             else:
                 MASTER.unlink()
+        if STATE.exists() and STATE.read_text() == saved_state:
+            if old_state is None:
+                STATE.unlink()
+            else:
+                atomic(STATE, old_state)
         raise
     finally:
         staged_binds.unlink(missing_ok=True)
         if staged_master:
             staged_master.unlink(missing_ok=True)
 
-
 def current_state():
     if not STATE.exists():
         return defaults()
-    state = json.loads(STATE.read_text())
+    state = migrate_state(json.loads(STATE.read_text()))
     validate_state(state)
     return state
 
@@ -369,12 +418,13 @@ def main():
     if command == "provision":
         state = current_state()
         master = MASTER.read_text() if MASTER.exists() else ""
-        if (not STATE.exists() or not OWNED.exists()
+        if (not STATE.exists() or json.loads(STATE.read_text()).get("version") != VERSION or not OWNED.exists()
                 or OWNED.read_text() != generate(state)
                 or with_include(master, INCLUDE) != master):
             commit(state)
     elif command == "save":
-        commit(json.loads(sys.argv[2]))
+        commit(migrate_state(json.loads(sys.argv[2])),
+               expected_state=json.loads(sys.argv[3]) if len(sys.argv) > 3 else None)
     elif command == "sync":
         edge_apps = json.loads(sys.argv[2]) if len(sys.argv) > 2 else None
         state = current_state()

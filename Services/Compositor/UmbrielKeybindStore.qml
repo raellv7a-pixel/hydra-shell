@@ -10,28 +10,19 @@ Singleton {
 
   property var catalog: []
   property var ipc: ({})
-  property var committed: ({
-                             "version": 1,
-                             "rebinds": {},
-                             "custom": []
-                           })
-  property var draft: ({
-                         "version": 1,
-                         "rebinds": {},
-                         "custom": []
-                       })
+  property var committed: ({ "version": 2, "overrides": {}, "custom": [] })
+  property var draft: ({ "version": 2, "overrides": {}, "custom": [] })
+  property var savingState: null
   property bool loaded: false
   property bool busy: false
   property string error: ""
   property var pendingEdgeApps: null
   property string syncingEdgeApps: ""
-  readonly property bool dirty: JSON.stringify(draft) !== JSON.stringify(committed)
+  readonly property bool dirty: canonical(draft) !== canonical(committed)
   readonly property var rows: {
     const values = [];
     for (const item of catalog)
-    values.push(Object.assign({}, item, {
-                                chord: draft.rebinds[item.id] || item.chord
-                              }));
+      values.push(Object.assign({}, item, draft.overrides[item.id] || {}));
     for (let i = 0; i < draft.custom.length; i++)
     values.push(Object.assign({
                                 id: "custom." + i,
@@ -43,6 +34,19 @@ Singleton {
   readonly property bool hasConflicts: Object.keys(conflicts).length > 0
 
   readonly property string script: Quickshell.shellDir + "/Scripts/python/umbriel_keybinds.py"
+  function canonical(state) {
+    function sorted(value) {
+      if (Array.isArray(value)) return value.map(sorted);
+      if (value !== null && typeof value === "object") {
+        const object = {};
+        for (const key of Object.keys(value).sort()) object[key] = sorted(value[key]);
+        return object;
+      }
+      return value;
+    }
+    return JSON.stringify(sorted(state));
+  }
+
 
   function init() {
     if (loaded || busy)
@@ -62,19 +66,41 @@ Singleton {
   }
 
   function rebind(id, value) {
-    const updated = JSON.parse(JSON.stringify(draft));
-    const row = catalog.find(item => item.id === id);
-    if (!row)
-      return;
-    const chord = Chords.normalize(value);
-    if (!chord) {
+    const normalized = Chords.normalize(value);
+    if (!normalized) {
       error = "Atalho inválido: " + value;
       return;
     }
-    if (chord === Chords.normalize(row.chord))
-      delete updated.rebinds[id];
+    editBind(id, "chord", normalized);
+  }
+
+  function editBind(id, field, value) {
+    if (id.startsWith("custom.")) {
+      editCustom(Number(id.slice(7)), field, value);
+      return;
+    }
+    const original = catalog.find(item => item.id === id);
+    if (!original || !["chord", "type", "action", "repeat", "allow_when_locked", "allow_when_inhibited", "cooldown_ms"].includes(field))
+      return;
+    const updated = JSON.parse(JSON.stringify(draft));
+    const override = updated.overrides[id] || {};
+    if (value === original[field])
+      delete override[field];
     else
-      updated.rebinds[id] = chord;
+      override[field] = value;
+    if (Object.keys(override).length)
+      updated.overrides[id] = override;
+    else
+      delete updated.overrides[id];
+    draft = updated;
+    error = "";
+  }
+
+  function restoreBind(id) {
+    if (id.startsWith("custom."))
+      return;
+    const updated = JSON.parse(JSON.stringify(draft));
+    delete updated.overrides[id];
     draft = updated;
     error = "";
   }
@@ -114,20 +140,17 @@ Singleton {
     error = "";
   }
   function restoreDefaults() {
-    draft = {
-      version: 1,
-      rebinds: {},
-      custom: []
-    };
+    draft = { version: 2, overrides: {}, custom: [] };
     error = "";
   }
 
   function save() {
     if (!loaded || busy || !dirty || hasConflicts)
       return;
+    savingState = JSON.parse(JSON.stringify(draft));
     busy = true;
     error = "";
-    saveProcess.command = ["python3", script, "save", JSON.stringify(draft)];
+    saveProcess.command = ["python3", script, "save", JSON.stringify(savingState), JSON.stringify(committed)];
     saveProcess.running = true;
   }
 
@@ -220,11 +243,13 @@ Singleton {
     onExited: code => {
       root.busy = false;
       if (code !== 0) {
+        root.savingState = null;
         root.error = saveError.text.trim() || "Falha na validação Umbriel";
         root.flushPendingEdgeSync();
         return;
       }
-      root.committed = JSON.parse(JSON.stringify(root.draft));
+      root.committed = root.savingState;
+      root.savingState = null;
       root.error = "";
       root.flushPendingEdgeSync();
     }

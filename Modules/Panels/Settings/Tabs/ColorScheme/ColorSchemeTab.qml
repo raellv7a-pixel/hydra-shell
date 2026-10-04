@@ -1,18 +1,13 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
-import Quickshell
-import Quickshell.Io
 import "."
-import qs.Commons
-import qs.Services.System
-import qs.Services.Theming
-import qs.Services.UI
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
+  pageKey: "colors"
 
   // Time dropdown options (00:00 .. 23:30)
   ListModel {
@@ -66,39 +61,18 @@ ColumnLayout {
     }
   }
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
+  groups: [
+    { key: "colors", labelKey: "common.colors", icon: "palette", content: colorsContent },
+    { key: "templates", labelKey: "common.templates", icon: "file-code", content: templatesContent }
+  ]
 
-    NTabButton {
-      text: I18n.tr("common.colors")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.templates")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
+  Component {
+    id: colorsContent
     ColorsSubTab {
       screen: root.screen
       timeOptions: timeOptions
       onOpenDownloadPopup: downloadPopupLoader.open()
     }
-    TemplatesSubTab {}
   }
+  Component { id: templatesContent; TemplatesSubTab {} }
 }

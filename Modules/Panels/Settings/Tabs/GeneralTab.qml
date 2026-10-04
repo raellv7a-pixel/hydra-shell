@@ -1,46 +1,15 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import Quickshell
-import "../../../../Helpers/QtObj2JS.js" as QtObj2JS
 import "General"
-import qs.Commons
-import qs.Services.System
-import qs.Services.UI
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
+  pageKey: "general"
+  groups: [
+    { key: "basics", labelKey: "panels.general.tab-basics", icon: "settings", content: basicsContent },
+    { key: "keybinds", labelKey: "panels.general.tab-keybinds", icon: "keyboard", content: keybindsContent }
+  ]
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
-
-    NTabButton {
-      text: I18n.tr("panels.general.tab-basics")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("panels.general.tab-keybinds")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-    BasicsSubTab {}
-    KeybindsSubTab {}
-  }
+  Component { id: basicsContent; BasicsSubTab {} }
+  Component { id: keybindsContent; KeybindsSubTab {} }
 }

@@ -1,6 +1,6 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell.Io
 import qs.Commons
 import qs.Services.Location
@@ -8,9 +8,9 @@ import qs.Services.UI
 import qs.Services.Compositor
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
+  pageKey: "display"
 
   // Time dropdown options (00:00 .. 23:30)
   ListModel {
@@ -56,50 +56,19 @@ ColumnLayout {
     stderr: StdioCollector {}
   }
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
+  groups: [
+    { key: "brightness", labelKey: "common.brightness", icon: "sun", content: brightnessContent },
+    { key: "night-light", labelKey: "common.night-light", icon: "moon-stars", content: nightLightContent },
+    { key: "layout", labelKey: "panels.display.monitor-layout-group", icon: "device-desktop", content: monitorLayoutContent, available: CompositorService.isUmbriel }
+  ]
 
-    NTabButton {
-      text: I18n.tr("common.brightness")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.night-light")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-    NTabButton {
-      text: "Arranjo de Monitores"
-      tabIndex: 2
-      visible: CompositorService.isUmbriel
-      checked: subTabBar.currentIndex === 2
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
-    BrightnessSubTab {}
+  Component { id: brightnessContent; BrightnessSubTab {} }
+  Component {
+    id: nightLightContent
     NightLightSubTab {
       timeOptions: timeOptions
       onCheckWlsunset: wlsunsetCheck.running = true
     }
-    Loader {
-      active: CompositorService.isUmbriel
-      sourceComponent: Component {
-        MonitorLayoutSubTab {}
-      }
-    }
-}
+  }
+  Component { id: monitorLayoutContent; MonitorLayoutSubTab {} }
 }

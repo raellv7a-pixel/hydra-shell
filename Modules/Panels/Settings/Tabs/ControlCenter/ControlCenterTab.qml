@@ -1,16 +1,15 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
-import Quickshell
 import qs.Commons
 import qs.Services.Hydra
-import qs.Services.System
 import qs.Services.UI
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
+  pageKey: "control-center"
 
   Component.onCompleted: {
     // Fill out availableWidgets ListModel
@@ -41,69 +40,30 @@ ColumnLayout {
                           });
   }
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
+  groups: [
+    { key: "appearance", labelKey: "common.appearance", icon: "palette", content: appearanceContent },
+    { key: "cards", labelKey: "common.cards", icon: "layout-dashboard", content: cardsContent },
+    { key: "shortcuts", labelKey: "common.shortcuts", icon: "grid-dots", content: shortcutsContent },
+    { key: "profile", labelKey: "common.profile", icon: "user", content: profileContent },
+    { key: "effects", labelKey: "common.effects", icon: "sparkles", content: effectsContent }
+  ]
 
-    NTabButton {
-      text: I18n.tr("common.appearance")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.cards")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-    NTabButton {
-      text: I18n.tr("common.shortcuts")
-      tabIndex: 2
-      checked: subTabBar.currentIndex === 2
-    }
-    NTabButton {
-      text: I18n.tr("common.profile")
-      tabIndex: 3
-      checked: subTabBar.currentIndex === 3
-    }
-    NTabButton {
-      text: I18n.tr("common.effects")
-      tabIndex: 4
-      checked: subTabBar.currentIndex === 4
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-
-    AppearanceSubTab {}
-
-    CardsSubTab {}
-
+  Component { id: appearanceContent; AppearanceSubTab {} }
+  Component { id: cardsContent; CardsSubTab {} }
+  Component {
+    id: shortcutsContent
     ShortcutsSubTab {
       availableWidgets: availableWidgets
-      onAddWidgetToSection: (widgetId, section) => _addWidgetToSection(widgetId, section)
-      onRemoveWidgetFromSection: (section, index) => _removeWidgetFromSection(section, index)
-      onReorderWidgetInSection: (section, fromIndex, toIndex) => _reorderWidgetInSection(section, fromIndex, toIndex)
-      onUpdateWidgetSettingsInSection: (section, index, settings) => _updateWidgetSettingsInSection(section, index, settings)
-      onMoveWidgetBetweenSections: (fromSection, index, toSection) => _moveWidgetBetweenSections(fromSection, index, toSection)
+      onAddWidgetToSection: (widgetId, section) => root._addWidgetToSection(widgetId, section)
+      onRemoveWidgetFromSection: (section, index) => root._removeWidgetFromSection(section, index)
+      onReorderWidgetInSection: (section, fromIndex, toIndex) => root._reorderWidgetInSection(section, fromIndex, toIndex)
+      onUpdateWidgetSettingsInSection: (section, index, settings) => root._updateWidgetSettingsInSection(section, index, settings)
+      onMoveWidgetBetweenSections: (fromSection, index, toSection) => root._moveWidgetBetweenSections(fromSection, index, toSection)
       onOpenPluginSettingsRequested: manifest => pluginSettingsDialog.openPluginSettings(manifest)
     }
-
-    ProfileSubTab {}
-
-    EffectsSubTab {}
   }
+  Component { id: profileContent; ProfileSubTab {} }
+  Component { id: effectsContent; EffectsSubTab {} }
 
   // ---------------------------------
   // Signal functions

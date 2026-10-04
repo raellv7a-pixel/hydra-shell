@@ -58,6 +58,7 @@ Item {
   property int searchSelectedIndex: 0
   property string highlightLabelKey: ""
   property bool navigatingFromSearch: false
+  property bool awaitingGroupedHighlight: false
 
   // Mouse hover suppression during keyboard navigation
   property bool ignoreMouseHover: false
@@ -113,6 +114,7 @@ Item {
                    "tabLabel": entry.tabLabel,
                    "subTab": entry.subTab,
                    "subTabLabel": entry.subTabLabel || null,
+                   "group": entry.group || "",
                    "label": I18n.tr(entry.labelKey),
                    "description": entry.descriptionKey ? I18n.tr(entry.descriptionKey) : "",
                    "subTabName": entry.subTabLabel ? I18n.tr(entry.subTabLabel) : ""
@@ -141,6 +143,7 @@ Item {
 
   // Navigate to a search result
   property int _pendingSubTab: -1
+  property string _pendingGroup: ""
 
   function navigateToResult(entry) {
     if (entry.tab < 0 || entry.tab >= tabsModel.length)
@@ -148,6 +151,8 @@ Item {
 
     highlightLabelKey = entry.labelKey;
     _pendingSubTab = (entry.subTab !== null && entry.subTab !== undefined) ? entry.subTab : -1;
+    _pendingGroup = entry.group || "";
+    awaitingGroupedHighlight = !!_pendingGroup;
 
     const alreadyOnTab = (currentTabIndex === entry.tab);
     navigatingFromSearch = true;
@@ -155,6 +160,10 @@ Item {
     navigatingFromSearch = false;
 
     if (alreadyOnTab && activeTabContent) {
+      if (_pendingGroup && activeTabContent.revealSettingsGroup) {
+        activeTabContent.revealSettingsGroup(_pendingGroup);
+        _pendingGroup = "";
+      }
       if (_pendingSubTab >= 0) {
         navigatingFromSearch = true;
         setSubTabIndex(_pendingSubTab);
@@ -165,8 +174,6 @@ Item {
       highlightScrollTimer.restart();
     }
 
-    // Clear highlight after a delay
-    highlightClearTimer.restart();
   }
 
   // Navigate to a tab and optionally a subtab (simpler than navigateToResult, no highlighting)
@@ -185,6 +192,7 @@ Item {
 
     const hasSubTab = subTabIndex !== null && subTabIndex !== undefined && subTabIndex >= 0;
     _pendingSubTab = hasSubTab ? subTabIndex : -1;
+    _pendingGroup = "";
 
     // Check if we're already on this tab
     const alreadyOnTab = (currentTabIndex === tabIndex);
@@ -223,9 +231,13 @@ Item {
     }
   }
 
-  // Set sub-tab on the currently loaded tab content. Returns true if an NTabBar was found.
+  // Group pages expose a navigation hook; existing pages still use NTabBar.
   function setSubTabIndex(subTabIndex) {
     if (activeTabContent) {
+      if (activeTabContent.navigateToSettingsGroup) {
+        activeTabContent.navigateToSettingsGroup(subTabIndex);
+        return true;
+      }
       return setSubTabRecursive(activeTabContent, subTabIndex);
     }
     return false;
@@ -309,6 +321,9 @@ Item {
   function clearHighlightImmediately() {
     highlightClearTimer.stop();
     highlightScrollTimer.stop();
+    highlightScrollTimer.targetKey = "";
+    highlightScrollTimer.attempts = 0;
+    awaitingGroupedHighlight = false;
     highlightAnimation.stop();
     highlightLabelKey = "";
     highlightOverlay.opacity = 0;
@@ -359,37 +374,47 @@ Item {
 
   Timer {
     id: highlightScrollTimer
-    interval: 333
+    interval: root.awaitingGroupedHighlight ? Style.animationNormal + Style.animationFast + 40 : 333
     property string targetKey: ""
+    property int attempts: 0
     onTriggered: {
-      if (root.activeTabContent && targetKey) {
-        const widget = root.findAndHighlightWidget(root.activeTabContent, targetKey);
-        if (widget && root.activeScrollView) {
-          // Scroll widget into view using the Flickable directly
-          const flickable = root.activeScrollView.contentItem;
-          const mapped = widget.mapToItem(flickable.contentItem, 0, 0);
-          const targetY = mapped.y - flickable.height / 3;
-          flickable.contentY = Math.max(0, Math.min(targetY, flickable.contentHeight - flickable.height));
-
-          // Position highlight overlay after scroll layout has settled
-          Qt.callLater(function () {
-            const overlayPos = widget.mapToItem(tabContentArea, 0, 0);
-            highlightOverlay.x = overlayPos.x - Style.marginM;
-            highlightOverlay.y = overlayPos.y - Style.marginM;
-            highlightOverlay.width = widget.width + Style.margin2M;
-            highlightOverlay.height = widget.height + Style.margin2M;
-            highlightAnimation.restart();
-          });
+      const widget = targetKey ? root.findAndHighlightWidget(root.activeTabContent, targetKey) : null;
+      if (!widget || !root.activeScrollView) {
+        if (targetKey && ++attempts < 12) {
+          restart();
+        } else {
+          root.clearHighlightImmediately();
         }
+        return;
       }
+
+      const key = targetKey;
+      const flickable = root.activeScrollView.contentItem;
+      const mapped = widget.mapToItem(flickable.contentItem, 0, 0);
+      const targetY = mapped.y - flickable.height / 3;
+      flickable.contentY = Math.max(0, Math.min(targetY, flickable.contentHeight - flickable.height));
       targetKey = "";
+      attempts = 0;
+
+      // Wait until group layout and the programmatic scroll have settled.
+      Qt.callLater(function () {
+        if (root.highlightLabelKey !== key) return;
+        const overlayPos = widget.mapToItem(tabContentArea, 0, 0);
+        highlightOverlay.x = overlayPos.x - Style.marginM;
+        highlightOverlay.y = overlayPos.y - Style.marginM;
+        highlightOverlay.width = widget.width + Style.margin2M;
+        highlightOverlay.height = widget.height + Style.margin2M;
+        highlightAnimation.restart();
+        root.awaitingGroupedHighlight = false;
+        highlightClearTimer.restart();
+      });
     }
   }
 
   // Clear highlight when the user scrolls so the outline doesn't stay in place
   Connections {
     target: root.activeScrollView ? root.activeScrollView.contentItem : null
-    enabled: root.highlightLabelKey !== "" && !highlightScrollTimer.running
+    enabled: root.highlightLabelKey !== "" && !root.awaitingGroupedHighlight && !highlightScrollTimer.running
     function onContentYChanged() {
       root.clearHighlightImmediately();
     }
@@ -646,7 +671,7 @@ Item {
           {
             "id": SettingsPanel.Tab.Umbriel,
             "label": "panels.umbriel.title",
-            "icon": "keyboard",
+            "icon": "app-window",
             "source": umbrielTab
           },
           {
@@ -1341,6 +1366,12 @@ Item {
                         item.screen = root.screen;
                       }
                       root.activeTabContent = item;
+                      if (item && item.hasOwnProperty("scrollView"))
+                        item.scrollView = scrollView;
+                      if (root._pendingGroup && item && item.revealSettingsGroup) {
+                        item.revealSettingsGroup(root._pendingGroup);
+                        root._pendingGroup = "";
+                      }
                       if (root._pendingSubTab >= 0) {
                         root.navigatingFromSearch = true;
                         if (root.setSubTabIndex(root._pendingSubTab))

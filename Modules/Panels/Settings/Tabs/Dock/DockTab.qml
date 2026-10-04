@@ -1,42 +1,13 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import qs.Commons
 import qs.Widgets
 
-ColumnLayout {
-  id: root
-  spacing: 0
+NSettingsGroupPage {
+  pageKey: "dock"
+  groups: [
+    { key: "appearance", labelKey: "common.appearance", icon: "palette", content: appearanceContent },
+    { key: "monitors", labelKey: "common.monitors", icon: "device-desktop", content: monitorsContent }
+  ]
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
-
-    NTabButton {
-      text: I18n.tr("common.appearance")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.monitors")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
-    AppearanceSubTab {}
-    MonitorsSubTab {}
-  }
+  Component { id: appearanceContent; AppearanceSubTab {} }
+  Component { id: monitorsContent; MonitorsSubTab {} }
 }

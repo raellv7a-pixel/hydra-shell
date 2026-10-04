@@ -1,15 +1,15 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
-import Quickshell
 import qs.Commons
 import qs.Services.Hydra
 import qs.Services.UI
 import qs.Widgets
 
-ColumnLayout {
+NSettingsGroupPage {
   id: root
-  spacing: 0
+  pageKey: "bar"
 
   // Helper functions to update arrays immutably
   function addMonitor(list, name) {
@@ -171,50 +171,17 @@ ColumnLayout {
     }
   }
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
+  groups: [
+    { key: "appearance", labelKey: "common.appearance", icon: "palette", content: appearanceContent },
+    { key: "widgets", labelKey: "common.widgets", icon: "grid-dots", content: widgetsContent },
+    { key: "behavior", labelKey: "common.behavior", icon: "settings-2", content: behaviorContent },
+    { key: "monitors", labelKey: "common.monitors", icon: "device-desktop", content: monitorsContent },
+    { key: "edge-shelf", labelKey: "panels.bar.edge-shelf-group", icon: "layout-sidebar-right", content: edgeShelfContent }
+  ]
 
-    NTabButton {
-      text: I18n.tr("common.appearance")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.widgets")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-    NTabButton {
-      text: I18n.tr("common.behavior")
-      tabIndex: 2
-      checked: subTabBar.currentIndex === 2
-    }
-    NTabButton {
-      text: I18n.tr("common.monitors")
-      tabIndex: 3
-      checked: subTabBar.currentIndex === 3
-    }
-    NTabButton {
-      text: "Edge Shelf"
-      tabIndex: 4
-      checked: subTabBar.currentIndex === 4
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginS
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
-    AppearanceSubTab {}
+  Component { id: appearanceContent; AppearanceSubTab {} }
+  Component {
+    id: widgetsContent
     WidgetsSubTab {
       availableWidgets: availableWidgets
       addWidgetToSection: root._addWidgetToSection
@@ -224,13 +191,16 @@ ColumnLayout {
       moveWidgetBetweenSections: root._moveWidgetBetweenSections
       onOpenPluginSettings: manifest => pluginSettingsDialog.openPluginSettings(manifest)
     }
-    BehaviorSubTab {}
+  }
+  Component { id: behaviorContent; BehaviorSubTab {} }
+  Component {
+    id: monitorsContent
     MonitorsSubTab {
       addMonitor: root.addMonitor
       removeMonitor: root.removeMonitor
     }
-    EdgeShelfSubTab {}
   }
+  Component { id: edgeShelfContent; EdgeShelfSubTab {} }
 
   NPluginSettingsPopup {
     id: pluginSettingsDialog

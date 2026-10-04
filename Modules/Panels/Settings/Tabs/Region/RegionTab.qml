@@ -1,48 +1,15 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import qs.Commons
 import qs.Widgets
 
-ColumnLayout {
-  id: root
-  spacing: 0
+NSettingsGroupPage {
+  pageKey: "region"
+  groups: [
+    { key: "location", labelKey: "common.location", icon: "map-pin", content: locationContent },
+    { key: "date", labelKey: "common.date", icon: "calendar", content: dateContent },
+    { key: "calendar", labelKey: "common.calendar-panel", icon: "clock", content: calendarContent }
+  ]
 
-  NTabBar {
-    id: subTabBar
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginM
-    distributeEvenly: true
-    currentIndex: tabView.currentIndex
-
-    NTabButton {
-      text: I18n.tr("common.location")
-      tabIndex: 0
-      checked: subTabBar.currentIndex === 0
-    }
-    NTabButton {
-      text: I18n.tr("common.date")
-      tabIndex: 1
-      checked: subTabBar.currentIndex === 1
-    }
-    NTabButton {
-      text: I18n.tr("common.calendar-panel")
-      tabIndex: 2
-      checked: subTabBar.currentIndex === 2
-    }
-  }
-
-  Item {
-    Layout.fillWidth: true
-    Layout.preferredHeight: Style.marginL
-  }
-
-  NTabView {
-    id: tabView
-    currentIndex: subTabBar.currentIndex
-
-    LocationSubTab {}
-    DateSubTab {}
-    ClockPanelSubTab {}
-  }
+  Component { id: locationContent; LocationSubTab {} }
+  Component { id: dateContent; DateSubTab {} }
+  Component { id: calendarContent; ClockPanelSubTab {} }
 }
