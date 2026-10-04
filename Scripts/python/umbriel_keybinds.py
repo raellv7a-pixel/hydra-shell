@@ -24,6 +24,7 @@ IPC = {
     "volume": ("increase", "decrease", "muteOutput"),
     "brightness": ("increase", "decrease"),
     "media": ("playPause", "next", "previous"),
+    "windowSwitcher": ("open", "hold", "holdPrevious", "close", "next", "previous"),
 }
 
 
@@ -35,6 +36,8 @@ def entry(id, category, label, chord, kind, action, *, repeat=False, locked=Fals
 
 CATALOG = [
     entry("shell.launcher", "Hydra", "Lançador", "Mod+Space", "hydra", "launcher toggle"),
+    entry("shell.switcher", "Hydra", "Alternador de janelas", "Alt+Tab", "hydra", "windowSwitcher hold"),
+    entry("shell.switcher.previous", "Hydra", "Alternador: anterior", "Alt+Shift+Tab", "hydra", "windowSwitcher holdPrevious"),
     entry("shell.clipboard", "Hydra", "Área de transferência", "Mod+V", "hydra", "launcher clipboard"),
     entry("shell.settings", "Hydra", "Configurações", "Mod+Comma", "hydra", "settings toggle"),
     entry("shell.control", "Hydra", "Central de controle", "Mod+S", "hydra", "controlCenter toggle"),
@@ -162,6 +165,13 @@ def validate_state(state):
         if not isinstance(custom, dict):
             raise ValueError("Atalho personalizado inválido")
         result.append(custom)
+    # A newly introduced default must not take a chord already owned by a
+    # personal bind. Explicit switcher overrides still obey normal conflicts.
+    result = [row for row in result if not (
+        row.get("id") in ("shell.switcher", "shell.switcher.previous")
+        and row["id"] not in state["overrides"]
+        and any(other is not row and chord(other.get("chord", "")) == chord(row["chord"])
+                for other in result))]
     for row in result:
         value = chord(row.get("chord", ""))
         if value in used:

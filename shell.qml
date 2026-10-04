@@ -29,6 +29,7 @@ import qs.Modules.Panels.Settings
 import qs.Modules.Polkit
 import qs.Modules.ScreenToolkit
 import qs.Modules.Toast
+import qs.Modules.WindowSwitcher
 import qs.Services.Compositor
 import qs.Services.Control
 import qs.Services.Hardware
@@ -159,7 +160,10 @@ ShellRoot {
       }
 
       FadeOverlay {}
+      WindowSwitcher {}
+      OverviewLauncherCapture {}
       ShowKeysOsd {}
+      SubmapOsd {}
       OSD {}
 
       // Settings window mode (single window across all monitors)

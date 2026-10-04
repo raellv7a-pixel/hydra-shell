@@ -35,6 +35,13 @@ function conflicts(rows) {
   return result;
 }
 
+function adoptSwitcherDefaults(rows, overrides) {
+  return rows.filter(row => !(
+    (row.id === "shell.switcher" || row.id === "shell.switcher.previous")
+    && !Object.prototype.hasOwnProperty.call(overrides, row.id)
+    && rows.some(other => other !== row && normalize(other.chord) === normalize(row.chord))));
+}
+
 function keyName(event) {
   const key = event.key;
   if (key >= Qt.Key_A && key <= Qt.Key_Z || key >= Qt.Key_0 && key <= Qt.Key_9)

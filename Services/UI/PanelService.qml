@@ -29,6 +29,23 @@ Singleton {
   property bool overlayLauncherOpen: false
   property var overlayLauncherScreen: null
   property var overlayLauncherCore: null  // Reference to LauncherCore when overlay is active
+  property bool launcherOpenedFromOverview: false
+  property var overviewLauncherScreen: null
+  property var overviewLauncherPanel: null
+  property var pendingLauncherSearch: null
+  onOverlayLauncherCoreChanged: {
+    if (overlayLauncherCore && pendingLauncherSearch !== null) {
+      overlayLauncherCore.setSearchText(pendingLauncherSearch);
+      pendingLauncherSearch = null;
+    }
+  }
+
+  function clearLauncherOwnership() {
+    launcherOpenedFromOverview = false;
+    overviewLauncherScreen = null;
+    overviewLauncherPanel = null;
+    pendingLauncherSearch = null;
+  }
 
 
   // Brief initialization window allows panel text inputs to acquire focus.
@@ -228,7 +245,7 @@ Singleton {
 
   // Helper to keep only one panel open at any time
   function willOpenPanel(panel) {
-    if (CompositorService.overviewActive)
+    if (CompositorService.overviewActive && !(launcherOpenedFromOverview && panel === overviewLauncherPanel))
       CompositorService.closeOverview();
     // Close overlay launcher if open
     if (overlayLauncherOpen) {
@@ -284,8 +301,9 @@ Singleton {
   }
 
   // Open launcher panel (handles both normal and overlay mode)
-  function openLauncher(screen) {
-    if (CompositorService.overviewActive)
+  function openLauncher(screen, fromOverview = false) {
+    if (!fromOverview) clearLauncherOwnership();
+    if (CompositorService.overviewActive && !fromOverview)
       CompositorService.closeOverview();
     if (Settings.data.appLauncher.overviewLayer) {
       // Close any regular panel first
@@ -303,8 +321,10 @@ Singleton {
     } else {
       // Normal mode - use the SmartPanel
       var panel = getPanel("launcherPanel", screen);
-      if (panel)
+      if (panel) {
+        if (fromOverview) overviewLauncherPanel = panel;
         panel.open();
+      }
     }
   }
 
@@ -342,6 +362,7 @@ Singleton {
 
   // Close overlay launcher
   function closeOverlayLauncher() {
+    clearLauncherOwnership();
     if (overlayLauncherOpen) {
       closedImmediately = false;
       overlayLauncherOpen = false;
@@ -352,6 +373,7 @@ Singleton {
 
   // Close overlay launcher immediately (for app launches)
   function closeOverlayLauncherImmediately() {
+    clearLauncherOwnership();
     if (overlayLauncherOpen) {
       closedImmediately = true;
       overlayLauncherOpen = false;
@@ -392,21 +414,30 @@ Singleton {
     }
   }
 
-  function openLauncherWithSearch(screen, searchText) {
+  function openLauncherWithSearch(screen, searchText, fromOverview = false) {
     if (Settings.data.appLauncher.overviewLayer) {
-      openLauncher(screen);
-      // Set search text after core is ready
-      Qt.callLater(() => {
-                     if (overlayLauncherCore)
-                     overlayLauncherCore.setSearchText(searchText);
-                   });
-    } else {
-      var panel = getPanel("launcherPanel", screen);
-      if (panel) {
-        panel.open();
-        panel.setSearchText(searchText);
+      // Install the query when the core is constructed, not in a late callback
+      // that can overwrite characters already typed by the user.
+      pendingLauncherSearch = searchText;
+      openLauncher(screen, fromOverview);
+      if (overlayLauncherCore) {
+        overlayLauncherCore.setSearchText(searchText);
+        pendingLauncherSearch = null;
+      } else {
+        pendingLauncherSearch = searchText;
       }
+    } else {
+      openLauncher(screen, fromOverview);
+      var panel = getPanel("launcherPanel", screen);
+      if (panel) panel.setSearchText(searchText);
     }
+  }
+
+  function openLauncherFromOverview(screen, searchText) {
+    if (!CompositorService.overviewActive || !Settings.data.umbriel.typeToLaunch) return;
+    launcherOpenedFromOverview = true;
+    overviewLauncherScreen = screen;
+    openLauncherWithSearch(screen, searchText, true);
   }
 
   function closeLauncher(screen) {
@@ -429,6 +460,7 @@ Singleton {
   }
 
   function closedPanel(panel) {
+    if (panel === overviewLauncherPanel) clearLauncherOwnership();
     if (openedPanel && openedPanel === panel) {
       openedPanel = null;
       assignToSlot(0, null);
@@ -451,14 +483,19 @@ Singleton {
     didClose();
   }
 
-  // Close panels when compositor overview opens (if setting is enabled)
   Connections {
     target: CompositorService
-    enabled: Settings.data.bar.hideOnOverview
-
     function onOverviewActiveChanged() {
-      if (CompositorService.overviewActive && root.openedPanel) {
-        root.openedPanel.close();
+      if (CompositorService.overviewActive) {
+        // Entry transition only: panels opened by Overview remain permitted.
+        root.closePanel();
+        if (root.modalPanel) root.modalPanel.close();
+        for (const screen of Quickshell.screens) root.closeContextMenu(screen);
+        WindowSwitcherService.close();
+      } else if (root.launcherOpenedFromOverview) {
+        const screen = root.overviewLauncherScreen;
+        root.closeLauncher(screen);
+        root.clearLauncherOwnership();
       }
     }
   }

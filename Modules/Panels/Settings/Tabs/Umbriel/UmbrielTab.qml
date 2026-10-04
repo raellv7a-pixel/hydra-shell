@@ -12,6 +12,8 @@ ColumnLayout {
   readonly property var groups: [
     { key: "keybinds", title: "Atalhos", icon: "keyboard" },
     { key: "overview", title: "Visão Geral", icon: "layout-dashboard" },
+    { key: "switcher", title: "Alternador de Janelas", icon: "layout-dashboard" },
+    { key: "interaction", title: "Interação Hydra", icon: "keyboard" },
     { key: "corners", title: "Cantos Ativos", icon: "focus-2" }
   ]
   readonly property var expandedGroups: SettingsPanelService.umbrielGroupState
@@ -33,6 +35,8 @@ ColumnLayout {
     SettingsPanelService.umbrielGroupState = {
       keybinds: key === "keybinds",
       overview: key === "overview",
+      switcher: key === "switcher",
+      interaction: key === "interaction",
       corners: key === "corners"
     };
   }
@@ -48,7 +52,8 @@ ColumnLayout {
   function scrollTo(key) {
     if (!root.scrollView) return;
     const flick = root.scrollView.contentItem;
-    const card = key === "keybinds" ? keybindsGroup : key === "overview" ? overviewGroup : cornersGroup;
+    const card = {keybinds: keybindsGroup, overview: overviewGroup, switcher: switcherGroup,
+      interaction: interactionGroup, corners: cornersGroup}[key];
     const y = card.mapToItem(flick.contentItem, 0, 0).y;
     flick.contentY = Math.max(0, Math.min(y, flick.contentHeight - flick.height));
   }
@@ -128,6 +133,24 @@ ColumnLayout {
     expanded: root.expandedGroups.overview
     onToggled: open => root.toggle("overview", open)
     UmbrielOverviewCard { Layout.fillWidth: true }
+  }
+  NSettingsGroupCard {
+    id: switcherGroup
+    title: "Alternador de Janelas"
+    description: "Apresentação, histórico de foco e filtros do Alt+Tab"
+    icon: "layout-dashboard"
+    expanded: root.expandedGroups.switcher ?? false
+    onToggled: open => root.toggle("switcher", open)
+    UmbrielSwitcherCard { Layout.fillWidth: true }
+  }
+  NSettingsGroupCard {
+    id: interactionGroup
+    title: "Interação Hydra"
+    description: "Digitação na Overview e feedback de modos do teclado"
+    icon: "keyboard"
+    expanded: root.expandedGroups.interaction ?? false
+    onToggled: open => root.toggle("interaction", open)
+    UmbrielInteractionCard { Layout.fillWidth: true }
   }
   NSettingsGroupCard {
     id: cornersGroup

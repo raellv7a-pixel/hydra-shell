@@ -53,6 +53,13 @@ Item {
     resetChooser();
   }
 
+  Connections {
+    target: CompositorService
+    function onOverviewActiveChanged() {
+      if (CompositorService.overviewActive) root.closeShelf();
+    }
+  }
+
   signal requestLauncher
 
   // --------------------------------------------------------------------------

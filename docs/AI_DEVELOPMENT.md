@@ -89,3 +89,36 @@ No UI feature belongs in Phase 2. Avoid remote install pipes. Audit repository i
 ## UI/UX acceptance policy
 
 Any change that adds/removes a setting, changes configurable behavior, alters layout, or modifies visible UI MUST include an explicit UX/UI review. Functional correctness alone is insufficient: controls and surfaces must remain clear, coherent, and consistent with Hydra's Material 3 design system, using existing `Style`, `Color`, `N*` components, spacing, radii, and typography. Do not treat a UI change as complete until its actual preview has been visually inspected.
+Consult `docs/UI_DESIGN.md` for visual hierarchy invariants, semantic Material surface tokens, theme compatibility requirements, and preview polish rules.
+
+## Umbriel native interaction
+
+- Build `Native/KeyboardState` with `bash Scripts/dev/build-native.sh` before
+  loading a source checkout or running `qmllint.sh`. Preview/installer build it
+  automatically. It uses Qt's platform modifier query after `wl_display_sync`;
+  do not replace the quick-tap check with the last QKeyEvent or a guessed delay.
+  The generated `Native/Input/qmldir` contains the real plugin directory because
+  Quickshell's `qs:@` source URLs are not filesystem locations for `dlopen`.
+  Rebuild after moving the checkout or upgrading Qt.
+- `WindowSwitcherService` owns candidates, selection and MRU. The compositor
+  facade supplies windows and actions only. Scratchpads, hidden tabs and unmapped
+  windows are excluded; absent app IDs retain the shared icon fallback.
+- Overview input capture is 1×1, click-through and exclusive per output. It is
+  suspended when native shortcuts are enabled, native ownership is external, or
+  the native settings snapshot is busy, errored or dirty. Never overwrite native
+  preferences or discard an unsaved draft to enable Type-to-Launch.
+- Own runtime `Connections` in `Scope`, not as an unnamed child of `Variants`:
+  the latter's default property is a delegate component, not a children list.
+  Keep the old capture alive through the real focus handoff and buffer printable
+  input until the Launcher owns the keyboard.
+- `PanelService.launcherOpenedFromOverview` distinguishes Launcher origins.
+  Close transient state on entry, not continuously while Overview is active.
+  Submap state is the native string/null snapshot; its indicator has no timer
+  and must not invent an Escape binding.
+- State regressions:
+  `node --test Services/UI/WindowSwitcherState.test.mjs Services/Compositor/UmbrielSnapshots.test.mjs Modules/Panels/Settings/Tabs/Umbriel/Chords.test.mjs`.
+  Python integration: `python3 -m unittest discover -s Scripts/python/tests -p 'test_umbriel*.py'`.
+- GUI validation uses `ydotool` only. A nested Umbriel must set
+  `general.mod_key = "Super"` explicitly: Umbriel defaults to Alt when nested
+  but Super on DRM. Isolate all XDG homes/runtime plus D-Bus; never install test
+  bindings into the host's real config.

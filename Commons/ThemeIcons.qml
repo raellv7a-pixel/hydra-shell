@@ -124,7 +124,7 @@ Singleton {
     const fallback = fallbackName || "application-x-executable";
     try {
       if (iconName && typeof Quickshell !== 'undefined' && Quickshell.iconPath) {
-        const p = Quickshell.iconPath(iconName, fallback);
+        const p = Quickshell.iconPath(iconName, true);
         if (p && p !== "")
           return p;
       }

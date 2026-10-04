@@ -36,3 +36,6 @@ patch_*.py
 .beads-credential-key
 .beads/proxieddb/
 *.gate.lock*
+
+# Generated native QML bridge (rebuild against the installed Qt ABI).
+/Native/Input/

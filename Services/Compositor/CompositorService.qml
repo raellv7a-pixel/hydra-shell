@@ -19,6 +19,7 @@ Singleton {
   readonly property bool displayScalesLoaded: backend.outputs.length > 0
   readonly property bool overviewActive: backend.overviewActive
   readonly property string keyboardLayout: backend.keyboardLayout
+  readonly property string activeSubmap: backend.activeSubmap
   readonly property string focusedOutputName: backend.focusedOutputName
 
   signal workspaceChanged
@@ -92,6 +93,12 @@ Singleton {
   function openOverview() { backend.action("overview-open"); }
   function closeOverview() { backend.action("overview-close"); }
   function toggleOverview() { backend.action("overview-toggle"); }
+  function navigateOverview(direction) {
+    if (!overviewActive) return;
+    const action = {left: "window-focus-left", right: "window-focus-right",
+      up: "window-focus-or-workspace-up", down: "window-focus-or-workspace-down"}[direction];
+    if (action) backend.action(action);
+  }
   function spawn(command) {
     const parts = Array.isArray(command) ? command : (command && typeof command === "object" && command.length !== undefined) ? Array.from(command) : [command];
     backend.spawn(parts);

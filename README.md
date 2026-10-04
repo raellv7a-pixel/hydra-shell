@@ -20,6 +20,26 @@ compositor. A Hydra é iniciada imediatamente numa sessão Umbriel ativa ou pelo
 autostart idempotente no próximo login. Sem Umbriel, o instalador recusa a operação;
 o runtime registra sessão não suportada e não seleciona backends alternativos.
 
+## Interação nativa Umbriel
+
+- **Alt+Tab:** alternador Hydra em Compacto ou Carrossel, com MRU e filtros em
+  **Settings → Umbriel → Alternador de Janelas**. Shift recua; soltar o
+  modificador confirma; Escape cancela. Não captura thumbnails.
+- Novos defaults de Alt+Tab não substituem atalhos pessoais já associados ao
+  mesmo chord. **Mod+Tab** continua associado aos scratchpads.
+- **Digitar na Overview:** abre o Launcher com a query inicial no output focado.
+  Os badges nativos têm prioridade: para usar a captura, desative **Atalhos de
+  janelas** no grupo Visão Geral e salve. Configuração externamente proprietária
+  ou alterações nativas ainda não salvas também suspendem a captura.
+- Ao entrar na Overview, painéis, popups e Edge Shelf são recolhidos. O Launcher
+  aberto pela Overview fecha junto com ela; o Launcher normal não ganha esse
+  ownership.
+- O indicador de submap mostra somente o nome do modo ativo, sem timeout ou
+  tecla de saída presumida. Seu toggle fica em **Interação Hydra**.
+
+Para executar um checkout manualmente, compile primeiro a ponte Qt/Wayland:
+`bash Scripts/dev/build-native.sh`. Installer e preview fazem esse build.
+
 ---
 
 ## Atualizando de uma instalação pré-rebrand (Noctalia)

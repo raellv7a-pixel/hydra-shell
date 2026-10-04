@@ -85,6 +85,11 @@ while IFS= read -r -d '' source_path; do
   fi
 done < <(git -C "$LAB_DIR" ls-files -z --cached --others --exclude-standard -- '*.qml' '*.js')
 
+# Native type metadata is generated against the installed Qt before preview.
+[[ -f "$LAB_DIR/Native/Input/hydrainput.qmltypes" ]] || die "Build the native input bridge first: Scripts/dev/build-native.sh"
+mkdir -p "$qml_import_root/qs/Native/Input"
+cp "$LAB_DIR/Native/Input/qmldir" "$LAB_DIR/Native/Input/hydrainput.qmltypes" "$qml_import_root/qs/Native/Input/"
+
 lint_paths=()
 for qml_path in "${changed_qml[@]}"; do
   lint_paths+=("$qml_import_root/qs/$qml_path")

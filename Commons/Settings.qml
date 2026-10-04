@@ -645,6 +645,21 @@ Singleton {
       property list<string> pinnedApps: []
     }
 
+    // Hydra-side presentation and input integration, not compositor TOML.
+    property JsonObject umbriel: JsonObject {
+      property bool typeToLaunch: true
+      property bool showSubmapIndicator: true
+      property JsonObject windowSwitcher: JsonObject {
+        property string style: "compact"
+        property bool mru: true
+        property bool currentWorkspaceOnly: false
+        property bool showAllOutputs: true
+        property bool showTitle: true
+        property bool showIcon: true
+        property bool showCount: true
+      }
+    }
+
 
     // general
     property JsonObject general: JsonObject {

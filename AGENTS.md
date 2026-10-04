@@ -31,12 +31,12 @@ there; the CLI needs no server and is the first choice.
 
 Auto-generated from the Prowl index, refreshed on each `overview`/`init`. Prefer retrieving from Prowl (and reading the cited files) over grepping or relying on training memory; this is the current shape of the repo.
 
-- size: 821 files, 83488 symbols, 5475 edges (resolved 4206, external deps 260, unresolved 1009)
-- languages: qml:574 json:78 python:43 bash:39 javascript:18 markdown:14 css:13 lua:11
-- subsystems: Modules/Panels(279,qml) · Widgets(53,qml) · Modules/Bar(44,qml) · Commons/Migrations(27,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(18,qml) · Services/System(15,qml) · Modules/MainScreen(14,qml)
-- entrypoints: shell.qml · Modules/Cards/MediaCard.qml · Modules/Panels/Settings/Bar/WidgetSettings/CustomButtonSettings.qml · Modules/Panels/Settings/DesktopWidgets/WidgetSettings/ClockSettings.qml · Modules/Panels/SessionMenu/SessionMenu.qml · Modules/Panels/Settings/Bar/WidgetSettings/ClockSettings.qml · Modules/Panels/Wallpaper/WallhavenSettingsPopup.qml · Modules/Cards/ProfileCard.qml · (+76 more)
-- central files (most depended-on): Commons/Settings.qml · Commons/Logger.qml · Commons/Time.qml · Commons/Style.qml · Commons/Color.qml
-- read these guides first: README.md · AGENTS.md · docs/AI_DEVELOPMENT.md
+- size: 801 files, 83293 symbols, 5336 edges (resolved 4009, external deps 351, unresolved 976)
+- languages: qml:561 json:76 python:53 bash:36 javascript:18 markdown:14 css:13 toml:11
+- subsystems: Modules/Panels(272,qml) · Widgets(56,qml) · Modules/Bar(44,qml) · Commons/Migrations(28,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(18,qml) · Modules/MainScreen(14,qml) · Services/System(14,qml)
+- entrypoints: shell.qml · Modules/Cards/MediaCard.qml · Modules/Panels/Settings/Bar/WidgetSettings/CustomButtonSettings.qml · Modules/Panels/Settings/DesktopWidgets/WidgetSettings/ClockSettings.qml · Modules/Panels/SessionMenu/SessionMenu.qml · Modules/Panels/Settings/Bar/WidgetSettings/ClockSettings.qml · Modules/Panels/Wallpaper/WallhavenSettingsPopup.qml · Modules/Cards/ProfileCard.qml · (+73 more)
+- central files (most depended-on): Commons/Settings.qml · Commons/Logger.qml · Commons/Time.qml · Commons/I18n.qml · Commons/Color.qml
+- read these guides first: README.md · AGENTS.md · docs/AI_DEVELOPMENT.md · docs/UI_DESIGN.md
 
 Depth on demand: `prowl find|def|outline|references <name>`, `search <text>`, `context search "<question>"`, `sketch <ui>`.
 <!-- /prowl-agent:map -->
@@ -52,5 +52,6 @@ Depth on demand: `prowl find|def|outline|references <name>`, `search <text>`, `c
 - Functional edits happen in the Lab checkout only. Run checks, preview the exact commit, validate behavior/UI, then request Reviewer findings before deployment. Deploy only with the validated full commit hash; never push from the Lab. Use `Scripts/dev/lab-rollback.sh` only after its clean-tree and recorded-deploy guards pass.
 - For incomplete work, update Beads before model/session changes: status, last action/result, branch/commit, changed files, tests, current failure, and exact next action. On completion, close with a clear reason.
 - Bootstrap work must not introduce Hydra UI behavior. If a clean baseline reproduces the workspace/icon alignment bug, record it as the first ready Beads bug; do not fix it during infrastructure setup.
+- For any visible UI/UX work, read `docs/UI_DESIGN.md` before planning or editing.
 
 See `docs/AI_DEVELOPMENT.md` for operational commands and recovery details.

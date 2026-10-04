@@ -16,6 +16,7 @@ Item {
   property string focusedOutputName: ""
   property bool overviewActive: false
   property string keyboardLayout: ""
+  property string activeSubmap: ""
   property bool initialized: false
   property bool windowsReceived: false
   property bool outputsRefreshPending: false
@@ -37,7 +38,7 @@ Item {
 
   Process {
     id: subscription
-    command: ["umbriel", "subscribe", "workspaces,windows,overview,keyboard_layout"]
+    command: ["umbriel", "subscribe", "workspaces,windows,overview,keyboard_layout,submap"]
     stdout: SplitParser { onRead: line => root.handleEvent(line) }
     stderr: SplitParser { onRead: line => Logger.w("UmbrielService", "IPC subscription:", line) }
     onExited: exitCode => Logger.w("UmbrielService", "IPC subscription ended:", exitCode)
@@ -63,6 +64,9 @@ Item {
       case "overview":
         if (typeof event.data?.open === "boolean")
           overviewActive = event.data.open;
+        break;
+      case "submap":
+        activeSubmap = Snapshots.submap(event.data);
         break;
       case "keyboard_layout":
         if (event.data)

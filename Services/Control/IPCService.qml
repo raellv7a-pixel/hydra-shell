@@ -598,6 +598,16 @@ Singleton {
     function toggle() { CompositorService.toggleOverview(); }
   }
 
+  IpcHandler {
+    target: "windowSwitcher"
+    function open() { WindowSwitcherService.open(); }
+    function hold() { WindowSwitcherService.open(true); }
+    function holdPrevious() { WindowSwitcherService.open(true, -1); }
+    function close() { WindowSwitcherService.close(); }
+    function next() { WindowSwitcherService.active ? WindowSwitcherService.cycle(1) : WindowSwitcherService.open(); }
+    function previous() { WindowSwitcherService.active ? WindowSwitcherService.cycle(-1) : WindowSwitcherService.open(false, -1); }
+  }
+
   // Wallpaper IPC: trigger a new random wallpaper
   IpcHandler {
     target: "wallpaper"

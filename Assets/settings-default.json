@@ -689,5 +689,18 @@
     "gridSnap": false,
     "gridSnapScale": false,
     "monitorWidgets": []
+  },
+  "umbriel": {
+    "typeToLaunch": true,
+    "showSubmapIndicator": true,
+    "windowSwitcher": {
+      "style": "compact",
+      "mru": true,
+      "currentWorkspaceOnly": false,
+      "showAllOutputs": true,
+      "showTitle": true,
+      "showIcon": true,
+      "showCount": true
+    }
   }
 }

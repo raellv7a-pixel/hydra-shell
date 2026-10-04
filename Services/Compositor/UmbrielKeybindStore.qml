@@ -28,7 +28,7 @@ Singleton {
                                 id: "custom." + i,
                                 category: "Personalizados"
                               }, draft.custom[i]));
-    return values;
+    return Chords.adoptSwitcherDefaults(values, draft.overrides);
   }
   readonly property var conflicts: Chords.conflicts(rows)
   readonly property bool hasConflicts: Object.keys(conflicts).length > 0

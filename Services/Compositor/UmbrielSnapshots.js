@@ -27,9 +27,15 @@ function windows(entries, workspaceCache) {
       isFocused: entry.active === true, isActive: entry.active === true,
       x: entry.x, y: entry.y, w: entry.w, h: entry.h,
       width: entry.w, height: entry.h, position: { x: entry.x, y: entry.y },
-      floating: entry.floating === true, scratchpad: entry.scratchpad || ""
+      floating: entry.floating === true, scratchpad: entry.scratchpad || "",
+      tabbed: entry.tabbed === true, tabIndex: entry.tab_index ?? -1,
+      tabHidden: entry.tab_hidden === true, mapped: entry.mapped !== false
     };
   });
+}
+
+function submap(data) {
+  return typeof data === "string" ? data : "";
 }
 
 function outputs(entries) {

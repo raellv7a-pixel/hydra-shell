@@ -402,6 +402,8 @@ def extract_entries(
             entry["group"] = {
                 "UmbrielKeybindsCard": "keybinds",
                 "UmbrielOverviewCard": "overview",
+                "UmbrielSwitcherCard": "switcher",
+                "UmbrielInteractionCard": "interaction",
                 "UmbrielHotCornersCard": "corners",
             }.get(qml_file.stem, "keybinds")
         if sub_tab_label is not None:

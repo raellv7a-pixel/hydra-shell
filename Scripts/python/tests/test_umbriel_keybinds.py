@@ -31,6 +31,32 @@ class UmbrielKeybindsTests(unittest.TestCase):
         reload_patch.start()
         self.addCleanup(reload_patch.stop)
 
+    def test_switcher_default_defers_to_existing_custom_chord(self):
+        state = binds.defaults()
+        custom = dict(label='Alternador pessoal', chord='alt+tab', type='command', action='kitty')
+        state['custom'].append(custom)
+        state['overrides']['shell.launcher'] = {'chord': 'Mod+Y'}
+        binds.commit(state)
+        rendered = binds.OWNED.read_text()
+        self.assertIn('"Alt+Tab" = { action = "spawn:kitty"', rendered)
+        self.assertNotIn('ipc call windowSwitcher hold",', rendered)
+        self.assertIn('scratchpad-focus-next:hydra-default', rendered)
+        self.assertEqual(binds.current_state(), state)
+        state['custom'].clear()
+        binds.commit(state)
+        self.assertIn('"Alt+Tab" = { action = "spawn:qs -c hydra-shell ipc call windowSwitcher hold"', binds.OWNED.read_text())
+
+    def test_switcher_default_preserves_rebound_catalog_action_and_reverse_chord(self):
+        state = binds.defaults()
+        state['overrides']['app.terminal'] = {'chord': 'Alt+Tab', 'action': 'alacritty'}
+        state['custom'].append(dict(label='Anterior pessoal', chord='shift+alt+tab', type='umbriel', action='window-focus-last'))
+        binds.commit(state)
+        text = binds.OWNED.read_text()
+        self.assertIn('"Alt+Tab" = { action = "spawn:alacritty"', text)
+        self.assertIn('"Alt+Shift+Tab" = { action = "window-focus-last"', text)
+        self.assertNotIn('ipc call windowSwitcher', text)
+        self.assertEqual(binds.current_state(), state)
+
     def test_provision_preserves_user_config_and_rebind_survives_reload(self):
         binds.MASTER.write_text('[general]\nautostart = ["qs -c hydra-shell -d"]\nshow_cheatsheet = false\n')
         binds.commit(binds.defaults())

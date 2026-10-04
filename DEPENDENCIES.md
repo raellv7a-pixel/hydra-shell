@@ -28,6 +28,14 @@ sudo pacman -S --needed \
     shelly shelly-flatpak-backend
 ```
 
+### Ponte nativa de input
+
+O Window Switcher consulta os modificadores reais pelo Qt após uma barreira
+Wayland. O build exige `cmake`, `pkgconf`, `base-devel`, `wayland`, `qt6-base` e
+`qt6-declarative` (headers e ferramentas incluídos nos pacotes Arch).
+Execute `bash Scripts/dev/build-native.sh` antes de iniciar um checkout manual.
+Os binários e metadata em `Native/Input/` são gerados localmente, não versionados.
+
 O compositor Umbriel deve estar instalado antes do instalador da Hydra.
 Use `xdg-desktop-portal-umbriel` para compartilhamento de tela externo; não
 instale o backend Hyprland para uma sessão Umbriel.

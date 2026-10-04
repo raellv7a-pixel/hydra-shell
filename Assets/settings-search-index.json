@@ -2626,6 +2626,24 @@
     "group": "corners"
   },
   {
+    "labelKey": "panels.umbriel.type-to-launch",
+    "descriptionKey": "panels.umbriel.type-to-launch-description",
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "interaction"
+  },
+  {
+    "labelKey": "panels.umbriel.submap-indicator",
+    "descriptionKey": "panels.umbriel.submap-indicator-description",
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "interaction"
+  },
+  {
     "labelKey": "panels.umbriel.keybind-search",
     "descriptionKey": null,
     "widget": "UmbrielSearchField",
@@ -2696,6 +2714,69 @@
     "tabLabel": "panels.umbriel.title",
     "subTab": null,
     "group": "overview"
+  },
+  {
+    "labelKey": "panels.umbriel.switcher-style",
+    "descriptionKey": null,
+    "widget": "NComboBox",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "switcher"
+  },
+  {
+    "labelKey": "panels.umbriel.switcher-mru",
+    "descriptionKey": null,
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "switcher"
+  },
+  {
+    "labelKey": "panels.umbriel.switcher-workspace",
+    "descriptionKey": null,
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "switcher"
+  },
+  {
+    "labelKey": "panels.umbriel.switcher-outputs",
+    "descriptionKey": null,
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "switcher"
+  },
+  {
+    "labelKey": "panels.umbriel.switcher-title",
+    "descriptionKey": null,
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "switcher"
+  },
+  {
+    "labelKey": "panels.umbriel.switcher-icon",
+    "descriptionKey": null,
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "switcher"
+  },
+  {
+    "labelKey": "panels.umbriel.switcher-count",
+    "descriptionKey": null,
+    "widget": "NToggle",
+    "tab": 22,
+    "tabLabel": "panels.umbriel.title",
+    "subTab": null,
+    "group": "switcher"
   },
   {
     "labelKey": "panels.user-interface.tooltips-label",

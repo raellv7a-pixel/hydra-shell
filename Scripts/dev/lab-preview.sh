@@ -12,6 +12,7 @@ command -v qs >/dev/null 2>&1 || {
   echo "qs (Hydra-compatible Quickshell) is not installed or not on PATH." >&2
   exit 1
 }
+bash "$LAB_DIR/Scripts/dev/build-native.sh"
 mkdir -p "$STATE_DIR"
 chmod 700 "$STATE_DIR"
 if [[ -f "$PREVIEW_PID_FILE" ]]; then

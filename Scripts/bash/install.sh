@@ -225,6 +225,10 @@ else
   git clone --branch "$BRANCH" "${LOCAL_SOURCE:-$REPO_URL}" "$INSTALL_DIR"
 fi
 
+log "Building Hydra's native input bridge"
+sudo pacman -S --needed --noconfirm cmake pkgconf base-devel
+bash "$INSTALL_DIR/Scripts/dev/build-native.sh"
+
 # ── 5b. migrate pre-rebrand Noctalia state before anything reads it ────────
 # Idempotent no-op once the directories/settings keys are already Hydra-named.
 log "Migrating pre-rebrand Noctalia config, if any"

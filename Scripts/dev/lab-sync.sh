@@ -108,6 +108,8 @@ done
 ((${#active_pids[@]} == 1)) || die "Expected exactly one active qs -c hydra-shell process; found ${#active_pids[@]}."
 active_pid="${active_pids[0]}"
 
+bash "$LAB_DIR/Scripts/dev/build-native.sh"
+
 mapfile -t changed_qml < <(git -C "$LAB_DIR" diff --name-only --diff-filter=ACMRT "$active_head..$candidate" -- '*.qml')
 if ((${#changed_qml[@]})); then
   log "Checking changed QML with pinned parser without rewriting validated source"
@@ -129,6 +131,10 @@ write_state previous-commit "$active_head"
 write_state active-commit "$deployed"
 write_state deployed-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 write_state validation-pending "$deployed"
+
+# The active checkout needs its own Qt ABI build and filesystem plugin path.
+bash "$ACTIVE_DIR/Scripts/dev/build-native.sh"
+touch "$ACTIVE_DIR/shell.qml"
 
 sleep 2
 kill -0 "$active_pid" 2>/dev/null ||
