@@ -93,7 +93,7 @@ Item {
   }
 
   function applyWheelScroll(delta) {
-    if (!root.contentOverflows)
+    if (!root.interactive || !root.contentOverflows)
       return;
 
     const step = delta * root.wheelScrollMultiplier;
@@ -376,17 +376,18 @@ Item {
                     }
 
     WheelHandler {
-      enabled: root.wheelScrollMultiplier !== 1.0
+      enabled: root.interactive && root.contentOverflows && root.wheelScrollMultiplier !== 1.0
+      blocking: root.interactive && root.contentOverflows
       acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
       onWheel: event => {
                  // Content fits entirely (e.g. a grid sized to its own item
                  // count via Layout.preferredHeight, or one embedded inside
-                 // a taller scrollable page): there is nothing here to
-                 // scroll, so let the event fall through to whatever
-                 // Flickable/ScrollView actually owns the page — otherwise
-                 // mouse wheel silently does nothing the moment the cursor
-                 // is over the grid's bounds.
-                 if (!root.contentOverflows) {
+                 // a taller scrollable page), or the grid is non-interactive:
+                 // there is nothing here to scroll, so let the event fall
+                 // through to whatever Flickable/ScrollView actually owns
+                 // the page — otherwise mouse wheel silently does nothing
+                 // the moment the cursor is over the grid's bounds.
+                 if (!root.interactive || !root.contentOverflows) {
                    event.accepted = false;
                    return;
                  }
