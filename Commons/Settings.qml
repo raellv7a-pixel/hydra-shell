@@ -858,6 +858,9 @@ Singleton {
       property string position: "bottom_center"  // Position: center, top_left, top_right, bottom_left, bottom_right, bottom_center, top_center
       property list<string> pinnedApps: []
       property list<string> hiddenApps: []
+      property list<var> userFolders: []
+      property string folderIconSource: "hydra"
+      property int folderIconSize: 32
       property bool sortByMostUsed: true
       property string terminalCommand: "alacritty -e"
       property bool customLaunchPrefixEnabled: false
@@ -870,6 +873,10 @@ Singleton {
       property int coverHeight: 160
       property real coverOverlay: 0.40
       property bool coverBlurEnabled: false
+      property real heroBlurIntensity: 0.5
+      property string heroTextContrast: "light" // light, dark
+      property bool heroAutoRotate: false
+      property bool heroShowContext: true
       property bool showCategories: true
       // Icon mode: "tabler" or "native"
       property string iconMode: "tabler"
@@ -1874,6 +1881,9 @@ Singleton {
       }
 
       normalizeControlCenterCards(hasPersistedCards ? rawCC.cards : (rawCC && rawCC.cards !== undefined ? rawCC.cards : undefined));
+
+      if (adapter.appLauncher.heroTextContrast !== "dark" && adapter.appLauncher.heroTextContrast !== "light")
+        adapter.appLauncher.heroTextContrast = "light";
 
       // -----------------
       // 7. Persist one final normalized adapter without yielding

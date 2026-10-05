@@ -126,6 +126,25 @@ ShellRoot {
 
   IpcHandler {
     target: "test"
+    function saveFolder(id: string, name: string, appId: string, parentId: string): string {
+      return JSON.stringify(core.browseModel.saveFolder(id, name, "folder", appId, parentId));
+    }
+    function expandFolder(id: string, childId: string): void {
+      core.openFolder(id);
+      if (childId) core.openSubfolder(childId);
+    }
+    function deleteFolder(id: string, parentId: string): void {
+      core.browseModel.deleteFolder(id, parentId);
+    }
+    function folderState(id: string): string {
+      const folder = core.browseModel.folders.find(folder => folder.id === id);
+      return JSON.stringify({
+        parent: core.activeFolderId, child: core.activeSubfolderId, expanded: core.folderExpanded, state: core.effectiveState,
+        apps: folder?.entries.map(app => app.appId) || [],
+        subfolders: (folder?.children || []).map(child => ({ id: child.id, name: child.name, apps: child.entries.map(app => app.appId) })),
+        stored: (Settings.data.appLauncher.userFolders || []).find(folder => folder.id === id)
+      });
+    }
     function prepare(): void {
     root.showingLauncher = true;
     Settings.data.appLauncher.viewMode = "list";
@@ -147,6 +166,7 @@ ShellRoot {
     core.defaultProvider.selectedCategory = "all";
     core.providers = [core.defaultProvider];
     core.searchText = "";
+    core.browseState = "all_apps";
     core.updateResults();
   }
     function panel(index: int): void {

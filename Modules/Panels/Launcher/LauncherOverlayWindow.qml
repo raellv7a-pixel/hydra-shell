@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Shapes
 import Quickshell
 import Quickshell.Wayland
+import "Helpers/LauncherGeometry.js" as LauncherGeometry
 
 import qs.Commons
 import qs.Modules.MainScreen.Backgrounds
@@ -133,8 +134,8 @@ Variants {
       // Launcher panel with position-based anchoring
       Item {
         id: launcherPanel
-        width: Math.round(Math.max(parent.width * 0.25, launcherWindow.listPanelWidth + Style.margin2L * 2))
-        height: Math.round(Math.max(parent.height * 0.5, 620 * Style.uiScaleRatio))
+        width: LauncherGeometry.panelWidth(parent.width, Style.uiScaleRatio, launcherWindow.barThickness, Settings.data.appLauncher.density)
+        height: LauncherGeometry.panelHeight(parent.height, Style.uiScaleRatio, launcherWindow.barThickness, launcherCore.effectiveState === "home" ? launcherCore.homePreferredHeight : 0, Settings.data.appLauncher.density)
         clip: false
         property bool presented: false
 

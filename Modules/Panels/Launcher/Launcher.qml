@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell
+import "Helpers/LauncherGeometry.js" as LauncherGeometry
 
 import qs.Commons
 import qs.Modules.MainScreen
@@ -45,13 +46,13 @@ SmartPanel {
   readonly property int previewPanelWidth: Math.round(400 * Style.uiScaleRatio)
 
   // Panel sizing
-  readonly property int listPanelWidth: Math.round(680 * Style.uiScaleRatio)
-  readonly property int totalBaseWidth: listPanelWidth + Style.margin2L
+  readonly property int listPanelWidth: preferredWidth - Style.margin2L
+  readonly property int totalBaseWidth: LauncherGeometry.panelWidth(screen?.width || width, Style.uiScaleRatio, Math.max(frameThickness, Style.marginL), Settings.data.appLauncher.density)
 
   preferredWidth: totalBaseWidth
-  preferredHeight: Math.round(620 * Style.uiScaleRatio)
-  preferredWidthRatio: 0.25
-  preferredHeightRatio: 0.5
+  preferredHeight: LauncherGeometry.panelHeight(screen?.height || height, Style.uiScaleRatio, Math.max(barHeight, Style.marginL), !launcherCoreRef || launcherCoreRef.effectiveState === "home" ? launcherCoreRef?.homePreferredHeight || 540 * Style.uiScaleRatio : 0, Settings.data.appLauncher.density)
+  preferredWidthRatio: 0
+  preferredHeightRatio: 0
   panelBackgroundColor: Color.mSurfaceContainer
   panelBorderColor: Qt.alpha(Color.mOutline, 0.32)
 
@@ -83,6 +84,8 @@ SmartPanel {
     id: ui
     color: "transparent"
     property bool presented: false
+    readonly property real contentPreferredWidth: root.preferredWidth
+    readonly property real contentPreferredHeight: root.preferredHeight
 
     opacity: launcherCore.resultsReady && presented ? 1.0 : 0.0
     scale: presented ? 1.0 : 0.965

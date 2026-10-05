@@ -32,6 +32,22 @@ Rectangle {
 
   // State
   property string searchText: ""
+  property string browseState: "home"
+  property string activeFolderId: ""
+  property string activeSubfolderId: ""
+  property var folderAnchor: null
+  readonly property var metrics: LauncherDensity {}
+  readonly property string effectiveState: searchText !== "" ? "search" : browseState
+  readonly property real homePreferredHeight: contentLayout.implicitHeight + metrics.outerPadding * 2
+  function scrollHomeVertically(event) { if (home.visible) home.scrollVertically(event); }
+  readonly property var browseModel: browse
+  readonly property var parentFolder: activeFolderId === "__pinned" ? { id: "__pinned", name: I18n.tr("launcher-home.pinned"), icon: "pin", mode: "pinned", entries: browse.pinned, children: [] } : browse.folders.find(folder => folder.id === activeFolderId) || null
+  readonly property var activeFolder: activeSubfolderId ? (parentFolder?.children || []).find(folder => folder.id === activeSubfolderId) || null : parentFolder
+  readonly property bool folderExpanded: effectiveState === "home" && activeFolder !== null
+  property bool appPanelShowingFolders: false
+  property var editingFolder: null
+  property string folderEditorAppId: ""
+  property string folderEditorParentId: ""
   property int selectedIndex: 0
   property var results: []
   property var providers: []
@@ -196,6 +212,175 @@ Rectangle {
     return provider && provider.wrapNavigation !== undefined ? provider.wrapNavigation : true;
   }
 
+  LauncherBrowseModel {
+    id: browse
+    provider: appsProvider
+    isOpen: root.isOpen
+    onFoldersChanged: {
+      const parent = browse.folders.find(folder => folder.id === root.activeFolderId);
+      if (root.activeFolderId && root.activeFolderId !== "__pinned" && !parent) root.closeExpandedFolder();
+      else if (root.activeSubfolderId && !(parent?.children || []).some(child => child.id === root.activeSubfolderId)) root.activeSubfolderId = "";
+      Qt.callLater(root.reanchorAppPanel);
+    }
+  }
+
+  function goHome() {
+    closeAppPanel();
+    browseState = "home";
+    activeFolderId = "";
+    activeSubfolderId = "";
+    folderAnchor = null;
+    appsProvider.selectedCategory = "all";
+    updateResults();
+    focusSearchInput();
+  }
+
+  function openAllApps(category) {
+    closeAppPanel();
+    browseState = "all_apps";
+    activeFolderId = "";
+    activeSubfolderId = "";
+    folderAnchor = null;
+    appsProvider.selectCategory(category || "all");
+    focusSearchInput();
+  }
+
+  function openFolder(id, anchor) {
+    closeAppPanel();
+    browseState = "home";
+    activeFolderId = id;
+    activeSubfolderId = "";
+    folderAnchor = anchor || null;
+    Qt.callLater(root.focusExpandedFolder);
+  }
+  function openPinned(anchor) {
+    openFolder("__pinned", anchor);
+  }
+
+  function focusExpandedFolder() {
+    if (collectionFlyout.status === Loader.Ready) collectionFlyout.item.focusFirst();
+  }
+
+  function closeExpandedFolder() {
+    closeAppPanel();
+    activeFolderId = "";
+    activeSubfolderId = "";
+    folderAnchor = null;
+    Qt.callLater(home.focusFirst);
+  }
+
+  function openSubfolder(id) {
+    if (!(parentFolder?.children || []).some(folder => folder.id === id)) return;
+    closeAppPanel();
+    activeSubfolderId = id;
+    Qt.callLater(root.focusExpandedFolder);
+  }
+
+  function backToParentFolder() {
+    closeAppPanel();
+    activeSubfolderId = "";
+    Qt.callLater(root.focusExpandedFolder);
+  }
+
+  function showHomeAppActions(item) {
+    if (folderExpanded) {
+      openAppPanel(item);
+      return;
+    }
+    openAllApps("all");
+    const target = results.find(entry => entry.appId === item.appId);
+    if (target) {
+      selectedIndex = results.indexOf(target);
+      openAppPanel(target);
+    }
+  }
+
+  function editFolder(folder, appId, parentId) {
+    editingFolder = folder;
+    folderEditorAppId = appId || "";
+    folderEditorParentId = parentId || folder?.parentId || "";
+    folderEditor.active = true;
+  }
+
+  function closeFolderEditor() {
+    folderEditor.active = false;
+    focusSearchInput();
+    if (folderExpanded) Qt.callLater(root.focusExpandedFolder);
+  }
+
+  function showFolderActions() {
+    appPanelShowingFolders = true;
+    appPanelShowingProperties = false;
+    appPanelActionIndex = -1;
+    refreshAppPanelActions();
+  }
+
+  function folderActions() {
+    const appId = appPanelItem?.appId || "";
+    const actions = [{
+      id: "folders-back", icon: "arrow-left", label: I18n.tr("launcher-home.back"),
+      keepOpen: true, action: () => { appPanelShowingFolders = false; }
+    }];
+    for (const folder of Settings.data.appLauncher.userFolders || []) {
+      const member = (folder.apps || []).includes(appId);
+      actions.push({
+        id: "folder-" + folder.id, icon: member ? "check" : (folder.icon || "folder"), label: folder.name,
+        description: I18n.tr(member ? "launcher-home.remove-from-folder" : "launcher-home.add-to-folder"),
+        keepOpen: true, action: () => browse.toggleMembership(folder.id, appId)
+      });
+      for (const child of folder.children || []) {
+        const childMember = (child.apps || []).includes(appId);
+        actions.push({
+          id: "folder-" + child.id, icon: childMember ? "check" : (child.icon || "folder"),
+          label: I18n.tr("launcher-home.subfolder-path", { parent: folder.name, child: child.name }),
+          description: I18n.tr(childMember ? "launcher-home.remove-from-folder" : "launcher-home.add-to-folder"),
+          keepOpen: true, action: () => browse.toggleMembership(folder.id, appId, child.id)
+        });
+      }
+    }
+    actions.push({ id: "folder-new", icon: "folder-plus", label: I18n.tr("launcher-home.new-folder"),
+      keepOpen: true, action: () => editFolder(null, appId) });
+    return actions;
+  }
+
+  function ensureHomeItemVisible(item) {
+    if (home.visible && !folderExpanded) home.ensureVisible(item);
+  }
+
+  function focusHomeCategories() {
+    if (categoryTabs.visible) categoryTabs.focusFirst();
+    else focusSearchInput();
+  }
+
+  function handleHomeItemKey(event, item) {
+    if (folderEditor.active)
+      return;
+    if (appPanelOpen && handleAppPanelKeyPress(event)) return;
+    if (checkKey(event, "escape")) {
+      if (searchText !== "") searchText = "";
+      else if (folderExpanded) closeExpandedFolder();
+      else if (browseState !== "home") goHome();
+      else close();
+      event.accepted = true;
+    } else if (event.text && event.text.trim() !== "" && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)) && event.key !== Qt.Key_Space) {
+      searchText += event.text;
+      focusSearchInput();
+      searchInput.inputItem.cursorPosition = searchText.length;
+      event.accepted = true;
+    } else if ([Qt.Key_Up, Qt.Key_Down, Qt.Key_Left, Qt.Key_Right].includes(event.key)) {
+      const forward = event.key === Qt.Key_Down || event.key === Qt.Key_Right;
+      let next = item.nextItemInFocusChain(forward);
+      for (let i = 0; next && i < 200; i++) {
+        if (next.visible && next.enabled && next.activeFocusOnTab) {
+          next.forceActiveFocus();
+          break;
+        }
+        next = next.nextItemInFocusChain(forward);
+      }
+      event.accepted = true;
+    }
+  }
+
   // Listen for plugin provider registry changes
   Connections {
     target: LauncherProviderRegistry
@@ -217,6 +402,11 @@ Rectangle {
     if (isOpen) {
       // Typing is a new intent: drop the panel instead of dragging it along.
       closeAppPanel();
+      if (searchText !== "") {
+        activeFolderId = "";
+        activeSubfolderId = "";
+        folderAnchor = null;
+      }
       updateResults();
     }
   }
@@ -235,12 +425,19 @@ Rectangle {
                      if (provider.onOpened)
                      provider.onOpened();
                    }
+                   appsProvider.selectedCategory = "all";
                    updateResults();
                  });
   }
 
   function onClosed() {
     searchText = "";
+    browseState = "home";
+    activeFolderId = "";
+    activeSubfolderId = "";
+    folderAnchor = null;
+    folderEditor.active = false;
+    hero.reset();
     closeAppPanel();
     ignoreMouseHover = true;
     if (resultsSwapView)
@@ -266,6 +463,7 @@ Rectangle {
     appPanelItem = item;
     appPanelActions = provider.getContextMenuActions(item);
     appPanelShowingProperties = false;
+    appPanelShowingFolders = false;
     appPanelActionIndex = -1;
     appPanelConfirmIndex = -1;
     propertiesApp = null;
@@ -290,6 +488,7 @@ Rectangle {
     appPanelItem = null;
     appPanelActions = [];
     appPanelShowingProperties = false;
+    appPanelShowingFolders = false;
     appPanelActionIndex = -1;
     appPanelConfirmIndex = -1;
     propertiesApp = null;
@@ -303,7 +502,9 @@ Rectangle {
     if (!appPanelItem)
       return;
     const provider = appPanelItem.provider || currentProvider;
-    if (provider && provider.getContextMenuActions)
+    if (appPanelShowingFolders)
+      appPanelActions = folderActions();
+    else if (provider && provider.getContextMenuActions)
       appPanelActions = provider.getContextMenuActions(appPanelItem);
   }
 
@@ -385,12 +586,11 @@ Rectangle {
     if (!categoryList || tabIndex < 0 || tabIndex >= categoryList.length)
       return false;
 
+    if (currentProvider === defaultProvider) {
+      browseState = "all_apps";
+      activeFolderId = "";
+    }
     currentProvider.selectCategory(categoryList[tabIndex]);
-    // Don't assign categoryTabs.currentIndex imperatively here: it has a
-    // live binding to computedCurrentIndex (which tracks selectedCategory).
-    // Overwriting it breaks that binding permanently, so any future
-    // selectedCategory change from elsewhere (e.g. a provider resetting it)
-    // would stop being reflected in the tab highlight.
     return true;
   }
 
@@ -413,7 +613,7 @@ Rectangle {
     }
 
     const direction = tabIndex > currentIdx ? 1 : -1;
-    resultsSwapView.swap(direction, () => applyCategorySelection(tabIndex, providerCategories));
+    resultsSwapView.swap(direction, () => applyCategorySelection(tabIndex, cats));
   }
 
   // Public API
@@ -422,10 +622,8 @@ Rectangle {
   }
 
   function focusSearchInput() {
-    var item = (hasCoverBanner && bannerSearchInput) ? bannerSearchInput : searchInput;
-    if (item && item.inputItem) {
-      item.inputItem.forceActiveFocus();
-    }
+    if (searchInput && searchInput.inputItem)
+      searchInput.inputItem.forceActiveFocus();
   }
 
   // Provider registration
@@ -570,14 +768,20 @@ Rectangle {
       // An operation can finish after closing a filtered launcher. Resolve its
       // still-installed app now, rather than parking a request for later search.
       appsProvider.selectedCategory = "all";
+      browseState = "all_apps";
+      activeFolderId = "";
       searchText = "";
       updateResults();
       entry = results.find(item => item && item.appId && normalize(item.appId) === target);
     }
     // Completion must not reopen an unchanged panel or leave a request that
     // unexpectedly targets a later, unrelated search.
-    if (entry && appPanelItem !== entry)
-      openAppPanel(entry);
+    if (entry && appPanelItem !== entry) {
+      if (effectiveState === "home")
+        showHomeAppActions(entry);
+      else
+        openAppPanel(entry);
+    }
   }
 
   // Results are rebuilt from scratch on every refresh, so an open panel has to
@@ -587,7 +791,8 @@ Rectangle {
       return;
 
     const key = appPanelItem.appId || appPanelItem.usageKey;
-    const rebound = key ? results.find(entry => (entry.appId || entry.usageKey) === key) : null;
+    const entries = folderExpanded ? activeFolder.entries : results;
+    const rebound = key ? entries.find(entry => (entry.appId || entry.usageKey) === key) : null;
     if (!rebound) {
       closeAppPanel();
       return;
@@ -636,8 +841,12 @@ Rectangle {
   }
 
   function activate() {
-    if (results.length > 0 && results[selectedIndex]) {
-      const item = results[selectedIndex];
+    if (results.length > 0 && results[selectedIndex])
+      activateEntry(results[selectedIndex]);
+  }
+
+  function activateEntry(item) {
+    if (item) {
       const provider = item.provider || currentProvider;
 
       // Track usage for providers that opt in (cross-provider "most used" tracking)
@@ -673,6 +882,10 @@ Rectangle {
         appPanelConfirmIndex = -1;
       else if (appPanelShowingProperties)
         hideAppProperties();
+      else if (appPanelShowingFolders) {
+        appPanelShowingFolders = false;
+        refreshAppPanelActions();
+      }
       else
         closeAppPanel();
       event.accepted = true;
@@ -738,16 +951,39 @@ Rectangle {
     // traversal keeps its own subtle hover state while preserving Enter's target.
     ignoreMouseHover = true;
     globalMouseInitialized = false;
+    if (folderEditor.active) {
+      if (checkKey(event, "escape")) closeFolderEditor();
+      event.accepted = true;
+      return;
+    }
     // The inline app panel grabs navigation keys while it is open.
     if (appPanelOpen && handleAppPanelKeyPress(event))
       return;
 
     if (checkKey(event, 'escape')) {
-      close();
+      if (searchText !== "")
+        searchText = "";
+      else if (folderExpanded)
+        closeExpandedFolder();
+      else if (browseState !== "home")
+        goHome();
+      else
+        close();
       event.accepted = true;
       return;
     }
 
+    if (effectiveState === "home") {
+      if (folderExpanded && (event.key === Qt.Key_Down || event.key === Qt.Key_Tab)) {
+        focusExpandedFolder();
+        event.accepted = true;
+      } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
+        if (categoryTabs.visible) categoryTabs.focusFirst();
+        else home.focusFirst();
+        event.accepted = true;
+      }
+      return;
+    }
     if (checkKey(event, 'enter')) {
       activate();
       event.accepted = true;
@@ -940,7 +1176,7 @@ Rectangle {
     enabled: !Settings.data.appLauncher.ignoreMouseInput
 
     onPointChanged: {
-      const position = point.globalPosition;
+      const position = point.scenePosition;
       if (!root.globalMouseInitialized) {
         root.globalLastMouseX = position.x;
         root.globalLastMouseY = position.y;
@@ -959,184 +1195,38 @@ Rectangle {
   }
 
   ColumnLayout {
+    id: contentLayout
+    enabled: !folderEditor.active
     anchors.fill: parent
-    anchors.topMargin: Style.marginM
-    anchors.bottomMargin: Style.marginM
-    spacing: Style.marginS
+    anchors.topMargin: root.metrics.outerPadding
+    anchors.bottomMargin: root.metrics.outerPadding
+    spacing: root.metrics.gapS
 
-    // Header Cover Banner (when coverMode !== "none")
-    Item {
-      id: coverBannerHeader
-      visible: root.hasCoverBanner
+    LauncherHero {
+      id: hero
+      launcher: root
+      visible: root.effectiveState === "home" && root.hasCoverBanner
       Layout.fillWidth: true
-      Layout.preferredHeight: root.coverBannerHeight
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
-      Layout.topMargin: 0
-      clip: false
+      Layout.preferredHeight: Math.min(root.coverBannerHeight, (root.screen?.height || 1080 * Style.uiScaleRatio) * 0.24)
+      Layout.leftMargin: root.metrics.padding
+      Layout.rightMargin: root.metrics.padding
+      Layout.bottomMargin: root.metrics.gapS
+    }
 
-      // Two-layer elevation: a wide ambient halo plus a tight contact shadow.
-      // Both stay well inside the panel's side margins so they never bleed past
-      // the launcher edges (Style.marginM on each side, blurMax is 22px).
-      NDropShadow {
-        anchors.fill: bannerContainer
-        source: bannerContainer
-        autoPaddingEnabled: true
-        shadowBlur: 0.30
-        shadowOpacity: 0.22
-        shadowHorizontalOffset: 0
-        shadowVerticalOffset: Math.round(2 * Style.uiScaleRatio)
-        z: -2
-      }
 
-      NDropShadow {
-        anchors.fill: bannerContainer
-        source: bannerContainer
-        autoPaddingEnabled: true
-        shadowBlur: 0.13
-        shadowOpacity: 0.26
-        shadowHorizontalOffset: 0
-        shadowVerticalOffset: Math.round(5 * Style.uiScaleRatio)
-        z: -1
-      }
-
-      Rectangle {
-        id: bannerContainer
-        anchors.fill: parent
-        radius: Style.radiusL
-        color: Color.mSurfaceContainerLow
-        border.color: "transparent"
-        border.width: 0
-
-        NImageRounded {
-          id: coverImage
-          anchors.fill: parent
-          imagePath: root.profileWallpaperPath
-          imageFillMode: Image.PreserveAspectCrop
-          radius: Style.radiusL
-        }
-
-        Rectangle {
-          anchors.fill: parent
-          // Gradient-style overlay: stronger at bottom for text legibility
-          gradient: Gradient {
-            orientation: Gradient.Vertical
-            GradientStop {
-              position: 0.0
-              color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.4)
-            }
-            GradientStop {
-              position: 0.6
-              color: Qt.rgba(0, 0, 0, (Settings.data.appLauncher.coverOverlay ?? 0.40) * 0.7)
-            }
-            GradientStop {
-              position: 1.0
-              color: Qt.rgba(0, 0, 0, Settings.data.appLauncher.coverOverlay ?? 0.40)
-            }
-          }
-          radius: Style.radiusL
-        }
-
-        // Rim light: reads as a lit top edge, which is what actually sells the
-        // floating look now that the shadow no longer carries it alone.
-        Rectangle {
-          anchors.fill: parent
-          radius: Style.radiusL
-          gradient: Gradient {
-            orientation: Gradient.Vertical
-            GradientStop {
-              position: 0.0
-              color: Qt.rgba(1, 1, 1, 0.10)
-            }
-            GradientStop {
-              position: 0.35
-              color: Qt.rgba(1, 1, 1, 0.0)
-            }
-          }
-        }
-
-        // Hairline outline so the banner keeps a crisp edge against the panel
-        Rectangle {
-          anchors.fill: parent
-          radius: Style.radiusL
-          color: "transparent"
-          border.width: Style.borderS
-          border.color: Qt.rgba(1, 1, 1, 0.14)
-        }
-
-        ColumnLayout {
-          anchors.fill: parent
-          anchors.margins: Style.marginL
-          spacing: Style.marginS
-
-          Item {
-            Layout.fillHeight: true
-          }
-
-          RowLayout {
-            Layout.fillWidth: true
-            spacing: Style.marginS
-
-            NTextInput {
-              id: bannerSearchInput
-              Layout.fillWidth: true
-              radius: Style.iRadiusL
-              inputIconName: "search"
-              text: root.searchText
-              placeholderText: I18n.tr("placeholders.search-launcher")
-              fontSize: Style.fontSizeM
-              onTextChanged: root.searchText = text
-
-              Component.onCompleted: {
-                if (bannerSearchInput.inputItem) {
-                  bannerSearchInput.inputItem.forceActiveFocus();
-                  bannerSearchInput.inputItem.Keys.onPressed.connect(function (event) {
-                    root.handleKeyPress(event);
-                  });
-                }
-              }
-            }
-
-            NIconButton {
-              visible: root.showLayoutToggle
-              icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
-              tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
-              customRadius: Style.iRadiusL
-              colorBg: Color.mSurfaceContainerHigh
-              colorBgHover: Color.mPrimaryContainer
-              colorFg: Color.mOnSurfaceVariant
-              colorFgHover: Color.mOnPrimaryContainer
-              colorBorder: "transparent"
-              colorBorderHover: "transparent"
-              Layout.preferredWidth: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
-              Layout.preferredHeight: bannerSearchInput.implicitHeight > 0 ? bannerSearchInput.implicitHeight : Math.round(36 * Style.uiScaleRatio)
-              onClicked: {
-                const current = Settings.data.appLauncher.viewMode;
-                if (current === "columns")
-                  Settings.data.appLauncher.viewMode = "grid";
-                else if (current === "grid")
-                  Settings.data.appLauncher.viewMode = "list";
-                else
-                  Settings.data.appLauncher.viewMode = "columns";
-              }
-            }
-          }
-        }
-      } // ends bannerContainer
-    } // ends coverBannerHeader
-
-    // Standard Search Bar when coverMode === "none"
+    // One search input in every browsing mode and cover configuration.
     RowLayout {
-      visible: !root.hasCoverBanner
+      visible: true
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
-      spacing: Style.marginS
+      Layout.leftMargin: root.metrics.outerPadding
+      Layout.rightMargin: root.metrics.outerPadding
+      spacing: root.metrics.gapS
 
       NTextInput {
         id: searchInput
         Layout.fillWidth: true
-        radius: Style.iRadiusL
+        inputHeight: root.metrics.searchHeight
+        radius: inputHeight / 2
         inputIconName: "search"
         text: root.searchText
         placeholderText: I18n.tr("placeholders.search-launcher")
@@ -1153,8 +1243,9 @@ Rectangle {
         }
       }
 
+
       NIconButton {
-        visible: root.showLayoutToggle
+        visible: root.effectiveState !== "home" && root.showLayoutToggle
         icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
         tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
         customRadius: Style.iRadiusL
@@ -1179,29 +1270,55 @@ Rectangle {
     }
 
     // Unified category tabs (works with any provider that has categories)
-    LauncherCategoryTabs {
+    LauncherCategoryPills {
       id: categoryTabs
+      launcher: root
       visible: root.showProviderCategories
+      Layout.fillWidth: true
+      Layout.leftMargin: root.metrics.outerPadding
+      Layout.rightMargin: root.metrics.outerPadding
+    }
+
+    RowLayout {
+      visible: root.effectiveState === "all_apps"
       Layout.fillWidth: true
       Layout.leftMargin: Style.marginM
       Layout.rightMargin: Style.marginM
+      LauncherHomeButton {
+        launcher: root
+        text: I18n.tr("launcher-home.back")
+        implicitHeight: Math.round(34 * Style.uiScaleRatio)
+        onClicked: root.goHome()
+      }
+      NIcon { icon: "apps"; color: Color.mPrimary }
+      NText {
+        Layout.fillWidth: true
+        text: I18n.tr("launcher-home.all-apps")
+        pointSize: Style.fontSizeL
+        font.weight: Style.fontWeightSemiBold
+      }
+    }
 
-      categories: root.providerCategories
-      currentIndex: visible && root.providerCategories.length > 0 ? root.providerCategories.indexOf(root.currentProvider.selectedCategory) : 0
-      iconFor: category => root.currentProvider.categoryIcons ? root.currentProvider.categoryIcons[category] : undefined
-      nameFor: category => root.currentProvider.getCategoryName ? root.currentProvider.getCategoryName(category) : category
-      onCategorySelected: index => root.selectCategoryWithSlide(index)
+    LauncherHome {
+      id: home
+      launcher: root
+      visible: root.effectiveState === "home"
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      Layout.leftMargin: root.metrics.padding
+      Layout.rightMargin: root.metrics.padding
     }
 
     // Results view
     NSlideSwapView {
       id: resultsSwapView
+      visible: root.effectiveState !== "home"
       Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
+      Layout.leftMargin: root.metrics.outerPadding
+      Layout.rightMargin: root.metrics.outerPadding
       Layout.fillHeight: true
       animationsEnabled: !root.animationsDisabled
-      sourceComponent: root.isSingleView ? singleViewComponent : rowsViewComponent
+      sourceComponent: root.effectiveState === "home" ? null : (root.isSingleView ? singleViewComponent : rowsViewComponent)
     }
 
     // --------------------------
@@ -1234,7 +1351,7 @@ Rectangle {
 
         width: parent.width
         height: parent.height
-        spacing: root.isGridView ? 0 : Style.marginXS
+        spacing: root.isGridView ? 0 : root.metrics.gapXS
         model: rowCount
         currentIndex: selectedRow
         cacheBuffer: resultsRows.height * 2
@@ -1327,6 +1444,7 @@ Rectangle {
     }
 
     ColumnLayout {
+      visible: root.effectiveState !== "home"
       Layout.leftMargin: Style.marginM
       Layout.rightMargin: Style.marginM
       spacing: 0
@@ -1363,4 +1481,44 @@ Rectangle {
       }
     }
   }
+  Item {
+    id: collectionLayer
+    anchors.fill: parent
+    anchors.margins: Style.marginXL
+    z: 100
+    clip: true
+    visible: root.folderExpanded
+    enabled: !folderEditor.active
+    Loader {
+      id: collectionFlyout
+      active: root.folderExpanded
+      width: Math.min(collectionLayer.width, 620 * Style.uiScaleRatio)
+      height: Math.min(collectionLayer.height, 360 * Style.uiScaleRatio, item?.implicitHeight || 360 * Style.uiScaleRatio)
+      readonly property point anchorPoint: {
+        root.width;
+        root.height;
+        home.contentY;
+        return root.folderAnchor ? root.folderAnchor.mapToItem(collectionLayer, 0, 0) : Qt.point(0, 0);
+      }
+      readonly property real belowAnchor: anchorPoint.y + (root.folderAnchor?.height || 0) + root.metrics.gapM
+      readonly property real aboveAnchor: anchorPoint.y - root.metrics.gapM - height
+      x: Math.max(0, Math.min(collectionLayer.width - width, anchorPoint.x))
+      y: Math.max(0, Math.min(collectionLayer.height - height, belowAnchor + height <= collectionLayer.height ? belowAnchor : aboveAnchor))
+      sourceComponent: LauncherCollectionFlyout { launcher: root }
+    }
+  }
+
+  Loader {
+    id: folderEditor
+    anchors.fill: parent
+    active: false
+    z: 200
+    sourceComponent: LauncherFolderEditor {
+      launcher: root
+      folder: root.editingFolder
+      appId: root.folderEditorAppId
+      parentId: root.folderEditorParentId
+    }
+  }
 }
+

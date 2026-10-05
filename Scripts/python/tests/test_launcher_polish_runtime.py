@@ -208,6 +208,34 @@ else:sys.exit(1)
             self.assertIsNone(unmanaged["package"])
             self.assertFalse(unmanaged["removeEnabled"])
 
+    def test_manual_subfolders_bound_depth_preserve_missing_apps_and_close_on_deletion(self):
+        self.call("prepare")
+        parent = self.call("saveFolder", "", "Work", "app-040", "")
+        try:
+            child = self.call("saveFolder", "", "Suite", "app-041", parent)
+            absent = self.call("saveFolder", "", "Absent", "not-installed", parent)
+            self.assertEqual(self.call("saveFolder", "", "Too deep", "app-042", child), "")
+            self.call("saveFolder", child, "Renamed", "", parent)
+            self.call("saveFolder", absent, "Still absent", "", parent)
+            self.wait(lambda: len(self.call("folderState", parent)["subfolders"]) == 2)
+            state = self.call("folderState", parent)
+            self.assertEqual(state["apps"], ["app-040"])
+            self.assertEqual(state["subfolders"], [
+                {"id": child, "name": "Renamed", "apps": ["app-041"]},
+                {"id": absent, "name": "Still absent", "apps": []},
+            ])
+            self.assertEqual(state["stored"]["children"][1]["apps"], ["not-installed"])
+            self.call("expandFolder", parent, child)
+            self.wait(lambda: self.call("folderState", parent)["expanded"])
+            self.assertEqual(self.call("folderState", parent)["state"], "home")
+            self.call("deleteFolder", child, parent)
+            self.wait(lambda: self.call("folderState", parent)["child"] == "")
+            self.assertTrue(self.call("folderState", parent)["expanded"])
+            self.call("deleteFolder", parent, "")
+            self.wait(lambda: not self.call("folderState", parent)["expanded"])
+        finally:
+            self.call("deleteFolder", parent, "")
+
     def test_metadata_preserves_live_entry_panel_selection_and_viewport(self):
         self.call("clearUpdates")
         self.prepare()

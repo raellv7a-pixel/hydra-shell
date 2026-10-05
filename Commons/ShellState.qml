@@ -14,6 +14,8 @@ Singleton {
 
   property string stateFile: ""
   property bool isLoaded: false
+  // Transient teaching hint: once per shell session, shared by all screens.
+  property bool launcherFolderHintShown: false
 
   // State properties for different services
   readonly property alias data: adapter
@@ -74,6 +76,8 @@ Singleton {
 
       // Launcher app usage counts
       property var launcherUsage: ({})
+      property var launcherRecentApps: []
+      property real recentDocumentsClearedAt: 0
     }
 
     onLoaded: {
@@ -117,6 +121,21 @@ Singleton {
     counts[toKey] = toCount + fromCount;
     delete counts[fromKey];
     adapter.launcherUsage = counts;
+    save();
+  }
+
+  function recordLauncherRecentApp(appId) {
+    if (!appId)
+      return;
+    const records = (adapter.launcherRecentApps || []).filter(record => record.appId !== appId);
+    records.unshift({ appId: appId, lastOpenedAt: Date.now() });
+    adapter.launcherRecentApps = records.slice(0, 24);
+    save();
+  }
+
+  function clearLauncherRecents() {
+    adapter.launcherRecentApps = [];
+    adapter.recentDocumentsClearedAt = Date.now();
     save();
   }
 

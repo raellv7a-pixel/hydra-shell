@@ -607,6 +607,7 @@ Item {
                        if (app.execute && (hasQuotedArgs || hasSpaceArgs)) {
                          Logger.d("ApplicationsProvider", `Detected quoted/space arguments in Exec for ${app.name}, using app.execute()`);
                          app.execute();
+                         ShellState.recordLauncherRecentApp(appKey);
                          return;
                        }
 
@@ -625,6 +626,7 @@ Item {
                            Logger.d("ApplicationsProvider", `Executing command (with prefix): ${command.join(" ")}`);
                            Quickshell.execDetached(command);
                          }
+                         ShellState.recordLauncherRecentApp(appKey);
                        } else {
                          if (app.runInTerminal && Settings.data.appLauncher.terminalCommand.trim() !== "") {
                            Logger.d("ApplicationsProvider", "Executing terminal app manually: " + app.name);
@@ -632,12 +634,15 @@ Item {
                            const command = terminal.concat(app.command);
                            Logger.d("ApplicationsProvider", "Executing command (manual terminal): " + command.join(" "));
                            CompositorService.spawn(command);
+                           ShellState.recordLauncherRecentApp(appKey);
                          } else if (app.command && app.command.length > 0) {
                            Logger.d("ApplicationsProvider", "Executing command: " + app.command.join(" "));
                            CompositorService.spawn(app.command);
+                           ShellState.recordLauncherRecentApp(appKey);
                          } else if (app.execute) {
                            Logger.d("ApplicationsProvider", "Calling app.execute() for: " + app.name);
                            app.execute();
+                           ShellState.recordLauncherRecentApp(appKey);
                          } else {
                            Logger.w("ApplicationsProvider", `Could not launch: ${app.name}. No valid launch method.`);
                          }
@@ -798,6 +803,13 @@ Item {
             "icon": pinned ? "unpin" : "pin",
             "label": pinned ? I18n.tr("common.unpin") : I18n.tr("common.pin"),
             "action": () => togglePin(item.appId)
+          },
+          {
+            "id": "folders",
+            "icon": "folder-plus",
+            "label": I18n.tr("launcher-home.add-to-folder"),
+            "keepOpen": true,
+            "action": () => launcher.showFolderActions()
           },
           {
             "id": "edgeShelf",

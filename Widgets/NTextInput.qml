@@ -21,6 +21,7 @@ ColumnLayout {
   property real radius: Style.iRadiusL
   property real minimumInputWidth: 80 * Style.uiScaleRatio
   property bool showClearButton: true
+  property real inputHeight: Style.baseWidgetSize * 1.1 * Style.uiScaleRatio
 
   property alias text: input.text
   property alias placeholderText: input.placeholderText
@@ -57,7 +58,7 @@ ColumnLayout {
     Layout.fillWidth: true
     Layout.minimumWidth: root.minimumInputWidth
     Layout.margins: Style.borderS
-    implicitHeight: Style.baseWidgetSize * 1.1 * Style.uiScaleRatio
+    implicitHeight: root.inputHeight
 
     // This is important - makes the control accept focus
     focusPolicy: Qt.StrongFocus

@@ -165,6 +165,73 @@ alacritty, GTK…) mantêm o nome antigo até os templates serem aplicados de no
 
 ## Launcher e efeitos visuais
 
+A Home da Launcher reúne Hero com wallpaper/saudação e uma página de data, hora,
+CPU e memória, busca única, categorias com texto, pastas, Todos os apps, Fixados
+e Recentes. No modo Emoldurado ela continua anexada ao centro inferior da
+moldura; o Overlay reutiliza o mesmo núcleo. A altura da Home acompanha seu
+conteúdo, com limite pela tela; o browser pode expandir. As pastas usam um
+carousel horizontal contínuo: aproximadamente quatro cards e um peek no desktop,
+três em telas menores. Wheel vertical sobre as pastas move o carousel apenas
+enquanto há conteúdo naquela direção; nos limites, libera o scroll ancestral.
+No Hero, wheel navega página a página, com cooldown de 220 ms; página única
+não captura eventos.
+Um nudge discreto ensina o scroll
+horizontal no máximo uma vez por sessão, antes da primeira interação e apenas
+com overflow e animações habilitadas.
+
+**Todas** restaura a Home neutra; **Todos os apps** abre o browser existente.
+Pastas inteligentes, pastas pessoais e a expansão de **Fixados** compartilham
+um flyout elevado no `LauncherCore`, fora do Flickable e dos layouts da Home.
+O anchor é mapeado da collection de origem; posição e tamanho ficam limitados
+à Launcher, sem reorganizar a Home. O grid compacto tem scroll vertical interno,
+foco e ações de aplicativo. A sombra usa tokens Hydra e respeita os controles
+globais de sombras e modo de desempenho.
+Digitar recolhe o flyout e ativa a busca; limpar retorna à Home ou ao browser
+anterior. Escape fecha primeiro as ações, depois limpa a busca, recolhe o flyout,
+volta à Home e finalmente fecha a Launcher.
+
+As pastas inteligentes são derivadas das categorias XDG: Ferramentas,
+Produtividade, Criatividade, Social, Jogos e Mídia. Social não inclui browsers
+ou Network automaticamente. Os quatro previews priorizam frequência de uso.
+Pastas pessoais ficam em `appLauncher.userFolders`, com `id`, `name`, `icon`
+e `apps`; `children` contém subpastas manuais com os mesmos campos, limitadas a
+um nível. Crie subpastas na pasta expandida e associe apps pelo menu
+**Adicionar à pasta**. Renomear mantém referências de apps ausentes;
+excluir uma subpasta retorna ao pai, excluir o pai recolhe a surface.
+Clique direito/Menu no card permite renomear, trocar ícone ou excluir com
+confirmação. Apps ausentes ficam invisíveis sem apagar suas referências.
+
+Em Settings → Launcher, **Pastas** oferece ícones Hydra ou do tema do sistema
+(resolução nativa `Quickshell.iconPath`, com fallback Hydra), e tamanho de
+ícone principal de 24–48 px (default 32 px); previews continuam com 24 px.
+**Density** controla largura, espaçamento, padding e alturas das novas
+surfaces, sem zoom de fontes e sem sobrescrever o tamanho escolhido do ícone.
+O Hero conserva seu ajuste próprio de altura.
+
+O texto do Hero possui apenas **Claro/Escuro**, sem scrim ou detecção de
+wallpaper. Valores antigos de Auto migram para Claro. Blur possui intensidade
+0–100% (default 50%), independente do overlay. O output é um `MultiEffect`
+com source capturada e escondida por `ShaderEffectSource`, máscara arredondada
+e blur máximo de 32 px; o modo de desempenho desativa o desfoque.
+
+Recentes lê `$XDG_DATA_HOME/recently-used.xbel` (fallback `~/.local/share`) por
+um helper Python assíncrono com parser XML estrutural, filtrando arquivos
+ausentes, URIs remotas e entradas privadas. Sem documentos válidos, exibe o
+MRU da Hydra, limitado a 24 apps com timestamp. **Limpar** esvazia esse MRU e
+grava um cutoff local para documentos em `ShellState`; nunca altera o XBEL
+compartilhado. Apps que não registram atividade no XBEL não contribuem para
+esse histórico de arquivos.
+
+Em **Settings → Launcher → Hero / Capa**, configure a fonte da imagem, altura,
+escurecimento, contraste do texto, resumo contextual, rotação automática e blur.
+O contraste **Automático** usa texto claro e um scrim escuro localizado; não há
+análise de luminância da região da imagem. **Claro** e **Escuro** forçam o
+foreground somente do Hero. Dots clicáveis e swipe horizontal controlam as
+páginas, sem setas sobre a imagem nem paginação por wheel vertical. A rotação é
+opcional e desativada por padrão; pausa durante hover/interação e não roda com
+a Home oculta, animações desativadas ou modo de desempenho. O blur também é
+desativado no modo de desempenho. Não há Media Player nem nova fonte de calendário.
+
 O Launcher usa os comandos granulares de update do Shelly 3.1.6 para pacotes de
 repositório, AUR e Flatpak. AppImage só permite upgrade global nessa versão:
 a ação informa explicitamente **Atualizar todos os AppImages gerenciados**.
