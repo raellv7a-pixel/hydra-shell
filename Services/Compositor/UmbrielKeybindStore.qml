@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Commons
 import "../../Modules/Panels/Settings/Tabs/Umbriel/Chords.js" as Chords
 
 Singleton {
@@ -12,12 +13,19 @@ Singleton {
   property var ipc: ({})
   property var committed: ({ "version": 2, "overrides": {}, "custom": [] })
   property var draft: ({ "version": 2, "overrides": {}, "custom": [] })
+  property var owners: []
+  readonly property bool externallyOwned: owners.length > 0
   property var savingState: null
+  property bool savingRecommended: false
+  property bool provisionAfterRead: false
+  property bool preserveLocalOnRead: false
   property bool loaded: false
   property bool busy: false
   property string error: ""
   property var pendingEdgeApps: null
   property string syncingEdgeApps: ""
+  signal committedState
+  signal saveFailed(string message)
   readonly property bool dirty: canonical(draft) !== canonical(committed)
   readonly property var rows: {
     const values = [];
@@ -48,13 +56,19 @@ Singleton {
   }
 
 
+  function isFirstRunPending() {
+    return Settings.shouldOpenSetupWizard || (Settings.data && Settings.data.onboardingVersion < Settings.currentOnboardingVersion);
+  }
+
+  function isPreserveMode() {
+    return (Settings.data && Settings.data.general && Settings.data.general.umbrielKeybindIntegration === "preserve");
+  }
+
   function init() {
-    if (loaded || busy)
+    if (!Settings.isLoaded || loaded || busy)
       return;
-    busy = true;
-    error = "";
-    provision.command = ["python3", script, "provision"];
-    provision.running = true;
+    provisionAfterRead = !isFirstRunPending() && !isPreserveMode();
+    refresh();
   }
 
   function refresh() {
@@ -63,6 +77,14 @@ Singleton {
     busy = true;
     error = "";
     loadProcess.running = true;
+  }
+
+  function refreshForOnboarding() {
+    if (busy)
+      return;
+    preserveLocalOnRead = loaded && dirty;
+    provisionAfterRead = false;
+    refresh();
   }
 
   function rebind(id, value) {
@@ -148,6 +170,18 @@ Singleton {
     if (!loaded || busy || !dirty || hasConflicts)
       return;
     savingState = JSON.parse(JSON.stringify(draft));
+    savingRecommended = false;
+    busy = true;
+    error = "";
+    saveProcess.command = ["python3", script, "save", JSON.stringify(savingState), JSON.stringify(committed)];
+    saveProcess.running = true;
+  }
+
+  function commitRecommended() {
+    if (!loaded || busy)
+      return;
+    savingState = JSON.parse(JSON.stringify(committed));
+    savingRecommended = true;
     busy = true;
     error = "";
     saveProcess.command = ["python3", script, "save", JSON.stringify(savingState), JSON.stringify(committed)];
@@ -156,6 +190,10 @@ Singleton {
 
   function syncEdgeScratchpads(pinnedApps) {
     const apps = Array.from(pinnedApps || []);
+    if (isFirstRunPending() || isPreserveMode() || externallyOwned) {
+      pendingEdgeApps = apps;
+      return;
+    }
     if (busy) {
       pendingEdgeApps = apps;
       return;
@@ -171,20 +209,27 @@ Singleton {
   }
 
   function flushPendingEdgeSync() {
-    if (busy || pendingEdgeApps === null)
+    if (busy || pendingEdgeApps === null || isFirstRunPending() || isPreserveMode() || externallyOwned)
       return;
     const apps = pendingEdgeApps;
     pendingEdgeApps = null;
     syncEdgeScratchpads(apps);
   }
-
   Connections {
     target: (typeof Settings !== "undefined" && Settings.data && Settings.data.edgeShelf) ? Settings.data.edgeShelf : null
     function onPinnedAppsChanged() {
       if (typeof CompositorService !== "undefined" && CompositorService.isUmbriel && Settings.isLoaded) {
+        if (root.isFirstRunPending() || root.isPreserveMode())
+          return;
         root.syncEdgeScratchpads(Settings.data.edgeShelf.pinnedApps);
       }
     }
+  }
+
+  Component.onCompleted: init()
+  Connections {
+    target: Settings
+    function onSettingsLoaded() { root.init(); }
   }
 
   Process {
@@ -214,19 +259,33 @@ Singleton {
     onExited: code => {
       root.busy = false;
       if (code !== 0) {
+        root.provisionAfterRead = false;
+        root.preserveLocalOnRead = false;
         root.error = loadError.text.trim() || "Falha ao carregar atalhos";
         root.flushPendingEdgeSync();
         return;
       }
       try {
         const data = JSON.parse(loadOutput.text);
-        root.catalog = data.catalog;
-        root.ipc = data.ipc;
-        root.committed = data.state;
-        root.draft = JSON.parse(JSON.stringify(data.state));
+        root.catalog = data.catalog || [];
+        root.ipc = data.ipc || {};
+        root.owners = data.owners || [];
+        if (!root.preserveLocalOnRead) {
+          root.committed = data.state || { version: 2, overrides: {}, custom: [] };
+          root.draft = JSON.parse(JSON.stringify(root.committed));
+        }
         root.loaded = true;
       } catch (e) {
+        root.provisionAfterRead = false;
         root.error = "Falha ao ler catálogo: " + e;
+      }
+      root.preserveLocalOnRead = false;
+      const shouldProvision = root.provisionAfterRead && !root.externallyOwned && !root.isFirstRunPending() && !root.isPreserveMode();
+      root.provisionAfterRead = false;
+      if (shouldProvision && root.loaded && !root.error) {
+        root.busy = true;
+        provision.command = ["python3", root.script, "provision"];
+        provision.running = true;
       }
       root.flushPendingEdgeSync();
     }
@@ -244,13 +303,19 @@ Singleton {
       root.busy = false;
       if (code !== 0) {
         root.savingState = null;
+        root.savingRecommended = false;
         root.error = saveError.text.trim() || "Falha na validação Umbriel";
+        root.saveFailed(root.error);
         root.flushPendingEdgeSync();
         return;
       }
       root.committed = root.savingState;
+      if (!root.savingRecommended)
+        root.draft = JSON.parse(JSON.stringify(root.savingState));
+      root.savingRecommended = false;
       root.savingState = null;
       root.error = "";
+      root.committedState();
       root.flushPendingEdgeSync();
     }
   }

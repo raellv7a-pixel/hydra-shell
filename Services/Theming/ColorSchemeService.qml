@@ -22,7 +22,8 @@ Singleton {
   readonly property string gtkRefreshScript: Quickshell.shellDir + "/Scripts/python/src/theming/gtk-refresh.py"
 
   signal namedSchemeSaved(bool success, string name, string path, string error)
-
+  signal colorsWritten()
+  signal colorsWriteFailed(string error)
   property string pendingSchemeName: ""
   property string pendingSchemePath: ""
 
@@ -39,6 +40,8 @@ Singleton {
   Connections {
     target: Settings.data.colorSchemes
     function onDarkModeChanged() {
+      if (AppThemeService.recipeUpdateInProgress)
+        return;
       Logger.d("ColorScheme", "Detected dark mode change");
       if (!Settings.data.colorSchemes.useWallpaperColors && Settings.data.colorSchemes.predefinedScheme) {
         // Re-apply current scheme to pick the right variant
@@ -81,13 +84,19 @@ Singleton {
     var filename = chunks[chunks.length - 1];
     var schemeName = filename.replace(".json", "");
     // Convert back to display names for special cases
-    if (schemeName === "Hydra-default") {
-      return "Hydra (default)";
-    } else if (schemeName === "Hydra-legacy") {
-      return "Hydra (legacy)";
-    } else if (schemeName === "Tokyo-Night") {
+    if (schemeName === "Hydra-default" || schemeName === "Hydra-Glacier" || schemeName === "Hydra (default)" || schemeName === "Hydra Glacier" || schemeName === "Hydra-legacy" || schemeName === "Hydra (legacy)") {
+      return "Hydra Glacier";
+    } else if (schemeName === "Hydra-Sage" || schemeName === "Hydra Sage") {
+      return "Hydra Sage";
+    } else if (schemeName === "Hydra-Cobalt" || schemeName === "Hydra Cobalt") {
+      return "Hydra Cobalt";
+    } else if (schemeName === "Hydra-Ember" || schemeName === "Hydra Ember") {
+      return "Hydra Ember";
+    } else if (schemeName === "Hydra-Graphite" || schemeName === "Hydra Graphite") {
+      return "Hydra Graphite";
+    } else if (schemeName === "Tokyo-Night" || schemeName === "Tokyo Night") {
       return "Tokyo Night";
-    } else if (schemeName === "Rosepine") {
+    } else if (schemeName === "Rosepine" || schemeName === "Rose Pine") {
       return "Rose Pine";
     }
     return schemeName;
@@ -96,15 +105,25 @@ Singleton {
   function resolveSchemePath(nameOrPath) {
     if (!nameOrPath)
       return "";
-    if (nameOrPath.indexOf("/") !== -1) {
+    // If it's a legacy Hydra-default / Hydra-legacy path, normalize it to Hydra-Glacier
+    if (nameOrPath.indexOf("/Hydra-default/") !== -1 || nameOrPath.indexOf("/Hydra-default.json") !== -1 ||
+        nameOrPath.indexOf("/Hydra-legacy/") !== -1 || nameOrPath.indexOf("/Hydra-legacy.json") !== -1) {
+      nameOrPath = "Hydra-Glacier";
+    } else if (nameOrPath.indexOf("/") !== -1) {
       return nameOrPath;
     }
-    // Handle special cases for Hydra schemes
+    // Handle special cases and legacy migration for Hydra schemes
     var schemeName = nameOrPath.replace(".json", "");
-    if (schemeName === "Hydra (default)") {
-      schemeName = "Hydra-default";
-    } else if (schemeName === "Hydra (legacy)") {
-      schemeName = "Hydra-legacy";
+    if (schemeName === "Hydra (default)" || schemeName === "Hydra-default" || schemeName === "Hydra (legacy)" || schemeName === "Hydra-legacy" || schemeName === "Hydra Glacier") {
+      schemeName = "Hydra-Glacier";
+    } else if (schemeName === "Hydra Sage") {
+      schemeName = "Hydra-Sage";
+    } else if (schemeName === "Hydra Cobalt") {
+      schemeName = "Hydra-Cobalt";
+    } else if (schemeName === "Hydra Ember") {
+      schemeName = "Hydra-Ember";
+    } else if (schemeName === "Hydra Graphite") {
+      schemeName = "Hydra-Graphite";
     } else if (schemeName === "Tokyo Night") {
       schemeName = "Tokyo-Night";
     } else if (schemeName === "Rose Pine") {
@@ -259,8 +278,10 @@ Singleton {
         }
       } catch (e) {
         Logger.e("ColorScheme", "Failed to parse scheme JSON:", path, e);
+        root.colorsWriteFailed(String(e));
       }
     }
+    onLoadFailed: error => root.colorsWriteFailed(String(error))
   }
 
   // Check if any templates are enabled
@@ -282,10 +303,12 @@ Singleton {
     id: colorsWriter
     path: colorsJsonFilePath
     printErrors: false
-    onSaved:
-
-    // Logger.i("ColorScheme", "Colors saved")
-    {}
+    onSaved: {
+      root.colorsWritten();
+    }
+    onSaveFailed: error => {
+      root.colorsWriteFailed(String(error));
+    }
     JsonAdapter {
       id: out
       property color mPrimary: "#000000"

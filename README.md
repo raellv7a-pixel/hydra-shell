@@ -20,6 +20,49 @@ compositor. A Hydra é iniciada imediatamente numa sessão Umbriel ativa ou pelo
 autostart idempotente no próximo login. Sem Umbriel, o instalador recusa a operação;
 o runtime registra sessão não suportada e não seleciona backends alternativos.
 
+## Temas oficiais e primeiro uso
+
+Novas configurações iniciam em **Hydra Glacier · Escuro · Material 2025**,
+com cores predefinidas e barra Framed. Os presets oficiais, nesta ordem, são
+**Glacier, Sage, Cobalt, Ember e Graphite**, todos com variantes Escuro/Claro,
+containers Material e paleta terminal completos. Seus anchors autorados são
+preservados também pelos templates; temas predefinidos não passam pelo Tinted.
+O nome antigo `Hydra (default)` / `Hydra-default` resolve para Glacier.
+Outros temas e escolhas explícitas de Material 2021 continuam preservados.
+
+O primeiro uso tem cinco etapas: **Telas → Seu estilo → Conheça a Hydra →
+Seus controles → Pronto**. A rail indica progresso; não há configuração
+detalhada de barra, Dock ou engine de cores nesse fluxo.
+
+- **Telas:** edite o draft nativo do `MonitorService`, aplique e confirme em
+  até 15 segundos. O timeout reverte; **Manter** persiste pelo writer
+  Hydra-owned de `outputs.toml`. Não é possível avançar com alterações
+  pendentes, rollback incompleto ou falha de persistência.
+- **Seu estilo:** a seleção altera a paleta da shell em memória, sem gravar
+  preferências nem regenerar templates externos a cada preview. Cores do
+  papel de parede usam o pipeline Material existente; fonte indisponível
+  volta ao preset com aviso. A conclusão confirma pelo pipeline oficial.
+- **Seus controles:** atalhos vêm do catálogo e das ações efetivas salvas.
+  Escolher recomendados preserva overrides existentes; manter os atuais
+  desativa provisionamento automático posterior. Ownership externo de
+  `[keybinds]` é somente informativo e nunca sobrescrito.
+- **Pronto:** resumo real e telemetria opcional, desativada por padrão.
+  **Usar padrões e começar** escolhe Glacier Escuro/2025, cores fixas,
+  integração segura e telemetria desligada; descarta apenas alterações de
+  display não aplicadas, preservando configurações já confirmadas.
+
+`settings.json` guarda `onboardingVersion` (atual: `1`). Arquivo novo mantém
+`0` até concluir; encerrar a sessão antes disso reabre o fluxo completo.
+Arquivo válido antigo sem esse campo migra para `1` sem onboarding obrigatório.
+A confirmação aguarda reconhecimento da gravação; escolhas já persistidas
+também são reconhecidas sem depender de um write idêntico do FileView.
+
+O primeiro uso não fecha por Escape ou clique no fundo. Para rever o fluxo,
+use **Configurações → Geral → Iniciar assistente de configuração**:
+**Cancelar** restaura a paleta anterior e descarta o draft de display da
+sessão; configurações de display já confirmadas permanecem. O aviso legado
+de privacidade continua separado, com uma única etapa.
+
 ## Interação nativa Umbriel
 
 - **Alt+Tab:** alternador Hydra em Compacto ou Carrossel, com MRU e filtros em

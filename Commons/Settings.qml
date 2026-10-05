@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import "../Helpers/QtObj2JS.js" as QtObj2JS
+import "../Helpers/Onboarding.js" as Onboarding
 import qs.Commons
 import qs.Commons.Migrations
 import qs.Modules.OSD
@@ -18,6 +19,9 @@ Singleton {
   property bool directoriesCreated: false
   property bool shouldOpenSetupWizard: false
   property bool isFreshInstall: false
+  readonly property int currentOnboardingVersion: 1
+  property string _savedSettingsSnapshot: ""
+  property string _pendingSettingsSnapshot: ""
 
   /*
   Shell directories.
@@ -38,6 +42,7 @@ Singleton {
 
   signal settingsLoaded
   signal settingsSaved
+  signal settingsSaveFailed(string message)
   signal settingsReloaded
 
   // Debounce external reload requests (file watcher + directory watcher)
@@ -74,12 +79,7 @@ Singleton {
   // -----------------------------------------------------
   // Ensure directories exist before FileView tries to read files
   Component.onCompleted: {
-    // ensure settings dir exists
-    Quickshell.execDetached(["mkdir", "-p", configDir]);
-    Quickshell.execDetached(["mkdir", "-p", cacheDir]);
-
-    // Mark directories as created and trigger file loading
-    directoriesCreated = true;
+    ensureDirectoriesProcess.running = true;
 
     // This should only be activated once when the settings structure has changed
     // Then it should be commented out again, regular users don't need to generate
@@ -99,6 +99,17 @@ Singleton {
     settingsFileView.adapter = adapter;
   }
 
+  Process {
+    id: ensureDirectoriesProcess
+    command: ["mkdir", "-p", root.configDir, root.cacheDir]
+    onExited: exitCode => {
+      if (exitCode === 0)
+        root.directoriesCreated = true;
+      else
+        Logger.e("Settings", "Could not create settings directories; exit code:", exitCode);
+    }
+  }
+
   // Don't write settings to disk immediately
   // This avoid excessive IO when a variable changes rapidly (ex: sliders)
   Timer {
@@ -115,9 +126,25 @@ Singleton {
 
   FileView {
     id: settingsFileView
-    path: directoriesCreated ? settingsFile : undefined
+    path: directoriesCreated ? settingsFile : ""
     printErrors: false
     watchChanges: true
+    onSaved: {
+      if (root._pendingSettingsSnapshot !== "") {
+        root._savedSettingsSnapshot = root._pendingSettingsSnapshot;
+        root._pendingSettingsSnapshot = "";
+      }
+      // FileView writes do not emit onLoaded. Bootstrap only after the fresh
+      // defaults really exist, otherwise first boot stalls with isLoaded=false.
+      if (!root.isLoaded && root.isFreshInstall)
+        Qt.callLater(() => settingsFileView.reload());
+      else
+        root.settingsSaved();
+    }
+    onSaveFailed: error => {
+      root._pendingSettingsSnapshot = "";
+      root.settingsSaveFailed(String(error));
+    }
     onAdapterUpdated: {
       if (!root._bootstrapComplete) {
         return;
@@ -126,13 +153,8 @@ Singleton {
     }
 
     onFileChanged: scheduleExternalReload()
-    // Trigger initial load when path changes from empty to actual path
-    onPathChanged: {
-      if (path !== undefined) {
-        reload();
-      }
-    }
     onLoaded: function () {
+      root._savedSettingsSnapshot = JSON.stringify(QtObj2JS.qtObjectToPlainObject(adapter));
       if (!isLoaded) {
         Logger.i("Settings", "Settings loaded");
 
@@ -145,6 +167,9 @@ Singleton {
         } catch (e) {
           Logger.w("Settings", "Could not parse raw JSON for migrations");
         }
+
+        adapter.onboardingVersion = Onboarding.versionForSettings(rawParsed ? rawJson : null, root.isFreshInstall, root.currentOnboardingVersion);
+        root.shouldOpenSetupWizard = adapter.onboardingVersion < root.currentOnboardingVersion;
 
         root._rawInitialPersistedJson = rawJson;
         root._rawInitialSettingsParsed = rawParsed;
@@ -183,10 +208,9 @@ Singleton {
         root._rawInitialPersistedJson = {};
         root._rawInitialSettingsParsed = true;
         root._rawInitialControlCenter = {};
-        writeAdapter();
+        // Do not replace FileView's active load from its completion callback.
+        Qt.callLater(() => settingsFileView.writeAdapter());
 
-        // We started without settings, we should open the setupWizard
-        root.shouldOpenSetupWizard = true;
       }
     }
   }
@@ -195,7 +219,7 @@ Singleton {
   // settings.json may be replaced atomically (e.g., symlink/store-path swap).
   FileView {
     id: settingsDirWatcher
-    path: directoriesCreated ? configDir : undefined
+    path: directoriesCreated ? configDir : ""
     printErrors: false
     watchChanges: true
     onFileChanged: scheduleExternalReload()
@@ -539,6 +563,7 @@ Singleton {
     id: adapter
 
     property int settingsVersion: 0
+    property int onboardingVersion: 0
 
     // bar
     property JsonObject bar: JsonObject {
@@ -691,6 +716,8 @@ Singleton {
       property bool allowPanelsOnScreenWithoutBar: true
       property bool showChangelogOnStartup: true
       property bool telemetryEnabled: false
+      // Startup provisioning is opt-in after first-run; existing installs retain it.
+      property string umbrielKeybindIntegration: "recommended"
       property bool enableLockScreenCountdown: true
       property int lockScreenCountdownDuration: 10000
       property bool autoStartAuth: false
@@ -1230,7 +1257,7 @@ Singleton {
 
     property JsonObject colorSchemes: JsonObject {
       property bool useWallpaperColors: false
-      property string predefinedScheme: "Hydra (default)"
+      property string predefinedScheme: "Hydra Glacier"
       property bool darkMode: true
       // Valid values: "off", "manual" (fixed sunrise/sunset), "location" (weather API
       // sunrise/sunset), "wallpaper" (derived from the active wallpaper's luminance).
@@ -1612,8 +1639,25 @@ Singleton {
   // -----------------------------------------------------
   // Public function to trigger immediate settings saving
   function saveImmediate() {
+    // Startup services must not overwrite a file whose initial read has not
+    // completed. Fresh-file creation is handled explicitly by onLoadFailed.
+    if (!root.isLoaded)
+      return;
+    saveTimer.stop();
+    const snapshot = JSON.stringify(QtObj2JS.qtObjectToPlainObject(adapter));
+    // FileView suppresses identical writes without emitting saved(). Acknowledge
+    // only the state already loaded/saved, never a changed or pending write.
+    if (snapshot === root._savedSettingsSnapshot && root._pendingSettingsSnapshot === "") {
+      Qt.callLater(() => {
+        if (JSON.stringify(QtObj2JS.qtObjectToPlainObject(adapter)) === root._savedSettingsSnapshot && root._pendingSettingsSnapshot === "")
+          root.settingsSaved();
+        else
+          root.saveImmediate();
+      });
+      return;
+    }
+    root._pendingSettingsSnapshot = snapshot;
     settingsFileView.writeAdapter();
-    root.settingsSaved(); // Emit signal after saving
   }
 
   // -----------------------------------------------------

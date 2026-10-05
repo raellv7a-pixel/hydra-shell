@@ -1,5 +1,6 @@
 {
   "settingsVersion": 0,
+  "onboardingVersion": 0,
   "bar": {
     "barType": "framed",
     "position": "top",
@@ -112,6 +113,7 @@
     "allowPanelsOnScreenWithoutBar": true,
     "showChangelogOnStartup": true,
     "telemetryEnabled": false,
+    "umbrielKeybindIntegration": "recommended",
     "enableLockScreenCountdown": true,
     "lockScreenCountdownDuration": 10000,
     "autoStartAuth": false,
@@ -606,7 +608,7 @@
   },
   "colorSchemes": {
     "useWallpaperColors": false,
-    "predefinedScheme": "Hydra (default)",
+    "predefinedScheme": "Hydra Glacier",
     "darkMode": true,
     "schedulingMode": "off",
     "manualSunrise": "06:30",

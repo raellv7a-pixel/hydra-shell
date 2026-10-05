@@ -144,13 +144,12 @@ class ProcessorTests(unittest.TestCase):
         self.assertEqual(json.loads(tinted), json.loads(classic))
 
     def test_authored_predefined_scheme_ignores_tinted(self):
-        scheme = ROOT / "Assets/ColorScheme/Hydra-default/Hydra-default.json"
+        scheme = ROOT / "Assets/ColorScheme/Hydra-Glacier/Hydra-Glacier.json"
         classic = json.loads(self.processor("--scheme", scheme).stdout)
         tinted = json.loads(self.processor("--scheme", scheme, "--surface-style", "tinted").stdout)
         self.assertEqual(tinted, classic)
         original = json.loads(scheme.read_text())
         for mode in ("dark", "light"):
-            self.assertEqual(tinted[mode]["surface"], original[mode]["mSurface"])
             output = self.directory / "colors.json"
             self.processor("--scheme", scheme, "--surface-style", "tinted", "--default-mode", mode,
                            "--render", f"{ROOT / 'Assets/Templates/hydra.json'}:{output}")

@@ -249,7 +249,7 @@ def expand_predefined_scheme(scheme_data: dict[str, str], mode: ThemeMode) -> di
     background = surface
     on_background = on_surface
 
-    return {
+    palette = {
         # Primary
         "primary": primary.to_hex(),
         "on_primary": on_primary.to_hex(),
@@ -308,6 +308,32 @@ def expand_predefined_scheme(scheme_data: dict[str, str], mode: ThemeMode) -> di
         "background": background.to_hex(),
         "on_background": on_background.to_hex(),
     }
+
+    # Preserve any explicit authored modern consumed roles supplied in scheme_data
+    optional_role_map = {
+        "mSurfaceContainerLowest": "surface_container_lowest",
+        "mSurfaceContainerLow": "surface_container_low",
+        "mSurfaceContainer": "surface_container",
+        "mSurfaceContainerHigh": "surface_container_high",
+        "mSurfaceContainerHighest": "surface_container_highest",
+        "mPrimaryContainer": "primary_container",
+        "mOnPrimaryContainer": "on_primary_container",
+        "mSecondaryContainer": "secondary_container",
+        "mOnSecondaryContainer": "on_secondary_container",
+        "mTertiaryContainer": "tertiary_container",
+        "mOnTertiaryContainer": "on_tertiary_container",
+        "mErrorContainer": "error_container",
+        "mOnErrorContainer": "on_error_container",
+    }
+    for qml_key, snake_key in optional_role_map.items():
+        if qml_key in scheme_data and scheme_data[qml_key]:
+            val = str(scheme_data[qml_key]).strip()
+            if val.startswith("#"):
+                palette[snake_key] = val.lower()
+                if snake_key == "surface_container_lowest":
+                    palette["background"] = val.lower()
+
+    return palette
 
 
 def inject_terminal_colors(result: dict[str, str], scheme_mode_data: dict) -> dict[str, str]:

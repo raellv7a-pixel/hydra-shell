@@ -26,8 +26,14 @@ Singleton {
   property bool verifyingRollback: false
   property int confirmationRemainingSeconds: 15
 
-  readonly property bool isBusy: transactionState !== "idle" || fetchProc.running || snapshotProc.running || applyProc.running || rollbackProc.running || verifyProc.running
+  readonly property bool isBusy: transactionState !== "idle" || fetchProc.running || snapshotProc.running || applyProc.running || rollbackProc.running || verifyProc.running || saveProc.running
+  readonly property bool isSettling: transactionState === "preparing" || transactionState === "applying" || transactionState === "verifying" || transactionState === "reverting" || transactionState === "rollback_verifying" || saveProc.running
+  readonly property bool isPersisting: saveProc.running
+  readonly property string persistenceError: lastPersistenceError
+  property string lastPersistenceError: ""
 
+  signal configSaved(bool success, string error)
+  signal layoutConfirmed
   readonly property var backendConfig: ({ script: Quickshell.shellDir + "/Scripts/python/umbriel_config.py" })
   Component.onCompleted: {
     if (CompositorService.isUmbriel)
@@ -391,9 +397,10 @@ Singleton {
     root.originalOutputs = JSON.parse(JSON.stringify(root.draftOutputs));
     root.rollbackSnapshot = null;
     root.transactionState = "idle";
+    root.lastPersistenceError = "";
+    root.layoutConfirmed();
     ToastService.showNotice("Layout Confirmado", "Configuração de monitores salva com sucesso para esta sessão!", "display");
   }
-
   function rollback() {
     confirmationTimer.stop();
     root.verifyingRollback = false;
@@ -431,10 +438,16 @@ Singleton {
 
   function saveToUmbrielConfig() {
     if (root.isBusy)
-      return;
+      return false;
+    root.lastPersistenceError = "";
     const result = root.activeBackend().buildApplyCommand(root.originalOutputs, root.backendConfig);
-    if (result.script)
+    if (result && result.script) {
       saveProc.exec({ command: ["bash", "-c", result.script] });
+      return true;
+    }
+    root.lastPersistenceError = result ? (result.error || "No apply command") : "Failed to generate config command";
+    root.configSaved(false, root.lastPersistenceError);
+    return false;
   }
 
   Process {
@@ -442,10 +455,14 @@ Singleton {
     stderr: StdioCollector {}
     onExited: code => {
       if (code === 0) {
+        root.lastPersistenceError = "";
         CompositorService.updateDisplayScales();
         ToastService.showNotice("Salvo na Umbriel", "Configuração validada em hydra/outputs.toml.", "display");
+        root.configSaved(true, "");
       } else {
-        ToastService.showError("Erro ao Salvar", saveProc.stderr.text);
+        root.lastPersistenceError = saveProc.stderr.text || ("Process exited with code " + code);
+        ToastService.showError("Erro ao Salvar", root.lastPersistenceError);
+        root.configSaved(false, root.lastPersistenceError);
       }
     }
   }

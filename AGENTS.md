@@ -31,7 +31,7 @@ there; the CLI needs no server and is the first choice.
 
 Auto-generated from the Prowl index, refreshed on each `overview`/`init`. Prefer retrieving from Prowl (and reading the cited files) over grepping or relying on training memory; this is the current shape of the repo.
 
-- size: 839 files, 83928 symbols, 5481 edges (resolved 4087, external deps 399, unresolved 995)
+- size: 839 files, 83948 symbols, 5481 edges (resolved 4087, external deps 399, unresolved 995)
 - languages: qml:573 json:76 python:56 bash:37 markdown:30 javascript:24 css:13 toml:11
 - subsystems: Modules/Panels(275,qml) · Widgets(56,qml) · Modules/Bar(44,qml) · Commons/Migrations(28,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(21,qml) · Modules/MainScreen(14,qml) · Services/System(14,qml)
 - entrypoints: shell.qml · Modules/Cards/MediaCard.qml · Modules/Panels/Settings/Bar/WidgetSettings/CustomButtonSettings.qml · Modules/Panels/Settings/DesktopWidgets/WidgetSettings/ClockSettings.qml · Modules/Panels/SessionMenu/SessionMenu.qml · Modules/Panels/Settings/Bar/WidgetSettings/ClockSettings.qml · Modules/Panels/Wallpaper/WallhavenSettingsPopup.qml · Modules/Cards/ProfileCard.qml · (+73 more)

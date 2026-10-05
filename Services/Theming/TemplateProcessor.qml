@@ -14,6 +14,7 @@ Singleton {
 
   // Signal emitted when color generation completes successfully (for wallpaper-based theming)
   signal colorsGenerated
+  signal colorsGenerationFailed(string message)
 
   readonly property string dynamicConfigPath: Settings.cacheDir + "theming.dynamic.toml"
   readonly property string templateProcessorScript: Quickshell.shellDir + "/Scripts/python/src/theming/template-processor.py"
@@ -626,6 +627,8 @@ Singleton {
       } else if (exitCode === 0) {
         // No pending request and successful completion - emit signal
         root.colorsGenerated();
+      } else {
+        root.colorsGenerationFailed(stderr.text.trim() || String(exitCode));
       }
     }
 

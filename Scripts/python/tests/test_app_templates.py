@@ -93,25 +93,28 @@ class AppTemplateTests(unittest.TestCase):
                             tomllib.loads(output)
 
     def test_predefined_terminals_keep_authored_backgrounds(self):
-        scheme = json.loads((ROOT / 'Assets/ColorScheme/Hydra-default/Hydra-default.json').read_text())
-        roles = {mode: inject_terminal_colors(expand_predefined_scheme(scheme[mode], mode), scheme[mode])
-                 for mode in ('dark', 'light')}
         files = ('terminal/foot-predefined', 'terminal/ghostty-predefined',
                  'terminal/kitty-predefined.conf', 'terminal/alacritty-predefined.toml',
                  'terminal/wezterm-predefined.toml', 'terminal/starship-predefined.toml')
-        for mode, background in (('dark', '070722'), ('light', 'e6e8fa')):
-            for filename in files:
-                with self.subTest(mode=mode, filename=filename):
-                    output = self.render(filename, roles, mode)
-                    if filename.endswith('.toml'):
-                        import tomllib
-                        tomllib.loads(output)
-                    if filename == 'terminal/foot-predefined':
-                        config = configparser.ConfigParser(interpolation=None)
-                        config.read_string(output)
-                        backgrounds = [config[s]['background'].lower() for s in config.sections()
-                                       if 'background' in config[s]]
-                        self.assertEqual(backgrounds, [background])
+        for name in ('Glacier', 'Sage', 'Cobalt', 'Ember', 'Graphite'):
+            path = ROOT / f'Assets/ColorScheme/Hydra-{name}/Hydra-{name}.json'
+            scheme = json.loads(path.read_text())
+            roles = {mode: inject_terminal_colors(expand_predefined_scheme(scheme[mode], mode), scheme[mode])
+                     for mode in ('dark', 'light')}
+            for mode in ('dark', 'light'):
+                background = scheme[mode]['terminal']['background'].lstrip('#').lower()
+                for filename in files:
+                    with self.subTest(theme=name, mode=mode, filename=filename):
+                        output = self.render(filename, roles, mode)
+                        if filename.endswith('.toml'):
+                            import tomllib
+                            tomllib.loads(output)
+                        if filename == 'terminal/foot-predefined':
+                            config = configparser.ConfigParser(interpolation=None)
+                            config.read_string(output)
+                            backgrounds = [config[s]['background'].lower() for s in config.sections()
+                                           if 'background' in config[s]]
+                            self.assertEqual(backgrounds, [background])
 
 
 if __name__ == '__main__':

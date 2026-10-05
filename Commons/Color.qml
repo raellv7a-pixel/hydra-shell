@@ -28,7 +28,7 @@ Singleton {
     running: false
     interval: 200
     onTriggered: {
-      if (customColorsFile.path !== undefined) {
+      if (!root.isPreviewing && customColorsFile.path !== undefined) {
         Logger.d("Color", "Reloading colors from disk");
         reloadColors = true;
         customColorsFile.reload();
@@ -37,7 +37,7 @@ Singleton {
   }
 
   function scheduleExternalColorReload() {
-    if (!Settings.directoriesCreated || customColorsFile.path === undefined) {
+    if (root.isPreviewing || !Settings.directoriesCreated || customColorsFile.path === undefined) {
       return;
     }
     externalColorReloadTimer.restart();
@@ -83,7 +83,19 @@ Singleton {
 
   // Optional engine roles. Replaced on EVERY load so a later legacy/predefined
   // file cannot retain containers from the previous wallpaper palette.
-  property var surfaceContainerRoles: ({})
+  property var surfaceContainerRoles: ({
+    "mSurfaceContainerLowest": defaultColors.mSurfaceContainerLowest,
+    "mSurfaceContainerLow": defaultColors.mSurfaceContainerLow,
+    "mSurfaceContainer": defaultColors.mSurfaceContainer,
+    "mSurfaceContainerHigh": defaultColors.mSurfaceContainerHigh,
+    "mSurfaceContainerHighest": defaultColors.mSurfaceContainerHighest,
+    "mPrimaryContainer": defaultColors.mPrimaryContainer,
+    "mOnPrimaryContainer": defaultColors.mOnPrimaryContainer,
+    "mSecondaryContainer": defaultColors.mSecondaryContainer,
+    "mOnSecondaryContainer": defaultColors.mOnSecondaryContainer,
+    "mTertiaryContainer": defaultColors.mTertiaryContainer,
+    "mOnTertiaryContainer": defaultColors.mOnTertiaryContainer
+  })
   property color _surfaceContainerLowest: surfaceContainerRoles.mSurfaceContainerLowest ?? mSurface
   property color _surfaceContainerLow: surfaceContainerRoles.mSurfaceContainerLow ?? blend(mSurface, mSurfaceVariant, 0.18)
   property color _surfaceContainer: surfaceContainerRoles.mSurfaceContainer ?? blend(mSurface, mSurfaceVariant, 0.36)
@@ -316,6 +328,7 @@ Singleton {
   // Update colors when customColorsData changes (imperative assignment enables Behavior animations)
   Connections {
     target: customColorsData
+    enabled: !root.isPreviewing
     function onMPrimaryChanged() {
       if (!root.skipTransition) {
         startTransition();
@@ -413,6 +426,100 @@ Singleton {
       root.mOnHover = customColorsData.mOnHover;
     }
   }
+  // ----------------------------------------------------------------
+  // Palette snapshot and in-memory live preview support
+  property bool isPreviewing: false
+  property var _snapshotColors: null
+  property var previewDarkMode: null
+  function takeSnapshot() {
+    const snapshot = {};
+    const baseKeys = [
+      "mPrimary", "mOnPrimary", "mSecondary", "mOnSecondary",
+      "mTertiary", "mOnTertiary", "mError", "mOnError",
+      "mSurface", "mOnSurface", "mSurfaceVariant", "mOnSurfaceVariant",
+      "mOutline", "mShadow", "mHover", "mOnHover"
+    ];
+    for (let i = 0; i < baseKeys.length; i++) {
+      const key = baseKeys[i];
+      snapshot[key] = root[key].toString();
+    }
+    const containerKeys = [
+      "mSurfaceContainerLowest", "mSurfaceContainerLow", "mSurfaceContainer",
+      "mSurfaceContainerHigh", "mSurfaceContainerHighest", "mPrimaryContainer",
+      "mOnPrimaryContainer", "mSecondaryContainer", "mOnSecondaryContainer",
+      "mTertiaryContainer", "mOnTertiaryContainer"
+    ];
+    for (let i = 0; i < containerKeys.length; i++) {
+      const key = containerKeys[i];
+      snapshot[key] = (root.surfaceContainerRoles[key] !== undefined ? root.surfaceContainerRoles[key] : root[key]).toString();
+    }
+    return snapshot;
+  }
+
+  function applySnapshot(snapshot) {
+    if (!snapshot)
+      return;
+    previewPalette(snapshot);
+    isPreviewing = false;
+    _snapshotColors = null;
+    previewDarkMode = null;
+  }
+
+  function previewPalette(paletteObj) {
+    if (!paletteObj)
+      return;
+    if (!isPreviewing && !_snapshotColors) {
+      _snapshotColors = takeSnapshot();
+    }
+    isPreviewing = true;
+    if (!root.skipTransition) {
+      startTransition();
+    }
+    const baseKeys = [
+      "mPrimary", "mOnPrimary", "mSecondary", "mOnSecondary",
+      "mTertiary", "mOnTertiary", "mError", "mOnError",
+      "mSurface", "mOnSurface", "mSurfaceVariant", "mOnSurfaceVariant",
+      "mOutline", "mShadow", "mHover", "mOnHover"
+    ];
+    for (let i = 0; i < baseKeys.length; i++) {
+      const key = baseKeys[i];
+      if (paletteObj[key] !== undefined) {
+        root[key] = paletteObj[key];
+      }
+    }
+    const containerKeys = [
+      "mSurfaceContainerLowest", "mSurfaceContainerLow", "mSurfaceContainer",
+      "mSurfaceContainerHigh", "mSurfaceContainerHighest", "mPrimaryContainer",
+      "mOnPrimaryContainer", "mSecondaryContainer", "mOnSecondaryContainer",
+      "mTertiaryContainer", "mOnTertiaryContainer"
+    ];
+    const nextContainers = {};
+    for (let i = 0; i < containerKeys.length; i++) {
+      const key = containerKeys[i];
+      if (paletteObj[key] !== undefined) {
+        nextContainers[key] = paletteObj[key];
+      }
+    }
+    root.surfaceContainerRoles = nextContainers;
+  }
+
+  function clearPreview() {
+    if (_snapshotColors) {
+      applySnapshot(_snapshotColors);
+    }
+    isPreviewing = false;
+    _snapshotColors = null;
+    previewDarkMode = null;
+  }
+
+  function commitPreview() {
+    isPreviewing = false;
+    _snapshotColors = null;
+    previewDarkMode = null;
+    // Reload every role after releasing the read-only preview, including base
+    // values whose JsonAdapter fields may have changed while signals were gated.
+    customColorsFile.reload();
+  }
 
   function resolveColorKey(key) {
     switch (key) {
@@ -463,7 +570,8 @@ Singleton {
   function adaptiveOpacity(baseOpacity) {
     if (PowerProfileService.hydraPerformanceMode)
       return 1.0;
-    return Settings.data.colorSchemes.darkMode ? baseOpacity : Math.pow(baseOpacity, 1.5);
+    const isDark = previewDarkMode !== null ? !!previewDarkMode : Settings.data.colorSchemes.darkMode;
+    return isDark ? baseOpacity : Math.pow(baseOpacity, 1.5);
   }
 
   function smartAlpha(baseColor, minAlpha = 0.4) {
@@ -504,35 +612,47 @@ Singleton {
   ]
 
   // --------------------------------
-  // Default colors: Hydra (default) dark — must match Assets/ColorScheme/Hydra-default
+  // Default colors: Hydra Glacier dark — must match Assets/ColorScheme/Hydra-Glacier
   QtObject {
     id: defaultColors
 
-    readonly property color mPrimary: "#fff59b"
-    readonly property color mOnPrimary: "#0e0e43"
+    readonly property color mPrimary: "#7DD3E8"
+    readonly property color mOnPrimary: "#001f26"
 
-    readonly property color mSecondary: "#a9aefe"
-    readonly property color mOnSecondary: "#0e0e43"
+    readonly property color mSecondary: "#A9C7D2"
+    readonly property color mOnSecondary: "#001f27"
 
-    readonly property color mTertiary: "#9BFECE"
-    readonly property color mOnTertiary: "#0e0e43"
+    readonly property color mTertiary: "#8BDDBA"
+    readonly property color mOnTertiary: "#002116"
 
-    readonly property color mError: "#FD4663"
-    readonly property color mOnError: "#0e0e43"
+    readonly property color mError: "#fa746f"
+    readonly property color mOnError: "#410005"
 
-    readonly property color mSurface: "#070722"
-    readonly property color mOnSurface: "#f3edf7"
+    readonly property color mSurface: "#10181D"
+    readonly property color mOnSurface: "#E4EDF1"
 
-    readonly property color mSurfaceVariant: "#11112d"
-    readonly property color mOnSurfaceVariant: "#7c80b4"
+    readonly property color mSurfaceVariant: "#172228"
+    readonly property color mOnSurfaceVariant: "#a3adb0"
 
-    readonly property color mOutline: "#21215F"
-    readonly property color mShadow: "#070722"
+    readonly property color mSurfaceContainerLowest: "#0B1115"
+    readonly property color mSurfaceContainerLow: "#121d23"
+    readonly property color mSurfaceContainer: "#172228"
+    readonly property color mSurfaceContainerHigh: "#1E2C33"
+    readonly property color mSurfaceContainerHighest: "#28363d"
 
-    readonly property color mHover: "#9BFECE"
-    readonly property color mOnHover: "#0e0e43"
+    readonly property color mPrimaryContainer: "#184E5A"
+    readonly property color mOnPrimaryContainer: "#d8f6ff"
+    readonly property color mSecondaryContainer: "#203d46"
+    readonly property color mOnSecondaryContainer: "#dbf5ff"
+    readonly property color mTertiaryContainer: "#00422f"
+    readonly property color mOnTertiaryContainer: "#c2fee2"
+
+    readonly property color mOutline: "#6d777a"
+    readonly property color mShadow: "#0B1115"
+
+    readonly property color mHover: "#8BDDBA"
+    readonly property color mOnHover: "#002116"
   }
-
   // ----------------------------------------------------------------
   // FileView to load custom colors data from colors.json
   FileView {
@@ -543,10 +663,14 @@ Singleton {
     onFileChanged: scheduleExternalColorReload()
 
     onLoaded: {
+      if (root.isPreviewing)
+        return;
       // Keep optional keys out of JsonAdapter: absent fields must reset, not
       // stick across loads. This FileView is read-only except ENOENT defaults.
       try {
         const next = JSON.parse(text());
+        for (const key of ["mPrimary", "mOnPrimary", "mSecondary", "mOnSecondary", "mTertiary", "mOnTertiary", "mError", "mOnError", "mSurface", "mOnSurface", "mSurfaceVariant", "mOnSurfaceVariant", "mOutline", "mShadow", "mHover", "mOnHover"])
+          root[key] = next[key] ?? defaultColors[key];
         const optionalKeys = ["mSurfaceContainerLowest", "mSurfaceContainerLow", "mSurfaceContainer", "mSurfaceContainerHigh", "mSurfaceContainerHighest", "mPrimaryContainer", "mOnPrimaryContainer", "mSecondaryContainer", "mOnSecondaryContainer", "mTertiaryContainer", "mOnTertiaryContainer"];
         const containersChanged = optionalKeys.some(key => next[key] !== root.surfaceContainerRoles[key]);
         root.surfaceContainerRoles = next;
@@ -582,8 +706,9 @@ Singleton {
 
       // Error code 2 = ENOENT (No such file or directory)
       if (error === 2 || error.toString().includes("No such file")) {
-        // File doesn't exist, create it with default values
-        writeAdapter();
+        // Include modern roles on first write, not just the legacy JsonAdapter,
+        // so factory Glacier containers stay exact throughout bootstrap.
+        customColorsFile.setText(JSON.stringify(root.takeSnapshot()));
       }
     }
     JsonAdapter {

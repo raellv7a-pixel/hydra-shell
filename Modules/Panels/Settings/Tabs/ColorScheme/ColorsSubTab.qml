@@ -22,21 +22,7 @@ ColumnLayout {
   signal openDownloadPopup
 
   function extractSchemeName(schemePath) {
-    var pathParts = schemePath.split("/");
-    var filename = pathParts[pathParts.length - 1];
-    var schemeName = filename.replace(".json", "");
-
-    if (schemeName === "Hydra-default") {
-      schemeName = "Hydra (default)";
-    } else if (schemeName === "Hydra-legacy") {
-      schemeName = "Hydra (legacy)";
-    } else if (schemeName === "Tokyo-Night") {
-      schemeName = "Tokyo Night";
-    } else if (schemeName === "Rosepine") {
-      schemeName = "Rose Pine";
-    }
-
-    return schemeName;
+    return ColorSchemeService.getBasename(schemePath);
   }
 
   function getSchemeColor(schemeName, colorKey) {

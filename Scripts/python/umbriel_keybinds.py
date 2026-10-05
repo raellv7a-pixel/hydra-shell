@@ -440,7 +440,10 @@ def main():
         state = current_state()
         commit(state, edge_apps=edge_apps)
     elif command == "state":
-        print(json.dumps({"catalog": CATALOG, "state": current_state(), "ipc": IPC}, ensure_ascii=False))
+        from umbriel_config import settings_sources
+        master = MASTER.read_text() if MASTER.exists() else ""
+        owners, _ = settings_sources(master, CONFIG_DIR, ('keybinds',), 'keybinds.toml')
+        print(json.dumps({"catalog": CATALOG, "state": current_state(), "ipc": IPC, "owners": owners}, ensure_ascii=False))
     else:
         raise ValueError("Comando desconhecido: " + command)
     if command != "state":
