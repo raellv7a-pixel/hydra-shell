@@ -2436,6 +2436,16 @@
     "cancel-timer": "Cancel timer",
     "title": "Session Menu"
   },
+  "settings": {
+    "sidebar": {
+      "advanced": "Advanced",
+      "devices-system": "Devices and System",
+      "integrations": "Integrations",
+      "personalization": "Personalization",
+      "session-security": "Session and Security",
+      "shell-interface": "Shell Interface"
+    }
+  },
   "setup": {
     "all-done": "All Done!",
     "appearance": {

@@ -29,6 +29,10 @@ Every UI decision must follow these structural invariants:
 
 - Delimit cards and functional clusters through semantic Material surfaces, rounded shapes, and proportional padding.
 - Permanent structural outlines create visual clutter ("boxes inside boxes"). Reserve borders strictly for active focus, interactive selection, drag states, or semantic error highlights.
+- **Settings Sidebar Surface:** Keep one inset `mSurfaceContainerHigh` surface with `Style.radiusL`, token spacing, and a quiet `NDropShadow` on the background only. The navigation surface remains opaque and legible independently of window translucency or compositor blur; no decorative outline or per-section cards.
+- **Settings Navigation Groups:** General, Personalization, Shell Interface, Session and Security, Devices and System, Integrations, Advanced, and About are secondary translated headings. All pages stay directly accessible; sections do not collapse. Preserve the existing whole-sidebar compact toggle and selected-item capsule.
+- **Settings Navigation Model:** Store section keys on the existing `tabsModel`; keep page IDs stable and resolve search destinations by their page label key, not their presentation index. Regenerate `Assets/settings-search-index.json` when the page order changes.
+- **Settings Sidebar Scrolling:** Hide the scrollbar in navigation and search results without disabling scrolling. Cache the small destination list to keep section measurements stable, and keep programmatic page selection in view. The main content scrollbar is unaffected.
 
 ---
 

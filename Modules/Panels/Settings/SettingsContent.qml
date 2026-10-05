@@ -66,8 +66,6 @@ Item {
   property real _lastMouseY: 0
   property bool _mouseInitialized: false
 
-  readonly property bool sidebarCardStyle: Settings.data.ui.settingsPanelSideBarCardStyle
-
   onSearchResultsChanged: {
     searchSelectedIndex = 0;
     ignoreMouseHover = true;
@@ -146,7 +144,9 @@ Item {
   property string _pendingGroup: ""
 
   function navigateToResult(entry) {
-    if (entry.tab < 0 || entry.tab >= tabsModel.length)
+    // Match the page identity, not its display index (Umbriel can be filtered out).
+    const tabIndex = tabsModel.findIndex(tab => tab.label === entry.tabLabel);
+    if (tabIndex < 0)
       return;
 
     highlightLabelKey = entry.labelKey;
@@ -154,9 +154,9 @@ Item {
     _pendingGroup = entry.group || "";
     awaitingGroupedHighlight = !!_pendingGroup;
 
-    const alreadyOnTab = (currentTabIndex === entry.tab);
+    const alreadyOnTab = (currentTabIndex === tabIndex);
     navigatingFromSearch = true;
-    currentTabIndex = entry.tab;
+    currentTabIndex = tabIndex;
     navigatingFromSearch = false;
 
     if (alreadyOnTab && activeTabContent) {
@@ -539,144 +539,168 @@ Item {
           {
             "id": SettingsPanel.Tab.General,
             "label": "common.general",
+            "section": "common.general",
             "icon": "settings-general",
             "source": generalTab
           },
           {
             "id": SettingsPanel.Tab.UserInterface,
             "label": "panels.user-interface.title",
+            "section": "settings.sidebar.personalization",
             "icon": "settings-user-interface",
             "source": userInterfaceTab
           },
           {
             "id": SettingsPanel.Tab.ColorScheme,
             "label": "panels.color-scheme.title",
+            "section": "settings.sidebar.personalization",
             "icon": "settings-color-scheme",
             "source": colorSchemeTab
           },
           {
             "id": SettingsPanel.Tab.Wallpaper,
             "label": "common.wallpaper",
+            "section": "settings.sidebar.personalization",
             "icon": "settings-wallpaper",
             "source": wallpaperTab
           },
           {
             "id": SettingsPanel.Tab.Bar,
             "label": "panels.bar.title",
+            "section": "settings.sidebar.shell-interface",
             "icon": "settings-bar",
             "source": barTab
           },
           {
             "id": SettingsPanel.Tab.Dock,
             "label": "panels.dock.title",
+            "section": "settings.sidebar.shell-interface",
             "icon": "settings-dock",
             "source": dockTab
           },
           {
             "id": SettingsPanel.Tab.DesktopWidgets,
             "label": "panels.desktop-widgets.title",
+            "section": "settings.sidebar.shell-interface",
             "icon": "clock",
             "source": desktopWidgetsTab
           },
           {
             "id": SettingsPanel.Tab.ControlCenter,
             "label": "panels.control-center.title",
+            "section": "settings.sidebar.shell-interface",
             "icon": "settings-control-center",
             "source": controlCenterTab
           },
           {
-            "id": SettingsPanel.Tab.Security,
-            "label": "panels.security.title",
-            "icon": "shield-lock",
-            "source": securityTab
-          },
-          {
             "id": SettingsPanel.Tab.Launcher,
             "label": "panels.launcher.title",
+            "section": "settings.sidebar.shell-interface",
             "icon": "settings-launcher",
             "source": launcherTab
           },
           {
             "id": SettingsPanel.Tab.Notifications,
             "label": "common.notifications",
+            "section": "settings.sidebar.shell-interface",
             "icon": "settings-notifications",
             "source": notificationsTab
           },
           {
             "id": SettingsPanel.Tab.OSD,
             "label": "panels.osd.title",
+            "section": "settings.sidebar.shell-interface",
             "icon": "settings-osd",
             "source": osdTab
           },
           {
-            "id": SettingsPanel.Tab.LockScreen,
-            "label": "panels.lock-screen.title",
-            "icon": "settings-lock-screen",
-            "source": lockScreenTab
-          },
-          {
             "id": SettingsPanel.Tab.SessionMenu,
             "label": "session-menu.title",
+            "section": "settings.sidebar.shell-interface",
             "icon": "settings-session-menu",
             "source": sessionMenuTab
           },
           {
+            "id": SettingsPanel.Tab.Security,
+            "label": "panels.security.title",
+            "section": "settings.sidebar.session-security",
+            "icon": "shield-lock",
+            "source": securityTab
+          },
+          {
+            "id": SettingsPanel.Tab.LockScreen,
+            "label": "panels.lock-screen.title",
+            "section": "settings.sidebar.session-security",
+            "icon": "settings-lock-screen",
+            "source": lockScreenTab
+          },
+          {
             "id": SettingsPanel.Tab.Idle,
             "label": "panels.idle.title",
+            "section": "settings.sidebar.session-security",
             "icon": "settings-idle",
             "source": idleTab
           },
           {
             "id": SettingsPanel.Tab.Audio,
             "label": "panels.audio.title",
+            "section": "settings.sidebar.devices-system",
             "icon": "settings-audio",
             "source": audioTab
           },
           {
             "id": SettingsPanel.Tab.Display,
             "label": "panels.display.title",
+            "section": "settings.sidebar.devices-system",
             "icon": "settings-display",
             "source": displayTab
           },
           {
             "id": SettingsPanel.Tab.Connections,
             "label": "panels.connections.title",
+            "section": "settings.sidebar.devices-system",
             "icon": "settings-network",
             "source": connectionsTab
           },
           {
             "id": SettingsPanel.Tab.Location,
             "label": "panels.region.title",
+            "section": "settings.sidebar.devices-system",
             "icon": "settings-location",
             "source": regionTab
           },
           {
             "id": SettingsPanel.Tab.System,
             "label": "panels.system.title",
+            "section": "settings.sidebar.devices-system",
             "icon": "settings-system-monitor",
             "source": systemMonitorTab
           },
           {
+            "id": SettingsPanel.Tab.Umbriel,
+            "label": "panels.umbriel.title",
+            "section": "settings.sidebar.integrations",
+            "icon": "app-window",
+            "source": umbrielTab
+          },
+          {
             "id": SettingsPanel.Tab.Plugins,
             "label": "panels.plugins.title",
+            "section": "settings.sidebar.advanced",
             "icon": "plugin",
             "source": pluginsTab
           },
           {
             "id": SettingsPanel.Tab.Hooks,
             "label": "panels.hooks.title",
+            "section": "settings.sidebar.advanced",
             "icon": "settings-hooks",
             "source": hooksTab
           },
           {
-            "id": SettingsPanel.Tab.Umbriel,
-            "label": "panels.umbriel.title",
-            "icon": "app-window",
-            "source": umbrielTab
-          },
-          {
             "id": SettingsPanel.Tab.About,
             "label": "panels.about.title",
+            "section": "panels.about.title",
             "icon": "settings-about",
             "source": aboutTab
           }
@@ -795,7 +819,7 @@ Item {
   // Main UI
   ColumnLayout {
     anchors.fill: parent
-    anchors.margins: Style.marginL
+    anchors.margins: Style.marginXL
     spacing: 0
 
     RowLayout {
@@ -804,17 +828,31 @@ Item {
       spacing: Style.marginL
 
       // Sidebar
-      NBox {
+      Item {
         id: sidebar
 
-        clip: true
-        Layout.preferredWidth: Math.round(root.sidebarExpanded ? 212 * Style.uiScaleRatio : sidebarToggle.width + (root.sidebarCardStyle ? Style.margin2M : 0) + (sidebarList.verticalScrollBarActive ? Style.marginM : 0))
+        Layout.preferredWidth: Math.round(root.sidebarExpanded ? 212 * Style.uiScaleRatio : sidebarToggle.width + Style.margin2M)
         Layout.fillHeight: true
         Layout.alignment: Qt.AlignTop
 
-        radius: root.sidebarCardStyle ? Style.radiusL : 0
-        color: root.sidebarCardStyle ? Color.mSurfaceContainerLow : "transparent"
-        border.color: "transparent"
+        NDropShadow {
+          anchors.fill: sidebarSurface
+          source: sidebarSurface
+          autoPaddingEnabled: true
+          shadowColor: Color.mShadow
+          shadowOpacity: Style.shadowOpacity * Style.opacityLight
+          shadowHorizontalOffset: 0
+          shadowVerticalOffset: Style.marginXXS
+        }
+
+        NBox {
+          id: sidebarSurface
+          anchors.fill: parent
+          radius: Style.radiusL
+          color: Color.mSurfaceContainerHigh
+          forceOpaque: true
+          border.width: 0
+        }
 
         Behavior on Layout.preferredWidth {
           NumberAnimation {
@@ -827,7 +865,7 @@ Item {
         ColumnLayout {
           anchors.fill: parent
           spacing: Style.marginS
-          anchors.margins: root.sidebarCardStyle ? Style.marginM : 0
+          anchors.margins: Style.marginM
 
           // Sidebar toggle button
           Item {
@@ -1019,7 +1057,7 @@ Item {
               model: root.searchResults
               spacing: Style.marginXS
               visible: root.searchText.trim() !== ""
-              verticalPolicy: ScrollBar.AsNeeded
+              verticalPolicy: ScrollBar.AlwaysOff
               gradientColor: "transparent"
               reserveScrollbarSpace: false
 
@@ -1117,12 +1155,39 @@ Item {
               visible: root.searchText.trim() === ""
               anchors.fill: parent
               model: root.tabsModel
+              cacheBuffer: contentHeight
               spacing: Style.marginXS
               currentIndex: root.currentTabIndex
               horizontalPolicy: ScrollBar.AlwaysOff
               verticalPolicy: ScrollBar.AlwaysOff
               gradientColor: "transparent"
               reserveScrollbarSpace: false
+
+              section.property: "section"
+              section.criteria: ViewSection.FullString
+              section.delegate: Item {
+                required property string section
+                width: sidebarList.width
+                height: root.sidebarExpanded ? sectionHeading.implicitHeight + Style.marginL + Style.marginS : Style.marginS
+
+                NText {
+                  id: sectionHeading
+                  anchors.left: parent.left
+                  anchors.right: parent.right
+                  anchors.top: parent.top
+                  anchors.leftMargin: Style.marginS
+                  anchors.rightMargin: Style.marginS
+                  anchors.topMargin: Style.marginL
+                  visible: root.sidebarExpanded
+                  text: I18n.tr(section)
+                  pointSize: Style.fontSizeXS
+                  font.weight: Style.fontWeightMedium
+                  font.capitalization: Font.AllUppercase
+                  color: Color.mOnSurfaceVariant
+                  wrapMode: Text.WordWrap
+                  Accessible.role: Accessible.Heading
+                }
+              }
 
               delegate: Rectangle {
                 id: tabItem
@@ -1237,10 +1302,7 @@ Item {
               Connections {
                 target: root
                 function onCurrentTabIndexChanged() {
-                  if (sidebarList.currentIndex !== root.currentTabIndex) {
-                    sidebarList.currentIndex = root.currentTabIndex;
-                    sidebarList.positionViewAtIndex(root.currentTabIndex, ListView.Contain);
-                  }
+                  Qt.callLater(() => sidebarList.positionViewAtIndex(root.currentTabIndex, ListView.Contain));
                 }
               }
             }

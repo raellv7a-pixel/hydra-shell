@@ -2436,6 +2436,16 @@
     "cancel-timer": "Cancelar temporizador",
     "title": "Menu da sessão"
   },
+  "settings": {
+    "sidebar": {
+      "advanced": "Avançado",
+      "devices-system": "Dispositivos e Sistema",
+      "integrations": "Integrações",
+      "personalization": "Personalização",
+      "session-security": "Sessão e Segurança",
+      "shell-interface": "Interface da Shell"
+    }
+  },
   "setup": {
     "all-done": "Concluído!",
     "appearance": {
