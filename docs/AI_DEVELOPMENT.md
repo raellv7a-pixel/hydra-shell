@@ -91,6 +91,24 @@ No UI feature belongs in Phase 2. Avoid remote install pipes. Audit repository i
 Any change that adds/removes a setting, changes configurable behavior, alters layout, or modifies visible UI MUST include an explicit UX/UI review. Functional correctness alone is insufficient: controls and surfaces must remain clear, coherent, and consistent with Hydra's Material 3 design system, using existing `Style`, `Color`, `N*` components, spacing, radii, and typography. Do not treat a UI change as complete until its actual preview has been visually inspected.
 Consult `docs/UI_DESIGN.md` for visual hierarchy invariants, semantic Material surface tokens, theme compatibility requirements, and preview polish rules.
 
+## Agent skills and design intelligence
+
+Project-local Agent Skills live under `.agents/skills/` as the canonical source. Tool-specific directories (`.gemini/skills/` and `.codex/skills/`) maintain relative symlinks pointing to this canonical tree.
+
+### Skills inventory and roles
+- `.agents/skills/hydra-ui-design/` — Operational design intelligence for Hydra Shell (translates `docs/UI_DESIGN.md` into concrete rules, real token mappings, component catalogs, panel docking contracts, and motion invariants).
+- `.agents/skills/material-3/` — Reference authority for Material Design 3 semantic color roles, container hierarchy, and tonal surfaces. **Constraint:** Upstream is Compose-first; Material semantics apply, but Jetpack Compose and Kotlin code must NEVER be imported into Hydra.
+- `.agents/skills/qt-qml/` — Technical guidance for QML coding standards, binding performance, and Loader lifecycle. Hydra's verified architecture and Quickshell modules take precedence over generic Qt style defaults.
+- `.agents/skills/qt-ui-design/` — General desktop interaction, layout density, and perceptual guidelines.
+
+### Precedence and authority
+1. **Design & Product Intent:** `AGENTS.md` + `docs/UI_DESIGN.md` > `hydra-ui-design` > `material-3` > `qt-ui-design`. Hydra's Framed-first spatial system and specific rules always override generic external advice.
+2. **Technical Implementation:** Hydra source code (`Commons/`, `Widgets/`, `Services/`) > `qt-qml` > generic recommendations.
+
+External skills have zero authority to modify Hydra product decisions, introduce arbitrary floating popups, or change architecture.
+
+### Upstream updates
+Vendored skills pin exact commit SHAs recorded in `.agents/skills/UPSTREAMS.md`. To update, fetch upstream in a temporary checkout, review diffs against Hydra assumptions, replace the vendored directory preserving third-party licenses, update `UPSTREAMS.md`, and validate. Never edit vendored upstream files in place to inject Hydra rules.
 ## Umbriel native interaction
 
 - Build `Native/KeyboardState` with `bash Scripts/dev/build-native.sh` before

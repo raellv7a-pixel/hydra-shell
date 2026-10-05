@@ -31,11 +31,11 @@ there; the CLI needs no server and is the first choice.
 
 Auto-generated from the Prowl index, refreshed on each `overview`/`init`. Prefer retrieving from Prowl (and reading the cited files) over grepping or relying on training memory; this is the current shape of the repo.
 
-- size: 801 files, 83293 symbols, 5336 edges (resolved 4009, external deps 351, unresolved 976)
-- languages: qml:561 json:76 python:53 bash:36 javascript:18 markdown:14 css:13 toml:11
-- subsystems: Modules/Panels(272,qml) · Widgets(56,qml) · Modules/Bar(44,qml) · Commons/Migrations(28,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(18,qml) · Modules/MainScreen(14,qml) · Services/System(14,qml)
+- size: 839 files, 83928 symbols, 5481 edges (resolved 4087, external deps 399, unresolved 995)
+- languages: qml:573 json:76 python:56 bash:37 markdown:30 javascript:24 css:13 toml:11
+- subsystems: Modules/Panels(275,qml) · Widgets(56,qml) · Modules/Bar(44,qml) · Commons/Migrations(28,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(21,qml) · Modules/MainScreen(14,qml) · Services/System(14,qml)
 - entrypoints: shell.qml · Modules/Cards/MediaCard.qml · Modules/Panels/Settings/Bar/WidgetSettings/CustomButtonSettings.qml · Modules/Panels/Settings/DesktopWidgets/WidgetSettings/ClockSettings.qml · Modules/Panels/SessionMenu/SessionMenu.qml · Modules/Panels/Settings/Bar/WidgetSettings/ClockSettings.qml · Modules/Panels/Wallpaper/WallhavenSettingsPopup.qml · Modules/Cards/ProfileCard.qml · (+73 more)
-- central files (most depended-on): Commons/Settings.qml · Commons/Logger.qml · Commons/Time.qml · Commons/I18n.qml · Commons/Color.qml
+- central files (most depended-on): Commons/Settings.qml · Commons/Logger.qml · Commons/Color.qml · Commons/Time.qml · Commons/I18n.qml
 - read these guides first: README.md · AGENTS.md · docs/AI_DEVELOPMENT.md · docs/UI_DESIGN.md
 
 Depth on demand: `prowl find|def|outline|references <name>`, `search <text>`, `context search "<question>"`, `sketch <ui>`.
@@ -52,6 +52,14 @@ Depth on demand: `prowl find|def|outline|references <name>`, `search <text>`, `c
 - Functional edits happen in the Lab checkout only. Run checks, preview the exact commit, validate behavior/UI, then request Reviewer findings before deployment. Deploy only with the validated full commit hash; never push from the Lab. Use `Scripts/dev/lab-rollback.sh` only after its clean-tree and recorded-deploy guards pass.
 - For incomplete work, update Beads before model/session changes: status, last action/result, branch/commit, changed files, tests, current failure, and exact next action. On completion, close with a clear reason.
 - Bootstrap work must not introduce Hydra UI behavior. If a clean baseline reproduces the workspace/icon alignment bug, record it as the first ready Beads bug; do not fix it during infrastructure setup.
-- For any visible UI/UX work, read `docs/UI_DESIGN.md` before planning or editing.
+- For any visible UI/UX work, read `docs/UI_DESIGN.md` and `.agents/skills/hydra-ui-design/` before planning or editing.
+
+## Agent skills and visible UI work
+
+For any user-visible surface, panel, settings, dialog, widget, or layout work:
+
+1. **Mandatory core guidance:** Read `docs/UI_DESIGN.md` (authoritative design policy) and load `.agents/skills/hydra-ui-design` (operational rules, real tokens, component catalog, and panel contracts).
+2. **Supporting design reference:** Consult `.agents/skills/material-3` for Material Design 3 semantic color roles, container hierarchy, and tonal principles (reference only; do not import Jetpack Compose or Kotlin implementations). Consult `.agents/skills/qt-ui-design` for display ergonomics and perceptual design principles.
+3. **Technical implementation:** Consult `.agents/skills/qt-qml` for QML coding best practices, binding efficiency, and Loader lifecycle. Hydra's verified architecture and Quickshell components always take precedence over generic Qt advice.
 
 See `docs/AI_DEVELOPMENT.md` for operational commands and recovery details.
