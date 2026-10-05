@@ -11,11 +11,10 @@ import qs.Widgets
 SmartPanel {
   id: root
 
-  // Single source of truth for placement. "close_to_bar_button" deliberately
-  // leaves every anchor false: SmartPanel then falls back to its button
-  // position / bar-edge attachment path, which requires
-  // hasExplicitHorizontalAnchor and hasExplicitVerticalAnchor to stay false.
-  readonly property string placement: Settings.data.controlCenter.position
+  // Framed placement is canonical; saved positioning remains available outside it.
+  readonly property string placement: isFramed ? "top_center" : Settings.data.controlCenter.position
+  forceAttachToBar: isFramed
+  allowButtonPosition: !isFramed
 
   panelAnchorTop: placement === "top_center" || placement === "top_left" || placement === "top_right"
   panelAnchorBottom: placement === "bottom_center" || placement === "bottom_left" || placement === "bottom_right"
@@ -54,6 +53,7 @@ SmartPanel {
   panelContent: Component {
     Panel {
       anchors.fill: parent
+      frameAttached: root.isFramed
       quickActionsPage: root.requestedQuickAction
       activeDetailView: root.requestedDetail
     }

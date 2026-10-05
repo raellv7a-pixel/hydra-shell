@@ -828,7 +828,7 @@ Singleton {
       property list<string> pinnedClipboardIds: []
       // Persistent author-created notes: [{ id, text, createdAt }]
       property list<var> clipboardNotes: []
-      property string position: "center"  // Position: center, top_left, top_right, bottom_left, bottom_right, bottom_center, top_center
+      property string position: "bottom_center"  // Position: center, top_left, top_right, bottom_left, bottom_right, bottom_center, top_center
       property list<string> pinnedApps: []
       property list<string> hiddenApps: []
       property bool sortByMostUsed: true
@@ -858,16 +858,14 @@ Singleton {
 
     // control center
     property JsonObject controlCenter: JsonObject {
-      // Where the panel appears. "close_to_bar_button" makes it track the bar
-      // widget; every other value pins it to a screen edge or corner.
+      // Used outside Framed mode; the frame always docks Dashboard at top_center.
+      // "close_to_bar_button" tracks the bar widget; other values pin an edge/corner.
       // close_to_bar_button, center, top_center, top_left, top_right,
       // center_left, center_right, bottom_center, bottom_left, bottom_right
-      property string position: "close_to_bar_button"
+      property string position: "top_center"
 
-      // Orthogonal to position: false glues the panel flush against the bar
-      // (SmartPanel's allowAttach path), true floats it with a screen margin.
-      // Any position can be either, e.g. top_left attached vs top_left floating.
-      property bool detached: true
+      // Outside Framed mode: false glues the panel flush, true adds a screen margin.
+      property bool detached: false
 
       property string diskPath: "/"
 
@@ -1102,7 +1100,7 @@ Singleton {
     property JsonObject sessionMenu: JsonObject {
       property bool enableCountdown: true
       property int countdownDuration: 10000
-      property string position: "center"
+      property string position: "center_right"
       property bool showHeader: true
       property bool showKeybinds: true
       property bool showProfileBadge: true

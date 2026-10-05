@@ -29,6 +29,8 @@ SmartPanel {
   // Attachment to bar & screen positioning
   readonly property string screenBarPosition: Settings.getBarPositionForScreen(screen?.name)
   readonly property bool isFramed: Settings.data.bar.barType === "framed"
+  forceAttachToBar: isFramed
+  allowButtonPosition: !isFramed
   readonly property string panelPosition: {
     var pos = Settings.data.sessionMenu.position;
     if (pos === "follow_bar") {

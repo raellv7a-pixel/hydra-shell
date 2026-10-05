@@ -91,9 +91,9 @@ Item {
   readonly property color m3PrimaryContainer: Color.mPrimaryContainer
 
   readonly property var geometryPlaceholder: panelContainer
-  // Attach/float is its own axis, independent of position: any position can be
-  // glued flush to the bar or floated off it with a screen margin.
-  readonly property bool allowAttach: !Settings.data.controlCenter.detached
+  // Framed hosts stay flush; detachment remains configurable outside the frame.
+  property bool frameAttached: false
+  readonly property bool allowAttach: frameAttached || !Settings.data.controlCenter.detached
   // Outer panel size: at least what the fixed-width card columns actually
   // need (implicitWidth/Height of dashboardLayout, see panelContainer
   // below), so the content is never cramped into a Flickable. panelWidth/

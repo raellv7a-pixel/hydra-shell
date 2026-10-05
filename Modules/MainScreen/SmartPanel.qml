@@ -37,6 +37,7 @@ Item {
   property bool panelAnchorRight: false
 
   // Button position properties
+  property bool allowButtonPosition: true
   property bool useButtonPosition: false
   property point buttonPosition: Qt.point(0, 0)
   property int buttonWidth: 0
@@ -165,6 +166,11 @@ Item {
     PanelService.closedImmediately = false;
     // Reset to default - fixes panel being stuck in one position
     root.useButtonPosition = false;
+    // Canonical frame panels keep their anchors even when opened from a widget.
+    if (!root.allowButtonPosition) {
+      buttonItem = null;
+      buttonName = null;
+    }
 
     // Calculate the bar window's position on screen based on bar settings
     // The BarContentWindow uses anchors + margins, so we need to compute its origin

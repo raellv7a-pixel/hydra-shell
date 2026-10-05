@@ -256,7 +256,7 @@
     "clipboardWatchImageCommand": "wl-paste --type image --watch cliphist store",
     "pinnedClipboardIds": [],
     "clipboardNotes": [],
-    "position": "center",
+    "position": "bottom_center",
     "pinnedApps": [],
     "hiddenApps": [],
     "sortByMostUsed": true,
@@ -282,8 +282,8 @@
     "density": "default"
   },
   "controlCenter": {
-    "position": "close_to_bar_button",
-    "detached": true,
+    "position": "top_center",
+    "detached": false,
     "diskPath": "/",
     "panelWidth": 1120,
     "panelHeight": 700,
@@ -485,7 +485,7 @@
   "sessionMenu": {
     "enableCountdown": true,
     "countdownDuration": 10000,
-    "position": "center",
+    "position": "center_right",
     "showHeader": true,
     "showKeybinds": true,
     "showProfileBadge": true,

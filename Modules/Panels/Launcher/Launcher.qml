@@ -56,8 +56,12 @@ SmartPanel {
   panelBorderColor: Qt.alpha(Color.mOutline, 0.32)
 
   // Positioning
+  forceAttachToBar: isFramed
+  allowButtonPosition: !isFramed
   readonly property string screenBarPosition: Settings.getBarPositionForScreen(screen?.name)
   readonly property string panelPosition: {
+    if (isFramed)
+      return "bottom_center";
     if (Settings.data.appLauncher.position === "follow_bar") {
       if (screenBarPosition === "left" || screenBarPosition === "right") {
         return `center_${screenBarPosition}`;
