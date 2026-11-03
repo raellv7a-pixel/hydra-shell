@@ -14,8 +14,6 @@ Singleton {
 
   property string stateFile: ""
   property bool isLoaded: false
-  // Transient teaching hint: once per shell session, shared by all screens.
-  property bool launcherFolderHintShown: false
 
   // State properties for different services
   readonly property alias data: adapter

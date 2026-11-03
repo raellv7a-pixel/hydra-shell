@@ -22,8 +22,8 @@ Item {
     { id: "tools", icon: "tool", categories: ["System", "Utility", "Settings", "PackageManager"] },
     { id: "productivity", icon: "file-text", categories: ["Office", "TextEditor", "WordProcessor", "Spreadsheet", "Presentation", "ProjectManagement"] },
     { id: "creativity", icon: "palette", categories: ["Graphics", "2DGraphics", "3DGraphics", "Photography", "Publishing"] },
-    { id: "social", icon: "users", categories: ["Chat", "InstantMessaging", "Email", "IRCClient", "Telephony", "VideoConference"] },
     { id: "games", icon: "device-gamepad", categories: ["Game", "Emulator", "ActionGame", "AdventureGame", "ArcadeGame", "BoardGame", "BlocksGame", "CardGame", "KidsGame", "LogicGame", "RolePlaying", "Simulation", "SportsGame", "StrategyGame"] },
+    { id: "social", icon: "users", categories: ["Chat", "InstantMessaging", "Email", "IRCClient", "Telephony", "VideoConference"] },
     { id: "media", icon: "music", categories: ["AudioVideo", "Audio", "Video", "Music", "Player", "Recorder", "AudioVideoEditing"] }
   ]
   readonly property var folders: {

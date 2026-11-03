@@ -134,7 +134,7 @@ Variants {
       // Launcher panel with position-based anchoring
       Item {
         id: launcherPanel
-        width: LauncherGeometry.panelWidth(parent.width, Style.uiScaleRatio, launcherWindow.barThickness, Settings.data.appLauncher.density)
+        width: LauncherGeometry.panelWidth(parent.width, Style.uiScaleRatio, launcherWindow.barThickness, Settings.data.appLauncher.density, launcherCore.catalogActive)
         height: LauncherGeometry.panelHeight(parent.height, Style.uiScaleRatio, launcherWindow.barThickness, launcherCore.effectiveState === "home" ? launcherCore.homePreferredHeight : 0, Settings.data.appLauncher.density)
         clip: false
         property bool presented: false

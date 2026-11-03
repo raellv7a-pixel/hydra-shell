@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import "Helpers/LauncherArtwork.js" as LauncherArtwork
 import qs.Commons
 import qs.Widgets
 
@@ -19,7 +20,7 @@ Item {
     return "";
   }
   readonly property bool useSystem: systemSource !== "" && systemImage.status !== Image.Error
-  readonly property bool illustrated: folder.mode === "smart" || !folder.icon || folder.icon === "folder" || !manualNames[folder.icon] || (Settings.data.appLauncher.folderIconSource === "system" && !useSystem)
+  readonly property string artworkIcon: LauncherArtwork.folderIcon(folder)
   implicitWidth: Math.round(Math.max(24, Math.min(48, iconSize)) * Style.uiScaleRatio)
   implicitHeight: implicitWidth
   Accessible.ignored: true
@@ -32,18 +33,10 @@ Item {
     fillMode: Image.PreserveAspectFit
     asynchronous: true
   }
-  Image {
+  NColorIcon {
     anchors.fill: parent
-    visible: !root.useSystem && root.illustrated
-    source: Qt.resolvedUrl("../../../Assets/Launcher/Folders/" + (root.folder.mode === "smart" ? root.folder.id : "folder") + ".svg")
-    sourceSize: Qt.size(width, height)
-    asynchronous: true
-  }
-  NIcon {
-    anchors.centerIn: parent
-    visible: !root.useSystem && !root.illustrated
-    icon: root.illustrated || root.useSystem ? "folder" : root.folder.icon || "folder"
-    pointSize: root.iconSize * Style.uiScaleRatio * 0.75
-    color: HydraColor.mPrimary
+    visible: !root.useSystem
+    icon: root.artworkIcon
+    size: root.implicitWidth
   }
 }

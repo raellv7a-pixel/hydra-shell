@@ -9,7 +9,7 @@ QtObject {
   readonly property real gapXS: Math.round(Style.marginXS * spacingRatio)
   readonly property real gapS: Math.round(Style.marginS * spacingRatio)
   readonly property real gapM: Math.round(Style.marginM * spacingRatio)
-  readonly property real gapL: Math.round(Style.marginL * spacingRatio)
+  readonly property real gapL: Math.round(Style.marginXL * spacingRatio)
   readonly property real padding: gapL
   readonly property real outerPadding: gapM
   readonly property real searchHeight: Math.round((compact ? 44 : (comfortable ? 56 : 50)) * Style.uiScaleRatio)
@@ -18,6 +18,9 @@ QtObject {
   readonly property real pinnedHeight: Math.round((compact ? 72 : (comfortable ? 88 : 80)) * Style.uiScaleRatio)
   readonly property real recentHeight: Math.round((compact ? 34 : (comfortable ? 44 : 38)) * Style.uiScaleRatio)
   readonly property real folderGap: gapM
+  readonly property real folderPreviewSize: Math.round((compact ? 28 : (comfortable ? 36 : 32)) * Style.uiScaleRatio)
+  readonly property real folderHeight: padding * 2 + Math.round(Math.max(40, Math.max(24, Math.min(48, Settings.data.appLauncher.folderIconSize))) * Style.uiScaleRatio) + folderPreviewSize + folderGap
+  readonly property real pinnedIconSize: Math.round((compact ? 40 : (comfortable ? 48 : 44)) * Style.uiScaleRatio)
   readonly property real gridCell: Math.round((compact ? 64 : (comfortable ? 80 : 72)) * Style.uiScaleRatio)
   readonly property real folderAppHeight: Math.round((compact ? 76 : (comfortable ? 96 : 86)) * Style.uiScaleRatio)
 }

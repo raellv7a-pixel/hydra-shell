@@ -177,33 +177,49 @@ alacritty, GTK…) mantêm o nome antigo até os templates serem aplicados de no
 
 ## Launcher e efeitos visuais
 
-A Home da Launcher reúne Hero com wallpaper/saudação e uma página de data, hora,
-CPU e memória, busca única, categorias com texto, pastas, Todos os apps, Fixados
-e Recentes. No modo Emoldurado ela continua anexada ao centro inferior da
-moldura; o Overlay reutiliza o mesmo núcleo. A altura da Home acompanha seu
-conteúdo, com limite pela tela; o browser pode expandir. As pastas usam um
-carousel horizontal contínuo: aproximadamente quatro cards e um peek no desktop,
-três em telas menores. Wheel vertical sobre as pastas move o carousel apenas
-enquanto há conteúdo naquela direção; nos limites, libera o scroll ancestral.
-No Hero, wheel navega página a página, com cooldown de 220 ms; página única
-não captura eventos.
-Um nudge discreto ensina o scroll
-horizontal no máximo uma vez por sessão, antes da primeira interação e apenas
-com overflow e animações habilitadas.
+A página inicial do Launcher reúne banner com wallpaper e saudação, pesquisa
+única, filtros de categorias com ícones Material 3 coloridos, pastas, acesso a
+Todos os apps, Fixados e Recentes. O layout adapta largura e altura à tela,
+à escala e à densidade configuradas. Os modos centralizado e flutuante continuam
+disponíveis; no modo Emoldurado, o painel mantém o acoplamento ao centro inferior
+da moldura. O Overlay reutiliza o mesmo núcleo e mantém seu posicionamento próprio.
+As pastas usam uma faixa horizontal com aproximadamente quatro cards e um
+preview do próximo no desktop. Wheel vertical sobre essa faixa move os cards
+apenas enquanto há conteúdo naquela direção; nos limites, libera o scroll da página.
+Não há deslocamento automático dos cards.
 
-**Todas** restaura a Home neutra; **Todos os apps** abre o browser existente.
-Pastas inteligentes, pastas pessoais e a expansão de **Fixados** compartilham
-um flyout elevado no `LauncherCore`, fora do Flickable e dos layouts da Home.
-O anchor é mapeado da collection de origem; posição e tamanho ficam limitados
-à Launcher, sem reorganizar a Home. O grid compacto tem scroll vertical interno,
-foco e ações de aplicativo. A sombra usa tokens Hydra e respeita os controles
-globais de sombras e modo de desempenho.
-Digitar recolhe o flyout e ativa a busca; limpar retorna à Home ou ao browser
-anterior. Escape fecha primeiro as ações, depois limpa a busca, recolhe o flyout,
-volta à Home e finalmente fecha a Launcher.
+A pasta selecionada recebe destaque tonal, contorno e chevron de expansão.
+Seu conteúdo ocupa uma seção no fluxo da Home, abaixo da faixa de pastas:
+nunca alterna entre posições acima/abaixo do card nem cobre o banner.
+O conector tonal acompanha o card de origem, inclusive após reconstruções do modelo.
+Cards internos mostram ícone próprio, nome e descrição; coleções maiores têm
+scroll interno. Em telas pequenas, a página revela o conteúdo expandido por
+scroll, mantendo a relação geométrica com a faixa. A abertura/saída e o scroll
+respeitam os controles globais de animação e desempenho.
+Em telas com menos de 800 pixels lógicos de altura, abrir uma pasta omite
+temporariamente o banner para preservar o card de origem e a área de aplicativos;
+o banner retorna ao recolher a pasta.
+Os previews das pastas e os ícones fixados acompanham a densidade escolhida.
+Fixados e Recentes compartilham a altura quando estão lado a lado, sem limitar
+o conteúdo quando empilhados. O feedback de pressão usa escala discreta e
+é desativado com as animações globais.
+
+**Todos os apps** abre um catálogo alfabético com cabeçalho, navegação lateral
+quando há largura, filtros, descrições e índice de letras. Os cards se reorganizam
+em três, duas ou uma coluna no modo Grade; Colunas limita a duas e Lista usa uma coluna. A ordem alfabética do
+catálogo não altera a preferência de frequência usada na pesquisa e nos previews.
+A barra superior oferece seleção direta entre Grade, Colunas e Lista.
+A navegação lateral usa superfície opaca, marcador de seleção e contadores;
+subtítulos podem quebrar linha em vez de desaparecer por truncamento.
+As ações de aplicativo expandem abaixo da linha correspondente, mantendo o
+aplicativo original como alvo. **Todas** restaura a Home quando já está nela;
+no catálogo, seleciona todos os aplicativos. Digitar ativa a pesquisa global,
+incluindo os provedores existentes; limpar retorna à visualização anterior.
+**Ctrl+K**, indicado no campo vazio quando há espaço, retorna o foco à pesquisa. Escape desfaz uma camada por vez:
+editor, confirmação/propriedades/ações, pesquisa, subpasta, pasta, catálogo e painel.
 
 As pastas inteligentes são derivadas das categorias XDG: Ferramentas,
-Produtividade, Criatividade, Social, Jogos e Mídia. Social não inclui browsers
+Produtividade, Criatividade, Jogos, Social e Mídia. Social não inclui browsers
 ou Network automaticamente. Os quatro previews priorizam frequência de uso.
 Pastas pessoais ficam em `appLauncher.userFolders`, com `id`, `name`, `icon`
 e `apps`; `children` contém subpastas manuais com os mesmos campos, limitadas a
@@ -213,9 +229,11 @@ excluir uma subpasta retorna ao pai, excluir o pai recolhe a surface.
 Clique direito/Menu no card permite renomear, trocar ícone ou excluir com
 confirmação. Apps ausentes ficam invisíveis sem apagar suas referências.
 
-Em Settings → Launcher, **Pastas** oferece ícones Hydra ou do tema do sistema
-(resolução nativa `Quickshell.iconPath`, com fallback Hydra), e tamanho de
-ícone principal de 24–48 px (default 32 px); previews continuam com 24 px.
+Em Settings → Launcher, **Pastas** oferece os ícones Material 3 coloridos da
+Hydra (`NColorIcon`/`ColoredIcons`, os mesmos de Configurações) ou os ícones do
+tema do sistema (`Quickshell.iconPath`, com fallback Hydra). O tamanho principal
+continua configurável de 24–48 px (default 32 px); previews continuam com 24 px.
+Ícones próprios de aplicativos instalados não são substituídos pela arte Material.
 **Density** controla largura, espaçamento, padding e alturas das novas
 surfaces, sem zoom de fontes e sem sobrescrever o tamanho escolhido do ícone.
 O Hero conserva seu ajuste próprio de altura.
@@ -236,13 +254,12 @@ esse histórico de arquivos.
 
 Em **Settings → Launcher → Hero / Capa**, configure a fonte da imagem, altura,
 escurecimento, contraste do texto, resumo contextual, rotação automática e blur.
-O contraste **Automático** usa texto claro e um scrim escuro localizado; não há
-análise de luminância da região da imagem. **Claro** e **Escuro** forçam o
-foreground somente do Hero. Dots clicáveis e swipe horizontal controlam as
-páginas, sem setas sobre a imagem nem paginação por wheel vertical. A rotação é
-opcional e desativada por padrão; pausa durante hover/interação e não roda com
-a Home oculta, animações desativadas ou modo de desempenho. O blur também é
-desativado no modo de desempenho. Não há Media Player nem nova fonte de calendário.
+**Claro** e **Escuro** escolhem o foreground do Hero. Dots clicáveis, swipe
+horizontal e wheel com cooldown de 220 ms controlam as páginas; página única
+não captura wheel. A rotação é opcional e desativada por padrão; pausa durante
+hover/interação e não roda com a Home oculta, animações desativadas ou modo de
+desempenho. O blur também é desativado no modo de desempenho. Não há Media
+Player nem nova fonte de calendário.
 
 O Launcher usa os comandos granulares de update do Shelly 3.1.6 para pacotes de
 repositório, AUR e Flatpak. AppImage só permite upgrade global nessa versão:

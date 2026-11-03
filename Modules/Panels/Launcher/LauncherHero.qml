@@ -96,7 +96,7 @@ Item {
         highlightRangeMode: ListView.StrictlyEnforceRange
         preferredHighlightBegin: 0
         preferredHighlightEnd: 0
-        highlightMoveDuration: Settings.data.general.animationDisabled ? 0 : Style.animationNormal
+        highlightMoveDuration: Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode ? 0 : Style.animationNormal
       }
       Item {
         Item {
@@ -143,15 +143,53 @@ Item {
         RowLayout {
           id: greeting
           anchors.left: parent.left
-          anchors.bottom: parent.bottom
-          anchors.leftMargin: Style.margin2XL
-          anchors.bottomMargin: Style.margin2XL
-          spacing: Style.marginM
-          NIcon { icon: Time.now.getHours() < 18 ? "sun" : "moon"; pointSize: Style.fontSizeXXXL; color: root.foreground }
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+          anchors.leftMargin: Math.min(Style.margin2XL, root.width * 0.06)
+          anchors.rightMargin: Math.min(Style.margin2XL, root.width * 0.06)
+          spacing: Style.marginXL
+          NIcon {
+            icon: Time.now.getHours() < 18 ? "sun" : "moon"
+            pointSize: Style.fontSizeXXXL * 1.25
+            color: root.foreground
+            Accessible.ignored: true
+          }
           ColumnLayout {
+            Layout.fillWidth: true
+            Layout.minimumWidth: 0
             spacing: Style.marginXXS
-            NText { text: I18n.tr(Time.now.getHours() < 12 ? "launcher-home.morning" : (Time.now.getHours() < 18 ? "launcher-home.afternoon" : "launcher-home.evening")); pointSize: Style.fontSizeXXL; font.weight: Style.fontWeightBold; color: root.foreground }
-            NText { text: I18n.tr("launcher-home.hero-subtitle"); pointSize: Style.fontSizeM; color: root.foreground }
+            NText {
+              Layout.fillWidth: true
+              Layout.minimumWidth: 0
+              text: I18n.tr(Time.now.getHours() < 12 ? "launcher-home.morning" : (Time.now.getHours() < 18 ? "launcher-home.afternoon" : "launcher-home.evening"))
+              pointSize: Style.fontSizeXXXL
+              font.weight: Style.fontWeightBold
+              color: root.foreground
+            }
+            NText {
+              Layout.fillWidth: true
+              Layout.minimumWidth: 0
+              text: I18n.tr("launcher-home.hero-subtitle")
+              pointSize: Style.fontSizeL
+              color: root.foreground
+            }
+          }
+          RowLayout {
+            visible: root.width >= Math.round(720 * Style.uiScaleRatio)
+            Layout.alignment: Qt.AlignBottom
+            spacing: Style.marginS
+            NIcon {
+              icon: "hydra"
+              pointSize: Style.fontSizeXXXL
+              color: root.foreground
+              Accessible.ignored: true
+            }
+            NText {
+              text: "Hydra Shell"
+              pointSize: Style.fontSizeL
+              font.weight: Style.fontWeightBold
+              color: root.foreground
+            }
           }
         }
       }

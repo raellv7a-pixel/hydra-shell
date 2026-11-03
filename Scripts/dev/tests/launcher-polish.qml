@@ -126,6 +126,65 @@ ShellRoot {
 
   IpcHandler {
     target: "test"
+    function home(): void {
+      core.goHome();
+    }
+    function clickFolder(index: int): void {
+      function click(item) {
+        if (item.folderIndex === index) { item.clicked(); return true; }
+        for (const child of item.children || []) if (click(child)) return true;
+        return false;
+      }
+      click(core);
+    }
+    function folderGeometry(): string {
+      const flyout = root.findItem(core, "subfolders");
+      const anchor = core.folderAnchor;
+      return JSON.stringify({
+        id: core.activeFolderId,
+        cardBottom: anchor ? anchor.mapToItem(core, 0, anchor.height).y : null,
+        panelTop: flyout ? flyout.mapToItem(core, 0, 0).y : null,
+        panelWidth: flyout?.width,
+        cardCenterX: anchor ? anchor.mapToItem(core, anchor.width / 2, 0).x : null,
+        connectorX: flyout ? flyout.mapToItem(core, flyout.connectorX, 0).x : null,
+        width: core.width,
+        expanded: core.folderExpanded
+      });
+    }
+    function prepareCatalog(): void {
+      root.showingLauncher = true;
+      core.providers = [core.defaultProvider];
+      core.closeAppPanel();
+      Settings.data.appLauncher.viewMode = "columns";
+      Settings.data.appLauncher.sortByMostUsed = true;
+      const names = ["Zulu", "Álpha", "Beta", "2 Tools", "Alpine"];
+      core.defaultProvider.entries = names.map((name, index) => ({
+        id: "app-" + String(index).padStart(3, "0"), name: name, command: ["true"], categories: ["System"], icon: "application-x-executable"
+      }));
+      ShellState.recordLauncherUsage("app-000");
+      core.searchText = "";
+      core.openAllApps("all");
+    }
+    function catalogState(): string {
+      const catalog = root.findItem(core, "alphabet");
+      return JSON.stringify({
+        order: catalog.catalog.order.map(index => core.results[index].name),
+        selected: core.results[core.selectedIndex]?.name,
+        panel: core.appPanelItem?.name || "",
+        row: catalog.resultsView.currentIndex,
+        columns: catalog.columns,
+        state: core.effectiveState
+      });
+    }
+    function catalogLetter(letter: string): void {
+      root.findItem(core, "alphabet").jumpToLetter(letter);
+    }
+    function catalogKey(key: int): void {
+      core.handleKeyPress({ key: key, modifiers: Qt.NoModifier, accepted: false });
+    }
+    function catalogLayout(mode: string): void {
+      Settings.data.appLauncher.viewMode = mode;
+    }
     function saveFolder(id: string, name: string, appId: string, parentId: string): string {
       return JSON.stringify(core.browseModel.saveFolder(id, name, "folder", appId, parentId));
     }
@@ -165,7 +224,8 @@ ShellRoot {
     core.defaultProvider.entries = entries;
     core.defaultProvider.selectedCategory = "all";
     core.providers = [core.defaultProvider];
-    core.searchText = "";
+    // Existing result/action regressions exercise search, not the app catalog.
+    core.searchText = " ";
     core.browseState = "all_apps";
     core.updateResults();
   }

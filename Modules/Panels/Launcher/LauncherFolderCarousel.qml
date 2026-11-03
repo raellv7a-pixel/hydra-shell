@@ -12,7 +12,7 @@ ListView {
   readonly property bool presented: visible && launcher.isOpen && launcher.effectiveState === "home"
   property bool interacted: false
   readonly property bool motionAllowed: !Settings.data.general.animationDisabled && !PowerProfileService.hydraPerformanceMode
-  onMotionAllowedChanged: if (!motionAllowed) stopHint()
+  onMotionAllowedChanged: if (!motionAllowed) { settle.stop(); snap.stop(); }
   orientation: ListView.Horizontal
   model: launcher.browseModel.folders
   spacing: launcher.metrics.gapL
@@ -20,23 +20,16 @@ ListView {
   snapMode: ListView.SnapToItem
   interactive: overflowing && !Settings.data.appLauncher.ignoreMouseInput
   clip: true
-  implicitHeight: currentItem ? currentItem.implicitHeight : 0
+  implicitHeight: count > 0 ? launcher.metrics.folderHeight : 0
   // Initial category population can change ListView.originX before layout settles.
   onModelChanged: if (!interacted) Qt.callLater(root.positionViewAtBeginning)
   onWidthChanged: if (!interacted) Qt.callLater(root.positionViewAtBeginning)
   onDraggingChanged: if (dragging) markInteracted()
-  onPresentedChanged: if (!presented) { stopHint(); settle.stop(); snap.stop(); }
-  onOverflowingChanged: if (!overflowing) { stopHint(); settle.stop(); snap.stop(); }
+  onPresentedChanged: if (!presented) { settle.stop(); snap.stop(); }
+  onOverflowingChanged: if (!overflowing) { settle.stop(); snap.stop(); }
 
-  function stopHint() {
-    if (!hint.running) return;
-    hint.stop();
-    if (!interacted) contentX = originX;
-  }
   function markInteracted() {
     interacted = true;
-    ShellState.launcherFolderHintShown = true;
-    hint.stop();
   }
 
   function focusIndex(index) {
@@ -75,20 +68,6 @@ ListView {
     onPressedChanged: if (pressed) root.markInteracted()
   }
 
-  Timer {
-    interval: 600
-    running: root.presented && root.overflowing && root.atXBeginning && !root.moving && !root.interacted && !ShellState.launcherFolderHintShown && root.motionAllowed
-    onTriggered: {
-      if (!root.atXBeginning || root.moving) return;
-      ShellState.launcherFolderHintShown = true;
-      hint.restart();
-    }
-  }
-  SequentialAnimation {
-    id: hint
-    NumberAnimation { target: root; property: "contentX"; to: root.originX + 14 * Style.uiScaleRatio; duration: Style.animationNormal; easing.type: Easing.OutCubic }
-    NumberAnimation { target: root; property: "contentX"; to: root.originX; duration: Style.animationSlow; easing.type: Easing.InOutCubic }
-  }
   Timer {
     id: settle
     interval: 160

@@ -9,10 +9,18 @@ Button {
   property color surface: HydraColor.mSurfaceContainerLow
   property color foreground: HydraColor.mOnSurface
   property real cornerRadius: Style.radiusL
+  property bool pressFeedback: false
+  scale: pressFeedback && down && Style.animationFast > 0 ? 0.98 : 1
+  Behavior on scale {
+    enabled: root.pressFeedback && Style.animationFast > 0
+    ScaleAnimator { duration: Style.animationFaster; easing.type: Easing.OutCubic }
+  }
   signal contextRequested
   focusPolicy: Qt.StrongFocus
   hoverEnabled: !Settings.data.appLauncher.ignoreMouseInput
   padding: launcher.metrics.padding
+  topPadding: launcher.metrics.gapS
+  bottomPadding: launcher.metrics.gapS
   Accessible.name: text
   background: NStateLayer {
     radius: root.cornerRadius
@@ -26,6 +34,7 @@ Button {
   contentItem: NText {
     text: root.text
     color: root.foreground
+    font.weight: Style.fontWeightSemiBold
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
   }

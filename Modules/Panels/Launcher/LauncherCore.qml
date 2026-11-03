@@ -28,7 +28,7 @@ Rectangle {
   }
 
   // Expose for preview panel positioning
-  readonly property var resultsView: resultsSwapView.item
+  readonly property var resultsView: catalogActive ? catalog.resultsView : resultsSwapView.item
 
   // State
   property string searchText: ""
@@ -38,6 +38,9 @@ Rectangle {
   property var folderAnchor: null
   readonly property var metrics: LauncherDensity {}
   readonly property string effectiveState: searchText !== "" ? "search" : browseState
+  readonly property bool catalogActive: effectiveState === "all_apps"
+  readonly property bool catalogSidebarVisible: catalogActive && width >= 900 * Style.uiScaleRatio
+  readonly property bool animationsDisabled: Style.animationFast === 0
   readonly property real homePreferredHeight: contentLayout.implicitHeight + metrics.outerPadding * 2
   function scrollHomeVertically(event) { if (home.visible) home.scrollVertically(event); }
   readonly property var browseModel: browse
@@ -225,6 +228,7 @@ Rectangle {
   }
 
   function goHome() {
+    searchText = "";
     closeAppPanel();
     browseState = "home";
     activeFolderId = "";
@@ -246,11 +250,12 @@ Rectangle {
   }
 
   function openFolder(id, anchor) {
+    searchText = "";
     closeAppPanel();
     browseState = "home";
+    folderAnchor = anchor || (activeFolderId === id ? folderAnchor : null);
     activeFolderId = id;
     activeSubfolderId = "";
-    folderAnchor = anchor || null;
     Qt.callLater(root.focusExpandedFolder);
   }
   function openPinned(anchor) {
@@ -258,15 +263,16 @@ Rectangle {
   }
 
   function focusExpandedFolder() {
-    if (collectionFlyout.status === Loader.Ready) collectionFlyout.item.focusFirst();
+    home.focusExpanded();
   }
 
   function closeExpandedFolder() {
+    const origin = folderAnchor;
     closeAppPanel();
     activeFolderId = "";
     activeSubfolderId = "";
     folderAnchor = null;
-    Qt.callLater(home.focusFirst);
+    Qt.callLater(() => { if (origin) origin.forceActiveFocus(); else home.focusFirst(); });
   }
 
   function openSubfolder(id) {
@@ -344,7 +350,7 @@ Rectangle {
   }
 
   function ensureHomeItemVisible(item) {
-    if (home.visible && !folderExpanded) home.ensureVisible(item);
+    if (home.visible && (!folderExpanded || item === folderAnchor)) home.ensureVisible(item);
   }
 
   function focusHomeCategories() {
@@ -355,12 +361,14 @@ Rectangle {
   function handleHomeItemKey(event, item) {
     if (folderEditor.active)
       return;
+    if (event.key === Qt.Key_K && (event.modifiers & Qt.ControlModifier)) {
+      focusSearchInput();
+      event.accepted = true;
+      return;
+    }
     if (appPanelOpen && handleAppPanelKeyPress(event)) return;
     if (checkKey(event, "escape")) {
-      if (searchText !== "") searchText = "";
-      else if (folderExpanded) closeExpandedFolder();
-      else if (browseState !== "home") goHome();
-      else close();
+      navigateBack();
       event.accepted = true;
     } else if (event.text && event.text.trim() !== "" && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)) && event.key !== Qt.Key_Space) {
       searchText += event.text;
@@ -750,6 +758,8 @@ Rectangle {
     selectedIndex = 0;
     reanchorAppPanel();
     applyPendingAppPanel();
+    if (catalogActive && !appPanelOpen)
+      Qt.callLater(() => { if (root.catalogActive && !root.appPanelOpen) catalog.selectFirst(); });
   }
 
   // A finished package operation asks (via PanelService) for the panel to come
@@ -873,21 +883,27 @@ Rectangle {
   function checkKey(event, settingName) {
     return Keybinds.checkKey(event, settingName, Settings);
   }
+  function navigateBack() {
+    if (folderEditor.active) closeFolderEditor();
+    else if (appPanelOpen) {
+      if (appPanelConfirmIndex >= 0) appPanelConfirmIndex = -1;
+      else if (appPanelShowingProperties) hideAppProperties();
+      else if (appPanelShowingFolders) {
+        appPanelShowingFolders = false;
+        refreshAppPanelActions();
+      } else closeAppPanel();
+    } else if (searchText !== "") searchText = "";
+    else if (activeSubfolderId) backToParentFolder();
+    else if (folderExpanded) closeExpandedFolder();
+    else if (browseState !== "home") goHome();
+    else close();
+  }
+
 
   // Returns true when the event was consumed by the inline app panel.
   function handleAppPanelKeyPress(event) {
     if (checkKey(event, 'escape')) {
-      // Unwind one layer at a time: confirmation, then properties, then panel.
-      if (appPanelConfirmIndex >= 0)
-        appPanelConfirmIndex = -1;
-      else if (appPanelShowingProperties)
-        hideAppProperties();
-      else if (appPanelShowingFolders) {
-        appPanelShowingFolders = false;
-        refreshAppPanelActions();
-      }
-      else
-        closeAppPanel();
+      navigateBack();
       event.accepted = true;
       return true;
     }
@@ -956,19 +972,17 @@ Rectangle {
       event.accepted = true;
       return;
     }
+    if (event.key === Qt.Key_K && (event.modifiers & Qt.ControlModifier)) {
+      focusSearchInput();
+      event.accepted = true;
+      return;
+    }
     // The inline app panel grabs navigation keys while it is open.
     if (appPanelOpen && handleAppPanelKeyPress(event))
       return;
 
     if (checkKey(event, 'escape')) {
-      if (searchText !== "")
-        searchText = "";
-      else if (folderExpanded)
-        closeExpandedFolder();
-      else if (browseState !== "home")
-        goHome();
-      else
-        close();
+      navigateBack();
       event.accepted = true;
       return;
     }
@@ -982,6 +996,14 @@ Rectangle {
         else home.focusFirst();
         event.accepted = true;
       }
+      return;
+    }
+    if (catalogActive && catalog.navigate(event)) return;
+    if (catalogActive && !searchInput.inputItem.activeFocus && event.text && event.text.trim() !== "" && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
+      searchText += event.text;
+      focusSearchInput();
+      searchInput.inputItem.cursorPosition = searchText.length;
+      event.accepted = true;
       return;
     }
     if (checkKey(event, 'enter')) {
@@ -1193,21 +1215,99 @@ Rectangle {
       }
     }
   }
+  RowLayout {
+    id: catalogToolbar
+    visible: root.catalogActive
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.margins: root.metrics.padding
+    height: root.metrics.pillHeight
+    spacing: root.metrics.gapL
+    NIcon { icon: "hydra"; color: HydraColor.mPrimary; pointSize: Style.fontSizeXXL }
+    NText { visible: root.width >= 600 * Style.uiScaleRatio; text: "Hydra Shell"; font.weight: Style.fontWeightSemiBold }
+    LauncherHomeButton {
+      launcher: root
+      text: I18n.tr("launcher-home.home")
+      implicitHeight: root.metrics.pillHeight
+      surface: "transparent"
+      onClicked: root.goHome()
+    }
+    NIcon { icon: "chevron-right"; color: HydraColor.mOnSurfaceVariant }
+    NText { Layout.fillWidth: true; text: I18n.tr("launcher-home.all-apps"); font.weight: Style.fontWeightSemiBold; elide: Text.ElideRight }
+    NBox {
+      Layout.preferredWidth: layoutOptions.implicitWidth + Style.margin2XS
+      Layout.preferredHeight: root.metrics.pillHeight + Style.margin2XS
+      color: HydraColor.mSurfaceContainerLow
+      forceOpaque: true
+      radius: height / 2
+      border.width: 0
+      RowLayout {
+        id: layoutOptions
+        anchors.centerIn: parent
+        spacing: Style.marginXXS
+        Repeater {
+          model: ["grid", "columns", "list"]
+          LauncherHomeButton {
+            id: layoutChoice
+            required property string modelData
+            readonly property bool selected: root.layoutMode === modelData
+            launcher: root
+            text: I18n.tr("options.launcher-view-mode." + modelData)
+            implicitWidth: root.metrics.pillHeight + Style.marginS
+            implicitHeight: root.metrics.pillHeight
+            padding: Style.marginS
+            cornerRadius: height / 2
+            surface: selected ? HydraColor.mPrimaryContainer : "transparent"
+            foreground: selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
+            Accessible.selected: selected
+            contentItem: NIcon {
+              icon: modelData === "list" ? "layout-list" : (modelData === "columns" ? "layout-columns" : "layout-grid")
+              color: layoutChoice.foreground
+              pointSize: Style.fontSizeL
+            }
+            onClicked: Settings.data.appLauncher.viewMode = modelData
+          }
+        }
+      }
+    }
+  }
+  LauncherCatalogSidebar {
+    launcher: root
+    visible: root.catalogSidebarVisible
+    anchors.left: parent.left
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
+    anchors.leftMargin: root.metrics.padding
+    anchors.topMargin: catalogToolbar.height + root.metrics.padding * 2
+    anchors.bottomMargin: root.metrics.padding
+    width: Math.round(224 * Style.uiScaleRatio)
+  }
 
   ColumnLayout {
     id: contentLayout
     enabled: !folderEditor.active
     anchors.fill: parent
-    anchors.topMargin: root.metrics.outerPadding
+    anchors.topMargin: root.catalogActive ? catalogToolbar.height + root.metrics.padding * 2 : root.metrics.outerPadding
+    anchors.leftMargin: root.catalogSidebarVisible ? Math.round(224 * Style.uiScaleRatio) + root.metrics.padding : 0
     anchors.bottomMargin: root.metrics.outerPadding
     spacing: root.metrics.gapS
 
     LauncherHero {
       id: hero
       launcher: root
-      visible: root.effectiveState === "home" && root.hasCoverBanner
+      visible: root.effectiveState === "home" && root.hasCoverBanner && (!root.folderExpanded || (root.screen?.height || 1080 * Style.uiScaleRatio) >= 800 * Style.uiScaleRatio)
       Layout.fillWidth: true
       Layout.preferredHeight: Math.min(root.coverBannerHeight, (root.screen?.height || 1080 * Style.uiScaleRatio) * 0.24)
+      Layout.leftMargin: root.metrics.padding
+      Layout.rightMargin: root.metrics.padding
+      Layout.bottomMargin: root.metrics.gapS
+    }
+    LauncherCatalogHeader {
+      launcher: root
+      visible: root.catalogActive
+      Layout.fillWidth: true
+      Layout.preferredHeight: Math.round(112 * Style.uiScaleRatio)
       Layout.leftMargin: root.metrics.padding
       Layout.rightMargin: root.metrics.padding
       Layout.bottomMargin: root.metrics.gapS
@@ -1218,8 +1318,8 @@ Rectangle {
     RowLayout {
       visible: true
       Layout.fillWidth: true
-      Layout.leftMargin: root.metrics.outerPadding
-      Layout.rightMargin: root.metrics.outerPadding
+      Layout.leftMargin: root.metrics.padding
+      Layout.rightMargin: root.metrics.padding
       spacing: root.metrics.gapS
 
       NTextInput {
@@ -1230,8 +1330,36 @@ Rectangle {
         inputIconName: "search"
         text: root.searchText
         placeholderText: I18n.tr("placeholders.search-launcher")
-        fontSize: Style.fontSizeM
+        fontSize: Style.fontSizeL
         onTextChanged: root.searchText = text
+
+        Binding {
+          target: searchInput.inputItem
+          property: "rightPadding"
+          value: searchShortcut.visible ? searchShortcut.width + Style.marginL : 0
+        }
+        NBox {
+          id: searchShortcut
+          parent: searchInput.inputItem
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+          anchors.rightMargin: Style.marginM
+          width: shortcutLabel.implicitWidth + Style.margin2M
+          height: shortcutLabel.implicitHeight + Style.margin2XS
+          visible: searchInput.text.length === 0 && searchInput.width >= 480 * Style.uiScaleRatio
+          color: HydraColor.mSurfaceContainerHighest
+          forceOpaque: true
+          radius: Style.iRadiusS
+          border.width: 0
+          Accessible.ignored: true
+          NText {
+            id: shortcutLabel
+            anchors.centerIn: parent
+            text: "Ctrl + K"
+            pointSize: Style.fontSizeS
+            color: HydraColor.mOnSurfaceVariant
+          }
+        }
 
         Component.onCompleted: {
           if (searchInput.inputItem) {
@@ -1245,7 +1373,7 @@ Rectangle {
 
 
       NIconButton {
-        visible: root.effectiveState !== "home" && root.showLayoutToggle
+        visible: root.effectiveState === "search" && root.showLayoutToggle
         icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
         tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
         customRadius: Style.iRadiusL
@@ -1275,29 +1403,10 @@ Rectangle {
       launcher: root
       visible: root.showProviderCategories
       Layout.fillWidth: true
-      Layout.leftMargin: root.metrics.outerPadding
-      Layout.rightMargin: root.metrics.outerPadding
+      Layout.leftMargin: root.metrics.padding
+      Layout.rightMargin: root.metrics.padding
     }
 
-    RowLayout {
-      visible: root.effectiveState === "all_apps"
-      Layout.fillWidth: true
-      Layout.leftMargin: Style.marginM
-      Layout.rightMargin: Style.marginM
-      LauncherHomeButton {
-        launcher: root
-        text: I18n.tr("launcher-home.back")
-        implicitHeight: Math.round(34 * Style.uiScaleRatio)
-        onClicked: root.goHome()
-      }
-      NIcon { icon: "apps"; color: HydraColor.mPrimary }
-      NText {
-        Layout.fillWidth: true
-        text: I18n.tr("launcher-home.all-apps")
-        pointSize: Style.fontSizeL
-        font.weight: Style.fontWeightSemiBold
-      }
-    }
 
     LauncherHome {
       id: home
@@ -1308,17 +1417,26 @@ Rectangle {
       Layout.leftMargin: root.metrics.padding
       Layout.rightMargin: root.metrics.padding
     }
+    LauncherAllApps {
+      id: catalog
+      launcher: root
+      visible: root.catalogActive
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      Layout.leftMargin: root.metrics.padding
+      Layout.rightMargin: root.metrics.padding
+    }
 
     // Results view
     NSlideSwapView {
       id: resultsSwapView
-      visible: root.effectiveState !== "home"
+      visible: root.effectiveState === "search"
       Layout.fillWidth: true
       Layout.leftMargin: root.metrics.outerPadding
       Layout.rightMargin: root.metrics.outerPadding
       Layout.fillHeight: true
       animationsEnabled: !root.animationsDisabled
-      sourceComponent: root.effectiveState === "home" ? null : (root.isSingleView ? singleViewComponent : rowsViewComponent)
+      sourceComponent: root.effectiveState !== "search" ? null : (root.isSingleView ? singleViewComponent : rowsViewComponent)
     }
 
     // --------------------------
@@ -1444,7 +1562,7 @@ Rectangle {
     }
 
     ColumnLayout {
-      visible: root.effectiveState !== "home"
+      visible: root.effectiveState === "search"
       Layout.leftMargin: Style.marginM
       Layout.rightMargin: Style.marginM
       spacing: 0
@@ -1481,32 +1599,6 @@ Rectangle {
       }
     }
   }
-  Item {
-    id: collectionLayer
-    anchors.fill: parent
-    anchors.margins: Style.marginXL
-    z: 100
-    clip: true
-    visible: root.folderExpanded
-    enabled: !folderEditor.active
-    Loader {
-      id: collectionFlyout
-      active: root.folderExpanded
-      width: Math.min(collectionLayer.width, 620 * Style.uiScaleRatio)
-      height: Math.min(collectionLayer.height, 360 * Style.uiScaleRatio, item?.implicitHeight || 360 * Style.uiScaleRatio)
-      readonly property point anchorPoint: {
-        root.width;
-        root.height;
-        home.contentY;
-        return root.folderAnchor ? root.folderAnchor.mapToItem(collectionLayer, 0, 0) : Qt.point(0, 0);
-      }
-      readonly property real belowAnchor: anchorPoint.y + (root.folderAnchor?.height || 0) + root.metrics.gapM
-      readonly property real aboveAnchor: anchorPoint.y - root.metrics.gapM - height
-      x: Math.max(0, Math.min(collectionLayer.width - width, anchorPoint.x))
-      y: Math.max(0, Math.min(collectionLayer.height - height, belowAnchor + height <= collectionLayer.height ? belowAnchor : aboveAnchor))
-      sourceComponent: LauncherCollectionFlyout { launcher: root }
-    }
-  }
 
   Loader {
     id: folderEditor
@@ -1519,6 +1611,13 @@ Rectangle {
       appId: root.folderEditorAppId
       parentId: root.folderEditorParentId
     }
+  }
+  MouseArea {
+    anchors.fill: parent
+    z: 300
+    enabled: Settings.data.appLauncher.ignoreMouseInput
+    acceptedButtons: Qt.AllButtons
+    onWheel: event => event.accepted = true
   }
 }
 

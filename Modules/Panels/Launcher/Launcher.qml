@@ -31,6 +31,10 @@ SmartPanel {
     if (launcherCoreRef)
       launcherCoreRef.setSearchText(text);
   }
+  function onEscapePressed() {
+    if (launcherCoreRef) launcherCoreRef.navigateBack();
+    else close();
+  }
 
   // Preview panel support
   readonly property bool previewActive: {
@@ -47,7 +51,7 @@ SmartPanel {
 
   // Panel sizing
   readonly property int listPanelWidth: preferredWidth - Style.margin2L
-  readonly property int totalBaseWidth: LauncherGeometry.panelWidth(screen?.width || width, Style.uiScaleRatio, Math.max(frameThickness, Style.marginL), Settings.data.appLauncher.density)
+  readonly property int totalBaseWidth: LauncherGeometry.panelWidth(screen?.width || width, Style.uiScaleRatio, Math.max(frameThickness, Style.marginL), Settings.data.appLauncher.density, launcherCoreRef?.catalogActive || false)
 
   preferredWidth: totalBaseWidth
   preferredHeight: LauncherGeometry.panelHeight(screen?.height || height, Style.uiScaleRatio, Math.max(barHeight, Style.marginL), !launcherCoreRef || launcherCoreRef.effectiveState === "home" ? launcherCoreRef?.homePreferredHeight || 540 * Style.uiScaleRatio : 0, Settings.data.appLauncher.density)

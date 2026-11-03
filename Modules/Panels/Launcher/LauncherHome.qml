@@ -8,6 +8,45 @@ Flickable {
   required property var launcher
   readonly property var browse: launcher.browseModel
   readonly property bool wide: width >= 560 * Style.uiScaleRatio
+  readonly property real sectionHeight: Math.max(launcher.metrics.pinnedHeight + Style.margin2L, pinnedBody.implicitHeight, recentBody.implicitHeight) + launcher.metrics.padding * 2
+  property var displayedFolder: null
+  readonly property var expandedView: expansion.status === Loader.Ready ? expansion.item : null
+  function revealExpanded() {
+    if (!expandedView) return;
+    const panelBottom = expansion.y + expansion.height;
+    const contextFits = panelBottom - folderCards.y <= height;
+    const top = contextFits ? folderCards.y : expansion.y;
+    const next = Math.max(0, Math.min(Math.max(0, contentHeight - height), Math.max(panelBottom - height, Math.min(contentY, top))));
+    if (Math.abs(next - contentY) > 0.5) {
+      revealScroll.from = contentY;
+      revealScroll.to = next;
+      revealScroll.restart();
+    }
+  }
+  function focusExpanded() {
+    revealExpanded();
+    if (expandedView) expandedView.focusFirst();
+  }
+  Connections {
+    target: root.launcher
+    function onActiveFolderChanged() {
+      if (root.launcher.activeFolder) root.displayedFolder = root.launcher.activeFolder;
+    }
+    function onFolderExpandedChanged() {
+      if (root.launcher.folderExpanded) {
+        closeDelay.stop();
+        Qt.callLater(root.focusExpanded);
+      } else if (expansion.active) {
+        revealScroll.stop();
+        closeDelay.restart();
+      }
+    }
+  }
+  Timer { id: closeDelay; interval: Style.animationFast }
+  NumberAnimation { id: revealScroll; target: root; property: "contentY"; duration: Style.animationNormal; easing.type: Easing.OutCubic }
+  onDraggingChanged: if (dragging) revealScroll.stop()
+  onVisibleChanged: if (!visible) revealScroll.stop()
+  onHeightChanged: if (launcher.folderExpanded) Qt.callLater(root.revealExpanded)
   contentWidth: width
   contentHeight: body.implicitHeight + launcher.metrics.gapM
   implicitHeight: contentHeight
@@ -21,7 +60,10 @@ Flickable {
   }
   function navigateFolder(index, event) {
     if (event.key === Qt.Key_Up) launcher.focusHomeCategories();
-    else if (event.key === Qt.Key_Down) allApps.forceActiveFocus();
+    else if (event.key === Qt.Key_Down) {
+      if (launcher.folderExpanded) focusExpanded();
+      else allApps.forceActiveFocus();
+    }
     else if (event.key === Qt.Key_Left || event.key === Qt.Key_Right) {
       const target = index + (event.key === Qt.Key_Left ? -1 : 1);
       if (target < 0) launcher.focusHomeCategories();
@@ -33,6 +75,7 @@ Flickable {
   }
   function scrollVertically(event) {
     if (!interactive) return false;
+    revealScroll.stop();
     const delta = event.pixelDelta.y || event.angleDelta.y / 120 * Style.baseWidgetSize;
     const next = Math.max(0, Math.min(contentHeight - height, contentY - delta));
     const consumed = Math.abs(next - contentY) > 0.5;
@@ -53,8 +96,8 @@ Flickable {
     RowLayout {
       Layout.fillWidth: true
       Layout.topMargin: root.launcher.metrics.gapS
-      NIcon { icon: "folder"; pointSize: Style.fontSizeL; color: HydraColor.mOnSurface }
-      NText { text: I18n.tr("launcher-home.folders-title"); font.weight: Style.fontWeightSemiBold; pointSize: Style.fontSizeL }
+      NIcon { icon: "folder"; pointSize: Style.fontSizeXL; color: HydraColor.mOnSurface }
+      NText { text: I18n.tr("launcher-home.folders-title"); font.weight: Style.fontWeightBold; pointSize: Style.fontSizeXL }
       Item { Layout.fillWidth: true }
       LauncherHomeButton {
         launcher: root.launcher
@@ -72,6 +115,29 @@ Flickable {
       Layout.fillWidth: true
       Layout.preferredHeight: implicitHeight
     }
+    Loader {
+      id: expansion
+      Layout.fillWidth: true
+      Layout.preferredHeight: active ? Math.min(item?.implicitHeight || 0, Math.max(180 * Style.uiScaleRatio, root.height * 0.6)) : 0
+      visible: active
+      active: root.launcher.folderExpanded || closeDelay.running
+      opacity: root.launcher.folderExpanded ? 1 : 0
+      Behavior on opacity {
+        enabled: Style.animationFast > 0
+        OpacityAnimator { duration: Style.animationFast; easing.type: Easing.OutCubic }
+      }
+      sourceComponent: LauncherCollectionFlyout {
+        launcher: root.launcher
+        folder: root.displayedFolder
+        connectorX: {
+          const anchor = root.launcher.folderAnchor;
+          if (!anchor) return width / 2;
+          if (anchor.folderIndex !== undefined)
+            return folderCards.x + anchor.x - folderCards.contentX + anchor.width / 2;
+          return anchor.mapToItem(root, anchor.width / 2, 0).x;
+        }
+      }
+    }
     LauncherHomeButton {
       id: allApps
       launcher: root.launcher
@@ -80,6 +146,7 @@ Flickable {
       Layout.fillWidth: true
       Layout.preferredHeight: root.launcher.metrics.allAppsHeight
       surface: HydraColor.mPrimaryContainer
+      foreground: HydraColor.mOnPrimaryContainer
       onClicked: launcher.openAllApps("all")
       contentItem: RowLayout {
         spacing: root.launcher.metrics.gapL
@@ -87,7 +154,7 @@ Flickable {
         ColumnLayout {
           Layout.fillWidth: true
           spacing: Style.marginXXS
-          NText { text: allApps.text; pointSize: Style.fontSizeL; font.weight: Style.fontWeightSemiBold; color: HydraColor.mOnPrimaryContainer }
+          NText { text: allApps.text; pointSize: Style.fontSizeL; font.weight: Style.fontWeightBold; color: HydraColor.mOnPrimaryContainer }
           NText { Layout.fillWidth: true; text: I18n.tr("launcher-home.all-apps-description"); pointSize: Style.fontSizeS; color: HydraColor.mOnPrimaryContainer; elide: Text.ElideRight }
         }
         NIcon { icon: "chevron-right"; color: HydraColor.mOnPrimaryContainer }
@@ -101,8 +168,8 @@ Flickable {
       NBox {
         Layout.fillWidth: true
         Layout.preferredWidth: root.width * 0.55
-        readonly property real padding: root.browse.pinned.length ? root.launcher.metrics.padding : root.launcher.metrics.gapS
-        Layout.preferredHeight: pinnedBody.implicitHeight + padding * 2
+        readonly property real padding: root.launcher.metrics.padding
+        Layout.preferredHeight: root.wide ? root.sectionHeight : Math.max(root.launcher.metrics.pinnedHeight + Style.margin2L, pinnedBody.implicitHeight) + padding * 2
         Layout.alignment: Qt.AlignTop
         forceOpaque: true
         color: HydraColor.mSurfaceContainerHigh
@@ -117,8 +184,9 @@ Flickable {
           spacing: root.browse.pinned.length ? root.launcher.metrics.gapM : root.launcher.metrics.gapXS
           RowLayout {
             Layout.fillWidth: true
-            NIcon { icon: "pin"; color: HydraColor.mOnSurface }
-            NText { text: I18n.tr("launcher-home.pinned"); pointSize: Style.fontSizeM; font.weight: Style.fontWeightSemiBold }
+            Layout.minimumHeight: Math.round(32 * Style.uiScaleRatio)
+            NIcon { icon: "pin"; pointSize: Style.fontSizeL; color: HydraColor.mOnSurface }
+            NText { text: I18n.tr("launcher-home.pinned"); pointSize: Style.fontSizeL; font.weight: Style.fontWeightSemiBold }
             Item { Layout.fillWidth: true }
             LauncherHomeButton {
               id: pinnedExpand
@@ -151,6 +219,7 @@ Flickable {
                 Layout.preferredHeight: root.launcher.metrics.pinnedHeight
                 padding: root.launcher.metrics.gapXS
                 surface: "transparent"
+                pressFeedback: true
                 onClicked: launcher.activateEntry(modelData)
                 onContextRequested: {
                   launcher.openPinned(pinnedExpand);
@@ -158,8 +227,8 @@ Flickable {
                 }
                 contentItem: ColumnLayout {
                   spacing: root.launcher.metrics.gapS
-                  LauncherAppIcon { Layout.alignment: Qt.AlignHCenter; Layout.preferredWidth: Math.round(40 * Style.uiScaleRatio); Layout.preferredHeight: Layout.preferredWidth; appIcon: pinnedApp.modelData.icon }
-                  NText { Layout.fillWidth: true; text: pinnedApp.text; pointSize: Style.fontSizeXS; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight }
+                  LauncherAppIcon { Layout.alignment: Qt.AlignHCenter; Layout.preferredWidth: root.launcher.metrics.pinnedIconSize; Layout.preferredHeight: Layout.preferredWidth; appIcon: pinnedApp.modelData.icon }
+                  NText { Layout.fillWidth: true; text: pinnedApp.text; pointSize: Style.fontSizeS; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight }
                 }
               }
             }
@@ -170,8 +239,8 @@ Flickable {
       NBox {
         Layout.fillWidth: true
         Layout.preferredWidth: root.width * 0.45
-        readonly property real padding: root.browse.recentItems.length || root.browse.recentApps.length ? root.launcher.metrics.padding : root.launcher.metrics.gapS
-        Layout.preferredHeight: recentBody.implicitHeight + padding * 2
+        readonly property real padding: root.launcher.metrics.padding
+        Layout.preferredHeight: root.wide ? root.sectionHeight : Math.max(root.launcher.metrics.pinnedHeight + Style.margin2L, recentBody.implicitHeight) + padding * 2
         Layout.alignment: Qt.AlignTop
         forceOpaque: true
         color: HydraColor.mSurfaceContainerHigh
@@ -183,24 +252,25 @@ Flickable {
           anchors.right: parent.right
           anchors.top: parent.top
           anchors.margins: parent.padding
-          spacing: root.launcher.metrics.gapXS
+          spacing: root.launcher.metrics.gapS
           RowLayout {
             Layout.fillWidth: true
-            NIcon { icon: "clock"; color: HydraColor.mOnSurface }
-            NText { text: I18n.tr("launcher-home.recent"); pointSize: Style.fontSizeM; font.weight: Style.fontWeightSemiBold }
+            Layout.minimumHeight: Math.round(32 * Style.uiScaleRatio)
+            NIcon { icon: "clock"; pointSize: Style.fontSizeL; color: HydraColor.mOnSurface }
+            NText { text: I18n.tr("launcher-home.recent"); pointSize: Style.fontSizeL; font.weight: Style.fontWeightSemiBold }
             Item { Layout.fillWidth: true }
             LauncherHomeButton {
               launcher: root.launcher
               visible: root.browse.recentItems.length > 0 || root.browse.recentApps.length > 0
               text: I18n.tr("launcher-home.clear")
               surface: "transparent"
-              implicitHeight: Math.round(30 * Style.uiScaleRatio)
+              implicitHeight: Math.round(32 * Style.uiScaleRatio)
               padding: Style.marginXS
               onClicked: root.browse.clearRecents()
             }
           }
           Repeater {
-            model: (root.browse.recentItems.length ? root.browse.recentItems : root.browse.recentApps).slice(0, 4)
+            model: (root.browse.recentItems.length ? root.browse.recentItems : root.browse.recentApps).slice(0, 3)
             LauncherHomeButton {
               id: recentItem
               readonly property string documentGroup: ["image", "video", "audio"].includes((modelData.mime || "").split("/")[0]) ? modelData.mime.split("/")[0] : "documents"
@@ -226,9 +296,9 @@ Flickable {
                   Layout.fillWidth: true
                   spacing: 0
                   NText { Layout.fillWidth: true; text: recentItem.text; pointSize: Style.fontSizeS; elide: Text.ElideMiddle }
-                  NText { Layout.fillWidth: true; text: recentItem.modelData.uri ? I18n.tr("launcher-home.document-types." + recentItem.documentGroup) : I18n.tr("launcher-home.app"); color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeXXS; elide: Text.ElideRight }
+                  NText { Layout.fillWidth: true; text: recentItem.modelData.uri ? I18n.tr("launcher-home.document-types." + recentItem.documentGroup) : I18n.tr("launcher-home.app"); color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeXS; elide: Text.ElideRight }
                 }
-                NText { text: Time.formatRelativeTime(new Date(recentItem.modelData.modifiedAt || recentItem.modelData.lastOpenedAt)); color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeXXS }
+                NText { text: Time.formatRelativeTime(new Date(recentItem.modelData.modifiedAt || recentItem.modelData.lastOpenedAt)); color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeXS }
               }
             }
           }
