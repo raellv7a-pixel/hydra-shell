@@ -48,10 +48,36 @@ class UmbrielSettingsTests(unittest.TestCase):
     def test_parameterized_action_uses_installed_umbriel_parser(self):
         state = umbriel_settings.defaults()
         state['hot_corners']['bottom_right'] = {
-            'enabled': True, 'delay_ms': 0, 'action': 'spawn:kitty -e htop'}
+            'enabled': True, 'delay_ms': 0, 'action': 'spawn kitty -e htop'}
         umbriel_config.commit('settings', umbriel_settings.generate(state))
         self.assertEqual(umbriel_settings.current()['state']['hot_corners']['bottom_right']['action'],
-                         'spawn:kitty -e htop')
+                         'spawn kitty -e htop')
+
+    def test_parameterized_workspace_action_uses_installed_umbriel_parser(self):
+        state = umbriel_settings.defaults()
+        state['hot_corners']['top_left'] = {
+            'enabled': True, 'delay_ms': 0, 'action': 'workspace-switch 2'}
+        umbriel_config.commit('settings', umbriel_settings.generate(state))
+        self.assertEqual(umbriel_settings.current()['state'], state)
+
+    def test_hot_corner_shell_command_text_is_preserved(self):
+        state = umbriel_settings.defaults()
+        action = """spawn printf '%s\\n' "https://example.org/a:b  c" | cat"""
+        state['hot_corners']['top_left'] = {
+            'enabled': True, 'delay_ms': 0, 'action': action}
+        umbriel_config.commit('settings', umbriel_settings.generate(state))
+        self.assertEqual(umbriel_settings.current()['state']['hot_corners']['top_left']['action'], action)
+
+    def test_hot_corner_rejects_legacy_and_malformed_actions(self):
+        for action in (None, 12, 'spawn:kitty', 'workspace-switch:1',
+                       ' workspace-switch 1', 'workspace-switch ',
+                       'workspace-switch\t1', 'workspace-switch 1\nwindow-close',
+                       'workspace-switch 1\rwindow-close', 'workspace-switch 1\x00'):
+            with self.subTest(action=action):
+                state = umbriel_settings.defaults()
+                state['hot_corners']['top_left']['action'] = action
+                with self.assertRaisesRegex(ValueError, 'Ação inválida'):
+                    umbriel_settings.generate(state)
 
     def test_external_ownership_blocks_save_without_modifying_user_config(self):
         master = self.directory / 'config.toml'

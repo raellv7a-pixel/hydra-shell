@@ -10,7 +10,7 @@ DashboardCard {
   property string valueText: ""
 
   Layout.preferredHeight: Math.round(64 * panelRoot.panelUnit)
-  color: Qt.alpha(Color.mPrimary, 0.09)
+  color: Qt.alpha(HydraColor.mPrimary, 0.09)
   radius: Style.radiusS
 
   RowLayout {
@@ -21,7 +21,7 @@ DashboardCard {
     NIcon {
       icon: iconName
       pointSize: Style.fontSizeM
-      color: Color.mPrimary
+      color: HydraColor.mPrimary
     }
 
     ColumnLayout {
@@ -30,13 +30,13 @@ DashboardCard {
 
       NText {
         text: titleText
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeS
       }
 
       NText {
         text: valueText
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
       }

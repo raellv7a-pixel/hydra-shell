@@ -117,7 +117,7 @@ ColumnLayout {
       NText {
         text: pluginApi?.tr("settings.filenameFormatDesc")
         pointSize: Style.fontSizeXS
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
       }
@@ -158,7 +158,7 @@ ColumnLayout {
           height: 28
           width: tokenRow.implicitWidth + Style.marginM * 2
           radius: Style.radiusM
-          color: tokenMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          color: tokenMA.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
           Behavior on color {
             ColorAnimation {
               duration: 120
@@ -172,13 +172,13 @@ ColumnLayout {
               text: modelData.label
               pointSize: Style.fontSizeXS
               font.weight: Font.Medium
-              color: tokenMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: tokenMA.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               anchors.verticalCenter: parent.verticalCenter
             }
             NText {
               text: modelData.value
               pointSize: Style.fontSizeXS
-              color: tokenMA.containsMouse ? Qt.rgba(1, 1, 1, 0.65) : Color.mOnSurfaceVariant
+              color: tokenMA.containsMouse ? Qt.rgba(1, 1, 1, 0.65) : HydraColor.mOnSurfaceVariant
               anchors.verticalCenter: parent.verticalCenter
             }
           }
@@ -217,7 +217,7 @@ ColumnLayout {
       Layout.fillWidth: true
       height: previewRow.implicitHeight + Style.marginM * 2
       radius: Style.radiusM
-      color: Color.mSurfaceVariant
+      color: HydraColor.mSurfaceVariant
       opacity: 0.7
       Row {
         id: previewRow
@@ -231,14 +231,14 @@ ColumnLayout {
         spacing: Style.marginS
         NIcon {
           icon: "file"
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           scale: 0.85
           anchors.verticalCenter: parent.verticalCenter
         }
         NText {
           text: root.buildPreview(root.filenameFormat) + ".ext"
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           font.family: "monospace"
           elide: Text.ElideRight
           width: parent.width - Style.marginM * 2
@@ -263,7 +263,7 @@ ColumnLayout {
       spacing: Style.marginS
       NIcon {
         icon: "share"
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
       NLabel {
         label: pluginApi?.tr("settings.shareSection")
@@ -295,7 +295,7 @@ ColumnLayout {
       NText {
         text: pluginApi?.tr("settings.x02ExpiryDesc")
         pointSize: Style.fontSizeXS
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
       }
@@ -334,7 +334,7 @@ ColumnLayout {
             width: _expLabel.implicitWidth + Style.marginM * 2
             radius: Style.radiusM
             enabled: root.x02ApiKey.trim() !== ""
-            color: root.x02Expiry === modelData.id ? Color.mPrimary : (_expMA.containsMouse ? Color.mHover : Color.mSurfaceVariant)
+            color: root.x02Expiry === modelData.id ? HydraColor.mPrimary : (_expMA.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
             Behavior on color {
               ColorAnimation {
                 duration: 120
@@ -346,7 +346,7 @@ ColumnLayout {
               text: modelData.label
               pointSize: Style.fontSizeXS
               font.weight: root.x02Expiry === modelData.id ? Font.Bold : Font.Normal
-              color: root.x02Expiry === modelData.id ? Color.mOnPrimary : (_expMA.containsMouse ? Color.mOnHover : Color.mOnSurface)
+              color: root.x02Expiry === modelData.id ? HydraColor.mOnPrimary : (_expMA.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface)
             }
             MouseArea {
               id: _expMA
@@ -439,7 +439,7 @@ ColumnLayout {
       spacing: Style.marginS
       NIcon {
         icon: "scan"
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
       NLabel {
         label: pluginApi?.tr("settings.ocrSection")

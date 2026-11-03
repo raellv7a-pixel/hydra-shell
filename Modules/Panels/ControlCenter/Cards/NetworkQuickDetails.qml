@@ -44,7 +44,7 @@ Item {
         text: root.panelRoot.tr("network")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 
@@ -53,9 +53,9 @@ Item {
         baseSize: Math.round(30 * root.panelRoot.panelUnit)
         enabled: !root.ethernetView && NetworkService.wifiEnabled && !NetworkService.scanningActive
         tooltipText: I18n.tr("common.scanning")
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSurfaceContainerHighest
-        colorFg: Color.mOnSurface
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSurfaceContainerHighest
+        colorFg: HydraColor.mOnSurface
         onClicked: NetworkService.scan()
       }
 
@@ -63,9 +63,9 @@ Item {
         icon: "settings"
         baseSize: Math.round(30 * root.panelRoot.panelUnit)
         tooltipText: I18n.tr("tooltips.open-settings")
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSurfaceContainerHighest
-        colorFg: Color.mOnSurface
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSurfaceContainerHighest
+        colorFg: HydraColor.mOnSurface
         onClicked: SettingsPanelService.openToTab(SettingsPanel.Tab.Connections, 0, root.panelRoot.activeScreen)
       }
 
@@ -88,7 +88,7 @@ Item {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(32 * root.panelRoot.panelUnit)
         radius: Style.radiusM
-        color: !root.ethernetView ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
+        color: !root.ethernetView ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
 
         RowLayout {
           anchors.centerIn: parent
@@ -97,14 +97,14 @@ Item {
           NIcon {
             icon: "wifi"
             pointSize: Style.fontSizeM
-            color: !root.ethernetView ? Color.mOnPrimaryContainer : Color.mOnSurface
+            color: !root.ethernetView ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
           }
 
           NText {
             text: I18n.tr("common.wifi")
             pointSize: Style.fontSizeS
             font.weight: !root.ethernetView ? Style.fontWeightSemiBold : Style.fontWeightMedium
-            color: !root.ethernetView ? Color.mOnPrimaryContainer : Color.mOnSurface
+            color: !root.ethernetView ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
           }
         }
 
@@ -119,7 +119,7 @@ Item {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(32 * root.panelRoot.panelUnit)
         radius: Style.radiusM
-        color: root.ethernetView ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
+        color: root.ethernetView ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
 
         RowLayout {
           anchors.centerIn: parent
@@ -128,14 +128,14 @@ Item {
           NIcon {
             icon: "network"
             pointSize: Style.fontSizeM
-            color: root.ethernetView ? Color.mOnPrimaryContainer : Color.mOnSurface
+            color: root.ethernetView ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
           }
 
           NText {
             text: I18n.tr("common.ethernet")
             pointSize: Style.fontSizeS
             font.weight: root.ethernetView ? Style.fontWeightSemiBold : Style.fontWeightMedium
-            color: root.ethernetView ? Color.mOnPrimaryContainer : Color.mOnSurface
+            color: root.ethernetView ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
           }
         }
 
@@ -154,7 +154,7 @@ Item {
       visible: NetworkService.lastError !== "" && !root.ethernetView
       text: NetworkService.lastError
       Layout.fillWidth: true
-      color: Color.mError
+      color: HydraColor.mError
       wrapMode: Text.WordWrap
     }
 
@@ -173,7 +173,7 @@ Item {
         NText {
           visible: !root.ethernetView && !NetworkService.wifiEnabled
           text: I18n.tr("wifi.panel.enable-message")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           wrapMode: Text.WordWrap
           Layout.fillWidth: true
           horizontalAlignment: Text.AlignHCenter
@@ -183,7 +183,7 @@ Item {
         NText {
           visible: !root.ethernetView && NetworkService.wifiEnabled && Object.keys(NetworkService.networks).length === 0
           text: NetworkService.scanningActive ? I18n.tr("wifi.panel.searching") : I18n.tr("wifi.panel.no-networks")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           Layout.fillWidth: true
           horizontalAlignment: Text.AlignHCenter
           Layout.topMargin: Style.marginL
@@ -206,7 +206,7 @@ Item {
             Layout.preferredHeight: Math.max(Math.round(32 * root.panelRoot.panelUnit), ethernetText.implicitHeight) + Style.margin2S
             radius: Style.radiusM
             border.width: 0
-            color: modelData.connected ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
+            color: modelData.connected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
 
             RowLayout {
               anchors.fill: parent
@@ -217,12 +217,12 @@ Item {
                 Layout.preferredWidth: Math.round(32 * root.panelRoot.panelUnit)
                 Layout.preferredHeight: Layout.preferredWidth
                 radius: Style.radiusS
-                color: modelData.connected ? Qt.alpha(Color.mPrimary, 0.16) : Color.mSurfaceContainerHighest
+                color: modelData.connected ? Qt.alpha(HydraColor.mPrimary, 0.16) : HydraColor.mSurfaceContainerHighest
                 NIcon {
                   anchors.centerIn: parent
                   icon: "network"
                   pointSize: Style.fontSizeM
-                  color: modelData.connected ? Color.mPrimary : Color.mOnSurface
+                  color: modelData.connected ? HydraColor.mPrimary : HydraColor.mOnSurface
                 }
               }
 
@@ -234,21 +234,21 @@ Item {
                   Layout.fillWidth: true
                   text: modelData.connectionName || modelData.ifname
                   font.weight: modelData.connected ? Style.fontWeightSemiBold : Style.fontWeightMedium
-                  color: modelData.connected ? Color.mOnPrimaryContainer : Color.mOnSurface
+                  color: modelData.connected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
                   elide: Text.ElideRight
                 }
                 NText {
                   Layout.fillWidth: true
                   text: modelData.connected ? I18n.tr("common.connected") : I18n.tr("common.disconnected")
                   pointSize: Style.fontSizeXS
-                  color: modelData.connected ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
+                  color: modelData.connected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
                 }
                 NText {
                   visible: modelData.connected
                   Layout.fillWidth: true
                   text: [NetworkService.activeEthernetDetails.ipv4, (NetworkService.activeEthernetDetails.dns4 || []).join(", "), NetworkService.activeEthernetDetails.gateway4].filter(Boolean).join(" · ")
                   pointSize: Style.fontSizeXS
-                  color: Color.mOnPrimaryContainer
+                  color: HydraColor.mOnPrimaryContainer
                   wrapMode: Text.WrapAnywhere
                 }
               }
@@ -259,7 +259,7 @@ Item {
         NText {
           visible: root.ethernetView && NetworkService.ethernetInterfaces.length === 0
           text: I18n.tr("wifi.panel.no-ethernet-devices")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           Layout.fillWidth: true
           horizontalAlignment: Text.AlignHCenter
           Layout.topMargin: Style.marginL

@@ -1,74 +1,74 @@
 # Hydra Design Tokens Reference
 
 This reference catalogs **only verified tokens** present in Hydra's current source code.
-Do not invent tokens (such as `Style.spacingM`, `Color.mOutlineVariant`, or `Theme.*`). If a token does not exist in this catalog, declare it as nonexistent and use proportional spacing or composition.
+Do not invent tokens (such as `Style.spacingM`, `HydraColor.mOutlineVariant`, or `Theme.*`). If a token does not exist in this catalog, declare it as nonexistent and use proportional spacing or composition.
 
 ---
 
-## 1. Color Tokens (`Commons/Color.qml`)
+## 1. Color Tokens (`Commons/HydraColor.qml`)
 
-All color tokens reside in the singleton `qs.Commons.Color` (or `Color.*`).
+All color tokens reside in the singleton `qs.Commons.HydraColor` (or `HydraColor.*`).
 Property names are prefixed with `m` to avoid collisions with QML signal handlers.
 
 ### Key Accent Roles
 | Token | Type | Description |
 | :--- | :--- | :--- |
-| `Color.mPrimary` | `color` | Main brand/accent color; prominent interactive states |
-| `Color.mOnPrimary` | `color` | Text/icons rendered over `mPrimary` |
-| `Color.mSecondary` | `color` | Secondary accent color; category badges and icons |
-| `Color.mOnSecondary` | `color` | Text/icons rendered over `mSecondary` |
-| `Color.mTertiary` | `color` | Tertiary accent color; balancing highlights |
-| `Color.mOnTertiary` | `color` | Text/icons rendered over `mTertiary` |
+| `HydraColor.mPrimary` | `color` | Main brand/accent color; prominent interactive states |
+| `HydraColor.mOnPrimary` | `color` | Text/icons rendered over `mPrimary` |
+| `HydraColor.mSecondary` | `color` | Secondary accent color; category badges and icons |
+| `HydraColor.mOnSecondary` | `color` | Text/icons rendered over `mSecondary` |
+| `HydraColor.mTertiary` | `color` | Tertiary accent color; balancing highlights |
+| `HydraColor.mOnTertiary` | `color` | Text/icons rendered over `mTertiary` |
 
 ### Utility & Error Roles
 | Token | Type | Description |
 | :--- | :--- | :--- |
-| `Color.mError` | `color` | Error, danger, and critical destructive actions |
-| `Color.mOnError` | `color` | Text/icons rendered over `mError` |
-| `Color.mErrorContainer` | `color` | Tonal error container background |
-| `Color.mOnErrorContainer` | `color` | Text/icons rendered over `mErrorContainer` |
+| `HydraColor.mError` | `color` | Error, danger, and critical destructive actions |
+| `HydraColor.mOnError` | `color` | Text/icons rendered over `mError` |
+| `HydraColor.mErrorContainer` | `color` | Tonal error container background |
+| `HydraColor.mOnErrorContainer` | `color` | Text/icons rendered over `mErrorContainer` |
 
 ### Base Surfaces & Text Roles
 | Token | Type | Description |
 | :--- | :--- | :--- |
-| `Color.mSurface` | `color` | Base desktop surface |
-| `Color.mOnSurface` | `color` | High-emphasis foreground text, titles, active labels |
-| `Color.mSurfaceVariant` | `color` | Alternative surface tone; subtle card tracks |
-| `Color.mOnSurfaceVariant` | `color` | Medium-emphasis text, descriptions, hints, disabled glyphs |
-| `Color.mOutline` | `color` | Semantic border and focus ring color |
-| `Color.mShadow` | `color` | Base shadow tint |
+| `HydraColor.mSurface` | `color` | Base desktop surface |
+| `HydraColor.mOnSurface` | `color` | High-emphasis foreground text, titles, active labels |
+| `HydraColor.mSurfaceVariant` | `color` | Alternative surface tone; subtle card tracks |
+| `HydraColor.mOnSurfaceVariant` | `color` | Medium-emphasis text, descriptions, hints, disabled glyphs |
+| `HydraColor.mOutline` | `color` | Semantic border and focus ring color |
+| `HydraColor.mShadow` | `color` | Base shadow tint |
 
 ### Surface Container Hierarchy
 | Token | Type | Description |
 | :--- | :--- | :--- |
-| `Color.mSurfaceContainerLowest` | `color` | Lowest/darkest surface step |
-| `Color.mSurfaceContainerLow` | `color` | Frame and bar background (`BarBackground.qml`) |
-| `Color.mSurfaceContainer` | `color` | Standard shell panel background (`SmartPanel.qml`) |
-| `Color.mSurfaceContainerHigh` | `color` | Elevated container cards (`NBox.qml`), modal overlays |
-| `Color.mSurfaceContainerHighest`| `color` | Top-level popouts, hover layers, active input tracks |
+| `HydraColor.mSurfaceContainerLowest` | `color` | Lowest/darkest surface step |
+| `HydraColor.mSurfaceContainerLow` | `color` | Frame and bar background (`BarBackground.qml`) |
+| `HydraColor.mSurfaceContainer` | `color` | Standard shell panel background (`SmartPanel.qml`) |
+| `HydraColor.mSurfaceContainerHigh` | `color` | Elevated container cards (`NBox.qml`), modal overlays |
+| `HydraColor.mSurfaceContainerHighest`| `color` | Top-level popouts, hover layers, active input tracks |
 
 ### Tonal Accent Containers
 | Token | Type | Description |
 | :--- | :--- | :--- |
-| `Color.mPrimaryContainer` | `color` | Tonal primary container (keyboard selection, prominent cards) |
-| `Color.mOnPrimaryContainer` | `color` | Text/icons rendered over `mPrimaryContainer` |
-| `Color.mSecondaryContainer` | `color` | Tonal secondary container (settings group icon boxes) |
-| `Color.mOnSecondaryContainer` | `color` | Text/icons rendered over `mSecondaryContainer` |
-| `Color.mTertiaryContainer` | `color` | Tonal tertiary container |
-| `Color.mOnTertiaryContainer` | `color` | Text/icons rendered over `mTertiaryContainer` |
+| `HydraColor.mPrimaryContainer` | `color` | Tonal primary container (keyboard selection, prominent cards) |
+| `HydraColor.mOnPrimaryContainer` | `color` | Text/icons rendered over `mPrimaryContainer` |
+| `HydraColor.mSecondaryContainer` | `color` | Tonal secondary container (settings group icon boxes) |
+| `HydraColor.mOnSecondaryContainer` | `color` | Text/icons rendered over `mSecondaryContainer` |
+| `HydraColor.mTertiaryContainer` | `color` | Tonal tertiary container |
+| `HydraColor.mOnTertiaryContainer` | `color` | Text/icons rendered over `mTertiaryContainer` |
 
 ### State & Interaction Colors
 | Token | Type | Description |
 | :--- | :--- | :--- |
-| `Color.mHover` | `color` | Pointer hover highlight color |
-| `Color.mOnHover` | `color` | Foreground text/icons over `mHover` |
+| `HydraColor.mHover` | `color` | Pointer hover highlight color |
+| `HydraColor.mOnHover` | `color` | Foreground text/icons over `mHover` |
 
 ### Color Utility Functions
-- `Color.resolveColorKey(key)` — Resolves `"primary"`, `"secondary"`, `"tertiary"`, or `"error"` to its color token (falls back to `mOnSurface`).
-- `Color.resolveOnColorKey(key)` — Resolves matching on-color (`mOnPrimary`, `mOnSecondary`, etc., falling back to `mSurface`).
-- `Color.resolveColorKeyOptional(key)` — Same as `resolveColorKey`, but falls back to `"transparent"`.
-- `Color.adaptiveOpacity(baseOpacity)` — Computes contrast-aware opacity (e.g., reduces opacity in light mode).
-- `Color.smartAlpha(baseColor, minAlpha)` — Computes opacity respecting performance mode and translucency settings.
+- `HydraColor.resolveColorKey(key)` — Resolves `"primary"`, `"secondary"`, `"tertiary"`, or `"error"` to its color token (falls back to `mOnSurface`).
+- `HydraColor.resolveOnColorKey(key)` — Resolves matching on-color (`mOnPrimary`, `mOnSecondary`, etc., falling back to `mSurface`).
+- `HydraColor.resolveColorKeyOptional(key)` — Same as `resolveColorKey`, but falls back to `"transparent"`.
+- `HydraColor.adaptiveOpacity(baseOpacity)` — Computes contrast-aware opacity (e.g., reduces opacity in light mode).
+- `HydraColor.smartAlpha(baseColor, minAlpha)` — Computes opacity respecting performance mode and translucency settings.
 
 ---
 
@@ -154,8 +154,8 @@ Precomputed double margins for parent sizing (e.g. `height: content.implicitHeig
 | `Style.borderS` | 1px | `Math.max(1, Math.round(1 * uiScaleRatio))` |
 | `Style.borderM` | 2px | `Math.max(1, Math.round(2 * uiScaleRatio))` |
 | `Style.borderL` | 3px | `Math.max(1, Math.round(3 * uiScaleRatio))` |
-| `Style.boxBorderColor` | `color` | `Settings.data.ui.boxBorderEnabled ? Color.mOutline : "transparent"` |
-| `Style.capsuleBorderColor` | `color` | `Settings.data.bar.showOutline ? Color.mPrimary : "transparent"` |
+| `Style.boxBorderColor` | `color` | `Settings.data.ui.boxBorderEnabled ? HydraColor.mOutline : "transparent"` |
+| `Style.capsuleBorderColor` | `color` | `Settings.data.bar.showOutline ? HydraColor.mPrimary : "transparent"` |
 | `Style.capsuleBorderWidth` | `int` | `Settings.data.bar.showOutline ? Style.borderS : 0` |
 
 ---
@@ -214,8 +214,8 @@ Durations are in milliseconds and adapt to `animationSpeed` and `PowerProfileSer
 ## 9. Verified Non-Existent Tokens
 
 The following names are NOT defined in Hydra. Do NOT use them:
-- `Color.mOutlineVariant` — Not in `Color.qml`. (Use `Color.mSurfaceVariant` or clean spacing).
+- `HydraColor.mOutlineVariant` — Not in `HydraColor.qml`. (Use `HydraColor.mSurfaceVariant` or clean spacing).
 - `Style.spacing*` — Spacing tokens in Hydra are named `Style.margin*`.
 - `Style.fontSize*` sizes like `Style.fontSizeBase` or `Style.fontSizeHeader` — Use `Style.fontSizeM`, `Style.fontSizeXL`, etc.
-- `Theme.*` — Theming is in `Color.*` and `Style.*`. There is no `Theme` singleton.
+- `Theme.*` — Theming is in `HydraColor.*` and `Style.*`. There is no `Theme` singleton.
 - `NCard.qml` — Does not exist as a separate widget file. The container primitive is `NBox.qml` or `NSettingsGroupCard.qml`.

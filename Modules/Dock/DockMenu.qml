@@ -581,9 +581,9 @@ PopupWindow {
   Rectangle {
     anchors.fill: parent
     anchors.margins: border.width
-    color: Color.mSurfaceVariant
+    color: HydraColor.mSurfaceVariant
     radius: Style.radiusS
-    border.color: Color.mOutline
+    border.color: HydraColor.mOutline
     border.width: Style.borderS
 
     HoverHandler {
@@ -648,7 +648,7 @@ PopupWindow {
             readonly property bool isSeparator: modelData && modelData.separator === true
             width: scrollColumn.width
             height: root.rowHeightForItem(modelData)
-            color: (!isSeparator && root.hoveredItem === index) ? Color.mHover : "transparent"
+            color: (!isSeparator && root.hoveredItem === index) ? HydraColor.mHover : "transparent"
             radius: Style.radiusXS
 
             Row {
@@ -664,7 +664,7 @@ PopupWindow {
               NIcon {
                 icon: modelData.icon
                 pointSize: Style.fontSizeL
-                color: root.hoveredItem === index ? Color.mOnHover : Color.mOnSurfaceVariant
+                color: root.hoveredItem === index ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
                 visible: icon !== ""
                 anchors.verticalCenter: parent.verticalCenter
               }
@@ -672,7 +672,7 @@ PopupWindow {
               NText {
                 text: modelData.text
                 pointSize: Style.fontSizeS
-                color: root.hoveredItem === index ? Color.mOnHover : Color.mOnSurfaceVariant
+                color: root.hoveredItem === index ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
                 anchors.verticalCenter: parent.verticalCenter
                 width: rowLayout.width - ((modelData.icon && modelData.icon !== "") ? (Style.fontSizeL + Style.marginS) : 0)
                 elide: Text.ElideRight
@@ -717,7 +717,7 @@ PopupWindow {
       anchors.rightMargin: Style.marginS
       anchors.topMargin: Style.marginS
       height: Style.borderS
-      color: Qt.alpha(Color.mOutline, 0.7)
+      color: Qt.alpha(HydraColor.mOutline, 0.7)
       radius: Style.radiusXS
     }
 
@@ -742,7 +742,7 @@ PopupWindow {
           readonly property int globalIndex: root.fixedItemGlobalIndex(index)
           width: fixedColumn.width
           height: root.rowHeightForItem(modelData)
-          color: root.hoveredItem === globalIndex ? Color.mHover : "transparent"
+          color: root.hoveredItem === globalIndex ? HydraColor.mHover : "transparent"
           radius: Style.radiusXS
 
           Row {
@@ -757,7 +757,7 @@ PopupWindow {
             NIcon {
               icon: modelData.icon
               pointSize: Style.fontSizeL
-              color: root.hoveredItem === fixedItemRect.globalIndex ? Color.mOnHover : Color.mOnSurfaceVariant
+              color: root.hoveredItem === fixedItemRect.globalIndex ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
               visible: icon !== ""
               anchors.verticalCenter: parent.verticalCenter
             }
@@ -765,7 +765,7 @@ PopupWindow {
             NText {
               text: modelData.text
               pointSize: Style.fontSizeS
-              color: root.hoveredItem === fixedItemRect.globalIndex ? Color.mOnHover : Color.mOnSurfaceVariant
+              color: root.hoveredItem === fixedItemRect.globalIndex ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
               anchors.verticalCenter: parent.verticalCenter
               width: fixedRowLayout.width - ((modelData.icon && modelData.icon !== "") ? (Style.fontSizeL + Style.marginS) : 0)
               elide: Text.ElideRight

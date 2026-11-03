@@ -1249,10 +1249,10 @@ Rectangle {
         icon: Settings.data.appLauncher.viewMode === "columns" ? "layout-columns" : (Settings.data.appLauncher.viewMode === "grid" ? "layout-grid" : "layout-list")
         tooltipText: Settings.data.appLauncher.viewMode === "columns" ? I18n.tr("options.launcher-view-mode.columns") : (Settings.data.appLauncher.viewMode === "grid" ? I18n.tr("options.launcher-view-mode.grid") : I18n.tr("options.launcher-view-mode.list"))
         customRadius: Style.iRadiusL
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mPrimaryContainer
-        colorFg: Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnPrimaryContainer
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mPrimaryContainer
+        colorFg: HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnPrimaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         Layout.preferredWidth: searchInput.height
@@ -1290,7 +1290,7 @@ Rectangle {
         implicitHeight: Math.round(34 * Style.uiScaleRatio)
         onClicked: root.goHome()
       }
-      NIcon { icon: "apps"; color: Color.mPrimary }
+      NIcon { icon: "apps"; color: HydraColor.mPrimary }
       NText {
         Layout.fillWidth: true
         text: I18n.tr("launcher-home.all-apps")
@@ -1345,7 +1345,7 @@ Rectangle {
         horizontalPolicy: ScrollBar.AlwaysOff
         verticalPolicy: ScrollBar.AlwaysOff
         reserveScrollbarSpace: false
-        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : Color.mSurfaceContainer
+        gradientColor: Settings.data.ui.panelBackgroundOpacity < 1 ? "transparent" : HydraColor.mSurfaceContainer
         wheelScrollMultiplier: 2.25
         smoothWheelAnimationDuration: Style.animationFast
 
@@ -1396,7 +1396,7 @@ Rectangle {
 
         NBox {
           anchors.fill: parent
-          color: Color.mSurfaceContainerLow
+          color: HydraColor.mSurfaceContainerLow
           forceOpaque: true
           Layout.fillWidth: true
           Layout.fillHeight: true
@@ -1413,7 +1413,7 @@ Rectangle {
                 text: root.results.length > 0 ? root.results[0].name : ""
                 pointSize: Style.fontSizeL
                 font.weight: Font.Bold
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
             }
 
@@ -1431,7 +1431,7 @@ Rectangle {
                 text: root.results.length > 0 ? root.results[0].description : ""
                 pointSize: Style.fontSizeM
                 font.weight: Font.Bold
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 horizontalAlignment: Text.AlignHLeft
                 verticalAlignment: Text.AlignTop
                 wrapMode: Text.Wrap
@@ -1475,7 +1475,7 @@ Rectangle {
           return prefix + I18n.trp("common.result-count", root.results.length);
         }
         pointSize: Style.fontSizeXS
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         horizontalAlignment: Text.AlignLeft
         opacity: 1.0
       }

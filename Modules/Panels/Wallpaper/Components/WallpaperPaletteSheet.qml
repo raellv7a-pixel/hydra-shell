@@ -164,7 +164,7 @@ Item {
       return clone(diskColors);
     var colors = {};
     for (const key of Object.keys(TemplateProcessor.colorKeyMap))
-      colors[key] = Color[key].toString();
+      colors[key] = HydraColor[key].toString();
     return colors;
   }
 
@@ -509,7 +509,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredWidth: 3
-      color: Color.mSurfaceContainerLow
+      color: HydraColor.mSurfaceContainerLow
       radius: Style.radiusL
 
       ColumnLayout {
@@ -523,14 +523,14 @@ Item {
           NIcon {
             icon: "color-swatch"
             pointSize: Style.fontSizeL
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
           }
 
           NText {
             text: I18n.tr("wallpaper.palette.title")
             pointSize: Style.fontSizeM
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             Layout.fillWidth: true
           }
 
@@ -547,7 +547,7 @@ Item {
           Layout.fillWidth: true
           text: root.wallpaperPath.split("/").pop()
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           elide: Text.ElideMiddle
         }
 
@@ -562,7 +562,7 @@ Item {
             NText {
               text: I18n.tr("wallpaper.palette.generation")
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
             }
             NComboBox {
               Layout.fillWidth: true
@@ -575,7 +575,7 @@ Item {
               Layout.fillWidth: true
               text: I18n.tr("panels.color-scheme.method-description." + root.draftModel)
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               wrapMode: Text.WordWrap
             }
             RowLayout {
@@ -635,7 +635,7 @@ Item {
             NText {
               text: I18n.tr("wallpaper.palette.seed")
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
             GridLayout {
               Layout.fillWidth: true
@@ -651,8 +651,8 @@ Item {
                   readonly property bool selected: root.draftSeedIndex === modelData.index
                   Layout.fillWidth: true
                   Layout.preferredHeight: 34 * Style.uiScaleRatio
-                  color: selected ? Color.mPrimaryContainer : (seedMouse.containsMouse ? Color.mSurfaceContainerHighest : Color.mSurfaceContainer)
-                  border.color: selected ? Color.mPrimary : "transparent"
+                  color: selected ? HydraColor.mPrimaryContainer : (seedMouse.containsMouse ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainer)
+                  border.color: selected ? HydraColor.mPrimary : "transparent"
                   RowLayout {
                     anchors.fill: parent
                     anchors.margins: Style.marginS
@@ -667,14 +667,14 @@ Item {
                       Layout.fillWidth: true
                       text: seedChip.modelData.hex
                       pointSize: Style.fontSizeXS
-                      color: seedChip.selected ? Color.mOnPrimaryContainer : Color.mOnSurface
+                      color: seedChip.selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
                       elide: Text.ElideRight
                     }
                     NIcon {
                       icon: "check"
                       visible: seedChip.selected
                       pointSize: Style.fontSizeXS
-                      color: Color.mOnPrimaryContainer
+                      color: HydraColor.mOnPrimaryContainer
                     }
                   }
                   MouseArea {
@@ -692,7 +692,7 @@ Item {
               text: root.generationError || (root.generating ? I18n.tr("wallpaper.palette.generating") : (!root.materialRecipe ? I18n.tr("wallpaper.palette.legacy-extraction") : (root.draftModel === "smart" ? "Smart → " + root.effectiveModel : I18n.tr("wallpaper.palette.recipe-note"))))
               pointSize: Style.fontSizeXS
               wrapMode: Text.WordWrap
-              color: root.generationError ? Color.mError : Color.mOnSurfaceVariant
+              color: root.generationError ? HydraColor.mError : HydraColor.mOnSurfaceVariant
             }
             NText {
               Layout.fillWidth: true
@@ -700,7 +700,7 @@ Item {
               text: I18n.tr("panels.color-scheme.material-spec-fallback")
               pointSize: Style.fontSizeXS
               wrapMode: Text.WordWrap
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
           }
         }
@@ -714,7 +714,7 @@ Item {
 
           NText {
             text: I18n.tr("wallpaper.palette.edit-roles")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             Layout.fillWidth: true
           }
 
@@ -732,7 +732,7 @@ Item {
           Layout.fillHeight: true
           horizontalPolicy: ScrollBar.AlwaysOff
           verticalPolicy: ScrollBar.AsNeeded
-          gradientColor: Color.mSurfaceContainerLow
+          gradientColor: HydraColor.mSurfaceContainerLow
 
           GridLayout {
             width: roleScroll.availableWidth
@@ -748,7 +748,7 @@ Item {
                 required property var modelData
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.round(48 * Style.uiScaleRatio)
-                color: Color.mSurfaceContainer
+                color: HydraColor.mSurfaceContainer
                 radius: Style.radiusS
 
                 RowLayout {
@@ -760,8 +760,8 @@ Item {
                     Layout.preferredWidth: Math.round(30 * Style.uiScaleRatio)
                     Layout.preferredHeight: Math.round(30 * Style.uiScaleRatio)
                     radius: Style.radiusS
-                    color: root.editingScheme ? root.editingScheme[root.editingVariant][roleCard.modelData.key] : Color.mSurface
-                    border.color: Color.mOutline
+                    color: root.editingScheme ? root.editingScheme[root.editingVariant][roleCard.modelData.key] : HydraColor.mSurface
+                    border.color: HydraColor.mOutline
                     border.width: Style.borderS
 
                     MouseArea {
@@ -777,7 +777,7 @@ Item {
 
                     NText {
                       text: I18n.tr("wallpaper.palette.roles." + roleCard.modelData.labelKey)
-                      color: Color.mOnSurface
+                      color: HydraColor.mOnSurface
                       pointSize: Style.fontSizeS
                       elide: Text.ElideRight
                       Layout.fillWidth: true
@@ -785,7 +785,7 @@ Item {
 
                     NText {
                       text: root.editingScheme ? root.editingScheme[root.editingVariant][roleCard.modelData.key].toUpperCase() : ""
-                      color: Color.mOnSurfaceVariant
+                      color: HydraColor.mOnSurfaceVariant
                       family: Settings.data.ui.fontFixed
                       pointSize: Style.fontSizeXS
                     }
@@ -811,7 +811,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredWidth: 2
-      color: Color.mSurfaceContainerHigh
+      color: HydraColor.mSurfaceContainerHigh
       radius: Style.radiusL
 
       ColumnLayout {
@@ -823,13 +823,13 @@ Item {
           text: I18n.tr("wallpaper.palette.save-title")
           pointSize: Style.fontSizeM
           font.weight: Style.fontWeightBold
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
         }
 
         NText {
           text: I18n.tr("wallpaper.palette.description")
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           wrapMode: Text.WordWrap
           Layout.fillWidth: true
         }
@@ -882,7 +882,7 @@ Item {
         NBox {
           Layout.fillWidth: true
           Layout.preferredHeight: previewStatus.implicitHeight + Style.margin2M
-          color: root.previewActive ? Color.mSecondaryContainer : Color.mSurfaceContainerHighest
+          color: root.previewActive ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHighest
           radius: Style.radiusM
 
           RowLayout {
@@ -893,12 +893,12 @@ Item {
 
             NIcon {
               icon: root.previewActive ? "eye" : "palette"
-              color: root.previewActive ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+              color: root.previewActive ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
             }
 
             NText {
               text: root.previewActive ? I18n.tr("wallpaper.palette.preview-active") : I18n.tr("wallpaper.palette.preview-inactive")
-              color: root.previewActive ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+              color: root.previewActive ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
               wrapMode: Text.WordWrap
               Layout.fillWidth: true
             }
@@ -912,7 +912,7 @@ Item {
         NText {
           text: I18n.tr("wallpaper.palette.terminal-note")
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           wrapMode: Text.WordWrap
           Layout.fillWidth: true
         }

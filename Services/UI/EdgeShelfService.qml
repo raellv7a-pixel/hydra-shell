@@ -175,7 +175,7 @@ Singleton {
     for (let i = 0; i < allWindows.length; i++) {
       if (allWindows[i].scratchpad === spName) {
         Logger.d("EdgeShelfService", "Toggling existing scratchpad member for", appId, spName);
-        _enqueueTask("toggle_" + spName, [["umbriel", "msg", "scratchpad-toggle:" + spName]], null);
+        _enqueueTask("toggle_" + spName, [["umbriel", "msg", "scratchpad-toggle", spName]], null);
         return [];
       }
     }
@@ -303,7 +303,7 @@ Singleton {
     // 1. Focus the window
     // 2. Move window to scratchpad
     // 3. Focus window (summons hidden scratchpad member to screen and active output)
-    const commands = [["umbriel", "msg", "window-focus:" + windowId], ["umbriel", "msg", "window-move-to-scratchpad:" + spName], ["umbriel", "msg", "window-focus:" + windowId]];
+    const commands = [["umbriel", "msg", "window-focus", String(windowId)], ["umbriel", "msg", "window-move-to-scratchpad", spName], ["umbriel", "msg", "window-focus", String(windowId)]];
 
     _adopting[appId] = String(windowId);
     adoptionTimeoutTimer.restart();
@@ -325,7 +325,7 @@ Singleton {
   * Safely removes a pinned app:
   * 1. Coalesces duplicate removals and cancels pending launches.
   * 2. If windows exist in the named scratchpad: restores all member windows to normal workspaces
-  *    (requires focus:id first so member is visible, then restore action).
+  *    (requires window-focus with the ID first so member is visible, then restore action).
   * 3. Observes subscribed windows until confirmed restored before mutating settings.
   * 4. Failure retains the favorite and configuration without mutating settings.
   *
@@ -383,14 +383,14 @@ Singleton {
 
     Logger.i("EdgeShelfService", "Restoring", spWindows.length, "windows from", spName, "before removal");
 
-    // Build serialized commands: focus:id first (summons/makes visible), then restore
+    // Build serialized commands: window-focus with the ID first (summons/makes visible), then restore
     const commands = [];
     const targetIds = [];
     for (let i = 0; i < spWindows.length; i++) {
       const win = spWindows[i];
       targetIds.push(String(win.id));
-      commands.push(["umbriel", "msg", "window-focus:" + win.id]);
-      commands.push(["umbriel", "msg", "window-restore-from-scratchpad:" + spName]);
+      commands.push(["umbriel", "msg", "window-focus", String(win.id)]);
+      commands.push(["umbriel", "msg", "window-restore-from-scratchpad", spName]);
     }
 
     _enqueueTask("remove_" + appId, commands, function (success, err) {

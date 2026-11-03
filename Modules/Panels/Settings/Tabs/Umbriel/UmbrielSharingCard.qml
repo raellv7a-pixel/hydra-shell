@@ -22,10 +22,10 @@ ColumnLayout {
     Layout.fillWidth: true
     visible: PortalPickerSettingsStore.externallyChanged
     text: "O seletor foi alterado externamente. A Hydra não substituirá essa configuração: " + PortalPickerSettingsStore.chooser
-    color: Color.mError
+    color: HydraColor.mError
     wrapMode: Text.WordWrap
   }
-  NText { Layout.fillWidth: true; visible: PortalPickerSettingsStore.error !== ""; text: PortalPickerSettingsStore.error; color: Color.mError; wrapMode: Text.WordWrap }
+  NText { Layout.fillWidth: true; visible: PortalPickerSettingsStore.error !== ""; text: PortalPickerSettingsStore.error; color: HydraColor.mError; wrapMode: Text.WordWrap }
   NToggle {
     Layout.fillWidth: true
     label: "Mostrar controles de compartilhamento no indicador"

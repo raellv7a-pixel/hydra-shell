@@ -8,7 +8,7 @@ import qs.Commons
 Item {
   id: root
 
-  property color color: Color.mSurfaceContainerHigh
+  property color color: HydraColor.mSurfaceContainerHigh
   property bool forceOpaque: false
   property alias radius: bg.radius
   property alias border: bg.border
@@ -30,7 +30,7 @@ Item {
         return root.color;
       }
 
-      return Color.smartAlpha(root.color);
+      return HydraColor.smartAlpha(root.color);
     }
   }
 }

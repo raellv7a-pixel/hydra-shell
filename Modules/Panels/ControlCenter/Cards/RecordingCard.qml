@@ -37,7 +37,7 @@ DashboardCard {
         NText {
           text: panelRoot.toolkitRecordState === "recording" ? panelRoot.tr("recordingNow") : (panelRoot.toolkitRecordState === "converting" ? panelRoot.tr("recordingConverting") : panelRoot.tr("screenToolsSubtitle"))
           pointSize: Style.fontSizeS
-          color: panelRoot.toolkitRecording ? Color.mError : panelRoot.componentText("recording", false)
+          color: panelRoot.toolkitRecording ? HydraColor.mError : panelRoot.componentText("recording", false)
         }
       }
     }

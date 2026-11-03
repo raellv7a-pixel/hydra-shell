@@ -12,8 +12,8 @@ Rectangle {
   property bool vertical: false
   signal chosen
   radius: Style.iRadiusM
-  color: selected ? Color.mPrimaryContainer : (mouse.containsMouse ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh)
-  readonly property color textColor: selected ? Color.mOnPrimaryContainer : Color.mOnSurface
+  color: selected ? HydraColor.mPrimaryContainer : (mouse.containsMouse ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainerHigh)
+  readonly property color textColor: selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
   readonly property var appEntry: ThemeIcons.findAppEntry(windowData.appId || "")
   readonly property string workspaceLabel: {
     const workspaces = CompositorService.workspaces;
@@ -66,7 +66,7 @@ Rectangle {
     }
     NText {
       text: root.workspaceLabel
-      color: root.selected ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
+      color: root.selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeS
       Layout.fillWidth: true
       horizontalAlignment: root.vertical ? Text.AlignHCenter : Text.AlignLeft

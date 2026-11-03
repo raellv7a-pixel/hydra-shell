@@ -95,7 +95,7 @@ Item {
     width: root.implicitWidth
     height: root.implicitHeight
     radius: Math.min(Style.iRadiusL, width / 2)
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? HydraColor.mHover : Style.capsuleColor
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
@@ -113,7 +113,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: root.roundedNeed + "%"
         pointSize: Style.fontSizeXXS
-        color: root.roundedNeed < 20 ? Color.mError : Color.mOnSurface
+        color: root.roundedNeed < 20 ? HydraColor.mError : HydraColor.mOnSurface
       }
     }
   }

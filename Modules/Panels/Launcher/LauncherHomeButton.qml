@@ -6,8 +6,8 @@ import qs.Widgets
 Button {
   id: root
   required property var launcher
-  property color surface: Color.mSurfaceContainerLow
-  property color foreground: Color.mOnSurface
+  property color surface: HydraColor.mSurfaceContainerLow
+  property color foreground: HydraColor.mOnSurface
   property real cornerRadius: Style.radiusL
   signal contextRequested
   focusPolicy: Qt.StrongFocus
@@ -16,11 +16,11 @@ Button {
   Accessible.name: text
   background: Rectangle {
     radius: root.cornerRadius
-    color: root.down ? Color.mPrimaryContainer : (root.hovered ? Color.mSurfaceContainerHighest : root.surface)
+    color: root.down ? HydraColor.mPrimaryContainer : (root.hovered ? HydraColor.mSurfaceContainerHighest : root.surface)
     border.width: root.activeFocus ? Style.borderM : 0
-    border.color: Color.mPrimary
+    border.color: HydraColor.mPrimary
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation { duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration }
     }
   }

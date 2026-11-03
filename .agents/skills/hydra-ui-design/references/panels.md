@@ -45,7 +45,7 @@ To avoid confusion between current code and design intent, agents must always di
 - `panelID`: Unique identifier string for binding panels to widgets.
 - `preferredWidth`, `preferredHeight`: Natural dimensions of the panel.
 - `preferredWidthRatio`, `preferredHeightRatio`: Proportional screen sizing.
-- `panelBackgroundColor`: Defaults to `Color.mSurfaceContainer` (or `Color.mSurfaceContainerHigh` when `modalOverlay` is true).
+- `panelBackgroundColor`: Defaults to `HydraColor.mSurfaceContainer` (or `HydraColor.mSurfaceContainerHigh` when `modalOverlay` is true).
 - `allowAttach`: Boolean indicating whether the panel attaches to the frame edge.
 - `forceAttachToBar`: Enforces docking regardless of default orientation.
 - `attachmentOverlap`: Hardcoded to `1px` to eliminate hairline rendering gaps caused by fractional display scaling.

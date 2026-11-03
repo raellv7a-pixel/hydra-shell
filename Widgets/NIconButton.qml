@@ -17,12 +17,12 @@ Item {
   property bool handleWheel: false
   property bool hovering: false
 
-  property color colorBg: Color.smartAlpha(Color.mSurfaceContainerHigh)
-  property color colorFg: Color.mPrimary
-  property color colorBgHover: Color.mSurfaceContainerHighest
-  property color colorFgHover: Color.mOnSurface
-  property color colorBorder: Color.mOutline
-  property color colorBorderHover: Color.mOutline
+  property color colorBg: HydraColor.smartAlpha(HydraColor.mSurfaceContainerHigh)
+  property color colorFg: HydraColor.mPrimary
+  property color colorBgHover: HydraColor.mSurfaceContainerHighest
+  property color colorFgHover: HydraColor.mOnSurface
+  property color colorBorder: HydraColor.mOutline
+  property color colorBorderHover: HydraColor.mOutline
   property real customRadius: -1 // -1 means use default (iRadiusL), otherwise use this value
 
   // Expose border properties for backwards compatibility (aliases to visualButton)
@@ -60,7 +60,7 @@ Item {
     border.width: Style.borderS
 
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation {
         duration: root.hovering ? Style.hoverEnterDuration : Style.hoverLeaveDuration
         easing.type: Easing.InOutQuad
@@ -84,7 +84,7 @@ Item {
       y: Style.pixelAlignCenter(visualButton.height, contentHeight)
 
       Behavior on color {
-        enabled: !Color.isTransitioning
+        enabled: !HydraColor.isTransitioning
         ColorAnimation {
           duration: root.hovering ? Style.hoverEnterDuration : Style.hoverLeaveDuration
           easing.type: Easing.InOutQuad

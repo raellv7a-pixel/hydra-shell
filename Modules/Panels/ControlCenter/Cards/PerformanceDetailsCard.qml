@@ -33,7 +33,7 @@ DashboardCard {
         text: panelRoot.tr("performance")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 
@@ -41,7 +41,7 @@ DashboardCard {
         text: panelRoot.tr("live")
         pointSize: Style.fontSizeS
         font.family: Settings.data.ui.fontFixed
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
     }
 
@@ -114,7 +114,7 @@ DashboardCard {
 
         NText {
           text: panelRoot.tr("resources")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           font.weight: Style.fontWeightSemiBold
         }
 

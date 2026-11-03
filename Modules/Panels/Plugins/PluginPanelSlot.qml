@@ -32,7 +32,7 @@ SmartPanel {
   panelAnchorRight: pluginInstance?.panelAnchorRight ?? false
 
   // Panel background color
-  panelBackgroundColor: pluginInstance?.panelBackgroundColor ?? Color.mSurface
+  panelBackgroundColor: pluginInstance?.panelBackgroundColor ?? HydraColor.mSurface
 
   // Panel content is dynamically loaded
   panelContent: Component {

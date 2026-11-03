@@ -29,8 +29,8 @@ NBox {
   radius: Style.radiusL
   bottomLeftRadius: entry.isPanelAnchor ? Style.radiusXXS : Style.radiusL
   bottomRightRadius: entry.isPanelAnchor ? Style.radiusXXS : Style.radiusL
-  color: entry.isSelected ? Color.mPrimaryContainer : (entry.isHovered ? Color.mSurfaceContainerHigh : "transparent")
-  border.color: (entry.isContextMenuTarget && !entry.isPanelAnchor) ? Color.mPrimary : "transparent"
+  color: entry.isSelected ? HydraColor.mPrimaryContainer : (entry.isHovered ? HydraColor.mSurfaceContainerHigh : "transparent")
+  border.color: (entry.isContextMenuTarget && !entry.isPanelAnchor) ? HydraColor.mPrimary : "transparent"
   border.width: (entry.isContextMenuTarget && !entry.isPanelAnchor) ? Style.borderM : 0
   z: entry.isContextMenuTarget ? 10 : 0
   scale: mouseArea.pressed ? 0.975 : (entry.isSelected ? 1.0 : 0.988)
@@ -71,7 +71,7 @@ NBox {
     width: 4
     height: Math.round(parent.height * 0.60)
     radius: 4
-    color: Color.mPrimary
+    color: HydraColor.mPrimary
     opacity: entry.isSelected ? 0.9 : 0.0
     scale: entry.isSelected ? 1.0 : 0.34
     transformOrigin: Item.Center
@@ -130,7 +130,7 @@ NBox {
         Rectangle {
           anchors.fill: parent
           radius: Style.radiusXS
-          color: Color.mSurfaceContainerHighest
+          color: HydraColor.mSurfaceContainerHighest
           visible: Settings.data.appLauncher.showIconBackground && !modelData.isImage
         }
 
@@ -140,7 +140,7 @@ NBox {
           anchors.fill: parent
           visible: !!modelData.isImage && !modelData.displayString
           radius: Style.radiusXS
-          borderColor: Color.mOnSurface
+          borderColor: HydraColor.mOnSurface
           borderWidth: Style.borderM
           imageFillMode: Image.PreserveAspectCrop
 
@@ -160,7 +160,7 @@ NBox {
           Rectangle {
             anchors.fill: parent
             visible: parent.status === Image.Loading
-            color: Color.mSurfaceContainerHigh
+            color: HydraColor.mSurfaceContainerHigh
 
             BusyIndicator {
               anchors.centerIn: parent
@@ -184,7 +184,7 @@ NBox {
           radius: Style.radiusXS
           color: modelData.colorHex || "transparent"
           visible: !!modelData.colorHex
-          border.color: Color.mOnSurface
+          border.color: HydraColor.mOnSurface
           border.width: Style.borderM
         }
 
@@ -209,7 +209,7 @@ NBox {
               icon: modelData.icon
               pointSize: Style.fontSizeXXXL
               visible: modelData.icon && !modelData.displayString
-              color: Settings.data.appLauncher.showIconBackground ? Color.mOnSurface : (entry.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface)
+              color: Settings.data.appLauncher.showIconBackground ? HydraColor.mOnSurface : (entry.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface)
             }
           }
 
@@ -232,7 +232,7 @@ NBox {
           text: modelData.displayString ? modelData.displayString : (modelData.name ? modelData.name.charAt(0).toUpperCase() : "?")
           pointSize: modelData.displayString ? (modelData.displayStringSize || Style.fontSizeXXXL) : Style.fontSizeXXL
           font.weight: Style.fontWeightBold
-          color: modelData.displayString ? Color.mOnSurface : (entry.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface)
+          color: modelData.displayString ? HydraColor.mOnSurface : (entry.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface)
         }
 
         // Image type indicator overlay
@@ -243,7 +243,7 @@ NBox {
           anchors.margins: 2
           width: formatLabel.width + Style.marginXS
           height: formatLabel.height + Style.marginXXS
-          color: Color.mSurfaceContainerHighest
+          color: HydraColor.mSurfaceContainerHighest
           radius: Style.radiusXXS
           NText {
             id: formatLabel
@@ -256,7 +256,7 @@ NBox {
               return parts[0] || "IMG";
             }
             pointSize: Style.fontSizeXXS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
           }
         }
 
@@ -268,13 +268,13 @@ NBox {
           anchors.margins: 2
           width: height
           height: Style.fontSizeM + Style.marginXS
-          color: Color.mSurfaceContainerHighest
+          color: HydraColor.mSurfaceContainerHighest
           radius: Style.radiusXXS
           NIcon {
             anchors.centerIn: parent
             icon: entry.badgeState.badgeIcon || ""
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
           }
         }
       }
@@ -289,7 +289,7 @@ NBox {
           text: modelData.name || "Unknown"
           pointSize: Style.fontSizeM
           font.weight: Font.Bold
-          color: entry.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface
+          color: entry.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
           elide: Text.ElideRight
           maximumLineCount: 1
           Layout.fillWidth: true
@@ -305,7 +305,7 @@ NBox {
         NText {
           text: modelData.description || ""
           pointSize: Style.fontSizeS
-          color: entry.isSelected ? Qt.alpha(Color.mOnPrimaryContainer, 0.78) : Color.mOnSurfaceVariant
+          color: entry.isSelected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.78) : HydraColor.mOnSurfaceVariant
           elide: Text.ElideRight
           maximumLineCount: 1
           Layout.fillWidth: true

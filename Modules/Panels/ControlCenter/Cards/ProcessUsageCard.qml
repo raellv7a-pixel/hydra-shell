@@ -70,14 +70,14 @@ DashboardCard {
 
         NText {
           text: panelRoot.tr("applicationUsage")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           font.weight: Style.fontWeightSemiBold
         }
 
         NText {
           Layout.fillWidth: true
           text: panelRoot.tr("applicationUsageSubtitle")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeXS
           elide: Text.ElideRight
         }
@@ -86,7 +86,7 @@ DashboardCard {
       NIcon {
         icon: "activity"
         pointSize: Style.fontSizeL
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
     }
 
@@ -175,7 +175,7 @@ DashboardCard {
             Layout.preferredWidth: Math.round(30 * panelRoot.panelUnit)
             Layout.preferredHeight: Layout.preferredWidth
             radius: Style.radiusS
-            color: Qt.alpha(Color.mPrimary, 0.12)
+            color: Qt.alpha(HydraColor.mPrimary, 0.12)
 
             IconImage {
               anchors.fill: parent
@@ -196,7 +196,7 @@ DashboardCard {
               NText {
                 Layout.fillWidth: true
                 text: processRow.usage.displayName
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 pointSize: Style.fontSizeS
                 font.weight: Style.fontWeightSemiBold
                 elide: Text.ElideRight
@@ -204,7 +204,7 @@ DashboardCard {
 
               NText {
                 text: panelRoot.processUsageValue(processRow.usage, panelRoot.processUsageMetric)
-                color: Color.mPrimary
+                color: HydraColor.mPrimary
                 pointSize: Style.fontSizeS
                 font.family: Settings.data.ui.fontFixed
                 font.weight: Style.fontWeightSemiBold
@@ -218,14 +218,14 @@ DashboardCard {
               Rectangle {
                 anchors.fill: parent
                 radius: height / 2
-                color: Qt.alpha(Color.mOutline, 0.16)
+                color: Qt.alpha(HydraColor.mOutline, 0.16)
               }
 
               Rectangle {
                 width: parent.width * processRow.metricRatio
                 height: parent.height
                 radius: height / 2
-                color: Color.mPrimary
+                color: HydraColor.mPrimary
 
                 Behavior on width {
                   NumberAnimation {
@@ -261,12 +261,12 @@ DashboardCard {
       NIcon {
         icon: panelRoot.processUsageMetric === "gpu" ? "device-desktop-off" : "hourglass-empty"
         pointSize: Style.fontSizeL
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
 
       NText {
         text: panelRoot.processUsageMetric === "gpu" ? panelRoot.tr("noGpuProcesses") : panelRoot.tr("noActiveProcesses")
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeS
       }
 

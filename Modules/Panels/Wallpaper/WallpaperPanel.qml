@@ -20,8 +20,8 @@ SmartPanel {
   preferredHeight: 700 * Style.uiScaleRatio
   preferredWidthRatio: 0.72
   preferredHeightRatio: 0.75
-  panelBackgroundColor: Color.mSurface
-  panelBorderColor: Qt.alpha(Color.mOutline, 0.30)
+  panelBackgroundColor: HydraColor.mSurface
+  panelBorderColor: Qt.alpha(HydraColor.mOutline, 0.30)
 
   // Positioning
   readonly property string screenBarPosition: Settings.getBarPositionForScreen(screen?.name)
@@ -359,7 +359,7 @@ SmartPanel {
         NBox {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          color: Color.mSurfaceContainerLow
+          color: HydraColor.mSurfaceContainerLow
           radius: Style.radiusL
 
           StackLayout {

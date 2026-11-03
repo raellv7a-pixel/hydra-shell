@@ -19,7 +19,7 @@ DashboardCard {
   Layout.preferredHeight: Math.max(Math.round(66 * panelRoot.panelUnit), contentColumn.implicitHeight + Style.marginS * 2)
   color: isExpanded ? panelRoot.m3SurfaceContainerHighest : panelRoot.m3SurfaceContainerHigh
   radius: Style.radiusM
-  border.color: isExpanded ? Qt.alpha(Color.mPrimary, 0.28) : "transparent"
+  border.color: isExpanded ? Qt.alpha(HydraColor.mPrimary, 0.28) : "transparent"
   border.width: Style.borderS
   clip: true
 
@@ -62,7 +62,7 @@ DashboardCard {
         imagePath: notificationData.cachedImage || notificationData.originalImage || ""
         fallbackIcon: "bell"
         fallbackIconSize: Style.fontSizeXL
-        borderColor: Qt.alpha(Color.mOutline, 0.12)
+        borderColor: Qt.alpha(HydraColor.mOutline, 0.12)
         borderWidth: Style.borderS
       }
 
@@ -81,14 +81,14 @@ DashboardCard {
             Layout.alignment: Qt.AlignVCenter
             radius: width / 2
             visible: notificationData.urgency !== 1
-            color: notificationData.urgency === 2 ? Color.mError : Color.mOnSurfaceVariant
+            color: notificationData.urgency === 2 ? HydraColor.mError : HydraColor.mOnSurfaceVariant
           }
 
           NText {
             Layout.fillWidth: true
             text: notificationData.appName || "Unknown"
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             font.weight: Style.fontWeightSemiBold
             elide: Text.ElideRight
           }
@@ -96,7 +96,7 @@ DashboardCard {
           NText {
             text: panelRoot.notificationTimeText(notificationData.timestamp)
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             font.family: Settings.data.ui.fontFixed
             horizontalAlignment: Text.AlignRight
           }
@@ -105,7 +105,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: notificationData.summary || notificationData.body || ""
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           textFormat: Text.StyledText
           wrapMode: isExpanded ? Text.WordWrap : Text.NoWrap
           maximumLineCount: isExpanded ? 3 : 1
@@ -148,7 +148,7 @@ DashboardCard {
       visible: isExpanded && String(notificationData.body || "").length > 0
       Layout.fillWidth: true
       text: notificationData.body || ""
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeS
       textFormat: Text.StyledText
       wrapMode: Text.WordWrap
@@ -169,10 +169,10 @@ DashboardCard {
           icon: modelData.identifier === "default" ? "external-link" : ""
           fontSize: Style.fontSizeS
           implicitHeight: Math.round(26 * panelRoot.panelUnit)
-          backgroundColor: Color.mPrimaryContainer
-          textColor: Color.mOnPrimaryContainer
-          hoverColor: Color.mSurfaceContainerHighest
-          textHoverColor: Color.mOnSurface
+          backgroundColor: HydraColor.mPrimaryContainer
+          textColor: HydraColor.mOnPrimaryContainer
+          hoverColor: HydraColor.mSurfaceContainerHighest
+          textHoverColor: HydraColor.mOnSurface
           onClicked: NotificationService.invokeAction(notificationData.id, modelData.identifier)
         }
       }

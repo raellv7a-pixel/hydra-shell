@@ -22,8 +22,8 @@ Flow {
       width: chipContent.implicitWidth + Style.margin2M
       height: Style.baseWidgetSize
       radius: height / 2
-      color: selected ? Color.mSecondaryContainer : chipHover.containsMouse ? Color.mSurfaceContainerHigh : Color.mSurfaceContainerLow
-      border.color: activeFocus ? Color.mPrimary : "transparent"
+      color: selected ? HydraColor.mSecondaryContainer : chipHover.containsMouse ? HydraColor.mSurfaceContainerHigh : HydraColor.mSurfaceContainerLow
+      border.color: activeFocus ? HydraColor.mPrimary : "transparent"
       border.width: activeFocus ? Style.borderM : 0
       activeFocusOnTab: true
       Accessible.role: Accessible.Button
@@ -36,8 +36,8 @@ Flow {
         id: chipContent
         anchors.centerIn: parent
         spacing: Style.marginXS
-        NIcon { icon: chip.modelData.icon; pointSize: Style.fontSizeM; color: chip.selected ? Color.mOnSecondaryContainer : Color.mOnSurface }
-        NText { text: chip.modelData.title; pointSize: Style.fontSizeS; color: chip.selected ? Color.mOnSecondaryContainer : Color.mOnSurface }
+        NIcon { icon: chip.modelData.icon; pointSize: Style.fontSizeM; color: chip.selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface }
+        NText { text: chip.modelData.title; pointSize: Style.fontSizeS; color: chip.selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface }
       }
       MouseArea {
         id: chipHover

@@ -39,9 +39,9 @@ Item {
     anchors.fill: parent
     anchors.margins: Style.marginXXS
     radius: Style.radiusL
-    color: gridEntryContainer.isSelected ? Color.mPrimaryContainer : (gridEntryContainer.isHovered ? Color.mSurfaceContainerHigh : Color.mSurfaceContainerLow)
+    color: gridEntryContainer.isSelected ? HydraColor.mPrimaryContainer : (gridEntryContainer.isHovered ? HydraColor.mSurfaceContainerHigh : HydraColor.mSurfaceContainerLow)
     forceOpaque: false
-    border.color: gridEntryContainer.isContextMenuTarget ? Color.mPrimary : (gridEntryContainer.isSelected ? Color.mPrimary : "transparent")
+    border.color: gridEntryContainer.isContextMenuTarget ? HydraColor.mPrimary : (gridEntryContainer.isSelected ? HydraColor.mPrimary : "transparent")
     border.width: gridEntryContainer.isContextMenuTarget ? Style.borderM : (gridEntryContainer.isSelected ? Style.borderS : 0)
     scale: mouseArea.pressed ? 0.95 : (gridEntryContainer.isSelected ? 1.0 : 0.975)
     transformOrigin: Item.Center
@@ -99,7 +99,7 @@ Item {
         Rectangle {
           anchors.fill: parent
           radius: Style.radiusM
-          color: Color.mSurfaceContainerHighest
+          color: HydraColor.mSurfaceContainerHighest
           visible: Settings.data.appLauncher.showIconBackground && !modelData.isImage
         }
 
@@ -126,7 +126,7 @@ Item {
           Rectangle {
             anchors.fill: parent
             visible: parent.status === Image.Loading
-            color: Color.mSurfaceContainerHigh
+            color: HydraColor.mSurfaceContainerHigh
 
             BusyIndicator {
               anchors.centerIn: parent
@@ -160,7 +160,7 @@ Item {
               icon: modelData.icon
               pointSize: Style.fontSizeXXXL
               visible: modelData.icon && !modelData.displayString
-              color: (gridEntryContainer.isSelected && !Settings.data.appLauncher.showIconBackground) ? Color.mOnPrimaryContainer : Color.mOnSurface
+              color: (gridEntryContainer.isSelected && !Settings.data.appLauncher.showIconBackground) ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
             }
           }
 
@@ -202,7 +202,7 @@ Item {
             return Math.min(Math.max(cellBasedSize, baseSize), maxSize);
           }
           font.weight: Style.fontWeightBold
-          color: modelData.displayString ? Color.mOnSurface : (gridEntryContainer.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface)
+          color: modelData.displayString ? HydraColor.mOnSurface : (gridEntryContainer.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface)
         }
 
         // Badge icon overlay (generic indicator for any provider)
@@ -213,13 +213,13 @@ Item {
           anchors.margins: 2
           width: height
           height: Style.fontSizeM + Style.marginXS
-          color: Color.mSurfaceContainerHighest
+          color: HydraColor.mSurfaceContainerHighest
           radius: Style.radiusXXS
           NIcon {
             anchors.centerIn: parent
             icon: gridEntryContainer.badgeState.badgeIcon || ""
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
           }
         }
       }
@@ -239,7 +239,7 @@ Item {
           return Math.min(Math.max(cellBasedSize, baseSize), maxSize);
         }
         font.weight: Style.fontWeightSemiBold
-        color: gridEntryContainer.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface
+        color: gridEntryContainer.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
         elide: Text.ElideRight
         Layout.fillWidth: true
         Layout.maximumWidth: gridEntry.width - 8

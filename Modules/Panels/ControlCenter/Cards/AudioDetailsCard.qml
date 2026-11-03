@@ -38,7 +38,7 @@ DashboardCard {
         text: panelRoot.tr("audio")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 
@@ -46,7 +46,7 @@ DashboardCard {
         text: panelRoot.tr("live")
         pointSize: Style.fontSizeS
         font.family: Settings.data.ui.fontFixed
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
     }
 
@@ -151,13 +151,13 @@ DashboardCard {
           NText {
             Layout.fillWidth: true
             text: panelRoot.tr("applicationVolumes")
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             font.weight: Style.fontWeightSemiBold
           }
 
           NText {
             text: AudioService.appStreams.length
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             font.family: Settings.data.ui.fontFixed
           }
         }
@@ -167,7 +167,7 @@ DashboardCard {
           Layout.fillWidth: true
           Layout.fillHeight: true
           text: panelRoot.tr("noApplications")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           horizontalAlignment: Text.AlignHCenter
           verticalAlignment: Text.AlignVCenter
         }

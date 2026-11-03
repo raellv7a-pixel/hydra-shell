@@ -97,9 +97,9 @@ Item {
         const avg = visualizer.average();
         const beat = visualizer.active ? panelRoot.clamp(0.25 + avg * 1.8, 0.25, 1.35) : 0.16;
 
-        const primary = Color.mPrimary;
-        const secondary = Color.mSecondary;
-        const tertiary = Color.mTertiary;
+        const primary = HydraColor.mPrimary;
+        const secondary = HydraColor.mSecondary;
+        const tertiary = HydraColor.mTertiary;
 
         if (visualizer.effect === "bars") {
           const bars = 24;

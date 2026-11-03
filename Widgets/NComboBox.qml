@@ -195,8 +195,8 @@ RowLayout {
     background: Rectangle {
       implicitWidth: Math.round(Style.baseWidgetSize * 3.75 * Style.uiScaleRatio)
       implicitHeight: Math.round(root.preferredHeight * Style.uiScaleRatio)
-      color: Color.mSurfaceContainerHigh
-      border.color: combo.activeFocus ? Color.mPrimary : Color.mOutline
+      color: HydraColor.mSurfaceContainerHigh
+      border.color: combo.activeFocus ? HydraColor.mPrimary : HydraColor.mOutline
       border.width: combo.activeFocus ? Style.borderM : Style.borderS
       radius: Style.iRadiusL
 
@@ -229,7 +229,7 @@ RowLayout {
       pointSize: Style.fontSizeM
       verticalAlignment: Text.AlignVCenter
       elide: Text.ElideRight
-      color: combo.currentIndex >= 0 ? Color.mOnSurface : Color.mOnSurfaceVariant
+      color: combo.currentIndex >= 0 ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
       text: {
         if (combo.currentIndex >= 0 && combo.currentIndex < root.itemCount()) {
           var item = root.getItem(combo.currentIndex);
@@ -272,7 +272,7 @@ RowLayout {
           width: listView.availableWidth
           height: delegateText.implicitHeight + Style.margin2S
           radius: height / 2
-          color: isHighlighted ? Color.mSecondaryContainer : "transparent"
+          color: isHighlighted ? HydraColor.mSecondaryContainer : "transparent"
 
           NText {
             id: delegateText
@@ -282,7 +282,7 @@ RowLayout {
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
             pointSize: Style.fontSizeM
-            color: delegateRect.isHighlighted ? Color.mOnSecondaryContainer : Color.mOnSurface
+            color: delegateRect.isHighlighted ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
             text: {
               var item = root.getItem(delegateRect.index);
               return item && item.name ? item.name : "";
@@ -310,7 +310,7 @@ RowLayout {
       }
 
       background: Rectangle {
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
         border.color: "transparent"
         border.width: 0
         radius: Style.iRadiusL

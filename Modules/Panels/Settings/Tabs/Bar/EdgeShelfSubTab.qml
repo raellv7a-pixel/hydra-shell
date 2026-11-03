@@ -53,9 +53,9 @@ ColumnLayout {
     Layout.fillWidth: true
     Layout.preferredHeight: frameNoticeLayout.implicitHeight + Style.marginM * 2
     visible: !root.isFramed
-    color: Color.mSurfaceVariant
+    color: HydraColor.mSurfaceVariant
     radius: Style.radiusM
-    border.color: Qt.alpha(Color.mOutline, 0.55)
+    border.color: Qt.alpha(HydraColor.mOutline, 0.55)
     border.width: Style.borderS
 
     RowLayout {
@@ -67,7 +67,7 @@ ColumnLayout {
       NIcon {
         icon: "info-circle"
         pointSize: Style.fontSizeL
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
         Layout.alignment: Qt.AlignVCenter
       }
 
@@ -83,7 +83,7 @@ ColumnLayout {
 
         NText {
           text: I18n.tr("panels.bar.edge-shelf-requires-frame-desc") ?? "O Edge Shelf é uma superfície lateral integrada à moldura. Ative o estilo 'Emoldurado' na aba Aparência para utilizá-lo."
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeS
           wrapMode: Text.WordWrap
           Layout.fillWidth: true
@@ -123,7 +123,7 @@ ColumnLayout {
     visible: root.pinnedApps.length === 0
     color: "transparent"
     radius: Style.radiusM
-    border.color: Qt.alpha(Color.mOutline, 0.55)
+    border.color: Qt.alpha(HydraColor.mOutline, 0.55)
     border.width: Style.borderS
 
     RowLayout {
@@ -133,12 +133,12 @@ ColumnLayout {
       NIcon {
         icon: "layout-sidebar-right"
         pointSize: Style.fontSizeL
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
 
       NText {
         text: I18n.tr("panels.bar.edge-shelf-empty-hint") ?? "Nenhum aplicativo adicionado. Abra o Lançador, clique com o botão direito em um app e selecione 'Adicionar ao Edge Shelf'."
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeS
       }
     }
@@ -161,8 +161,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: appRowContent.implicitHeight + Style.marginS * 2
         radius: Style.radiusM
-        color: Color.mSurfaceVariant
-        border.color: Qt.alpha(Color.mOutline, 0.55)
+        color: HydraColor.mSurfaceVariant
+        border.color: Qt.alpha(HydraColor.mOutline, 0.55)
         border.width: Style.borderS
 
         RowLayout {
@@ -202,7 +202,7 @@ ColumnLayout {
               Layout.fillWidth: true
               text: appRow.modelData
               elide: Text.ElideRight
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               pointSize: Style.fontSizeXS
             }
           }
@@ -219,7 +219,7 @@ ColumnLayout {
               customRadius: Style.iRadiusS
               colorBg: "transparent"
               colorBorder: "transparent"
-              colorFg: Color.mOnSurfaceVariant
+              colorFg: HydraColor.mOnSurfaceVariant
               tooltipText: I18n.tr("common.move-up")
               enabled: appRow.index > 0
               onClicked: root.moveApp(appRow.index, appRow.index - 1)
@@ -231,7 +231,7 @@ ColumnLayout {
               customRadius: Style.iRadiusS
               colorBg: "transparent"
               colorBorder: "transparent"
-              colorFg: Color.mOnSurfaceVariant
+              colorFg: HydraColor.mOnSurfaceVariant
               tooltipText: I18n.tr("common.move-down")
               enabled: appRow.index < root.pinnedApps.length - 1
               onClicked: root.moveApp(appRow.index, appRow.index + 1)
@@ -244,7 +244,7 @@ ColumnLayout {
               customRadius: Style.iRadiusS
               colorBg: "transparent"
               colorBorder: "transparent"
-              colorFg: Color.mOnSurfaceVariant
+              colorFg: HydraColor.mOnSurfaceVariant
               tooltipText: I18n.tr("common.remove")
               onClicked: root.removeApp(appRow.index)
             }

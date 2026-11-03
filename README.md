@@ -20,6 +20,18 @@ compositor. A Hydra é iniciada imediatamente numa sessão Umbriel ativa ou pelo
 autostart idempotente no próximo login. Sem Umbriel, o instalador recusa a operação;
 o runtime registra sessão não suportada e não seleciona backends alternativos.
 
+Compatibilidade de ações: a Hydra usa a interface atual da Umbriel oficial
+(`0.1.0.r1459.2952bbc-1`): `umbriel msg <ação> [argumentos...]`, com argumentos
+separados, e ações de configuração como `workspace-switch 1`,
+`scratchpad-toggle hydra-default` e `spawn kitty`. A sintaxe antiga
+`ação:argumento` não é suportada; consulte `umbriel msg --help` da instalação.
+Workspaces em outro monitor usam `workspace-switch 1 --output DP-2`, não
+`1/DP-2`; nomes numéricos usam `workspace-switch --name 3 --output DP-2`.
+
+Com Qt 6.12, os tokens da Hydra vêm de `qs.Commons.HydraColor`
+(`Commons/HydraColor.qml`). O nome evita colisão com o singleton `QtQuick.Color`
+introduzido nessa versão; componentes e extensões devem usar `HydraColor.*`.
+
 ## Temas oficiais e primeiro uso
 
 Novas configurações iniciam em **Hydra Glacier · Escuro · Material 2025**,

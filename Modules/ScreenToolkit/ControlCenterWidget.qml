@@ -34,7 +34,7 @@ Item {
     width: 8
     height: 8
     radius: Style.radiusXXS
-    color: Color.mError || "#f44336"
+    color: HydraColor.mError || "#f44336"
     anchors {
       top: btn.top
       right: btn.right

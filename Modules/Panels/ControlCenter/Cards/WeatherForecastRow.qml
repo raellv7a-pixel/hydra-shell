@@ -10,7 +10,7 @@ DashboardCard {
   property var dailyData: null
 
   Layout.preferredHeight: Math.round(54 * panelRoot.panelUnit)
-  color: Color.mSurfaceContainerHighest
+  color: HydraColor.mSurfaceContainerHighest
   radius: Style.radiusS
 
   RowLayout {
@@ -21,14 +21,14 @@ DashboardCard {
     NText {
       Layout.preferredWidth: Math.round(48 * panelRoot.panelUnit)
       text: panelRoot.weatherDayLabel(forecastRow.dailyData?.time?.[forecastRow.dayIndex])
-      color: Color.mOnSurface
+      color: HydraColor.mOnSurface
       font.weight: Style.fontWeightSemiBold
     }
 
     NIcon {
       icon: LocationService.weatherSymbolFromCode(forecastRow.dailyData?.weathercode?.[forecastRow.dayIndex] || 0)
       pointSize: Style.fontSizeXL
-      color: Color.mPrimary
+      color: HydraColor.mPrimary
     }
 
     Item {
@@ -37,13 +37,13 @@ DashboardCard {
 
     NText {
       text: panelRoot.weatherTemperature(forecastRow.dailyData?.temperature_2m_max?.[forecastRow.dayIndex])
-      color: Color.mOnSurface
+      color: HydraColor.mOnSurface
       font.weight: Style.fontWeightSemiBold
     }
 
     NText {
       text: panelRoot.weatherTemperature(forecastRow.dailyData?.temperature_2m_min?.[forecastRow.dayIndex])
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
     }
   }
 }

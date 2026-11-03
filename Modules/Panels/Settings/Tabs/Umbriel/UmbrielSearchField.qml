@@ -20,7 +20,7 @@ ColumnLayout {
     text: root.label
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightMedium
-    color: Color.mOnSurface
+    color: HydraColor.mOnSurface
   }
 
   Rectangle {
@@ -28,12 +28,12 @@ ColumnLayout {
     Layout.fillWidth: true
     implicitHeight: Style.baseWidgetSize * 1.2 * Style.uiScaleRatio
     radius: Style.iRadiusL
-    color: input.activeFocus || hover.hovered ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh
-    border.color: input.activeFocus ? Color.mPrimary : "transparent"
+    color: input.activeFocus || hover.hovered ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainerHigh
+    border.color: input.activeFocus ? HydraColor.mPrimary : "transparent"
     border.width: input.activeFocus ? Style.borderM : 0
 
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation { duration: hover.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration }
     }
 
@@ -45,7 +45,7 @@ ColumnLayout {
       anchors.rightMargin: Style.marginS
       spacing: Style.marginM
 
-      NIcon { icon: "search"; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeM }
+      NIcon { icon: "search"; color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeM }
       TextField {
         id: input
         Layout.fillWidth: true
@@ -57,8 +57,8 @@ ColumnLayout {
         bottomPadding: 0
         verticalAlignment: TextInput.AlignVCenter
         placeholderText: root.placeholderText
-        placeholderTextColor: Qt.alpha(Color.mOnSurfaceVariant, 0.7)
-        color: Color.mOnSurface
+        placeholderTextColor: Qt.alpha(HydraColor.mOnSurfaceVariant, 0.7)
+        color: HydraColor.mOnSurface
         font.family: fieldLabel.font.family
         font.pointSize: fieldLabel.font.pointSize
         selectByMouse: true

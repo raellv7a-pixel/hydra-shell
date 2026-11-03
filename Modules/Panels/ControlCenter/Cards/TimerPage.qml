@@ -99,7 +99,7 @@ Item {
       pointSize: Style.fontSizeXXL * 1.45
       font.family: Settings.data.ui.fontFixed
       font.weight: Style.fontWeightBold
-      color: Time.timerSoundPlaying ? Color.mError : Color.mPrimary
+      color: Time.timerSoundPlaying ? HydraColor.mError : HydraColor.mPrimary
     }
 
     Item {
@@ -110,7 +110,7 @@ Item {
       Rectangle {
         anchors.fill: parent
         radius: height / 2
-        color: Color.mSurfaceVariant
+        color: HydraColor.mSurfaceVariant
       }
 
       Rectangle {
@@ -119,7 +119,7 @@ Item {
         anchors.bottom: parent.bottom
         width: parent.width * Math.max(0, Math.min(1, Time.timerRemainingSeconds / Math.max(1, Time.timerTotalSeconds)))
         radius: height / 2
-        color: Time.timerSoundPlaying ? Color.mError : Color.mPrimary
+        color: Time.timerSoundPlaying ? HydraColor.mError : HydraColor.mPrimary
       }
     }
 

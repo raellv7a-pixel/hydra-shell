@@ -10,9 +10,9 @@ DashboardCard {
   readonly property bool selected: panelRoot.screenUsageRangeDays === days
 
   Layout.preferredHeight: Math.round(32 * panelRoot.panelUnit)
-  color: selected ? Color.mPrimary : panelRoot.m3SurfaceContainerHigh
+  color: selected ? HydraColor.mPrimary : panelRoot.m3SurfaceContainerHigh
   radius: Style.radiusS
-  border.color: selected ? Color.mPrimary : Qt.alpha(Color.mOutline, 0.18)
+  border.color: selected ? HydraColor.mPrimary : Qt.alpha(HydraColor.mOutline, 0.18)
 
   NText {
     anchors.centerIn: parent
@@ -21,7 +21,7 @@ DashboardCard {
     anchors.leftMargin: Style.marginS
     anchors.rightMargin: Style.marginS
     text: screenUsageRangeButton.labelText
-    color: screenUsageRangeButton.selected ? Color.mOnPrimary : Color.mOnSurfaceVariant
+    color: screenUsageRangeButton.selected ? HydraColor.mOnPrimary : HydraColor.mOnSurfaceVariant
     pointSize: Style.fontSizeXS
     font.weight: screenUsageRangeButton.selected ? Style.fontWeightSemiBold : Style.fontWeightMedium
     horizontalAlignment: Text.AlignHCenter

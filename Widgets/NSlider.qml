@@ -8,15 +8,15 @@ Slider {
   id: root
 
   readonly property bool sliderActive: activeFocus || pressed
-  property color fillColor: Color.mPrimary
-  property var cutoutColor: Color.mSurface
+  property color fillColor: HydraColor.mPrimary
+  property var cutoutColor: HydraColor.mSurface
   property bool snapAlways: true
   property real heightRatio: 0.7
   property var tooltipText
   property string tooltipDirection: "auto"
   property bool hovering: false
 
-  readonly property color effectiveFillColor: enabled ? fillColor : Color.mOutline
+  readonly property color effectiveFillColor: enabled ? fillColor : HydraColor.mOutline
 
   readonly property real knobDiameter: Math.round((Style.baseWidgetSize * heightRatio * Style.uiScaleRatio) / 2) * 2
   readonly property real handleWidth: Math.max(3, Math.round(4 * Style.uiScaleRatio))
@@ -52,7 +52,7 @@ Slider {
         id: bgPath
         strokeColor: "transparent"
         strokeWidth: 0
-        fillColor: Color.mSurfaceContainerHighest
+        fillColor: HydraColor.mSurfaceContainerHighest
 
         readonly property real w: bgContainer.width
         readonly property real h: bgContainer.height
@@ -190,7 +190,7 @@ Slider {
       implicitWidth: root.handleWidth + root.cutoutExtra
       implicitHeight: root.knobDiameter + root.cutoutExtra
       radius: Math.min(Style.iRadiusL, width / 2)
-      color: root.cutoutColor !== undefined ? root.cutoutColor : Color.mSurface
+      color: root.cutoutColor !== undefined ? root.cutoutColor : HydraColor.mSurface
       x: root.visualPosition * (root.availableWidth - root.handleTouchWidth) + (root.handleTouchWidth - width) / 2
       anchors.verticalCenter: parent.verticalCenter
     }

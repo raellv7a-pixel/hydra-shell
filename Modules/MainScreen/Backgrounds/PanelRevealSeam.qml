@@ -26,8 +26,8 @@ Rectangle {
   readonly property bool revealing: revealLength > 0 && revealLength < targetLength
   readonly property real seamLength: Math.min(24, revealLength)
   readonly property real cornerInset: Math.min(Style.radiusL, (revealHorizontally ? panelHeight : panelWidth) / 2)
-  readonly property color seamShadow: Qt.rgba(Color.mShadow.r, Color.mShadow.g, Color.mShadow.b, Color.mShadow.a * 0.34)
-  readonly property color seamMidShadow: Qt.rgba(Color.mShadow.r, Color.mShadow.g, Color.mShadow.b, Color.mShadow.a * 0.10)
+  readonly property color seamShadow: Qt.rgba(HydraColor.mShadow.r, HydraColor.mShadow.g, HydraColor.mShadow.b, HydraColor.mShadow.a * 0.34)
+  readonly property color seamMidShadow: Qt.rgba(HydraColor.mShadow.r, HydraColor.mShadow.g, HydraColor.mShadow.b, HydraColor.mShadow.a * 0.10)
   readonly property bool shadowAtStart: fromRight || fromBottom
 
   visible: assignedPanel && panelBg && revealing && seamLength > 0 && (fromLeft || fromRight || fromTop || fromBottom)

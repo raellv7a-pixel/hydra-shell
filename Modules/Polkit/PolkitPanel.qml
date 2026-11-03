@@ -235,7 +235,7 @@ SmartPanel {
             horizontalAlignment: Text.AlignHCenter
             pointSize: Style.fontSizeXXL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             wrapMode: Text.Wrap
           }
 
@@ -245,7 +245,7 @@ SmartPanel {
             text: root.appDescription
             horizontalAlignment: Text.AlignHCenter
             pointSize: Style.fontSizeS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             wrapMode: Text.Wrap
           }
 
@@ -254,7 +254,7 @@ SmartPanel {
             Layout.topMargin: Style.marginXS
             visible: actionIdLabel.text !== ""
             radius: height / 2
-            color: Qt.alpha(Color.mPrimary, 0.16)
+            color: Qt.alpha(HydraColor.mPrimary, 0.16)
             implicitWidth: actionIdLabel.implicitWidth + Style.marginM * 2
             implicitHeight: actionIdLabel.implicitHeight + Style.marginXS * 2
 
@@ -264,7 +264,7 @@ SmartPanel {
               text: root.flow ? root.flow.actionId : ""
               pointSize: Style.fontSizeXXS
               font.weight: Style.fontWeightSemiBold
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
           }
         }
@@ -274,7 +274,7 @@ SmartPanel {
           visible: root.flow && root.flow.supplementaryMessage !== ""
           text: root.flow ? root.flow.supplementaryMessage : ""
           pointSize: Style.fontSizeS
-          color: (root.flow && root.flow.supplementaryIsError) ? Color.mError : Color.mOnSurfaceVariant
+          color: (root.flow && root.flow.supplementaryIsError) ? HydraColor.mError : HydraColor.mOnSurfaceVariant
           wrapMode: Text.Wrap
           Layout.fillWidth: true
         }
@@ -312,8 +312,8 @@ SmartPanel {
 
           NButton {
             text: "Cancelar"
-            backgroundColor: Color.mSurfaceVariant
-            textColor: Color.mOnSurfaceVariant
+            backgroundColor: HydraColor.mSurfaceVariant
+            textColor: HydraColor.mOnSurfaceVariant
             outlined: false
             onClicked: {
               root.cancelAuth();
@@ -323,8 +323,8 @@ SmartPanel {
 
           NButton {
             text: "Autenticar"
-            backgroundColor: Color.mPrimary
-            textColor: Color.mOnPrimary
+            backgroundColor: HydraColor.mPrimary
+            textColor: HydraColor.mOnPrimary
             enabled: root.flow && root.flow.isResponseRequired
             onClicked: {
               root.submitPassword(passwordInput.text);

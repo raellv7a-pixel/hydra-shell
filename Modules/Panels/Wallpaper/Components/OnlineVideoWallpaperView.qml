@@ -112,7 +112,7 @@ Item {
                         page: root.providerService.currentPage
                       })
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
       }
 
       NIconButton {
@@ -126,7 +126,7 @@ Item {
     NBox {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      color: Color.mSurfaceContainerLow
+      color: HydraColor.mSurfaceContainerLow
       radius: Style.radiusL
 
       NBusyIndicator {
@@ -145,13 +145,13 @@ Item {
         NIcon {
           icon: root.providerService.lastError ? "alert-circle" : "video"
           pointSize: Style.fontSizeXXL
-          color: root.providerService.lastError ? Color.mError : Color.mOnSurfaceVariant
+          color: root.providerService.lastError ? HydraColor.mError : HydraColor.mOnSurfaceVariant
           Layout.alignment: Qt.AlignHCenter
         }
 
         NText {
           text: root.providerService.lastError || I18n.tr("wallpaper.live-video.no-results")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           wrapMode: Text.WordWrap
           horizontalAlignment: Text.AlignHCenter
           Layout.fillWidth: true
@@ -185,7 +185,7 @@ Item {
           NBox {
             anchors.fill: parent
             anchors.margins: Style.marginS
-            color: cardMouse.containsMouse ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
+            color: cardMouse.containsMouse ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
             radius: Style.radiusL
             clip: true
 
@@ -222,7 +222,7 @@ Item {
                   visible: thumbnail.status === Image.Loading || thumbnail.status === Image.Error
                   icon: thumbnail.status === Image.Error ? "alert-circle" : "image"
                   pointSize: Style.fontSizeXL
-                  color: Color.mOnSurfaceVariant
+                  color: HydraColor.mOnSurfaceVariant
                 }
 
                 // Spinning up a hardware decoder costs several frames, so a
@@ -284,7 +284,7 @@ Item {
                   height: 20 * Style.uiScaleRatio
                   width: cardMouse.containsMouse ? 108 * Style.uiScaleRatio : 48 * Style.uiScaleRatio
                   radius: height / 2
-                  color: cardMouse.containsMouse ? Color.mSecondaryContainer : Color.mPrimaryContainer
+                  color: cardMouse.containsMouse ? HydraColor.mSecondaryContainer : HydraColor.mPrimaryContainer
 
                   Behavior on width {
                     NumberAnimation {
@@ -297,7 +297,7 @@ Item {
                     text: cardMouse.containsMouse ? I18n.tr("wallpaper.live-video.motion-badge") : I18n.tr("wallpaper.live-video.live-badge")
                     pointSize: Style.fontSizeXS
                     font.weight: Style.fontWeightBold
-                    color: cardMouse.containsMouse ? Color.mOnSecondaryContainer : Color.mOnPrimaryContainer
+                    color: cardMouse.containsMouse ? HydraColor.mOnSecondaryContainer : HydraColor.mOnPrimaryContainer
                   }
                 }
               }
@@ -305,7 +305,7 @@ Item {
               Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 32 * Style.uiScaleRatio
-                color: cardMouse.containsMouse ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
+                color: cardMouse.containsMouse ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
 
                 RowLayout {
                   anchors.fill: parent
@@ -316,7 +316,7 @@ Item {
                     text: delegateRoot.modelData.name || I18n.tr("wallpaper.live-video.unnamed")
                     pointSize: Style.fontSizeXS
                     font.weight: Style.fontWeightBold
-                    color: Color.mOnSurface
+                    color: HydraColor.mOnSurface
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                   }
@@ -325,7 +325,7 @@ Item {
                     visible: !!delegateRoot.modelData.resolution
                     text: delegateRoot.modelData.resolution || ""
                     pointSize: Style.fontSizeXS
-                    color: Color.mOnSurfaceVariant
+                    color: HydraColor.mOnSurfaceVariant
                   }
 
                   NIconButton {

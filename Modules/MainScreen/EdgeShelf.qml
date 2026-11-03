@@ -67,10 +67,10 @@ Item {
   // --------------------------------------------------------------------------
   readonly property real frameOpacity: Settings.data.bar.useSeparateOpacity ? Style.effectiveBarOpacity : Style.effectivePanelOpacity
 
-  // Translucent primary for Material 3 state layers (avoids saturated Color.mHover)
-  readonly property color hoverColor: Qt.rgba(Color.mPrimary.r, Color.mPrimary.g, Color.mPrimary.b, 0.12)
-  readonly property color hoverColorStrong: Qt.rgba(Color.mPrimary.r, Color.mPrimary.g, Color.mPrimary.b, 0.20)
-  readonly property color associatedBg: Qt.rgba(Color.mPrimary.r, Color.mPrimary.g, Color.mPrimary.b, 0.22)
+  // Translucent primary for Material 3 state layers (avoids saturated HydraColor.mHover)
+  readonly property color hoverColor: Qt.rgba(HydraColor.mPrimary.r, HydraColor.mPrimary.g, HydraColor.mPrimary.b, 0.12)
+  readonly property color hoverColorStrong: Qt.rgba(HydraColor.mPrimary.r, HydraColor.mPrimary.g, HydraColor.mPrimary.b, 0.20)
+  readonly property color associatedBg: Qt.rgba(HydraColor.mPrimary.r, HydraColor.mPrimary.g, HydraColor.mPrimary.b, 0.22)
 
   // --------------------------------------------------------------------------
   // Internal Sizing and Geometry
@@ -281,7 +281,7 @@ Item {
       id: handleGlyph
       icon: "chevron-right"
       pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       opacity: root.handleProgress * (1 - root.revealProgress)
       visible: opacity > 0
       x: root.frameLeft + root.handleDepth / 2 - handleMetrics.tightBoundingRect.width / 2 - handleMetrics.tightBoundingRect.x
@@ -329,11 +329,11 @@ Item {
         }
         GradientStop {
           position: 0.5
-          color: Qt.rgba(Color.mShadow.r, Color.mShadow.g, Color.mShadow.b, Color.mShadow.a * 0.10)
+          color: Qt.rgba(HydraColor.mShadow.r, HydraColor.mShadow.g, HydraColor.mShadow.b, HydraColor.mShadow.a * 0.10)
         }
         GradientStop {
           position: 1
-          color: Qt.rgba(Color.mShadow.r, Color.mShadow.g, Color.mShadow.b, Color.mShadow.a * 0.34)
+          color: Qt.rgba(HydraColor.mShadow.r, HydraColor.mShadow.g, HydraColor.mShadow.b, HydraColor.mShadow.a * 0.34)
         }
       }
     }
@@ -408,7 +408,7 @@ Item {
                 }
                 return "transparent";
               }
-              border.color: isAssociated ? Color.mPrimary : "transparent"
+              border.color: isAssociated ? HydraColor.mPrimary : "transparent"
               border.width: isAssociated ? Style.borderS : 0
 
               // Centered Application Icon
@@ -430,7 +430,7 @@ Item {
                 width: 3
                 height: 18
                 radius: 1.5
-                color: Color.mPrimary
+                color: HydraColor.mPrimary
                 visible: appTile.isAssociated
               }
 
@@ -442,7 +442,7 @@ Item {
                 width: 4
                 height: 4
                 radius: 2
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 visible: appTile.isRunning && !appTile.isAssociated
               }
 
@@ -484,7 +484,7 @@ Item {
             width: 32
             height: 1
             anchors.horizontalCenter: parent.horizontalCenter
-            color: Color.mOutline
+            color: HydraColor.mOutline
             opacity: 0.5
             visible: root.pinnedApps.length > 0
           }
@@ -502,7 +502,7 @@ Item {
               anchors.centerIn: parent
               icon: "plus"
               pointSize: Style.fontSizeM
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             MouseArea {
@@ -541,8 +541,8 @@ Item {
     Rectangle {
       anchors.fill: parent
       radius: Style.radiusM
-      color: Qt.alpha(Color.mSurface, root.frameOpacity)
-      border.color: Qt.alpha(Color.mOutline, 0.55)
+      color: Qt.alpha(HydraColor.mSurface, root.frameOpacity)
+      border.color: Qt.alpha(HydraColor.mOutline, 0.55)
 
       MouseArea {
         anchors.fill: parent
@@ -563,7 +563,7 @@ Item {
           NIcon {
             icon: "window"
             pointSize: Style.fontSizeS
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
           }
 
           NText {
@@ -571,7 +571,7 @@ Item {
             text: root.getAppName(root.chooserAppId)
             font.weight: Style.fontWeightBold
             pointSize: Style.fontSizeS
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             elide: Text.ElideRight
           }
 
@@ -587,7 +587,7 @@ Item {
         Rectangle {
           Layout.fillWidth: true
           Layout.preferredHeight: 1
-          color: Color.mOutline
+          color: HydraColor.mOutline
           opacity: 0.5
         }
 
@@ -639,7 +639,7 @@ Item {
                     Layout.fillWidth: true
                     text: (modelData.title && modelData.title.length > 0) ? modelData.title : (modelData.appId || ("Window " + modelData.id))
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSurface
+                    color: HydraColor.mOnSurface
                     elide: Text.ElideRight
                   }
                 }

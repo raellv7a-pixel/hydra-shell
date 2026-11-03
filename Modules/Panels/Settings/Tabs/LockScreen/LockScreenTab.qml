@@ -45,8 +45,8 @@ ColumnLayout {
       NIconButton {
         icon: "filter"
         tooltipText: root.showInstalledOnly ? I18n.tr("actions.show-all") : I18n.tr("actions.show-active-only")
-        colorBg: root.showInstalledOnly ? Color.mPrimary : Color.mSurface
-        colorFg: root.showInstalledOnly ? Color.mOnPrimary : Color.mOnSurface
+        colorBg: root.showInstalledOnly ? HydraColor.mPrimary : HydraColor.mSurface
+        colorFg: root.showInstalledOnly ? HydraColor.mOnPrimary : HydraColor.mOnSurface
         onClicked: root.showInstalledOnly = !root.showInstalledOnly
       }
 
@@ -89,7 +89,7 @@ ColumnLayout {
       Layout.topMargin: Style.marginM
       visible: root.filteredThemes.length === 0
       text: LockThemeService.isFetchingCatalog ? I18n.tr("panels.lock-screen.sddm-loading") : I18n.tr("common.no-results")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       horizontalAlignment: Text.AlignHCenter
     }
   }

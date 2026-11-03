@@ -40,12 +40,12 @@ Rectangle {
   Accessible.name: root.text
   Accessible.selected: root.checked
 
-  color: root.checked ? Color.mSecondaryContainer : (root.isHovered ? Color.mSurfaceContainerHighest : "transparent")
-  border.color: root.activeFocus ? Color.mPrimary : "transparent"
+  color: root.checked ? HydraColor.mSecondaryContainer : (root.isHovered ? HydraColor.mSurfaceContainerHighest : "transparent")
+  border.color: root.activeFocus ? HydraColor.mPrimary : "transparent"
   border.width: root.activeFocus ? Style.borderM : 0
 
   Behavior on color {
-    enabled: !Color.isTransitioning
+    enabled: !HydraColor.isTransitioning
     ColorAnimation {
       duration: Style.animationFast
       easing.type: Easing.OutCubic
@@ -64,10 +64,10 @@ Rectangle {
       Layout.alignment: Qt.AlignVCenter
       icon: root.icon
       pointSize: root.pointSize * 1.2
-      color: root.checked ? Color.mOnSecondaryContainer : Color.mOnSurface
+      color: root.checked ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
 
       Behavior on color {
-        enabled: !Color.isTransitioning
+        enabled: !HydraColor.isTransitioning
         ColorAnimation {
           duration: Style.animationFast
           easing.type: Easing.OutCubic
@@ -82,12 +82,12 @@ Rectangle {
       text: root.text
       pointSize: root.pointSize
       font.weight: Style.fontWeightSemiBold
-      color: root.checked ? Color.mOnSecondaryContainer : Color.mOnSurface
+      color: root.checked ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
 
       Behavior on color {
-        enabled: !Color.isTransitioning
+        enabled: !HydraColor.isTransitioning
         ColorAnimation {
           duration: Style.animationFast
           easing.type: Easing.OutCubic

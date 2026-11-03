@@ -53,7 +53,7 @@ Flickable {
     RowLayout {
       Layout.fillWidth: true
       Layout.topMargin: root.launcher.metrics.gapS
-      NIcon { icon: "folder"; pointSize: Style.fontSizeL; color: Color.mOnSurface }
+      NIcon { icon: "folder"; pointSize: Style.fontSizeL; color: HydraColor.mOnSurface }
       NText { text: I18n.tr("launcher-home.folders-title"); font.weight: Style.fontWeightSemiBold; pointSize: Style.fontSizeL }
       Item { Layout.fillWidth: true }
       LauncherHomeButton {
@@ -79,18 +79,18 @@ Flickable {
       Accessible.description: I18n.tr("launcher-home.all-apps-description")
       Layout.fillWidth: true
       Layout.preferredHeight: root.launcher.metrics.allAppsHeight
-      surface: Color.mPrimaryContainer
+      surface: HydraColor.mPrimaryContainer
       onClicked: launcher.openAllApps("all")
       contentItem: RowLayout {
         spacing: root.launcher.metrics.gapL
-        NIcon { icon: "apps"; pointSize: Style.fontSizeXXL; color: Color.mOnPrimaryContainer }
+        NIcon { icon: "apps"; pointSize: Style.fontSizeXXL; color: HydraColor.mOnPrimaryContainer }
         ColumnLayout {
           Layout.fillWidth: true
           spacing: Style.marginXXS
-          NText { text: allApps.text; pointSize: Style.fontSizeL; font.weight: Style.fontWeightSemiBold; color: Color.mOnPrimaryContainer }
-          NText { Layout.fillWidth: true; text: I18n.tr("launcher-home.all-apps-description"); pointSize: Style.fontSizeS; color: Color.mOnPrimaryContainer; elide: Text.ElideRight }
+          NText { text: allApps.text; pointSize: Style.fontSizeL; font.weight: Style.fontWeightSemiBold; color: HydraColor.mOnPrimaryContainer }
+          NText { Layout.fillWidth: true; text: I18n.tr("launcher-home.all-apps-description"); pointSize: Style.fontSizeS; color: HydraColor.mOnPrimaryContainer; elide: Text.ElideRight }
         }
-        NIcon { icon: "chevron-right"; color: Color.mOnPrimaryContainer }
+        NIcon { icon: "chevron-right"; color: HydraColor.mOnPrimaryContainer }
       }
     }
     GridLayout {
@@ -105,7 +105,7 @@ Flickable {
         Layout.preferredHeight: pinnedBody.implicitHeight + padding * 2
         Layout.alignment: Qt.AlignTop
         forceOpaque: true
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
         border.width: 0
         radius: Style.radiusL
         ColumnLayout {
@@ -117,7 +117,7 @@ Flickable {
           spacing: root.browse.pinned.length ? root.launcher.metrics.gapM : root.launcher.metrics.gapXS
           RowLayout {
             Layout.fillWidth: true
-            NIcon { icon: "pin"; color: Color.mOnSurface }
+            NIcon { icon: "pin"; color: HydraColor.mOnSurface }
             NText { text: I18n.tr("launcher-home.pinned"); pointSize: Style.fontSizeM; font.weight: Style.fontWeightSemiBold }
             Item { Layout.fillWidth: true }
             LauncherHomeButton {
@@ -129,7 +129,7 @@ Flickable {
               implicitWidth: Math.round(32 * Style.uiScaleRatio)
               implicitHeight: implicitWidth
               padding: Style.marginXS
-              contentItem: NIcon { icon: "chevron-right"; color: Color.mOnSurfaceVariant }
+              contentItem: NIcon { icon: "chevron-right"; color: HydraColor.mOnSurfaceVariant }
               onClicked: launcher.openPinned(pinnedExpand)
             }
           }
@@ -164,7 +164,7 @@ Flickable {
               }
             }
           }
-          NText { visible: root.browse.pinned.length === 0; Layout.fillWidth: true; text: I18n.tr("launcher-home.no-pinned"); color: Color.mOnSurfaceVariant; wrapMode: Text.Wrap; pointSize: Style.fontSizeS }
+          NText { visible: root.browse.pinned.length === 0; Layout.fillWidth: true; text: I18n.tr("launcher-home.no-pinned"); color: HydraColor.mOnSurfaceVariant; wrapMode: Text.Wrap; pointSize: Style.fontSizeS }
         }
       }
       NBox {
@@ -174,7 +174,7 @@ Flickable {
         Layout.preferredHeight: recentBody.implicitHeight + padding * 2
         Layout.alignment: Qt.AlignTop
         forceOpaque: true
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
         border.width: 0
         radius: Style.radiusL
         ColumnLayout {
@@ -186,7 +186,7 @@ Flickable {
           spacing: root.launcher.metrics.gapXS
           RowLayout {
             Layout.fillWidth: true
-            NIcon { icon: "clock"; color: Color.mOnSurface }
+            NIcon { icon: "clock"; color: HydraColor.mOnSurface }
             NText { text: I18n.tr("launcher-home.recent"); pointSize: Style.fontSizeM; font.weight: Style.fontWeightSemiBold }
             Item { Layout.fillWidth: true }
             LauncherHomeButton {
@@ -220,19 +220,19 @@ Flickable {
               onContextRequested: if (modelData.appId) launcher.showHomeAppActions(modelData)
               contentItem: RowLayout {
                 spacing: root.launcher.metrics.gapS
-                NIcon { visible: !!recentItem.modelData.uri; Layout.preferredWidth: Math.round(24 * Style.uiScaleRatio); Layout.preferredHeight: Layout.preferredWidth; icon: recentItem.modelData.icon; color: Color.mPrimary }
+                NIcon { visible: !!recentItem.modelData.uri; Layout.preferredWidth: Math.round(24 * Style.uiScaleRatio); Layout.preferredHeight: Layout.preferredWidth; icon: recentItem.modelData.icon; color: HydraColor.mPrimary }
                 LauncherAppIcon { visible: !recentItem.modelData.uri; Layout.preferredWidth: Math.round(24 * Style.uiScaleRatio); Layout.preferredHeight: Layout.preferredWidth; appIcon: recentItem.modelData.icon }
                 ColumnLayout {
                   Layout.fillWidth: true
                   spacing: 0
                   NText { Layout.fillWidth: true; text: recentItem.text; pointSize: Style.fontSizeS; elide: Text.ElideMiddle }
-                  NText { Layout.fillWidth: true; text: recentItem.modelData.uri ? I18n.tr("launcher-home.document-types." + recentItem.documentGroup) : I18n.tr("launcher-home.app"); color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeXXS; elide: Text.ElideRight }
+                  NText { Layout.fillWidth: true; text: recentItem.modelData.uri ? I18n.tr("launcher-home.document-types." + recentItem.documentGroup) : I18n.tr("launcher-home.app"); color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeXXS; elide: Text.ElideRight }
                 }
-                NText { text: Time.formatRelativeTime(new Date(recentItem.modelData.modifiedAt || recentItem.modelData.lastOpenedAt)); color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeXXS }
+                NText { text: Time.formatRelativeTime(new Date(recentItem.modelData.modifiedAt || recentItem.modelData.lastOpenedAt)); color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeXXS }
               }
             }
           }
-          NText { visible: !root.browse.recentItems.length && !root.browse.recentApps.length; text: I18n.tr("launcher-home.no-recent"); Layout.fillWidth: true; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeS; wrapMode: Text.Wrap }
+          NText { visible: !root.browse.recentItems.length && !root.browse.recentApps.length; text: I18n.tr("launcher-home.no-recent"); Layout.fillWidth: true; color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeS; wrapMode: Text.Wrap }
         }
       }
     }

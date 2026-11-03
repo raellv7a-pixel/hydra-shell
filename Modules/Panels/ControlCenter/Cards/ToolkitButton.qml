@@ -17,9 +17,9 @@ DashboardCard {
 
   Layout.fillWidth: true
   Layout.preferredHeight: Math.round(32 * panelRoot.panelUnit)
-  color: destructive ? Qt.alpha(Color.mError, 0.14) : (active ? panelRoot.m3PrimaryContainer : panelRoot.componentColor(styleKey, "buttonBackground", mouseArea.containsMouse ? panelRoot.m3SurfaceContainerHighest : panelRoot.m3SurfaceContainerHigh))
+  color: destructive ? Qt.alpha(HydraColor.mError, 0.14) : (active ? panelRoot.m3PrimaryContainer : panelRoot.componentColor(styleKey, "buttonBackground", mouseArea.containsMouse ? panelRoot.m3SurfaceContainerHighest : panelRoot.m3SurfaceContainerHigh))
   radius: height / 2
-  border.color: activeFocus ? (destructive ? Color.mError : panelRoot.componentAccent(styleKey)) : "transparent"
+  border.color: activeFocus ? (destructive ? HydraColor.mError : panelRoot.componentAccent(styleKey)) : "transparent"
   border.width: activeFocus ? Style.borderM : 0
   scale: mouseArea.pressed ? 0.96 : (mouseArea.containsMouse || activeFocus ? 1.02 : 1)
   transformOrigin: Item.Center
@@ -49,13 +49,13 @@ DashboardCard {
     NIcon {
       icon: iconName
       pointSize: Style.fontSizeM
-      color: destructive ? Color.mError : (active ? Color.mOnPrimaryContainer : panelRoot.componentAccent(toolkitButton.styleKey))
+      color: destructive ? HydraColor.mError : (active ? HydraColor.mOnPrimaryContainer : panelRoot.componentAccent(toolkitButton.styleKey))
     }
 
     NText {
       Layout.fillWidth: true
       text: labelText
-      color: active && !destructive ? panelRoot.componentColor(toolkitButton.styleKey, "text", Color.mOnPrimaryContainer) : panelRoot.componentText(toolkitButton.styleKey, true)
+      color: active && !destructive ? panelRoot.componentColor(toolkitButton.styleKey, "text", HydraColor.mOnPrimaryContainer) : panelRoot.componentText(toolkitButton.styleKey, true)
       pointSize: Style.fontSizeS
       font.weight: Style.fontWeightSemiBold
       elide: Text.ElideRight

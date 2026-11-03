@@ -30,7 +30,7 @@ ColumnLayout {
     text: I18n.tr("usb-drive-manager.settings.widget-section")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: HydraColor.mOnSurface
   }
 
   NToggle {
@@ -77,7 +77,7 @@ ColumnLayout {
     text: I18n.tr("usb-drive-manager.settings.behavior-section")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightBold
-    color: Color.mOnSurface
+    color: HydraColor.mOnSurface
   }
 
   NToggle {
@@ -190,7 +190,7 @@ ColumnLayout {
                                                                                                                                                                                                                                        "programs": UsbDriveService.missingDependencies.join(", ")
                                                                                                                                                                                                                                      })
     pointSize: Style.fontSizeXS
-    color: UsbDriveService.dependenciesChecked && UsbDriveService.missingDependencies.length > 0 ? Color.mError : Color.mOnSurfaceVariant
+    color: UsbDriveService.dependenciesChecked && UsbDriveService.missingDependencies.length > 0 ? HydraColor.mError : HydraColor.mOnSurfaceVariant
     wrapMode: Text.Wrap
   }
 }

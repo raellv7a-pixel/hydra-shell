@@ -32,19 +32,19 @@ ColumnLayout {
     NIcon {
       icon: iconName
       pointSize: Style.fontSizeL
-      color: Color.mPrimary
+      color: HydraColor.mPrimary
     }
 
     NText {
       Layout.fillWidth: true
       text: labelText
-      color: Color.mOnSurface
+      color: HydraColor.mOnSurface
       font.weight: Style.fontWeightMedium
     }
 
     NText {
       text: valueText
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       font.family: Settings.data.ui.fontFixed
     }
   }

@@ -114,13 +114,13 @@ NSettingsGroupPage {
     if (isPlugin) {
       badges.push({
                     "icon": "plugin",
-                    "color": Color.mSecondary
+                    "color": HydraColor.mSecondary
                   });
     }
     locations.forEach(function (location) {
       badges.push({
                     "icon": location,
-                    "color": Color.mOnSurfaceVariant
+                    "color": HydraColor.mOnSurfaceVariant
                   });
     });
     return badges;

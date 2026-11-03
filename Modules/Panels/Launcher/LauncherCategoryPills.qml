@@ -22,8 +22,8 @@ Flow {
       launcher: root.launcher
       readonly property bool selected: modelData === "all" && launcher.effectiveState === "home" || (modelData === "applications" && launcher.effectiveState === "all_apps" && root.provider.selectedCategory === "all") || (modelData !== "all" && launcher.effectiveState !== "home" && root.provider.selectedCategory === modelData)
       text: modelData === "all" ? I18n.tr("launcher-home.all") : (modelData === "applications" ? I18n.tr("launcher-home.applications") : (root.provider.getCategoryName ? root.provider.getCategoryName(modelData) : modelData))
-      surface: selected ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
-      foreground: selected ? Color.mOnPrimaryContainer : Color.mOnSurface
+      surface: selected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
+      foreground: selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
       cornerRadius: height / 2
       implicitWidth: row.implicitWidth + padding * 2
       implicitHeight: launcher.metrics.pillHeight

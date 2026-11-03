@@ -40,7 +40,7 @@ DashboardCard {
         text: panelRoot.tr("weather")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 
@@ -48,7 +48,7 @@ DashboardCard {
         text: weatherReady ? panelRoot.tr("live") : panelRoot.tr("idle")
         pointSize: Style.fontSizeS
         font.family: Settings.data.ui.fontFixed
-        color: weatherReady ? Color.mPrimary : Color.mOnSurfaceVariant
+        color: weatherReady ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
       }
     }
 
@@ -67,7 +67,7 @@ DashboardCard {
       Layout.fillWidth: true
       Layout.fillHeight: true
       text: panelRoot.tr("noWeather")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
     }
@@ -143,7 +143,7 @@ DashboardCard {
 
         NText {
           text: panelRoot.tr("forecast")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           font.weight: Style.fontWeightSemiBold
         }
 

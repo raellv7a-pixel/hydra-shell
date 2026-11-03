@@ -361,7 +361,7 @@ Variants {
       width: activeRow.implicitWidth + Style.marginL * 2
       height: activeRow.implicitHeight + Style.marginM * 2
       radius: Style.radiusL
-      color: Color.mSurface
+      color: HydraColor.mSurface
       border.color: "white"
       border.width: 2
       Row {
@@ -373,14 +373,14 @@ Variants {
           anchors.verticalCenter: parent.verticalCenter
           NText {
             text: overlayWin.curDist + " px"
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             font.weight: Font.Bold
             pointSize: Style.fontSizeM
             anchors.horizontalCenter: parent.horizontalCenter
           }
           NText {
             text: Math.round(overlayWin.curW) + " × " + Math.round(overlayWin.curH)
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
             anchors.horizontalCenter: parent.horizontalCenter
           }
@@ -390,11 +390,11 @@ Variants {
           height: 28
           radius: Style.radiusS
           anchors.verticalCenter: parent.verticalCenter
-          color: acopyBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          color: acopyBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
           NIcon {
             anchors.centerIn: parent
             icon: "copy"
-            color: acopyBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+            color: acopyBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
             scale: 0.85
           }
           MouseArea {
@@ -415,11 +415,11 @@ Variants {
           height: 28
           radius: Style.radiusS
           anchors.verticalCenter: parent.verticalCenter
-          color: ascreenshotBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          color: ascreenshotBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
           NIcon {
             anchors.centerIn: parent
             icon: "camera"
-            color: ascreenshotBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+            color: ascreenshotBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
             scale: 0.85
           }
           MouseArea {
@@ -437,11 +437,11 @@ Variants {
           height: 28
           radius: Style.radiusS
           anchors.verticalCenter: parent.verticalCenter
-          color: pinBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          color: pinBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
           NIcon {
             anchors.centerIn: parent
             icon: "pin"
-            color: pinBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+            color: pinBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
             scale: 0.85
           }
           MouseArea {
@@ -462,11 +462,11 @@ Variants {
           height: 28
           radius: Style.radiusS
           anchors.verticalCenter: parent.verticalCenter
-          color: discardBtn.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurfaceVariant
+          color: discardBtn.containsMouse ? Qt.alpha(HydraColor.mError, 0.15) : HydraColor.mSurfaceVariant
           NIcon {
             anchors.centerIn: parent
             icon: "x"
-            color: discardBtn.containsMouse ? Color.mError : Color.mOnSurface
+            color: discardBtn.containsMouse ? HydraColor.mError : HydraColor.mOnSurface
             scale: 0.85
           }
           MouseArea {
@@ -508,7 +508,7 @@ Variants {
         width: pinnedRow.implicitWidth + Style.marginL * 2
         height: pinnedRow.implicitHeight + Style.marginM * 2
         radius: Style.radiusL
-        color: Color.mSurface
+        color: HydraColor.mSurface
         border.color: mdata.color
         border.width: 2
         Row {
@@ -527,14 +527,14 @@ Variants {
             anchors.verticalCenter: parent.verticalCenter
             NText {
               text: mdist + " px"
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               font.weight: Font.Bold
               pointSize: Style.fontSizeM
               anchors.horizontalCenter: parent.horizontalCenter
             }
             NText {
               text: Math.round(mw) + " × " + Math.round(mh)
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               pointSize: Style.fontSizeXS
               anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -544,11 +544,11 @@ Variants {
             height: 26
             radius: Style.radiusS
             anchors.verticalCenter: parent.verticalCenter
-            color: pcopyBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+            color: pcopyBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
             NIcon {
               anchors.centerIn: parent
               icon: "copy"
-              color: pcopyBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: pcopyBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               scale: 0.8
             }
             MouseArea {
@@ -569,11 +569,11 @@ Variants {
             height: 26
             radius: Style.radiusS
             anchors.verticalCenter: parent.verticalCenter
-            color: pscreenshotBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+            color: pscreenshotBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
             NIcon {
               anchors.centerIn: parent
               icon: "camera"
-              color: pscreenshotBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: pscreenshotBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               scale: 0.8
             }
             MouseArea {
@@ -591,11 +591,11 @@ Variants {
             height: 26
             radius: Style.radiusS
             anchors.verticalCenter: parent.verticalCenter
-            color: premoveBtn.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurfaceVariant
+            color: premoveBtn.containsMouse ? Qt.alpha(HydraColor.mError, 0.15) : HydraColor.mSurfaceVariant
             NIcon {
               anchors.centerIn: parent
               icon: "x"
-              color: premoveBtn.containsMouse ? Color.mError : Color.mOnSurface
+              color: premoveBtn.containsMouse ? HydraColor.mError : HydraColor.mOnSurface
               scale: 0.8
             }
             MouseArea {
@@ -619,8 +619,8 @@ Variants {
       width: clearRow.implicitWidth + Style.marginL * 2
       height: 38
       radius: Style.radiusM
-      color: clearAllBtn.containsMouse ? Qt.alpha(Color.mError, 0.15) : Color.mSurface
-      border.color: Color.mError
+      color: clearAllBtn.containsMouse ? Qt.alpha(HydraColor.mError, 0.15) : HydraColor.mSurface
+      border.color: HydraColor.mError
       border.width: Style.borderS
       Row {
         id: clearRow
@@ -628,11 +628,11 @@ Variants {
         spacing: Style.marginS
         NIcon {
           icon: "trash"
-          color: Color.mError
+          color: HydraColor.mError
         }
         NText {
           text: _tr("measure.clearAll")
-          color: Color.mError
+          color: HydraColor.mError
           font.weight: Font.Bold
           pointSize: Style.fontSizeS
         }

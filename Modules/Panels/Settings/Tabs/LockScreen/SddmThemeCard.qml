@@ -51,7 +51,7 @@ Item {
         imagePath: card.previewUrl
         fallbackIcon: "lock"
         radius: Style.radiusL
-        borderColor: card.isApplied ? Color.mPrimary : "transparent"
+        borderColor: card.isApplied ? HydraColor.mPrimary : "transparent"
         borderWidth: card.isApplied ? Style.borderL : 0
         imageFillMode: Image.PreserveAspectCrop
       }
@@ -64,7 +64,7 @@ Item {
           top: parent.top
         }
         height: card.imageHeight
-        color: Color.mSurface
+        color: HydraColor.mSurface
         radius: Style.radiusL
         opacity: (card.hovered || card.isApplied) ? 0 : 0.18
 
@@ -95,14 +95,14 @@ Item {
         height: width
         radius: width / 2
         z: 6
-        color: Color.mPrimaryContainer
+        color: HydraColor.mPrimaryContainer
         visible: card.isApplied
 
         NIcon {
           anchors.centerIn: parent
           icon: "check"
           pointSize: Style.fontSizeM
-          color: Color.mOnPrimaryContainer
+          color: HydraColor.mOnPrimaryContainer
         }
       }
 
@@ -128,7 +128,7 @@ Item {
         text: card.themeName
         font.weight: Style.fontWeightBold
         pointSize: Style.fontSizeS
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 

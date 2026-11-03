@@ -37,7 +37,7 @@ ColumnLayout {
     NIcon {
       icon: root.icon
       pointSize: Style.fontSizeL
-      color: Color.mPrimary
+      color: HydraColor.mPrimary
       visible: root.icon !== ""
     }
 
@@ -49,14 +49,14 @@ ColumnLayout {
         text: root.title
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         visible: root.title !== ""
       }
 
       NText {
         text: root.description
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
         visible: root.description !== ""

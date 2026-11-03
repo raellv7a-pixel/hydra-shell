@@ -44,9 +44,9 @@ Popup {
 
   background: Rectangle {
     id: bgRect
-    color: Color.mSurface
+    color: HydraColor.mSurface
     radius: Style.radiusM
-    border.color: Color.mOutline
+    border.color: HydraColor.mOutline
     border.width: Style.borderS
     NDropShadow {
       source: bgRect
@@ -63,7 +63,7 @@ Popup {
       NText {
         text: I18n.tr("wallpaper.panel.color-filter")
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         Layout.fillWidth: true
       }
       NIconButton {
@@ -93,7 +93,7 @@ Popup {
           height: root.swatchSize
           radius: width / 2
           color: "#" + modelData
-          border.color: Color.mOutline
+          border.color: HydraColor.mOutline
           border.width: Settings.data.wallpaper.wallhavenColors === modelData ? Style.borderM : Style.borderS
 
           MouseArea {

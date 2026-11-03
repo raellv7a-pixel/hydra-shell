@@ -21,7 +21,7 @@ Always reuse these tested primitives instead of assembling ad-hoc combinations (
 
 ### `NBox`
 - **Path:** `Widgets/NBox.qml`
-- **Purpose:** Base rounded group container elevated above its parent panel (`Color.mSurfaceContainerHigh`), supporting per-corner radius overrides.
+- **Purpose:** Base rounded group container elevated above its parent panel (`HydraColor.mSurfaceContainerHigh`), supporting per-corner radius overrides.
 - **When to reuse:** Wrapping related controls, form rows, or card strips within panels and settings. This is Hydra's **primary card primitive** (there is no `NCard.qml`).
 - **When NOT to reuse:** The outermost panel background (handled by `SmartPanel` and `PanelBackground`).
 
@@ -124,7 +124,7 @@ Always reuse these tested primitives instead of assembling ad-hoc combinations (
 
 ### `NDivider`
 - **Path:** `Widgets/NDivider.qml`
-- **Purpose:** Subtle separator line using `Color.mOutline`.
+- **Purpose:** Subtle separator line using `HydraColor.mOutline`.
 - **When to reuse:** Separating distinct content blocks when spacing alone is insufficient.
 
 ### `NScrollText`

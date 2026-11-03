@@ -18,7 +18,7 @@ Item {
     anchors.fill: parent
     visible: root.iconSource === ""
     icon: "apps"
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
     pointSize: root.height * 0.6 / Style.uiScaleRatio
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter

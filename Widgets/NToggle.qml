@@ -38,7 +38,7 @@ RowLayout {
     label: root.label
     description: root.description
     icon: root.icon
-    iconColor: root.checked ? Color.mPrimary : Color.mOnSurface
+    iconColor: root.checked ? HydraColor.mPrimary : HydraColor.mOnSurface
     visible: root.label !== "" || root.description !== ""
     showIndicator: root.isValueChanged
     indicatorTooltip: root.indicatorTooltip
@@ -53,8 +53,8 @@ RowLayout {
     implicitWidth: Math.round(root.baseSize * .85) * 2
     implicitHeight: Math.round(root.baseSize * .5) * 2
     radius: Math.min(Style.iRadiusL, height / 2)
-    color: root.checked ? Color.mPrimary : Color.mSurfaceContainerHighest
-    border.color: root.activeFocus ? Color.mPrimary : (root.checked ? "transparent" : Color.mOutline)
+    color: root.checked ? HydraColor.mPrimary : HydraColor.mSurfaceContainerHighest
+    border.color: root.activeFocus ? HydraColor.mPrimary : (root.checked ? "transparent" : HydraColor.mOutline)
     border.width: root.activeFocus ? Style.borderM : (root.checked ? 0 : Style.borderS)
 
     Behavior on color {
@@ -73,7 +73,7 @@ RowLayout {
       implicitWidth: Math.round(root.baseSize * 0.4) * 2
       implicitHeight: Math.round(root.baseSize * 0.4) * 2
       radius: Math.min(Style.iRadiusL, height / 2)
-      color: root.checked ? Color.mOnPrimary : Color.mOnSurfaceVariant
+      color: root.checked ? HydraColor.mOnPrimary : HydraColor.mOnSurfaceVariant
       border.color: "transparent"
       border.width: 0
       anchors.verticalCenter: parent.verticalCenter

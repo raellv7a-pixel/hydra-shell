@@ -2,6 +2,7 @@ import json
 import subprocess
 from pathlib import Path
 import tempfile
+import tomllib
 import unittest
 from unittest.mock import patch
 
@@ -23,6 +24,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
             replacing.start()
             self.addCleanup(replacing.stop)
         real_run = subprocess.run
+        self.real_run = real_run
         def validate_only(command, *args, **kwargs):
             if command[:3] == ["umbriel", "msg", "config-reload"]:
                 return subprocess.CompletedProcess(command, 0, "", "")
@@ -31,6 +33,106 @@ class UmbrielKeybindsTests(unittest.TestCase):
         reload_patch.start()
         self.addCleanup(reload_patch.stop)
 
+    def test_fresh_offline_provision_validates_all_defaults_with_official_space_syntax(self):
+        with (patch.object(sys, 'argv', ['umbriel_keybinds.py', 'provision']),
+              patch.object(binds.subprocess, 'run', self.real_run),
+              patch.dict(binds.os.environ, {'XDG_RUNTIME_DIR': self.directory.name})):
+            binds.os.environ.pop('UMBRIEL_SOCKET', None)
+            binds.main()
+        actions = {
+            key: value['action']
+            for key, value in tomllib.loads(binds.OWNED.read_text())['keybinds'].items()
+        }
+        self.assertEqual(actions['Mod+Space'], 'spawn qs -c hydra-shell ipc call launcher toggle')
+        self.assertEqual(actions['Mod+Return'], 'spawn kitty')
+        self.assertEqual(actions['Mod+Shift+O'], 'workspace-set-layout toggle')
+        self.assertEqual(actions['Mod+Alt+Space'], 'scratchpad-toggle hydra-default')
+        self.assertEqual(actions['Mod+Shift+Space'], 'window-move-to-scratchpad hydra-default')
+        self.assertEqual(actions['Mod+Tab'], 'scratchpad-focus-next hydra-default')
+        for number in range(1, 10):
+            self.assertEqual(actions[f'Mod+{number}'], f'workspace-switch {number}')
+            self.assertEqual(actions[f'Mod+Shift+{number}'], f'window-move-to-workspace {number}')
+        self.assertEqual(binds.current_state(), binds.defaults())
+
+    def test_runtime_provision_with_unavailable_socket_rolls_back_new_files(self):
+        with (patch.object(sys, 'argv', ['umbriel_keybinds.py', 'provision']),
+              patch.object(binds.subprocess, 'run', self.real_run),
+              patch.dict(binds.os.environ, {
+                  'XDG_RUNTIME_DIR': self.directory.name,
+                  'UMBRIEL_SOCKET': str(self.config_dir / 'unavailable.sock')})):
+            with self.assertRaises(ValueError):
+                binds.main()
+        self.assertFalse(binds.MASTER.exists())
+        self.assertFalse(binds.OWNED.exists())
+        self.assertFalse(binds.STATE.exists())
+
+    def test_save_and_sync_without_compositor_require_reload_and_restore_files(self):
+        binds.commit(binds.defaults(), edge_apps=[])
+        previous = (binds.MASTER.read_bytes(), binds.OWNED.read_bytes(), binds.STATE.read_bytes())
+        state = binds.defaults()
+        state['overrides']['app.files'] = {'action': 'kitty'}
+        commands = (
+            ['umbriel_keybinds.py', 'save', json.dumps(state)],
+            ['umbriel_keybinds.py', 'sync', '["org.kde.dolphin.desktop"]'],
+        )
+        for command in commands:
+            with self.subTest(command=command[1]):
+                with (patch.object(sys, 'argv', command),
+                      patch.object(binds.subprocess, 'run', self.real_run),
+                      patch.dict(binds.os.environ, {'XDG_RUNTIME_DIR': self.directory.name})):
+                    binds.os.environ.pop('UMBRIEL_SOCKET', None)
+                    with self.assertRaises(ValueError):
+                        binds.main()
+                self.assertEqual(
+                    (binds.MASTER.read_bytes(), binds.OWNED.read_bytes(), binds.STATE.read_bytes()),
+                    previous)
+
+    def test_umbriel_arguments_are_preserved_and_validated_officially(self):
+        state = binds.defaults()
+        action = 'workspace-set-layout toggle scrolling dwindle'
+        state['overrides']['umbriel.layout'] = {'action': action}
+        binds.commit(state)
+        rendered = tomllib.loads(binds.OWNED.read_text())
+        self.assertEqual(rendered['keybinds']['Mod+Shift+O']['action'], action)
+        self.assertEqual(binds.current_state(), state)
+
+    def test_command_shell_text_is_not_reinterpreted(self):
+        state = binds.defaults()
+        command = """printf '%s\\n' "https://example.org/a:b  c" | cat > "$HOME/output name" """
+        state['overrides']['app.terminal'] = {'action': command}
+        binds.commit(state)
+        rendered = tomllib.loads(binds.OWNED.read_text())
+        self.assertEqual(rendered['keybinds']['Mod+Return']['action'], 'spawn ' + command)
+        self.assertEqual(binds.current_state(), state)
+
+    def test_malformed_umbriel_actions_are_rejected_without_normalizing_them(self):
+        for action in (None, 12, '', 'workspace-switch:1', 'spawn:kitty',
+                       ' workspace-switch 1', 'window-close ', 'workspace-switch  ',
+                       'workspace-switch\t1', 'workspace-switch 1\nwindow-close',
+                       'workspace-switch 1\rwindow-close', 'workspace-switch 1\x00'):
+            with self.subTest(action=action):
+                state = binds.defaults()
+                state['overrides']['app.terminal'] = {'type': 'umbriel', 'action': action}
+                with self.assertRaisesRegex(ValueError, 'Ação Umbriel inválida'):
+                    binds.validate_state(state)
+
+    def test_malformed_hydra_actions_remain_rejected(self):
+        for action in (None, 12, 'launcher\ntoggle', 'launcher\rtoggle', 'launcher\ttoggle'):
+            with self.subTest(action=action):
+                state = binds.defaults()
+                state['overrides']['shell.launcher'] = {'action': action}
+                with self.assertRaisesRegex(ValueError, 'IPC Hydra desconhecido'):
+                    binds.validate_state(state)
+
+    def test_command_line_breaks_remain_rejected(self):
+        for action in ('kitty\nwindow-close', 'kitty\rwindow-close'):
+            with self.subTest(action=action):
+                state = binds.defaults()
+                state['overrides']['app.terminal'] = {'action': action}
+                with self.assertRaisesRegex(ValueError, 'quebras de linha'):
+                    binds.validate_state(state)
+
+
     def test_switcher_default_defers_to_existing_custom_chord(self):
         state = binds.defaults()
         custom = dict(label='Alternador pessoal', chord='alt+tab', type='command', action='kitty')
@@ -38,13 +140,13 @@ class UmbrielKeybindsTests(unittest.TestCase):
         state['overrides']['shell.launcher'] = {'chord': 'Mod+Y'}
         binds.commit(state)
         rendered = binds.OWNED.read_text()
-        self.assertIn('"Alt+Tab" = { action = "spawn:kitty"', rendered)
+        self.assertIn('"Alt+Tab" = { action = "spawn kitty"', rendered)
         self.assertNotIn('ipc call windowSwitcher hold",', rendered)
-        self.assertIn('scratchpad-focus-next:hydra-default', rendered)
+        self.assertIn('scratchpad-focus-next hydra-default', rendered)
         self.assertEqual(binds.current_state(), state)
         state['custom'].clear()
         binds.commit(state)
-        self.assertIn('"Alt+Tab" = { action = "spawn:qs -c hydra-shell ipc call windowSwitcher hold"', binds.OWNED.read_text())
+        self.assertIn('"Alt+Tab" = { action = "spawn qs -c hydra-shell ipc call windowSwitcher hold"', binds.OWNED.read_text())
 
     def test_switcher_default_preserves_rebound_catalog_action_and_reverse_chord(self):
         state = binds.defaults()
@@ -52,7 +154,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         state['custom'].append(dict(label='Anterior pessoal', chord='shift+alt+tab', type='umbriel', action='window-focus-last'))
         binds.commit(state)
         text = binds.OWNED.read_text()
-        self.assertIn('"Alt+Tab" = { action = "spawn:alacritty"', text)
+        self.assertIn('"Alt+Tab" = { action = "spawn alacritty"', text)
         self.assertIn('"Alt+Shift+Tab" = { action = "window-focus-last"', text)
         self.assertNotIn('ipc call windowSwitcher', text)
         self.assertEqual(binds.current_state(), state)
@@ -69,7 +171,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         binds.commit(state)
         self.assertEqual(binds.MASTER.read_text(), before)
         self.assertEqual(binds.current_state(), state)
-        self.assertIn('"Mod+Y" = { action = "spawn:qs -c hydra-shell ipc call launcher toggle"', binds.OWNED.read_text())
+        self.assertIn('"Mod+Y" = { action = "spawn qs -c hydra-shell ipc call launcher toggle"', binds.OWNED.read_text())
         self.assertIn('"Mod+Alt+Y" = { action = "overview-toggle"', binds.OWNED.read_text())
 
     def test_rejects_conflicts_and_invalid_actions_without_replacing_good_file(self):
@@ -82,7 +184,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         self.assertEqual(binds.OWNED.read_bytes(), original)
         state = binds.defaults()
         state['custom'].append(dict(label='Quebrado', chord='Mod+Y', type='umbriel', action='not-an-action'))
-        with self.assertRaisesRegex(ValueError, 'unknown action'):
+        with self.assertRaises(ValueError):
             binds.commit(state)
         self.assertEqual(binds.OWNED.read_bytes(), original)
         state = binds.defaults()
@@ -142,7 +244,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         self.assertEqual(migrated['custom'], old['custom'])
         binds.commit(migrated)
         self.assertEqual(json.loads(binds.STATE.read_text())['version'], 2)
-        self.assertIn('\"Mod+D\" = { action = \"spawn:xdg-open ~\"', binds.OWNED.read_text())
+        self.assertIn('\"Mod+D\" = { action = \"spawn xdg-open ~\"', binds.OWNED.read_text())
 
     def test_catalog_action_and_options_can_be_overridden_and_restored(self):
         original = binds.generate(binds.defaults())
@@ -150,7 +252,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         state['overrides']['app.files'] = {'type': 'command', 'action': 'gtk-launch org.kde.dolphin.desktop',
                                           'repeat': True, 'cooldown_ms': 250}
         binds.commit(state)
-        self.assertIn('spawn:gtk-launch org.kde.dolphin.desktop', binds.OWNED.read_text())
+        self.assertIn('spawn gtk-launch org.kde.dolphin.desktop', binds.OWNED.read_text())
         self.assertIn('repeat = true', binds.OWNED.read_text())
         self.assertIn('cooldown_ms = 250', binds.OWNED.read_text())
         state['overrides'].pop('app.files')
@@ -187,7 +289,7 @@ class UmbrielKeybindsTests(unittest.TestCase):
         text = binds.OWNED.read_text()
         self.assertEqual(text.count('name = \"hydra-default\"'), 1)
         self.assertEqual(text.count('name = \"hydra-edge-org-kde-dolphin\"'), 1)
-        self.assertIn('spawn:gtk-launch org.kde.dolphin.desktop', text)
+        self.assertIn('spawn gtk-launch org.kde.dolphin.desktop', text)
 
     def test_external_keybind_include_blocks_override_without_changes(self):
         personal = self.config_dir / 'personal.toml'
@@ -218,13 +320,11 @@ class UmbrielKeybindsTests(unittest.TestCase):
         previous = (binds.MASTER.read_bytes(), binds.OWNED.read_bytes(), binds.STATE.read_bytes())
         change = binds.defaults()
         change['overrides']['app.files'] = {'action': 'gtk-launch org.kde.dolphin'}
-        real_run = binds.subprocess.run
-        def fail_reload(command, *args, **kwargs):
-            if command[:3] == ['umbriel', 'msg', 'config-reload']:
-                return subprocess.CompletedProcess(command, 1, '', 'reload refused')
-            return real_run(command, *args, **kwargs)
-        with patch.object(binds.subprocess, 'run', side_effect=fail_reload):
-            with self.assertRaisesRegex(ValueError, 'reload refused'):
+        with (patch.object(binds.subprocess, 'run', self.real_run),
+              patch.dict(binds.os.environ, {
+                  'XDG_RUNTIME_DIR': self.directory.name,
+                  'UMBRIEL_SOCKET': str(self.config_dir / 'unavailable.sock')})):
+            with self.assertRaises(ValueError):
                 binds.commit(change)
         self.assertEqual((binds.MASTER.read_bytes(), binds.OWNED.read_bytes(), binds.STATE.read_bytes()),
                          previous)

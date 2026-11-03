@@ -155,7 +155,7 @@ Canvas {
 
     const lineWidth = borderWidth;
     const inset = lineWidth / 2;
-    const colors = borderColors && borderColors.length > 0 ? borderColors : [Color.mPrimary];
+    const colors = borderColors && borderColors.length > 0 ? borderColors : [HydraColor.mPrimary];
     const energy = reactive ? panelRoot.spectrumAverage() : 0;
     const alpha = reactive ? panelRoot.clamp(0.48 + energy * 0.46, 0.48, 0.94) : 0.86;
     const flow = animation === "flow" || animation === "flowEase" || animation === "spark" || animation === "reactiveFlow" || animation === "reactiveSpark" || animation === "scan" || animation === "profileAurora" || animation === "profileSpotlight";

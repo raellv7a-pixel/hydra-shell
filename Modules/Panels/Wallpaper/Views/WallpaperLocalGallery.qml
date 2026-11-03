@@ -392,7 +392,7 @@ Item {
         NText {
           text: root.isBrowseMode ? root.currentBrowsePath : root.rootDirectory
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
       }
 
@@ -589,7 +589,7 @@ Item {
       // Scanning / empty state
       Rectangle {
         anchors.fill: parent
-        color: Color.mSurfaceContainerLow
+        color: HydraColor.mSurfaceContainerLow
         radius: Style.radiusL
         visible: WallpaperService.scanning || wallpaperModel.count === 0
 
@@ -608,14 +608,14 @@ Item {
             visible: !WallpaperService.scanning
             icon: "folder-open"
             pointSize: Style.fontSizeXXL
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
             visible: !WallpaperService.scanning
             text: (root.filterText && root.filterText.length > 0) ? I18n.tr("wallpaper.no-match") : (root.isBrowseMode ? I18n.tr("wallpaper.browse.empty-directory") : I18n.tr("wallpaper.no-wallpaper"))
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             font.weight: Style.fontWeightBold
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
@@ -624,7 +624,7 @@ Item {
           NText {
             visible: !WallpaperService.scanning
             text: (root.filterText && root.filterText.length > 0) ? I18n.tr("wallpaper.try-different-search") : (root.isBrowseMode ? I18n.tr("wallpaper.browse.go-up-hint") : I18n.tr("wallpaper.configure-directory"))
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true

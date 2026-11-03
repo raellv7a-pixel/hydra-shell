@@ -51,7 +51,7 @@ Item {
       duration = ObsControlService.displayStreamDurationMs;
     return showElapsed && duration > 0 ? `${labels.join("+")} ${formatDuration(duration)}` : labels.join("+");
   }
-  readonly property color accentColor: errorState ? Color.mError : ObsControlService.recording ? Color.mError : ObsControlService.streaming ? Color.mPrimary : ObsControlService.replayBuffer ? Color.mSecondary : Color.resolveColorKey(iconColorKey)
+  readonly property color accentColor: errorState ? HydraColor.mError : ObsControlService.recording ? HydraColor.mError : ObsControlService.streaming ? HydraColor.mPrimary : ObsControlService.replayBuffer ? HydraColor.mSecondary : HydraColor.resolveColorKey(iconColorKey)
   readonly property string iconName: ObsControlService.recording ? "player-record-filled" : ObsControlService.streaming ? "broadcast" : ObsControlService.replayBuffer ? "history" : errorState ? "alert-triangle" : ObsControlService.connected ? "brand-obs" : "plug-connected-x"
   readonly property string tooltipText: {
     let text = I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`);
@@ -78,7 +78,7 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? HydraColor.mHover : Style.capsuleColor
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth

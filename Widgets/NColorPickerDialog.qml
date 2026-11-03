@@ -56,9 +56,9 @@ Popup {
   }
 
   background: Rectangle {
-    color: Color.mSurface
+    color: HydraColor.mSurface
     radius: Style.iRadiusS
-    border.color: Color.mPrimary
+    border.color: HydraColor.mPrimary
     border.width: Style.borderM
   }
 
@@ -76,14 +76,14 @@ Popup {
         NIcon {
           icon: "color-picker"
           pointSize: Style.fontSizeXXL
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
         }
 
         NText {
           text: I18n.tr("widgets.color-picker.title")
           pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightBold
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
         }
       }
 
@@ -103,7 +103,7 @@ Popup {
       Layout.preferredHeight: 80
       radius: Style.iRadiusS
       color: root.selectedColor
-      border.color: Color.mOutline
+      border.color: HydraColor.mOutline
       border.width: Style.borderS
 
       ColumnLayout {
@@ -477,7 +477,7 @@ Popup {
               Layout.alignment: Qt.AlignTop
 
               radius: 0
-              border.color: Color.mOutline
+              border.color: HydraColor.mOutline
               border.width: Style.borderS
               clip: true
 
@@ -600,7 +600,7 @@ Popup {
               Rectangle {
                 anchors.fill: parent
                 color: "transparent"
-                border.color: Color.mOutline
+                border.color: HydraColor.mOutline
                 border.width: Style.borderS
                 antialiasing: false
               }
@@ -637,31 +637,31 @@ Popup {
               model: [
                 {
                   name: "mPrimary",
-                  color: Color.mPrimary
+                  color: HydraColor.mPrimary
                 },
                 {
                   name: "mSecondary",
-                  color: Color.mSecondary
+                  color: HydraColor.mSecondary
                 },
                 {
                   name: "mTertiary",
-                  color: Color.mTertiary
+                  color: HydraColor.mTertiary
                 },
                 {
                   name: "mError",
-                  color: Color.mError
+                  color: HydraColor.mError
                 },
                 {
                   name: "mSurface",
-                  color: Color.mSurface
+                  color: HydraColor.mSurface
                 },
                 {
                   name: "mSurfaceVariant",
-                  color: Color.mSurfaceVariant
+                  color: HydraColor.mSurfaceVariant
                 },
                 {
                   name: "mOutline",
-                  color: Color.mOutline
+                  color: HydraColor.mOutline
                 }
               ]
 
@@ -670,7 +670,7 @@ Popup {
                 height: 24
                 radius: Style.iRadiusXXS
                 color: modelData.color
-                border.color: root.selectedColor.toString() === modelData.color.toString() ? Color.mPrimary : Color.mOutline
+                border.color: root.selectedColor.toString() === modelData.color.toString() ? HydraColor.mPrimary : HydraColor.mOutline
                 border.width: Math.max(1, root.selectedColor.toString() === modelData.color.toString() ? Style.borderM : Style.borderS)
 
                 MouseArea {
@@ -713,7 +713,7 @@ Popup {
                 height: 24
                 radius: Math.min(Style.iRadiusXS, width / 2)
                 color: modelData.color
-                border.color: root.selectedColor.toString() === modelData.color.toString() ? Color.mPrimary : Color.mOutline
+                border.color: root.selectedColor.toString() === modelData.color.toString() ? HydraColor.mPrimary : HydraColor.mOutline
                 border.width: root.selectedColor.toString() === modelData.color.toString() ? 2 : 1
 
                 MouseArea {

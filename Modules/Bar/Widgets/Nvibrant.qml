@@ -43,7 +43,7 @@ NIconButton {
   applyUiScale: false
   customRadius: Style.radiusL
   colorBg: Style.capsuleColor
-  colorFg: root.vibranceEnabled ? Color.mPrimary : Color.resolveColorKey(iconColorKey)
+  colorFg: root.vibranceEnabled ? HydraColor.mPrimary : HydraColor.resolveColorKey(iconColorKey)
   onClicked: root.toggle()
 
   border.color: Style.capsuleBorderColor

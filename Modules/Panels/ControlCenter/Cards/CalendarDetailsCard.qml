@@ -33,7 +33,7 @@ DashboardCard {
         text: panelRoot.tr("calendar")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 
@@ -41,7 +41,7 @@ DashboardCard {
         text: I18n.locale.toString(Time.now, "ddd, dd")
         pointSize: Style.fontSizeS
         font.family: Settings.data.ui.fontFixed
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
     }
 

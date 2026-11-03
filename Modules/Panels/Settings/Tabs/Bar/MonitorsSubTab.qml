@@ -65,7 +65,7 @@ ColumnLayout {
               text: monitorCard.screenName
               pointSize: Style.fontSizeM
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
             }
 
             NText {
@@ -78,7 +78,7 @@ ColumnLayout {
                                });
               }
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
           }
 

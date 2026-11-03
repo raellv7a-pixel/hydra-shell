@@ -25,13 +25,13 @@ DashboardCard {
       NIcon {
         icon: "adjustments-horizontal"
         pointSize: Style.fontSizeL
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
 
       NText {
         Layout.fillWidth: true
         text: panelRoot.tr("easyEffects")
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
       }
@@ -41,14 +41,14 @@ DashboardCard {
         baseSize: Math.round(28 * panelRoot.panelUnit)
         tooltipText: panelRoot.tr("refresh")
         onClicked: panelRoot.refreshEasyEffects()
-        colorBg: Color.mSurfaceContainerHighest
+        colorBg: HydraColor.mSurfaceContainerHighest
       }
     }
 
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.round(54 * panelRoot.panelUnit)
-      color: Color.mSurfaceContainerHighest
+      color: HydraColor.mSurfaceContainerHighest
       radius: Style.radiusS
 
       RowLayout {
@@ -64,7 +64,7 @@ DashboardCard {
             Layout.fillHeight: true
             readonly property real bandLevel: panelRoot.equalizerBandLevel(index, 10)
             readonly property real barW: Math.max(4, Math.round(7 * panelRoot.panelUnit))
-            readonly property color barColor: bandLevel > 0.72 ? Color.mTertiary : (bandLevel > 0.4 ? Color.mSecondary : Color.mPrimary)
+            readonly property color barColor: bandLevel > 0.72 ? HydraColor.mTertiary : (bandLevel > 0.4 ? HydraColor.mSecondary : HydraColor.mPrimary)
             property real peakLevel: 0
 
             onBandLevelChanged: eqBand.peakLevel = Math.max(eqBand.peakLevel, eqBand.bandLevel)
@@ -110,7 +110,7 @@ DashboardCard {
               width: eqBand.barW
               height: Math.max(2, Math.round(2 * panelRoot.panelUnit))
               radius: height / 2
-              color: Color.mTertiary
+              color: HydraColor.mTertiary
               visible: panelRoot.musicActive && !panelRoot.dashboardPerformanceMode
               opacity: 0.85
 
@@ -135,8 +135,8 @@ DashboardCard {
       icon: "chevron-down"
       fontSize: Style.fontSizeS
       horizontalAlignment: Qt.AlignLeft
-      backgroundColor: Color.mSurfaceContainerHighest
-      textColor: Color.mOnSurface
+      backgroundColor: HydraColor.mSurfaceContainerHighest
+      textColor: HydraColor.mOnSurface
       onClicked: {
         var items = [];
         for (var i = 0; i < panelRoot.easyEffectsPresets.length; i++) {
@@ -162,7 +162,7 @@ DashboardCard {
       Layout.fillWidth: true
       visible: panelRoot.easyEffectsPresets.length === 0
       text: panelRoot.easyEffectsStatus !== "" ? panelRoot.easyEffectsStatus : panelRoot.tr("easyEffectsNoPresets")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeXS
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter

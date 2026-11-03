@@ -15,8 +15,8 @@ SmartPanel {
   Component.onDestruction: SystemStatService.unregisterComponent("panel-systemstats")
 
   preferredWidth: Math.round(440 * Style.uiScaleRatio)
-  panelBackgroundColor: Color.mSurface
-  panelBorderColor: Qt.alpha(Color.mOutline, 0.28)
+  panelBackgroundColor: HydraColor.mSurface
+  panelBorderColor: Qt.alpha(HydraColor.mOutline, 0.28)
 
   panelContent: Item {
     id: panelContent
@@ -42,7 +42,7 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         implicitHeight: headerRow.implicitHeight + Style.margin2M
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
         radius: Style.radiusL
 
         RowLayout {
@@ -55,13 +55,13 @@ SmartPanel {
             Layout.preferredWidth: Style.baseWidgetSize * 0.8
             Layout.preferredHeight: Style.baseWidgetSize * 0.8
             radius: height / 2
-            color: Color.mPrimaryContainer
+            color: HydraColor.mPrimaryContainer
 
             NIcon {
               anchors.centerIn: parent
               icon: "device-analytics"
               pointSize: Style.fontSizeL
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
           }
 
@@ -69,7 +69,7 @@ SmartPanel {
             text: I18n.tr("system-monitor.title")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             Layout.fillWidth: true
           }
 
@@ -88,7 +88,7 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         Layout.preferredHeight: panelContent.cardHeight
-        color: Color.mSurfaceContainer
+        color: HydraColor.mSurfaceContainer
         radius: Style.radiusL
 
         ColumnLayout {
@@ -103,13 +103,13 @@ SmartPanel {
             NIcon {
               icon: "cpu-usage"
               pointSize: Style.fontSizeM
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: I18n.tr("system-monitor.cpu-usage")
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               font.weight: Style.fontWeightMedium
             }
 
@@ -120,20 +120,20 @@ SmartPanel {
             NIcon {
               icon: "cpu-temperature"
               pointSize: Style.fontSizeXS
-              color: Color.mSecondary
+              color: HydraColor.mSecondary
             }
 
             NText {
               text: `${Math.round(SystemStatService.cpuTemp)}°C`
               pointSize: Style.fontSizeXS
-              color: Color.mSecondary
+              color: HydraColor.mSecondary
               font.family: Settings.data.ui.fontFixed
             }
 
             NText {
               text: `${Math.round(SystemStatService.cpuUsage)}% · ${SystemStatService.cpuFreq.replace(/[^0-9.]/g, "")} GHz`
               pointSize: Style.fontSizeXS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               font.family: Settings.data.ui.fontFixed
               font.weight: Style.fontWeightBold
             }
@@ -142,7 +142,7 @@ SmartPanel {
           Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Color.mSurfaceContainerLow
+            color: HydraColor.mSurfaceContainerLow
             radius: Style.iRadiusM
 
             NGraph {
@@ -154,8 +154,8 @@ SmartPanel {
               maxValue: 100
               minValue2: Math.max(SystemStatService.cpuTempHistoryMin - 5, 0)
               maxValue2: Math.max(SystemStatService.cpuTempHistoryMax + 5, 1)
-              color: Color.mPrimary
-              color2: Color.mSecondary
+              color: HydraColor.mPrimary
+              color2: HydraColor.mSecondary
               strokeWidth: Math.max(1, Style.uiScaleRatio)
               fill: true
               fillOpacity: 0.18
@@ -169,7 +169,7 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         Layout.preferredHeight: panelContent.cardHeight
-        color: Color.mSurfaceContainer
+        color: HydraColor.mSurfaceContainer
         radius: Style.radiusL
 
         ColumnLayout {
@@ -184,13 +184,13 @@ SmartPanel {
             NIcon {
               icon: "memory"
               pointSize: Style.fontSizeM
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: I18n.tr("common.memory")
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               font.weight: Style.fontWeightMedium
             }
 
@@ -201,7 +201,7 @@ SmartPanel {
             NText {
               text: `${Math.round(SystemStatService.memPercent)}% · ${(SystemStatService.memGb).toFixed(1)} GiB`
               pointSize: Style.fontSizeXS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               font.family: Settings.data.ui.fontFixed
               font.weight: Style.fontWeightBold
             }
@@ -210,7 +210,7 @@ SmartPanel {
           Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Color.mSurfaceContainerLow
+            color: HydraColor.mSurfaceContainerLow
             radius: Style.iRadiusM
 
             NGraph {
@@ -219,7 +219,7 @@ SmartPanel {
               values: SystemStatService.memHistory
               minValue: 0
               maxValue: 100
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               strokeWidth: Math.max(1, Style.uiScaleRatio)
               fill: true
               fillOpacity: 0.18
@@ -233,7 +233,7 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         Layout.preferredHeight: panelContent.cardHeight
-        color: Color.mSurfaceContainer
+        color: HydraColor.mSurfaceContainer
         radius: Style.radiusL
 
         ColumnLayout {
@@ -248,13 +248,13 @@ SmartPanel {
             NIcon {
               icon: "network"
               pointSize: Style.fontSizeM
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: I18n.tr("common.network")
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               font.weight: Style.fontWeightMedium
             }
 
@@ -265,26 +265,26 @@ SmartPanel {
             NIcon {
               icon: "download-speed"
               pointSize: Style.fontSizeXS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: SystemStatService.formatSpeed(SystemStatService.rxSpeed).replace(/([0-9.]+)([A-Za-z]+)/, "$1 $2") + "/s"
               pointSize: Style.fontSizeXS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               font.family: Settings.data.ui.fontFixed
             }
 
             NIcon {
               icon: "upload-speed"
               pointSize: Style.fontSizeXS
-              color: Color.mSecondary
+              color: HydraColor.mSecondary
             }
 
             NText {
               text: SystemStatService.formatSpeed(SystemStatService.txSpeed).replace(/([0-9.]+)([A-Za-z]+)/, "$1 $2") + "/s"
               pointSize: Style.fontSizeXS
-              color: Color.mSecondary
+              color: HydraColor.mSecondary
               font.family: Settings.data.ui.fontFixed
             }
           }
@@ -292,7 +292,7 @@ SmartPanel {
           Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Color.mSurfaceContainerLow
+            color: HydraColor.mSurfaceContainerLow
             radius: Style.iRadiusM
 
             NGraph {
@@ -304,8 +304,8 @@ SmartPanel {
               maxValue: SystemStatService.rxMaxSpeed
               minValue2: 0
               maxValue2: SystemStatService.txMaxSpeed
-              color: Color.mPrimary
-              color2: Color.mSecondary
+              color: HydraColor.mPrimary
+              color2: HydraColor.mSecondary
               strokeWidth: Math.max(1, Style.uiScaleRatio)
               fill: true
               fillOpacity: 0.18
@@ -320,7 +320,7 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         implicitHeight: detailsColumn.implicitHeight + Style.margin2M
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
         radius: Style.radiusL
 
         ColumnLayout {
@@ -340,19 +340,19 @@ SmartPanel {
             NIcon {
               icon: "cpu-usage"
               pointSize: Style.fontSizeM
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: I18n.tr("system-monitor.load-average") + ":"
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             NText {
               text: `${SystemStatService.loadAvg1.toFixed(2)} • ${SystemStatService.loadAvg5.toFixed(2)} • ${SystemStatService.loadAvg15.toFixed(2)}`
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
               horizontalAlignment: Text.AlignRight
             }
@@ -367,19 +367,19 @@ SmartPanel {
             NIcon {
               icon: "gpu-temperature"
               pointSize: Style.fontSizeM
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: I18n.tr("system-monitor.gpu-temp") + ":"
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             NText {
               text: `${Math.round(SystemStatService.gpuTemp)}°C`
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
               horizontalAlignment: Text.AlignRight
             }
@@ -393,13 +393,13 @@ SmartPanel {
             NIcon {
               icon: "storage"
               pointSize: Style.fontSizeM
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: I18n.tr("system-monitor.disk") + ":"
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             NText {
@@ -410,7 +410,7 @@ SmartPanel {
                 return `${percent}% (${usedGb.toFixed(1)} / ${sizeGb.toFixed(1)} GB)`;
               }
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
               horizontalAlignment: Text.AlignRight
               elide: Text.ElideMiddle
@@ -426,19 +426,19 @@ SmartPanel {
             NIcon {
               icon: "exchange"
               pointSize: Style.fontSizeM
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: I18n.tr("bar.system-monitor.swap-usage-label") + ":"
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             NText {
               text: `${(SystemStatService.swapGb).toFixed(1)} / ${(SystemStatService.swapTotalGb).toFixed(1)} GiB`
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
               horizontalAlignment: Text.AlignRight
             }

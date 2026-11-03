@@ -4,6 +4,8 @@ import json
 import re
 import subprocess
 
+ACTION_RE = re.compile(r"[a-z][a-z0-9-]*(?: [^\s\x00-\x1f\x7f]+(?: +[^\s\x00-\x1f\x7f]+)*)?")
+
 GROUPS = {
     'Apps': 'Aplicativos', 'Focus': 'Foco', 'Move & size': 'Mover e redimensionar',
     'Windows': 'Janelas', 'Scratchpad': 'Scratchpads', 'Workspaces': 'Workspaces',
@@ -20,12 +22,15 @@ def catalog(help_text):
             in_actions = True
         elif in_actions and line and not line.startswith(' '):
             group = GROUPS.get(line, line)
-        match = re.match(r'^  (\S+)\s{2,}(.+)$', line)
+        match = re.match(r'^  (.+?)\s{2,}(\S.*)$', line)
         if not match or not group:
             continue
         signature, description = match.groups()
-        name = signature.split(':', 1)[0]
-        argument = signature.split(':', 1)[1] if ':' in signature else ''
+        parts = signature.split(maxsplit=1)
+        name = parts[0]
+        if not re.fullmatch(r'[a-z][a-z0-9-]*', name):
+            continue
+        argument = parts[1] if len(parts) > 1 else ''
         entries.append({'key': name, 'name': description, 'category': group,
                         'argument': argument, 'required': bool(argument and argument.startswith('<')),
                         'signature': signature})

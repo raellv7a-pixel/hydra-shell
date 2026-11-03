@@ -35,7 +35,7 @@ Auto-generated from the Prowl index, refreshed on each `overview`/`init`. Prefer
 - languages: qml:577 json:80 python:57 bash:37 markdown:30 javascript:26 css:13 toml:11
 - subsystems: Modules/Panels(279,qml) · Widgets(56,qml) · Modules/Bar(44,qml) · Commons/Migrations(28,qml) · Modules/ScreenToolkit(21,qml) · Services/UI(21,qml) · Modules/MainScreen(14,qml) · Services/System(14,qml)
 - entrypoints: shell.qml · Modules/Cards/MediaCard.qml · Modules/Panels/Settings/Bar/WidgetSettings/CustomButtonSettings.qml · Modules/Panels/Settings/DesktopWidgets/WidgetSettings/ClockSettings.qml · Modules/Panels/SessionMenu/SessionMenu.qml · Modules/Panels/Settings/Bar/WidgetSettings/ClockSettings.qml · Modules/Panels/Wallpaper/WallhavenSettingsPopup.qml · Modules/Cards/ProfileCard.qml · (+73 more)
-- central files (most depended-on): Commons/Settings.qml · Commons/Logger.qml · Commons/Color.qml · Commons/Time.qml · Commons/I18n.qml
+- central files (most depended-on): Commons/Settings.qml · Commons/Logger.qml · Commons/HydraColor.qml · Commons/Time.qml · Commons/I18n.qml
 - read these guides first: README.md · AGENTS.md · docs/AI_DEVELOPMENT.md · docs/UI_DESIGN.md
 
 Depth on demand: `prowl find|def|outline|references <name>`, `search <text>`, `context search "<question>"`, `sketch <ui>`.

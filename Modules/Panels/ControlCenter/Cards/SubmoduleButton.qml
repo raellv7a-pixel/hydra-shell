@@ -32,7 +32,7 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: height / 2
-    color: panelRoot.componentColor(submoduleButton.styleKey, "buttonBackground", submoduleHover.hovered ? Color.mSecondaryContainer : Color.mSurfaceContainerHighest)
+    color: panelRoot.componentColor(submoduleButton.styleKey, "buttonBackground", submoduleHover.hovered ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHighest)
     border.width: submoduleButton.activeFocus ? Style.borderM : 0
     border.color: panelRoot.componentAccent(submoduleButton.styleKey)
 
@@ -52,13 +52,13 @@ Item {
         text: submoduleButton.labelText
         pointSize: Style.fontSizeXS
         font.weight: Style.fontWeightSemiBold
-        color: panelRoot.componentColor(submoduleButton.styleKey, "buttonText", submoduleHover.hovered ? Color.mOnSecondaryContainer : Color.mOnSurface)
+        color: panelRoot.componentColor(submoduleButton.styleKey, "buttonText", submoduleHover.hovered ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface)
       }
 
       NIcon {
         icon: submoduleButton.iconName
         pointSize: Style.fontSizeS
-        color: panelRoot.componentColor(submoduleButton.styleKey, "buttonText", submoduleHover.hovered ? Color.mOnSecondaryContainer : Color.mOnSurface)
+        color: panelRoot.componentColor(submoduleButton.styleKey, "buttonText", submoduleHover.hovered ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface)
       }
     }
   }

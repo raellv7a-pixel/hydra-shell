@@ -8,7 +8,7 @@ import qs.Services.Compositor
 
 SmartPanel {
   id: root
-  panelBackgroundColor: Qt.alpha(Color.mSurface, Settings.data.dock.backgroundOpacity)
+  panelBackgroundColor: Qt.alpha(HydraColor.mSurface, Settings.data.dock.backgroundOpacity)
 
   readonly property string dockPosition: Settings.data.dock.position
   readonly property bool isVertical: dockPosition === "left" || dockPosition === "right"

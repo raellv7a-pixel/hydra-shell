@@ -12,7 +12,7 @@ Rectangle {
   id: root
 
   anchors.fill: parent
-  color: Qt.alpha(Color.mShadow, 0.78)
+  color: Qt.alpha(HydraColor.mShadow, 0.78)
   z: 200
   visible: opacity > 0 || releaseTimer.running
   opacity: 0
@@ -151,7 +151,7 @@ Rectangle {
     anchors.centerIn: parent
     width: Math.min(parent.width * 0.62, 520 * Style.uiScaleRatio)
     implicitHeight: contentCol.implicitHeight + Style.margin2L
-    color: Color.mSurfaceContainerHigh
+    color: HydraColor.mSurfaceContainerHigh
     radius: Style.radiusL
 
     MouseArea {
@@ -178,7 +178,7 @@ Rectangle {
           NIcon {
             icon: "alert-triangle"
             pointSize: Style.fontSizeXL
-            color: Color.mSecondary
+            color: HydraColor.mSecondary
           }
 
           ColumnLayout {
@@ -188,13 +188,13 @@ Rectangle {
             NText {
               text: I18n.tr("wallpaper.upscale.warning-title")
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
             }
 
             NText {
               Layout.fillWidth: true
               wrapMode: Text.WordWrap
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               pointSize: Style.fontSizeS
               text: I18n.tr("wallpaper.upscale.warning-body", {
                               candidate: root.candidateWidth + "×" + root.candidateHeight,
@@ -214,8 +214,8 @@ Rectangle {
 
           NButton {
             text: I18n.tr("common.cancel")
-            backgroundColor: Color.mSurfaceContainerHighest
-            textColor: Color.mOnSurface
+            backgroundColor: HydraColor.mSurfaceContainerHighest
+            textColor: HydraColor.mOnSurface
             onClicked: root._resolve("cancel")
           }
 
@@ -224,16 +224,16 @@ Rectangle {
             icon: "sparkles"
             enabled: !WallpaperUpscaleService.vulkanChecked || WallpaperUpscaleService.vulkanAvailable
             tooltipText: (WallpaperUpscaleService.vulkanChecked && !WallpaperUpscaleService.vulkanAvailable) ? I18n.tr("wallpaper.upscale.no-vulkan-tooltip") : ""
-            backgroundColor: Color.mSecondaryContainer
-            textColor: Color.mOnSecondaryContainer
+            backgroundColor: HydraColor.mSecondaryContainer
+            textColor: HydraColor.mOnSecondaryContainer
             onClicked: root._startUpscale()
           }
 
           NButton {
             text: I18n.tr("wallpaper.upscale.apply-as-is")
             icon: "check"
-            backgroundColor: Color.mPrimary
-            textColor: Color.mOnPrimary
+            backgroundColor: HydraColor.mPrimary
+            textColor: HydraColor.mOnPrimary
             onClicked: root._resolve("as-is")
           }
         }
@@ -257,7 +257,7 @@ Rectangle {
           NText {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             text: I18n.tr("wallpaper.upscale.obtaining")
           }
         }
@@ -281,7 +281,7 @@ Rectangle {
           NText {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             text: I18n.tr("wallpaper.upscale.installing")
           }
         }
@@ -312,7 +312,7 @@ Rectangle {
                 width: 28
                 height: 28
                 radius: width / 2
-                color: index <= currentPhaseIndex ? Color.mPrimary : Color.mSurfaceVariant
+                color: index <= currentPhaseIndex ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
 
                 Behavior on color {
                   ColorAnimation {
@@ -324,7 +324,7 @@ Rectangle {
                   anchors.centerIn: parent
                   icon: modelData.icon
                   pointSize: Style.fontSizeS
-                  color: index <= currentPhaseIndex ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                  color: index <= currentPhaseIndex ? HydraColor.mOnPrimary : HydraColor.mOnSurfaceVariant
                 }
               }
 
@@ -332,7 +332,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 text: modelData.label
                 pointSize: Style.fontSizeXS
-                color: index === currentPhaseIndex ? Color.mPrimary : Color.mOnSurfaceVariant
+                color: index === currentPhaseIndex ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
                 font.weight: index === currentPhaseIndex ? Style.fontWeightBold : Style.fontWeightRegular
               }
             }
@@ -353,13 +353,13 @@ Rectangle {
           NIcon {
             icon: "alert-circle"
             pointSize: Style.fontSizeXL
-            color: Color.mError
+            color: HydraColor.mError
           }
 
           NText {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             text: root.errorText || I18n.tr("wallpaper.upscale.generic-error")
           }
         }
@@ -374,15 +374,15 @@ Rectangle {
 
           NButton {
             text: I18n.tr("common.cancel")
-            backgroundColor: Color.mSurfaceContainerHighest
-            textColor: Color.mOnSurface
+            backgroundColor: HydraColor.mSurfaceContainerHighest
+            textColor: HydraColor.mOnSurface
             onClicked: root._resolve("cancel")
           }
 
           NButton {
             text: I18n.tr("wallpaper.upscale.apply-as-is")
-            backgroundColor: Color.mPrimary
-            textColor: Color.mOnPrimary
+            backgroundColor: HydraColor.mPrimary
+            textColor: HydraColor.mOnPrimary
             onClicked: root._resolve("as-is")
           }
         }

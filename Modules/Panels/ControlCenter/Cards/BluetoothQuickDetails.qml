@@ -56,7 +56,7 @@ Item {
         text: root.panelRoot.tr("bluetooth")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 
@@ -75,9 +75,9 @@ Item {
         baseSize: Math.round(30 * root.panelRoot.panelUnit)
         tooltipText: I18n.tr("bluetooth.panel.scanning")
         enabled: BluetoothService.enabled
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSurfaceContainerHighest
-        colorFg: Color.mOnSurface
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSurfaceContainerHighest
+        colorFg: HydraColor.mOnSurface
         onClicked: BluetoothService.setScanActive(true)
       }
 
@@ -85,9 +85,9 @@ Item {
         icon: Settings.data.network.bluetoothAutoConnect ? "bluetooth-connected" : "bluetooth"
         baseSize: Math.round(30 * root.panelRoot.panelUnit)
         tooltipText: Settings.data.network.bluetoothAutoConnect ? I18n.tr("tooltips.bluetooth-auto-connect-on") : I18n.tr("tooltips.bluetooth-auto-connect-off")
-        colorBg: Settings.data.network.bluetoothAutoConnect ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
-        colorBgHover: Settings.data.network.bluetoothAutoConnect ? Qt.alpha(Color.mPrimaryContainer, 0.8) : Color.mSurfaceContainerHighest
-        colorFg: Settings.data.network.bluetoothAutoConnect ? Color.mOnPrimaryContainer : Color.mOnSurface
+        colorBg: Settings.data.network.bluetoothAutoConnect ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
+        colorBgHover: Settings.data.network.bluetoothAutoConnect ? Qt.alpha(HydraColor.mPrimaryContainer, 0.8) : HydraColor.mSurfaceContainerHighest
+        colorFg: Settings.data.network.bluetoothAutoConnect ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
         onClicked: Settings.data.network.bluetoothAutoConnect = !Settings.data.network.bluetoothAutoConnect
       }
 
@@ -95,9 +95,9 @@ Item {
         icon: "settings"
         baseSize: Math.round(30 * root.panelRoot.panelUnit)
         tooltipText: I18n.tr("tooltips.open-settings")
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSurfaceContainerHighest
-        colorFg: Color.mOnSurface
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSurfaceContainerHighest
+        colorFg: HydraColor.mOnSurface
         onClicked: SettingsPanelService.openToTab(SettingsPanel.Tab.Connections, 1, root.panelRoot.activeScreen)
       }
       Item {
@@ -123,7 +123,7 @@ Item {
           Layout.fillWidth: true
           text: I18n.tr("bluetooth.panel.enable-message")
           wrapMode: Text.WordWrap
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           horizontalAlignment: Text.AlignHCenter
           Layout.topMargin: Style.marginL
         }
@@ -140,7 +140,7 @@ Item {
         NText {
           visible: BluetoothService.enabled && BluetoothService.adapter && BluetoothService.adapter.devices && BluetoothService.adapter.devices.values.length === 0
           text: BluetoothService.scanningActive ? I18n.tr("bluetooth.panel.scanning") : I18n.tr("bluetooth.panel.no-devices")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           Layout.fillWidth: true
           horizontalAlignment: Text.AlignHCenter
           Layout.topMargin: Style.marginL

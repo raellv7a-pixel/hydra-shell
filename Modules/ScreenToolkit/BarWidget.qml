@@ -41,7 +41,7 @@ Item {
     width: 8
     height: 8
     radius: Style.radiusXXS
-    color: Color.mError
+    color: HydraColor.mError
     anchors {
       top: pill.top
       right: pill.right

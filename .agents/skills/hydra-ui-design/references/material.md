@@ -21,7 +21,7 @@ Hydra adopts Material 3 as its core visual foundation while tailoring it to an a
 
 ## 2. Semantic Color System
 
-All colors are exposed through the singleton `qs.Commons.Color` (`Commons/Color.qml`).
+All colors are exposed through the singleton `qs.Commons.HydraColor` (`Commons/HydraColor.qml`).
 
 ### Why the `m` Prefix?
 In QML, property names starting with `on` (such as `onPrimary` or `onSurface`) are interpreted by the QML engine as signal handlers for hypothetical signals named `primary` or `surface`. To prevent parse-time signal collisions and binding failures, **all Material color properties in Hydra are prefixed with `m`** (e.g., `mPrimary`, `mOnPrimary`, `mSurface`, `mOnSurface`).
@@ -30,30 +30,30 @@ In QML, property names starting with `on` (such as `onPrimary` or `onSurface`) a
 
 | Material Role | Hydra Token | Purpose & Application |
 | :--- | :--- | :--- |
-| **Primary** | `Color.mPrimary` | High-emphasis fills, active toggles, highlighted states, primary accents |
-| **On-Primary** | `Color.mOnPrimary` | High-contrast text/glyphs rendered directly atop `mPrimary` |
-| **Primary Container** | `Color.mPrimaryContainer` | Standout accent container (keyboard active selection, prominent cards) |
-| **On-Primary Container** | `Color.mOnPrimaryContainer` | Text/glyphs rendered directly atop `mPrimaryContainer` |
-| **Secondary** | `Color.mSecondary` | Less prominent accent; category icons, secondary chips |
-| **On-Secondary** | `Color.mOnSecondary` | Text/glyphs rendered directly atop `mSecondary` |
-| **Secondary Container** | `Color.mSecondaryContainer` | Tonal secondary backgrounds (e.g. settings section icon boxes) |
-| **On-Secondary Container**| `Color.mOnSecondaryContainer`| Text/glyphs rendered directly atop `mSecondaryContainer` |
-| **Tertiary** | `Color.mTertiary` | Complementary accent for balancing primary/secondary tones |
-| **Tertiary Container** | `Color.mTertiaryContainer` | Tonal tertiary container for specialized status or badges |
-| **On-Tertiary Container** | `Color.mOnTertiaryContainer` | Text/glyphs rendered directly atop `mTertiaryContainer` |
-| **Surface** | `Color.mSurface` | Base desktop surface background |
-| **On-Surface** | `Color.mOnSurface` | High-emphasis text (titles, values, active labels) on surfaces |
-| **Surface Variant** | `Color.mSurfaceVariant` | Alternative surface tone; inactive track fills, subtle backgrounds |
-| **On-Surface Variant** | `Color.mOnSurfaceVariant` | Medium-emphasis text (descriptions, hints, secondary labels, disabled icons) |
-| **Outline** | `Color.mOutline` | Semantic borders (focus rings, error highlights, active selections) |
-| **Shadow** | `Color.mShadow` | Elevation drop shadow tint (used in `NDropShadow`) |
-| **Error** | `Color.mError` | Critical alerts, dangerous actions, failure states |
-| **On-Error** | `Color.mOnError` | Text/glyphs rendered directly atop `mError` |
-| **Error Container** | `Color.mErrorContainer` | Tonal fill for error notices and warnings |
-| **On-Error Container** | `Color.mOnErrorContainer` | Text/glyphs rendered directly atop `mErrorContainer` |
-| **Hover / On-Hover** | `Color.mHover`, `Color.mOnHover` | Pointer hover accents and state layers |
+| **Primary** | `HydraColor.mPrimary` | High-emphasis fills, active toggles, highlighted states, primary accents |
+| **On-Primary** | `HydraColor.mOnPrimary` | High-contrast text/glyphs rendered directly atop `mPrimary` |
+| **Primary Container** | `HydraColor.mPrimaryContainer` | Standout accent container (keyboard active selection, prominent cards) |
+| **On-Primary Container** | `HydraColor.mOnPrimaryContainer` | Text/glyphs rendered directly atop `mPrimaryContainer` |
+| **Secondary** | `HydraColor.mSecondary` | Less prominent accent; category icons, secondary chips |
+| **On-Secondary** | `HydraColor.mOnSecondary` | Text/glyphs rendered directly atop `mSecondary` |
+| **Secondary Container** | `HydraColor.mSecondaryContainer` | Tonal secondary backgrounds (e.g. settings section icon boxes) |
+| **On-Secondary Container**| `HydraColor.mOnSecondaryContainer`| Text/glyphs rendered directly atop `mSecondaryContainer` |
+| **Tertiary** | `HydraColor.mTertiary` | Complementary accent for balancing primary/secondary tones |
+| **Tertiary Container** | `HydraColor.mTertiaryContainer` | Tonal tertiary container for specialized status or badges |
+| **On-Tertiary Container** | `HydraColor.mOnTertiaryContainer` | Text/glyphs rendered directly atop `mTertiaryContainer` |
+| **Surface** | `HydraColor.mSurface` | Base desktop surface background |
+| **On-Surface** | `HydraColor.mOnSurface` | High-emphasis text (titles, values, active labels) on surfaces |
+| **Surface Variant** | `HydraColor.mSurfaceVariant` | Alternative surface tone; inactive track fills, subtle backgrounds |
+| **On-Surface Variant** | `HydraColor.mOnSurfaceVariant` | Medium-emphasis text (descriptions, hints, secondary labels, disabled icons) |
+| **Outline** | `HydraColor.mOutline` | Semantic borders (focus rings, error highlights, active selections) |
+| **Shadow** | `HydraColor.mShadow` | Elevation drop shadow tint (used in `NDropShadow`) |
+| **Error** | `HydraColor.mError` | Critical alerts, dangerous actions, failure states |
+| **On-Error** | `HydraColor.mOnError` | Text/glyphs rendered directly atop `mError` |
+| **Error Container** | `HydraColor.mErrorContainer` | Tonal fill for error notices and warnings |
+| **On-Error Container** | `HydraColor.mOnErrorContainer` | Text/glyphs rendered directly atop `mErrorContainer` |
+| **Hover / On-Hover** | `HydraColor.mHover`, `HydraColor.mOnHover` | Pointer hover accents and state layers |
 
-*(Note: `Color.mOutlineVariant` does not exist in the current runtime code. For subtle dividing lines, use proportional spacing or `mSurfaceVariant` rather than inventing missing tokens).*
+*(Note: `HydraColor.mOutlineVariant` does not exist in the current runtime code. For subtle dividing lines, use proportional spacing or `mSurfaceVariant` rather than inventing missing tokens).*
 
 ---
 
@@ -74,11 +74,11 @@ Material 3 establishes depth through 5 container steps. In Hydra, these are reso
 ```
 
 ### Usage Guidelines
-1. **Frame & Bar:** Uses `Color.mSurfaceContainerLow`.
-2. **Docked Panel Surfaces:** Default to `Color.mSurfaceContainer`.
-3. **Modal Overlays:** Use `Color.mSurfaceContainerHigh` to visually elevate above the underlying panel.
-4. **Grouped Cards & Sub-boxes:** Use `NBox` (`Color.mSurfaceContainerHigh`) inside a panel to delineate functional groups.
-5. **Interactive Controls:** Use `Color.mSurfaceContainerHighest` for hover states, inactive toggle tracks, or pill chips.
+1. **Frame & Bar:** Uses `HydraColor.mSurfaceContainerLow`.
+2. **Docked Panel Surfaces:** Default to `HydraColor.mSurfaceContainer`.
+3. **Modal Overlays:** Use `HydraColor.mSurfaceContainerHigh` to visually elevate above the underlying panel.
+4. **Grouped Cards & Sub-boxes:** Use `NBox` (`HydraColor.mSurfaceContainerHigh`) inside a panel to delineate functional groups.
+5. **Interactive Controls:** Use `HydraColor.mSurfaceContainerHighest` for hover states, inactive toggle tracks, or pill chips.
 
 ---
 
@@ -139,4 +139,4 @@ Hydra supports dynamic wallpaper-derived color extraction and multiple palette e
 
 ### Golden Rule for UI Components
 **NEVER branch styling on `surfaceStyle` or active theme name inside UI components.**
-Components bind strictly to `Color.m*` tokens. The theming engine automatically resolves the active theme into the correct semantic token values.
+Components bind strictly to `HydraColor.m*` tokens. The theming engine automatically resolves the active theme into the correct semantic token values.

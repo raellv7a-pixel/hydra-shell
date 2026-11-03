@@ -266,13 +266,13 @@ ColumnLayout {
       width: 40
       height: 40
       radius: Style.radiusL
-      color: Color.mSurfaceVariant
+      color: HydraColor.mSurfaceVariant
       opacity: 0.6
 
       NIcon {
         icon: "device-desktop"
         pointSize: Style.fontSizeL
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
         anchors.centerIn: parent
       }
     }
@@ -285,13 +285,13 @@ ColumnLayout {
         text: I18n.tr("setup.hydra.displays.header")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightBold
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
 
       NText {
         text: I18n.tr("setup.hydra.displays.subheader")
         pointSize: Style.fontSizeM
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
     }
   }
@@ -315,8 +315,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: 64
         visible: root.isConfirming
-        color: Qt.alpha(Color.mPrimary, 0.15)
-        border.color: Color.mPrimary
+        color: Qt.alpha(HydraColor.mPrimary, 0.15)
+        border.color: HydraColor.mPrimary
         border.width: 1
         radius: Style.radiusM
 
@@ -327,7 +327,7 @@ ColumnLayout {
 
           NIcon {
             icon: "alert-circle"
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
             pointSize: Style.fontSizeL
           }
 
@@ -337,12 +337,12 @@ ColumnLayout {
             NText {
               text: I18n.tr("setup.hydra.displays.confirm-title")
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               pointSize: Style.fontSizeM
             }
             NText {
               text: I18n.tr("setup.hydra.displays.confirm-desc", { "seconds": MonitorService.confirmationRemainingSeconds })
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               pointSize: Style.fontSizeS
             }
           }
@@ -350,8 +350,8 @@ ColumnLayout {
           SetupAction {
             text: I18n.tr("setup.hydra.displays.keep-button", { "seconds": MonitorService.confirmationRemainingSeconds })
             icon: "check"
-            backgroundColor: Color.mPrimary
-            textColor: Color.mOnPrimary
+            backgroundColor: HydraColor.mPrimary
+            textColor: HydraColor.mOnPrimary
             onClicked: {
               MonitorService.keepLayout();
               MonitorService.saveToUmbrielConfig();
@@ -361,8 +361,8 @@ ColumnLayout {
           SetupAction {
             text: I18n.tr("setup.hydra.displays.revert-now")
             icon: "arrow-back"
-            backgroundColor: Color.mError
-            textColor: Color.mOnError
+            backgroundColor: HydraColor.mError
+            textColor: HydraColor.mOnError
             onClicked: MonitorService.rollback()
           }
         }
@@ -373,8 +373,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: 64
         visible: root.isRollbackFailed
-        color: Qt.alpha(Color.mError, 0.15)
-        border.color: Color.mError
+        color: Qt.alpha(HydraColor.mError, 0.15)
+        border.color: HydraColor.mError
         border.width: 1
         radius: Style.radiusM
 
@@ -385,14 +385,14 @@ ColumnLayout {
 
           NIcon {
             icon: "alert-triangle"
-            color: Color.mError
+            color: HydraColor.mError
             pointSize: Style.fontSizeL
           }
 
           NText {
             Layout.fillWidth: true
             text: I18n.tr("setup.hydra.displays.rollback-failed-desc")
-            color: Color.mOnErrorContainer || Color.mError
+            color: HydraColor.mOnErrorContainer || HydraColor.mError
             pointSize: Style.fontSizeS
             wrapMode: Text.WordWrap
           }
@@ -400,8 +400,8 @@ ColumnLayout {
           SetupAction {
             text: I18n.tr("setup.hydra.displays.retry-rollback")
             icon: "refresh"
-            backgroundColor: Color.mError
-            textColor: Color.mOnError
+            backgroundColor: HydraColor.mError
+            textColor: HydraColor.mOnError
             onClicked: MonitorService.retryRollback()
           }
         }
@@ -412,8 +412,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: 44
         visible: root.isSettling && !root.isConfirming
-        color: Qt.alpha(Color.mSurfaceVariant, 0.85)
-        border.color: Color.mOutline
+        color: Qt.alpha(HydraColor.mSurfaceVariant, 0.85)
+        border.color: HydraColor.mOutline
         border.width: 1
         radius: Style.radiusM
 
@@ -433,7 +433,7 @@ ColumnLayout {
                   MonitorService.transactionState === "verifying" ? I18n.tr("setup.hydra.displays.status-verifying") :
                   MonitorService.isPersisting ? I18n.tr("setup.hydra.displays.status-persisting") :
                   I18n.tr("setup.hydra.displays.status-reverting")
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             pointSize: Style.fontSizeS
           }
         }
@@ -444,8 +444,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: 56
         visible: MonitorService.persistenceError !== "" && !root.isSettling
-        color: Qt.alpha(Color.mError, 0.15)
-        border.color: Color.mError
+        color: Qt.alpha(HydraColor.mError, 0.15)
+        border.color: HydraColor.mError
         border.width: 1
         radius: Style.radiusM
 
@@ -456,14 +456,14 @@ ColumnLayout {
 
           NIcon {
             icon: "alert-triangle"
-            color: Color.mError
+            color: HydraColor.mError
             pointSize: Style.fontSizeM
           }
 
           NText {
             Layout.fillWidth: true
             text: I18n.tr("setup.hydra.displays.persist-error", { "error": MonitorService.persistenceError })
-            color: Color.mOnErrorContainer || Color.mError
+            color: HydraColor.mOnErrorContainer || HydraColor.mError
             pointSize: Style.fontSizeS
             wrapMode: Text.WordWrap
           }
@@ -471,8 +471,8 @@ ColumnLayout {
           SetupAction {
             text: I18n.tr("setup.hydra.displays.retry-save")
             icon: "refresh"
-            backgroundColor: Color.mError
-            textColor: Color.mOnError
+            backgroundColor: HydraColor.mError
+            textColor: HydraColor.mOnError
             onClicked: MonitorService.saveToUmbrielConfig()
           }
         }
@@ -488,7 +488,7 @@ ColumnLayout {
           text: I18n.tr("setup.hydra.displays.select-display")
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightBold
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
 
         Repeater {
@@ -499,8 +499,8 @@ ColumnLayout {
             readonly property bool isPrimary: modelData.isPrimary || (modelData.x === 0 && modelData.y === 0)
 
             text: (modelData.name || modelData.outputId) + (isPrimary ? " ★" : "")
-            backgroundColor: isSelected ? Color.mPrimary : Color.mSurfaceContainerHigh
-            textColor: isSelected ? Color.mOnPrimary : Color.mOnSurface
+            backgroundColor: isSelected ? HydraColor.mPrimary : HydraColor.mSurfaceContainerHigh
+            textColor: isSelected ? HydraColor.mOnPrimary : HydraColor.mOnSurface
             enabled: !MonitorService.isBusy
             onClicked: MonitorService.selectOutput(modelData.outputId)
           }
@@ -519,8 +519,8 @@ ColumnLayout {
           id: sceneCanvas
           width: Math.max(root.viewportWidth, root.requiredSceneSize.width)
           height: Math.max(root.viewportHeight, root.requiredSceneSize.height)
-          color: Qt.alpha(Color.mSurface, 0.5)
-          border.color: Color.mOutline
+          color: Qt.alpha(HydraColor.mSurface, 0.5)
+          border.color: HydraColor.mOutline
           border.width: Style.borderS
           radius: Style.radiusM
 
@@ -529,7 +529,7 @@ ColumnLayout {
             opacity: 0.12
             onPaint: {
               var ctx = getContext("2d");
-              ctx.strokeStyle = Color.mOnSurface;
+              ctx.strokeStyle = HydraColor.mOnSurface;
               ctx.lineWidth = 1;
               ctx.beginPath();
               for (var x = 0; x < width; x += 32) {
@@ -563,8 +563,8 @@ ColumnLayout {
               z: isSelected ? 1 : 0
 
               radius: Style.radiusS
-              color: isSelected ? Qt.alpha(Color.mPrimary, 0.25) : Qt.alpha(Color.mSurfaceContainerHigh, 0.8)
-              border.color: isSelected ? Color.mPrimary : Color.mOutline
+              color: isSelected ? Qt.alpha(HydraColor.mPrimary, 0.25) : Qt.alpha(HydraColor.mSurfaceContainerHigh, 0.8)
+              border.color: isSelected ? HydraColor.mPrimary : HydraColor.mOutline
               border.width: isSelected ? Style.borderM : Style.borderS
 
               ColumnLayout {
@@ -578,13 +578,13 @@ ColumnLayout {
                     text: output.name || output.outputId
                     font.weight: Style.fontWeightBold
                     pointSize: Style.fontSizeS
-                    color: isSelected ? Color.mPrimary : Color.mOnSurface
+                    color: isSelected ? HydraColor.mPrimary : HydraColor.mOnSurface
                   }
                   NIcon {
                     visible: isPrimary
                     icon: "star"
                     pointSize: Style.fontSizeXS
-                    color: isSelected ? Color.mPrimary : Color.mOnSurfaceVariant
+                    color: isSelected ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
                   }
                 }
 
@@ -592,7 +592,7 @@ ColumnLayout {
                   Layout.alignment: Qt.AlignHCenter
                   text: Math.round(output.width) + "x" + Math.round(output.height) + " (" + Math.round((output.scale || 1.0) * 100) + "%)"
                   pointSize: Style.fontSizeXS
-                  color: Color.mOnSurfaceVariant
+                  color: HydraColor.mOnSurfaceVariant
                 }
               }
             }
@@ -625,7 +625,7 @@ ColumnLayout {
           text: root.selectedOutput ? (root.selectedOutput.name + " (" + (root.selectedOutput.model || root.selectedOutput.make || "Monitor") + ")") : I18n.tr("setup.hydra.displays.monitor-settings")
           pointSize: Style.fontSizeM
           font.weight: Style.fontWeightBold
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
         }
 
         // Primary Display Button (for multi-monitor)
@@ -636,9 +636,9 @@ ColumnLayout {
                 I18n.tr("setup.hydra.displays.set-primary")
           icon: "star"
           backgroundColor: (root.selectedOutput && (root.selectedOutput.isPrimary || (root.selectedOutput.x === 0 && root.selectedOutput.y === 0))) ?
-                           Qt.alpha(Color.mPrimary, 0.2) : Color.mSurfaceVariant
+                           Qt.alpha(HydraColor.mPrimary, 0.2) : HydraColor.mSurfaceVariant
           textColor: (root.selectedOutput && (root.selectedOutput.isPrimary || (root.selectedOutput.x === 0 && root.selectedOutput.y === 0))) ?
-                     Color.mPrimary : Color.mOnSurfaceVariant
+                     HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
           enabled: !MonitorService.isBusy && !!root.selectedOutput && !(root.selectedOutput.isPrimary || (root.selectedOutput.x === 0 && root.selectedOutput.y === 0))
           onClicked: {
             if (root.selectedOutput) {
@@ -742,8 +742,8 @@ ColumnLayout {
         SetupAction {
           text: I18n.tr("setup.hydra.displays.apply-button")
           icon: "check"
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: HydraColor.mPrimary
+          textColor: HydraColor.mOnPrimary
           enabled: !MonitorService.isBusy && root.isDirty
           onClicked: MonitorService.applyLayout()
         }
@@ -751,8 +751,8 @@ ColumnLayout {
         SetupAction {
           text: I18n.tr("setup.hydra.displays.reset-draft")
           icon: "refresh"
-          backgroundColor: Color.mSurfaceVariant
-          textColor: Color.mOnSurfaceVariant
+          backgroundColor: HydraColor.mSurfaceVariant
+          textColor: HydraColor.mOnSurfaceVariant
           enabled: !MonitorService.isBusy && root.isDirty
           onClicked: root.discardDraft()
         }
@@ -766,7 +766,7 @@ ColumnLayout {
                 root.isConfirming ? I18n.tr("setup.hydra.displays.confirming-hint") :
                 I18n.tr("setup.hydra.displays.synced-hint")
           pointSize: Style.fontSizeS
-          color: root.isDirty ? Color.mPrimary : Color.mOnSurfaceVariant
+          color: root.isDirty ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
         }
       }
     }

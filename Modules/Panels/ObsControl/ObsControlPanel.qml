@@ -9,8 +9,8 @@ SmartPanel {
   id: root
 
   preferredWidth: Math.round(430 * Style.uiScaleRatio)
-  panelBackgroundColor: Color.mSurface
-  panelBorderColor: Qt.alpha(Color.mOutline, 0.28)
+  panelBackgroundColor: HydraColor.mSurface
+  panelBorderColor: Qt.alpha(HydraColor.mOutline, 0.28)
 
   panelContent: Item {
     id: panelContent
@@ -32,13 +32,13 @@ SmartPanel {
           Layout.preferredWidth: Style.baseWidgetSize * 0.9
           Layout.preferredHeight: Style.baseWidgetSize * 0.9
           radius: height / 2
-          color: ObsControlService.recording ? Color.mErrorContainer : Color.mPrimaryContainer
+          color: ObsControlService.recording ? HydraColor.mErrorContainer : HydraColor.mPrimaryContainer
 
           NIcon {
             anchors.centerIn: parent
             icon: ObsControlService.recording ? "player-record-filled" : "brand-obs"
             pointSize: Style.fontSizeL
-            color: ObsControlService.recording ? Color.mOnErrorContainer : Color.mOnPrimaryContainer
+            color: ObsControlService.recording ? HydraColor.mOnErrorContainer : HydraColor.mOnPrimaryContainer
           }
         }
 
@@ -51,13 +51,13 @@ SmartPanel {
             text: I18n.tr("bar.obs-control.title")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
           }
           NText {
             Layout.fillWidth: true
             text: I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`)
             wrapMode: Text.WordWrap
-            color: ObsControlService.connected ? Color.mPrimary : Color.mOnSurfaceVariant
+            color: ObsControlService.connected ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
           }
         }
 
@@ -77,7 +77,7 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         implicitHeight: statusColumn.implicitHeight + Style.margin2M
-        color: Color.mSurfaceContainer
+        color: HydraColor.mSurfaceContainer
 
         ColumnLayout {
           id: statusColumn
@@ -89,7 +89,7 @@ SmartPanel {
             Layout.fillWidth: true
             text: I18n.tr("bar.obs-control.status")
             font.weight: Style.fontWeightSemiBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
           }
 
           RowLayout {
@@ -98,13 +98,13 @@ SmartPanel {
 
             NIcon {
               icon: ObsControlService.connected ? "plug-connected" : "plug-connected-x"
-              color: ObsControlService.connected ? Color.mPrimary : Color.mError
+              color: ObsControlService.connected ? HydraColor.mPrimary : HydraColor.mError
             }
             NText {
               Layout.fillWidth: true
               text: ObsControlService.connected ? I18n.tr("bar.obs-control.authenticated") : I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`)
               wrapMode: Text.WordWrap
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
           }
 
@@ -113,28 +113,28 @@ SmartPanel {
             visible: ObsControlService.effectiveState === "connection-error" && ObsControlService.lastError !== ""
             text: ObsControlService.lastError
             wrapMode: Text.WordWrap
-            color: Color.mError
+            color: HydraColor.mError
           }
 
           NText {
             Layout.fillWidth: true
             visible: ObsControlService.recording
             text: `${I18n.tr("bar.obs-control.recording")}: ${formatDuration(ObsControlService.displayRecordDurationMs)}`
-            color: Color.mError
+            color: HydraColor.mError
             font.weight: Style.fontWeightSemiBold
           }
           NText {
             Layout.fillWidth: true
             visible: ObsControlService.streaming
             text: `${I18n.tr("bar.obs-control.streaming")}: ${formatDuration(ObsControlService.displayStreamDurationMs)}`
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
             font.weight: Style.fontWeightSemiBold
           }
           NText {
             Layout.fillWidth: true
             visible: ObsControlService.replayBuffer
             text: I18n.tr("bar.obs-control.replay-active")
-            color: Color.mSecondary
+            color: HydraColor.mSecondary
             font.weight: Style.fontWeightSemiBold
           }
         }
@@ -151,8 +151,8 @@ SmartPanel {
           icon: "player-record"
           text: ObsControlService.recording ? I18n.tr("bar.obs-control.stop-recording") : I18n.tr("bar.obs-control.start-recording")
           enabled: ObsControlService.connected && !ObsControlService.actionBusy
-          backgroundColor: ObsControlService.recording ? Color.mError : Color.mPrimary
-          textColor: ObsControlService.recording ? Color.mOnError : Color.mOnPrimary
+          backgroundColor: ObsControlService.recording ? HydraColor.mError : HydraColor.mPrimary
+          textColor: ObsControlService.recording ? HydraColor.mOnError : HydraColor.mOnPrimary
           onClicked: ObsControlService.toggleRecord()
         }
         NButton {
@@ -160,8 +160,8 @@ SmartPanel {
           icon: "broadcast"
           text: ObsControlService.streaming ? I18n.tr("bar.obs-control.stop-streaming") : I18n.tr("bar.obs-control.start-streaming")
           enabled: ObsControlService.connected && !ObsControlService.actionBusy
-          backgroundColor: ObsControlService.streaming ? Color.mPrimary : Color.mSurfaceVariant
-          textColor: ObsControlService.streaming ? Color.mOnPrimary : Color.mOnSurface
+          backgroundColor: ObsControlService.streaming ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
+          textColor: ObsControlService.streaming ? HydraColor.mOnPrimary : HydraColor.mOnSurface
           onClicked: ObsControlService.toggleStream()
         }
         NButton {
@@ -169,8 +169,8 @@ SmartPanel {
           icon: "history"
           text: ObsControlService.replayBuffer ? I18n.tr("bar.obs-control.stop-replay") : I18n.tr("bar.obs-control.start-replay")
           enabled: ObsControlService.connected && !ObsControlService.actionBusy
-          backgroundColor: ObsControlService.replayBuffer ? Color.mSecondary : Color.mSurfaceVariant
-          textColor: ObsControlService.replayBuffer ? Color.mOnSecondary : Color.mOnSurface
+          backgroundColor: ObsControlService.replayBuffer ? HydraColor.mSecondary : HydraColor.mSurfaceVariant
+          textColor: ObsControlService.replayBuffer ? HydraColor.mOnSecondary : HydraColor.mOnSurface
           onClicked: ObsControlService.toggleReplay()
         }
         NButton {
@@ -188,7 +188,7 @@ SmartPanel {
         visible: ObsControlService.configurationMissing
         text: I18n.tr("bar.obs-control.configure-hint")
         wrapMode: Text.WordWrap
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
     }
 

@@ -41,14 +41,14 @@ ColumnLayout {
 
             NText {
               text: modelData.name
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
             }
 
             NText {
               text: modelData.url
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               Layout.fillWidth: true
               elide: Text.ElideRight
             }
@@ -100,9 +100,9 @@ ColumnLayout {
     padding: Style.marginL
 
     background: Rectangle {
-      color: Color.mSurface
+      color: HydraColor.mSurface
       radius: Style.radiusS
-      border.color: Color.mPrimary
+      border.color: HydraColor.mPrimary
       border.width: Style.borderM
     }
 
@@ -144,8 +144,8 @@ ColumnLayout {
 
         NButton {
           text: I18n.tr("common.add")
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: HydraColor.mPrimary
+          textColor: HydraColor.mOnPrimary
           enabled: sourceNameInput.text.length > 0 && sourceUrlInput.text.length > 0
           onClicked: {
             if (PluginRegistry.addPluginSource(sourceNameInput.text, sourceUrlInput.text)) {

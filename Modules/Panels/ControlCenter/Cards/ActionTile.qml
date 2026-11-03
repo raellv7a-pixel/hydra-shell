@@ -76,7 +76,7 @@ DashboardCard {
 
       NIcon {
         icon: iconName
-        color: active ? Color.mOnPrimaryContainer : panelRoot.componentText(actionTile.styleKey, false)
+        color: active ? HydraColor.mOnPrimaryContainer : panelRoot.componentText(actionTile.styleKey, false)
         pointSize: Style.fontSizeXL
         scale: active ? 1.08 : 1
 
@@ -91,7 +91,7 @@ DashboardCard {
       NText {
         Layout.fillWidth: true
         text: labelText
-        color: active ? panelRoot.componentColor(actionTile.styleKey, "text", Color.mOnPrimaryContainer) : panelRoot.componentText(actionTile.styleKey, true)
+        color: active ? panelRoot.componentColor(actionTile.styleKey, "text", HydraColor.mOnPrimaryContainer) : panelRoot.componentText(actionTile.styleKey, true)
         pointSize: Style.fontSizeS
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
@@ -108,7 +108,7 @@ DashboardCard {
         Layout.fillWidth: true
         text: detailText
         pointSize: Style.fontSizeXS
-        color: active ? panelRoot.componentColor(actionTile.styleKey, "subtext", Qt.alpha(Color.mOnPrimaryContainer, 0.78)) : panelRoot.componentText(actionTile.styleKey, false)
+        color: active ? panelRoot.componentColor(actionTile.styleKey, "subtext", Qt.alpha(HydraColor.mOnPrimaryContainer, 0.78)) : panelRoot.componentText(actionTile.styleKey, false)
         elide: Text.ElideRight
       }
 
@@ -119,9 +119,9 @@ DashboardCard {
         baseSize: Math.round(24 * panelRoot.panelUnit)
         tooltipText: secondaryTooltip
         colorBg: "transparent"
-        colorBgHover: panelRoot.componentColor(actionTile.styleKey, "buttonBackground", Color.mSurfaceContainerHighest)
-        colorFg: active ? Color.mOnPrimaryContainer : panelRoot.componentText(actionTile.styleKey, false)
-        colorFgHover: panelRoot.componentColor(actionTile.styleKey, "buttonText", Color.mOnSurface)
+        colorBgHover: panelRoot.componentColor(actionTile.styleKey, "buttonBackground", HydraColor.mSurfaceContainerHighest)
+        colorFg: active ? HydraColor.mOnPrimaryContainer : panelRoot.componentText(actionTile.styleKey, false)
+        colorFgHover: panelRoot.componentColor(actionTile.styleKey, "buttonText", HydraColor.mOnSurface)
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: actionTile.secondaryTriggered()

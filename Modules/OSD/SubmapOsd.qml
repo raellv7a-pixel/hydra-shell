@@ -25,7 +25,7 @@ Loader {
     Rectangle {
       anchors.fill: parent
       radius: Style.radiusL
-      color: Color.mSurfaceContainerHigh
+      color: HydraColor.mSurfaceContainerHigh
       RowLayout {
         id: row
         anchors {
@@ -37,12 +37,12 @@ Loader {
         spacing: Style.marginM
         NIcon {
           icon: "keyboard"
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
           pointSize: Style.fontSizeL
         }
         NText {
           text: "Modo: " + CompositorService.activeSubmap
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           font.weight: Style.fontWeightSemiBold
           Layout.fillWidth: true
           elide: Text.ElideRight

@@ -23,13 +23,13 @@ Item {
       NIcon {
         icon: "apps"
         pointSize: Style.fontSizeM
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
 
       NText {
         Layout.fillWidth: true
         text: screenUsageAppRow.appData?.name || "--"
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         pointSize: Style.fontSizeS
         font.weight: Style.fontWeightMedium
         elide: Text.ElideRight
@@ -37,7 +37,7 @@ Item {
 
       NText {
         text: panelRoot.durationText(screenUsageAppRow.appData?.seconds || 0)
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeXS
         font.family: Settings.data.ui.fontFixed
       }
@@ -47,7 +47,7 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.max(4, Math.round(5 * panelRoot.panelUnit))
       radius: height / 2
-      color: Qt.alpha(Color.mSurface, 0.5)
+      color: Qt.alpha(HydraColor.mSurface, 0.5)
 
       Rectangle {
         anchors.left: parent.left
@@ -55,7 +55,7 @@ Item {
         anchors.bottom: parent.bottom
         width: parent.width * Math.max(0.02, Math.min(1, Number(screenUsageAppRow.appData?.seconds || 0) / Math.max(1, screenUsageAppRow.maxSeconds)))
         radius: parent.radius
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
         opacity: 0.82
       }
     }

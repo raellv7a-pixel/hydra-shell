@@ -97,7 +97,7 @@ Item {
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? Color.mHover : Style.capsuleColor
+    color: mouseArea.containsMouse ? HydraColor.mHover : Style.capsuleColor
     radius: Math.min(Style.iRadiusL, width / 2)
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth

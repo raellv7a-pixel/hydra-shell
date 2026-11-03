@@ -12,7 +12,7 @@ DashboardCard {
   property string detailText: ""
   property string iconName: ""
   property real ratio: 0
-  property color fillColor: Color.mPrimary
+  property color fillColor: HydraColor.mPrimary
 
   Layout.preferredHeight: Math.round(104 * panelRoot.panelUnit)
   color: panelRoot.m3SurfaceContainerHigh

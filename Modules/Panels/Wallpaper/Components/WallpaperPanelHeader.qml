@@ -49,7 +49,7 @@ NBox {
     }
   }
 
-  color: Color.mSurfaceContainerLow
+  color: HydraColor.mSurfaceContainerLow
   radius: Style.radiusL
   implicitHeight: headerColumn.implicitHeight + Style.margin2L
 
@@ -84,14 +84,14 @@ NBox {
       NIcon {
         icon: "settings-wallpaper-selector"
         pointSize: Style.fontSizeXXL
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
 
       NText {
         text: I18n.tr("wallpaper.panel.title")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         Layout.fillWidth: true
       }
 
@@ -100,8 +100,8 @@ NBox {
         icon: "dark-mode"
         tooltipText: Settings.data.wallpaper.linkLightAndDarkWallpapers ? I18n.tr("wallpaper.panel.header-separate-light-dark-tooltip") : I18n.tr("wallpaper.panel.header-link-light-dark-tooltip")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
-        colorFg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+        colorBg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+        colorFg: !Settings.data.wallpaper.linkLightAndDarkWallpapers ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: Settings.data.wallpaper.linkLightAndDarkWallpapers = !Settings.data.wallpaper.linkLightAndDarkWallpapers
@@ -112,8 +112,8 @@ NBox {
         icon: "devices"
         tooltipText: Settings.data.wallpaper.setWallpaperOnAllMonitors ? I18n.tr("wallpaper.panel.header-devices-apply-all-tooltip") : I18n.tr("wallpaper.panel.header-devices-per-monitor-tooltip")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
-        colorFg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+        colorBg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+        colorFg: !Settings.data.wallpaper.setWallpaperOnAllMonitors ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: Settings.data.wallpaper.setWallpaperOnAllMonitors = !Settings.data.wallpaper.setWallpaperOnAllMonitors
@@ -123,10 +123,10 @@ NBox {
         icon: "folder-open"
         tooltipText: I18n.tr("wallpaper.panel.import-local-tooltip")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSecondaryContainer
-        colorFg: Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnSecondaryContainer
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSecondaryContainer
+        colorFg: HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnSecondaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: root.importRequested()
@@ -136,8 +136,8 @@ NBox {
         icon: "palette"
         tooltipText: I18n.tr("wallpaper.panel.solid-color-tooltip")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: Settings.data.wallpaper.useSolidColor ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
-        colorFg: Settings.data.wallpaper.useSolidColor ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+        colorBg: Settings.data.wallpaper.useSolidColor ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+        colorFg: Settings.data.wallpaper.useSolidColor ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: root.solidColorRequested()
@@ -147,10 +147,10 @@ NBox {
         icon: "settings"
         tooltipText: I18n.tr("panels.wallpaper.settings-title")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSecondaryContainer
-        colorFg: Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnSecondaryContainer
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSecondaryContainer
+        colorFg: HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnSecondaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: root.settingsRequested()
@@ -160,10 +160,10 @@ NBox {
         icon: "close"
         tooltipText: I18n.tr("common.close")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSecondaryContainer
-        colorFg: Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnSecondaryContainer
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSecondaryContainer
+        colorFg: HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnSecondaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: root.closeRequested()
@@ -332,10 +332,10 @@ NBox {
         icon: "color-swatch"
         tooltipText: Settings.data.colorSchemes.useWallpaperColors ? I18n.tr("wallpaper.panel.color-extraction-enabled") : I18n.tr("wallpaper.panel.color-extraction-disabled")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: Settings.data.colorSchemes.useWallpaperColors ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSecondaryContainer
-        colorFg: Settings.data.colorSchemes.useWallpaperColors ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnSecondaryContainer
+        colorBg: Settings.data.colorSchemes.useWallpaperColors ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSecondaryContainer
+        colorFg: Settings.data.colorSchemes.useWallpaperColors ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnSecondaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: {
@@ -447,10 +447,10 @@ NBox {
         icon: "settings"
         tooltipText: I18n.tr("wallpaper.panel.wallhaven-settings-title")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSecondaryContainer
-        colorFg: Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnSecondaryContainer
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSecondaryContainer
+        colorFg: HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnSecondaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         visible: Settings.data.wallpaper.useWallhaven

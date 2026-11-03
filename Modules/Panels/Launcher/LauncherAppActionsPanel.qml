@@ -88,7 +88,7 @@ Item {
 
   // Material 3 tonal surface: one step above the launcher's own container, with a
   // hint of the accent so it belongs to the highlighted entry above it.
-  readonly property color panelColor: Color.blend(Color.mSurfaceContainerHigh, Color.mPrimary, 0.07)
+  readonly property color panelColor: HydraColor.blend(HydraColor.mSurfaceContainerHigh, HydraColor.mPrimary, 0.07)
   readonly property int seamRadius: Style.radiusXXS
   readonly property int outerRadius: Style.radiusL
   readonly property real rowHeight: Math.round(38 * Style.uiScaleRatio)
@@ -165,9 +165,9 @@ Item {
           colorBg: "transparent"
           colorBorder: "transparent"
           colorBorderHover: "transparent"
-          colorFg: Color.mOnSurfaceVariant
-          colorBgHover: Color.mPrimaryContainer
-          colorFgHover: Color.mOnPrimaryContainer
+          colorFg: HydraColor.mOnSurfaceVariant
+          colorBgHover: HydraColor.mPrimaryContainer
+          colorFgHover: HydraColor.mOnPrimaryContainer
           onClicked: {
             if (root.launcher)
               root.launcher.hideAppProperties();
@@ -179,7 +179,7 @@ Item {
           text: root.showingProperties ? I18n.tr("launcher.app-properties.description") : I18n.tr("launcher.app-actions.title")
           pointSize: Style.fontSizeXS
           font.weight: Style.fontWeightSemiBold
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           elide: Text.ElideRight
         }
 
@@ -190,9 +190,9 @@ Item {
           colorBg: "transparent"
           colorBorder: "transparent"
           colorBorderHover: "transparent"
-          colorFg: Color.mOnSurfaceVariant
-          colorBgHover: Color.mPrimaryContainer
-          colorFgHover: Color.mOnPrimaryContainer
+          colorFg: HydraColor.mOnSurfaceVariant
+          colorBgHover: HydraColor.mPrimaryContainer
+          colorFgHover: HydraColor.mOnPrimaryContainer
           onClicked: root.requestClose()
         }
       }
@@ -223,12 +223,12 @@ Item {
 
             readonly property color foreground: {
               if (isConfirming)
-                return Color.mOnErrorContainer;
+                return HydraColor.mOnErrorContainer;
               if (isDestructive)
-                return Color.mError;
+                return HydraColor.mError;
               if (isActive && isEnabled)
-                return Color.mOnPrimaryContainer;
-              return Color.mOnSurface;
+                return HydraColor.mOnPrimaryContainer;
+              return HydraColor.mOnSurface;
             }
 
             Layout.fillWidth: true
@@ -251,9 +251,9 @@ Item {
               radius: Style.radiusS
               color: {
                 if (actionRow.isConfirming)
-                  return Color.mErrorContainer;
+                  return HydraColor.mErrorContainer;
                 if (actionRow.isActive && actionRow.isEnabled)
-                  return actionRow.isDestructive ? Qt.alpha(Color.mError, 0.14) : Color.mPrimaryContainer;
+                  return actionRow.isDestructive ? Qt.alpha(HydraColor.mError, 0.14) : HydraColor.mPrimaryContainer;
                 return "transparent";
               }
 
@@ -318,7 +318,7 @@ Item {
                   running: visible
                   size: Math.round(Style.fontSizeL * 1.3 * Style.uiScaleRatio)
                   strokeWidth: Style.borderM
-                  color: Color.mPrimary
+                  color: HydraColor.mPrimary
                 }
               }
 
@@ -342,7 +342,7 @@ Item {
                 text: actionRow.modelData.description || ""
                 visible: !actionRow.isConfirming && text !== ""
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 elide: Text.ElideRight
                 horizontalAlignment: Text.AlignRight
                 Layout.maximumWidth: Math.round(actionRow.width * 0.45)
@@ -356,9 +356,9 @@ Item {
                 Layout.preferredHeight: Math.round(root.rowHeight * 0.64)
                 Layout.alignment: Qt.AlignVCenter
                 radius: height * 0.5
-                color: cancelMouse.containsMouse ? Qt.alpha(Color.mOnErrorContainer, 0.14) : "transparent"
+                color: cancelMouse.containsMouse ? Qt.alpha(HydraColor.mOnErrorContainer, 0.14) : "transparent"
                 border.width: Style.borderS
-                border.color: Qt.alpha(Color.mOnErrorContainer, 0.4)
+                border.color: Qt.alpha(HydraColor.mOnErrorContainer, 0.4)
 
                 NText {
                   id: cancelLabel
@@ -366,7 +366,7 @@ Item {
                   text: I18n.tr("common.cancel")
                   pointSize: Style.fontSizeXS
                   font.weight: Style.fontWeightSemiBold
-                  color: Color.mOnErrorContainer
+                  color: HydraColor.mOnErrorContainer
                 }
 
                 MouseArea {
@@ -387,7 +387,7 @@ Item {
                 Layout.preferredHeight: Math.round(root.rowHeight * 0.64)
                 Layout.alignment: Qt.AlignVCenter
                 radius: height * 0.5
-                color: confirmMouse.containsMouse ? Color.mError : Qt.alpha(Color.mError, 0.85)
+                color: confirmMouse.containsMouse ? HydraColor.mError : Qt.alpha(HydraColor.mError, 0.85)
 
                 NText {
                   id: confirmLabel
@@ -395,7 +395,7 @@ Item {
                   text: I18n.tr("common.confirm")
                   pointSize: Style.fontSizeXS
                   font.weight: Style.fontWeightSemiBold
-                  color: Color.mOnError
+                  color: HydraColor.mOnError
                 }
 
                 MouseArea {
@@ -422,7 +422,7 @@ Item {
           Layout.preferredHeight: errorRow.implicitHeight + Style.margin2S
           visible: root.errorText !== ""
           radius: Style.radiusS
-          color: Color.mErrorContainer
+          color: HydraColor.mErrorContainer
 
           RowLayout {
             id: errorRow
@@ -436,7 +436,7 @@ Item {
             NIcon {
               icon: "alert-circle"
               pointSize: Style.fontSizeM
-              color: Color.mError
+              color: HydraColor.mError
               Layout.alignment: Qt.AlignTop
             }
 
@@ -444,7 +444,7 @@ Item {
               Layout.fillWidth: true
               text: root.errorText
               pointSize: Style.fontSizeXS
-              color: Color.mOnErrorContainer
+              color: HydraColor.mOnErrorContainer
               wrapMode: Text.Wrap
               maximumLineCount: 3
               elide: Text.ElideRight
@@ -490,7 +490,7 @@ Item {
                 anchors.centerIn: parent
                 icon: modelData.icon
                 pointSize: Style.fontSizeM
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
               }
             }
 
@@ -502,7 +502,7 @@ Item {
                 Layout.fillWidth: true
                 text: modelData.label
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 elide: Text.ElideRight
               }
 
@@ -510,7 +510,7 @@ Item {
                 Layout.fillWidth: true
                 text: modelData.value
                 pointSize: Style.fontSizeS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
                 elide: Text.ElideRight

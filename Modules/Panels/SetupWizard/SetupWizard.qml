@@ -22,7 +22,7 @@ SmartPanel {
   allowButtonPosition: false
   panelAnchorHorizontalCenter: true
   panelAnchorVerticalCenter: true
-  panelBackgroundColor: Color.mSurfaceContainer
+  panelBackgroundColor: HydraColor.mSurfaceContainer
   preferredWidth: Math.min(1040 * Math.min(Style.uiScaleRatio, 1.25), (screen?.width || 1040) - Style.margin2XL - frameThickness * 2)
   preferredHeight: Math.min((telemetryOnlyMode ? 520 : 740) * Math.min(Style.uiScaleRatio, 1.25), (screen?.height || 800) - barHeight - Style.margin2XL - frameThickness * 2)
 
@@ -216,11 +216,11 @@ SmartPanel {
               Layout.preferredWidth: 28 * Style.uiScaleRatio
               Layout.preferredHeight: 28 * Style.uiScaleRatio
               radius: width / 2
-              color: index === flow.currentStep ? Color.mPrimary : Color.mSurfaceContainerHigh
+              color: index === flow.currentStep ? HydraColor.mPrimary : HydraColor.mSurfaceContainerHigh
               NIcon {
                 anchors.centerIn: parent
                 icon: index < flow.currentStep ? "check" : flow.stepIcons[index]
-                color: index === flow.currentStep ? Color.mOnPrimary : Color.mOnSurfaceVariant
+                color: index === flow.currentStep ? HydraColor.mOnPrimary : HydraColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeM
               }
             }
@@ -228,7 +228,7 @@ SmartPanel {
               text: I18n.tr("setup.hydra.step-" + modelData)
               Layout.fillWidth: true
               wrapMode: Text.WordWrap
-              color: index === flow.currentStep ? Color.mPrimary : Color.mOnSurfaceVariant
+              color: index === flow.currentStep ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
               font.weight: index === flow.currentStep ? Style.fontWeightBold : Style.fontWeightRegular
             }
           }
@@ -236,7 +236,7 @@ SmartPanel {
         Item { Layout.fillHeight: true }
         NText {
           text: I18n.tr("setup.hydra.rail-note")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeS
           Layout.fillWidth: true
           wrapMode: Text.WordWrap
@@ -303,7 +303,7 @@ SmartPanel {
         NText {
           visible: flow.errorMessage !== "" || themeSession.error !== ""
           text: flow.errorMessage || themeSession.error
-          color: Color.mError
+          color: HydraColor.mError
           Layout.fillWidth: true
           wrapMode: Text.WordWrap
         }
@@ -312,8 +312,8 @@ SmartPanel {
           spacing: Style.marginM
           SetupAction {
             text: I18n.tr(root.mandatorySession ? "setup.hydra.use-defaults" : "common.cancel")
-            backgroundColor: Color.mSurfaceContainerHigh
-            textColor: Color.mOnSurface
+            backgroundColor: HydraColor.mSurfaceContainerHigh
+            textColor: HydraColor.mOnSurface
             enabled: !flow.busy
             onClicked: root.mandatorySession ? flow.useDefaults() : flow.cancelSession()
           }
@@ -322,8 +322,8 @@ SmartPanel {
             text: I18n.tr("common.back")
             visible: !root.telemetryOnlyMode && flow.currentStep > 0
             enabled: !flow.busy
-            backgroundColor: Color.mSurfaceContainerHigh
-            textColor: Color.mOnSurface
+            backgroundColor: HydraColor.mSurfaceContainerHigh
+            textColor: HydraColor.mOnSurface
             onClicked: flow.changeStep(flow.currentStep - 1)
           }
           SetupAction {

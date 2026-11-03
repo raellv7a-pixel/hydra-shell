@@ -364,9 +364,9 @@ Singleton {
   // PREVIEW — read-only palette computation, no templates/files touched
   // ================================================================================
   // Maps the snake_case keys template-processor.py returns to the "m*" keys that
-  // feed colors.json / Commons/Color.qml, per Assets/Templates/hydra.json.
+  // feed colors.json / Commons/HydraColor.qml, per Assets/Templates/hydra.json.
   // Surface containers are transported explicitly; accent containers remain
-  // derived locally in Commons/Color.qml.
+  // derived locally in Commons/HydraColor.qml.
   readonly property var colorKeyMap: ({
                                         "mPrimary": "primary",
                                         "mOnPrimary": "on_primary",

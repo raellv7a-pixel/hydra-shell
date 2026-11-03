@@ -38,7 +38,7 @@ SmartPanel {
       NText {
         Layout.fillWidth: true
         text: content.request?.multiple ? "Escolha uma ou mais fontes para compartilhar." : "Escolha um monitor ou uma janela para compartilhar."
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
       }
       Flow {
@@ -49,8 +49,8 @@ SmartPanel {
           NButton {
             required property string modelData
             text: modelData === "monitor" ? "Monitores" : "Janelas"
-            backgroundColor: root.sourceKind === modelData ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
-            textColor: root.sourceKind === modelData ? Color.mOnPrimaryContainer : Color.mOnSurface
+            backgroundColor: root.sourceKind === modelData ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
+            textColor: root.sourceKind === modelData ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
             activeFocusOnTab: true
             Keys.onSpacePressed: clicked()
             onClicked: { root.sourceKind = modelData; grid.currentIndex = 0; }
@@ -85,9 +85,9 @@ SmartPanel {
             anchors.fill: parent
             anchors.margins: Style.marginXS
             radius: Style.radiusM
-            color: parent.selected ? Color.mPrimaryContainer : (pointer.containsMouse ? Color.mSurfaceContainerHigh : Color.mSurfaceContainerLow)
+            color: parent.selected ? HydraColor.mPrimaryContainer : (pointer.containsMouse ? HydraColor.mSurfaceContainerHigh : HydraColor.mSurfaceContainerLow)
             border.width: grid.activeFocus && grid.currentIndex === index ? Style.borderM : 0
-            border.color: Color.mPrimary
+            border.color: HydraColor.mPrimary
             ColumnLayout {
               anchors.fill: parent
               anchors.margins: Style.marginM
@@ -102,16 +102,16 @@ SmartPanel {
                   fallbackIcon: "app-window"
                   borderWidth: 0
                 }
-                NIcon { visible: root.sourceKind === "monitor"; icon: "device-desktop"; pointSize: Style.fontSizeXXXL; color: Color.mOnSurfaceVariant }
+                NIcon { visible: root.sourceKind === "monitor"; icon: "device-desktop"; pointSize: Style.fontSizeXXXL; color: HydraColor.mOnSurfaceVariant }
                 Item { Layout.fillWidth: true }
-                NIcon { visible: selected; icon: "check"; color: Color.mPrimary }
+                NIcon { visible: selected; icon: "check"; color: HydraColor.mPrimary }
               }
               NText { Layout.fillWidth: true; text: modelData.title || modelData.name || modelData.app_id || "Janela"; elide: Text.ElideRight; font.weight: Style.fontWeightSemiBold }
               NText {
                 Layout.fillWidth: true
                 text: root.sourceKind === "monitor" ? modelData.width + " × " + modelData.height + " · " + (modelData.description || modelData.name) : (modelData.app_id || "Aplicativo sem identificador")
                 elide: Text.ElideRight
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
               }
             }
@@ -123,13 +123,13 @@ SmartPanel {
             }
           }
         }
-        NText { anchors.centerIn: parent; visible: grid.count === 0; text: content.request ? "Nenhuma fonte disponível nesta categoria." : "Carregando fontes…"; color: Color.mOnSurfaceVariant }
+        NText { anchors.centerIn: parent; visible: grid.count === 0; text: content.request ? "Nenhuma fonte disponível nesta categoria." : "Carregando fontes…"; color: HydraColor.mOnSurfaceVariant }
       }
       RowLayout {
         Layout.fillWidth: true
-        NText { text: ScreenShareService.selections.length + " selecionada(s)"; color: Color.mOnSurfaceVariant }
+        NText { text: ScreenShareService.selections.length + " selecionada(s)"; color: HydraColor.mOnSurfaceVariant }
         Item { Layout.fillWidth: true }
-        NButton { text: "Cancelar"; backgroundColor: Color.mSurfaceContainerHigh; textColor: Color.mOnSurface; activeFocusOnTab: true; Keys.onSpacePressed: clicked(); onClicked: ScreenShareService.cancel() }
+        NButton { text: "Cancelar"; backgroundColor: HydraColor.mSurfaceContainerHigh; textColor: HydraColor.mOnSurface; activeFocusOnTab: true; Keys.onSpacePressed: clicked(); onClicked: ScreenShareService.cancel() }
         NButton { text: "Compartilhar"; enabled: ScreenShareService.selections.length > 0; activeFocusOnTab: true; Keys.onSpacePressed: clicked(); onClicked: ScreenShareService.respond(ScreenShareService.selections) }
       }
     }

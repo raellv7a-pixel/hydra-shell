@@ -38,7 +38,7 @@ DashboardCard {
         text: panelRoot.tr("media")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 
@@ -46,7 +46,7 @@ DashboardCard {
         text: MediaService.isPlaying ? panelRoot.tr("playing") : panelRoot.tr("idle")
         pointSize: Style.fontSizeS
         font.family: Settings.data.ui.fontFixed
-        color: MediaService.isPlaying ? Color.mPrimary : Color.mOnSurfaceVariant
+        color: MediaService.isPlaying ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
       }
     }
 
@@ -98,7 +98,7 @@ DashboardCard {
 
               width: lyricsList.width
               text: modelData || "· · ·"
-              color: activeLine ? Color.mPrimary : Color.mOnSurfaceVariant
+              color: activeLine ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
               pointSize: activeLine ? Style.fontSizeL : Style.fontSizeM
               font.weight: activeLine ? Style.fontWeightBold : Style.fontWeightNormal
               horizontalAlignment: Text.AlignHCenter
@@ -212,7 +212,7 @@ DashboardCard {
                     imagePath: MediaService.trackArtUrl
                     fallbackIcon: "music"
                     fallbackIconSize: Style.fontSizeXXXL * 2
-                    borderColor: Qt.alpha(Color.mOutline, 0.3)
+                    borderColor: Qt.alpha(HydraColor.mOutline, 0.3)
                     borderWidth: Style.borderS
 
                     SequentialAnimation on scale {
@@ -245,7 +245,7 @@ DashboardCard {
                     NText {
                       Layout.fillWidth: true
                       text: MediaService.trackTitle || panelRoot.tr("nothingPlaying")
-                      color: Color.mOnSurface
+                      color: HydraColor.mOnSurface
                       pointSize: Style.fontSizeXXL
                       font.weight: Style.fontWeightBold
                       horizontalAlignment: Text.AlignHCenter
@@ -255,7 +255,7 @@ DashboardCard {
                     NText {
                       Layout.fillWidth: true
                       text: MediaService.trackArtist || MediaService.playerIdentity || ""
-                      color: Color.mOnSurfaceVariant
+                      color: HydraColor.mOnSurfaceVariant
                       pointSize: Style.fontSizeL
                       horizontalAlignment: Text.AlignHCenter
                       elide: Text.ElideRight
@@ -285,7 +285,7 @@ DashboardCard {
                       Layout.fillWidth: true
                       NText {
                         text: MediaService.positionString || "0:00"
-                        color: Color.mOnSurfaceVariant
+                        color: HydraColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeXS
                         font.family: Settings.data.ui.fontFixed
                       }
@@ -294,7 +294,7 @@ DashboardCard {
                       }
                       NText {
                         text: MediaService.lengthString || "0:00"
-                        color: Color.mOnSurfaceVariant
+                        color: HydraColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeXS
                         font.family: Settings.data.ui.fontFixed
                       }
@@ -310,7 +310,7 @@ DashboardCard {
                       baseSize: Math.round(36 * panelRoot.panelUnit)
                       enabled: MediaService.canGoPrevious
                       onClicked: MediaService.previous()
-                      colorBg: Qt.alpha(Color.mPrimary, 0.1)
+                      colorBg: Qt.alpha(HydraColor.mPrimary, 0.1)
                     }
 
                     NIconButton {
@@ -318,8 +318,8 @@ DashboardCard {
                       baseSize: Math.round(52 * panelRoot.panelUnit)
                       enabled: MediaService.currentPlayer !== null
                       onClicked: MediaService.playPause()
-                      colorBg: Color.mPrimary
-                      colorFg: Color.mOnPrimary
+                      colorBg: HydraColor.mPrimary
+                      colorFg: HydraColor.mOnPrimary
                     }
 
                     NIconButton {
@@ -327,7 +327,7 @@ DashboardCard {
                       baseSize: Math.round(36 * panelRoot.panelUnit)
                       enabled: MediaService.canGoNext
                       onClicked: MediaService.next()
-                      colorBg: Qt.alpha(Color.mPrimary, 0.1)
+                      colorBg: Qt.alpha(HydraColor.mPrimary, 0.1)
                     }
                   }
 
@@ -356,7 +356,7 @@ DashboardCard {
 
                   NText {
                     text: panelRoot.tr("players")
-                    color: Color.mOnSurface
+                    color: HydraColor.mOnSurface
                     font.weight: Style.fontWeightSemiBold
                   }
 
@@ -394,7 +394,7 @@ DashboardCard {
             width: mediaSwipeView.currentIndex === index ? Math.round(24 * panelRoot.panelUnit) : Math.round(8 * panelRoot.panelUnit)
             height: Math.round(8 * panelRoot.panelUnit)
             radius: height / 2
-            color: mediaSwipeView.currentIndex === index ? Color.mPrimary : Color.mSurfaceVariant
+            color: mediaSwipeView.currentIndex === index ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
             Behavior on width {
               NumberAnimation {
                 duration: Style.animationNormal

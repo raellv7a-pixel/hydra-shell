@@ -84,14 +84,14 @@ Item {
 
     color: {
       if (pillMouseArea.containsMouse)
-        return Color.mHover;
+        return HydraColor.mHover;
       if (workspace.isFocused)
-        return Color.resolveColorKey(focusedColor);
+        return HydraColor.resolveColorKey(focusedColor);
       if (workspace.isUrgent)
-        return Color.mError;
+        return HydraColor.mError;
       if (workspace.isOccupied)
-        return Color.resolveColorKey(occupiedColor);
-      return Qt.alpha(Color.resolveColorKey(emptyColor), 0.3);
+        return HydraColor.resolveColorKey(occupiedColor);
+      return Qt.alpha(HydraColor.resolveColorKey(emptyColor), 0.3);
     }
 
     Loader {
@@ -126,18 +126,18 @@ Item {
           wrapMode: Text.Wrap
           color: {
             if (pillMouseArea.containsMouse)
-              return Color.mOnHover;
+              return HydraColor.mOnHover;
             if (workspace.isFocused)
-              return Color.resolveOnColorKey(focusedColor);
+              return HydraColor.resolveOnColorKey(focusedColor);
             if (workspace.isUrgent)
-              return Color.mOnError;
+              return HydraColor.mOnError;
             if (workspace.isOccupied)
-              return Color.resolveOnColorKey(occupiedColor);
-            return Color.resolveOnColorKey(emptyColor);
+              return HydraColor.resolveOnColorKey(occupiedColor);
+            return HydraColor.resolveOnColorKey(emptyColor);
           }
 
           Behavior on color {
-            enabled: !Color.isTransitioning
+            enabled: !HydraColor.isTransitioning
             ColorAnimation {
               duration: Style.animationFast
               easing.type: Easing.InOutQuad
@@ -155,7 +155,7 @@ Item {
       }
     }
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation {
         duration: Style.animationFast
         easing.type: Easing.InOutQuad

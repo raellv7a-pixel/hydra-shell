@@ -69,7 +69,7 @@ Rectangle {
   Layout.margins: 0
   implicitWidth: tabRow.implicitWidth + (margins * 2)
   implicitHeight: tabHeight + (margins * 2)
-  color: Color.mSurfaceContainerHigh
+  color: HydraColor.mSurfaceContainerHigh
   radius: Style.iRadiusL
 
   RowLayout {

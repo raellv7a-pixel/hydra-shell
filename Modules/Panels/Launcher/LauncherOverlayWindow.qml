@@ -108,7 +108,7 @@ Variants {
       // Dimmer background (click to close)
       Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(Color.mSurface, Settings.data.general.dimmerOpacity)
+        color: Qt.alpha(HydraColor.mSurface, Settings.data.general.dimmerOpacity)
         opacity: launcherPanel.presented ? 1.0 : 0.0
 
         Behavior on opacity {
@@ -290,7 +290,7 @@ Variants {
 
           ShapePath {
             strokeWidth: -1
-            fillColor: Qt.alpha(Color.mSurfaceContainer, Color.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
+            fillColor: Qt.alpha(HydraColor.mSurfaceContainer, HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
 
             // Offset by radius to account for Shape's extended bounds
             startX: panelShape.radius + panelShape.radius * panelShape.tlMultX
@@ -356,7 +356,7 @@ Variants {
           anchors.fill: parent
           color: "transparent"
           radius: Style.radiusL
-          border.color: Qt.alpha(Color.mOutline, 0.32)
+          border.color: Qt.alpha(HydraColor.mOutline, 0.32)
           border.width: Style.borderS
           visible: !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
         }
@@ -389,7 +389,7 @@ Variants {
         width: launcherWindow.previewPanelWidth
         height: Math.round(400 * Style.uiScaleRatio)
         forceOpaque: true
-        color: Color.mSurfaceContainerLow
+        color: HydraColor.mSurfaceContainerLow
         x: {
           if (panelPosition.endsWith("_right"))
             return launcherPanel.x - launcherWindow.previewPanelWidth - Style.marginM;

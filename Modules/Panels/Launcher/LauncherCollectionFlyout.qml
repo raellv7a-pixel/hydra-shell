@@ -20,7 +20,7 @@ Item {
     anchors.fill: surface
     source: surface
     autoPaddingEnabled: true
-    shadowColor: Color.mShadow
+    shadowColor: HydraColor.mShadow
     shadowOpacity: Style.shadowOpacity * Style.opacityLight
     shadowHorizontalOffset: 0
     shadowVerticalOffset: Style.marginXXS
@@ -29,7 +29,7 @@ Item {
     id: surface
     anchors.fill: parent
     forceOpaque: true
-    color: Color.mSurfaceContainerHighest
+    color: HydraColor.mSurfaceContainerHighest
     radius: Style.radiusL
     border.width: 0
   }
@@ -83,14 +83,14 @@ Item {
         Layout.preferredWidth: root.folder?.mode === "pinned" ? root.launcher.metrics.pillHeight : Settings.data.appLauncher.folderIconSize * Style.uiScaleRatio
         Layout.preferredHeight: Layout.preferredWidth
         sourceComponent: root.folder?.mode === "pinned" ? pinnedIcon : folderIcon
-        Component { id: pinnedIcon; NIcon { icon: "pin"; color: Color.mPrimary } }
+        Component { id: pinnedIcon; NIcon { icon: "pin"; color: HydraColor.mPrimary } }
         Component { id: folderIcon; LauncherFolderIcon { folder: root.folder || { mode: "manual", icon: "folder" } } }
       }
       ColumnLayout {
         Layout.fillWidth: true
         spacing: 0
         NText { Layout.fillWidth: true; text: root.folder?.name || ""; pointSize: Style.fontSizeM; font.weight: Style.fontWeightSemiBold; elide: Text.ElideRight }
-        NText { text: I18n.tr("launcher-home.app-count", { count: root.folder?.entries.length || 0 }); pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant }
+        NText { text: I18n.tr("launcher-home.app-count", { count: root.folder?.entries.length || 0 }); pointSize: Style.fontSizeXS; color: HydraColor.mOnSurfaceVariant }
       }
       LauncherHomeButton {
         visible: root.folder?.mode === "manual" && !root.launcher.activeSubfolderId
@@ -156,7 +156,7 @@ Item {
             Layout.preferredHeight: Layout.preferredWidth
             LauncherAppIcon { anchors.fill: parent; visible: !appButton.isFolder; appIcon: appButton.modelData.icon || "" }
             Loader { anchors.centerIn: parent; active: appButton.isFolder; sourceComponent: LauncherFolderIcon { folder: appButton.modelData } }
-            NIcon { anchors.right: parent.right; anchors.bottom: parent.bottom; visible: !!appButton.badgeState.badgeIcon; icon: appButton.badgeState.badgeIcon || ""; pointSize: Style.fontSizeS; color: Color.mPrimary }
+            NIcon { anchors.right: parent.right; anchors.bottom: parent.bottom; visible: !!appButton.badgeState.badgeIcon; icon: appButton.badgeState.badgeIcon || ""; pointSize: Style.fontSizeS; color: HydraColor.mPrimary }
           }
           NText { Layout.fillWidth: true; text: appButton.text; pointSize: Style.fontSizeXS; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight }
         }
@@ -170,7 +170,7 @@ Item {
         }
       }
     }
-    NText { visible: !root.entries.length && !root.launcher.appPanelOpen; Layout.fillWidth: true; text: I18n.tr("launcher-home.empty-folder"); color: Color.mOnSurfaceVariant; wrapMode: Text.Wrap }
+    NText { visible: !root.entries.length && !root.launcher.appPanelOpen; Layout.fillWidth: true; text: I18n.tr("launcher-home.empty-folder"); color: HydraColor.mOnSurfaceVariant; wrapMode: Text.Wrap }
     Flickable {
       id: actionsScroll
       visible: root.launcher.appPanelOpen

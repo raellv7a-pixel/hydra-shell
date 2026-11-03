@@ -56,7 +56,7 @@ ShellRoot {
     }
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "hydra-polish-regression"
-    color: Color.mSurface
+    color: HydraColor.mSurface
 
     Item {
       visible: !root.showingLauncher

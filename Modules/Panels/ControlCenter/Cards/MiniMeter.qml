@@ -62,7 +62,7 @@ DashboardCard {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.max(5, Math.round(6 * panelRoot.panelUnit))
       radius: height / 2
-      color: Qt.alpha(Color.mOutline, 0.16)
+      color: Qt.alpha(HydraColor.mOutline, 0.16)
       clip: true
 
       Rectangle {

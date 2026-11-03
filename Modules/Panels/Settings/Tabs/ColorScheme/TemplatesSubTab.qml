@@ -26,7 +26,7 @@ ColumnLayout {
     function ch(v) {
       return Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, "0");
     }
-    var c = Color.mPrimary;
+    var c = HydraColor.mPrimary;
     return "#" + ch(c.r) + ch(c.g) + ch(c.b);
   }
 
@@ -235,8 +235,8 @@ ColumnLayout {
       icon: "filter"
       tooltipText: root.showOnlyActive ? I18n.tr("actions.show-all") : I18n.tr("actions.show-active-only")
 
-      colorBg: root.showOnlyActive ? Color.mPrimary : Color.mSurface
-      colorFg: root.showOnlyActive ? Color.mOnPrimary : Color.mOnSurface
+      colorBg: root.showOnlyActive ? HydraColor.mPrimary : HydraColor.mSurface
+      colorFg: root.showOnlyActive ? HydraColor.mOnPrimary : HydraColor.mOnSurface
 
       onClicked: root.showOnlyActive = !root.showOnlyActive
     }
@@ -257,8 +257,8 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(Style.baseWidgetSize * 0.9)
         radius: Style.iRadiusM
-        color: chipMouse.containsMouse ? Color.mHover : (isActive ? Color.mPrimary : Color.mSurface)
-        border.color: isActive ? Color.mPrimary : Color.mOutline
+        color: chipMouse.containsMouse ? HydraColor.mHover : (isActive ? HydraColor.mPrimary : HydraColor.mSurface)
+        border.color: isActive ? HydraColor.mPrimary : HydraColor.mOutline
         border.width: Style.borderS
 
         required property int index
@@ -277,7 +277,7 @@ ColumnLayout {
           width: parent.width - Style.margin2L
           text: chip.modelData.name
           pointSize: Style.fontSizeS
-          color: chipMouse.containsMouse ? Color.mOnHover : (isActive ? Color.mOnPrimary : Color.mOnSurface)
+          color: chipMouse.containsMouse ? HydraColor.mOnHover : (isActive ? HydraColor.mOnPrimary : HydraColor.mOnSurface)
           horizontalAlignment: Text.AlignHCenter
           elide: Text.ElideRight
 
@@ -311,7 +311,7 @@ ColumnLayout {
   NText {
     visible: filteredTemplates.length === 0 && searchText.trim() !== ""
     text: I18n.tr("common.no-results")
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
   }
 
   // Cursor size — only meaningful while the adaptive "Cursor" template is

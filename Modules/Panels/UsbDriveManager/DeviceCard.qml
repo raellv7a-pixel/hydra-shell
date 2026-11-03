@@ -28,7 +28,7 @@ NBox {
   }
 
   implicitHeight: contentColumn.implicitHeight + Style.margin2M
-  color: Color.mSurfaceContainer
+  color: HydraColor.mSurfaceContainer
   radius: Style.radiusL
 
   ColumnLayout {
@@ -45,13 +45,13 @@ NBox {
         Layout.preferredWidth: Style.baseWidgetSize * 0.8
         Layout.preferredHeight: Style.baseWidgetSize * 0.8
         radius: height / 2
-        color: root.device.isMounted ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
+        color: root.device.isMounted ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
 
         NIcon {
           anchors.centerIn: parent
           icon: "usb"
           pointSize: Style.fontSizeL
-          color: root.device.isMounted ? Color.mPrimary : Color.mOnSurfaceVariant
+          color: root.device.isMounted ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
         }
       }
 
@@ -64,7 +64,7 @@ NBox {
           text: root.displayName
           pointSize: Style.fontSizeM
           font.weight: Style.fontWeightMedium
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           elide: Text.ElideRight
         }
 
@@ -72,7 +72,7 @@ NBox {
           Layout.fillWidth: true
           text: root.details
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           elide: Text.ElideRight
         }
       }
@@ -81,7 +81,7 @@ NBox {
         Layout.preferredWidth: statusText.implicitWidth + Style.margin2S
         Layout.preferredHeight: statusText.implicitHeight + Style.marginXS
         radius: height / 2
-        color: root.device.isMounted ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
+        color: root.device.isMounted ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
 
         NText {
           id: statusText
@@ -89,7 +89,7 @@ NBox {
           text: root.device.isMounted ? I18n.tr("usb-drive-manager.device.mounted") : I18n.tr("usb-drive-manager.device.unmounted")
           pointSize: Style.fontSizeXXS
           font.weight: Style.fontWeightMedium
-          color: root.device.isMounted ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
+          color: root.device.isMounted ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
         }
       }
     }
@@ -100,7 +100,7 @@ NBox {
       text: root.device.mountpoint
       pointSize: Style.fontSizeXS
       font.family: Settings.data.ui.fontFixed
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       elide: Text.ElideMiddle
     }
 
@@ -113,13 +113,13 @@ NBox {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.max(4, Math.round(4 * Style.uiScaleRatio))
         radius: height / 2
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
 
         Rectangle {
           width: parent.width * Math.min(Math.max(root.device.usedPercent, 0), 100) / 100
           height: parent.height
           radius: parent.radius
-          color: root.device.usedPercent >= 90 ? Color.mError : Color.mPrimary
+          color: root.device.usedPercent >= 90 ? HydraColor.mError : HydraColor.mPrimary
         }
       }
 
@@ -131,7 +131,7 @@ NBox {
                                                       "size": UsbDriveService.formatBytes(root.device.usedBytes)
                                                     }) : I18n.tr("usb-drive-manager.device.usage-loading")
           pointSize: Style.fontSizeXXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
 
         Item {
@@ -143,7 +143,7 @@ NBox {
                                                       "size": UsbDriveService.formatBytes(root.device.freeBytes)
                                                     }) : ""
           pointSize: Style.fontSizeXXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
       }
     }

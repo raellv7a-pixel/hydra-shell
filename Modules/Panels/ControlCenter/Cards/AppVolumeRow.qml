@@ -22,7 +22,7 @@ DashboardCard {
   }
 
   Layout.preferredHeight: Math.round((streamTitle ? 94 : 76) * panelRoot.panelUnit)
-  color: Color.mSurfaceContainerHighest
+  color: HydraColor.mSurfaceContainerHighest
   radius: Style.radiusS
 
   ColumnLayout {
@@ -44,14 +44,14 @@ DashboardCard {
           anchors.fill: parent
           icon: "apps"
           visible: appIcon.status === Image.Error || appIcon.status === Image.Null
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
         }
       }
 
       NText {
         Layout.fillWidth: true
         text: appVolumeRow.appName
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
       }
@@ -59,7 +59,7 @@ DashboardCard {
 
       NText {
         text: Math.round(appVolumeRow.streamVolume * 100) + "%"
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         font.family: Settings.data.ui.fontFixed
       }
 
@@ -73,7 +73,7 @@ DashboardCard {
       visible: appVolumeRow.streamTitle !== ""
       Layout.fillWidth: true
       text: appVolumeRow.streamTitle
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       elide: Text.ElideRight
       pointSize: Style.fontSizeXS
     }

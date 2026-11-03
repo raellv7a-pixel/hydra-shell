@@ -50,7 +50,7 @@ Item {
     NIcon {
       icon: "color-swatch"
       pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
     }
 
     NText {
@@ -59,7 +59,7 @@ Item {
                       "total": root._diff.total
                     })
       pointSize: Style.fontSizeXS
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       elide: Text.ElideRight
       Layout.fillWidth: true
     }

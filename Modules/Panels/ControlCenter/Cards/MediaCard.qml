@@ -68,7 +68,7 @@ DashboardCard {
         imagePath: MediaService.trackArtUrl
         fallbackIcon: "music"
         fallbackIconSize: Style.fontSizeXXL
-        borderColor: Qt.alpha(Color.mOutline, 0.18)
+        borderColor: Qt.alpha(HydraColor.mOutline, 0.18)
         borderWidth: Style.borderS
 
         property string _lastTitle: MediaService.trackTitle
@@ -97,7 +97,7 @@ DashboardCard {
 
         NText {
           text: panelRoot.tr("media")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeXS
           font.weight: Style.fontWeightSemiBold
         }
@@ -105,7 +105,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: MediaService.trackTitle || panelRoot.tr("nothingPlaying")
-          color: panelRoot.componentColor("media", "text", panelRoot.musicActive ? Color.mOnPrimaryContainer : Color.mOnSurface)
+          color: panelRoot.componentColor("media", "text", panelRoot.musicActive ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface)
           font.weight: Style.fontWeightSemiBold
           elide: Text.ElideRight
         }
@@ -113,7 +113,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: MediaService.trackArtist || MediaService.playerIdentity || ""
-          color: panelRoot.componentColor("media", "subtext", panelRoot.musicActive ? Qt.alpha(Color.mOnPrimaryContainer, 0.78) : Color.mOnSurfaceVariant)
+          color: panelRoot.componentColor("media", "subtext", panelRoot.musicActive ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.78) : HydraColor.mOnSurfaceVariant)
           pointSize: Style.fontSizeS
           elide: Text.ElideRight
         }
@@ -230,7 +230,7 @@ DashboardCard {
           NText {
             text: MediaService.positionString || "0:00"
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             font.family: Settings.data.ui.fontFixed
           }
 
@@ -241,7 +241,7 @@ DashboardCard {
           NText {
             text: MediaService.lengthString || "0:00"
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             font.family: Settings.data.ui.fontFixed
             horizontalAlignment: Text.AlignRight
           }

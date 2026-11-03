@@ -36,6 +36,9 @@ Wayland. O build exige `cmake`, `pkgconf`, `base-devel`, `wayland`, `qt6-base` e
 Execute `bash Scripts/dev/build-native.sh` antes de iniciar um checkout manual.
 Os binários e metadata em `Native/Input/` são gerados localmente, não versionados.
 
+Qt 6.12 exporta `QtQuick.Color`; o singleton de cores da Hydra é
+`qs.Commons.HydraColor`, evitando essa colisão sem alterar paletas ou tokens.
+
 O compositor Umbriel deve estar instalado antes do instalador da Hydra.
 Use `xdg-desktop-portal-umbriel` para compartilhamento de tela externo; não
 instale o backend Hyprland para uma sessão Umbriel.

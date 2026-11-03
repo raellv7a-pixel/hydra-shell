@@ -278,14 +278,14 @@ Item {
         spacing: Style.marginS
         NIcon {
           icon: "crosshair"
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
           anchors.verticalCenter: parent.verticalCenter
         }
         NText {
           text: pluginApi?.tr("panel.title")
           pointSize: Style.fontSizeL
           font.weight: Font.Bold
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           anchors.verticalCenter: parent.verticalCenter
         }
       }
@@ -293,7 +293,7 @@ Item {
         id: toolBar
         width: parent.width
         height: toolsCol.implicitHeight + Style.marginM * 2
-        color: Color.mSurfaceVariant
+        color: HydraColor.mSurfaceVariant
         radius: Style.radiusL
         focus: true
         Component.onCompleted: forceActiveFocus()
@@ -380,7 +380,7 @@ Item {
       Rectangle {
         width: parent.width
         height: 56
-        color: Color.mSurfaceVariant
+        color: HydraColor.mSurfaceVariant
         radius: Style.radiusL
         visible: root.isRunning
         Row {
@@ -388,7 +388,7 @@ Item {
           spacing: Style.marginM
           NIcon {
             icon: "loader"
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
             RotationAnimation on rotation {
               running: root.isRunning
               from: 0
@@ -399,7 +399,7 @@ Item {
           }
           NText {
             text: pluginApi?.tr("panel.running")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
           }
         }
       }
@@ -416,7 +416,7 @@ Item {
         width: parent.width
         height: 38
         radius: Style.radiusM
-        color: recPanelStopBtn.containsMouse ? Color.mError : Color.mSurfaceVariant
+        color: recPanelStopBtn.containsMouse ? HydraColor.mError : HydraColor.mSurfaceVariant
         Row {
           anchors.centerIn: parent
           spacing: Style.marginS
@@ -424,12 +424,12 @@ Item {
             width: Style.marginM
             height: Style.marginM
             radius: Style.radiusXXXS
-            color: recPanelStopBtn.containsMouse ? "white" : Color.mError
+            color: recPanelStopBtn.containsMouse ? "white" : HydraColor.mError
             anchors.verticalCenter: parent.verticalCenter
           }
           NText {
             text: pluginApi?.tr("record.stop")
-            color: recPanelStopBtn.containsMouse ? "white" : Color.mOnSurface
+            color: recPanelStopBtn.containsMouse ? "white" : HydraColor.mOnSurface
             font.weight: Font.Bold
             pointSize: Style.fontSizeS
           }
@@ -455,13 +455,13 @@ Item {
         width: parent.width
         height: 38
         radius: Style.radiusM
-        color: Color.mSurfaceVariant
+        color: HydraColor.mSurfaceVariant
         Row {
           anchors.centerIn: parent
           spacing: Style.marginS
           NIcon {
             icon: "loader"
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             anchors.verticalCenter: parent.verticalCenter
             RotationAnimation on rotation {
               running: root.isConverting
@@ -473,7 +473,7 @@ Item {
           }
           NText {
             text: root.recordFormat === "mp4" ? pluginApi?.tr("record.savingMp4") : pluginApi?.tr("record.convertingGif")
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             pointSize: Style.fontSizeS
             anchors.verticalCenter: parent.verticalCenter
           }
@@ -495,7 +495,7 @@ Item {
           width: parent.width
           height: Math.round(parent.width * 9 / 16)
           radius: Style.radiusM
-          color: Color.mSurfaceVariant
+          color: HydraColor.mSurfaceVariant
           clip: true
           AnimatedImage {
             anchors.fill: parent
@@ -522,18 +522,18 @@ Item {
             height: 38
             radius: Style.radiusM
             width: parent.width - 44 - Style.marginS
-            color: recSaveBtn.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+            color: recSaveBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
             Row {
               anchors.centerIn: parent
               spacing: Style.marginS
               NIcon {
                 icon: "device-floppy"
-                color: recSaveBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+                color: recSaveBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                 anchors.verticalCenter: parent.verticalCenter
               }
               NText {
                 text: root.recordFormat === "mp4" ? pluginApi?.tr("record.saveMp4") : pluginApi?.tr("record.saveGif")
-                color: recSaveBtn.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+                color: recSaveBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                 font.weight: Font.Bold
                 pointSize: Style.fontSizeS
                 anchors.verticalCenter: parent.verticalCenter
@@ -551,13 +551,13 @@ Item {
             width: 38
             height: 38
             radius: Style.radiusM
-            color: recDiscardBtn.containsMouse ? Color.mError : Color.mSurface
-            border.color: recDiscardBtn.containsMouse ? Color.mError : Style.capsuleBorderColor
+            color: recDiscardBtn.containsMouse ? HydraColor.mError : HydraColor.mSurface
+            border.color: recDiscardBtn.containsMouse ? HydraColor.mError : Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
             NIcon {
               anchors.centerIn: parent
               icon: "trash"
-              color: recDiscardBtn.containsMouse ? Color.mError : Color.mOnSurfaceVariant
+              color: recDiscardBtn.containsMouse ? HydraColor.mError : HydraColor.mOnSurfaceVariant
             }
             MouseArea {
               id: recDiscardBtn
@@ -587,20 +587,20 @@ Item {
           width: (parent.width - Style.marginS * 2) / 3
           height: 38
           radius: Style.radiusM
-          color: annotRegionBtn.containsMouse ? Color.mPrimary : Color.mSurface
-          border.color: Color.mPrimary
+          color: annotRegionBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurface
+          border.color: HydraColor.mPrimary
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
             spacing: Style.marginXS
             NIcon {
               icon: "crop"
-              color: annotRegionBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+              color: annotRegionBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary
               scale: 0.85
             }
             NText {
               text: pluginApi?.tr("annotate.region")
-              color: annotRegionBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+              color: annotRegionBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary
               font.weight: Font.Bold
               pointSize: Style.fontSizeXS
             }
@@ -620,7 +620,7 @@ Item {
           height: 38
           radius: Style.radiusM
           enabled: root._isUmbriel
-          color: !enabled ? Color.mSurfaceVariant : (annotWinBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface)
+          color: !enabled ? HydraColor.mSurfaceVariant : (annotWinBtn.containsMouse ? HydraColor.mSurfaceVariant : HydraColor.mSurface)
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           opacity: enabled ? 1.0 : 0.5
@@ -629,12 +629,12 @@ Item {
             spacing: Style.marginXS
             NIcon {
               icon: "app-window"
-              color: !parent.parent.enabled ? Color.mOnSurfaceVariant : (annotWinBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant)
+              color: !parent.parent.enabled ? HydraColor.mOnSurfaceVariant : (annotWinBtn.containsMouse ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant)
               scale: 0.85
             }
             NText {
               text: pluginApi?.tr("annotate.window")
-              color: !parent.parent.enabled ? Color.mOnSurfaceVariant : (annotWinBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant)
+              color: !parent.parent.enabled ? HydraColor.mOnSurfaceVariant : (annotWinBtn.containsMouse ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant)
               font.weight: Font.Bold
               pointSize: Style.fontSizeXS
             }
@@ -654,7 +654,7 @@ Item {
           width: (parent.width - Style.marginS * 2) / 3
           height: 38
           radius: Style.radiusM
-          color: annotFsBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface
+          color: annotFsBtn.containsMouse ? HydraColor.mSurfaceVariant : HydraColor.mSurface
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           Row {
@@ -662,12 +662,12 @@ Item {
             spacing: Style.marginXS
             NIcon {
               icon: "maximize"
-              color: annotFsBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+              color: annotFsBtn.containsMouse ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
               scale: 0.85
             }
             NText {
               text: pluginApi?.tr("annotate.fullscreen")
-              color: annotFsBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+              color: annotFsBtn.containsMouse ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
               font.weight: Font.Bold
               pointSize: Style.fontSizeXS
             }
@@ -702,7 +702,7 @@ Item {
           NText {
             id: langLabel
             text: pluginApi?.tr("panel.lang")
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             pointSize: Style.fontSizeS
             anchors.verticalCenter: parent.verticalCenter
           }
@@ -717,12 +717,12 @@ Item {
                 height: 24
                 width: chipLangText.implicitWidth + Style.marginM * 2
                 radius: Style.radiusS
-                color: root.selectedOcrLang === modelData ? Color.mPrimary : (chipMA.containsMouse ? Color.mHover : Color.mSurfaceVariant)
+                color: root.selectedOcrLang === modelData ? HydraColor.mPrimary : (chipMA.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
                 NText {
                   id: chipLangText
                   anchors.centerIn: parent
                   text: modelData.toUpperCase()
-                  color: root.selectedOcrLang === modelData ? Color.mOnPrimary : Color.mOnSurface
+                  color: root.selectedOcrLang === modelData ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                   pointSize: Style.fontSizeXS
                   font.weight: root.selectedOcrLang === modelData ? Font.Bold : Font.Normal
                 }
@@ -752,8 +752,8 @@ Item {
             height: 26
             width: _scanRow.implicitWidth + Style.marginM * 2
             radius: Style.radiusS
-            color: scanBtn.containsMouse ? Color.mPrimary : Color.mSurface
-            border.color: Color.mPrimary
+            color: scanBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurface
+            border.color: HydraColor.mPrimary
             border.width: Style.capsuleBorderWidth
             anchors.verticalCenter: parent.verticalCenter
             Row {
@@ -762,12 +762,12 @@ Item {
               spacing: Style.marginXS
               NIcon {
                 icon: "scan"
-                color: scanBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                color: scanBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary
                 scale: 0.8
               }
               NText {
                 text: pluginApi?.tr("panel.scan")
-                color: scanBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                color: scanBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary
                 font.weight: Font.Bold
                 pointSize: Style.fontSizeXS
               }
@@ -798,19 +798,19 @@ Item {
           width: (parent.width - Style.marginS) / 2
           height: 38
           radius: Style.radiusM
-          color: pinScreenBtn.containsMouse ? Color.mPrimary : Color.mSurface
-          border.color: Color.mPrimary
+          color: pinScreenBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurface
+          border.color: HydraColor.mPrimary
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
             spacing: Style.marginS
             NIcon {
               icon: "crosshair"
-              color: pinScreenBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+              color: pinScreenBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary
             }
             NText {
               text: pluginApi?.tr("panel.pinCapture")
-              color: pinScreenBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+              color: pinScreenBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary
               font.weight: Font.Bold
               pointSize: Style.fontSizeS
             }
@@ -829,7 +829,7 @@ Item {
           width: (parent.width - Style.marginS) / 2
           height: 38
           radius: Style.radiusM
-          color: pinFileBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface
+          color: pinFileBtn.containsMouse ? HydraColor.mSurfaceVariant : HydraColor.mSurface
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           Row {
@@ -837,11 +837,11 @@ Item {
             spacing: Style.marginS
             NIcon {
               icon: "folder-open"
-              color: pinFileBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+              color: pinFileBtn.containsMouse ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
             }
             NText {
               text: pluginApi?.tr("panel.pinFile")
-              color: pinFileBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+              color: pinFileBtn.containsMouse ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
               font.weight: Font.Bold
               pointSize: Style.fontSizeS
             }
@@ -874,7 +874,7 @@ Item {
           spacing: Style.marginS
           NText {
             text: pluginApi?.tr("panel.format")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
             height: 26
             verticalAlignment: Text.AlignVCenter
@@ -896,14 +896,14 @@ Item {
               height: 26
               width: fmtLabel.implicitWidth + (modelData.hint !== "" ? fmtHint.implicitWidth + Style.marginXS : 0) + Style.marginM * 2 + Style.marginS
               radius: Style.radiusS
-              color: root.selectedRecordFormat === modelData.id ? Color.mPrimary : (fmtArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
+              color: root.selectedRecordFormat === modelData.id ? HydraColor.mPrimary : (fmtArea.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
               Row {
                 anchors.centerIn: parent
                 spacing: Style.marginXS
                 NText {
                   id: fmtLabel
                   text: modelData.label
-                  color: root.selectedRecordFormat === modelData.id ? Color.mOnPrimary : Color.mOnSurface
+                  color: root.selectedRecordFormat === modelData.id ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                   pointSize: Style.fontSizeXS
                   font.weight: root.selectedRecordFormat === modelData.id ? Font.Bold : Font.Normal
                 }
@@ -911,7 +911,7 @@ Item {
                   id: fmtHint
                   visible: modelData.hint !== ""
                   text: modelData.hint
-                  color: root.selectedRecordFormat === modelData.id ? Qt.rgba(1, 1, 1, 0.65) : Color.mOnSurfaceVariant
+                  color: root.selectedRecordFormat === modelData.id ? Qt.rgba(1, 1, 1, 0.65) : HydraColor.mOnSurfaceVariant
                   pointSize: Style.fontSizeXS
                 }
               }
@@ -930,7 +930,7 @@ Item {
           spacing: Style.marginS
           NText {
             text: pluginApi?.tr("panel.audio")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
             height: 26
             verticalAlignment: Text.AlignVCenter
@@ -939,20 +939,20 @@ Item {
             height: 26
             width: audioOutIcon.implicitWidth + audioOutLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
             radius: Style.radiusS
-            color: root.recordAudioOutput ? Color.mPrimary : (audioOutArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
+            color: root.recordAudioOutput ? HydraColor.mPrimary : (audioOutArea.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
             Row {
               anchors.centerIn: parent
               spacing: Style.marginXS
               NIcon {
                 id: audioOutIcon
                 icon: root.recordAudioOutput ? "volume" : "volume-off"
-                color: root.recordAudioOutput ? Color.mOnPrimary : Color.mOnSurface
+                color: root.recordAudioOutput ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                 scale: 0.8
               }
               NText {
                 id: audioOutLabel
                 text: pluginApi?.tr("panel.system")
-                color: root.recordAudioOutput ? Color.mOnPrimary : Color.mOnSurface
+                color: root.recordAudioOutput ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                 pointSize: Style.fontSizeXS
                 font.weight: root.recordAudioOutput ? Font.Bold : Font.Normal
               }
@@ -971,20 +971,20 @@ Item {
             height: 26
             width: micIcon.implicitWidth + micLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
             radius: Style.radiusS
-            color: root.recordAudioInput ? Color.mPrimary : (micArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
+            color: root.recordAudioInput ? HydraColor.mPrimary : (micArea.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
             Row {
               anchors.centerIn: parent
               spacing: Style.marginXS
               NIcon {
                 id: micIcon
                 icon: root.recordAudioInput ? "microphone" : "microphone-off"
-                color: root.recordAudioInput ? Color.mOnPrimary : Color.mOnSurface
+                color: root.recordAudioInput ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                 scale: 0.8
               }
               NText {
                 id: micLabel
                 text: pluginApi?.tr("panel.mic")
-                color: root.recordAudioInput ? Color.mOnPrimary : Color.mOnSurface
+                color: root.recordAudioInput ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                 pointSize: Style.fontSizeXS
                 font.weight: root.recordAudioInput ? Font.Bold : Font.Normal
               }
@@ -1003,20 +1003,20 @@ Item {
             height: 26
             width: cursorIcon.implicitWidth + cursorLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
             radius: Style.radiusS
-            color: root.recordCursor ? Color.mPrimary : (cursorArea.containsMouse ? Color.mHover : Color.mSurfaceVariant)
+            color: root.recordCursor ? HydraColor.mPrimary : (cursorArea.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
             Row {
               anchors.centerIn: parent
               spacing: Style.marginXS
               NIcon {
                 id: cursorIcon
                 icon: "pointer"
-                color: root.recordCursor ? Color.mOnPrimary : Color.mOnSurface
+                color: root.recordCursor ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                 scale: 0.8
               }
               NText {
                 id: cursorLabel
                 text: pluginApi?.tr("panel.cursor")
-                color: root.recordCursor ? Color.mOnPrimary : Color.mOnSurface
+                color: root.recordCursor ? HydraColor.mOnPrimary : HydraColor.mOnSurface
                 pointSize: Style.fontSizeXS
                 font.weight: root.recordCursor ? Font.Bold : Font.Normal
               }
@@ -1039,20 +1039,20 @@ Item {
             width: (parent.width - Style.marginS) / 2
             height: 38
             radius: Style.radiusM
-            color: recRegionBtn.containsMouse ? Color.mPrimary : Color.mSurface
-            border.color: Color.mPrimary
+            color: recRegionBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurface
+            border.color: HydraColor.mPrimary
             border.width: Style.capsuleBorderWidth
             Row {
               anchors.centerIn: parent
               spacing: Style.marginXS
               NIcon {
                 icon: "crop"
-                color: recRegionBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                color: recRegionBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary
                 scale: 0.85
               }
               NText {
                 text: pluginApi?.tr("record.region")
-                color: recRegionBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary
+                color: recRegionBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary
                 font.weight: Font.Bold
                 pointSize: Style.fontSizeS
               }
@@ -1071,7 +1071,7 @@ Item {
             width: (parent.width - Style.marginS) / 2
             height: 38
             radius: Style.radiusM
-            color: recFsBtn.containsMouse ? Color.mSurfaceVariant : Color.mSurface
+            color: recFsBtn.containsMouse ? HydraColor.mSurfaceVariant : HydraColor.mSurface
             border.color: Style.capsuleBorderColor
             border.width: Style.capsuleBorderWidth
             Row {
@@ -1079,12 +1079,12 @@ Item {
               spacing: Style.marginXS
               NIcon {
                 icon: "maximize"
-                color: recFsBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                color: recFsBtn.containsMouse ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
                 scale: 0.85
               }
               NText {
                 text: pluginApi?.tr("annotate.fullscreen")
-                color: recFsBtn.containsMouse ? Color.mOnSurface : Color.mOnSurfaceVariant
+                color: recFsBtn.containsMouse ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
                 font.weight: Font.Bold
                 pointSize: Style.fontSizeS
               }
@@ -1118,12 +1118,12 @@ Item {
           spacing: Style.marginS
           NIcon {
             icon: "camera"
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
             anchors.verticalCenter: parent.verticalCenter
           }
           NText {
             text: pluginApi?.tr("mirror.title")
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             font.weight: Font.Bold
             pointSize: Style.fontSizeS
             anchors.verticalCenter: parent.verticalCenter
@@ -1133,26 +1133,26 @@ Item {
           width: parent.width
           wrapMode: Text.WordWrap
           text: pluginApi?.tr("mirror.hint")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeXS
         }
         Rectangle {
           width: parent.width
           height: 38
           radius: Style.radiusM
-          color: root.mirrorActive ? Color.mError : (mirrorToggleBtn.containsMouse ? Color.mPrimary : Color.mSurface)
-          border.color: root.mirrorActive ? Color.mError : Color.mPrimary
+          color: root.mirrorActive ? HydraColor.mError : (mirrorToggleBtn.containsMouse ? HydraColor.mPrimary : HydraColor.mSurface)
+          border.color: root.mirrorActive ? HydraColor.mError : HydraColor.mPrimary
           border.width: Style.capsuleBorderWidth
           Row {
             anchors.centerIn: parent
             spacing: Style.marginS
             NIcon {
               icon: root.mirrorActive ? "camera-off" : "camera"
-              color: root.mirrorActive ? Color.mOnError : (mirrorToggleBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary)
+              color: root.mirrorActive ? HydraColor.mOnError : (mirrorToggleBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary)
             }
             NText {
               text: root.mirrorActive ? pluginApi?.tr("mirror.close") : pluginApi?.tr("mirror.open")
-              color: root.mirrorActive ? Color.mOnError : (mirrorToggleBtn.containsMouse ? Color.mOnPrimary : Color.mPrimary)
+              color: root.mirrorActive ? HydraColor.mOnError : (mirrorToggleBtn.containsMouse ? HydraColor.mOnPrimary : HydraColor.mPrimary)
               font.weight: Font.Bold
               pointSize: Style.fontSizeS
             }
@@ -1235,7 +1235,7 @@ Item {
     property bool recording: false
     property bool hasResult: false
     readonly property bool _accented: recording || active || focused
-    readonly property color _accentColor: recording ? Color.mError : active ? Color.mPrimary : Color.mSecondary
+    readonly property color _accentColor: recording ? HydraColor.mError : active ? HydraColor.mPrimary : HydraColor.mSecondary
     signal triggered
     Column {
       anchors.centerIn: parent
@@ -1245,8 +1245,8 @@ Item {
         height: Math.min(btn.width - 8, 42)
         radius: Style.radiusM
         anchors.horizontalCenter: parent.horizontalCenter
-        color: ba.containsMouse ? Color.mHover : Color.mSurface
-        border.color: btn._accented ? btn._accentColor : ba.containsMouse ? Color.mOnSurfaceVariant : "transparent"
+        color: ba.containsMouse ? HydraColor.mHover : HydraColor.mSurface
+        border.color: btn._accented ? btn._accentColor : ba.containsMouse ? HydraColor.mOnSurfaceVariant : "transparent"
         border.width: btn._accented ? 2 : ba.containsMouse ? 1 : 0
         clip: true
         scale: ba.containsMouse && !btn.running ? 1.04 : 1.0
@@ -1265,7 +1265,7 @@ Item {
         Rectangle {
           anchors.fill: parent
           radius: parent.radius
-          color: Color.mError
+          color: HydraColor.mError
           visible: btn.recording
           opacity: 0
           SequentialAnimation on opacity {
@@ -1320,7 +1320,7 @@ Item {
         NIcon {
           anchors.centerIn: parent
           icon: btn.icon
-          color: btn._accented ? btn._accentColor : ba.containsMouse ? Color.mOnHover : Color.mOnSurface
+          color: btn._accented ? btn._accentColor : ba.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
           Behavior on color {
             ColorAnimation {
               duration: 120
@@ -1332,7 +1332,7 @@ Item {
           height: 8
           radius: 4
           color: btn._accentColor
-          border.color: Color.mSurface
+          border.color: HydraColor.mSurface
           border.width: Style.borderM
           anchors.top: parent.top
           anchors.right: parent.right
@@ -1362,7 +1362,7 @@ Item {
       NText {
         text: btn.label
         pointSize: Style.fontSizeXS
-        color: (ba.containsMouse || btn._accented) ? Color.mOnSurface : Color.mOnSurfaceVariant
+        color: (ba.containsMouse || btn._accented) ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
         font.weight: btn.active ? Font.Bold : Font.Normal
         anchors.horizontalCenter: parent.horizontalCenter
         width: btn.width

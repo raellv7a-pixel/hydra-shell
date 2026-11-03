@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Validated native settings in Hydra's owned Umbriel include."""
 import json
-import re
 import sys
 import tomllib
 
 import umbriel_config
+from umbriel_actions import ACTION_RE
 
 CORNERS = ('top_left', 'top_right', 'bottom_left', 'bottom_right')
 OVERVIEW = {
@@ -57,9 +57,8 @@ def validate(state):
         if type(corner['enabled']) is not bool or type(corner['delay_ms']) is not int or not 0 <= corner['delay_ms'] <= 10000:
             raise ValueError('Ativação ou atraso inválido em ' + name)
         action = corner['action']
-        if (not isinstance(action, str) or (action and
-            (not re.fullmatch(r'[a-z][a-z0-9-]*(?::[^\r\n]+)?', action) or action.endswith((':', '/'))))
-            or (corner['enabled'] and not action)):
+        if (not isinstance(action, str) or (action and not ACTION_RE.fullmatch(action))
+                or (corner['enabled'] and not action)):
             raise ValueError('Ação inválida em ' + name)
     return state
 

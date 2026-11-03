@@ -119,7 +119,7 @@ ColumnLayout {
                         });
               }
               pointSize: Style.fontSizeS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               wrapMode: Text.WordWrap
               horizontalAlignment: Text.AlignRight
               Layout.alignment: Qt.AlignBottom
@@ -193,7 +193,7 @@ ColumnLayout {
               visible: brightnessMonitor && !brightnessMonitor.brightnessControlAvailable && !(brightnessMonitor.method === "internal" && brightnessMonitor.initInProgress)
               text: !Settings.data.brightness.enableDdcSupport ? I18n.tr("panels.display.monitors-brightness-unavailable-ddc-disabled") : I18n.tr("panels.display.monitors-brightness-unavailable-generic")
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               Layout.fillWidth: true
               wrapMode: Text.WordWrap
             }

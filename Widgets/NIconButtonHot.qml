@@ -22,16 +22,16 @@ Rectangle {
   property bool pressed: false
 
   // Color properties
-  property color colorBg: Color.smartAlpha(Color.mSurfaceVariant)
-  property color colorFg: Color.mPrimary
-  property color colorBgHover: Color.mHover
-  property color colorFgHover: Color.mOnHover
-  property color colorBorder: Color.mOutline
-  property color colorBorderHover: Color.mOutline
+  property color colorBg: HydraColor.smartAlpha(HydraColor.mSurfaceVariant)
+  property color colorFg: HydraColor.mPrimary
+  property color colorBgHover: HydraColor.mHover
+  property color colorFgHover: HydraColor.mOnHover
+  property color colorBorder: HydraColor.mOutline
+  property color colorBorderHover: HydraColor.mOutline
 
   // Hot state colors
-  property color colorBgHot: Color.mPrimary
-  property color colorFgHot: Color.mOnPrimary
+  property color colorBgHot: HydraColor.mPrimary
+  property color colorFgHot: HydraColor.mOnPrimary
 
   // Signals
   signal entered
@@ -61,7 +61,7 @@ Rectangle {
   border.width: Style.borderS
 
   Behavior on color {
-    enabled: !Color.isTransitioning
+    enabled: !HydraColor.isTransitioning
     ColorAnimation {
       duration: Style.animationFast
       easing.type: Easing.InOutQuad
@@ -95,7 +95,7 @@ Rectangle {
     y: (root.height - height) / 2 + (height - contentHeight) / 2
 
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation {
         duration: Style.animationFast
         easing.type: Easing.InOutQuad

@@ -12,8 +12,8 @@ SmartPanel {
 
   preferredWidth: Math.round(430 * Style.uiScaleRatio)
   preferredHeight: Math.round(570 * Style.uiScaleRatio)
-  panelBackgroundColor: Color.mSurface
-  panelBorderColor: Qt.alpha(Color.mOutline, 0.28)
+  panelBackgroundColor: HydraColor.mSurface
+  panelBorderColor: Qt.alpha(HydraColor.mOutline, 0.28)
 
   readonly property string stateLabel: I18n.tr("tamagotchi.states." + TamagotchiService.petState)
   property string feedbackText: ""
@@ -53,7 +53,7 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         implicitHeight: headerRow.implicitHeight + Style.margin2M
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
         radius: Style.radiusL
 
         RowLayout {
@@ -71,14 +71,14 @@ SmartPanel {
               text: I18n.tr("tamagotchi.panel.title")
               pointSize: Style.fontSizeL
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
             }
 
             NText {
               Layout.fillWidth: true
               text: root.stateLabel
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
           }
 
@@ -132,21 +132,21 @@ SmartPanel {
               NIcon {
                 icon: modelData.icon
                 pointSize: Style.fontSizeM
-                color: modelData.value < 20 ? Color.mError : Color.mPrimary
+                color: modelData.value < 20 ? HydraColor.mError : HydraColor.mPrimary
               }
 
               NText {
                 Layout.fillWidth: true
                 text: modelData.label
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
               }
 
               NText {
                 text: Math.round(modelData.value) + "%"
                 pointSize: Style.fontSizeXS
                 font.weight: Style.fontWeightSemiBold
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
             }
 
@@ -154,13 +154,13 @@ SmartPanel {
               Layout.fillWidth: true
               Layout.preferredHeight: Math.max(5, Math.round(6 * Style.uiScaleRatio))
               radius: height / 2
-              color: Color.mSurfaceContainerHighest
+              color: HydraColor.mSurfaceContainerHighest
 
               Rectangle {
                 width: parent.width * Math.max(0, Math.min(1, modelData.value / 100))
                 height: parent.height
                 radius: parent.radius
-                color: modelData.value < 20 ? Color.mError : Color.mPrimary
+                color: modelData.value < 20 ? HydraColor.mError : HydraColor.mPrimary
               }
             }
           }
@@ -170,7 +170,7 @@ SmartPanel {
       NBox {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Color.mSurfaceContainer
+        color: HydraColor.mSurfaceContainer
         radius: Style.radiusL
 
         ColumnLayout {
@@ -196,7 +196,7 @@ SmartPanel {
             horizontalAlignment: Text.AlignHCenter
             pointSize: Style.fontSizeS
             font.weight: Style.fontWeightSemiBold
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
           }
         }
       }

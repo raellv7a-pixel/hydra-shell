@@ -163,12 +163,15 @@ Item {
       Logger.w("UmbrielService", "Compositor action unavailable outside Umbriel:", name);
       return;
     }
-    Quickshell.execDetached(["umbriel", "msg", argument === undefined ? name : name + ":" + String(argument)]);
+    const command = ["umbriel", "msg", name];
+    if (argument !== undefined)
+      command.push(...(Array.isArray(argument) ? argument : [argument]).map(String));
+    Quickshell.execDetached(command);
   }
 
   function switchToWorkspace(workspace) {
     if (workspace)
-      action("workspace-switch", Snapshots.workspaceSelector(workspace));
+      action("workspace-switch", Snapshots.workspaceArguments(workspace));
   }
 
   function focusWindow(window) {
@@ -186,8 +189,8 @@ Item {
 
   function moveWindowToWorkspace(id, workspace) {
     // Native action moves the currently focused window, so select the requested ID first.
-    const selector = typeof workspace === "object" ? Snapshots.workspaceSelector(workspace) : String(workspace);
-    Quickshell.execDetached(["sh", "-c", 'umbriel msg "window-focus:$1" && umbriel msg "window-move-to-workspace:$2"', "hydra", String(id), selector]);
+    const args = typeof workspace === "object" ? Snapshots.workspaceArguments(workspace) : [String(workspace)];
+    Quickshell.execDetached(["sh", "-c", 'umbriel msg window-focus "$1" && shift && umbriel msg window-move-to-workspace "$@"', "hydra", String(id)].concat(args));
   }
 
   function spawn(command) {

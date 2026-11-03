@@ -23,8 +23,8 @@ Item {
   property real preferredHeight: 900
   property real preferredWidthRatio
   property real preferredHeightRatio
-  property color panelBackgroundColor: modalOverlay ? Color.mSurfaceContainerHigh : Color.mSurfaceContainer
-  property color panelBorderColor: Color.mOutline
+  property color panelBackgroundColor: modalOverlay ? HydraColor.mSurfaceContainerHigh : HydraColor.mSurfaceContainer
+  property color panelBorderColor: HydraColor.mOutline
   property var buttonItem: null
   property bool forceAttachToBar: false
 

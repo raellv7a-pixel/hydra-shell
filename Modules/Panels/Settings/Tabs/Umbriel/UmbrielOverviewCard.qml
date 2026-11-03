@@ -16,7 +16,7 @@ ColumnLayout {
     text: I18n.tr("panels.umbriel.overview-group-scale")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightSemiBold
-    color: Color.mPrimary
+    color: HydraColor.mPrimary
   }
   NValueSlider {
     label: I18n.tr("panels.umbriel.overview-zoom")
@@ -47,7 +47,7 @@ ColumnLayout {
     text: I18n.tr("panels.umbriel.overview-group-appearance")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightSemiBold
-    color: Color.mPrimary
+    color: HydraColor.mPrimary
   }
   NToggle {
     label: I18n.tr("panels.umbriel.overview-blur")
@@ -66,7 +66,7 @@ ColumnLayout {
     text: I18n.tr("panels.umbriel.overview-group-navigation")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightSemiBold
-    color: Color.mPrimary
+    color: HydraColor.mPrimary
   }
   NToggle {
     label: I18n.tr("panels.umbriel.overview-shortcuts")

@@ -177,8 +177,8 @@ ColumnLayout {
       id: categoryGeneral
       property bool checked: categoryRow.isChecked(0)
       text: I18n.tr("common.general")
-      backgroundColor: checked ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
-      textColor: checked ? Color.mOnSecondaryContainer : Color.mOnSurface
+      backgroundColor: checked ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+      textColor: checked ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
       onClicked: categoryRow.toggleCategory(0, !checked)
     }
 
@@ -186,8 +186,8 @@ ColumnLayout {
       id: categoryAnime
       property bool checked: categoryRow.isChecked(1)
       text: I18n.tr("wallpaper.panel.categories-anime")
-      backgroundColor: checked ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
-      textColor: checked ? Color.mOnSecondaryContainer : Color.mOnSurface
+      backgroundColor: checked ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+      textColor: checked ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
       onClicked: categoryRow.toggleCategory(1, !checked)
     }
 
@@ -195,8 +195,8 @@ ColumnLayout {
       id: categoryPeople
       property bool checked: categoryRow.isChecked(2)
       text: I18n.tr("wallpaper.panel.categories-people")
-      backgroundColor: checked ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
-      textColor: checked ? Color.mOnSecondaryContainer : Color.mOnSurface
+      backgroundColor: checked ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+      textColor: checked ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
       onClicked: categoryRow.toggleCategory(2, !checked)
     }
 
@@ -209,10 +209,10 @@ ColumnLayout {
       property string activeColor: Settings.data.wallpaper.wallhavenColors || ""
       icon: "palette"
       tooltipText: I18n.tr("wallpaper.panel.color-filter")
-      colorBg: activeColor !== "" ? "#" + activeColor : Color.mSurfaceContainerHigh
-      colorFg: activeColor !== "" ? "#ffffff" : Color.mOnSurface
-      colorBorder: activeColor !== "" ? Color.mOnSurface : "transparent"
-      colorBorderHover: Color.mPrimary
+      colorBg: activeColor !== "" ? "#" + activeColor : HydraColor.mSurfaceContainerHigh
+      colorFg: activeColor !== "" ? "#ffffff" : HydraColor.mOnSurface
+      colorBorder: activeColor !== "" ? HydraColor.mOnSurface : "transparent"
+      colorBorderHover: HydraColor.mPrimary
       onClicked: colorPopup.showAt(colorButton)
 
       WallhavenColorPopup {

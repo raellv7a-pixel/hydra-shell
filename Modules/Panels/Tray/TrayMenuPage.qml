@@ -183,9 +183,9 @@ Item {
         tooltipText: I18n.tr("common.back")
         baseSize: Math.round(30 * Style.uiScaleRatio)
         colorBg: "transparent"
-        colorBgHover: Color.mSurfaceContainerHighest
-        colorFg: Color.mOnSurface
-        colorFgHover: Color.mOnSurface
+        colorBgHover: HydraColor.mSurfaceContainerHighest
+        colorFg: HydraColor.mOnSurface
+        colorFgHover: HydraColor.mOnSurface
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: root.back()
@@ -203,7 +203,7 @@ Item {
         text: root.menuPath.length ? (root.currentMenu?.text || root.trayItem?.tooltipTitle || root.trayItem?.title || root.trayItem?.id || "") : (root.trayItem?.tooltipTitle || root.trayItem?.title || root.trayItem?.id || "")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
     }
@@ -243,7 +243,7 @@ Item {
               color: {
                 if (!entry.modelData?.enabled)
                   return "transparent";
-                return pointer.containsMouse ? Color.mSurfaceContainerHighest : "transparent";
+                return pointer.containsMouse ? HydraColor.mSurfaceContainerHighest : "transparent";
               }
 
               Behavior on color {
@@ -262,7 +262,7 @@ Item {
                 NIcon {
                   visible: (entry.modelData?.buttonType ?? QsMenuButtonType.None) !== QsMenuButtonType.None
                   icon: entry.modelData?.buttonType === QsMenuButtonType.RadioButton ? ((entry.modelData?.checkState === Qt.Checked || entry.modelData?.checked) ? "circle-dot" : "circle") : ((entry.modelData?.checkState === Qt.Checked || entry.modelData?.checked) ? "checkbox" : "square")
-                  color: Color.mPrimary
+                  color: HydraColor.mPrimary
                   pointSize: Style.fontSizeS
                   Layout.alignment: Qt.AlignVCenter
                 }
@@ -280,7 +280,7 @@ Item {
                   Layout.fillWidth: true
                   Layout.minimumWidth: 0
                   text: (entry.modelData?.text || "").replace(/[\n\r]+/g, " ")
-                  color: entry.modelData?.enabled ? Color.mOnSurface : Color.mOnSurfaceVariant
+                  color: entry.modelData?.enabled ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
                   elide: Text.ElideRight
                   pointSize: Style.fontSizeM
                 }
@@ -288,7 +288,7 @@ Item {
                 NIcon {
                   visible: entry.modelData?.hasChildren ?? false
                   icon: "chevron-right"
-                  color: Color.mOnSurfaceVariant
+                  color: HydraColor.mOnSurfaceVariant
                   pointSize: Style.fontSizeS
                   Layout.alignment: Qt.AlignVCenter
                 }
@@ -322,10 +322,10 @@ Item {
       Layout.preferredHeight: root.pinButtonHeight
       text: root.pinned ? I18n.tr("panels.bar.tray-unpin-application") : I18n.tr("panels.bar.tray-pin-application")
       icon: root.pinned ? "unpin" : "pin"
-      backgroundColor: Color.mSecondaryContainer
-      textColor: Color.mOnSecondaryContainer
-      hoverColor: Color.mSurfaceContainerHighest
-      textHoverColor: Color.mOnSurface
+      backgroundColor: HydraColor.mSecondaryContainer
+      textColor: HydraColor.mOnSecondaryContainer
+      hoverColor: HydraColor.mSurfaceContainerHighest
+      textHoverColor: HydraColor.mOnSurface
       buttonRadius: Style.radiusS
       onClicked: root.pinToggled()
     }

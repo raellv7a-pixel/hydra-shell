@@ -112,15 +112,15 @@ Slider {
       fillRoundedTrack(0, centerY - baseH / 2, width, baseH, rgba(panelRoot.m3SurfaceContainerHighest, inactiveAlpha));
 
       const grad = ctx.createLinearGradient(0, 0, width, 0);
-      grad.addColorStop(0, rgba(Color.mPrimary, active ? 0.84 : 0.9));
-      grad.addColorStop(0.62, rgba(Color.mSecondary, active ? 0.78 : 0.86));
-      grad.addColorStop(1, rgba(Color.mPrimary, active ? 0.92 : 1));
+      grad.addColorStop(0, rgba(HydraColor.mPrimary, active ? 0.84 : 0.9));
+      grad.addColorStop(0.62, rgba(HydraColor.mSecondary, active ? 0.78 : 0.86));
+      grad.addColorStop(1, rgba(HydraColor.mPrimary, active ? 0.92 : 1));
 
       if (activeW <= 0)
         return;
 
       if (!active) {
-        fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, inactiveAlpha));
+        fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(HydraColor.mPrimary, inactiveAlpha));
         return;
       }
 
@@ -135,7 +135,7 @@ Slider {
       ctx.clip();
 
       if (reactiveSlider.effect === "spectrum") {
-        fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, 0.2 + level * 0.12));
+        fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(HydraColor.mPrimary, 0.2 + level * 0.12));
         const bands = Math.max(12, Math.min(36, Math.round(activeW / Math.max(4, 6 * panelRoot.panelUnit))));
         if (trackCanvas.spectrumPeaks.length !== bands)
           trackCanvas.spectrumPeaks = new Array(bands).fill(0);
@@ -147,7 +147,7 @@ Slider {
           const bandH = panelRoot.clamp(baseH + amp * maxBandH * (0.5 + level * 0.38), baseH, maxBandH);
           const bandW = Math.max(1.5, slot * 0.42);
           const x = i * slot + (slot - bandW) / 2;
-          const bandColor = i % 3 === 0 ? Color.mSecondary : Color.mPrimary;
+          const bandColor = i % 3 === 0 ? HydraColor.mSecondary : HydraColor.mPrimary;
           ctx.fillStyle = rgba(bandColor, 0.42 + amp * 0.5);
           ctx.beginPath();
           roundedRect(x, centerY - bandH / 2, bandW, bandH, bandW / 2);
@@ -159,7 +159,7 @@ Slider {
           if (peak > 0.04) {
             const peakH = panelRoot.clamp(baseH + peak * maxBandH * (0.5 + level * 0.38), baseH, maxBandH);
             const capH = Math.max(1.5, 2 * panelRoot.panelUnit);
-            ctx.fillStyle = rgba(peak > 0.7 ? Color.mTertiary : Color.mSecondary, 0.5 + peak * 0.4);
+            ctx.fillStyle = rgba(peak > 0.7 ? HydraColor.mTertiary : HydraColor.mSecondary, 0.5 + peak * 0.4);
             ctx.beginPath();
             roundedRect(x, centerY - peakH / 2 - capH, bandW, capH, capH / 2);
             ctx.fill();
@@ -172,9 +172,9 @@ Slider {
           ctx.lineCap = "round";
           ctx.lineJoin = "round";
           ctx.lineWidth = lineWidth;
-          ctx.strokeStyle = rgba(Color.mPrimary, alpha);
+          ctx.strokeStyle = rgba(HydraColor.mPrimary, alpha);
           ctx.shadowBlur = blur;
-          ctx.shadowColor = rgba(Color.mSecondary, alpha * 0.9);
+          ctx.shadowColor = rgba(HydraColor.mSecondary, alpha * 0.9);
           ctx.beginPath();
           for (let x = 0; x <= activeW + filamentStep; x += filamentStep) {
             const p = x / Math.max(1, activeW);
@@ -200,13 +200,13 @@ Slider {
           const progress = (phase * 0.24 + i * 0.25) % 1;
           const radius = (3 + progress * (14 + level * 7)) * panelRoot.panelUnit;
           ctx.lineWidth = Math.max(1, (2.2 - progress * 1.2) * panelRoot.panelUnit);
-          ctx.strokeStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary, (1 - progress) * (0.22 + level * 0.42));
+          ctx.strokeStyle = rgba(i % 2 === 0 ? HydraColor.mPrimary : HydraColor.mSecondary, (1 - progress) * (0.22 + level * 0.42));
           ctx.beginPath();
           ctx.arc(pulseOriginX, centerY, radius, 0, Math.PI * 2);
           ctx.stroke();
         }
       } else if (reactiveSlider.effect === "bars") {
-        fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(Color.mPrimary, 0.24 + level * 0.16));
+        fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, rgba(HydraColor.mPrimary, 0.24 + level * 0.16));
         const bars = 30;
         const slot = width / bars;
         for (let i = 0; i < bars; i++) {
@@ -215,7 +215,7 @@ Slider {
           const h = Math.max(baseH, baseH + amp * effectH * 1.25);
           const barW = Math.max(2, slot * 0.46);
           const x = i * slot + slot * 0.27;
-          ctx.fillStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary, 0.28 + amp * 0.56);
+          ctx.fillStyle = rgba(i % 2 === 0 ? HydraColor.mPrimary : HydraColor.mSecondary, 0.28 + amp * 0.56);
           ctx.beginPath();
           roundedRect(x, centerY - h / 2, barW, h, barW / 2);
           ctx.fill();
@@ -229,7 +229,7 @@ Slider {
           const blockW = Math.max(2, slot * 0.75);
           const x = i * slot + slot * 0.125;
           const op = 0.3 + (amp * 0.7) + (level * 0.2);
-          ctx.fillStyle = rgba(Color.mPrimary, Math.min(1, op));
+          ctx.fillStyle = rgba(HydraColor.mPrimary, Math.min(1, op));
           ctx.beginPath();
           roundedRect(x, centerY - baseH / 2, blockW, baseH, baseH / 2);
           ctx.fill();
@@ -242,7 +242,7 @@ Slider {
           const amp = sample(p);
           const radius = (baseH * 0.3) + (amp * effectH * 0.35);
           const x = i * slot + slot * 0.5;
-          ctx.fillStyle = rgba(i % 2 === 0 ? Color.mPrimary : Color.mSecondary, 0.5 + amp * 0.5);
+          ctx.fillStyle = rgba(i % 2 === 0 ? HydraColor.mPrimary : HydraColor.mSecondary, 0.5 + amp * 0.5);
           ctx.beginPath();
           ctx.arc(x, centerY, radius, 0, Math.PI * 2);
           ctx.fill();
@@ -269,13 +269,13 @@ Slider {
         const pulse = 0.5 + Math.sin(phase * 2.1) * 0.5;
         const h = panelRoot.clamp(baseH + effectH * (0.18 + level * 0.66 + pulse * 0.18), baseH, effectH * 1.22);
         fillRoundedTrack(0, centerY - h / 2, activeW, h, grad);
-        ctx.fillStyle = rgba(Color.mSecondary, 0.1 + pulse * 0.16 + level * 0.14);
+        ctx.fillStyle = rgba(HydraColor.mSecondary, 0.1 + pulse * 0.16 + level * 0.14);
         ctx.beginPath();
         roundedRect(0, centerY - h / 2, activeW, h * 0.48, h * 0.24);
         ctx.fill();
       } else if (reactiveSlider.effect === "glow") {
         ctx.shadowBlur = 12 + level * 8;
-        ctx.shadowColor = rgba(Color.mPrimary, 0.6 + level * 0.4);
+        ctx.shadowColor = rgba(HydraColor.mPrimary, 0.6 + level * 0.4);
         fillRoundedTrack(0, centerY - baseH / 2, activeW, baseH, grad);
         ctx.shadowBlur = 0;
         ctx.shadowColor = "transparent";
@@ -302,16 +302,16 @@ Slider {
         const tailLen = Math.max(18, travel * 0.3);
         const tailStart = Math.max(0, cometX - tailLen);
         const tailGrad = ctx.createLinearGradient(tailStart, 0, cometX, 0);
-        tailGrad.addColorStop(0, rgba(Color.mSecondary, 0));
-        tailGrad.addColorStop(1, rgba(Color.mSecondary, 0.55 + level * 0.35));
+        tailGrad.addColorStop(0, rgba(HydraColor.mSecondary, 0));
+        tailGrad.addColorStop(1, rgba(HydraColor.mSecondary, 0.55 + level * 0.35));
         ctx.fillStyle = tailGrad;
         ctx.beginPath();
         roundedRect(tailStart, centerY - baseH / 2, cometX - tailStart, baseH, baseH / 2);
         ctx.fill();
 
         ctx.shadowBlur = 10 + level * 10;
-        ctx.shadowColor = rgba(Color.mPrimary, 0.7);
-        ctx.fillStyle = rgba(Color.mPrimary, 0.95);
+        ctx.shadowColor = rgba(HydraColor.mPrimary, 0.7);
+        ctx.fillStyle = rgba(HydraColor.mPrimary, 0.95);
         ctx.beginPath();
         ctx.arc(cometX, centerY, cometR, 0, Math.PI * 2);
         ctx.fill();
@@ -338,9 +338,9 @@ Slider {
           ctx.fillStyle = bandGrad;
           ctx.fill();
         }
-        auroraBand(Color.mTertiary, 2.4, 0.6, 1.0, 0.26 + level * 0.2);
-        auroraBand(Color.mSecondary, 3.1, -0.9, 0.75, 0.3 + level * 0.22);
-        auroraBand(Color.mPrimary, 4.0, 1.3, 0.5, 0.38 + level * 0.25);
+        auroraBand(HydraColor.mTertiary, 2.4, 0.6, 1.0, 0.26 + level * 0.2);
+        auroraBand(HydraColor.mSecondary, 3.1, -0.9, 0.75, 0.3 + level * 0.22);
+        auroraBand(HydraColor.mPrimary, 4.0, 1.3, 0.5, 0.38 + level * 0.25);
       } else {
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
@@ -362,7 +362,7 @@ Slider {
 
       ctx.restore();
 
-      ctx.fillStyle = rgba(Color.mPrimary, 0.1 + level * 0.12);
+      ctx.fillStyle = rgba(HydraColor.mPrimary, 0.1 + level * 0.12);
       ctx.beginPath();
       const overlayH = reactiveSlider.overflowEffects ? baseH : effectH;
       roundedRect(0, centerY - overlayH / 2, activeW, overlayH, overlayH / 2);
@@ -381,7 +381,7 @@ Slider {
       width: parent.width
       height: parent.height
       radius: width / 2
-      color: reactiveSlider.enabled ? Color.mPrimary : Color.mOutline
+      color: reactiveSlider.enabled ? HydraColor.mPrimary : HydraColor.mOutline
 
       Behavior on color {
         ColorAnimation {

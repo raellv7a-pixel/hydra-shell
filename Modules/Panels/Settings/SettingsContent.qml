@@ -839,7 +839,7 @@ Item {
           anchors.fill: sidebarSurface
           source: sidebarSurface
           autoPaddingEnabled: true
-          shadowColor: Color.mShadow
+          shadowColor: HydraColor.mShadow
           shadowOpacity: Style.shadowOpacity * Style.opacityLight
           shadowHorizontalOffset: 0
           shadowVerticalOffset: Style.marginXXS
@@ -849,7 +849,7 @@ Item {
           id: sidebarSurface
           anchors.fill: parent
           radius: Style.radiusL
-          color: Color.mSurfaceContainerHigh
+          color: HydraColor.mSurfaceContainerHigh
           forceOpaque: true
           border.width: 0
         }
@@ -879,15 +879,15 @@ Item {
               height: parent.height
               anchors.left: parent.left
               radius: height / 2
-              color: toggleMouseArea.containsMouse || activeFocus ? Color.mSurfaceContainerHigh : "transparent"
-              border.color: activeFocus ? Color.mPrimary : "transparent"
+              color: toggleMouseArea.containsMouse || activeFocus ? HydraColor.mSurfaceContainerHigh : "transparent"
+              border.color: activeFocus ? HydraColor.mPrimary : "transparent"
               border.width: activeFocus ? Style.borderM : 0
               activeFocusOnTab: true
               Accessible.role: Accessible.Button
               Accessible.name: root.sidebarExpanded ? I18n.tr("tooltips.collapse") : I18n.tr("tooltips.expand")
 
               Behavior on color {
-                enabled: !Color.isTransitioning
+                enabled: !HydraColor.isTransitioning
                 ColorAnimation {
                   duration: Style.animationFast
                   easing.type: Easing.InOutQuad
@@ -903,7 +903,7 @@ Item {
 
                 NIcon {
                   icon: root.sidebarExpanded ? "layout-sidebar-right-expand" : "layout-sidebar-left-expand"
-                  color: toggleMouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                  color: toggleMouseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
                   pointSize: Style.fontSizeXL
                 }
               }
@@ -985,15 +985,15 @@ Item {
                 height: parent.height
                 anchors.left: parent.left
                 radius: height / 2
-                color: searchCollapsedMouseArea.containsMouse || activeFocus ? Color.mSurfaceContainerHigh : "transparent"
-                border.color: activeFocus ? Color.mPrimary : "transparent"
+                color: searchCollapsedMouseArea.containsMouse || activeFocus ? HydraColor.mSurfaceContainerHigh : "transparent"
+                border.color: activeFocus ? HydraColor.mPrimary : "transparent"
                 border.width: activeFocus ? Style.borderM : 0
                 activeFocusOnTab: true
                 Accessible.role: Accessible.Button
                 Accessible.name: I18n.tr("common.search")
 
                 Behavior on color {
-                  enabled: !Color.isTransitioning
+                  enabled: !HydraColor.isTransitioning
                   ColorAnimation {
                     duration: Style.animationFast
                     easing.type: Easing.InOutQuad
@@ -1009,7 +1009,7 @@ Item {
 
                   NIcon {
                     icon: "search"
-                    color: searchCollapsedMouseArea.containsMouse ? Color.mOnHover : Color.mOnSurface
+                    color: searchCollapsedMouseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
                     pointSize: Style.fontSizeXL
                   }
                 }
@@ -1087,10 +1087,10 @@ Item {
                 radius: Style.iRadiusL
                 readonly property bool selected: index === root.searchSelectedIndex
                 readonly property bool effectiveHover: !root.ignoreMouseHover && resultMouseArea.containsMouse
-                color: selected ? Color.mSecondaryContainer : (effectiveHover ? Color.mSurfaceContainerHigh : "transparent")
+                color: selected ? HydraColor.mSecondaryContainer : (effectiveHover ? HydraColor.mSurfaceContainerHigh : "transparent")
 
                 Behavior on color {
-                  enabled: !Color.isTransitioning
+                  enabled: !HydraColor.isTransitioning
                   ColorAnimation {
                     duration: Style.animationFast
                     easing.type: Easing.InOutQuad
@@ -1110,7 +1110,7 @@ Item {
                     text: I18n.tr(modelData.labelKey)
                     pointSize: Style.fontSizeM
                     font.weight: Style.fontWeightSemiBold
-                    color: resultItem.selected ? Color.mOnSecondaryContainer : Color.mOnSurface
+                    color: resultItem.selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -1124,7 +1124,7 @@ Item {
                       return t;
                     }
                     pointSize: Style.fontSizeXS
-                    color: resultItem.selected ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+                    color: resultItem.selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                     maximumLineCount: 1
@@ -1183,7 +1183,7 @@ Item {
                   pointSize: Style.fontSizeXS
                   font.weight: Style.fontWeightMedium
                   font.capitalization: Font.AllUppercase
-                  color: Color.mOnSurfaceVariant
+                  color: HydraColor.mOnSurfaceVariant
                   wrapMode: Text.WordWrap
                   Accessible.role: Accessible.Heading
                 }
@@ -1194,8 +1194,8 @@ Item {
                 width: sidebarList.width
                 height: Math.max(Math.round(32 * Style.uiScaleRatio), tabEntryRow.implicitHeight + Style.margin2XS)
                 radius: height / 2
-                color: selected ? Color.mSecondaryContainer : (tabItem.hovering ? Color.mSurfaceContainerHigh : "transparent")
-                border.color: activeFocus ? Color.mPrimary : "transparent"
+                color: selected ? HydraColor.mSecondaryContainer : (tabItem.hovering ? HydraColor.mSurfaceContainerHigh : "transparent")
+                border.color: activeFocus ? HydraColor.mPrimary : "transparent"
                 border.width: activeFocus ? Style.borderM : 0
                 activeFocusOnTab: true
                 Accessible.role: Accessible.PageTab
@@ -1203,10 +1203,10 @@ Item {
                 Accessible.selected: selected
                 readonly property bool selected: index === root.currentTabIndex
                 property bool hovering: false
-                property color tabTextColor: selected ? Color.mOnSecondaryContainer : Color.mOnSurface
+                property color tabTextColor: selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
 
                 Behavior on color {
-                  enabled: !Color.isTransitioning
+                  enabled: !HydraColor.isTransitioning
                   ColorAnimation {
                     duration: Style.animationFast
                     easing.type: Easing.InOutQuad
@@ -1214,7 +1214,7 @@ Item {
                 }
 
                 Behavior on tabTextColor {
-                  enabled: !Color.isTransitioning
+                  enabled: !HydraColor.isTransitioning
                   ColorAnimation {
                     duration: Style.animationFast
                     easing.type: Easing.InOutQuad
@@ -1317,7 +1317,7 @@ Item {
         Layout.fillHeight: true
         Layout.alignment: Qt.AlignTop
         radius: Style.radiusL
-        color: Color.mSurfaceContainer
+        color: HydraColor.mSurfaceContainer
         border.color: "transparent"
 
         ColumnLayout {
@@ -1341,7 +1341,7 @@ Item {
 
             NIcon {
               icon: root.tabsModel[currentTabIndex]?.icon ?? ""
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               pointSize: Style.fontSizeXXXL
             }
 
@@ -1349,7 +1349,7 @@ Item {
               text: root.tabsModel[root.currentTabIndex]?.label ? I18n.tr(root.tabsModel[root.currentTabIndex].label) : ""
               pointSize: Style.fontSizeXXL
               font.weight: Style.fontWeightSemiBold
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
               Layout.alignment: Qt.AlignVCenter
             }
@@ -1358,10 +1358,10 @@ Item {
               icon: "close"
               tooltipText: I18n.tr("common.close")
               Layout.alignment: Qt.AlignVCenter
-              colorBg: Color.mSurfaceContainerHigh
-              colorBgHover: Color.mSecondaryContainer
-              colorFg: Color.mOnSurfaceVariant
-              colorFgHover: Color.mOnSecondaryContainer
+              colorBg: HydraColor.mSurfaceContainerHigh
+              colorBgHover: HydraColor.mSecondaryContainer
+              colorFg: HydraColor.mOnSurfaceVariant
+              colorFgHover: HydraColor.mOnSecondaryContainer
               colorBorder: "transparent"
               colorBorderHover: "transparent"
               onClicked: root.closeRequested()
@@ -1455,8 +1455,8 @@ Item {
               id: highlightOverlay
               visible: opacity > 0
               opacity: 0
-              color: Qt.alpha(Color.mSecondaryContainer, 0.72)
-              border.color: Color.mSecondary
+              color: Qt.alpha(HydraColor.mSecondaryContainer, 0.72)
+              border.color: HydraColor.mSecondary
               border.width: Style.borderM
               radius: Style.radiusS
               z: 100

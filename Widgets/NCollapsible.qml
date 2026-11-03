@@ -24,9 +24,9 @@ ColumnLayout {
     id: headerContainer
     Layout.fillWidth: true
     Layout.preferredHeight: headerContent.implicitHeight + Style.margin2M
-    color: headerArea.containsMouse ? Color.mSurfaceContainerHighest : (root.expanded ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh)
+    color: headerArea.containsMouse ? HydraColor.mSurfaceContainerHighest : (root.expanded ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh)
     radius: Style.iRadiusM
-    border.color: Color.mOutline
+    border.color: HydraColor.mOutline
     border.width: Style.borderS
 
     // Smooth color transitions
@@ -70,7 +70,7 @@ ColumnLayout {
         id: chevronIcon
         icon: "chevron-right"
         pointSize: Style.fontSizeL
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
         Layout.alignment: Qt.AlignVCenter
 
         rotation: root.expanded ? 90 : 0
@@ -100,7 +100,7 @@ ColumnLayout {
           text: root.label
           pointSize: Style.fontSizeL
           font.weight: Style.fontWeightSemiBold
-          color: root.expanded && !headerArea.containsMouse ? Color.mOnSecondaryContainer : Color.mOnSurface
+          color: root.expanded && !headerArea.containsMouse ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
           wrapMode: Text.WordWrap
 
           Behavior on color {
@@ -115,7 +115,7 @@ ColumnLayout {
           text: root.description
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightRegular
-          color: root.expanded && !headerArea.containsMouse ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+          color: root.expanded && !headerArea.containsMouse ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
           Layout.fillWidth: true
           wrapMode: Text.WordWrap
           visible: root.description !== ""
@@ -139,9 +139,9 @@ ColumnLayout {
     Layout.topMargin: Style.marginS
 
     visible: root.expanded
-    color: Color.mSurfaceContainerHigh
+    color: HydraColor.mSurfaceContainerHigh
     radius: Style.iRadiusL
-    border.color: Color.mOutline
+    border.color: HydraColor.mOutline
     border.width: Style.borderS
 
     // Dynamic height based on content

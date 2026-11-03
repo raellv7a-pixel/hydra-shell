@@ -105,8 +105,8 @@ Singleton {
   function openOverview() { backend.action("overview-open"); }
   function closeOverview() { backend.action("overview-close"); }
   function toggleOverview() { backend.action("overview-toggle"); }
-  function screencastSetWindow(id) { backend.action("screencast-set-window", id || ""); }
-  function screencastSetOutput(name) { backend.action("screencast-set-output", name || ""); }
+  function screencastSetWindow(id) { backend.action("screencast-set-window", id || undefined); }
+  function screencastSetOutput(name) { backend.action("screencast-set-output", name || undefined); }
   function screencastFollowWindow() { backend.action("screencast-follow-window"); }
   function screencastFollowOutput() { backend.action("screencast-follow-output"); }
   function screencastFollowStop() { backend.action("screencast-follow-stop"); }

@@ -19,7 +19,7 @@ ColumnLayout {
   property bool advancedOpen: false
   readonly property string displayAction: {
     if (!action) return I18n.tr("panels.umbriel.picker-none");
-    const key = action.split(":")[0];
+    const key = action.split(/\s+/, 1)[0];
     const item = catalog.find(entry => entry.key === key);
     return item ? descriptionFor(item) + (action.length > key.length ? " · " + action.slice(key.length + 1) : "") : action;
   }
@@ -68,10 +68,10 @@ ColumnLayout {
   }
 
   Component.onCompleted: UmbrielActionStore.ensureLoaded()
-  NText { visible: UmbrielActionStore.error !== ""; text: UmbrielActionStore.error; color: Color.mError; Layout.fillWidth: true; wrapMode: Text.Wrap }
+  NText { visible: UmbrielActionStore.error !== ""; text: UmbrielActionStore.error; color: HydraColor.mError; Layout.fillWidth: true; wrapMode: Text.Wrap }
   NText {
     text: root.label
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
     pointSize: Style.fontSizeM
   }
   Rectangle {
@@ -79,8 +79,8 @@ ColumnLayout {
     Layout.fillWidth: true
     implicitHeight: Style.baseWidgetSize * 1.25 * Style.uiScaleRatio
     radius: Style.iRadiusL
-    color: root.pickerOpen || selectorHover.containsMouse ? Color.mSecondaryContainer : Color.mSurfaceContainerHighest
-    border.color: activeFocus ? Color.mPrimary : "transparent"
+    color: root.pickerOpen || selectorHover.containsMouse ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHighest
+    border.color: activeFocus ? HydraColor.mPrimary : "transparent"
     border.width: activeFocus ? Style.borderM : 0
     activeFocusOnTab: true
     Accessible.role: Accessible.Button
@@ -88,7 +88,7 @@ ColumnLayout {
     Keys.onReturnPressed: root.togglePicker()
     Keys.onSpacePressed: root.togglePicker()
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation { duration: selectorHover.containsMouse ? Style.hoverEnterDuration : Style.hoverLeaveDuration }
     }
     RowLayout {
@@ -96,16 +96,16 @@ ColumnLayout {
       anchors.leftMargin: Style.marginL
       anchors.rightMargin: Style.marginL
       spacing: Style.marginM
-      NIcon { icon: "bolt"; color: root.pickerOpen || selectorHover.containsMouse ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant; pointSize: Style.fontSizeM }
+      NIcon { icon: "bolt"; color: root.pickerOpen || selectorHover.containsMouse ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeM }
       NText {
         Layout.fillWidth: true
         text: root.displayAction
-        color: root.pickerOpen || selectorHover.containsMouse ? Color.mOnSecondaryContainer : Color.mOnSurface
+        color: root.pickerOpen || selectorHover.containsMouse ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
         elide: Text.ElideRight
       }
       NIcon {
         icon: "chevron-down"
-        color: root.pickerOpen || selectorHover.containsMouse ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+        color: root.pickerOpen || selectorHover.containsMouse ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
         rotation: root.pickerOpen ? 180 : 0
         Behavior on rotation { NumberAnimation { duration: Style.animationFast } }
       }
@@ -134,10 +134,10 @@ ColumnLayout {
       delegate: NButton {
         required property var modelData
         Layout.fillWidth: true
-        backgroundColor: Color.mSurfaceContainerHigh
-        textColor: Color.mOnSurface
-        hoverColor: Color.mSurfaceContainerHighest
-        textHoverColor: Color.mOnSurface
+        backgroundColor: HydraColor.mSurfaceContainerHigh
+        textColor: HydraColor.mOnSurface
+        hoverColor: HydraColor.mSurfaceContainerHighest
+        textHoverColor: HydraColor.mOnSurface
         text: modelData.category + " · " + root.descriptionFor(modelData)
         tooltipText: modelData.name + " (" + modelData.signature + ")"
         onClicked: {
@@ -160,15 +160,15 @@ ColumnLayout {
       visible: root.pendingRequired || (root.pendingHint !== "" && argumentInput.text.trim() !== "")
       text: "Usar ação com argumento"
       enabled: argumentInput.text.trim() !== ""
-      onClicked: root.selected(root.pendingAction + ":" + argumentInput.text.trim())
+      onClicked: root.selected(root.pendingAction + " " + argumentInput.text.trim())
     }
     NButton {
       text: root.advancedOpen ? I18n.tr("panels.umbriel.picker-custom-hide") : I18n.tr("panels.umbriel.picker-custom-show")
       icon: "code"
-      backgroundColor: Color.mSurfaceContainerHigh
-      textColor: Color.mOnSurfaceVariant
-      hoverColor: Color.mSurfaceContainerHighest
-      textHoverColor: Color.mOnSurface
+      backgroundColor: HydraColor.mSurfaceContainerHigh
+      textColor: HydraColor.mOnSurfaceVariant
+      hoverColor: HydraColor.mSurfaceContainerHighest
+      textHoverColor: HydraColor.mOnSurface
       onClicked: root.advancedOpen = !root.advancedOpen
     }
     NTextInput {

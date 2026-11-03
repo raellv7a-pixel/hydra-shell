@@ -10,6 +10,8 @@ import sys
 import tempfile
 import tomllib
 
+from umbriel_actions import ACTION_RE
+
 VERSION = 2
 IPC = {
     "launcher": ("toggle", "clipboard"),
@@ -56,10 +58,10 @@ CATALOG = [
     entry("window.extent", "Janelas", "Ciclar largura", "Mod+R", "umbriel", "window-cycle-primary-extent"),
     entry("window.extent_back", "Janelas", "Ciclar largura para trás", "Mod+Shift+R", "umbriel", "window-cycle-primary-extent-back"),
     entry("umbriel.overview", "Umbriel", "Visão geral", "Mod+O", "umbriel", "overview-toggle"),
-    entry("umbriel.layout", "Umbriel", "Alternar layout", "Mod+Shift+O", "umbriel", "workspace-set-layout:toggle"),
-    entry("umbriel.scratchpad", "Umbriel", "Mostrar scratchpad", "Mod+Alt+Space", "umbriel", "scratchpad-toggle:hydra-default"),
-    entry("umbriel.scratchpad_move", "Umbriel", "Mover ao scratchpad", "Mod+Shift+Space", "umbriel", "window-move-to-scratchpad:hydra-default"),
-    entry("umbriel.scratchpad_next", "Umbriel", "Próximo no scratchpad", "Mod+Tab", "umbriel", "scratchpad-focus-next:hydra-default"),
+    entry("umbriel.layout", "Umbriel", "Alternar layout", "Mod+Shift+O", "umbriel", "workspace-set-layout toggle"),
+    entry("umbriel.scratchpad", "Umbriel", "Mostrar scratchpad", "Mod+Alt+Space", "umbriel", "scratchpad-toggle hydra-default"),
+    entry("umbriel.scratchpad_move", "Umbriel", "Mover ao scratchpad", "Mod+Shift+Space", "umbriel", "window-move-to-scratchpad hydra-default"),
+    entry("umbriel.scratchpad_next", "Umbriel", "Próximo no scratchpad", "Mod+Tab", "umbriel", "scratchpad-focus-next hydra-default"),
     entry("umbriel.inhibit", "Umbriel", "Atalhos inibidos: alternar", "Mod+Shift+Escape", "umbriel", "shortcuts-inhibit-toggle", inhibited=True),
     entry("workspace.next", "Workspaces", "Próximo workspace", "Mod+WheelDown", "umbriel", "workspace-next", cooldown=150),
     entry("workspace.previous", "Workspaces", "Workspace anterior", "Mod+WheelUp", "umbriel", "workspace-previous", cooldown=150),
@@ -71,8 +73,8 @@ for direction, key in (("left", "H"), ("down", "J"), ("up", "K"), ("right", "L")
 for direction, action in (("left", "column-move-left"), ("right", "column-move-right"), ("up", "window-move-up"), ("down", "window-move-down")):
     CATALOG.append(entry("move." + direction, "Janelas", "Mover " + direction, "Mod+Shift+" + direction.title(), "umbriel", action, repeat=True))
 for number in range(1, 10):
-    CATALOG.append(entry("workspace." + str(number), "Workspaces", "Workspace " + str(number), "Mod+" + str(number), "umbriel", "workspace-switch:" + str(number)))
-    CATALOG.append(entry("workspace.move." + str(number), "Workspaces", "Mover janela para " + str(number), "Mod+Shift+" + str(number), "umbriel", "window-move-to-workspace:" + str(number)))
+    CATALOG.append(entry("workspace." + str(number), "Workspaces", "Workspace " + str(number), "Mod+" + str(number), "umbriel", "workspace-switch " + str(number)))
+    CATALOG.append(entry("workspace.move." + str(number), "Workspaces", "Mover janela para " + str(number), "Mod+Shift+" + str(number), "umbriel", "window-move-to-workspace " + str(number)))
 for name, chord, action in (
     ("region", "Print", "annotate"), ("window", "Shift+Print", "annotateWindow"),
     ("fullscreen", "Ctrl+Print", "annotateFullscreen"), ("color", "Mod+Print", "colorPicker"),
@@ -179,15 +181,14 @@ def validate_state(state):
         used[value] = row.get("label", "sem descrição")
         kind, action = row.get("type"), row.get("action", "")
         if kind == "hydra":
-            parts = action.split()
+            parts = action.split(" ") if isinstance(action, str) else []
             if len(parts) != 2 or parts[0] not in IPC or parts[1] not in IPC[parts[0]]:
-                raise ValueError("IPC Hydra desconhecido: " + action)
+                raise ValueError("IPC Hydra desconhecido: " + str(action))
         elif kind == "command":
             if not isinstance(action, str) or not action.strip() or "\n" in action or "\r" in action:
                 raise ValueError("Comando vazio ou com quebras de linha")
         elif kind == "umbriel":
-            if (not isinstance(action, str) or not re.fullmatch(r"[a-z][a-z0-9-]*(?::[^\r\n]+)?", action)
-                    or action.endswith((':', '/'))):
+            if not isinstance(action, str) or not ACTION_RE.fullmatch(action):
                 raise ValueError("Ação Umbriel inválida: " + str(action))
         else:
             raise ValueError("Tipo de ação inválido: " + str(kind))
@@ -245,7 +246,7 @@ def generate(state, edge_apps=None):
 
     lines.append("[keybinds]")
     for row in rows:
-        action = row["action"] if row["type"] == "umbriel" else "spawn:" + ("qs -c hydra-shell ipc call " + row["action"] if row["type"] == "hydra" else row["action"])
+        action = row["action"] if row["type"] == "umbriel" else "spawn " + ("qs -c hydra-shell ipc call " + row["action"] if row["type"] == "hydra" else row["action"])
         values = ["action = " + json.dumps(action, ensure_ascii=False),
                   "repeat = " + str(row.get("repeat", False)).lower()]
         for field in ("allow_when_locked", "allow_when_inhibited"):
@@ -339,17 +340,17 @@ def atomic(path, text):
         temp.unlink(missing_ok=True)
 
 
-def commit(state, edge_apps=None, expected_state=None):
+def commit(state, edge_apps=None, expected_state=None, *, reload_config=True):
     generated = generate(state, edge_apps=edge_apps)
     if MASTER.is_symlink() or OWNED.is_symlink() or STATE.is_symlink():
         raise ValueError("Recusando substituir configuração Umbriel por link simbólico")
     OWNED.parent.mkdir(parents=True, exist_ok=True)
     with (OWNED.parent / ".config.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        _commit_locked(state, generated, expected_state)
+        _commit_locked(state, generated, expected_state, reload_config)
 
 
-def _commit_locked(state, generated, expected_state):
+def _commit_locked(state, generated, expected_state, reload_config):
     had_master = MASTER.exists()
     old_master = MASTER.read_text() if had_master else '[general]\nautostart = ["qs -c hydra-shell -d"]\n'
     old_owned = OWNED.read_text() if OWNED.exists() else None
@@ -390,9 +391,10 @@ def _commit_locked(state, generated, expected_state):
         if not had_master or final_master != old_master:
             atomic(MASTER, final_master)
         atomic(STATE, saved_state)
-        result = subprocess.run(["umbriel", "msg", "config-reload"], capture_output=True, text=True)
-        if result.returncode:
-            raise ValueError((result.stderr or result.stdout).strip() or "Umbriel reload falhou")
+        if reload_config:
+            result = subprocess.run(["umbriel", "msg", "config-reload"], capture_output=True, text=True)
+            if result.returncode:
+                raise ValueError((result.stderr or result.stdout).strip() or "Umbriel reload falhou")
     except Exception:
         if OWNED.exists() and OWNED.read_text() == generated:
             if old_owned is None:
@@ -431,7 +433,7 @@ def main():
         if (not STATE.exists() or json.loads(STATE.read_text()).get("version") != VERSION or not OWNED.exists()
                 or OWNED.read_text() != generate(state)
                 or with_include(master, INCLUDE) != master):
-            commit(state)
+            commit(state, reload_config=bool(os.environ.get("UMBRIEL_SOCKET")))
     elif command == "save":
         commit(migrate_state(json.loads(sys.argv[2])),
                expected_state=json.loads(sys.argv[3]) if len(sys.argv) > 3 else None)

@@ -43,7 +43,7 @@ Item {
   }
 
   function begin() {
-    _snapshotColors = Color.takeSnapshot();
+    _snapshotColors = HydraColor.takeSnapshot();
     _snapshotSettings = {
       darkMode: Settings.data.colorSchemes.darkMode,
       useWallpaperColors: Settings.data.colorSchemes.useWallpaperColors,
@@ -69,7 +69,7 @@ Item {
       AppThemeService.recipeUpdateInProgress = false;
     }
     if (_snapshotColors)
-      Color.applySnapshot(_snapshotColors);
+      HydraColor.applySnapshot(_snapshotColors);
   }
 
   function finalize() {
@@ -77,7 +77,7 @@ Item {
     _snapshotSettings = null;
     _commitAttempted = false;
     _pendingCancel = false;
-    Color.commitPreview();
+    HydraColor.commitPreview();
     ColorSchemeService.pushSystemColorScheme();
   }
 
@@ -97,7 +97,7 @@ Item {
              _snapshotSettings.useWallpaperColors, _snapshotSettings.materialSpec);
       return false;
     }
-    Color.clearPreview();
+    HydraColor.clearPreview();
     _snapshotColors = null;
     _snapshotSettings = null;
     _pendingCancel = false;
@@ -138,8 +138,8 @@ Item {
           variant = targetDark ? (data.dark || data.light) : (data.light || data.dark);
         }
         if (variant) {
-          Color.previewDarkMode = targetDark;
-          Color.previewPalette(variant);
+          HydraColor.previewDarkMode = targetDark;
+          HydraColor.previewPalette(variant);
         }
         root.busy = false;
       } catch (e) {
@@ -190,8 +190,8 @@ Item {
       const rawMode = dark ? (result.dark || result.light) : (result.light || result.dark);
       const mapped = TemplateProcessor.mapToColorKeys(rawMode);
       if (mapped) {
-        Color.previewDarkMode = dark;
-        Color.previewPalette(mapped);
+        HydraColor.previewDarkMode = dark;
+        HydraColor.previewPalette(mapped);
       }
     });
   }

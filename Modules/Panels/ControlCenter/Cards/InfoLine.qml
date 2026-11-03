@@ -13,13 +13,13 @@ RowLayout {
   NIcon {
     icon: iconName
     pointSize: Style.fontSizeM
-    color: coverMode ? Qt.alpha("white", 0.92) : Color.mPrimary
+    color: coverMode ? Qt.alpha("white", 0.92) : HydraColor.mPrimary
   }
 
   NText {
     Layout.fillWidth: true
     text: labelText
-    color: coverMode ? Qt.alpha("white", 0.82) : Color.mOnSurfaceVariant
+    color: coverMode ? Qt.alpha("white", 0.82) : HydraColor.mOnSurfaceVariant
     pointSize: Style.fontSizeS
     elide: Text.ElideRight
   }

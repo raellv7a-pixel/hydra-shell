@@ -44,7 +44,7 @@ ColumnLayout {
     text: I18n.tr("bar.obs-control.connection-settings")
     pointSize: Style.fontSizeM
     font.weight: Style.fontWeightSemiBold
-    color: Color.mOnSurface
+    color: HydraColor.mOnSurface
   }
 
   NToggle {
@@ -115,7 +115,7 @@ ColumnLayout {
     Layout.fillWidth: true
     text: I18n.tr(`bar.obs-control.state-${ObsControlService.effectiveState}`)
     wrapMode: Text.WordWrap
-    color: ObsControlService.connected ? Color.mPrimary : Color.mOnSurfaceVariant
+    color: ObsControlService.connected ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
   }
 
   NButton {

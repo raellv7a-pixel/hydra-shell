@@ -96,7 +96,7 @@ ColumnLayout {
                                                          "coordinates": LocationService.displayCoordinates
                                                        }) : ""
       pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       font.italic: true
     }
   }

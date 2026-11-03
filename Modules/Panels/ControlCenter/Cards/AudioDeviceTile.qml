@@ -31,13 +31,13 @@ DashboardCard {
       NIcon {
         icon: audioDeviceTile.iconName
         pointSize: Style.fontSizeL
-        color: audioDeviceTile.muted ? Color.mError : Color.mPrimary
+        color: audioDeviceTile.muted ? HydraColor.mError : HydraColor.mPrimary
       }
 
       NText {
         Layout.fillWidth: true
         text: audioDeviceTile.titleText
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeS
         elide: Text.ElideRight
       }

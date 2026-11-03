@@ -61,7 +61,9 @@ function keyboardLayout(data) {
       ? (data.names[data.current_index] || "") : "";
 }
 
-function workspaceSelector(workspace) {
-  const selector = workspace.named ? workspace.name : String(workspace.index || workspace.idx);
-  return selector + (workspace.output ? "/" + workspace.output : "");
+function workspaceArguments(workspace) {
+  const args = workspace.named ? ["--name", workspace.name] : [String(workspace.index || workspace.idx)];
+  if (workspace.output)
+    args.push("--output", workspace.output);
+  return args;
 }

@@ -37,8 +37,8 @@ NIconButton {
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
   customRadius: Style.radiusL
-  colorBg: PowerProfileService.hydraPerformanceMode ? Color.mPrimary : Style.capsuleColor
-  colorFg: PowerProfileService.hydraPerformanceMode ? Color.mOnPrimary : Color.resolveColorKey(iconColorKey)
+  colorBg: PowerProfileService.hydraPerformanceMode ? HydraColor.mPrimary : Style.capsuleColor
+  colorFg: PowerProfileService.hydraPerformanceMode ? HydraColor.mOnPrimary : HydraColor.resolveColorKey(iconColorKey)
   border.color: Style.capsuleBorderColor
   border.width: Style.capsuleBorderWidth
 

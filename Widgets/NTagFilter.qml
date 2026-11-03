@@ -35,8 +35,8 @@ NCollapsible {
 
       delegate: NButton {
         text: root.formatTag(modelData)
-        backgroundColor: root.selectedTag === modelData ? Color.mPrimary : Color.mSurfaceVariant
-        textColor: root.selectedTag === modelData ? Color.mOnPrimary : Color.mOnSurfaceVariant
+        backgroundColor: root.selectedTag === modelData ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
+        textColor: root.selectedTag === modelData ? HydraColor.mOnPrimary : HydraColor.mOnSurfaceVariant
         onClicked: root.selectedTag = modelData
         fontSize: Style.fontSizeS
         iconSize: Style.fontSizeS

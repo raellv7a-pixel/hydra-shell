@@ -46,17 +46,17 @@ Item {
     } catch (e) {}
 
     // Fall back strictly to live Color design system tokens
-    if (key === "mPrimary") return Color.mPrimary;
-    if (key === "mSecondary") return Color.mSecondary;
-    if (key === "mTertiary") return Color.mTertiary;
-    if (key === "mPrimaryContainer") return Color.mPrimaryContainer;
-    if (key === "mSurface") return Color.mSurface;
-    if (key === "mSurfaceContainer") return Color.mSurfaceContainer;
-    if (key === "mSurfaceContainerHigh") return Color.mSurfaceContainerHigh;
-    if (key === "mSurfaceContainerLowest") return Color.mSurfaceContainerLowest;
-    if (key === "mOnSurface") return Color.mOnSurface;
-    if (key === "mOnSurfaceVariant") return Color.mOnSurfaceVariant;
-    return Color.mSurfaceVariant;
+    if (key === "mPrimary") return HydraColor.mPrimary;
+    if (key === "mSecondary") return HydraColor.mSecondary;
+    if (key === "mTertiary") return HydraColor.mTertiary;
+    if (key === "mPrimaryContainer") return HydraColor.mPrimaryContainer;
+    if (key === "mSurface") return HydraColor.mSurface;
+    if (key === "mSurfaceContainer") return HydraColor.mSurfaceContainer;
+    if (key === "mSurfaceContainerHigh") return HydraColor.mSurfaceContainerHigh;
+    if (key === "mSurfaceContainerLowest") return HydraColor.mSurfaceContainerLowest;
+    if (key === "mOnSurface") return HydraColor.mOnSurface;
+    if (key === "mOnSurfaceVariant") return HydraColor.mOnSurfaceVariant;
+    return HydraColor.mSurfaceVariant;
   }
 
   Repeater {
@@ -97,14 +97,14 @@ Item {
           text: I18n.tr("setup.hydra.theme.title")
           pointSize: Style.fontSizeXXL
           font.weight: Style.fontWeightBold
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
           Layout.fillWidth: true
         }
 
         NText {
           text: I18n.tr("setup.hydra.theme.subtitle")
           pointSize: Style.fontSizeM
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           wrapMode: Text.WordWrap
           Layout.fillWidth: true
         }
@@ -114,7 +114,7 @@ Item {
       Rectangle {
         Layout.fillWidth: true
         radius: Style.radiusL
-        color: Color.mSurfaceContainerLow
+        color: HydraColor.mSurfaceContainerLow
         implicitHeight: toggleColumn.implicitHeight + Style.marginL * 2
 
         ColumnLayout {
@@ -136,7 +136,7 @@ Item {
           Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: Qt.alpha(Color.mOutline, 0.15)
+            color: Qt.alpha(HydraColor.mOutline, 0.15)
           }
 
           NToggle {
@@ -158,7 +158,7 @@ Item {
         text: I18n.tr("setup.hydra.theme.presets-title")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         Layout.fillWidth: true
       }
 
@@ -184,10 +184,10 @@ Item {
 
             readonly property bool isSelected: !root.useWallpaperColors && (root.selectedScheme === modelData.name || root.selectedScheme === modelData.basename)
 
-            color: isSelected ? Color.mPrimaryContainer : Color.mSurfaceContainer
+            color: isSelected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainer
             // Semantic border only for focus or selection; no permanent border
             border.width: card.activeFocus ? Style.borderL : (isSelected ? Style.borderM : 0)
-            border.color: card.activeFocus ? Color.mPrimary : (isSelected ? Color.mPrimary : "transparent")
+            border.color: card.activeFocus ? HydraColor.mPrimary : (isSelected ? HydraColor.mPrimary : "transparent")
 
             Accessible.role: Accessible.RadioButton
             Accessible.name: modelData.name
@@ -290,7 +290,7 @@ Item {
                   NText {
                     text: modelData.name
                     font.weight: card.isSelected ? Style.fontWeightBold : Style.fontWeightMedium
-                    color: card.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurface
+                    color: card.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
                     pointSize: Style.fontSizeM
                     Layout.fillWidth: true
                   }
@@ -298,13 +298,13 @@ Item {
                     visible: card.index === 0
                     text: I18n.tr("common.default")
                     pointSize: Style.fontSizeXS
-                    color: card.isSelected ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
+                    color: card.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
                   }
                 }
 
                 NText {
                   text: I18n.tr("setup.hydra.theme." + modelData.basename.toLowerCase().replace("hydra-", "") + "-desc")
-                  color: card.isSelected ? Qt.alpha(Color.mOnPrimaryContainer, 0.8) : Color.mOnSurfaceVariant
+                  color: card.isSelected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.8) : HydraColor.mOnSurfaceVariant
                   pointSize: Style.fontSizeS
                   wrapMode: Text.WordWrap
                   Layout.fillWidth: true
@@ -316,7 +316,7 @@ Item {
                 visible: card.isSelected
                 icon: "check"
                 pointSize: Style.fontSizeM
-                color: Color.mPrimary
+                color: HydraColor.mPrimary
               }
             }
           }

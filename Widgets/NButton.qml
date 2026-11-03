@@ -11,10 +11,10 @@ Item {
   property string text: ""
   property string icon: ""
   property var tooltipText
-  property color backgroundColor: Color.mPrimary
-  property color textColor: Color.mOnPrimary
-  property color hoverColor: Color.mSurfaceContainerHighest
-  property color textHoverColor: Color.mOnSurface
+  property color backgroundColor: HydraColor.mPrimary
+  property color textColor: HydraColor.mOnPrimary
+  property color hoverColor: HydraColor.mSurfaceContainerHighest
+  property color textHoverColor: HydraColor.mOnSurface
   property real fontSize: Style.fontSizeM
   property int fontWeight: Style.fontWeightSemiBold
   property real iconSize: Style.fontSizeL
@@ -33,7 +33,7 @@ Item {
   property bool hovered: false
   readonly property color contentColor: {
     if (!root.enabled) {
-      return Color.mOnSurfaceVariant;
+      return HydraColor.mOnSurfaceVariant;
     }
     if (root.hovered) {
       return root.textHoverColor;
@@ -61,7 +61,7 @@ Item {
     radius: root.buttonRadius
     color: {
       if (!root.enabled)
-        return root.outlined ? "transparent" : Qt.lighter(Color.mSurfaceVariant, 1.2);
+        return root.outlined ? "transparent" : Qt.lighter(HydraColor.mSurfaceVariant, 1.2);
       if (root.hovered)
         return root.hoverColor;
       return root.outlined ? "transparent" : root.backgroundColor;
@@ -70,14 +70,14 @@ Item {
     border.width: root.outlined ? Style.borderS : 0
     border.color: {
       if (!root.enabled)
-        return Color.mOutline;
+        return HydraColor.mOutline;
       if (root.hovered)
         return root.hoverColor;
       return root.outlined ? root.backgroundColor : "transparent";
     }
 
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation {
         duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
         easing.type: Easing.OutCubic
@@ -85,7 +85,7 @@ Item {
     }
 
     Behavior on border.color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation {
         duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
         easing.type: Easing.OutCubic
@@ -110,7 +110,7 @@ Item {
         color: root.contentColor
 
         Behavior on color {
-          enabled: !Color.isTransitioning
+          enabled: !HydraColor.isTransitioning
           ColorAnimation {
             duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
             easing.type: Easing.OutCubic
@@ -128,7 +128,7 @@ Item {
         color: root.contentColor
 
         Behavior on color {
-          enabled: !Color.isTransitioning
+          enabled: !HydraColor.isTransitioning
           ColorAnimation {
             duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
             easing.type: Easing.OutCubic

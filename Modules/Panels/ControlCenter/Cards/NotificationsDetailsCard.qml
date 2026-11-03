@@ -34,7 +34,7 @@ DashboardCard {
         text: panelRoot.tr("notifications")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightSemiBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         elide: Text.ElideRight
       }
 
@@ -42,7 +42,7 @@ DashboardCard {
         text: NotificationService.historyModel.count
         pointSize: Style.fontSizeS
         font.family: Settings.data.ui.fontFixed
-        color: NotificationService.historyModel.count > 0 ? Color.mPrimary : Color.mOnSurfaceVariant
+        color: NotificationService.historyModel.count > 0 ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
       }
     }
 
@@ -78,7 +78,7 @@ DashboardCard {
               x: Math.round((parent.width - dndIconMetrics.tightBoundingRect.width) / 2) - dndIconMetrics.tightBoundingRect.x
               icon: NotificationService.doNotDisturb ? "bell-off" : "bell"
               pointSize: Style.fontSizeL
-              color: NotificationService.doNotDisturb ? Color.mError : Color.mPrimary
+              color: NotificationService.doNotDisturb ? HydraColor.mError : HydraColor.mPrimary
             }
           }
 
@@ -90,14 +90,14 @@ DashboardCard {
             NText {
               Layout.fillWidth: true
               text: panelRoot.tr("dnd")
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               font.weight: Style.fontWeightSemiBold
               elide: Text.ElideRight
             }
 
             NText {
               text: NotificationService.doNotDisturb ? panelRoot.tr("enabled") : panelRoot.tr("disabled")
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               pointSize: Style.fontSizeXS
             }
           }
@@ -125,7 +125,7 @@ DashboardCard {
           NIcon {
             icon: "trash"
             pointSize: Style.fontSizeXL
-            color: NotificationService.historyModel.count > 0 ? Color.mPrimary : Color.mOnSurfaceVariant
+            color: NotificationService.historyModel.count > 0 ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
           }
 
           ColumnLayout {
@@ -134,14 +134,14 @@ DashboardCard {
 
             NText {
               text: panelRoot.tr("clear")
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               font.weight: Style.fontWeightSemiBold
               elide: Text.ElideRight
             }
 
             NText {
               text: panelRoot.tr("openHistory")
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               pointSize: Style.fontSizeXS
             }
           }
@@ -175,14 +175,14 @@ DashboardCard {
           NText {
             Layout.fillWidth: true
             text: panelRoot.tr("openHistory")
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             font.weight: Style.fontWeightSemiBold
             elide: Text.ElideRight
           }
 
           NText {
             text: NotificationService.historyModel.count
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             font.family: Settings.data.ui.fontFixed
           }
         }
@@ -192,7 +192,7 @@ DashboardCard {
           Layout.fillWidth: true
           Layout.fillHeight: true
           text: panelRoot.tr("noNotifications")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           horizontalAlignment: Text.AlignHCenter
           verticalAlignment: Text.AlignVCenter
         }

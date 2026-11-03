@@ -135,7 +135,7 @@ ColumnLayout {
       visible: Settings.data.wallpaper.enableMultiMonitorDirectories
       Layout.fillWidth: true
       radius: Style.radiusM
-      border.color: Color.mOutline
+      border.color: HydraColor.mOutline
       border.width: Style.borderS
       implicitHeight: contentCol.implicitHeight + Style.margin2L
       clip: true
@@ -153,7 +153,7 @@ ColumnLayout {
 
             NText {
               text: (modelData.name || "Unknown")
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               font.weight: Style.fontWeightBold
               pointSize: Style.fontSizeM
             }

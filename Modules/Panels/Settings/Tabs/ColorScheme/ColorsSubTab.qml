@@ -42,16 +42,16 @@ ColumnLayout {
     }
 
     if (colorKey === "mSurface")
-      return Color.mSurfaceVariant;
+      return HydraColor.mSurfaceVariant;
     if (colorKey === "mPrimary")
-      return Color.mPrimary;
+      return HydraColor.mPrimary;
     if (colorKey === "mSecondary")
-      return Color.mSecondary;
+      return HydraColor.mSecondary;
     if (colorKey === "mTertiary")
-      return Color.mTertiary;
+      return HydraColor.mTertiary;
     if (colorKey === "mError")
-      return Color.mError;
-    return Color.mOnSurfaceVariant;
+      return HydraColor.mError;
+    return HydraColor.mOnSurfaceVariant;
   }
 
   function schemeLoaded(schemeName, jsonData) {
@@ -164,7 +164,7 @@ ColumnLayout {
       NText {
         text: I18n.tr("panels.display.night-light-manual-schedule-sunrise")
         pointSize: Style.fontSizeM
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
 
       NComboBox {
@@ -182,7 +182,7 @@ ColumnLayout {
       NText {
         text: I18n.tr("panels.display.night-light-manual-schedule-sunset")
         pointSize: Style.fontSizeM
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
 
       NComboBox {
@@ -271,7 +271,7 @@ ColumnLayout {
         wrapMode: Text.WordWrap
         text: I18n.tr("panels.color-scheme.method-description." + Settings.data.colorSchemes.generationMethod)
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
 
       RowLayout {
@@ -306,7 +306,7 @@ ColumnLayout {
         wrapMode: Text.WordWrap
         text: I18n.tr("panels.color-scheme.material-spec-description")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
 
       NDivider {
@@ -351,7 +351,7 @@ ColumnLayout {
         wrapMode: Text.WordWrap
         text: I18n.tr(surfaceStyleSelector.enabled ? "panels.color-scheme.surface-style-description" : "panels.color-scheme.surface-style-unsupported")
         pointSize: Style.fontSizeS
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
 
       Row {
@@ -361,7 +361,7 @@ ColumnLayout {
         property int diameter: 16 * Style.uiScaleRatio
 
         Repeater {
-          model: [Color.mPrimary, Color.mSecondary, Color.mTertiary, Color.mError]
+          model: [HydraColor.mPrimary, HydraColor.mSecondary, HydraColor.mTertiary, HydraColor.mError]
 
           Rectangle {
             width: colorPreviewRow.diameter
@@ -413,12 +413,12 @@ ColumnLayout {
           border.width: Style.borderL
           border.color: {
             if ((Settings.data.colorSchemes.predefinedScheme === schemeName) && schemeItem.enabled) {
-              return Color.mSecondary;
+              return HydraColor.mSecondary;
             }
             if (itemMouseArea.containsMouse) {
-              return Color.mHover;
+              return HydraColor.mHover;
             }
-            return Color.mOutline;
+            return HydraColor.mOutline;
           }
 
           RowLayout {
@@ -430,7 +430,7 @@ ColumnLayout {
             NText {
               text: schemeItem.schemeName
               pointSize: Style.fontSizeS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
               elide: Text.ElideRight
               verticalAlignment: Text.AlignVCenter
@@ -493,14 +493,14 @@ ColumnLayout {
             width: 20
             height: 20
             radius: Math.min(Style.radiusL, width / 2)
-            color: Color.mSecondary
+            color: HydraColor.mSecondary
             border.width: Style.borderS
-            border.color: Color.mOnSecondary
+            border.color: HydraColor.mOnSecondary
 
             NIcon {
               icon: "check"
               pointSize: Style.fontSizeXS
-              color: Color.mOnSecondary
+              color: HydraColor.mOnSecondary
               anchors.centerIn: parent
             }
           }

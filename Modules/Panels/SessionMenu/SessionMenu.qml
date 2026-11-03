@@ -23,8 +23,8 @@ SmartPanel {
   preferredHeightRatio: 0
 
   blurEnabled: true
-  panelBackgroundColor: Color.mSurface
-  panelBorderColor: Qt.alpha(Color.mOutline, 0.28)
+  panelBackgroundColor: HydraColor.mSurface
+  panelBorderColor: Qt.alpha(HydraColor.mOutline, 0.28)
 
   // Attachment to bar & screen positioning
   readonly property string screenBarPosition: Settings.getBarPositionForScreen(screen?.name)
@@ -534,7 +534,7 @@ SmartPanel {
     NBox {
       anchors.fill: parent
       anchors.margins: Style.marginM
-      color: Color.mSurfaceContainerLow
+      color: HydraColor.mSurfaceContainerLow
       radius: Style.radiusL
 
       ColumnLayout {
@@ -574,8 +574,8 @@ SmartPanel {
               Layout.fillWidth: true
               Layout.preferredHeight: Math.round(42 * Style.uiScaleRatio)
               radius: Style.iRadiusL
-              color: Qt.alpha(Color.mSurfaceContainerHigh, 0.82)
-              border.color: Qt.alpha(Color.mOutline, 0.32)
+              color: Qt.alpha(HydraColor.mSurfaceContainerHigh, 0.82)
+              border.color: Qt.alpha(HydraColor.mOutline, 0.32)
               border.width: Style.borderS
 
               RowLayout {
@@ -585,14 +585,14 @@ SmartPanel {
                 NIcon {
                   icon: "person"
                   pointSize: Style.fontSizeM
-                  color: Color.mPrimary
+                  color: HydraColor.mPrimary
                 }
 
                 NText {
                   text: HostService.displayName || Quickshell.env("USER") || "user"
                   font.weight: Style.fontWeightBold
                   pointSize: Style.fontSizeM
-                  color: Color.mOnSurface
+                  color: HydraColor.mOnSurface
                   elide: Text.ElideRight
                 }
               }
@@ -608,7 +608,7 @@ SmartPanel {
               Layout.fillWidth: true
               Layout.preferredHeight: Math.round(36 * Style.uiScaleRatio)
               radius: Style.iRadiusL
-              color: Qt.alpha(Color.mSurfaceContainerHighest, 0.88)
+              color: Qt.alpha(HydraColor.mSurfaceContainerHighest, 0.88)
 
               RowLayout {
                 anchors.centerIn: parent
@@ -617,7 +617,7 @@ SmartPanel {
                 NIcon {
                   icon: "clock"
                   pointSize: Style.fontSizeS
-                  color: Color.mPrimary
+                  color: HydraColor.mPrimary
                 }
 
                 NText {
@@ -625,7 +625,7 @@ SmartPanel {
                                   "uptime": root.uptimeText
                                 })
                   pointSize: Style.fontSizeS
-                  color: Color.mOnSurface
+                  color: HydraColor.mOnSurface
                   font.weight: Style.fontWeightMedium
                 }
               }
@@ -685,23 +685,23 @@ SmartPanel {
     readonly property bool destructiveState: isShutdown && (pending || activeFocusOrHover)
     readonly property color containerColor: {
       if (destructiveState)
-        return Color.blend(Color.mSurfaceContainerHigh, Color.mError, 0.24);
+        return HydraColor.blend(HydraColor.mSurfaceContainerHigh, HydraColor.mError, 0.24);
       if (pending)
-        return Color.mPrimaryContainer;
+        return HydraColor.mPrimaryContainer;
       if (mouseArea.pressed)
-        return Color.mPrimaryContainer;
+        return HydraColor.mPrimaryContainer;
       if (activeFocusOrHover)
-        return Color.mSecondaryContainer;
-      return Color.mSurfaceContainerHigh;
+        return HydraColor.mSecondaryContainer;
+      return HydraColor.mSurfaceContainerHigh;
     }
     readonly property color contentColor: {
       if (destructiveState)
-        return Color.mError;
+        return HydraColor.mError;
       if (pending || mouseArea.pressed)
-        return Color.mOnPrimaryContainer;
+        return HydraColor.mOnPrimaryContainer;
       if (activeFocusOrHover)
-        return Color.mOnSecondaryContainer;
-      return Color.mOnSurface;
+        return HydraColor.mOnSecondaryContainer;
+      return HydraColor.mOnSurface;
     }
 
     signal clicked
@@ -714,7 +714,7 @@ SmartPanel {
     radius: pending || activeFocusOrHover ? Style.iRadiusL : Style.iRadiusM
     color: containerColor
     border.width: isSelected ? Style.borderM : 0
-    border.color: destructiveState ? Color.mError : Color.mPrimary
+    border.color: destructiveState ? HydraColor.mError : HydraColor.mPrimary
 
     scale: mouseArea.pressed ? 0.98 : 1.0
 
@@ -748,7 +748,7 @@ SmartPanel {
         Layout.alignment: Qt.AlignHCenter
         icon: buttonRoot.icon
         pointSize: Style.fontSizeXXXL
-        color: buttonRoot.isShutdown ? Color.mError : buttonRoot.contentColor
+        color: buttonRoot.isShutdown ? HydraColor.mError : buttonRoot.contentColor
 
         Behavior on color {
           ColorAnimation {
@@ -782,7 +782,7 @@ SmartPanel {
       width: keybindText.implicitWidth + Style.marginS
       height: keybindText.implicitHeight + Style.marginXS
       radius: height / 2
-      color: buttonRoot.activeFocusOrHover ? Color.mSurfaceContainerHighest : Color.mSurfaceContainer
+      color: buttonRoot.activeFocusOrHover ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainer
       visible: Settings.data.sessionMenu.showKeybinds && (buttonRoot.keybind !== "") && !buttonRoot.pending
       z: 5
 
@@ -791,7 +791,7 @@ SmartPanel {
         anchors.centerIn: parent
         text: buttonRoot.keybind
         pointSize: Style.fontSizeXXS
-        color: buttonRoot.activeFocusOrHover ? Color.mOnSurface : Color.mOnSurfaceVariant
+        color: buttonRoot.activeFocusOrHover ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
         font.weight: Style.fontWeightMedium
       }
     }

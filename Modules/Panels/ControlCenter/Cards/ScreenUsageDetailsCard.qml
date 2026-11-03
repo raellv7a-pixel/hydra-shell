@@ -40,7 +40,7 @@ DashboardCard {
           text: panelRoot.tr("screenUsage")
           pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightSemiBold
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           elide: Text.ElideRight
         }
 
@@ -48,7 +48,7 @@ DashboardCard {
           Layout.fillWidth: true
           text: panelRoot.tr("trackedToday")
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           elide: Text.ElideRight
         }
       }
@@ -58,7 +58,7 @@ DashboardCard {
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
         font.family: Settings.data.ui.fontFixed
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
     }
 
@@ -106,13 +106,13 @@ DashboardCard {
 
           NText {
             text: panelRoot.screenUsageRangeDays === 1 ? panelRoot.tr("totalToday") : panelRoot.tr("totalRange")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
           }
 
           NText {
             text: panelRoot.durationText(panelRoot.screenUsageTotalForRange(panelRoot.screenUsageRangeDays))
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             pointSize: Style.fontSizeXXL
             font.weight: Style.fontWeightBold
             font.family: Settings.data.ui.fontFixed
@@ -125,7 +125,7 @@ DashboardCard {
 
           NText {
             text: panelRoot.tr("appsTracked")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
             horizontalAlignment: Text.AlignRight
             Layout.alignment: Qt.AlignRight
@@ -133,7 +133,7 @@ DashboardCard {
 
           NText {
             text: String(screenUsageDetails.allApps.length)
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             pointSize: Style.fontSizeXXL
             font.weight: Style.fontWeightBold
             font.family: Settings.data.ui.fontFixed
@@ -159,7 +159,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: panelRoot.tr("allApps")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           font.weight: Style.fontWeightSemiBold
           elide: Text.ElideRight
         }
@@ -195,7 +195,7 @@ DashboardCard {
           Layout.fillHeight: true
           visible: screenUsageDetails.allApps.length === 0
           text: panelRoot.tr("screenUsageEmpty")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           horizontalAlignment: Text.AlignHCenter
           verticalAlignment: Text.AlignVCenter
           wrapMode: Text.WordWrap

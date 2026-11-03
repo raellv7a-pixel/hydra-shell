@@ -383,7 +383,7 @@ ColumnLayout {
         NText {
           text: root.dtr("settingsBorderColor" + (index + 1))
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
 
         NColorPicker {

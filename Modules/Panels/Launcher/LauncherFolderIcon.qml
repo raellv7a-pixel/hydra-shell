@@ -44,6 +44,6 @@ Item {
     visible: !root.useSystem && !root.illustrated
     icon: root.illustrated || root.useSystem ? "folder" : root.folder.icon || "folder"
     pointSize: root.iconSize * Style.uiScaleRatio * 0.75
-    color: Color.mPrimary
+    color: HydraColor.mPrimary
   }
 }

@@ -53,8 +53,8 @@ SmartPanel {
   preferredHeight: LauncherGeometry.panelHeight(screen?.height || height, Style.uiScaleRatio, Math.max(barHeight, Style.marginL), !launcherCoreRef || launcherCoreRef.effectiveState === "home" ? launcherCoreRef?.homePreferredHeight || 540 * Style.uiScaleRatio : 0, Settings.data.appLauncher.density)
   preferredWidthRatio: 0
   preferredHeightRatio: 0
-  panelBackgroundColor: Color.mSurfaceContainer
-  panelBorderColor: Qt.alpha(Color.mOutline, 0.32)
+  panelBackgroundColor: HydraColor.mSurfaceContainer
+  panelBorderColor: Qt.alpha(HydraColor.mOutline, 0.32)
 
   // Positioning
   forceAttachToBar: isFramed
@@ -135,7 +135,7 @@ SmartPanel {
       width: root.previewPanelWidth
       height: Math.round(400 * Style.uiScaleRatio)
       forceOpaque: true // no blur for now
-      color: Color.mSurfaceContainerLow
+      color: HydraColor.mSurfaceContainerLow
       x: root.panelAnchorRight ? -(root.previewPanelWidth + Style.marginM) : ui.width + Style.marginM
       y: {
         var view = launcherCore.resultsView;

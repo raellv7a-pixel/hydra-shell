@@ -33,10 +33,10 @@ ColumnLayout {
         Layout.alignment: Qt.AlignTop
         implicitHeight: controls.implicitHeight + Style.margin2XL
         radius: Style.radiusM
-        color: corner.enabled ? Color.mSurfaceContainerHigh : Color.mSurfaceContainerLow
+        color: corner.enabled ? HydraColor.mSurfaceContainerHigh : HydraColor.mSurfaceContainerLow
 
         Behavior on color {
-          enabled: !Color.isTransitioning
+          enabled: !HydraColor.isTransitioning
           ColorAnimation { duration: Style.animationFast }
         }
 
@@ -53,12 +53,12 @@ ColumnLayout {
               Layout.preferredWidth: Style.baseWidgetSize * Style.uiScaleRatio
               Layout.preferredHeight: Layout.preferredWidth
               radius: Style.iRadiusM
-              color: cornerBlock.corner.enabled ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
+              color: cornerBlock.corner.enabled ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
               NIcon {
                 anchors.centerIn: parent
                 icon: cornerBlock.modelData.icon
                 pointSize: Style.fontSizeL
-                color: cornerBlock.corner.enabled ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+                color: cornerBlock.corner.enabled ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
               }
             }
             NText {
@@ -66,7 +66,7 @@ ColumnLayout {
               text: cornerBlock.modelData.title
               font.weight: Style.fontWeightSemiBold
               pointSize: Style.fontSizeL
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
             }
             NToggle {
               Layout.fillWidth: false

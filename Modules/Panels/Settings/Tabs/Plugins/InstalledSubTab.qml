@@ -71,8 +71,8 @@ ColumnLayout {
     icon: "download"
     visible: (updateCount > 0)
     enabled: !isUpdating
-    backgroundColor: Color.mPrimary
-    textColor: Color.mOnPrimary
+    backgroundColor: HydraColor.mPrimary
+    textColor: HydraColor.mOnPrimary
     Layout.fillWidth: true
     onClicked: {
       isUpdating = true;
@@ -171,19 +171,19 @@ ColumnLayout {
             NIcon {
               icon: "plugin"
               pointSize: Style.fontSizeL
-              color: PluginService.hasPluginError(modelData.compositeKey) ? Color.mError : Color.mPrimary
+              color: PluginService.hasPluginError(modelData.compositeKey) ? HydraColor.mError : HydraColor.mPrimary
             }
 
             NText {
               text: modelData.name
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               elide: Text.ElideRight
             }
 
             // Official badge (Hydra Team maintained)
             Rectangle {
               visible: modelData.official === true
-              color: Color.mSecondary
+              color: HydraColor.mSecondary
               radius: Style.radiusXS
               implicitWidth: officialBadgeRow.implicitWidth + Style.margin2S
               implicitHeight: officialBadgeRow.implicitHeight + Style.margin2XS
@@ -196,14 +196,14 @@ ColumnLayout {
                 NIcon {
                   icon: "official-plugin"
                   pointSize: Style.fontSizeXXS
-                  color: Color.mOnSecondary
+                  color: HydraColor.mOnSecondary
                 }
 
                 NText {
                   text: I18n.tr("common.official")
                   font.pointSize: Style.fontSizeXXS
                   font.weight: Style.fontWeightMedium
-                  color: Color.mOnSecondary
+                  color: HydraColor.mOnSecondary
                 }
               }
             }
@@ -263,8 +263,8 @@ ColumnLayout {
               icon: isUpdating ? "" : "download"
               visible: modelData.updateInfo !== undefined
               enabled: !isUpdating
-              backgroundColor: Color.mPrimary
-              textColor: Color.mOnPrimary
+              backgroundColor: HydraColor.mPrimary
+              textColor: HydraColor.mOnPrimary
               fontSize: Style.fontSizeXXS
               fontWeight: Style.fontWeightMedium
               onClicked: {
@@ -314,7 +314,7 @@ ColumnLayout {
             visible: modelData.description
             text: modelData.description || ""
             font.pointSize: Style.fontSizeXS
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             wrapMode: Text.WordWrap
             maximumLineCount: 2
             elide: Text.ElideRight
@@ -343,20 +343,20 @@ ColumnLayout {
                 return "v" + modelData.version;
               }
               font.pointSize: Style.fontSizeXS
-              color: modelData.updateInfo ? Color.mPrimary : (modelData.pendingUpdateInfo ? Color.mTertiary : Color.mOnSurfaceVariant)
+              color: modelData.updateInfo ? HydraColor.mPrimary : (modelData.pendingUpdateInfo ? HydraColor.mTertiary : HydraColor.mOnSurfaceVariant)
               font.weight: (modelData.updateInfo || modelData.pendingUpdateInfo) ? Style.fontWeightMedium : Style.fontWeightRegular
             }
 
             NText {
               text: "•"
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             NText {
               text: stripAuthorEmail(modelData.author)
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             // Source indicator for plugins from non-official repos
@@ -364,28 +364,28 @@ ColumnLayout {
               visible: !modelData.isFromOfficialRepo
               text: "•"
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             NText {
               visible: !modelData.isFromOfficialRepo
               text: modelData.sourceName || I18n.tr("panels.plugins.source-custom")
               font.pointSize: Style.fontSizeXS
-              color: Color.mTertiary
+              color: HydraColor.mTertiary
             }
 
             NText {
               visible: !!modelData.lastUpdated
               text: "•"
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             NText {
               visible: !!modelData.lastUpdated
               text: modelData.lastUpdated ? Time.formatRelativeTime(new Date(modelData.lastUpdated)) : ""
               font.pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             Item {
@@ -401,14 +401,14 @@ ColumnLayout {
             NIcon {
               icon: "alert-triangle"
               pointSize: Style.fontSizeS
-              color: Color.mError
+              color: HydraColor.mError
             }
 
             NText {
               property var errorInfo: PluginService.getPluginError(modelData.compositeKey)
               text: errorInfo ? errorInfo.error : ""
               font.pointSize: Style.fontSizeXXS
-              color: Color.mError
+              color: HydraColor.mError
               wrapMode: Text.WordWrap
               Layout.fillWidth: true
               elide: Text.ElideRight
@@ -440,9 +440,9 @@ ColumnLayout {
     property var pluginToUninstall: null
 
     background: Rectangle {
-      color: Color.mSurface
+      color: HydraColor.mSurface
       radius: Style.radiusS
-      border.color: Color.mPrimary
+      border.color: HydraColor.mPrimary
       border.width: Style.borderM
     }
 
@@ -472,8 +472,8 @@ ColumnLayout {
 
         NButton {
           text: I18n.tr("common.uninstall")
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: HydraColor.mPrimary
+          textColor: HydraColor.mOnPrimary
           onClicked: {
             if (uninstallDialog.pluginToUninstall) {
               root.uninstallPlugin(uninstallDialog.pluginToUninstall.compositeKey);

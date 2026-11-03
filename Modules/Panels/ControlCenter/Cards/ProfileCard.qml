@@ -232,7 +232,7 @@ DashboardCard {
 
       const lineWidth = Math.max(1, Math.round(panelRoot.profileCoverBorderWidth * panelRoot.panelUnit));
       const inset = lineWidth / 2;
-      const colors = borderColors && borderColors.length > 0 ? borderColors : [Color.mPrimary];
+      const colors = borderColors && borderColors.length > 0 ? borderColors : [HydraColor.mPrimary];
       const animation = panelRoot.profileCoverBorderAnimation;
       const reactive = animation.indexOf("reactive") === 0;
       const energy = reactive ? panelRoot.spectrumAverage() : 0;
@@ -405,7 +405,7 @@ DashboardCard {
           width: parent.width + Math.round(20 * panelRoot.panelUnit)
           height: parent.height + Math.round(20 * panelRoot.panelUnit)
           radius: avatarStage.circleAvatar ? width / 2 : Style.radiusL
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
           opacity: avatarStage.glowEffect ? 0.12 : 0
 
           SequentialAnimation on scale {
@@ -438,7 +438,7 @@ DashboardCard {
           radius: avatarStage.circleAvatar ? width / 2 : Style.radiusL
           color: "transparent"
           border.width: Math.round(2 * panelRoot.panelUnit)
-          border.color: Color.mPrimary
+          border.color: HydraColor.mPrimary
           opacity: avatarStage.ringEffect ? 0.55 : 0
 
           SequentialAnimation on scale {
@@ -464,7 +464,7 @@ DashboardCard {
           radius: avatarStage.circleAvatar ? width / 2 : Style.radiusL
           color: "transparent"
           border.width: Math.round(1 * panelRoot.panelUnit)
-          border.color: Color.mSecondary
+          border.color: HydraColor.mSecondary
           opacity: avatarStage.ringEffect ? 0.22 : 0
 
           SequentialAnimation on scale {
@@ -504,7 +504,7 @@ DashboardCard {
             radius: width / 2
             x: (parent.width - width) / 2
             y: -height / 2
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
           }
 
           Rectangle {
@@ -513,7 +513,7 @@ DashboardCard {
             radius: width / 2
             x: (parent.width - width) / 2
             y: parent.height - height / 2
-            color: Color.mSecondary
+            color: HydraColor.mSecondary
           }
         }
 
@@ -588,7 +588,7 @@ DashboardCard {
             imagePath: Settings.preprocessPath(panelRoot.avatarPath)
             fallbackIcon: "user"
             fallbackIconSize: Style.fontSizeXXXL
-            borderColor: panelRoot.musicActive && avatarStage.ringEffect ? Color.mSecondary : Color.mPrimary
+            borderColor: panelRoot.musicActive && avatarStage.ringEffect ? HydraColor.mSecondary : HydraColor.mPrimary
             borderWidth: Style.borderM
           }
         }

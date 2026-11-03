@@ -69,7 +69,7 @@ ColumnLayout {
 
   NText {
     text: "Integração nativa com a Umbriel · atalhos, visão geral e cantos ativos."
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
     Layout.fillWidth: true
     wrapMode: Text.WordWrap
   }
@@ -81,14 +81,14 @@ ColumnLayout {
   NText {
     visible: root.settingsStore.error !== ""
     text: root.settingsStore.error
-    color: Color.mError
+    color: HydraColor.mError
     Layout.fillWidth: true
     wrapMode: Text.WordWrap
   }
   NText {
     visible: root.settingsStore.externallyOwned
     text: "Configuração controlada externamente: " + root.settingsStore.owners.join(", ") + ". O config.toml e includes pessoais podem prevalecer; a Hydra não editará essas seções."
-    color: Color.mError
+    color: HydraColor.mError
     Layout.fillWidth: true
     wrapMode: Text.WordWrap
   }
@@ -99,15 +99,15 @@ ColumnLayout {
     NText {
       Layout.fillWidth: true
       text: "Alterações Umbriel não salvas"
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
     }
     RowLayout {
       Layout.fillWidth: true
       Item { Layout.fillWidth: true }
       NButton {
         text: "Reverter"
-        backgroundColor: Color.mSurfaceContainerHigh
-        textColor: Color.mOnSurfaceVariant
+        backgroundColor: HydraColor.mSurfaceContainerHigh
+        textColor: HydraColor.mOnSurfaceVariant
         enabled: root.settingsStore.dirty && !root.settingsStore.busy
         onClicked: root.settingsStore.revert()
       }

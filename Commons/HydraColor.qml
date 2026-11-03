@@ -29,7 +29,7 @@ Singleton {
     interval: 200
     onTriggered: {
       if (!root.isPreviewing && customColorsFile.path !== undefined) {
-        Logger.d("Color", "Reloading colors from disk");
+        Logger.d("HydraColor", "Reloading colors from disk");
         reloadColors = true;
         customColorsFile.reload();
       }
@@ -677,7 +677,7 @@ Singleton {
         if (!root.skipTransition && containersChanged)
         root.startTransition();
       } catch (error) {
-        Logger.w("Color", "Failed to parse surface container roles:", error);
+        Logger.w("HydraColor", "Failed to parse surface container roles:", error);
       }
       if (root.skipTransition) {
         Qt.callLater(function () {

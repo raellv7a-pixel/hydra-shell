@@ -8,7 +8,7 @@ LauncherHomeButton {
   required property var folder
   required property var homeView
   required property int folderIndex
-  surface: Color.mSurfaceContainerHigh
+  surface: HydraColor.mSurfaceContainerHigh
   text: folder.name
   Accessible.description: I18n.tr("launcher-home.app-count", { count: folder.entries.length })
   padding: launcher.metrics.padding
@@ -29,9 +29,9 @@ LauncherHomeButton {
         Layout.fillWidth: true
         spacing: 0
         NText { Layout.fillWidth: true; text: root.folder.name; font.weight: Style.fontWeightSemiBold; pointSize: Style.fontSizeM; elide: Text.ElideRight }
-        NText { Layout.fillWidth: true; text: I18n.tr("launcher-home.app-count", { count: root.folder.entries.length }); pointSize: Style.fontSizeXS; color: Color.mOnSurfaceVariant }
+        NText { Layout.fillWidth: true; text: I18n.tr("launcher-home.app-count", { count: root.folder.entries.length }); pointSize: Style.fontSizeXS; color: HydraColor.mOnSurfaceVariant }
       }
-      NIcon { icon: "chevron-right"; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeS }
+      NIcon { icon: "chevron-right"; color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeS }
     }
     RowLayout {
       Layout.fillWidth: true

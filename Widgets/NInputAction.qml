@@ -40,9 +40,9 @@ RowLayout {
 
     text: root.actionButtonText
     icon: root.actionButtonIcon
-    backgroundColor: Color.mSecondary
-    textColor: Color.mOnSecondary
-    hoverColor: Color.mHover
+    backgroundColor: HydraColor.mSecondary
+    textColor: HydraColor.mOnSecondary
+    hoverColor: HydraColor.mHover
     enabled: root.actionButtonEnabled
 
     onClicked: {

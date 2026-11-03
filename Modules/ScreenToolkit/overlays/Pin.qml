@@ -246,12 +246,12 @@ Item {
               NIcon {
                 anchors.horizontalCenter: parent.horizontalCenter
                 icon: "photo-off"
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
               }
               NText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.pluginApi?.tr("pin.noFile")
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeXS
               }
             }
@@ -572,7 +572,7 @@ Item {
               width: implicitWidth
               height: implicitHeight
               radius: Style.radiusM
-              color: Color.mSurface
+              color: HydraColor.mSurface
               border.color: Qt.rgba(1, 1, 1, 0.12)
               border.width: Style.capsuleBorderWidth
               Column {
@@ -714,7 +714,7 @@ Item {
     width: parent.width
     height: 32
     radius: Style.radiusS
-    color: miMA.containsMouse && mEnabled ? Color.mHover : "transparent"
+    color: miMA.containsMouse && mEnabled ? HydraColor.mHover : "transparent"
     opacity: mEnabled ? 1.0 : 0.38
     Row {
       anchors {
@@ -725,13 +725,13 @@ Item {
       spacing: Style.marginS
       NIcon {
         icon: mIcon
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         scale: 0.85
         anchors.verticalCenter: parent.verticalCenter
       }
       NText {
         text: mLabel
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         pointSize: Style.fontSizeS
         anchors.verticalCenter: parent.verticalCenter
       }

@@ -66,7 +66,7 @@ Variants {
                 pointSize: Style.fontSizeM
                 font.family: Settings.data.ui.fontFixed
                 font.weight: Style.fontWeightBold
-                color: Color.mOnPrimary
+                color: HydraColor.mOnPrimary
               }
             }
           }

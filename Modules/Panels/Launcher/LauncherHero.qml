@@ -14,9 +14,9 @@ Item {
   property alias currentIndex: pages.currentIndex
   readonly property bool presented: visible && launcher.isOpen
   readonly property bool contextEnabled: Settings.data.appLauncher.heroShowContext
-  readonly property bool surfaceIsLight: ColorsConvert.isLightColor(Color.mSurface.toString())
-  readonly property color lightTone: surfaceIsLight ? Color.mSurface : Color.mOnSurface
-  readonly property color darkTone: surfaceIsLight ? Color.mOnSurface : Color.mSurface
+  readonly property bool surfaceIsLight: ColorsConvert.isLightColor(HydraColor.mSurface.toString())
+  readonly property color lightTone: surfaceIsLight ? HydraColor.mSurface : HydraColor.mOnSurface
+  readonly property color darkTone: surfaceIsLight ? HydraColor.mOnSurface : HydraColor.mSurface
   readonly property bool lightText: Settings.data.appLauncher.heroTextContrast !== "dark"
   readonly property color foreground: lightText ? lightTone : darkTone
   readonly property string registrationId: "launcher-hero-" + (launcher.screen?.name || "default")
@@ -68,7 +68,7 @@ Item {
     anchors.fill: surface
     source: surface
     autoPaddingEnabled: true
-    shadowColor: Color.mShadow
+    shadowColor: HydraColor.mShadow
     shadowOpacity: Style.shadowOpacity * Style.opacityLight
     shadowHorizontalOffset: 0
     shadowVerticalOffset: Style.marginXXS
@@ -77,7 +77,7 @@ Item {
     id: surface
     anchors.fill: parent
     radius: Style.radiusL
-    color: Color.mSurfaceContainerHigh
+    color: HydraColor.mSurfaceContainerHigh
     forceOpaque: true
     border.width: 0
     SwipeView {
@@ -120,7 +120,7 @@ Item {
           id: coverMask
           anchors.fill: parent
           radius: Style.radiusL
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           visible: false
           layer.enabled: true
         }
@@ -138,7 +138,7 @@ Item {
         Rectangle {
           anchors.fill: parent
           radius: Style.radiusL
-          color: Qt.alpha(Color.mShadow, Settings.data.appLauncher.coverOverlay * 0.20)
+          color: Qt.alpha(HydraColor.mShadow, Settings.data.appLauncher.coverOverlay * 0.20)
         }
         RowLayout {
           id: greeting
@@ -177,7 +177,7 @@ Item {
           height: Math.round(10 * Style.uiScaleRatio)
           padding: 0
           cornerRadius: height / 2
-          surface: pages.currentIndex === index ? Color.mPrimary : Qt.alpha(Color.mOnSurfaceVariant, 0.6)
+          surface: pages.currentIndex === index ? HydraColor.mPrimary : Qt.alpha(HydraColor.mOnSurfaceVariant, 0.6)
           contentItem: Item {}
           onClicked: pages.setCurrentIndex(index)
         }
@@ -200,14 +200,14 @@ Item {
         anchors.fill: parent
         anchors.margins: Style.margin2XL
         spacing: Style.marginS
-        NText { text: Time.now.toLocaleDateString(I18n.locale, Locale.LongFormat); pointSize: Style.fontSizeM; color: Color.mOnSurfaceVariant }
+        NText { text: Time.now.toLocaleDateString(I18n.locale, Locale.LongFormat); pointSize: Style.fontSizeM; color: HydraColor.mOnSurfaceVariant }
         NText { text: Time.now.toLocaleTimeString(I18n.locale, Locale.ShortFormat); pointSize: Style.fontSizeXXXL; font.weight: Style.fontWeightBold }
         RowLayout {
           Layout.fillWidth: true
           spacing: Style.marginL
-          NIcon { icon: "cpu"; color: Color.mPrimary }
+          NIcon { icon: "cpu"; color: HydraColor.mPrimary }
           NText { text: I18n.tr("launcher-home.cpu", { value: Math.round(SystemStatService.cpuUsage) }); pointSize: Style.fontSizeS }
-          NIcon { icon: "server"; color: Color.mPrimary }
+          NIcon { icon: "server"; color: HydraColor.mPrimary }
           NText { text: I18n.tr("launcher-home.memory", { value: Math.round(SystemStatService.memPercent) }); pointSize: Style.fontSizeS }
           Item { Layout.fillWidth: true }
         }

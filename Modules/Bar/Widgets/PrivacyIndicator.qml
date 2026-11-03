@@ -43,10 +43,10 @@ Item {
   readonly property var scrApps: PrivacyIndicatorService.scrApps
   readonly property string cameraDetectionState: PrivacyIndicatorService.cameraDetectionState
 
-  readonly property color inactiveColor: Qt.alpha(Color.mOnSurfaceVariant, 0.3)
-  readonly property color micColor: micActive ? Color.mPrimary : inactiveColor
-  readonly property color camColor: camActive ? Color.mPrimary : inactiveColor
-  readonly property color scrColor: scrActive ? Color.mPrimary : inactiveColor
+  readonly property color inactiveColor: Qt.alpha(HydraColor.mOnSurfaceVariant, 0.3)
+  readonly property color micColor: micActive ? HydraColor.mPrimary : inactiveColor
+  readonly property color camColor: camActive ? HydraColor.mPrimary : inactiveColor
+  readonly property color scrColor: scrActive ? HydraColor.mPrimary : inactiveColor
 
   readonly property bool isPrivacyVisible: !hideInactive || micActive || camActive || scrActive
 

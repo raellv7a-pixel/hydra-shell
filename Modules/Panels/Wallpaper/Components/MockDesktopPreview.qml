@@ -25,7 +25,7 @@ Item {
   // Candidate palette for wallpaperPath, computed read-only (no side effects on the
   // live theme) via TemplateProcessor.previewWallpaperPalette(). null while loading,
   // unavailable (video — no frame extraction today), or on failure; paletteColor()
-  // falls back to the live Color.* singleton in all those cases.
+  // falls back to the live HydraColor.* singleton in all those cases.
   property var candidatePalette: null
   property int paletteRevision: 0
   property var paletteOverride: null
@@ -36,7 +36,7 @@ Item {
     if (palette && palette[mode] && palette[mode][key] !== undefined) {
       return palette[mode][key];
     }
-    return Color[key];
+    return HydraColor[key];
   }
 
   // Snapshot of the live theme, restricted to the same role set candidatePalette
@@ -50,7 +50,7 @@ Item {
     var snapshot = {};
     var keys = Object.keys(TemplateProcessor.colorKeyMap);
     for (var i = 0; i < keys.length; i++) {
-      snapshot[keys[i]] = Color[keys[i]];
+      snapshot[keys[i]] = HydraColor[keys[i]];
     }
     return snapshot;
   }
@@ -143,9 +143,9 @@ Item {
       width: Math.min(screenContainer.width, screenContainer.height * 16 / 9)
       height: Math.min(screenContainer.height, screenContainer.width * 9 / 16)
       anchors.centerIn: parent
-      color: Color.mSurfaceContainerHighest
+      color: HydraColor.mSurfaceContainerHighest
       radius: Style.radiusL
-      border.color: Qt.alpha(Color.mOutline, 0.35)
+      border.color: Qt.alpha(HydraColor.mOutline, 0.35)
       border.width: Style.borderS
       clip: true
 
@@ -227,11 +227,11 @@ Item {
         Rectangle {
           anchors.fill: parent
           visible: bgImage.status !== Image.Ready
-          color: Color.mSurfaceContainer
+          color: HydraColor.mSurfaceContainer
           NText {
             anchors.centerIn: parent
             text: I18n.tr("wallpaper.panel.preview-empty")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
           }
         }
       }

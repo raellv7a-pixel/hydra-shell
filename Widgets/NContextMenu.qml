@@ -62,8 +62,8 @@ Popup {
   padding: Style.marginS
 
   background: Rectangle {
-    color: Color.mSurfaceContainerHigh
-    border.color: Color.mOutline
+    color: HydraColor.mSurfaceContainerHigh
+    border.color: HydraColor.mOutline
     border.width: Style.borderS
     radius: Style.iRadiusM
   }
@@ -89,7 +89,7 @@ Popup {
       property var popup: root
 
       background: Rectangle {
-        color: menuItem.hovered && menuItem.enabled ? Color.mSurfaceContainerHighest : "transparent"
+        color: menuItem.hovered && menuItem.enabled ? HydraColor.mSurfaceContainerHighest : "transparent"
         radius: Style.iRadiusS
 
         Behavior on color {
@@ -107,7 +107,7 @@ Popup {
           visible: modelData.icon !== undefined
           icon: modelData.icon || ""
           pointSize: Style.fontSizeM
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           Layout.leftMargin: root.itemPadding
 
           Behavior on color {
@@ -120,7 +120,7 @@ Popup {
         NText {
           text: modelData.label || modelData.text || ""
           pointSize: Style.fontSizeM
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           verticalAlignment: Text.AlignVCenter
           Layout.fillWidth: true
           Layout.leftMargin: modelData.icon === undefined ? root.itemPadding : 0

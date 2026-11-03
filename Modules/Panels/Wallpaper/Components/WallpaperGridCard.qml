@@ -107,17 +107,17 @@ Item {
           top: parent.top
         }
         height: card.imageHeight
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
         radius: Style.radiusL
         visible: card.isDirectory
-        border.color: card.isCurrent ? Color.mPrimary : "transparent"
+        border.color: card.isCurrent ? HydraColor.mPrimary : "transparent"
         border.width: card.isCurrent ? Style.borderL : 0
 
         NIcon {
           anchors.centerIn: parent
           icon: "folder"
           pointSize: Style.fontSizeXXXL
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
         }
       }
 
@@ -133,7 +133,7 @@ Item {
         visible: !card.isDirectory
         imagePath: card._cachedSource
         radius: Style.radiusL
-        borderColor: (card.isSelected || card.isCurrent) ? Color.mPrimary : "transparent"
+        borderColor: (card.isSelected || card.isCurrent) ? HydraColor.mPrimary : "transparent"
         borderWidth: (card.isSelected || card.isCurrent) ? Style.borderL : 0
         imageFillMode: Image.PreserveAspectCrop
       }
@@ -146,7 +146,7 @@ Item {
           top: parent.top
         }
         height: card.imageHeight
-        color: Color.mSurfaceContainerHigh
+        color: HydraColor.mSurfaceContainerHigh
         radius: Style.radiusL
         visible: !card.isDirectory && (thumbnail.status === Image.Loading || thumbnail.status === Image.Error || card._cachedSource === "")
 
@@ -154,7 +154,7 @@ Item {
           anchors.centerIn: parent
           icon: thumbnail.status === Image.Error ? "alert-circle" : "image"
           pointSize: Style.fontSizeL
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
       }
 
@@ -178,14 +178,14 @@ Item {
         height: width
         radius: width / 2
         z: 6
-        color: Color.mPrimaryContainer
+        color: HydraColor.mPrimaryContainer
         visible: card.isSelected
 
         NIcon {
           anchors.centerIn: parent
           icon: "check"
           pointSize: Style.fontSizeM
-          color: Color.mOnPrimaryContainer
+          color: HydraColor.mOnPrimaryContainer
         }
       }
 
@@ -205,9 +205,9 @@ Item {
         visible: card.favoriteEnabled && !card.isDirectory && (card.isFavorited || hoverHandler.hovered || card.isCurrent)
         color: {
           if (card.isFavorited) {
-            return starHoverHandler.hovered ? Color.mPrimaryContainer : Color.mSecondaryContainer;
+            return starHoverHandler.hovered ? HydraColor.mPrimaryContainer : HydraColor.mSecondaryContainer;
           }
-          return starHoverHandler.hovered ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh;
+          return starHoverHandler.hovered ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainerHigh;
         }
         opacity: (card.isFavorited || starHoverHandler.hovered) ? 1.0 : 0.7
 
@@ -228,9 +228,9 @@ Item {
           pointSize: Style.fontSizeM
           color: {
             if (card.isFavorited) {
-              return starHoverHandler.hovered ? Color.mOnPrimaryContainer : Color.mOnSecondaryContainer;
+              return starHoverHandler.hovered ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSecondaryContainer;
             }
-            return starHoverHandler.hovered ? Color.mOnSurface : Color.mOnSurfaceVariant;
+            return starHoverHandler.hovered ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant;
           }
         }
 
@@ -272,15 +272,15 @@ Item {
             height: paletteRow.diameter
             radius: width * 0.5
             visible: card.showAppearanceBadge
-            color: Color.mSurface
-            border.color: Color.mShadow
+            color: HydraColor.mSurface
+            border.color: HydraColor.mShadow
             border.width: Style.borderS
 
             NIcon {
               anchors.centerIn: parent
               icon: card.paletteAppearanceDark ? "moon" : "sun"
               pointSize: parent.width * 0.45
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
             }
           }
 
@@ -294,7 +294,7 @@ Item {
               height: paletteRow.diameter
               radius: width * 0.5
               color: modelData
-              border.color: Color.mShadow
+              border.color: HydraColor.mShadow
               border.width: Style.borderS
             }
           }
@@ -313,7 +313,7 @@ Item {
           top: parent.top
         }
         height: card.imageHeight
-        color: Color.mSurface
+        color: HydraColor.mSurface
         radius: Style.radiusL
         opacity: card.active ? 0 : 0.18
 
@@ -348,7 +348,7 @@ Item {
     NText {
       text: card.label
       visible: card.showLabel
-      color: card.active ? Color.mOnSurface : Color.mOnSurfaceVariant
+      color: card.active ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeXS
       Layout.fillWidth: true
       Layout.leftMargin: Style.marginS

@@ -17,6 +17,6 @@ NButton {
     radius: root.buttonRadius
     color: "transparent"
     border.width: root.activeFocus ? Style.borderM : 0
-    border.color: Color.mPrimary
+    border.color: HydraColor.mPrimary
   }
 }

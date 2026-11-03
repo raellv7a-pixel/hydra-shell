@@ -271,7 +271,7 @@ Item {
       // Loading overlay — same footprint as the grid so nothing jumps
       Rectangle {
         anchors.fill: parent
-        color: Color.mSurfaceContainerLow
+        color: HydraColor.mSurfaceContainerLow
         radius: Style.radiusL
         visible: root.loading || WallhavenService.fetching
         z: 10
@@ -283,7 +283,7 @@ Item {
 
           NBusyIndicator {
             size: Style.baseWidgetSize * 1.5
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
             Layout.alignment: Qt.AlignHCenter
           }
 
@@ -291,7 +291,7 @@ Item {
             text: WallhavenService.retrySeconds > 0 ? I18n.tr("wallpaper.wallhaven.retrying", {
                                                                 "seconds": WallhavenService.retrySeconds
                                                               }) : I18n.tr("wallpaper.wallhaven.loading")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeM
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
@@ -302,7 +302,7 @@ Item {
       // Error overlay
       Rectangle {
         anchors.fill: parent
-        color: Color.mSurfaceContainerLow
+        color: HydraColor.mSurfaceContainerLow
         radius: Style.radiusL
         visible: root.errorMessage !== "" && !root.loading
         z: 10
@@ -315,13 +315,13 @@ Item {
           NIcon {
             icon: "alert-circle"
             pointSize: Style.fontSizeXXL
-            color: Color.mError
+            color: HydraColor.mError
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
             text: root.errorMessage
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
@@ -339,7 +339,7 @@ Item {
       // Empty state overlay
       Rectangle {
         anchors.fill: parent
-        color: Color.mSurfaceContainerLow
+        color: HydraColor.mSurfaceContainerLow
         radius: Style.radiusL
         visible: root.wallpapers.length === 0 && !root.loading && root.errorMessage === ""
         z: 10
@@ -352,13 +352,13 @@ Item {
           NIcon {
             icon: "image"
             pointSize: Style.fontSizeXXL
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             Layout.alignment: Qt.AlignHCenter
           }
 
           NText {
             text: I18n.tr("wallpaper.wallhaven.no-results")
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             wrapMode: Text.WordWrap
             horizontalAlignment: Text.AlignHCenter
             Layout.fillWidth: true
@@ -379,10 +379,10 @@ Item {
 
       NIconButton {
         icon: "chevron-left"
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSecondaryContainer
-        colorFg: Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnSecondaryContainer
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSecondaryContainer
+        colorFg: HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnSecondaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         enabled: !root.loading && WallhavenService.currentPage > 1 && !WallhavenService.fetching
@@ -394,7 +394,7 @@ Item {
 
         NText {
           text: I18n.tr("wallpaper.wallhaven.page-prefix")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
         }
 
         NTextInput {
@@ -436,16 +436,16 @@ Item {
 
         NText {
           text: I18n.tr("wallpaper.wallhaven.page-suffix").replace("{total}", WallhavenService.lastPage)
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
         }
       }
 
       NIconButton {
         icon: "chevron-right"
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSecondaryContainer
-        colorFg: Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnSecondaryContainer
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSecondaryContainer
+        colorFg: HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnSecondaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         enabled: WallhavenService.currentPage < WallhavenService.lastPage && !WallhavenService.fetching
@@ -455,10 +455,10 @@ Item {
       NIconButton {
         icon: "refresh"
         tooltipText: I18n.tr("tooltips.refresh-wallhaven")
-        colorBg: Color.mSurfaceContainerHigh
-        colorBgHover: Color.mSecondaryContainer
-        colorFg: Color.mOnSurfaceVariant
-        colorFgHover: Color.mOnSecondaryContainer
+        colorBg: HydraColor.mSurfaceContainerHigh
+        colorBgHover: HydraColor.mSecondaryContainer
+        colorFg: HydraColor.mOnSurfaceVariant
+        colorFgHover: HydraColor.mOnSecondaryContainer
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         enabled: !WallhavenService.fetching

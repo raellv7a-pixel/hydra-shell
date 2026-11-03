@@ -576,7 +576,7 @@ Variants {
       visible: overlayWin.isPrimary && overlayWin.showSharePopover
       z: 20
       radius: Style.radiusL
-      color: Color.mSurface
+      color: HydraColor.mSurface
       border.color: Style.capsuleBorderColor
       border.width: Style.capsuleBorderWidth
       height: 44
@@ -590,12 +590,12 @@ Variants {
         visible: overlayWin.isUploading
         NIcon {
           icon: "upload"
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           anchors.verticalCenter: parent.verticalCenter
         }
         NText {
           text: root.mainInstance?.pluginApi?.tr("annotate.sharing")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeS
           anchors.verticalCenter: parent.verticalCenter
         }
@@ -607,12 +607,12 @@ Variants {
         visible: !overlayWin.isUploading && !overlayWin.uploadFailed && overlayWin.shareUrl !== ""
         NIcon {
           icon: "link"
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
           anchors.verticalCenter: parent.verticalCenter
         }
         NText {
           text: overlayWin.shareUrl
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeXS
           width: Math.min(implicitWidth, 260)
           elide: Text.ElideMiddle
@@ -622,12 +622,12 @@ Variants {
           width: 28
           height: 28
           radius: Style.radiusS
-          color: _copyUrlMA.containsMouse ? Color.mHover : "transparent"
+          color: _copyUrlMA.containsMouse ? HydraColor.mHover : "transparent"
           anchors.verticalCenter: parent.verticalCenter
           NIcon {
             anchors.centerIn: parent
             icon: "copy"
-            color: _copyUrlMA.containsMouse ? Color.mOnHover : Color.mOnSurface
+            color: _copyUrlMA.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
           }
           MouseArea {
             id: _copyUrlMA
@@ -653,12 +653,12 @@ Variants {
         visible: !overlayWin.isUploading && overlayWin.uploadFailed
         NIcon {
           icon: "alert-circle"
-          color: Color.mError
+          color: HydraColor.mError
           anchors.verticalCenter: parent.verticalCenter
         }
         NText {
           text: root.mainInstance?.pluginApi?.tr("annotate.shareFailed")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeS
           anchors.verticalCenter: parent.verticalCenter
         }
@@ -722,20 +722,20 @@ Variants {
       width: zoomBadgeRow.implicitWidth + Style.marginS * 2
       height: 22
       radius: Style.radiusS
-      color: Color.mPrimary
+      color: HydraColor.mPrimary
       Row {
         id: zoomBadgeRow
         anchors.centerIn: parent
         spacing: Style.marginXS
         NIcon {
           icon: "zoom-in"
-          color: Color.mOnPrimary
+          color: HydraColor.mOnPrimary
         }
         NText {
           text: root.mainInstance?.pluginApi?.tr("annotate.zoomViewOnly", {
                                                    scale: Math.round(root.zoomScale)
                                                  })
-          color: Color.mOnPrimary
+          color: HydraColor.mOnPrimary
           pointSize: Style.fontSizeXS
         }
       }
@@ -1088,7 +1088,7 @@ Variants {
       x: overlayWin._tbUserX >= 0 ? Math.max(0, Math.min(overlayWin.width - width, overlayWin._tbUserX)) : _autoX
       y: overlayWin._tbUserY >= 0 ? Math.max(0, Math.min(overlayWin.height - height, overlayWin._tbUserY)) : _autoY
       radius: Style.radiusL
-      color: Color.mSurface
+      color: HydraColor.mSurface
       border.color: Style.capsuleBorderColor
       border.width: Style.capsuleBorderWidth
       property real _dragSx: 0
@@ -1256,7 +1256,7 @@ Variants {
           NText {
             anchors.verticalCenter: parent.verticalCenter
             text: root.zoomScale === 1.0 ? "1×" : Math.round(root.zoomScale) + "×"
-            color: root.zoomScale > 1.0 ? Color.mPrimary : Color.mOnSurfaceVariant
+            color: root.zoomScale > 1.0 ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
             font.bold: root.zoomScale > 1.0
             width: 22
@@ -1275,7 +1275,7 @@ Variants {
             radius: Math.round(Style.marginXL / 2)
             anchors.verticalCenter: parent.verticalCenter
             color: overlayWin.drawColor
-            border.color: overlayWin.showPopover ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.2)
+            border.color: overlayWin.showPopover ? HydraColor.mPrimary : Qt.rgba(0, 0, 0, 0.2)
             border.width: overlayWin.showPopover ? Style.borderM : Style.borderS
             scale: colorBtnH.containsMouse ? 1.1 : 1
             Behavior on scale {
@@ -1374,7 +1374,7 @@ Variants {
           NText {
             anchors.horizontalCenter: parent.horizontalCenter
             text: root.zoomScale === 1.0 ? "1×" : Math.round(root.zoomScale) + "×"
-            color: root.zoomScale > 1.0 ? Color.mPrimary : Color.mOnSurfaceVariant
+            color: root.zoomScale > 1.0 ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
             font.bold: root.zoomScale > 1.0
           }
@@ -1391,7 +1391,7 @@ Variants {
             radius: Math.round(Style.marginXL / 2)
             anchors.horizontalCenter: parent.horizontalCenter
             color: overlayWin.drawColor
-            border.color: overlayWin.showPopover ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.2)
+            border.color: overlayWin.showPopover ? HydraColor.mPrimary : Qt.rgba(0, 0, 0, 0.2)
             border.width: overlayWin.showPopover ? Style.borderM : Style.borderS
             scale: colorBtnV.containsMouse ? 1.1 : 1
             Behavior on scale {
@@ -1469,7 +1469,7 @@ Variants {
       id: popover
       visible: overlayWin.isPrimary && overlayWin.showPopover
       radius: Style.radiusL
-      color: Color.mSurface
+      color: HydraColor.mSurface
       border.color: Style.capsuleBorderColor
       border.width: Style.capsuleBorderWidth
       width: toolbar.useVertical ? (popContent.implicitWidth + Style.marginS) : (popContent.implicitWidth + Style.marginM)
@@ -1493,7 +1493,7 @@ Variants {
               height: 20
               radius: 10
               color: modelData
-              border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.15)
+              border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? HydraColor.mPrimary : Qt.rgba(0, 0, 0, 0.15)
               border.width: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Style.borderM : Style.borderS
               scale: chH.containsMouse ? 1.2 : 1
               Behavior on scale {
@@ -1516,7 +1516,7 @@ Variants {
           Rectangle {
             width: Style.borderS
             height: 16
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             opacity: 0.3
             anchors.verticalCenter: parent.verticalCenter
           }
@@ -1526,8 +1526,8 @@ Variants {
               width: 28
               height: 24
               radius: Style.radiusS
-              color: overlayWin.drawSize === modelData.size ? Color.mPrimaryContainer : (shH.containsMouse ? Color.mHover : "transparent")
-              border.color: overlayWin.drawSize === modelData.size ? Color.mPrimary : "transparent"
+              color: overlayWin.drawSize === modelData.size ? HydraColor.mPrimaryContainer : (shH.containsMouse ? HydraColor.mHover : "transparent")
+              border.color: overlayWin.drawSize === modelData.size ? HydraColor.mPrimary : "transparent"
               border.width: Style.borderS
               Row {
                 anchors.centerIn: parent
@@ -1542,7 +1542,7 @@ Variants {
                 NText {
                   text: root.mainInstance?.pluginApi?.tr(modelData.labelKey)
                   pointSize: Style.fontSizeXS
-                  color: Color.mOnSurfaceVariant
+                  color: HydraColor.mOnSurfaceVariant
                   anchors.verticalCenter: parent.verticalCenter
                 }
               }
@@ -1575,7 +1575,7 @@ Variants {
                 radius: Math.round((Style.marginXL + Style.marginXXS) / 2)
                 anchors.centerIn: parent
                 color: modelData
-                border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Color.mPrimary : Qt.rgba(0, 0, 0, 0.15)
+                border.color: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? HydraColor.mPrimary : Qt.rgba(0, 0, 0, 0.15)
                 border.width: overlayWin.drawColor.toString().toUpperCase() === modelData.toUpperCase() ? Style.borderM : Style.borderS
                 scale: chV.containsMouse ? 1.2 : 1
                 Behavior on scale {
@@ -1599,7 +1599,7 @@ Variants {
           Rectangle {
             width: 16
             height: Style.borderS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             opacity: 0.3
             anchors.horizontalCenter: parent.horizontalCenter
           }
@@ -1609,8 +1609,8 @@ Variants {
               width: 32
               height: 24
               radius: Style.radiusS
-              color: overlayWin.drawSize === modelData.size ? Color.mPrimaryContainer : (shV.containsMouse ? Color.mHover : "transparent")
-              border.color: overlayWin.drawSize === modelData.size ? Color.mPrimary : "transparent"
+              color: overlayWin.drawSize === modelData.size ? HydraColor.mPrimaryContainer : (shV.containsMouse ? HydraColor.mHover : "transparent")
+              border.color: overlayWin.drawSize === modelData.size ? HydraColor.mPrimary : "transparent"
               border.width: Style.borderS
               Row {
                 anchors.centerIn: parent
@@ -1625,7 +1625,7 @@ Variants {
                 NText {
                   text: root.mainInstance?.pluginApi?.tr(modelData.labelKey)
                   pointSize: Style.fontSizeXS
-                  color: Color.mOnSurfaceVariant
+                  color: HydraColor.mOnSurfaceVariant
                   anchors.verticalCenter: parent.verticalCenter
                 }
               }
@@ -1738,7 +1738,7 @@ Variants {
     readonly property bool vertical: toolbar.useVertical
     width: vertical ? 28 : Style.borderS
     height: vertical ? Style.borderS : 28
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
     opacity: 0.3
     anchors.horizontalCenter: vertical ? parent.horizontalCenter : undefined
     anchors.verticalCenter: vertical ? undefined : parent.verticalCenter
@@ -1751,11 +1751,11 @@ Variants {
     height: 34
     radius: Style.radiusS
     opacity: root.zoomScale > 1.0 ? 0.35 : 1.0
-    color: overlayWin.tool === toolId ? Color.mPrimary : (tbHover.containsMouse ? Color.mHover : "transparent")
+    color: overlayWin.tool === toolId ? HydraColor.mPrimary : (tbHover.containsMouse ? HydraColor.mHover : "transparent")
     NIcon {
       anchors.centerIn: parent
       icon: iconName
-      color: overlayWin.tool === toolId ? Color.mOnPrimary : tbHover.containsMouse ? Color.mOnHover : Color.mOnSurface
+      color: overlayWin.tool === toolId ? HydraColor.mOnPrimary : tbHover.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
     }
     MouseArea {
       id: tbHover
@@ -1780,14 +1780,14 @@ Variants {
     width: 28
     height: 34
     radius: Style.radiusS
-    color: zbHover.containsMouse ? Color.mHover : "transparent"
+    color: zbHover.containsMouse ? HydraColor.mHover : "transparent"
     enabled: btnEnabled
     opacity: enabled ? 1.0 : 0.3
     signal clicked
     NIcon {
       anchors.centerIn: parent
       icon: iconName
-      color: zbHover.containsMouse ? Color.mOnHover : Color.mOnSurface
+      color: zbHover.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
     }
     MouseArea {
       id: zbHover
@@ -1808,12 +1808,12 @@ Variants {
     height: 34
     radius: Style.radiusS
     opacity: disabled ? 0.3 : 1.0
-    color: (!disabled && abHover.containsMouse) ? (danger ? Qt.alpha(Color.mError, 0.15) : Color.mHover) : "transparent"
+    color: (!disabled && abHover.containsMouse) ? (danger ? Qt.alpha(HydraColor.mError, 0.15) : HydraColor.mHover) : "transparent"
     signal clicked
     NIcon {
       anchors.centerIn: parent
       icon: iconName
-      color: (!parent.disabled && abHover.containsMouse) && parent.danger ? Color.mError : (!parent.disabled && abHover.containsMouse) ? Color.mOnHover : Color.mOnSurface
+      color: (!parent.disabled && abHover.containsMouse) && parent.danger ? HydraColor.mError : (!parent.disabled && abHover.containsMouse) ? HydraColor.mOnHover : HydraColor.mOnSurface
     }
     MouseArea {
       id: abHover
@@ -1834,7 +1834,7 @@ Variants {
     height: 36
     radius: Style.radiusS
     width: _sbRow.implicitWidth + Style.marginL
-    color: sbHover.containsMouse ? (primary ? Color.mPrimary : Color.mSecondary || Color.mPrimary) : (primary ? Color.mPrimaryContainer || Color.mSurfaceVariant : Color.mSurfaceVariant)
+    color: sbHover.containsMouse ? (primary ? HydraColor.mPrimary : HydraColor.mSecondary || HydraColor.mPrimary) : (primary ? HydraColor.mPrimaryContainer || HydraColor.mSurfaceVariant : HydraColor.mSurfaceVariant)
     opacity: overlayWin.isSaving ? 0.5 : 1.0
     signal clicked
     Row {
@@ -1843,11 +1843,11 @@ Variants {
       spacing: Style.marginXS
       NIcon {
         icon: iconName
-        color: sbHover.containsMouse ? Color.mOnPrimary : (primary ? Color.mPrimary : Color.mOnSurface)
+        color: sbHover.containsMouse ? HydraColor.mOnPrimary : (primary ? HydraColor.mPrimary : HydraColor.mOnSurface)
       }
       NText {
         text: labelText
-        color: sbHover.containsMouse ? Color.mOnPrimary : (primary ? Color.mPrimary : Color.mOnSurface)
+        color: sbHover.containsMouse ? HydraColor.mOnPrimary : (primary ? HydraColor.mPrimary : HydraColor.mOnSurface)
         font.weight: Font.Bold
         pointSize: Style.fontSizeS
       }
@@ -1868,7 +1868,7 @@ Variants {
     width: 30
     height: 30
     radius: Style.radiusS
-    color: dragMA.containsMouse || dragMA.pressed ? Color.mHover : "transparent"
+    color: dragMA.containsMouse || dragMA.pressed ? HydraColor.mHover : "transparent"
     Column {
       anchors.centerIn: parent
       spacing: Style.marginXS
@@ -1879,7 +1879,7 @@ Variants {
           width: Style.marginL
           height: Style.marginXXS
           radius: Style.radiusXXXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           opacity: 0.6
         }
       }
@@ -1894,7 +1894,7 @@ Variants {
           width: Style.marginXXS
           height: Style.marginL
           radius: Style.radiusXXXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           opacity: 0.6
         }
       }

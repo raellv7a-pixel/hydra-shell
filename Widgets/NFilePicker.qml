@@ -133,9 +133,9 @@ Popup {
   anchors.centerIn: Overlay.overlay
 
   background: Rectangle {
-    color: Color.mSurfaceVariant
+    color: HydraColor.mSurfaceVariant
     radius: Style.iRadiusL
-    border.color: Color.mOutline
+    border.color: HydraColor.mOutline
     border.width: Style.borderS
   }
 
@@ -228,14 +228,14 @@ Popup {
 
         NIcon {
           icon: "filepicker-folder"
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
           pointSize: Style.fontSizeXXL
         }
         NText {
           text: root.title
           pointSize: Style.fontSizeXL
           font.weight: Style.fontWeightBold
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
           Layout.fillWidth: true
         }
 
@@ -279,9 +279,9 @@ Popup {
       Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 45
-        color: Color.mSurfaceVariant
+        color: HydraColor.mSurfaceVariant
         radius: Style.iRadiusS
-        border.color: Color.mOutline
+        border.color: HydraColor.mOutline
         border.width: Style.borderS
 
         RowLayout {
@@ -406,9 +406,9 @@ Popup {
       Rectangle {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        color: Color.mSurface
+        color: HydraColor.mSurface
         radius: Style.iRadiusM
-        border.color: Color.mOutline
+        border.color: HydraColor.mOutline
         border.width: Style.borderS
 
         FolderListModel {
@@ -460,7 +460,7 @@ Popup {
           model: filteredModel
           visible: filePickerPanel.viewMode
           reuseItems: true
-          gradientColor: Color.mSurface
+          gradientColor: HydraColor.mSurface
 
           property int columns: Math.max(1, Math.floor(availableWidth / 120))
           property int itemSize: Math.floor((availableWidth - leftMargin - rightMargin - (columns * Style.marginS)) / columns)
@@ -486,7 +486,7 @@ Popup {
               anchors.fill: parent
               color: "transparent"
               radius: parent.radius
-              border.color: isSelected ? Color.mSecondary : Color.mSurface
+              border.color: isSelected ? HydraColor.mSecondary : HydraColor.mSurface
               border.width: Style.borderL
               Behavior on color {
                 ColorAnimation {
@@ -497,9 +497,9 @@ Popup {
 
             Rectangle {
               anchors.fill: parent
-              color: (mouseArea.containsMouse && !isSelected) ? Color.mHover : "transparent"
+              color: (mouseArea.containsMouse && !isSelected) ? HydraColor.mHover : "transparent"
               radius: parent.radius
-              border.color: (mouseArea.containsMouse && !isSelected) ? Color.mHover : "transparent"
+              border.color: (mouseArea.containsMouse && !isSelected) ? HydraColor.mHover : "transparent"
               border.width: Style.borderS
               Behavior on color {
                 ColorAnimation {
@@ -550,13 +550,13 @@ Popup {
 
                   Rectangle {
                     anchors.fill: parent
-                    color: Color.mSurfaceVariant
+                    color: HydraColor.mSurfaceVariant
                     radius: Style.iRadiusS
                     visible: thumbnail.status === Image.Loading
                     NIcon {
                       icon: "filepicker-photo"
                       pointSize: Style.fontSizeL
-                      color: Color.mOnSurfaceVariant
+                      color: HydraColor.mOnSurfaceVariant
                       anchors.centerIn: parent
                     }
                   }
@@ -567,11 +567,11 @@ Popup {
                   pointSize: Style.fontSizeXXL * 2
                   color: {
                     if (isSelected)
-                      return Color.mSecondary;
+                      return HydraColor.mSecondary;
                     else if (mouseArea.containsMouse)
-                      return Color.mOnHover;
+                      return HydraColor.mOnHover;
                     else
-                      return model.fileIsDir ? Color.mPrimary : Color.mOnSurfaceVariant;
+                      return model.fileIsDir ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant;
                   }
                   anchors.centerIn: parent
                   visible: !iconContainer.isImage || thumbnail.status !== Image.Ready
@@ -584,14 +584,14 @@ Popup {
                   width: 24
                   height: 24
                   radius: Math.min(Style.iRadiusL, width / 2)
-                  color: Color.mSecondary
-                  border.color: Color.mOutline
+                  color: HydraColor.mSecondary
+                  border.color: HydraColor.mOutline
                   border.width: Style.borderS
                   visible: isSelected
                   NIcon {
                     icon: "filepicker-check"
                     pointSize: Style.fontSizeS
-                    color: Color.mOnSecondary
+                    color: HydraColor.mOnSecondary
                     anchors.centerIn: parent
                   }
                 }
@@ -601,11 +601,11 @@ Popup {
                 text: model.fileName
                 color: {
                   if (isSelected)
-                    return Color.mSecondary;
+                    return HydraColor.mSecondary;
                   else if (mouseArea.containsMouse)
-                    return Color.mOnHover;
+                    return HydraColor.mOnHover;
                   else
-                    return Color.mOnSurfaceVariant;
+                    return HydraColor.mOnSurfaceVariant;
                 }
                 pointSize: Style.fontSizeS
                 font.weight: isSelected ? Style.fontWeightBold : Style.fontWeightRegular
@@ -666,7 +666,7 @@ Popup {
           anchors.margins: Style.marginS
           model: filteredModel
           visible: !filePickerPanel.viewMode
-          gradientColor: Color.mSurface
+          gradientColor: HydraColor.mSurface
 
           delegate: Rectangle {
             id: listItem
@@ -674,9 +674,9 @@ Popup {
             height: 40
             color: {
               if (filePickerPanel.currentSelection.includes(model.filePath))
-                return Color.mSecondary;
+                return HydraColor.mSecondary;
               if (mouseArea.containsMouse)
-                return Color.mHover;
+                return HydraColor.mHover;
               return "transparent";
             }
             radius: Style.iRadiusS
@@ -695,12 +695,12 @@ Popup {
               NIcon {
                 icon: model.fileIsDir ? "filepicker-folder" : root.getFileIcon(model.fileName)
                 pointSize: Style.fontSizeL
-                color: model.fileIsDir ? (filePickerPanel.currentSelection.includes(model.filePath) ? Color.mOnSecondary : Color.mPrimary) : Color.mOnSurfaceVariant
+                color: model.fileIsDir ? (filePickerPanel.currentSelection.includes(model.filePath) ? HydraColor.mOnSecondary : HydraColor.mPrimary) : HydraColor.mOnSurfaceVariant
               }
 
               NText {
                 text: model.fileName
-                color: filePickerPanel.currentSelection.includes(model.filePath) ? Color.mOnSecondary : Color.mOnSurface
+                color: filePickerPanel.currentSelection.includes(model.filePath) ? HydraColor.mOnSecondary : HydraColor.mOnSurface
                 pointSize: Style.fontSizeM
                 font.weight: filePickerPanel.currentSelection.includes(model.filePath) ? Style.fontWeightBold : Style.fontWeightRegular
                 Layout.fillWidth: true
@@ -709,7 +709,7 @@ Popup {
 
               NText {
                 text: model.fileIsDir ? "" : root.formatFileSize(model.fileSize)
-                color: filePickerPanel.currentSelection.includes(model.filePath) ? Color.mOnSecondary : Color.mOnSurfaceVariant
+                color: filePickerPanel.currentSelection.includes(model.filePath) ? HydraColor.mOnSecondary : HydraColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 visible: !model.fileIsDir
                 Layout.preferredWidth: implicitWidth
@@ -775,7 +775,7 @@ Popup {
               return filteredModel.count + " " + (filteredModel.count === 1 ? I18n.tr("widgets.file-picker.item") : I18n.tr("widgets.file-picker.items"));
             }
           }
-          color: filePickerPanel.searchText.length > 0 ? Color.mPrimary : Color.mOnSurfaceVariant
+          color: filePickerPanel.searchText.length > 0 ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeS
           Layout.fillWidth: true
         }

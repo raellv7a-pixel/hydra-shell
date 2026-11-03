@@ -138,7 +138,7 @@ ColumnLayout {
           text: zoneCol.modelData.title
           pointSize: Style.fontSizeM
           font.bold: true
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
         }
 
         Item {
@@ -150,7 +150,7 @@ ColumnLayout {
                           "count": zoneCol.zoneCards.length
                         }) || (zoneCol.zoneCards.length + " cards")
           pointSize: Style.fontSizeS
-          color: Color.mOutline
+          color: HydraColor.mOutline
         }
       }
       Repeater {
@@ -162,9 +162,9 @@ ColumnLayout {
           required property int index
           Layout.fillWidth: true
           Layout.preferredHeight: boxColumn.implicitHeight + Style.marginM * 2
-          color: Color.mSurfaceContainer
+          color: HydraColor.mSurfaceContainer
           radius: Style.radiusM
-          border.color: cardBox.modelData.enabled ? Qt.alpha(Color.mPrimary, 0.3) : Qt.alpha(Color.mOutline, 0.15)
+          border.color: cardBox.modelData.enabled ? Qt.alpha(HydraColor.mPrimary, 0.3) : Qt.alpha(HydraColor.mOutline, 0.15)
           border.width: Style.borderS
 
           readonly property var meta: root.getCardMeta(cardBox.modelData.id)
@@ -191,7 +191,7 @@ ColumnLayout {
               NIcon {
                 icon: cardBox.meta.icon
                 pointSize: Style.fontSizeL
-                color: cardBox.modelData.enabled ? Color.mPrimary : Color.mOutline
+                color: cardBox.modelData.enabled ? HydraColor.mPrimary : HydraColor.mOutline
               }
 
               ColumnLayout {
@@ -205,14 +205,14 @@ ColumnLayout {
                     text: cardBox.meta.name
                     pointSize: Style.fontSizeM
                     font.bold: true
-                    color: cardBox.modelData.enabled ? Color.mOnSurface : Color.mOutline
+                    color: cardBox.modelData.enabled ? HydraColor.mOnSurface : HydraColor.mOutline
                   }
 
                   NBox {
                     visible: cardBox.isLocked
                     Layout.preferredHeight: 18 * Style.uiScaleRatio
                     Layout.preferredWidth: lockedText.implicitWidth + Style.marginS * 2
-                    color: Qt.alpha(Color.mPrimary, 0.15)
+                    color: Qt.alpha(HydraColor.mPrimary, 0.15)
                     radius: Style.radiusS
 
                     NText {
@@ -221,7 +221,7 @@ ColumnLayout {
                       text: root.dtr("cardLocked")
                       pointSize: Style.fontSizeXS
                       font.bold: true
-                      color: Color.mPrimary
+                      color: HydraColor.mPrimary
                     }
                   }
                 }
@@ -229,7 +229,7 @@ ColumnLayout {
                 NText {
                   text: cardBox.meta.description
                   pointSize: Style.fontSizeS
-                  color: Color.mOutline
+                  color: HydraColor.mOutline
                   wrapMode: Text.WordWrap
                   Layout.fillWidth: true
                 }
@@ -311,7 +311,7 @@ ColumnLayout {
               Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Style.borderS
-                color: Qt.alpha(Color.mOutline, 0.15)
+                color: Qt.alpha(HydraColor.mOutline, 0.15)
               }
 
               // Subordinate 1: Audio Controls
@@ -322,7 +322,7 @@ ColumnLayout {
                 NIcon {
                   icon: "volume"
                   pointSize: Style.fontSizeM
-                  color: controlSettings.audioOn ? Color.mPrimary : Color.mOutline
+                  color: controlSettings.audioOn ? HydraColor.mPrimary : HydraColor.mOutline
                 }
 
                 ColumnLayout {
@@ -333,13 +333,13 @@ ColumnLayout {
                     text: root.dtr("cardAudioControlsLabel")
                     pointSize: Style.fontSizeS
                     font.bold: true
-                    color: controlSettings.audioOn ? Color.mOnSurface : Color.mOutline
+                    color: controlSettings.audioOn ? HydraColor.mOnSurface : HydraColor.mOutline
                   }
 
                   NText {
                     text: root.dtr("cardAudioControlsDesc")
                     pointSize: Style.fontSizeXS
-                    color: Color.mOutline
+                    color: HydraColor.mOutline
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                   }
@@ -384,7 +384,7 @@ ColumnLayout {
                 NIcon {
                   icon: "brightness-up"
                   pointSize: Style.fontSizeM
-                  color: controlSettings.brightnessOn ? Color.mPrimary : Color.mOutline
+                  color: controlSettings.brightnessOn ? HydraColor.mPrimary : HydraColor.mOutline
                 }
 
                 ColumnLayout {
@@ -395,13 +395,13 @@ ColumnLayout {
                     text: root.dtr("cardBrightnessControlLabel")
                     pointSize: Style.fontSizeS
                     font.bold: true
-                    color: controlSettings.brightnessOn ? Color.mOnSurface : Color.mOutline
+                    color: controlSettings.brightnessOn ? HydraColor.mOnSurface : HydraColor.mOutline
                   }
 
                   NText {
                     text: root.dtr("cardBrightnessControlDesc")
                     pointSize: Style.fontSizeXS
-                    color: Color.mOutline
+                    color: HydraColor.mOutline
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                   }

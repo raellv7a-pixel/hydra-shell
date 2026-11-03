@@ -109,7 +109,7 @@ When two panels compete for display space:
 
 ## 5. Anti-Patterns to Avoid
 
-- **Hardcoded Colors:** Using `#hex` literals instead of semantic tokens (`Color.mSurface*`, `Color.mPrimary`, etc.).
+- **Hardcoded Colors:** Using `#hex` literals instead of semantic tokens (`HydraColor.mSurface*`, `HydraColor.mPrimary`, etc.).
 - **Hardcoded Spacing/Radii:** Using magic numbers instead of `Style.margin*`, `Style.radius*`, or `Style.iRadius*`.
 - **Boxes Inside Boxes:** Nesting bordered containers inside bordered cards without semantic justification.
 - **Permanent Outlines:** Framing every button, chip, and card with high-contrast borders.
@@ -133,7 +133,7 @@ For exceptional exploratory tasks or artistic critique, a frontend-design skill 
 Detailed operational guides are maintained in the `references/` directory:
 
 - [Material 3 Adaptation (`references/material.md`)](references/material.md) — Semantic color mapping, container hierarchy, and theme compatibility.
-- [Tokens Inventory (`references/tokens.md`)](references/tokens.md) — Comprehensive inventory of verified tokens in `Commons/Color.qml` and `Commons/Style.qml`.
+- [Tokens Inventory (`references/tokens.md`)](references/tokens.md) — Comprehensive inventory of verified tokens in `Commons/HydraColor.qml` and `Commons/Style.qml`.
 - [Components Catalog (`references/components.md`)](references/components.md) — Confirmed reusable `N*` primitives, container patterns, and reuse rules.
 - [Panels & Frame Architecture (`references/panels.md`)](references/panels.md) — `SmartPanel`, `PanelBackground`, 4-state curvature, and `PanelService`.
 - [Motion & Easing (`references/motion.md`)](references/motion.md) — Animation duration tokens, easing curves, asymmetric hover timing, and performance gating.

@@ -226,7 +226,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredWidth: 3
-      color: Color.mSurfaceContainerLow
+      color: HydraColor.mSurfaceContainerLow
       radius: Style.radiusL
       clip: true
 
@@ -275,7 +275,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredWidth: 2
-      color: Color.mSurfaceContainerHigh
+      color: HydraColor.mSurfaceContainerHigh
       radius: Style.radiusL
 
       ColumnLayout {
@@ -289,14 +289,14 @@ Item {
           NIcon {
             icon: "adjustments"
             pointSize: Style.fontSizeL
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
           }
 
           NText {
             text: "Ajustes de Imagem (ImageMagick)"
             pointSize: Style.fontSizeM
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             Layout.fillWidth: true
           }
 
@@ -316,7 +316,7 @@ Item {
           text: "Presets de Estilo (Filtros de Cor)"
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightBold
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
 
         // Presets Grid
@@ -334,8 +334,8 @@ Item {
               text: modelData
               Layout.fillWidth: true
               fontSize: Style.fontSizeS
-              backgroundColor: root.activePreset === modelData ? Color.mSecondaryContainer : Color.mSurfaceContainerHighest
-              textColor: root.activePreset === modelData ? Color.mOnSecondaryContainer : Color.mOnSurface
+              backgroundColor: root.activePreset === modelData ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHighest
+              textColor: root.activePreset === modelData ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
               onClicked: root.applyPreset(modelData)
             }
           }
@@ -349,7 +349,7 @@ Item {
           text: "Ajustes Finos"
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightBold
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
 
         // Sliders
@@ -363,7 +363,7 @@ Item {
             NText {
               text: "Brilho"
               pointSize: Style.fontSizeS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.preferredWidth: 80
             }
             Slider {
@@ -376,7 +376,7 @@ Item {
             NText {
               text: Math.round(root.brightnessValue * 100) + "%"
               pointSize: Style.fontSizeS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               Layout.preferredWidth: 40
             }
           }
@@ -387,7 +387,7 @@ Item {
             NText {
               text: "Contraste"
               pointSize: Style.fontSizeS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.preferredWidth: 80
             }
             Slider {
@@ -400,7 +400,7 @@ Item {
             NText {
               text: Math.round(root.contrastValue * 100) + "%"
               pointSize: Style.fontSizeS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               Layout.preferredWidth: 40
             }
           }
@@ -411,7 +411,7 @@ Item {
             NText {
               text: "Saturação"
               pointSize: Style.fontSizeS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.preferredWidth: 80
             }
             Slider {
@@ -424,7 +424,7 @@ Item {
             NText {
               text: Math.round(root.saturationValue * 100) + "%"
               pointSize: Style.fontSizeS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               Layout.preferredWidth: 40
             }
           }
@@ -435,7 +435,7 @@ Item {
             NText {
               text: "Temperatura"
               pointSize: Style.fontSizeS
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.preferredWidth: 80
             }
             Slider {
@@ -448,7 +448,7 @@ Item {
             NText {
               text: Math.round(root.warmthValue * 100) + "%"
               pointSize: Style.fontSizeS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               Layout.preferredWidth: 40
             }
           }
@@ -463,8 +463,8 @@ Item {
           text: "Aplicar Papel de Parede Editado"
           icon: "check"
           enabled: !root.isVideoWallpaper && !root.isBaking
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: HydraColor.mPrimary
+          textColor: HydraColor.mOnPrimary
           onClicked: root.applyFullGraded()
         }
       }

@@ -22,8 +22,21 @@ console.log(JSON.stringify(vm.runInContext(process.argv[2], api)));'''
           {id:'DP-2:5', index:1, name:'1', output:'DP-2', focused:true, occupied:false, active:true}]);
           const next = workspaces([{id:'DP-1:9', index:1, output:'DP-1', focused:true}]);
           [first.map(w => w.id), focusedOutput(first), focusedOutput(next), focusedOutput([]),
-           workspaceSelector(first[1]), workspaceSelector({named:true,name:'web',output:'DP-2'})]''')
-        self.assertEqual(result, [['DP-1:9', 'DP-2:5'], 'DP-2', 'DP-1', '', '1/DP-2', 'web/DP-2'])
+           workspaceArguments(first[1]), workspaceArguments({named:true,name:'web',output:'DP-2'})]''')
+        self.assertEqual(result, [['DP-1:9', 'DP-2:5'], 'DP-2', 'DP-1', '', ['1', '--output', 'DP-2'], ['--name', 'web', '--output', 'DP-2']])
+
+    def test_workspace_arguments_keep_names_and_output_separate(self):
+        result = self.js("""[
+          workspaceArguments({named:true,name:'3',output:'DP-2'}),
+          workspaceArguments({named:true,name:'web / chat',output:'DP-3'}),
+          workspaceArguments({index:2}),
+          workspaceArguments({idx:4,output:'HDMI-A-1'})]""")
+        self.assertEqual(result, [
+            ['--name', '3', '--output', 'DP-2'],
+            ['--name', 'web / chat', '--output', 'DP-3'],
+            ['2'],
+            ['4', '--output', 'HDMI-A-1'],
+        ])
 
     def test_windows_use_opaque_workspace_and_global_active_not_local_focus(self):
         result = self.js('''windows([

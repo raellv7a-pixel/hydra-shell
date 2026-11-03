@@ -11,7 +11,7 @@ Rectangle {
   property string parentId: ""
   property string chosenIcon: folder ? folder.icon : "folder"
   property bool confirmDelete: false
-  color: Qt.alpha(Color.mSurface, 0.92)
+  color: Qt.alpha(HydraColor.mSurface, 0.92)
   Accessible.role: Accessible.Dialog
   Accessible.name: I18n.tr(folder ? "launcher-home.edit-folder" : (parentId ? "launcher-home.new-subfolder" : "launcher-home.new-folder"))
   MouseArea { anchors.fill: parent }
@@ -19,7 +19,7 @@ Rectangle {
     anchors.centerIn: parent
     width: Math.min(root.width - Style.margin2XL, 420 * Style.uiScaleRatio)
     height: form.implicitHeight + Style.margin2XL
-    color: Color.mSurfaceContainerHigh
+    color: HydraColor.mSurfaceContainerHigh
     forceOpaque: true
     border.width: 0
     radius: Style.radiusL
@@ -51,9 +51,9 @@ Rectangle {
             width: Math.round(36 * Style.uiScaleRatio)
             height: width
             padding: Style.marginS
-            surface: root.chosenIcon === modelData ? Color.mPrimaryContainer : Color.mSurfaceContainerLow
+            surface: root.chosenIcon === modelData ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerLow
             Accessible.selected: root.chosenIcon === modelData
-            contentItem: NIcon { icon: iconChoice.modelData; color: Color.mOnSurface }
+            contentItem: NIcon { icon: iconChoice.modelData; color: HydraColor.mOnSurface }
             onClicked: root.chosenIcon = modelData
           }
         }
@@ -66,7 +66,7 @@ Rectangle {
           padding: Style.marginS
           visible: !!root.folder
           text: I18n.tr(root.confirmDelete ? "launcher-home.confirm-delete" : "launcher-home.delete-folder")
-          foreground: Color.mError
+          foreground: HydraColor.mError
           onClicked: {
             if (!root.confirmDelete) { root.confirmDelete = true; return; }
             root.launcher.browseModel.deleteFolder(root.folder.id, root.parentId);
@@ -75,7 +75,7 @@ Rectangle {
         }
         Item { Layout.fillWidth: true }
         LauncherHomeButton { launcher: root.launcher; text: I18n.tr("common.cancel"); implicitHeight: Math.round(36 * Style.uiScaleRatio); padding: Style.marginS; onClicked: root.launcher.closeFolderEditor() }
-        LauncherHomeButton { launcher: root.launcher; text: I18n.tr("common.save"); implicitHeight: Math.round(36 * Style.uiScaleRatio); padding: Style.marginS; surface: Color.mPrimaryContainer; foreground: Color.mOnPrimaryContainer; enabled: nameInput.text.trim() !== ""; onClicked: root.save() }
+        LauncherHomeButton { launcher: root.launcher; text: I18n.tr("common.save"); implicitHeight: Math.round(36 * Style.uiScaleRatio); padding: Style.marginS; surface: HydraColor.mPrimaryContainer; foreground: HydraColor.mOnPrimaryContainer; enabled: nameInput.text.trim() !== ""; onClicked: root.save() }
       }
     }
   }

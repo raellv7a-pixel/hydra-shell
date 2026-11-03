@@ -30,7 +30,7 @@ ColumnLayout {
         text: "Agente de Autenticação Polkit"
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
       }
 
       NToggle {
@@ -72,7 +72,7 @@ ColumnLayout {
         text: "Comportamento & Efeitos Visuais"
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
       }
 
       NToggle {

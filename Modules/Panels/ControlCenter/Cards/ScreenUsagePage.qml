@@ -67,7 +67,7 @@ Item {
       panelRoot: screenUsagePage.panelRoot
       Layout.fillWidth: true
       Layout.preferredHeight: Math.round(76 * panelRoot.panelUnit)
-      color: Color.mSurfaceContainerHighest
+      color: HydraColor.mSurfaceContainerHighest
       radius: Style.radiusS
 
       RowLayout {
@@ -140,7 +140,7 @@ Item {
         Layout.fillHeight: true
         visible: screenUsagePage.topApps.length === 0
         text: panelRoot.tr("screenUsageEmpty")
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeS
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

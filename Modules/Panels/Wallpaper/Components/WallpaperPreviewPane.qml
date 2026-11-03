@@ -38,7 +38,7 @@ NBox {
   signal applyRequested
   signal findSimilarRequested(string wallpaperId)
 
-  color: Color.mSurfaceContainerLow
+  color: HydraColor.mSurfaceContainerLow
   radius: Style.radiusL
 
   WallpaperFileInfo {
@@ -122,14 +122,14 @@ NBox {
       NIcon {
         icon: "device-desktop"
         pointSize: Style.fontSizeL
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
 
       NText {
         text: I18n.tr("wallpaper.panel.preview-title")
         pointSize: Style.fontSizeM
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         Layout.fillWidth: true
       }
 
@@ -139,7 +139,7 @@ NBox {
         Layout.preferredWidth: stateChipText.implicitWidth + Style.marginM * 2
         Layout.preferredHeight: stateChipText.implicitHeight + Style.marginXS * 2
         radius: height / 2
-        color: root.showingCandidate ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
+        color: root.showingCandidate ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
 
         NText {
           id: stateChipText
@@ -148,7 +148,7 @@ NBox {
           text: root.showingCandidate ? I18n.tr("wallpaper.panel.preview-chip-candidate") : I18n.tr("wallpaper.panel.preview-chip-applied")
           pointSize: Style.fontSizeXS
           font.weight: Style.fontWeightBold
-          color: root.showingCandidate ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
+          color: root.showingCandidate ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
         }
       }
     }
@@ -180,7 +180,7 @@ NBox {
     NBox {
       Layout.fillWidth: true
       Layout.preferredHeight: infoColumn.implicitHeight + Style.marginM * 2
-      color: Color.mSurfaceContainerHigh
+      color: HydraColor.mSurfaceContainerHigh
       radius: Style.radiusL
 
       ColumnLayout {
@@ -194,7 +194,7 @@ NBox {
           text: root.titleText()
           pointSize: Style.fontSizeM
           font.weight: Style.fontWeightMedium
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           elide: Text.ElideMiddle
           Layout.fillWidth: true
         }
@@ -203,7 +203,7 @@ NBox {
           text: root.primaryInfo()
           visible: text !== ""
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           elide: Text.ElideRight
           Layout.fillWidth: true
         }
@@ -212,7 +212,7 @@ NBox {
           text: root.secondaryInfo()
           visible: text !== ""
           pointSize: Style.fontSizeXS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           elide: Text.ElideRight
           Layout.fillWidth: true
         }
@@ -249,7 +249,7 @@ NBox {
               Layout.preferredHeight: candidateSwatches.diameter
               radius: candidateSwatches.diameter / 2
               color: candidateSwatches.palette?.[modelData] ?? "transparent"
-              border.color: Qt.alpha(Color.mOnSurface, 0.25)
+              border.color: Qt.alpha(HydraColor.mOnSurface, 0.25)
               border.width: Style.borderS
             }
           }
@@ -280,8 +280,8 @@ NBox {
         icon: mockPreview.previewDarkMode ? "moon" : "sun"
         tooltipText: mockPreview.previewDarkMode ? I18n.tr("wallpaper.panel.preview-light-tooltip") : I18n.tr("wallpaper.panel.preview-dark-tooltip")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: mockPreview.previewDarkMode ? Color.mSecondaryContainer : Color.mSurfaceContainerHighest
-        colorFg: mockPreview.previewDarkMode ? Color.mOnSecondaryContainer : Color.mOnSurfaceVariant
+        colorBg: mockPreview.previewDarkMode ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHighest
+        colorFg: mockPreview.previewDarkMode ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: mockPreview.previewDarkMode = !mockPreview.previewDarkMode
@@ -292,8 +292,8 @@ NBox {
         icon: "photo-search"
         tooltipText: I18n.tr("wallpaper.wallhaven.find-similar")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: Color.mSurfaceContainerHighest
-        colorFg: Color.mOnSurfaceVariant
+        colorBg: HydraColor.mSurfaceContainerHighest
+        colorFg: HydraColor.mOnSurfaceVariant
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: {
@@ -308,8 +308,8 @@ NBox {
         icon: "external-link"
         tooltipText: I18n.tr("wallpaper.wallhaven.open-browser")
         baseSize: Style.baseWidgetSize * 0.8
-        colorBg: Color.mSurfaceContainerHighest
-        colorFg: Color.mOnSurfaceVariant
+        colorBg: HydraColor.mSurfaceContainerHighest
+        colorFg: HydraColor.mOnSurfaceVariant
         colorBorder: "transparent"
         colorBorderHover: "transparent"
         onClicked: Qt.openUrlExternally(root.meta.url)
@@ -323,8 +323,8 @@ NBox {
         text: root.applying ? I18n.tr("wallpaper.wallhaven.downloading") : I18n.tr("common.apply")
         icon: root.applying ? "loader-2" : "check"
         enabled: root.previewPath !== "" && !root.applying
-        backgroundColor: Color.mPrimary
-        textColor: Color.mOnPrimary
+        backgroundColor: HydraColor.mPrimary
+        textColor: HydraColor.mOnPrimary
         onClicked: root.applyRequested()
       }
     }

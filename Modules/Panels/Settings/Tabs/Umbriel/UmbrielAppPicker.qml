@@ -26,7 +26,7 @@ ColumnLayout {
                        .slice(0, 8);
   }
 
-  NText { text: "Aplicativo: " + (root.selectedApp ? root.selectedApp.name : root.command || "Nenhum"); Layout.fillWidth: true; color: Color.mOnSurfaceVariant; wrapMode: Text.Wrap }
+  NText { text: "Aplicativo: " + (root.selectedApp ? root.selectedApp.name : root.command || "Nenhum"); Layout.fillWidth: true; color: HydraColor.mOnSurfaceVariant; wrapMode: Text.Wrap }
   NTextInput {
     Layout.fillWidth: true
     label: "Pesquisar aplicativo instalado"
@@ -41,8 +41,8 @@ ColumnLayout {
       Layout.fillWidth: true
       implicitHeight: Style.baseWidgetSize + Style.marginS
       radius: Style.radiusM
-      color: hover.containsMouse ? Color.mSecondaryContainer : Color.mSurfaceContainerHigh
-      border.color: activeFocus ? Color.mPrimary : Color.mOutline
+      color: hover.containsMouse ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+      border.color: activeFocus ? HydraColor.mPrimary : HydraColor.mOutline
       border.width: Style.borderS
       activeFocusOnTab: true
       Accessible.role: Accessible.Button
@@ -63,7 +63,7 @@ ColumnLayout {
           Layout.fillWidth: true
           text: appRow.modelData.name + " · " + appRow.modelData.id
           elide: Text.ElideRight
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
         }
       }
       MouseArea {
@@ -80,6 +80,6 @@ ColumnLayout {
     text: "Nenhum aplicativo instalado corresponde à busca. Use Executar comando para casos avançados."
     Layout.fillWidth: true
     wrapMode: Text.Wrap
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
   }
 }

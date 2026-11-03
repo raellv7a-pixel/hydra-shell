@@ -49,8 +49,8 @@ NIconButton {
   baseSize: Style.getCapsuleHeightForScreen(screen?.name)
   applyUiScale: false
   customRadius: Style.radiusL
-  colorBg: hasMountedDevices ? Color.mPrimary : Style.capsuleColor
-  colorFg: hasMountedDevices ? Color.mOnPrimary : Color.resolveColorKey(iconColorKey)
+  colorBg: hasMountedDevices ? HydraColor.mPrimary : Style.capsuleColor
+  colorFg: hasMountedDevices ? HydraColor.mOnPrimary : HydraColor.resolveColorKey(iconColorKey)
   border.color: Style.capsuleBorderColor
   border.width: Style.capsuleBorderWidth
 
@@ -69,7 +69,7 @@ NIconButton {
     width: Math.max(badgeLabel.implicitWidth + 6, 14)
     height: 14
     radius: height / 2
-    color: root.hasMountedDevices ? Color.mOnPrimary : Color.mPrimary
+    color: root.hasMountedDevices ? HydraColor.mOnPrimary : HydraColor.mPrimary
 
     NText {
       id: badgeLabel
@@ -77,7 +77,7 @@ NIconButton {
       text: String(UsbDriveService.mountedCount)
       pointSize: Style.fontSizeXXS
       font.weight: Style.fontWeightBold
-      color: root.hasMountedDevices ? Color.mPrimary : Color.mOnPrimary
+      color: root.hasMountedDevices ? HydraColor.mPrimary : HydraColor.mOnPrimary
     }
   }
 

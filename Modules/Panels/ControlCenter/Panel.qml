@@ -84,11 +84,11 @@ Item {
   readonly property real requestedPanelHeight: panelBaseHeight * Style.uiScaleRatio * localScale
   readonly property real autoFitScale: Math.min(1, Math.min(maxPanelWidth / Math.max(1, requestedPanelWidth), maxPanelHeight / Math.max(1, requestedPanelHeight)))
   readonly property real panelUnit: Style.uiScaleRatio * localScale * autoFitScale
-  readonly property color m3SurfaceContainerLow: Color.mSurfaceContainerLow
-  readonly property color m3SurfaceContainer: Color.mSurfaceContainer
-  readonly property color m3SurfaceContainerHigh: Color.mSurfaceContainerHigh
-  readonly property color m3SurfaceContainerHighest: Color.mSurfaceContainerHighest
-  readonly property color m3PrimaryContainer: Color.mPrimaryContainer
+  readonly property color m3SurfaceContainerLow: HydraColor.mSurfaceContainerLow
+  readonly property color m3SurfaceContainer: HydraColor.mSurfaceContainer
+  readonly property color m3SurfaceContainerHigh: HydraColor.mSurfaceContainerHigh
+  readonly property color m3SurfaceContainerHighest: HydraColor.mSurfaceContainerHighest
+  readonly property color m3PrimaryContainer: HydraColor.mPrimaryContainer
 
   readonly property var geometryPlaceholder: panelContainer
   // Framed hosts stay flush; detachment remains configurable outside the frame.
@@ -273,7 +273,7 @@ Item {
   }
 
   function profileTextColor(strong) {
-    return root.profileWallpaperPath !== "" ? "white" : (strong ? Color.mOnSurface : Color.mOnSurfaceVariant);
+    return root.profileWallpaperPath !== "" ? "white" : (strong ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant);
   }
 
   function profileCardRadius(width, height) {
@@ -293,8 +293,8 @@ Item {
 
   function automaticProfileBorderColors() {
     if (profileCoverBorderEffect === "secondary")
-      return [Color.mSecondary, Color.mTertiary, Color.mPrimary];
-    return [Color.mPrimary, Color.mSecondary, Color.mTertiary, Color.mPrimary];
+      return [HydraColor.mSecondary, HydraColor.mTertiary, HydraColor.mPrimary];
+    return [HydraColor.mPrimary, HydraColor.mSecondary, HydraColor.mTertiary, HydraColor.mPrimary];
   }
 
   function customProfileBorderColors() {
@@ -303,7 +303,7 @@ Item {
     const colors = [];
     for (let i = 0; i < count; i++) {
       const value = String(source[i] || "").trim();
-      colors.push(value !== "" ? value : Color.mPrimary);
+      colors.push(value !== "" ? value : HydraColor.mPrimary);
     }
     return colors;
   }
@@ -388,19 +388,19 @@ Item {
   }
 
   function componentText(componentKey, strong) {
-    return root.componentColor(componentKey, strong ? "text" : "subtext", strong ? Color.mOnSurface : Color.mOnSurfaceVariant);
+    return root.componentColor(componentKey, strong ? "text" : "subtext", strong ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant);
   }
 
   function componentAccent(componentKey) {
-    return root.componentColor(componentKey, "accent", Color.mPrimary);
+    return root.componentColor(componentKey, "accent", HydraColor.mPrimary);
   }
 
   function componentButtonBackground(componentKey) {
-    return root.componentColor(componentKey, "buttonBackground", Color.mPrimary);
+    return root.componentColor(componentKey, "buttonBackground", HydraColor.mPrimary);
   }
 
   function componentButtonText(componentKey) {
-    return root.componentColor(componentKey, "buttonText", Color.mOnPrimary);
+    return root.componentColor(componentKey, "buttonText", HydraColor.mOnPrimary);
   }
 
   function inheritedStyleKey(item) {
@@ -472,10 +472,10 @@ Item {
   function componentBorderColors(componentKey) {
     const style = root.componentStyle(componentKey);
     if (!style)
-      return [Color.mPrimary, Color.mSecondary, Color.mTertiary];
+      return [HydraColor.mPrimary, HydraColor.mSecondary, HydraColor.mTertiary];
 
     if (String(style.borderColorMode || "auto") !== "custom")
-      return [Color.mPrimary, Color.mSecondary, Color.mTertiary, Color.mError];
+      return [HydraColor.mPrimary, HydraColor.mSecondary, HydraColor.mTertiary, HydraColor.mError];
 
     const source = [style.borderColor1, style.borderColor2, style.borderColor3, style.borderColor4, style.borderColor5];
     const count = root.clamp(Number(style.borderColorCount || 3), 3, 5);

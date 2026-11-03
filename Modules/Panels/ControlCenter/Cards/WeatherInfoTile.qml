@@ -21,7 +21,7 @@ DashboardCard {
     NIcon {
       icon: weatherInfoTile.iconName
       pointSize: Style.fontSizeL
-      color: Color.mPrimary
+      color: HydraColor.mPrimary
     }
 
     ColumnLayout {
@@ -31,7 +31,7 @@ DashboardCard {
       NText {
         Layout.fillWidth: true
         text: weatherInfoTile.titleText
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeXS
         elide: Text.ElideRight
       }
@@ -39,7 +39,7 @@ DashboardCard {
       NText {
         Layout.fillWidth: true
         text: weatherInfoTile.valueText
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         font.weight: Style.fontWeightSemiBold
         elide: Text.ElideRight
       }

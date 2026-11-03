@@ -23,8 +23,8 @@ SmartPanel {
   panelAnchorHorizontalCenter: placement === "center" || placement === "top_center" || placement === "bottom_center"
   panelAnchorVerticalCenter: placement === "center" || placement === "center_left" || placement === "center_right"
 
-  panelBackgroundColor: Color.mSurface
-  panelBorderColor: Qt.alpha(Color.mOutline, 0.30)
+  panelBackgroundColor: HydraColor.mSurface
+  panelBorderColor: Qt.alpha(HydraColor.mOutline, 0.30)
 
   preferredWidth: Math.round(Settings.data.controlCenter.panelWidth * Style.uiScaleRatio * Settings.data.controlCenter.panelScale)
   preferredHeight: Math.round(Settings.data.controlCenter.panelHeight * Style.uiScaleRatio * Settings.data.controlCenter.panelScale)

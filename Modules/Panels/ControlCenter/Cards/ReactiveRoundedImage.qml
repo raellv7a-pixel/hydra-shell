@@ -21,9 +21,9 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: reactiveImage.radius
-    color: (reactiveImage.framed || reactiveImage.showFallback) ? Qt.alpha(Color.mSurface, 0.28) : "transparent"
+    color: (reactiveImage.framed || reactiveImage.showFallback) ? Qt.alpha(HydraColor.mSurface, 0.28) : "transparent"
     border.width: (reactiveImage.framed || reactiveImage.showFallback) ? Style.borderS : 0
-    border.color: Qt.alpha(Color.mOutline, 0.18)
+    border.color: Qt.alpha(HydraColor.mOutline, 0.18)
 
     Loader {
       id: imageSourceLoader
@@ -92,7 +92,7 @@ Item {
       visible: reactiveImage.showFallback
       icon: reactiveImage.fallbackIcon
       pointSize: reactiveImage.fallbackIconSize
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
     }
   }
 }

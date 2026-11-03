@@ -178,7 +178,7 @@ Item {
           text: I18n.tr("panels.connections.bluetooth-discoverable", {
                           hostName: HostService.hostName
                         })
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           richTextEnabled: true
           wrapMode: Text.WordWrap
           horizontalAlignment: Text.AlignHCenter
@@ -198,7 +198,7 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: connectedDevicesCol.implicitHeight + Style.margin2M
       border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
-      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? HydraColor.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: connectedDevicesCol
@@ -229,7 +229,7 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: pairedDevicesCol.implicitHeight + Style.margin2M
       border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
-      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? HydraColor.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: pairedDevicesCol
@@ -260,7 +260,7 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: availableDevicesCol.implicitHeight + Style.margin2M
       border.color: "transparent"
-      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? HydraColor.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: availableDevicesCol
@@ -292,7 +292,7 @@ Item {
           visible: root.availableDevices.length === 0 && root.unnamedAvailableDevices.length > 0
           text: I18n.tr("panels.connections.bluetooth-devices-unnamed")
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           horizontalAlignment: Text.AlignHCenter
           Layout.fillWidth: true
           Layout.margins: Style.marginL
@@ -377,15 +377,15 @@ Item {
       readonly property bool isBusy: BluetoothService.isDeviceBusy(modelData)
       readonly property bool isExpanded: root.expandedDeviceKey === BluetoothService.deviceKey(modelData)
 
-      function getContentColors(defaultColors = [Color.mSurface, Color.mOnSurface]) {
+      function getContentColors(defaultColors = [HydraColor.mSurface, HydraColor.mOnSurface]) {
         if (modelData.pairing || modelData.state === BluetoothDeviceState.Connecting) {
-          return [Color.mPrimary, Color.mOnPrimary];
+          return [HydraColor.mPrimary, HydraColor.mOnPrimary];
         }
         if (modelData.connected && modelData.state !== BluetoothDeviceState.Disconnecting) {
-          return [Color.mPrimary, Color.mOnPrimary];
+          return [HydraColor.mPrimary, HydraColor.mOnPrimary];
         }
         if (modelData.blocked || modelData.state === BluetoothDeviceState.Disconnecting) {
-          return [Color.mError, Color.mOnError];
+          return [HydraColor.mError, HydraColor.mOnError];
         }
         return defaultColors;
       }
@@ -398,10 +398,10 @@ Item {
       color: {
         if (root.dashboardMode) {
           if (device.isBusy)
-            return Qt.alpha(Color.mPrimaryContainer, 0.7);
+            return Qt.alpha(HydraColor.mPrimaryContainer, 0.7);
           if (modelData.connected)
-            return Color.mPrimaryContainer;
-          return hoverArea.hovered ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh;
+            return HydraColor.mPrimaryContainer;
+          return hoverArea.hovered ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainerHigh;
         }
         return device.getContentColors()[0];
       }
@@ -433,8 +433,8 @@ Item {
             color: {
               if (root.dashboardMode) {
                 if (modelData.connected)
-                  return Qt.alpha(Color.mPrimary, 0.16);
-                return Color.mSurfaceContainerHighest;
+                  return Qt.alpha(HydraColor.mPrimary, 0.16);
+                return HydraColor.mSurfaceContainerHighest;
               }
               return "transparent";
             }
@@ -445,7 +445,7 @@ Item {
               pointSize: root.dashboardMode ? Style.fontSizeM : Style.fontSizeXXL
               color: {
                 if (root.dashboardMode) {
-                  return modelData.connected ? Color.mPrimary : Color.mOnSurface;
+                  return modelData.connected ? HydraColor.mPrimary : HydraColor.mOnSurface;
                 }
                 return device.getContentColors()[1];
               }
@@ -463,7 +463,7 @@ Item {
               elide: Text.ElideRight
               color: {
                 if (root.dashboardMode) {
-                  return modelData.connected ? Color.mOnPrimaryContainer : Color.mOnSurface;
+                  return modelData.connected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface;
                 }
                 return device.getContentColors()[1];
               }
@@ -487,9 +487,9 @@ Item {
               pointSize: Style.fontSizeXS
               color: {
                 if (root.dashboardMode) {
-                  return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                  return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                 }
-                return Qt.alpha(device.getContentColors([Color.mSurfaceVariant, Color.mOnSurfaceVariant])[1], Style.opacityHeavy);
+                return Qt.alpha(device.getContentColors([HydraColor.mSurfaceVariant, HydraColor.mOnSurfaceVariant])[1], Style.opacityHeavy);
               }
             }
 
@@ -504,7 +504,7 @@ Item {
                 pointSize: Style.fontSizeXS
                 color: {
                   if (root.dashboardMode) {
-                    return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                    return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                   }
                   return Qt.alpha(device.getContentColors()[1], Style.opacityHeavy);
                 }
@@ -517,9 +517,9 @@ Item {
                 pointSize: Style.fontSizeXS
                 color: {
                   if (root.dashboardMode) {
-                    return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                    return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                   }
-                  return Qt.alpha(device.getContentColors([Color.mSurfaceVariant, Color.mOnSurfaceVariant])[1], Style.opacityHeavy);
+                  return Qt.alpha(device.getContentColors([HydraColor.mSurfaceVariant, HydraColor.mOnSurfaceVariant])[1], Style.opacityHeavy);
                 }
               }
             }
@@ -535,7 +535,7 @@ Item {
             NBusyIndicator {
               visible: isBusy
               running: visible && root.effectivelyVisible
-              color: root.dashboardMode ? (modelData.connected ? Color.mOnPrimaryContainer : Color.mPrimary) : device.getContentColors()[1]
+              color: root.dashboardMode ? (modelData.connected ? HydraColor.mOnPrimaryContainer : HydraColor.mPrimary) : device.getContentColors()[1]
               size: Math.round((root.dashboardMode ? 20 : Style.baseWidgetSize * 0.5) * (root.panelUnit || 1.0))
             }
 
@@ -544,8 +544,8 @@ Item {
               icon: "info"
               tooltipText: I18n.tr("common.info")
               baseSize: Math.round((root.dashboardMode ? 28 : Style.baseWidgetSize * 0.75) * (root.panelUnit || 1.0))
-              colorBg: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
-              colorFg: Color.mOnSurface
+              colorBg: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceVariant
+              colorFg: HydraColor.mOnSurface
               colorBorder: "transparent"
               colorBorderHover: "transparent"
               onClicked: {
@@ -559,8 +559,8 @@ Item {
               icon: "trash"
               tooltipText: I18n.tr("common.unpair")
               baseSize: Math.round((root.dashboardMode ? 28 : Style.baseWidgetSize * 0.75) * (root.panelUnit || 1.0))
-              colorBg: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mPrimary
-              colorFg: root.dashboardMode ? Color.mError : Color.mOnPrimary
+              colorBg: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mPrimary
+              colorFg: root.dashboardMode ? HydraColor.mError : HydraColor.mOnPrimary
               colorBorder: "transparent"
               colorBorderHover: "transparent"
               onClicked: BluetoothService.unpairDevice(modelData)
@@ -571,8 +571,8 @@ Item {
               visible: modelData.state !== BluetoothDeviceState.Connecting && modelData.state !== BluetoothDeviceState.Disconnecting
               enabled: (canConnect || canDisconnect || (root.dashboardMode ? canPair : (root.showOnlyLists ? false : canPair))) && !isBusy
               fontSize: Style.fontSizeS
-              backgroundColor: modelData.connected ? (root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant) : Color.mPrimary
-              textColor: modelData.connected ? Color.mOnSurface : Color.mOnPrimary
+              backgroundColor: modelData.connected ? (root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceVariant) : HydraColor.mPrimary
+              textColor: modelData.connected ? HydraColor.mOnSurface : HydraColor.mOnPrimary
               text: {
                 if (modelData.pairing)
                   return I18n.tr("common.pairing");
@@ -605,7 +605,7 @@ Item {
           Layout.fillWidth: true
           implicitHeight: infoColumn.implicitHeight + Style.margin2S
           radius: root.dashboardMode ? Style.radiusM : Style.radiusXS
-          color: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
+          color: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceVariant
           border.width: root.dashboardMode ? 0 : Style.borderS
           border.color: root.dashboardMode ? "transparent" : Style.boxBorderColor
           clip: true
@@ -642,12 +642,12 @@ Item {
               NIcon {
                 icon: BluetoothService.getSignalIcon(modelData)
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
               NText {
                 text: BluetoothService.getSignalStrength(modelData)
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -663,7 +663,7 @@ Item {
                   return BatteryService.getIcon(b !== null ? b : 0, false, false, b !== null);
                 }
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
               NText {
                 text: {
@@ -671,7 +671,7 @@ Item {
                   return b === null ? "-" : (b + "%");
                 }
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -683,12 +683,12 @@ Item {
               NIcon {
                 icon: "link"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
               NText {
                 text: modelData.paired ? I18n.tr("common.yes") : I18n.tr("common.no")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -700,12 +700,12 @@ Item {
               NIcon {
                 icon: "shield-check"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
               NText {
                 text: modelData.trusted ? I18n.tr("common.yes") : I18n.tr("common.no")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -717,12 +717,12 @@ Item {
               NIcon {
                 icon: "hash"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
               NText {
                 text: modelData.address || "-"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -758,7 +758,7 @@ Item {
     anchors.centerIn: parent
     width: Math.min(parent.width * 0.9, 400)
     height: pinCol.implicitHeight + Style.margin2L
-    color: Color.mSurface
+    color: HydraColor.mSurface
     radius: Style.radiusM
     border.color: root.dashboardMode ? "transparent" : Style.boxBorderColor
     border.width: root.dashboardMode ? 0 : Style.borderS
@@ -780,21 +780,21 @@ Item {
       NIcon {
         icon: "lock"
         pointSize: 48
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
         Layout.alignment: Qt.AlignHCenter
       }
       NText {
         text: I18n.tr("panels.connections.authentication-required")
         pointSize: Style.fontSizeXL
         font.weight: Style.fontWeightBold
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         horizontalAlignment: Text.AlignHCenter
         Layout.fillWidth: true
       }
       NText {
         text: I18n.tr("panels.connections.pin-instructions")
         pointSize: Style.fontSizeM
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignHCenter
         Layout.fillWidth: true
@@ -828,8 +828,8 @@ Item {
         NButton {
           text: I18n.tr("common.confirm")
           icon: "check"
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: HydraColor.mPrimary
+          textColor: HydraColor.mOnPrimary
           enabled: pinInput.text.length > 0
           onClicked: {
             BluetoothService.submitPin(pinInput.text);

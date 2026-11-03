@@ -40,7 +40,7 @@ Loader {
     Rectangle {
       anchors.fill: parent
       radius: Style.radiusL
-      color: Color.mSurfaceContainerHigh
+      color: HydraColor.mSurfaceContainerHigh
       Item {
         id: keyboard
         anchors.fill: parent
@@ -77,13 +77,13 @@ Loader {
             NText {
               text: "Alternador de janelas"
               font.weight: Style.fontWeightSemiBold
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
             }
             NText {
               visible: Settings.data.umbriel.windowSwitcher.showCount
               text: (WindowSwitcherService.selectedIndex + 1) + " / " + WindowSwitcherService.entries.length
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
           }
           Loader {
@@ -93,7 +93,7 @@ Loader {
           }
           NText {
             text: WindowSwitcherService.holding ? "Solte o modificador para alternar · Esc cancela" : "Enter alterna · Esc cancela"
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeS
             Layout.fillWidth: true
             wrapMode: Text.WordWrap

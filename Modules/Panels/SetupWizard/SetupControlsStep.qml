@@ -109,7 +109,7 @@ NScrollView {
 
     NText {
       text: I18n.tr("setup.hydra.controls.subheader")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeM
       Layout.fillWidth: true
       wrapMode: Text.WordWrap
@@ -118,7 +118,7 @@ NScrollView {
     NBox {
       Layout.fillWidth: true
       visible: root.externallyOwned
-      color: Color.mSurfaceContainerHigh
+      color: HydraColor.mSurfaceContainerHigh
       implicitHeight: externalRow.implicitHeight + Style.marginL * 2
 
       RowLayout {
@@ -130,7 +130,7 @@ NScrollView {
         NIcon {
           icon: "info-circle"
           pointSize: Style.fontSizeXL
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
         }
 
         ColumnLayout {
@@ -140,12 +140,12 @@ NScrollView {
           NText {
             text: I18n.tr("setup.hydra.controls.external-title")
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
           }
 
           NText {
             text: I18n.tr("setup.hydra.controls.external-description")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             pointSize: Style.fontSizeS
@@ -168,7 +168,7 @@ NScrollView {
           height: 22
           radius: 11
           color: "transparent"
-          border.color: radioRec.activeFocus || root.useRecommended ? Color.mPrimary : Color.mOutline
+          border.color: radioRec.activeFocus || root.useRecommended ? HydraColor.mPrimary : HydraColor.mOutline
           border.width: radioRec.activeFocus ? Style.borderL : Style.borderS
           activeFocusOnTab: true
           Accessible.role: Accessible.RadioButton
@@ -183,7 +183,7 @@ NScrollView {
             width: 10
             height: 10
             radius: 5
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
             visible: root.useRecommended
           }
 
@@ -204,11 +204,11 @@ NScrollView {
           NText {
             text: I18n.tr("setup.hydra.controls.recommended-title")
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
           }
           NText {
             text: I18n.tr("setup.hydra.controls.recommended-description")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeS
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
@@ -226,7 +226,7 @@ NScrollView {
           height: 22
           radius: 11
           color: "transparent"
-          border.color: radioKeep.activeFocus || !root.useRecommended ? Color.mPrimary : Color.mOutline
+          border.color: radioKeep.activeFocus || !root.useRecommended ? HydraColor.mPrimary : HydraColor.mOutline
           border.width: radioKeep.activeFocus ? Style.borderL : Style.borderS
           activeFocusOnTab: true
           Accessible.role: Accessible.RadioButton
@@ -241,7 +241,7 @@ NScrollView {
             width: 10
             height: 10
             radius: 5
-            color: Color.mPrimary
+            color: HydraColor.mPrimary
             visible: !root.useRecommended
           }
 
@@ -262,11 +262,11 @@ NScrollView {
           NText {
             text: I18n.tr("setup.hydra.controls.keep-title")
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
           }
           NText {
             text: I18n.tr("setup.hydra.controls.keep-description")
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeS
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
@@ -293,7 +293,7 @@ NScrollView {
         delegate: NBox {
           Layout.fillWidth: true
           implicitHeight: cardContent.implicitHeight + Style.marginM * 2
-          color: Color.mSurfaceContainer
+          color: HydraColor.mSurfaceContainer
 
           RowLayout {
             id: cardContent
@@ -304,7 +304,7 @@ NScrollView {
             NIcon {
               icon: modelData.icon
               pointSize: Style.fontSizeXL
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             ColumnLayout {
@@ -314,12 +314,12 @@ NScrollView {
               NText {
                 text: I18n.tr(modelData.titleKey)
                 font.weight: Style.fontWeightBold
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
 
               NText {
                 text: I18n.tr(modelData.descKey)
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
@@ -329,8 +329,8 @@ NScrollView {
             Rectangle {
               height: 28
               radius: Style.radiusS
-              color: Color.mSurfaceContainerHighest
-              border.color: Color.mOutline
+              color: HydraColor.mSurfaceContainerHighest
+              border.color: HydraColor.mOutline
               border.width: Style.borderS
               implicitWidth: chordText.implicitWidth + Style.marginM * 2
 
@@ -340,7 +340,7 @@ NScrollView {
                 text: modelData.chord
                 font.weight: Style.fontWeightBold
                 pointSize: Style.fontSizeS
-                color: Color.mPrimary
+                color: HydraColor.mPrimary
               }
             }
           }
@@ -350,7 +350,7 @@ NScrollView {
 
     NText {
       text: I18n.tr("setup.hydra.controls.change-later")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeS
       Layout.fillWidth: true
       wrapMode: Text.WordWrap

@@ -29,7 +29,7 @@ NSettingsGroupPage {
                               }
                               badges.push({
                                             "icon": "plugin",
-                                            "color": Color.mSecondary
+                                            "color": HydraColor.mSecondary
                                           });
                             }
                             availableWidgets.append({

@@ -84,9 +84,9 @@ Popup {
 
   background: Rectangle {
     id: backgroundRect
-    color: Color.mSurface
+    color: HydraColor.mSurface
     radius: Style.radiusL
-    border.color: Color.mOutline
+    border.color: HydraColor.mOutline
     border.width: Style.borderM
 
     NDropShadow {
@@ -100,7 +100,7 @@ Popup {
     verticalPolicy: ScrollBar.AsNeeded
     reserveScrollbarSpace: true
     showGradientMasks: true
-    gradientColor: Color.mSurface
+    gradientColor: HydraColor.mSurface
 
     ColumnLayout {
       id: contentColumn
@@ -115,14 +115,14 @@ Popup {
         NIcon {
           icon: "settings"
           pointSize: Style.fontSizeL
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
         }
 
         NText {
           text: I18n.tr("wallpaper.panel.wallhaven-settings-title")
           pointSize: Style.fontSizeL
           font.weight: Style.fontWeightBold
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           Layout.fillWidth: true
         }
 
@@ -145,7 +145,7 @@ Popup {
 
         NText {
           text: I18n.tr("wallpaper.panel.apikey-label")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeM
         }
 
@@ -172,7 +172,7 @@ Popup {
 
         NText {
           text: I18n.tr("wallpaper.panel.apikey-help")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeS
           wrapMode: Text.WordWrap
           Layout.fillWidth: true
@@ -190,7 +190,7 @@ Popup {
 
         NText {
           text: I18n.tr("wallpaper.panel.purity-label")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeM
           Layout.preferredWidth: implicitWidth
         }
@@ -257,7 +257,7 @@ Popup {
 
               NText {
                 text: I18n.tr("wallpaper.panel.purity-sfw")
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 pointSize: Style.fontSizeM
               }
 
@@ -266,8 +266,8 @@ Popup {
                 implicitWidth: Math.round(Style.baseWidgetSize * 0.7)
                 implicitHeight: Math.round(Style.baseWidgetSize * 0.7)
                 radius: Style.radiusXS
-                color: sfwToggle.checked ? Color.mPrimary : Color.mSurface
-                border.color: Color.mOutline
+                color: sfwToggle.checked ? HydraColor.mPrimary : HydraColor.mSurface
+                border.color: HydraColor.mOutline
                 border.width: Style.borderS
 
                 Behavior on color {
@@ -281,7 +281,7 @@ Popup {
                   anchors.centerIn: parent
                   anchors.horizontalCenterOffset: -1
                   icon: "check"
-                  color: Color.mOnPrimary
+                  color: HydraColor.mOnPrimary
                   pointSize: Math.max(Style.fontSizeXS, sfwBox.width * 0.5)
                 }
 
@@ -306,7 +306,7 @@ Popup {
 
               NText {
                 text: I18n.tr("wallpaper.panel.purity-sketchy")
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 pointSize: Style.fontSizeM
               }
 
@@ -315,8 +315,8 @@ Popup {
                 implicitWidth: Math.round(Style.baseWidgetSize * 0.7)
                 implicitHeight: Math.round(Style.baseWidgetSize * 0.7)
                 radius: Style.radiusXS
-                color: sketchyToggle.checked ? Color.mPrimary : Color.mSurface
-                border.color: Color.mOutline
+                color: sketchyToggle.checked ? HydraColor.mPrimary : HydraColor.mSurface
+                border.color: HydraColor.mOutline
                 border.width: Style.borderS
 
                 Behavior on color {
@@ -330,7 +330,7 @@ Popup {
                   anchors.centerIn: parent
                   anchors.horizontalCenterOffset: -1
                   icon: "check"
-                  color: Color.mOnPrimary
+                  color: HydraColor.mOnPrimary
                   pointSize: Math.max(Style.fontSizeXS, sketchyBox.width * 0.5)
                 }
 
@@ -356,7 +356,7 @@ Popup {
 
               NText {
                 text: I18n.tr("wallpaper.panel.purity-nsfw")
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 pointSize: Style.fontSizeM
               }
 
@@ -365,8 +365,8 @@ Popup {
                 implicitWidth: Math.round(Style.baseWidgetSize * 0.7)
                 implicitHeight: Math.round(Style.baseWidgetSize * 0.7)
                 radius: Style.radiusXS
-                color: nsfwToggle.checked ? Color.mPrimary : Color.mSurface
-                border.color: Color.mOutline
+                color: nsfwToggle.checked ? HydraColor.mPrimary : HydraColor.mSurface
+                border.color: HydraColor.mOutline
                 border.width: Style.borderS
 
                 Behavior on color {
@@ -380,7 +380,7 @@ Popup {
                   anchors.centerIn: parent
                   anchors.horizontalCenterOffset: -1
                   icon: "check"
-                  color: Color.mOnPrimary
+                  color: HydraColor.mOnPrimary
                   pointSize: Math.max(Style.fontSizeXS, nsfwBox.width * 0.5)
                 }
 
@@ -430,7 +430,7 @@ Popup {
 
         NText {
           text: I18n.tr("wallpaper.panel.ratios-label")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeM
           Layout.preferredWidth: implicitWidth
         }
@@ -519,7 +519,7 @@ Popup {
 
         NText {
           text: I18n.tr("wallpaper.panel.resolution-label")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeM
         }
 
@@ -529,7 +529,7 @@ Popup {
 
           NText {
             text: I18n.tr("wallpaper.panel.resolution-mode-label")
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             pointSize: Style.fontSizeM
             Layout.preferredWidth: implicitWidth
           }
@@ -609,7 +609,7 @@ Popup {
 
           NText {
             text: "×"
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             pointSize: Style.fontSizeM
             Layout.preferredWidth: implicitWidth
           }

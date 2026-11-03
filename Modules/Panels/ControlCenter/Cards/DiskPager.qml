@@ -56,7 +56,7 @@ DashboardCard {
       NIcon {
         icon: "database"
         pointSize: Style.fontSizeM
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
 
       ColumnLayout {
@@ -66,7 +66,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: panelRoot.diskLabel(diskPager.currentPath)
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeS
           elide: Text.ElideRight
         }
@@ -74,7 +74,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: diskPager.currentPath
-          color: Qt.alpha(Color.mOnSurfaceVariant, 0.72)
+          color: Qt.alpha(HydraColor.mOnSurfaceVariant, 0.72)
           pointSize: Style.fontSizeXXS
           elide: Text.ElideMiddle
           visible: diskPager.pageCount > 1
@@ -83,7 +83,7 @@ DashboardCard {
 
       NText {
         text: Math.round(diskPager.percent) + "%"
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         pointSize: Style.fontSizeS
         font.weight: Style.fontWeightSemiBold
       }
@@ -93,7 +93,7 @@ DashboardCard {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.max(4, Math.round(5 * panelRoot.panelUnit))
       radius: height / 2
-      color: Qt.alpha(Color.mOutline, 0.22)
+      color: Qt.alpha(HydraColor.mOutline, 0.22)
 
       Rectangle {
         width: parent.width * Math.max(0, Math.min(1, diskPager.percent / 100))
@@ -118,7 +118,7 @@ DashboardCard {
       NText {
         Layout.fillWidth: true
         text: diskPager.sizeGb > 0 ? (diskPager.usedGb.toFixed(1) + " / " + diskPager.sizeGb.toFixed(1) + " GB") : ""
-        color: Qt.alpha(Color.mOnSurfaceVariant, 0.72)
+        color: Qt.alpha(HydraColor.mOnSurfaceVariant, 0.72)
         pointSize: Style.fontSizeXXS
         elide: Text.ElideRight
       }

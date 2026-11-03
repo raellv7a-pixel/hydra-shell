@@ -9,7 +9,7 @@ DashboardCard {
   property int maxSeconds: 1
 
   Layout.preferredHeight: Math.round(66 * panelRoot.panelUnit)
-  color: Color.mSurfaceContainerHighest
+  color: HydraColor.mSurfaceContainerHighest
   radius: Style.radiusS
 
   ColumnLayout {
@@ -24,7 +24,7 @@ DashboardCard {
       NIcon {
         icon: "apps"
         pointSize: Style.fontSizeL
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
       }
 
       ColumnLayout {
@@ -34,7 +34,7 @@ DashboardCard {
         NText {
           Layout.fillWidth: true
           text: screenUsageDetailRow.appData?.name || "--"
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightSemiBold
           elide: Text.ElideRight
@@ -44,7 +44,7 @@ DashboardCard {
           Layout.fillWidth: true
           text: screenUsageDetailRow.appData?.title || screenUsageDetailRow.appData?.id || ""
           visible: text !== ""
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           pointSize: Style.fontSizeXXS
           elide: Text.ElideRight
         }
@@ -52,7 +52,7 @@ DashboardCard {
 
       NText {
         text: panelRoot.durationText(screenUsageDetailRow.appData?.seconds || 0)
-        color: Color.mOnSurface
+        color: HydraColor.mOnSurface
         pointSize: Style.fontSizeS
         font.weight: Style.fontWeightSemiBold
         font.family: Settings.data.ui.fontFixed
@@ -63,7 +63,7 @@ DashboardCard {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.max(5, Math.round(6 * panelRoot.panelUnit))
       radius: height / 2
-      color: Color.mSurfaceContainerLow
+      color: HydraColor.mSurfaceContainerLow
 
       Rectangle {
         anchors.left: parent.left
@@ -71,7 +71,7 @@ DashboardCard {
         anchors.bottom: parent.bottom
         width: parent.width * Math.max(0.025, Math.min(1, Number(screenUsageDetailRow.appData?.seconds || 0) / Math.max(1, screenUsageDetailRow.maxSeconds)))
         radius: parent.radius
-        color: Color.mPrimary
+        color: HydraColor.mPrimary
         opacity: 0.88
       }
     }

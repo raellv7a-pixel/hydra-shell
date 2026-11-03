@@ -15,20 +15,20 @@ RowLayout {
   NIcon {
     icon: iconName
     pointSize: Style.fontSizeM
-    color: Color.mPrimary
+    color: HydraColor.mPrimary
   }
 
   NText {
     Layout.fillWidth: true
     text: labelText
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
     pointSize: Style.fontSizeS
     elide: Text.ElideRight
   }
 
   NText {
     text: valueText
-    color: Color.mOnSurface
+    color: HydraColor.mOnSurface
     pointSize: Style.fontSizeS
     font.family: Settings.data.ui.fontFixed
     horizontalAlignment: Text.AlignRight

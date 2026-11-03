@@ -38,17 +38,17 @@ Every UI decision must follow these structural invariants:
 
 ## 3. Semantic Surfaces & Color Tokens
 
-All UI colors must derive strictly from Hydra's design tokens in `Commons/Color.qml` and `Commons/Style.qml`:
+All UI colors must derive strictly from Hydra's design tokens in `Commons/HydraColor.qml` and `Commons/Style.qml`:
 
 - **Surfaces & Containers:**
-  - `Color.mSurface`, `Color.mSurfaceVariant`, `Color.mSurfaceContainerLowest`, `Color.mSurfaceContainerLow`, `Color.mSurfaceContainer`, `Color.mSurfaceContainerHigh`, `Color.mSurfaceContainerHighest`
+  - `HydraColor.mSurface`, `HydraColor.mSurfaceVariant`, `HydraColor.mSurfaceContainerLowest`, `HydraColor.mSurfaceContainerLow`, `HydraColor.mSurfaceContainer`, `HydraColor.mSurfaceContainerHigh`, `HydraColor.mSurfaceContainerHighest`
 - **Tonal Brand Accents:**
-  - `Color.mPrimary`, `Color.mOnPrimary`, `Color.mPrimaryContainer`, `Color.mOnPrimaryContainer`
-  - `Color.mSecondary`, `Color.mSecondaryContainer`, `Color.mTertiary`, `Color.mTertiaryContainer`
+  - `HydraColor.mPrimary`, `HydraColor.mOnPrimary`, `HydraColor.mPrimaryContainer`, `HydraColor.mOnPrimaryContainer`
+  - `HydraColor.mSecondary`, `HydraColor.mSecondaryContainer`, `HydraColor.mTertiary`, `HydraColor.mTertiaryContainer`
 - **Text & Icon Roles:**
-  - `Color.mOnSurface` (high emphasis: titles, active text)
-  - `Color.mOnSurfaceVariant` (medium emphasis: descriptions, labels, hints)
-  - `Color.mOutline`, `Color.mOutlineVariant` (semantic borders, subtle dividers when strictly needed)
+  - `HydraColor.mOnSurface` (high emphasis: titles, active text)
+  - `HydraColor.mOnSurfaceVariant` (medium emphasis: descriptions, labels, hints)
+  - `HydraColor.mOutline`, `HydraColor.mOutlineVariant` (semantic borders, subtle dividers when strictly needed)
 - **Zero Hardcoded Colors:** Never introduce literal `#hex` colors or component-specific ad-hoc color schemes.
 
 ---
@@ -114,7 +114,7 @@ Framed integration does not mean borrowing visual aesthetics from external shell
 
 - **Core Foundations:** Hydra strictly preserves Material You / Material 3 foundations, Google Pixel surface rhythms and tonal elevation, and Apple-grade spatial breathing room and quiet polish.
 - **Caelestia Reference:** Architectural reference strictly for spatial coordination and panel coexistence concepts—**never** for visual styling.
-- **Material Geometry:** Hydra expresses depth and docking purely through semantic Material tokens (`Color.mSurface*`, `Color.mSurfaceContainer*`), 4-state corner rendering (`PanelBackground`), and proportional spacing (`Style.margin*`). Hydra has **zero** aesthetic dependency on metaballs, organic blob shaders, or gooey fusion effects.
+- **Material Geometry:** Hydra expresses depth and docking purely through semantic Material tokens (`HydraColor.mSurface*`, `HydraColor.mSurfaceContainer*`), 4-state corner rendering (`PanelBackground`), and proportional spacing (`Style.margin*`). Hydra has **zero** aesthetic dependency on metaballs, organic blob shaders, or gooey fusion effects.
 - **Surface Continuity:** Docked panels must preserve unbroken surface continuity with the frame, eliminating hairline gaps (via subpixel attachment overlap) and applying corner radii tailored to the contacted edge. When adjacent panels meet in future layouts, they must form a unified spatial composition rather than two overlapping, disconnected rectangles.
 
 ### 8.3 Canonical Frame Regions
@@ -175,7 +175,7 @@ Every new shell panel, drawer, or surface must satisfy this mandatory checklist 
 4. **Conflict Resolution:** In case of spatial collision, does it replace, shrink, shift, or overlay?
 5. **Workflow Dependency:** Does a functional dependency exist between this panel and the trigger surface that opened it?
 6. **Orientation & Scale Invariance:** Does the docking geometry behave reliably across different bar positions (top, bottom, left, right) and screen resolutions?
-7. **Design System Tokens:** Does the surface honor Hydra's Material 3 tokens (`Color.mSurface*`), frame-continuous corner states, and standard spacing?
+7. **Design System Tokens:** Does the surface honor Hydra's Material 3 tokens (`HydraColor.mSurface*`), frame-continuous corner states, and standard spacing?
 
 > **"Panel placement is part of the feature design, not an afterthought."**
 

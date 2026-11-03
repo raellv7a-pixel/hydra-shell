@@ -97,7 +97,7 @@ DashboardCard {
 
         NText {
           text: panelRoot.tr("networkTraffic")
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           font.weight: Style.fontWeightSemiBold
         }
 

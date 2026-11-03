@@ -105,7 +105,7 @@ Item {
           NText {
             text: I18n.tr("panels.umbriel.keybind-category")
             pointSize: Style.fontSizeM
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
           }
           NComboBox {
             Layout.fillWidth: true
@@ -124,19 +124,19 @@ Item {
       NText {
         visible: !root.store.loaded
         text: root.store.busy ? "Carregando atalhos…" : "Não foi possível carregar o catálogo."
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
       }
       NText {
         visible: root.store.error !== ""
         Layout.fillWidth: true
         wrapMode: Text.WordWrap
         text: root.store.error
-        color: Color.mError
+        color: HydraColor.mError
       }
       NText {
         visible: root.store.hasConflicts
         text: "Resolva os conflitos antes de salvar."
-        color: Color.mError
+        color: HydraColor.mError
       }
 
       NButton {
@@ -155,20 +155,20 @@ Item {
         NText {
           visible: root.store.dirty
           text: "Alterações não salvas"
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
         NButton {
           text: "Restaurar padrões"
-          backgroundColor: Color.mSurfaceContainerHigh
-          textColor: Color.mOnSurfaceVariant
+          backgroundColor: HydraColor.mSurfaceContainerHigh
+          textColor: HydraColor.mOnSurfaceVariant
           enabled: root.store.loaded && !root.store.busy
           onClicked: root.store.restoreDefaults()
         }
         NButton {
           text: "Reverter"
           visible: root.store.dirty || root.store.busy
-          backgroundColor: Color.mSurfaceContainerHigh
-          textColor: Color.mOnSurfaceVariant
+          backgroundColor: HydraColor.mSurfaceContainerHigh
+          textColor: HydraColor.mOnSurfaceVariant
           enabled: root.store.dirty && !root.store.busy
           onClicked: root.store.revert()
         }
@@ -196,9 +196,9 @@ Item {
           Rectangle {
             anchors.fill: parent
             radius: Style.iRadiusM
-            color: rowHover.hovered ? Color.mSurfaceContainerHigh : Color.mSurfaceContainerLow
+            color: rowHover.hovered ? HydraColor.mSurfaceContainerHigh : HydraColor.mSurfaceContainerLow
             Behavior on color {
-              enabled: !Color.isTransitioning
+              enabled: !HydraColor.isTransitioning
               ColorAnimation { duration: rowHover.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration }
             }
           }
@@ -216,11 +216,11 @@ Item {
               NText {
                 text: rowItem.modelData.label
                 font.weight: Font.DemiBold
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
               }
               NText {
                 text: rowItem.modelData.category + " · " + rowItem.modelData.action
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 font.pointSize: Style.fontSizeS
                 elide: Text.ElideRight
                 Layout.fillWidth: true
@@ -228,20 +228,20 @@ Item {
               NText {
                 visible: !rowItem.isCustom && rowItem.modelData.chord !== rowItem.originalChord
                 text: "Padrão: " + rowItem.originalChord
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
               }
               NText {
                 visible: rowItem.conflict !== "" || !Chords.normalize(rowItem.modelData.chord)
                 text: rowItem.conflict ? "Conflito com: " + rowItem.conflict : "Combinação inválida"
-                color: Color.mError
+                color: HydraColor.mError
               }
             }
             NButton {
               text: rowItem.modelData.chord || "Gravar"
-              backgroundColor: Color.mSurfaceContainerHighest
-              textColor: Color.mOnSurface
-              hoverColor: Color.mSecondaryContainer
-              textHoverColor: Color.mOnSecondaryContainer
+              backgroundColor: HydraColor.mSurfaceContainerHighest
+              textColor: HydraColor.mOnSurface
+              hoverColor: HydraColor.mSecondaryContainer
+              textHoverColor: HydraColor.mOnSecondaryContainer
               buttonRadius: Style.iRadiusL
               onClicked: root.startRecord(rowItem.modelData.id)
             }
@@ -379,9 +379,9 @@ Item {
     visible: root.recording
     onOpened: capture.forceActiveFocus()
     background: Rectangle {
-      color: Color.mSurface
+      color: HydraColor.mSurface
       radius: Style.radiusL
-      border.color: Color.mPrimary
+      border.color: HydraColor.mPrimary
     }
     Item {
       id: capture
@@ -410,11 +410,11 @@ Item {
         }
         NText {
           text: root.forming
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
         NText {
           text: "Escape cancela · timeout: 15 s"
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
         NButton {
           text: "Cancelar"

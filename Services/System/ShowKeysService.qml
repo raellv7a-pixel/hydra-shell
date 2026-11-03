@@ -24,8 +24,8 @@ Singleton {
   readonly property int hideDelaySec: Settings.data.showKeys.hideDelaySec
   readonly property var disabledScreens: Settings.data.showKeys.disabledScreens || []
 
-  readonly property color pillColor: (useCustomColors && Settings.data.showKeys.pillColor) ? Settings.data.showKeys.pillColor : Color.mPrimary
-  readonly property color pillBg: (useCustomColors && Settings.data.showKeys.pillBg) ? Settings.data.showKeys.pillBg : Color.mSurface
+  readonly property color pillColor: (useCustomColors && Settings.data.showKeys.pillColor) ? Settings.data.showKeys.pillColor : HydraColor.mPrimary
+  readonly property color pillBg: (useCustomColors && Settings.data.showKeys.pillBg) ? Settings.data.showKeys.pillBg : HydraColor.mSurface
 
   // ── evtest binary detection ──────────────────────────
   property bool evtestAvailable: false

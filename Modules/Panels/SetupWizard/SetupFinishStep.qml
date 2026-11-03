@@ -24,7 +24,7 @@ NScrollView {
     NIcon {
       icon: root.telemetryOnly ? "shield-check" : "circle-check"
       pointSize: Style.fontSizeXXXL * 1.5
-      color: Color.mPrimary
+      color: HydraColor.mPrimary
       Layout.topMargin: Style.marginM
     }
     NText {
@@ -36,7 +36,7 @@ NScrollView {
     }
     NText {
       text: I18n.tr(root.telemetryOnly ? "setup.hydra.privacy-description" : "setup.hydra.ready-description")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       Layout.fillWidth: true
       wrapMode: Text.WordWrap
     }
@@ -56,11 +56,11 @@ NScrollView {
           required property var modelData
           Layout.fillWidth: true
           spacing: Style.marginL
-          NIcon { icon: modelData.icon; color: Color.mPrimary; pointSize: Style.fontSizeXL }
+          NIcon { icon: modelData.icon; color: HydraColor.mPrimary; pointSize: Style.fontSizeXL }
           ColumnLayout {
             Layout.fillWidth: true
             spacing: Style.marginXS
-            NText { text: I18n.tr("setup.hydra.summary-" + modelData.key); color: Color.mOnSurfaceVariant }
+            NText { text: I18n.tr("setup.hydra.summary-" + modelData.key); color: HydraColor.mOnSurfaceVariant }
             NText { text: modelData.value; Layout.fillWidth: true; wrapMode: Text.WordWrap; font.weight: Style.fontWeightMedium }
           }
         }
@@ -76,7 +76,7 @@ NScrollView {
     }
     NText {
       text: I18n.tr("setup.hydra.change-later")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeS
       Layout.fillWidth: true
       wrapMode: Text.WordWrap

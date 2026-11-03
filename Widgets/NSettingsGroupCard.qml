@@ -21,11 +21,11 @@ ColumnLayout {
     Layout.fillWidth: true
     implicitHeight: heading.implicitHeight + (root.expanded ? body.implicitHeight + Style.marginL : 0) + Style.margin2XL
     radius: Style.radiusL
-    color: root.expanded || headingHover.containsMouse ? Color.mSurfaceContainer : Color.mSurfaceContainerLow
+    color: root.expanded || headingHover.containsMouse ? HydraColor.mSurfaceContainer : HydraColor.mSurfaceContainerLow
     clip: true
 
     Behavior on color {
-      enabled: !Color.isTransitioning
+      enabled: !HydraColor.isTransitioning
       ColorAnimation { duration: headingHover.containsMouse ? Style.hoverEnterDuration : Style.hoverLeaveDuration }
     }
     Behavior on implicitHeight {
@@ -56,11 +56,11 @@ ColumnLayout {
             Layout.preferredWidth: Style.baseWidgetSize * Style.uiScaleRatio
             Layout.preferredHeight: Layout.preferredWidth
             radius: Style.iRadiusM
-            color: Color.mSecondaryContainer
+            color: HydraColor.mSecondaryContainer
             NIcon {
               anchors.centerIn: parent
               icon: root.icon
-              color: Color.mOnSecondaryContainer
+              color: HydraColor.mOnSecondaryContainer
               pointSize: Style.fontSizeL
             }
           }
@@ -68,11 +68,11 @@ ColumnLayout {
             Layout.fillWidth: true
             spacing: Style.marginXXS
             NText { Layout.fillWidth: true; text: root.title; font.weight: Style.fontWeightSemiBold; pointSize: Style.fontSizeL }
-            NText { text: root.description; visible: root.description !== ""; wrapMode: Text.WordWrap; color: Color.mOnSurfaceVariant; pointSize: Style.fontSizeM; Layout.fillWidth: true }
+            NText { text: root.description; visible: root.description !== ""; wrapMode: Text.WordWrap; color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeM; Layout.fillWidth: true }
           }
           NIcon {
             icon: "chevron-down"
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeM
             rotation: root.expanded ? 180 : 0
             Behavior on rotation { NumberAnimation { duration: Style.animationFast } }
@@ -89,7 +89,7 @@ ColumnLayout {
           anchors.fill: parent
           radius: Style.radiusM
           color: "transparent"
-          border.color: heading.activeFocus ? Color.mPrimary : "transparent"
+          border.color: heading.activeFocus ? HydraColor.mPrimary : "transparent"
           border.width: heading.activeFocus ? Style.borderM : 0
         }
       }

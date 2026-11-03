@@ -26,7 +26,7 @@ ColumnLayout {
             : (UmbrielSettingsStore.committed.overview?.shortcuts ?? true)
               ? "Os atalhos nativos da Visão Geral têm prioridade. Desative ‘Atalhos de janelas’ no grupo Visão Geral e salve para permitir digitar para pesquisar. Nenhuma preferência é alterada automaticamente."
               : "Disponível com os atalhos nativos de janelas desativados. O Lançador aberto pela Visão Geral fecha junto com ela; o Lançador normal mantém seu comportamento."
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
     wrapMode: Text.WordWrap
     pointSize: Style.fontSizeS
   }

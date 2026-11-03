@@ -22,7 +22,7 @@ Row {
       width: Math.round((index === pageDots.currentIndex ? 16 : 6) * panelRoot.panelUnit)
       height: Math.round(6 * panelRoot.panelUnit)
       radius: height / 2
-      color: index === pageDots.currentIndex ? Color.mPrimary : Qt.alpha(Color.mOnSurfaceVariant, 0.36)
+      color: index === pageDots.currentIndex ? HydraColor.mPrimary : Qt.alpha(HydraColor.mOnSurfaceVariant, 0.36)
 
       Behavior on width {
         NumberAnimation {

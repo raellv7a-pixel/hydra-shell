@@ -83,7 +83,7 @@ NScrollView {
 
     NText {
       text: I18n.tr("setup.hydra.discover.subheader")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeM
       Layout.fillWidth: true
       wrapMode: Text.WordWrap
@@ -93,14 +93,14 @@ NScrollView {
     NBox {
       Layout.fillWidth: true
       Layout.preferredHeight: 260
-      color: Color.mSurfaceContainerLowest
+      color: HydraColor.mSurfaceContainerLowest
 
       Rectangle {
         anchors.fill: parent
         anchors.margins: Style.marginM
         radius: Style.radiusM
-        color: Color.mSurfaceContainer
-        border.color: Color.mOutline
+        color: HydraColor.mSurfaceContainer
+        border.color: HydraColor.mOutline
         border.width: Style.borderS
         clip: true
 
@@ -111,7 +111,7 @@ NScrollView {
           anchors.left: parent.left
           anchors.right: parent.right
           height: 28
-          color: Color.mSurfaceContainerHigh
+          color: HydraColor.mSurfaceContainerHigh
 
           RowLayout {
             anchors.fill: parent
@@ -121,14 +121,14 @@ NScrollView {
             NIcon {
               icon: "sparkles"
               pointSize: Style.fontSizeS
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
             }
 
             NText {
               text: "Hydra"
               pointSize: Style.fontSizeXS
               font.weight: Style.fontWeightBold
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
             }
 
             Item { Layout.fillWidth: true }
@@ -136,16 +136,16 @@ NScrollView {
             NText {
               text: "12:00"
               pointSize: Style.fontSizeXS
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             Item { Layout.fillWidth: true }
 
             RowLayout {
               spacing: 6
-              NIcon { icon: "wifi"; pointSize: 10; color: Color.mOnSurfaceVariant }
-              NIcon { icon: "volume"; pointSize: 10; color: Color.mOnSurfaceVariant }
-              NIcon { icon: "battery"; pointSize: 10; color: Color.mOnSurfaceVariant }
+              NIcon { icon: "wifi"; pointSize: 10; color: HydraColor.mOnSurfaceVariant }
+              NIcon { icon: "volume"; pointSize: 10; color: HydraColor.mOnSurfaceVariant }
+              NIcon { icon: "battery"; pointSize: 10; color: HydraColor.mOnSurfaceVariant }
             }
           }
         }
@@ -166,8 +166,8 @@ NScrollView {
             width: 220
             height: 120
             radius: Style.radiusM
-            color: Color.mSurfaceContainerHigh
-            border.color: Color.mPrimary
+            color: HydraColor.mSurfaceContainerHigh
+            border.color: HydraColor.mPrimary
             border.width: Style.borderM
 
             ColumnLayout {
@@ -179,12 +179,12 @@ NScrollView {
                 Layout.fillWidth: true
                 height: 22
                 radius: Style.radiusS
-                color: Color.mSurfaceContainerHighest
+                color: HydraColor.mSurfaceContainerHighest
                 RowLayout {
                   anchors.fill: parent
                   anchors.leftMargin: 6
-                  NIcon { icon: "search"; pointSize: 10; color: Color.mPrimary }
-                  NText { text: I18n.tr("setup.hydra.discover.mock-search"); pointSize: 9; color: Color.mOnSurfaceVariant }
+                  NIcon { icon: "search"; pointSize: 10; color: HydraColor.mPrimary }
+                  NText { text: I18n.tr("setup.hydra.discover.mock-search"); pointSize: 9; color: HydraColor.mOnSurfaceVariant }
                 }
               }
 
@@ -196,8 +196,8 @@ NScrollView {
                     width: 28
                     height: 28
                     radius: Style.radiusS
-                    color: Color.mSurfaceContainerHighest
-                    NIcon { anchors.centerIn: parent; icon: ["terminal", "folder", "browser", "music"][index]; pointSize: 12; color: Color.mPrimary }
+                    color: HydraColor.mSurfaceContainerHighest
+                    NIcon { anchors.centerIn: parent; icon: ["terminal", "folder", "browser", "music"][index]; pointSize: 12; color: HydraColor.mPrimary }
                   }
                 }
               }
@@ -213,8 +213,8 @@ NScrollView {
             width: 200
             height: 130
             radius: Style.radiusM
-            color: Color.mSurfaceContainerHigh
-            border.color: Color.mPrimary
+            color: HydraColor.mSurfaceContainerHigh
+            border.color: HydraColor.mPrimary
             border.width: Style.borderM
 
             ColumnLayout {
@@ -226,7 +226,7 @@ NScrollView {
                 text: I18n.tr("setup.hydra.discover.mock-dashboard")
                 pointSize: Style.fontSizeXS
                 font.weight: Style.fontWeightBold
-                color: Color.mPrimary
+                color: HydraColor.mPrimary
               }
 
               RowLayout {
@@ -235,22 +235,22 @@ NScrollView {
                   width: 50
                   height: 32
                   radius: Style.radiusS
-                  color: Color.mPrimaryContainer
-                  NText { anchors.centerIn: parent; text: "Wi-Fi"; pointSize: 8; color: Color.mOnPrimaryContainer; font.weight: Style.fontWeightBold }
+                  color: HydraColor.mPrimaryContainer
+                  NText { anchors.centerIn: parent; text: "Wi-Fi"; pointSize: 8; color: HydraColor.mOnPrimaryContainer; font.weight: Style.fontWeightBold }
                 }
                 Rectangle {
                   width: 50
                   height: 32
                   radius: Style.radiusS
-                  color: Color.mSurfaceContainerHighest
-                  NText { anchors.centerIn: parent; text: "BT"; pointSize: 8; color: Color.mOnSurfaceVariant }
+                  color: HydraColor.mSurfaceContainerHighest
+                  NText { anchors.centerIn: parent; text: "BT"; pointSize: 8; color: HydraColor.mOnSurfaceVariant }
                 }
                 Rectangle {
                   width: 50
                   height: 32
                   radius: Style.radiusS
-                  color: Color.mSurfaceContainerHighest
-                  NText { anchors.centerIn: parent; text: "DND"; pointSize: 8; color: Color.mOnSurfaceVariant }
+                  color: HydraColor.mSurfaceContainerHighest
+                  NText { anchors.centerIn: parent; text: "DND"; pointSize: 8; color: HydraColor.mOnSurfaceVariant }
                 }
               }
 
@@ -258,12 +258,12 @@ NScrollView {
                 Layout.fillWidth: true
                 height: 14
                 radius: 7
-                color: Color.mSurfaceContainerHighest
+                color: HydraColor.mSurfaceContainerHighest
                 Rectangle {
                   width: parent.width * 0.7
                   height: parent.height
                   radius: 7
-                  color: Color.mPrimary
+                  color: HydraColor.mPrimary
                 }
               }
             }
@@ -285,8 +285,8 @@ NScrollView {
                   width: 70
                   height: 50
                   radius: Style.radiusS
-                  color: index === 0 ? Color.mPrimaryContainer : Color.mSurfaceContainerHigh
-                  border.color: index === 0 ? Color.mPrimary : Color.mOutline
+                  color: index === 0 ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
+                  border.color: index === 0 ? HydraColor.mPrimary : HydraColor.mOutline
                   border.width: index === 0 ? Style.borderM : Style.borderS
 
                   NText {
@@ -294,7 +294,7 @@ NScrollView {
                     text: (index + 1).toString()
                     font.weight: Style.fontWeightBold
                     pointSize: Style.fontSizeS
-                    color: index === 0 ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
+                    color: index === 0 ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
                   }
                 }
               }
@@ -311,8 +311,8 @@ NScrollView {
               anchors.centerIn: parent
               width: 140
               height: 80
-              color: Qt.alpha(Color.mPrimary, 0.15)
-              border.color: Color.mPrimary
+              color: Qt.alpha(HydraColor.mPrimary, 0.15)
+              border.color: HydraColor.mPrimary
               border.width: 1
             }
 
@@ -324,18 +324,18 @@ NScrollView {
               width: 160
               height: 32
               radius: 16
-              color: Color.mSurfaceContainerHighest
-              border.color: Color.mPrimary
+              color: HydraColor.mSurfaceContainerHighest
+              border.color: HydraColor.mPrimary
               border.width: Style.borderS
 
               RowLayout {
                 anchors.centerIn: parent
                 spacing: 8
-                NIcon { icon: "crop"; pointSize: 12; color: Color.mPrimary }
-                NIcon { icon: "pencil"; pointSize: 12; color: Color.mOnSurface }
-                NIcon { icon: "file-text"; pointSize: 12; color: root.ocrSupported ? Color.mOnSurface : Color.mOutline }
-                NIcon { icon: "qrcode"; pointSize: 12; color: root.qrSupported ? Color.mOnSurface : Color.mOutline }
-                NIcon { icon: "check"; pointSize: 12; color: Color.mPrimary }
+                NIcon { icon: "crop"; pointSize: 12; color: HydraColor.mPrimary }
+                NIcon { icon: "pencil"; pointSize: 12; color: HydraColor.mOnSurface }
+                NIcon { icon: "file-text"; pointSize: 12; color: root.ocrSupported ? HydraColor.mOnSurface : HydraColor.mOutline }
+                NIcon { icon: "qrcode"; pointSize: 12; color: root.qrSupported ? HydraColor.mOnSurface : HydraColor.mOutline }
+                NIcon { icon: "check"; pointSize: 12; color: HydraColor.mPrimary }
               }
             }
           }
@@ -359,8 +359,8 @@ NScrollView {
 
           Layout.fillWidth: true
           implicitHeight: cardLayout.implicitHeight + Style.marginM * 2
-          color: root.activeHighlight === index ? Color.mPrimaryContainer : Color.mSurfaceContainer
-          border.color: highlightCard.activeFocus || root.activeHighlight === index ? Color.mPrimary : "transparent"
+          color: root.activeHighlight === index ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainer
+          border.color: highlightCard.activeFocus || root.activeHighlight === index ? HydraColor.mPrimary : "transparent"
           border.width: highlightCard.activeFocus ? Style.borderL : root.activeHighlight === index ? Style.borderM : 0
 
           activeFocusOnTab: true
@@ -388,7 +388,7 @@ NScrollView {
             NIcon {
               icon: modelData.icon
               pointSize: Style.fontSizeXL
-              color: root.activeHighlight === index ? Color.mOnPrimaryContainer : Color.mPrimary
+              color: root.activeHighlight === index ? HydraColor.mOnPrimaryContainer : HydraColor.mPrimary
             }
 
             ColumnLayout {
@@ -398,7 +398,7 @@ NScrollView {
               NText {
                 text: I18n.tr(modelData.titleKey)
                 font.weight: Style.fontWeightBold
-                color: root.activeHighlight === index ? Color.mOnPrimaryContainer : Color.mOnSurface
+                color: root.activeHighlight === index ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
               }
 
               NText {
@@ -416,7 +416,7 @@ NScrollView {
                   }
                   return I18n.tr(modelData.descKey);
                 }
-                color: root.activeHighlight === index ? Color.mOnPrimaryContainer : Color.mOnSurfaceVariant
+                color: root.activeHighlight === index ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
                 pointSize: Style.fontSizeS
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
@@ -426,8 +426,8 @@ NScrollView {
             Rectangle {
               height: 28
               radius: Style.radiusS
-              color: root.activeHighlight === index ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh
-              border.color: Color.mOutline
+              color: root.activeHighlight === index ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainerHigh
+              border.color: HydraColor.mOutline
               border.width: Style.borderS
               implicitWidth: chordBadge.implicitWidth + Style.marginM * 2
 
@@ -437,7 +437,7 @@ NScrollView {
                 text: modelData.chord
                 font.weight: Style.fontWeightBold
                 pointSize: Style.fontSizeS
-                color: Color.mPrimary
+                color: HydraColor.mPrimary
               }
             }
           }

@@ -161,7 +161,7 @@ Item {
       width: parent.width
       height: 160 * Style.uiScaleRatio
       radius: Style.radiusM
-      color: Color.mSurfaceVariant
+      color: HydraColor.mSurfaceVariant
       clip: true
       visible: root.ocrCapturePath !== "" && root.ocrResult !== "" && ocrThumb.status === Image.Ready
       Image {
@@ -177,7 +177,7 @@ Item {
       width: parent.width
       height: 220 * Style.uiScaleRatio
       radius: Style.radiusM
-      color: Color.mSurface
+      color: HydraColor.mSurface
       clip: true
       border.color: Style.capsuleBorderColor
       border.width: Style.capsuleBorderWidth
@@ -193,12 +193,12 @@ Item {
           width: ocrFlick.width
           text: root.ocrResult
           wrapMode: TextEdit.WordWrap
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           font.pointSize: Style.fontSizeS
           horizontalAlignment: /[\u0600-\u06FF\u0590-\u05FF]/.test(root.ocrResult) ? TextEdit.AlignRight : TextEdit.AlignLeft
           selectByMouse: true
-          selectionColor: Color.mPrimary
-          selectedTextColor: Color.mOnPrimary
+          selectionColor: HydraColor.mPrimary
+          selectedTextColor: HydraColor.mOnPrimary
           WheelHandler {
             onWheel: event => {
                        ocrFlick.flick(0, event.angleDelta.y * 5);
@@ -219,19 +219,19 @@ Item {
           height: 26
           width: _ocrOpenRow.implicitWidth + Style.marginS * 2
           radius: Style.radiusS
-          color: _ocrOpenMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          color: _ocrOpenMA.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
           Row {
             id: _ocrOpenRow
             anchors.centerIn: parent
             spacing: Style.marginXS
             NIcon {
               icon: root.ocrType === "email" ? "mail" : "external-link"
-              color: _ocrOpenMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: _ocrOpenMA.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               scale: 0.8
             }
             NText {
               text: root.ocrType === "email" ? pluginApi?.tr("panel.composeMail") : pluginApi?.tr("panel.openUrl")
-              color: _ocrOpenMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: _ocrOpenMA.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               pointSize: Style.fontSizeXS
             }
           }
@@ -247,19 +247,19 @@ Item {
           height: 26
           width: _ocrSearchRow.implicitWidth + Style.marginS * 2
           radius: Style.radiusS
-          color: _ocrSearchMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          color: _ocrSearchMA.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
           Row {
             id: _ocrSearchRow
             anchors.centerIn: parent
             spacing: Style.marginXS
             NIcon {
               icon: "search"
-              color: _ocrSearchMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: _ocrSearchMA.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               scale: 0.8
             }
             NText {
               text: pluginApi?.tr("panel.searchText")
-              color: _ocrSearchMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: _ocrSearchMA.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               pointSize: Style.fontSizeXS
             }
           }
@@ -275,19 +275,19 @@ Item {
           height: 26
           width: _ocrCopyRow.implicitWidth + Style.marginS * 2
           radius: Style.radiusS
-          color: _ocrCopyMA.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          color: _ocrCopyMA.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
           Row {
             id: _ocrCopyRow
             anchors.centerIn: parent
             spacing: Style.marginXS
             NIcon {
               icon: "copy"
-              color: _ocrCopyMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: _ocrCopyMA.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               scale: 0.8
             }
             NText {
               text: pluginApi?.tr("panel.copy")
-              color: _ocrCopyMA.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+              color: _ocrCopyMA.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
               pointSize: Style.fontSizeXS
             }
           }
@@ -308,8 +308,8 @@ Item {
         height: 26
         width: _ocrClearRow.implicitWidth + Style.marginM * 2
         radius: Style.radiusS
-        color: _ocrClearMA.containsMouse ? Qt.rgba(Color.mError.r, Color.mError.g, Color.mError.b, 0.15) : Color.mSurfaceVariant
-        border.color: Color.mError
+        color: _ocrClearMA.containsMouse ? Qt.rgba(HydraColor.mError.r, HydraColor.mError.g, HydraColor.mError.b, 0.15) : HydraColor.mSurfaceVariant
+        border.color: HydraColor.mError
         border.width: Style.capsuleBorderWidth
         Row {
           id: _ocrClearRow
@@ -317,12 +317,12 @@ Item {
           spacing: Style.marginXS
           NIcon {
             icon: "trash"
-            color: _ocrClearMA.containsMouse ? Color.mError : Color.mOnSurfaceVariant
+            color: _ocrClearMA.containsMouse ? HydraColor.mError : HydraColor.mOnSurfaceVariant
             scale: 0.8
           }
           NText {
             text: pluginApi?.tr("panel.clearResult")
-            color: _ocrClearMA.containsMouse ? Color.mError : Color.mOnSurfaceVariant
+            color: _ocrClearMA.containsMouse ? HydraColor.mError : HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeXS
           }
         }
@@ -343,23 +343,23 @@ Item {
       Rectangle {
         width: 32
         height: 1
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         opacity: 0.25
         anchors.verticalCenter: parent.verticalCenter
       }
       NIcon {
         icon: "world"
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         scale: 0.75
       }
       NText {
         text: pluginApi?.tr("ocr.translateSection")
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeXS
       }
       Rectangle {
         height: 1
-        color: Color.mOnSurfaceVariant
+        color: HydraColor.mOnSurfaceVariant
         opacity: 0.25
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width - 32 - Style.marginS * 3 - 16 - _transLabel.implicitWidth
@@ -374,7 +374,7 @@ Item {
       visible: !root.transAvailable
       width: parent.width
       text: pluginApi?.tr("ocr.noTranslateTool")
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       pointSize: Style.fontSizeXS
       wrapMode: Text.WordWrap
     }
@@ -401,11 +401,11 @@ Item {
           height: 34
           width: 34
           radius: Style.radiusM
-          color: transBtnMa.containsMouse ? Color.mPrimary : Color.mSurfaceVariant
+          color: transBtnMa.containsMouse ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
           NIcon {
             anchors.centerIn: parent
             icon: "world"
-            color: transBtnMa.containsMouse ? Color.mOnPrimary : Color.mOnSurface
+            color: transBtnMa.containsMouse ? HydraColor.mOnPrimary : HydraColor.mOnSurface
           }
           MouseArea {
             id: transBtnMa
@@ -422,7 +422,7 @@ Item {
         width: parent.width
         height: 140 * Style.uiScaleRatio
         radius: Style.radiusM
-        color: Color.mSurface
+        color: HydraColor.mSurface
         clip: true
         border.color: Style.capsuleBorderColor
         border.width: Style.capsuleBorderWidth
@@ -438,13 +438,13 @@ Item {
             id: trText
             width: trFlick.width
             text: root.translateResult
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             font.pointSize: Style.fontSizeS
             wrapMode: TextEdit.WordWrap
             horizontalAlignment: /[\u0600-\u06FF\u0590-\u05FF]/.test(root.translateResult) ? TextEdit.AlignRight : TextEdit.AlignLeft
             selectByMouse: true
-            selectionColor: Color.mPrimary
-            selectedTextColor: Color.mOnPrimary
+            selectionColor: HydraColor.mPrimary
+            selectedTextColor: HydraColor.mOnPrimary
             WheelHandler {
               onWheel: event => {
                          trFlick.flick(0, event.angleDelta.y * 5);
@@ -455,7 +455,7 @@ Item {
         }
         NIcon {
           icon: "copy"
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           anchors.right: parent.right
           anchors.top: parent.top
           anchors.margins: Style.marginS

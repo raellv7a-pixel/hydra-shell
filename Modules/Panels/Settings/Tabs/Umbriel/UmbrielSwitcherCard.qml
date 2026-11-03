@@ -59,7 +59,7 @@ ColumnLayout {
   NText {
     Layout.fillWidth: true
     text: "Alt+Tab avança · Shift+Alt+Tab volta · Soltar o modificador confirma. Atalhos pessoais existentes têm prioridade sobre os novos padrões."
-    color: Color.mOnSurfaceVariant
+    color: HydraColor.mOnSurfaceVariant
     pointSize: Style.fontSizeS
     wrapMode: Text.WordWrap
   }

@@ -188,8 +188,8 @@ ColumnLayout {
       Layout.fillWidth: true
       Layout.preferredHeight: 64
       visible: MonitorService.transactionState === "confirming"
-      color: Qt.alpha(Color.mPrimary, 0.15)
-      border.color: Color.mPrimary
+      color: Qt.alpha(HydraColor.mPrimary, 0.15)
+      border.color: HydraColor.mPrimary
       border.width: 1
       radius: Style.radiusM
 
@@ -200,7 +200,7 @@ ColumnLayout {
 
         NIcon {
           icon: "alert-circle"
-          color: Color.mPrimary
+          color: HydraColor.mPrimary
           pointSize: Style.fontSizeL
         }
 
@@ -210,12 +210,12 @@ ColumnLayout {
           NText {
             text: "Manter nova configuração de telas?"
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             pointSize: Style.fontSizeM
           }
           NText {
             text: "Revertendo automaticamente em " + MonitorService.confirmationRemainingSeconds + " segundos se não for confirmada..."
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeS
           }
         }
@@ -223,16 +223,16 @@ ColumnLayout {
         NButton {
           text: "Manter (" + MonitorService.confirmationRemainingSeconds + "s)"
           icon: "check"
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: HydraColor.mPrimary
+          textColor: HydraColor.mOnPrimary
           onClicked: MonitorService.keepLayout()
         }
 
         NButton {
           text: "Reverter Agora"
           icon: "arrow-back"
-          backgroundColor: Color.mError
-          textColor: Color.mOnError
+          backgroundColor: HydraColor.mError
+          textColor: HydraColor.mOnError
           onClicked: MonitorService.rollback()
         }
       }
@@ -243,8 +243,8 @@ ColumnLayout {
       Layout.fillWidth: true
       Layout.preferredHeight: 64
       visible: MonitorService.transactionState === "rollback_failed"
-      color: Qt.alpha(Color.mError, 0.15)
-      border.color: Color.mError
+      color: Qt.alpha(HydraColor.mError, 0.15)
+      border.color: HydraColor.mError
       border.width: 1
       radius: Style.radiusM
 
@@ -255,14 +255,14 @@ ColumnLayout {
 
         NIcon {
           icon: "alert-triangle"
-          color: Color.mError
+          color: HydraColor.mError
           pointSize: Style.fontSizeL
         }
 
         NText {
           Layout.fillWidth: true
           text: "Falha ao restaurar o layout anterior. O snapshot seguro continua preservado na memória."
-          color: Color.mOnErrorContainer || Color.mError
+          color: HydraColor.mOnErrorContainer || HydraColor.mError
           pointSize: Style.fontSizeS
           wrapMode: Text.WordWrap
         }
@@ -270,8 +270,8 @@ ColumnLayout {
         NButton {
           text: "Tentar Reverter Novamente"
           icon: "refresh"
-          backgroundColor: Color.mError
-          textColor: Color.mOnError
+          backgroundColor: HydraColor.mError
+          textColor: HydraColor.mOnError
           onClicked: MonitorService.retryRollback()
         }
       }
@@ -282,8 +282,8 @@ ColumnLayout {
       Layout.fillWidth: true
       Layout.preferredHeight: 44
       visible: MonitorService.transactionState === "preparing" || MonitorService.transactionState === "applying" || MonitorService.transactionState === "verifying" || MonitorService.transactionState === "reverting" || MonitorService.transactionState === "rollback_verifying"
-      color: Qt.alpha(Color.mSurfaceVariant, 0.85)
-      border.color: Color.mOutline
+      color: Qt.alpha(HydraColor.mSurfaceVariant, 0.85)
+      border.color: HydraColor.mOutline
       border.width: 1
       radius: Style.radiusM
 
@@ -300,7 +300,7 @@ ColumnLayout {
           Layout.fillWidth: true
           text: MonitorService.transactionState === "preparing" ? "Capturando a configuração atual antes de aplicar..." : MonitorService.transactionState === "applying" ? "Aplicando configuração de monitores no compositor..." : MonitorService.transactionState === "verifying" ? "Verificando integridade das saídas de vídeo..." :
                                                                                                                                                                                                                                                                                       "Revertendo para a configuração anterior segura..."
-          color: Color.mOnSurface
+          color: HydraColor.mOnSurface
           pointSize: Style.fontSizeS
         }
       }
@@ -319,8 +319,8 @@ ColumnLayout {
         id: sceneCanvas
         width: Math.max(root.viewportWidth, root.requiredSceneSize.width)
         height: Math.max(root.viewportHeight, root.requiredSceneSize.height)
-        color: Qt.alpha(Color.mSurface, 0.5)
-        border.color: Color.mOutline
+        color: Qt.alpha(HydraColor.mSurface, 0.5)
+        border.color: HydraColor.mOutline
         border.width: Style.borderS
         radius: Style.radiusM
 
@@ -329,7 +329,7 @@ ColumnLayout {
           opacity: 0.12
           onPaint: {
             var ctx = getContext("2d");
-            ctx.strokeStyle = Color.mOnSurface;
+            ctx.strokeStyle = HydraColor.mOnSurface;
             ctx.lineWidth = 1;
             ctx.beginPath();
             for (var x = 0; x < width; x += 40) {
@@ -361,8 +361,8 @@ ColumnLayout {
             height: logicalRect.height * root.activeSceneScale
             z: isSelected ? 1 : 0
 
-            color: isSelected ? Qt.alpha(Color.mPrimary, 0.28) : Qt.alpha(Color.mSurfaceVariant, 0.65)
-            border.color: isSelected ? Color.mPrimary : Color.mOutline
+            color: isSelected ? Qt.alpha(HydraColor.mPrimary, 0.28) : Qt.alpha(HydraColor.mSurfaceVariant, 0.65)
+            border.color: isSelected ? HydraColor.mPrimary : HydraColor.mOutline
             border.width: isSelected ? 2 : 1
             radius: Style.radiusM
 
@@ -387,7 +387,7 @@ ColumnLayout {
               anchors.margins: 6
               height: 20
               width: primaryBadgeLayout.implicitWidth + 10
-              color: Color.mPrimary
+              color: HydraColor.mPrimary
               radius: 4
 
               RowLayout {
@@ -396,13 +396,13 @@ ColumnLayout {
                 spacing: 3
                 NIcon {
                   icon: "star"
-                  color: Color.mOnPrimary
+                  color: HydraColor.mOnPrimary
                   pointSize: Style.fontSizeXXS
                 }
                 NText {
                   text: "Principal"
                   pointSize: Style.fontSizeXXS
-                  color: Color.mOnPrimary
+                  color: HydraColor.mOnPrimary
                   font.weight: Style.fontWeightBold
                 }
               }
@@ -416,14 +416,14 @@ ColumnLayout {
                 text: monitorTile.output.name
                 pointSize: Style.fontSizeS
                 font.weight: Style.fontWeightBold
-                color: monitorTile.isSelected ? Color.mPrimary : Color.mOnSurface
+                color: monitorTile.isSelected ? HydraColor.mPrimary : HydraColor.mOnSurface
                 Layout.alignment: Qt.AlignHCenter
               }
 
               NText {
                 text: monitorTile.output.width + "x" + monitorTile.output.height + (monitorTile.output.refresh ? ("@" + Math.round(monitorTile.output.refresh) + "Hz") : "")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 Layout.alignment: Qt.AlignHCenter
               }
             }
@@ -458,7 +458,7 @@ ColumnLayout {
       text: root.selectedOutput ? ("Ajustes do Monitor: " + root.selectedOutput.name + " (" + (root.selectedOutput.model || root.selectedOutput.make || "Monitor") + ")") : "Ajustes do Monitor"
       pointSize: Style.fontSizeM
       font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
+      color: HydraColor.mOnSurface
     }
 
     ColumnLayout {
@@ -487,8 +487,8 @@ ColumnLayout {
         Layout.fillWidth: true
         text: (root.selectedOutput && root.selectedOutput.isPrimary) ? "Monitor Principal Definido (Origem 0, 0)" : "Definir como Monitor Principal"
         icon: "star"
-        backgroundColor: (root.selectedOutput && root.selectedOutput.isPrimary) ? Qt.alpha(Color.mPrimary, 0.2) : Color.mSurfaceVariant
-        textColor: (root.selectedOutput && root.selectedOutput.isPrimary) ? Color.mPrimary : Color.mOnSurfaceVariant
+        backgroundColor: (root.selectedOutput && root.selectedOutput.isPrimary) ? Qt.alpha(HydraColor.mPrimary, 0.2) : HydraColor.mSurfaceVariant
+        textColor: (root.selectedOutput && root.selectedOutput.isPrimary) ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
         enabled: !MonitorService.isBusy && root.selectedOutput && root.selectedOutput.active !== false && !root.selectedOutput.disabled && !root.selectedOutput.isPrimary
         onClicked: {
           if (root.selectedOutput) {
@@ -676,8 +676,8 @@ ColumnLayout {
       NButton {
         text: "Aplicar Agora"
         icon: "check"
-        backgroundColor: Color.mPrimary
-        textColor: Color.mOnPrimary
+        backgroundColor: HydraColor.mPrimary
+        textColor: HydraColor.mOnPrimary
         enabled: !MonitorService.isBusy
         onClicked: MonitorService.applyLayout()
       }
@@ -685,8 +685,8 @@ ColumnLayout {
       NButton {
         text: "Salvar na Umbriel"
         icon: "device-floppy"
-        backgroundColor: Color.mPrimary
-        textColor: Color.mOnPrimary
+        backgroundColor: HydraColor.mPrimary
+        textColor: HydraColor.mOnPrimary
         enabled: !MonitorService.isBusy && MonitorService.transactionState === "idle"
         onClicked: MonitorService.saveToUmbrielConfig()
       }
@@ -694,8 +694,8 @@ ColumnLayout {
       NButton {
         text: "Copiar TOML"
         icon: "copy"
-        backgroundColor: Color.mSurfaceVariant
-        textColor: Color.mOnSurfaceVariant
+        backgroundColor: HydraColor.mSurfaceVariant
+        textColor: HydraColor.mOnSurfaceVariant
         onClicked: {
           var snippet = MonitorService.generateConfigSnippet();
           if (snippet) {
@@ -712,8 +712,8 @@ ColumnLayout {
       NButton {
         text: "Restaurar Padrão"
         icon: "refresh"
-        backgroundColor: Color.mSurfaceVariant
-        textColor: Color.mOnSurfaceVariant
+        backgroundColor: HydraColor.mSurfaceVariant
+        textColor: HydraColor.mOnSurfaceVariant
         enabled: !MonitorService.isBusy
         onClicked: MonitorService.resetDraftOutputs()
       }
@@ -732,13 +732,13 @@ ColumnLayout {
       text: "Código de Configuração dos Monitores"
       pointSize: Style.fontSizeM
       font.weight: Style.fontWeightBold
-      color: Color.mOnSurface
+      color: HydraColor.mOnSurface
     }
 
     NText {
       text: "Configuração gerada para o arquivo Hydra-owned hydra/outputs.toml. A aplicação valida o TOML antes de recarregar a Umbriel."
       pointSize: Style.fontSizeS
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
       wrapMode: Text.WordWrap
       Layout.fillWidth: true
     }
@@ -748,14 +748,14 @@ ColumnLayout {
       text: "Umbriel — hydra/outputs.toml:"
       pointSize: Style.fontSizeS
       font.weight: Style.fontWeightBold
-      color: Color.mOnSurfaceVariant
+      color: HydraColor.mOnSurfaceVariant
     }
 
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: 110
-      color: Qt.alpha(Color.mSurface, 0.9)
-      border.color: Color.mOutline
+      color: Qt.alpha(HydraColor.mSurface, 0.9)
+      border.color: HydraColor.mOutline
       border.width: Style.borderS
       radius: Style.radiusM
 
@@ -771,7 +771,7 @@ ColumnLayout {
           text: MonitorService.generateConfigSnippet() || "# Nenhum monitor"
           font.family: "monospace"
           pointSize: Style.fontSizeS
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
         }
       }
     }
@@ -783,8 +783,8 @@ ColumnLayout {
       NButton {
         text: "Salvar em outputs.toml"
         icon: "device-floppy"
-        backgroundColor: Color.mPrimary
-        textColor: Color.mOnPrimary
+        backgroundColor: HydraColor.mPrimary
+        textColor: HydraColor.mOnPrimary
         enabled: !MonitorService.isBusy && MonitorService.transactionState === "idle"
         onClicked: MonitorService.saveToUmbrielConfig()
       }
@@ -792,8 +792,8 @@ ColumnLayout {
       NButton {
         text: "Copiar TOML"
         icon: "copy"
-        backgroundColor: Color.mSurfaceVariant
-        textColor: Color.mOnSurfaceVariant
+        backgroundColor: HydraColor.mSurfaceVariant
+        textColor: HydraColor.mOnSurfaceVariant
         onClicked: {
           var snippet = MonitorService.generateConfigSnippet();
           if (snippet) {

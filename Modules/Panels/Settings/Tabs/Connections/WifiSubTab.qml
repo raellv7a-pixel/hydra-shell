@@ -164,7 +164,7 @@ Item {
           visible: !root.showOnlyLists && NetworkService.wifiEnabled
           Layout.fillWidth: true
           text: I18n.tr("panels.connections.wifi-header-text")
-          color: Color.mOnSurfaceVariant
+          color: HydraColor.mOnSurfaceVariant
           richTextEnabled: true
           wrapMode: Text.WordWrap
           horizontalAlignment: Text.AlignHCenter
@@ -184,7 +184,7 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: connectedCol.implicitHeight + Style.margin2M
       border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
-      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? HydraColor.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: connectedCol
@@ -215,7 +215,7 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: savedCol.implicitHeight + Style.margin2M
       border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
-      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? HydraColor.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: savedCol
@@ -246,7 +246,7 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: availableCol.implicitHeight + Style.margin2M
       border.color: root.dashboardMode ? "transparent" : (showOnlyLists ? Style.boxBorderColor : "transparent")
-      color: root.dashboardMode ? "transparent" : (showOnlyLists ? Color.mSurfaceVariant : "transparent")
+      color: root.dashboardMode ? "transparent" : (showOnlyLists ? HydraColor.mSurfaceVariant : "transparent")
 
       ColumnLayout {
         id: availableCol
@@ -278,7 +278,7 @@ Item {
           visible: !root.showOnlyLists
           Layout.fillWidth: true
           Layout.preferredHeight: addHiddenContent.implicitHeight + Style.margin2M
-          color: addHiddenMouseArea.containsMouse ? Color.mSurfaceVariant : Color.mSurface
+          color: addHiddenMouseArea.containsMouse ? HydraColor.mSurfaceVariant : HydraColor.mSurface
           radius: Style.radiusM
 
           RowLayout {
@@ -290,13 +290,13 @@ Item {
             NIcon {
               icon: "plus"
               pointSize: Style.fontSizeXXL
-              color: Color.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
             }
 
             NText {
               text: I18n.tr("wifi.panel.add-network")
               pointSize: Style.fontSizeM
-              color: Color.mOnSurface
+              color: HydraColor.mOnSurface
               Layout.fillWidth: true
             }
           }
@@ -388,8 +388,8 @@ Item {
       id: customPopupBg
       anchors.fill: parent
       radius: Style.radiusL
-      color: Qt.alpha(Color.mSurface, 0.95)
-      border.color: Color.mOutline
+      color: Qt.alpha(HydraColor.mSurface, 0.95)
+      border.color: HydraColor.mOutline
       border.width: Style.borderS
     }
 
@@ -419,7 +419,7 @@ Item {
             text: I18n.tr("wifi.panel.add-network")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             wrapMode: Text.Wrap
             Layout.fillWidth: true
           }
@@ -604,16 +604,16 @@ Item {
 
         NButton {
           text: I18n.tr("common.cancel")
-          backgroundColor: Color.mSurfaceVariant
-          textColor: Color.mOnSurfaceVariant
+          backgroundColor: HydraColor.mSurfaceVariant
+          textColor: HydraColor.mOnSurfaceVariant
           outlined: false
           onClicked: addNetworkPopup.close()
         }
 
         NButton {
           text: I18n.tr("common.connect")
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: HydraColor.mPrimary
+          textColor: HydraColor.mOnPrimary
           enabled: addNetworkPopup.customSsid.length > 0 && (addNetworkPopup.customSecurityKey === "open" || addNetworkPopup.customPassword.length > 0) && (addNetworkPopup.customSecurityKey.indexOf("-eap") === -1 || addNetworkPopup.customIdentity.length > 0)
           onClicked: {
             NetworkService.connect(addNetworkPopup.customSsid, addNetworkPopup.customPassword, addNetworkPopup.customIsHidden, addNetworkPopup.customSecurityKey, addNetworkPopup.customIdentity, {
@@ -639,18 +639,18 @@ Item {
       readonly property bool isExpanded: root.infoSsid === modelData.ssid
       readonly property bool isEnterprise: NetworkService.isEnterprise(modelData.security)
 
-      function getContentColors(defaultColors = [Color.mSurface, Color.mOnSurface]) {
+      function getContentColors(defaultColors = [HydraColor.mSurface, HydraColor.mOnSurface]) {
         if (root.passwordSsid === modelData.ssid || NetworkService.connectingTo === modelData.ssid) {
-          return [Color.mPrimary, Color.mOnPrimary];
+          return [HydraColor.mPrimary, HydraColor.mOnPrimary];
         }
         if (modelData.connected && NetworkService.internetConnectivity && NetworkService.disconnectingFrom !== modelData.ssid) {
-          return [Color.mPrimary, Color.mOnPrimary];
+          return [HydraColor.mPrimary, HydraColor.mOnPrimary];
         }
         if (NetworkService.disconnectingFrom === modelData.ssid || NetworkService.forgettingNetwork === modelData.ssid) {
-          return [Color.mError, Color.mOnError];
+          return [HydraColor.mError, HydraColor.mOnError];
         }
         if (modelData.connected && !NetworkService.internetConnectivity) {
-          return [Color.mError, Color.mOnError];
+          return [HydraColor.mError, HydraColor.mOnError];
         }
         return defaultColors;
       }
@@ -663,10 +663,10 @@ Item {
       color: {
         if (root.dashboardMode) {
           if (networkItem.isBusy)
-            return Qt.alpha(Color.mPrimaryContainer, 0.7);
+            return Qt.alpha(HydraColor.mPrimaryContainer, 0.7);
           if (modelData.connected)
-            return Color.mPrimaryContainer;
-          return hoverArea.hovered ? Color.mSurfaceContainerHighest : Color.mSurfaceContainerHigh;
+            return HydraColor.mPrimaryContainer;
+          return hoverArea.hovered ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainerHigh;
         }
         return networkItem.getContentColors()[0];
       }
@@ -698,8 +698,8 @@ Item {
             color: {
               if (root.dashboardMode) {
                 if (modelData.connected)
-                  return Qt.alpha(Color.mPrimary, 0.16);
-                return Color.mSurfaceContainerHighest;
+                  return Qt.alpha(HydraColor.mPrimary, 0.16);
+                return HydraColor.mSurfaceContainerHighest;
               }
               return "transparent";
             }
@@ -710,7 +710,7 @@ Item {
               pointSize: root.dashboardMode ? Style.fontSizeM : Style.fontSizeXXL
               color: {
                 if (root.dashboardMode) {
-                  return modelData.connected ? Color.mPrimary : Color.mOnSurface;
+                  return modelData.connected ? HydraColor.mPrimary : HydraColor.mOnSurface;
                 }
                 return networkItem.getContentColors()[1];
               }
@@ -735,7 +735,7 @@ Item {
               elide: Text.ElideRight
               color: {
                 if (root.dashboardMode) {
-                  return modelData.connected ? Color.mOnPrimaryContainer : Color.mOnSurface;
+                  return modelData.connected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface;
                 }
                 return networkItem.getContentColors()[1];
               }
@@ -750,7 +750,7 @@ Item {
                 pointSize: Style.fontSizeXXS
                 color: {
                   if (root.dashboardMode) {
-                    return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                    return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                   }
                   return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
                 }
@@ -782,7 +782,7 @@ Item {
                 pointSize: Style.fontSizeXXS
                 color: {
                   if (root.dashboardMode) {
-                    return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                    return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                   }
                   return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
                 }
@@ -801,7 +801,7 @@ Item {
                   pointSize: Style.fontSizeXXS
                   color: {
                     if (root.dashboardMode) {
-                      return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                      return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                     }
                     return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
                   }
@@ -813,7 +813,7 @@ Item {
                   pointSize: Style.fontSizeXXS
                   color: {
                     if (root.dashboardMode) {
-                      return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                      return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                     }
                     return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
                   }
@@ -832,7 +832,7 @@ Item {
                   pointSize: Style.fontSizeXXS
                   color: {
                     if (root.dashboardMode) {
-                      return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                      return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                     }
                     return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
                   }
@@ -844,7 +844,7 @@ Item {
                   pointSize: Style.fontSizeXXS
                   color: {
                     if (root.dashboardMode) {
-                      return modelData.connected ? Qt.alpha(Color.mOnPrimaryContainer, 0.75) : Color.mOnSurfaceVariant;
+                      return modelData.connected ? Qt.alpha(HydraColor.mOnPrimaryContainer, 0.75) : HydraColor.mOnSurfaceVariant;
                     }
                     return Qt.alpha(networkItem.getContentColors()[1], Style.opacityHeavy);
                   }
@@ -864,7 +864,7 @@ Item {
             NBusyIndicator {
               visible: networkItem.isBusy
               running: visible && root.effectivelyVisible
-              color: root.dashboardMode ? (modelData.connected ? Color.mOnPrimaryContainer : Color.mPrimary) : networkItem.getContentColors()[1]
+              color: root.dashboardMode ? (modelData.connected ? HydraColor.mOnPrimaryContainer : HydraColor.mPrimary) : networkItem.getContentColors()[1]
               size: Math.round((root.dashboardMode ? 20 : Style.baseWidgetSize * 0.5) * (root.panelUnit || 1.0))
             }
 
@@ -873,8 +873,8 @@ Item {
               icon: "info"
               tooltipText: I18n.tr("common.info")
               baseSize: Math.round((root.dashboardMode ? 28 : Style.baseWidgetSize * 0.75) * (root.panelUnit || 1.0))
-              colorBg: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
-              colorFg: Color.mOnSurface
+              colorBg: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceVariant
+              colorFg: HydraColor.mOnSurface
               colorBorder: "transparent"
               colorBorderHover: "transparent"
               onClicked: {
@@ -892,8 +892,8 @@ Item {
               icon: "trash"
               tooltipText: I18n.tr("tooltips.forget-network")
               baseSize: Math.round((root.dashboardMode ? 28 : Style.baseWidgetSize * 0.75) * (root.panelUnit || 1.0))
-              colorBg: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mPrimary
-              colorFg: root.dashboardMode ? Color.mError : Color.mOnPrimary
+              colorBg: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mPrimary
+              colorFg: root.dashboardMode ? HydraColor.mError : HydraColor.mOnPrimary
               colorBorder: "transparent"
               colorBorderHover: "transparent"
               onClicked: root.requestForget(modelData.ssid)
@@ -904,8 +904,8 @@ Item {
               visible: !modelData.connected && NetworkService.connectingTo !== modelData.ssid && root.passwordSsid !== modelData.ssid
               enabled: !NetworkService.connecting && !networkItem.isBusy
               fontSize: Style.fontSizeS
-              backgroundColor: Color.mPrimary
-              textColor: Color.mOnPrimary
+              backgroundColor: HydraColor.mPrimary
+              textColor: HydraColor.mOnPrimary
               text: I18n.tr("common.connect")
               onClicked: {
                 if (modelData.existing || !NetworkService.isSecured(modelData.security)) {
@@ -921,8 +921,8 @@ Item {
               visible: modelData.connected && NetworkService.disconnectingFrom !== modelData.ssid
               text: I18n.tr("common.disconnect")
               fontSize: Style.fontSizeS
-              backgroundColor: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
-              textColor: Color.mOnSurface
+              backgroundColor: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceVariant
+              textColor: HydraColor.mOnSurface
               onClicked: NetworkService.disconnect(modelData.ssid)
             }
           }
@@ -934,7 +934,7 @@ Item {
           Layout.fillWidth: true
           implicitHeight: infoColumn.implicitHeight + Style.margin2S
           radius: root.dashboardMode ? Style.radiusM : Style.radiusXS
-          color: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
+          color: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceVariant
           border.width: root.dashboardMode ? 0 : Style.borderS
           border.color: root.dashboardMode ? "transparent" : Style.boxBorderColor
           clip: true
@@ -986,7 +986,7 @@ Item {
               NIcon {
                 icon: "network"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 MouseArea {
                   anchors.fill: parent
                   hoverEnabled: true
@@ -997,7 +997,7 @@ Item {
               NText {
                 text: NetworkService.activeWifiIf || "-"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
                 wrapMode: root.detailsGrid ? Text.NoWrap : Text.WrapAtWordBoundaryOrAnywhere
                 elide: root.detailsGrid ? Text.ElideRight : Text.ElideNone
@@ -1029,7 +1029,7 @@ Item {
               NIcon {
                 icon: "router"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 MouseArea {
                   anchors.fill: parent
                   hoverEnabled: true
@@ -1051,7 +1051,7 @@ Item {
               NIcon {
                 icon: "gauge"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 MouseArea {
                   anchors.fill: parent
                   hoverEnabled: true
@@ -1062,7 +1062,7 @@ Item {
               NText {
                 text: (NetworkService.activeWifiDetails.rateShort && NetworkService.activeWifiDetails.rateShort.length > 0) ? NetworkService.activeWifiDetails.rateShort : ((NetworkService.activeWifiDetails.rate && NetworkService.activeWifiDetails.rate.length > 0) ? NetworkService.activeWifiDetails.rate : "-")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
               }
             }
@@ -1074,7 +1074,7 @@ Item {
               NIcon {
                 icon: "network"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 MouseArea {
                   anchors.fill: parent
                   hoverEnabled: true
@@ -1089,7 +1089,7 @@ Item {
               NText {
                 text: root.ipVersion === 4 ? (NetworkService.activeWifiDetails.ipv4 || "-") : ((NetworkService.activeWifiDetails.ipv6 || []).join(", ") || "-")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
 
                 MouseArea {
@@ -1117,7 +1117,7 @@ Item {
               NIcon {
                 icon: "world"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 MouseArea {
                   anchors.fill: parent
                   hoverEnabled: true
@@ -1132,7 +1132,7 @@ Item {
               NText {
                 text: root.ipVersion === 4 ? ((NetworkService.activeWifiDetails.dns4 || []).join(", ") || "-") : ((NetworkService.activeWifiDetails.dns6 || []).join(", ") || "-")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
 
                 MouseArea {
@@ -1160,7 +1160,7 @@ Item {
               NIcon {
                 icon: "router"
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 MouseArea {
                   anchors.fill: parent
                   hoverEnabled: true
@@ -1175,7 +1175,7 @@ Item {
               NText {
                 text: root.ipVersion === 4 ? (NetworkService.activeWifiDetails.gateway4 || "-") : ((NetworkService.activeWifiDetails.gateway6 || []).join(", ") || "-")
                 pointSize: Style.fontSizeXS
-                color: Color.mOnSurface
+                color: HydraColor.mOnSurface
                 Layout.fillWidth: true
 
                 MouseArea {
@@ -1203,8 +1203,8 @@ Item {
           visible: root.passwordSsid === modelData.ssid && !networkItem.isBusy
           Layout.fillWidth: true
           height: passwordLayout.implicitHeight + Style.margin2S
-          color: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
-          border.color: root.dashboardMode ? "transparent" : Color.mOutline
+          color: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceVariant
+          border.color: root.dashboardMode ? "transparent" : HydraColor.mOutline
           border.width: root.dashboardMode ? 0 : Style.borderS
           radius: root.dashboardMode ? Style.radiusM : Style.iRadiusXS
 
@@ -1275,8 +1275,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Style.baseWidgetSize * 0.9
                     radius: Style.iRadiusXS
-                    color: Color.mSurface
-                    border.color: caCertInput.activeFocus ? Color.mSecondary : Color.mOutline
+                    color: HydraColor.mSurface
+                    border.color: caCertInput.activeFocus ? HydraColor.mSecondary : HydraColor.mOutline
                     border.width: Style.borderS
 
                     TextInput {
@@ -1287,7 +1287,7 @@ Item {
                       anchors.margins: Style.marginS
                       font.family: Settings.data.ui.fontFixed
                       font.pointSize: Style.fontSizeS
-                      color: Color.mOnSurface
+                      color: HydraColor.mOnSurface
                       selectByMouse: true
                       text: root.enterpriseCaCert
                       onTextChanged: root.enterpriseCaCert = text
@@ -1296,7 +1296,7 @@ Item {
                         visible: parent.text.length === 0
                         anchors.verticalCenter: parent.verticalCenter
                         text: I18n.tr("wifi.enterprise.ca-cert")
-                        color: Color.mOnSurfaceVariant
+                        color: HydraColor.mOnSurfaceVariant
                         pointSize: Style.fontSizeS
                       }
                     }
@@ -1316,8 +1316,8 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Style.baseWidgetSize * 0.9
                 radius: Style.iRadiusXS
-                color: Color.mSurface
-                border.color: anonIdentityInput.activeFocus ? Color.mSecondary : Color.mOutline
+                color: HydraColor.mSurface
+                border.color: anonIdentityInput.activeFocus ? HydraColor.mSecondary : HydraColor.mOutline
                 border.width: Style.borderS
 
                 TextInput {
@@ -1328,7 +1328,7 @@ Item {
                   anchors.margins: Style.marginS
                   font.family: Settings.data.ui.fontFixed
                   font.pointSize: Style.fontSizeS
-                  color: Color.mOnSurface
+                  color: HydraColor.mOnSurface
                   selectByMouse: true
                   text: root.enterpriseAnonIdentity
                   onTextChanged: root.enterpriseAnonIdentity = text
@@ -1338,7 +1338,7 @@ Item {
                     visible: parent.text.length === 0
                     anchors.verticalCenter: parent.verticalCenter
                     text: I18n.tr("wifi.enterprise.anonymous-identity")
-                    color: Color.mOnSurfaceVariant
+                    color: HydraColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeS
                   }
                 }
@@ -1350,8 +1350,8 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Style.baseWidgetSize * 0.9
                 radius: Style.iRadiusXS
-                color: Color.mSurface
-                border.color: identityInput.activeFocus ? Color.mSecondary : Color.mOutline
+                color: HydraColor.mSurface
+                border.color: identityInput.activeFocus ? HydraColor.mSecondary : HydraColor.mOutline
                 border.width: Style.borderS
 
                 TextInput {
@@ -1362,7 +1362,7 @@ Item {
                   anchors.margins: Style.marginS
                   font.family: Settings.data.ui.fontFixed
                   font.pointSize: Style.fontSizeS
-                  color: Color.mOnSurface
+                  color: HydraColor.mOnSurface
                   selectByMouse: true
                   onVisibleChanged: {
                     if (visible) {
@@ -1375,7 +1375,7 @@ Item {
                     visible: parent.text.length === 0
                     anchors.verticalCenter: parent.verticalCenter
                     text: I18n.tr("wifi.enterprise.username")
-                    color: Color.mOnSurfaceVariant
+                    color: HydraColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeS
                   }
                 }
@@ -1386,8 +1386,8 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Style.baseWidgetSize * 0.9
                 radius: Style.iRadiusXS
-                color: Color.mSurface
-                border.color: pwdInput.activeFocus ? Color.mSecondary : Color.mOutline
+                color: HydraColor.mSurface
+                border.color: pwdInput.activeFocus ? HydraColor.mSecondary : HydraColor.mOutline
                 border.width: Style.borderS
 
                 TextInput {
@@ -1398,7 +1398,7 @@ Item {
                   anchors.margins: Style.marginS
                   font.family: Settings.data.ui.fontFixed
                   font.pointSize: Style.fontSizeS
-                  color: Color.mOnSurface
+                  color: HydraColor.mOnSurface
                   echoMode: TextInput.Password
                   selectByMouse: true
                   passwordCharacter: "●"
@@ -1419,7 +1419,7 @@ Item {
                     visible: parent.text.length === 0
                     anchors.verticalCenter: parent.verticalCenter
                     text: networkItem.isEnterprise ? I18n.tr("wifi.enterprise.password") : I18n.tr("wifi.panel.enter-password")
-                    color: Color.mOnSurfaceVariant
+                    color: HydraColor.mOnSurfaceVariant
                     pointSize: Style.fontSizeS
                   }
                 }
@@ -1456,10 +1456,10 @@ Item {
           visible: root.expandedSsid === modelData.ssid && !networkItem.isBusy
           Layout.fillWidth: true
           height: forgetRow.implicitHeight + Style.margin2S
-          color: root.dashboardMode ? Color.mSurfaceContainerHighest : Color.mSurfaceVariant
+          color: root.dashboardMode ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceVariant
           radius: root.dashboardMode ? Style.radiusM : Style.radiusS
           border.width: root.dashboardMode ? 0 : Style.borderS
-          border.color: root.dashboardMode ? "transparent" : Color.mOutline
+          border.color: root.dashboardMode ? "transparent" : HydraColor.mOutline
 
           RowLayout {
             id: forgetRow
@@ -1471,13 +1471,13 @@ Item {
               NIcon {
                 icon: "trash"
                 pointSize: Style.fontSizeL
-                color: Color.mError
+                color: HydraColor.mError
               }
 
               NText {
                 text: I18n.tr("wifi.panel.forget-network")
                 pointSize: Style.fontSizeS
-                color: Color.mError
+                color: HydraColor.mError
                 Layout.fillWidth: true
               }
             }
@@ -1486,7 +1486,7 @@ Item {
               id: forgetButton
               text: I18n.tr("wifi.panel.forget")
               fontSize: Style.fontSizeXXS
-              backgroundColor: Color.mError
+              backgroundColor: HydraColor.mError
               outlined: !forgetButton.hovered
               onClicked: root.confirmForget(modelData.ssid)
             }

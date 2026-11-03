@@ -186,8 +186,8 @@ PanelWindow {
       anchors.fill: parent
       anchors.margins: shadowPadding
       radius: Style.radiusL
-      color: Qt.alpha(Color.mSurface, 0.96)
-      border.color: (flow && (flow.failed || flow.supplementaryIsError)) ? Color.mError : Color.mOutline
+      color: Qt.alpha(HydraColor.mSurface, 0.96)
+      border.color: (flow && (flow.failed || flow.supplementaryIsError)) ? HydraColor.mError : HydraColor.mOutline
       border.width: Style.borderS
 
       Behavior on border.color {
@@ -224,7 +224,7 @@ PanelWindow {
             text: polkitWindow.resolvedMessage || (flow ? flow.message : "Autenticação Administrativa Requerida")
             pointSize: Style.fontSizeL
             font.weight: Style.fontWeightBold
-            color: Color.mOnSurface
+            color: HydraColor.mOnSurface
             wrapMode: Text.Wrap
             Layout.fillWidth: true
           }
@@ -232,7 +232,7 @@ PanelWindow {
           NText {
             text: flow ? flow.actionId : ""
             pointSize: Style.fontSizeXS
-            color: Color.mOnSurfaceVariant
+            color: HydraColor.mOnSurfaceVariant
             wrapMode: Text.Wrap
             Layout.fillWidth: true
             visible: text !== ""
@@ -245,7 +245,7 @@ PanelWindow {
         visible: flow && flow.supplementaryMessage !== ""
         text: flow ? flow.supplementaryMessage : ""
         pointSize: Style.fontSizeS
-        color: (flow && flow.supplementaryIsError) ? Color.mError : Color.mOnSurfaceVariant
+        color: (flow && flow.supplementaryIsError) ? HydraColor.mError : HydraColor.mOnSurfaceVariant
         wrapMode: Text.Wrap
         Layout.fillWidth: true
       }
@@ -279,8 +279,8 @@ PanelWindow {
 
         NButton {
           text: "Cancelar"
-          backgroundColor: Color.mSurfaceVariant
-          textColor: Color.mOnSurfaceVariant
+          backgroundColor: HydraColor.mSurfaceVariant
+          textColor: HydraColor.mOnSurfaceVariant
           outlined: false
           onClicked: {
             if (flow)
@@ -290,8 +290,8 @@ PanelWindow {
 
         NButton {
           text: "Autenticar"
-          backgroundColor: Color.mPrimary
-          textColor: Color.mOnPrimary
+          backgroundColor: HydraColor.mPrimary
+          textColor: HydraColor.mOnPrimary
           enabled: flow && flow.isResponseRequired
           onClicked: {
             if (flow) {
