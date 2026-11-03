@@ -317,49 +317,56 @@ Item {
         anchors.margins: Style.marginXL
         spacing: Style.marginM
 
-        NToggle {
-          label: I18n.tr("panels.connections.bluetooth-auto-connect-label")
-          description: I18n.tr("panels.connections.bluetooth-auto-connect-description")
-          checked: Settings.data.network.bluetoothAutoConnect
-          onToggled: checked => Settings.data.network.bluetoothAutoConnect = checked
-        }
+        NSettingsSection {
+          title: I18n.tr("settings.content.visibility")
+          icon: "bluetooth"
+          NToggle {
+            label: I18n.tr("panels.connections.bluetooth-auto-connect-label")
+            description: I18n.tr("panels.connections.bluetooth-auto-connect-description")
+            checked: Settings.data.network.bluetoothAutoConnect
+            onToggled: checked => Settings.data.network.bluetoothAutoConnect = checked
+          }
 
-        NToggle {
-          label: I18n.tr("panels.connections.hide-unnamed-devices-label")
-          description: I18n.tr("panels.connections.hide-unnamed-devices-description")
-          checked: Settings.data.network.bluetoothHideUnnamedDevices
-          onToggled: checked => Settings.data.network.bluetoothHideUnnamedDevices = checked
-        }
+          NToggle {
+            label: I18n.tr("panels.connections.hide-unnamed-devices-label")
+            description: I18n.tr("panels.connections.hide-unnamed-devices-description")
+            checked: Settings.data.network.bluetoothHideUnnamedDevices
+            onToggled: checked => Settings.data.network.bluetoothHideUnnamedDevices = checked
+          }
 
-        NToggle {
-          label: I18n.tr("panels.connections.disable-discoverability-label")
-          description: I18n.tr("panels.connections.disable-discoverability-description")
-          checked: Settings.data.network.disableDiscoverability
-          onToggled: checked => {
-                       Settings.data.network.disableDiscoverability = checked;
-                       BluetoothService.setDiscoverable(!checked);
-                     }
+          NToggle {
+            label: I18n.tr("panels.connections.disable-discoverability-label")
+            description: I18n.tr("panels.connections.disable-discoverability-description")
+            checked: Settings.data.network.disableDiscoverability
+            onToggled: checked => {
+              Settings.data.network.disableDiscoverability = checked;
+              BluetoothService.setDiscoverable(!checked);
+            }
+          }
         }
-
-        // RSSI Polling
-        NToggle {
-          label: I18n.tr("panels.connections.bluetooth-rssi-polling-label")
-          description: I18n.tr("panels.connections.bluetooth-rssi-polling-description")
-          checked: Settings.data.network.bluetoothRssiPollingEnabled
-          onToggled: checked => Settings.data.network.bluetoothRssiPollingEnabled = checked
-        }
-        NSpinBox {
-          label: I18n.tr("panels.connections.bluetooth-rssi-polling-interval-label")
-          description: I18n.tr("panels.connections.bluetooth-rssi-polling-interval-description")
-          from: 10000
-          to: 120000
-          stepSize: 1000
-          value: Settings.data.network.bluetoothRssiPollIntervalMs
-          defaultValue: Settings.getDefaultValue("network.bluetoothRssiPollIntervalMs")
-          onValueChanged: Settings.data.network.bluetoothRssiPollIntervalMs = value
-          suffix: " ms"
-          Layout.alignment: Qt.AlignVCenter
-          visible: Settings.data.network.bluetoothRssiPollingEnabled
+        NSettingsSection {
+          title: I18n.tr("panels.connections.bluetooth-rssi-polling-label")
+          icon: "antenna-bars-5"
+          // RSSI Polling
+          NToggle {
+            label: I18n.tr("panels.connections.bluetooth-rssi-polling-label")
+            description: I18n.tr("panels.connections.bluetooth-rssi-polling-description")
+            checked: Settings.data.network.bluetoothRssiPollingEnabled
+            onToggled: checked => Settings.data.network.bluetoothRssiPollingEnabled = checked
+          }
+          NSpinBox {
+            label: I18n.tr("panels.connections.bluetooth-rssi-polling-interval-label")
+            description: I18n.tr("panels.connections.bluetooth-rssi-polling-interval-description")
+            from: 10000
+            to: 120000
+            stepSize: 1000
+            value: Settings.data.network.bluetoothRssiPollIntervalMs
+            defaultValue: Settings.getDefaultValue("network.bluetoothRssiPollIntervalMs")
+            onValueChanged: Settings.data.network.bluetoothRssiPollIntervalMs = value
+            suffix: " ms"
+            Layout.alignment: Qt.AlignVCenter
+            visible: Settings.data.network.bluetoothRssiPollingEnabled
+          }
         }
       }
     }

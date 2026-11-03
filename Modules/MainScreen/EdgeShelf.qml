@@ -56,7 +56,8 @@ Item {
   Connections {
     target: CompositorService
     function onOverviewActiveChanged() {
-      if (CompositorService.overviewActive) root.closeShelf();
+      if (CompositorService.overviewActive)
+        root.closeShelf();
     }
   }
 
@@ -67,9 +68,9 @@ Item {
   // --------------------------------------------------------------------------
   readonly property real frameOpacity: Settings.data.bar.useSeparateOpacity ? Style.effectiveBarOpacity : Style.effectivePanelOpacity
 
-  // Translucent primary for Material 3 state layers (avoids saturated HydraColor.mHover)
-  readonly property color hoverColor: Qt.rgba(HydraColor.mPrimary.r, HydraColor.mPrimary.g, HydraColor.mPrimary.b, 0.12)
-  readonly property color hoverColorStrong: Qt.rgba(HydraColor.mPrimary.r, HydraColor.mPrimary.g, HydraColor.mPrimary.b, 0.20)
+  // State-layer strength is shared; association remains a persistent base.
+  readonly property color hoverColor: Qt.alpha(HydraColor.mPrimary, Style.stateHoverOpacity)
+  readonly property color hoverColorStrong: Qt.alpha(HydraColor.mPrimary, Style.statePressedOpacity)
   readonly property color associatedBg: Qt.rgba(HydraColor.mPrimary.r, HydraColor.mPrimary.g, HydraColor.mPrimary.b, 0.22)
 
   // --------------------------------------------------------------------------
@@ -401,7 +402,7 @@ Item {
 
               color: {
                 if (isAssociated) {
-                  return tileMouseArea.containsMouse ? root.hoverColorStrong : root.associatedBg;
+                  return Style.interactionColor(root.associatedBg, HydraColor.mOnPrimaryContainer, tileMouseArea.containsMouse, tileMouseArea.pressed);
                 }
                 if (tileMouseArea.containsMouse) {
                   return root.hoverColor;

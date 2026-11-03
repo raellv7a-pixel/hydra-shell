@@ -151,46 +151,46 @@ RowLayout {
     }
 
     Keys.onUpPressed: event => {
-                        if (combo.popup.visible) {
-                          if (listView.currentIndex > 0) {
-                            listView.currentIndex--;
-                            listView.positionViewAtIndex(listView.currentIndex, ListView.Contain);
-                          }
-                          event.accepted = true;
-                        } else {
-                          event.accepted = false;
-                        }
-                      }
+      if (combo.popup.visible) {
+        if (listView.currentIndex > 0) {
+          listView.currentIndex--;
+          listView.positionViewAtIndex(listView.currentIndex, ListView.Contain);
+        }
+        event.accepted = true;
+      } else {
+        event.accepted = false;
+      }
+    }
 
     Keys.onDownPressed: event => {
-                          if (combo.popup.visible) {
-                            if (listView.currentIndex < root.itemCount() - 1) {
-                              listView.currentIndex++;
-                              listView.positionViewAtIndex(listView.currentIndex, ListView.Contain);
-                            }
-                            event.accepted = true;
-                          } else {
-                            event.accepted = false;
-                          }
-                        }
+      if (combo.popup.visible) {
+        if (listView.currentIndex < root.itemCount() - 1) {
+          listView.currentIndex++;
+          listView.positionViewAtIndex(listView.currentIndex, ListView.Contain);
+        }
+        event.accepted = true;
+      } else {
+        event.accepted = false;
+      }
+    }
 
     Keys.onReturnPressed: event => {
-                            if (combo.popup.visible) {
-                              var item = root.getItem(listView.currentIndex);
-                              if (item && item.key !== undefined) {
-                                root.selected(item.key);
-                                combo.currentIndex = listView.currentIndex;
-                                combo.popup.close();
-                              }
-                              event.accepted = true;
-                            } else {
-                              event.accepted = false;
-                            }
-                          }
+      if (combo.popup.visible) {
+        var item = root.getItem(listView.currentIndex);
+        if (item && item.key !== undefined) {
+          root.selected(item.key);
+          combo.currentIndex = listView.currentIndex;
+          combo.popup.close();
+        }
+        event.accepted = true;
+      } else {
+        event.accepted = false;
+      }
+    }
 
     Keys.onEnterPressed: event => {
-                           combo.Keys.returnPressed(event);
-                         }
+      combo.Keys.returnPressed(event);
+    }
 
     background: Rectangle {
       implicitWidth: Math.round(Style.baseWidgetSize * 3.75 * Style.uiScaleRatio)
@@ -264,32 +264,52 @@ RowLayout {
         highlightMoveDuration: 0
         //showGradientMasks: false
 
-        delegate: Rectangle {
+        delegate: NStateLayer {
           id: delegateRect
           required property int index
           property bool isHighlighted: listView.currentIndex === index
+          readonly property bool isSelected: {
+            const item = root.getItem(index);
+            return !!item && item.key === root.currentKey;
+          }
 
           width: listView.availableWidth
           height: delegateText.implicitHeight + Style.margin2S
           radius: height / 2
-          color: isHighlighted ? HydraColor.mSecondaryContainer : "transparent"
+          baseColor: isSelected ? HydraColor.mSecondaryContainer : "transparent"
+          stateColor: isSelected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
+          hovering: delegateMouse.containsMouse || isHighlighted
+          pressed: delegateMouse.pressed
+          focusVisible: isHighlighted && !delegateMouse.containsMouse
 
           NText {
             id: delegateText
             anchors.fill: parent
             anchors.leftMargin: Style.marginM
-            anchors.rightMargin: Style.marginM
+            anchors.rightMargin: delegateRect.isSelected ? Style.margin2L : Style.marginM
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
             pointSize: Style.fontSizeM
-            color: delegateRect.isHighlighted ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
+            font.weight: delegateRect.isSelected ? Style.fontWeightSemiBold : Style.fontWeightRegular
+            color: delegateRect.isSelected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
             text: {
               var item = root.getItem(delegateRect.index);
               return item && item.name ? item.name : "";
             }
           }
 
+          NIcon {
+            anchors.right: parent.right
+            anchors.rightMargin: Style.marginM
+            anchors.verticalCenter: parent.verticalCenter
+            icon: "check"
+            pointSize: Style.fontSizeS
+            color: HydraColor.mOnSecondaryContainer
+            visible: delegateRect.isSelected
+            Accessible.ignored: true
+          }
           MouseArea {
+            id: delegateMouse
             anchors.fill: parent
             hoverEnabled: true
             onContainsMouseChanged: {

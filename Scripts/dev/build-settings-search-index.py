@@ -32,6 +32,7 @@ WIDGET_TYPES = (
     "NTextInput",
     "NCheckbox",
     "NLabel",
+    "NSettingsSection",
     "NColorChoice",
     "HookRow",
     "UmbrielActionPicker",
@@ -43,6 +44,7 @@ RE_WIDGET_OPEN = re.compile(
     r"^\s*(" + "|".join(WIDGET_TYPES) + r")\s*\{", re.MULTILINE
 )
 RE_LABEL = re.compile(r'label:\s*I18n\.tr\("([^"]+)"')
+RE_SECTION_TITLE = re.compile(r'title:\s*I18n\.tr\("([^"]+)"')
 RE_DESCRIPTION = re.compile(r'description:\s*I18n\.tr\("([^"]+)"')
 RE_VISIBLE = re.compile(r'^\s*visible:\s*(.+?)(?:\s*;)?\s*$')
 
@@ -337,7 +339,8 @@ def extract_widget_blocks(content: str) -> list[tuple[str, str, int]]:
 
             block_text = "\n".join(block_lines)
             results.append((widget_type, block_text, start_line))
-            i = j + 1
+            # Sections are containers: their controls remain individually searchable.
+            i = i + 1 if widget_type == "NSettingsSection" else j + 1
         else:
             i += 1
 
@@ -365,11 +368,14 @@ def extract_entries(
     entries = []
 
     for widget_type, block, start_line in extract_widget_blocks(content):
-        label_match = RE_LABEL.search(block)
+        label_match = (RE_SECTION_TITLE if widget_type == "NSettingsSection" else RE_LABEL).search(block)
         if not label_match:
             continue
 
         label_key = label_match.group(1)
+        # Repeated generic headings are wayfinding, not new settings results.
+        if widget_type == "NSettingsSection" and label_key.startswith("settings.content."):
+            continue
         desc_match = RE_DESCRIPTION.search(block)
         desc_key = desc_match.group(1) if desc_match else None
 

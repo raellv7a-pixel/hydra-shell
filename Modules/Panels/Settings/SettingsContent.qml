@@ -13,7 +13,6 @@ import qs.Modules.Panels.Settings.Tabs.ControlCenter
 import qs.Modules.Panels.Settings.Tabs.Display
 import qs.Modules.Panels.Settings.Tabs.Dock
 import qs.Modules.Panels.Settings.Tabs.Hooks
-import qs.Modules.Panels.Settings.Tabs.Umbriel
 import qs.Modules.Panels.Settings.Tabs.Idle
 import qs.Modules.Panels.Settings.Tabs.Launcher
 import qs.Modules.Panels.Settings.Tabs.LockScreen
@@ -24,6 +23,7 @@ import qs.Modules.Panels.Settings.Tabs.Region
 import qs.Modules.Panels.Settings.Tabs.Security
 import qs.Modules.Panels.Settings.Tabs.SessionMenu
 import qs.Modules.Panels.Settings.Tabs.SystemMonitor
+import qs.Modules.Panels.Settings.Tabs.Umbriel
 import qs.Modules.Panels.Settings.Tabs.UserInterface
 import qs.Modules.Panels.Settings.Tabs.Wallpaper
 import qs.Services.Compositor
@@ -173,7 +173,6 @@ Item {
       highlightScrollTimer.targetKey = highlightLabelKey;
       highlightScrollTimer.restart();
     }
-
   }
 
   // Navigate to a tab and optionally a subtab (simpler than navigateToResult, no highlighting)
@@ -350,8 +349,10 @@ Item {
     if (!isEffectivelyVisible(item))
       return null;
 
-    // Check if this item has a matching label.
-    if (item.hasOwnProperty("label") && item.label === I18n.tr(labelKey) && item.width > 0 && item.height > 0) {
+    // Section titles can retain a search destination when a label becomes a heading.
+    const matchingLabel = item.hasOwnProperty("label") && item.label === I18n.tr(labelKey);
+    const matchingSection = item.toString().startsWith("NSettingsSection") && item.title === I18n.tr(labelKey);
+    if ((matchingLabel || matchingSection) && item.width > 0 && item.height > 0) {
       return item;
     }
 
@@ -398,7 +399,8 @@ Item {
 
       // Wait until group layout and the programmatic scroll have settled.
       Qt.callLater(function () {
-        if (root.highlightLabelKey !== key) return;
+        if (root.highlightLabelKey !== key)
+          return;
         const overlayPos = widget.mapToItem(tabContentArea, 0, 0);
         highlightOverlay.x = overlayPos.x - Style.marginM;
         highlightOverlay.y = overlayPos.y - Style.marginM;
@@ -439,7 +441,10 @@ Item {
   // Tab components
   Component {
     id: generalTab
-    GeneralTab {}
+    GeneralTab {
+      onWallpaperRequested: root.navigateToTab(SettingsPanel.Tab.Wallpaper, 0)
+      onColorsRequested: root.navigateToTab(SettingsPanel.Tab.ColorScheme, 0)
+    }
   }
   Component {
     id: launcherTab
@@ -735,9 +740,9 @@ Item {
     const isNvidia = SystemStatService.gpuType === "nvidia";
     if (sidebarExpanded && !isNvidia) {
       Qt.callLater(() => {
-                     if (searchInput.inputItem)
-                     searchInput.inputItem.forceActiveFocus();
-                   });
+        if (searchInput.inputItem)
+          searchInput.inputItem.forceActiveFocus();
+      });
     } else {
       // Ensure root has focus so it can catch typing
       Qt.callLater(() => root.forceActiveFocus());
@@ -747,28 +752,28 @@ Item {
   // Handle typing when sidebar is collapsed
   focus: true
   Keys.onPressed: event => {
-                    if (!sidebarExpanded && event.text.length > 0 && event.text.trim() !== "") {
-                      // Only capture if it looks like visible text
-                      if (event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
-                      return;
+    if (!sidebarExpanded && event.text.length > 0 && event.text.trim() !== "") {
+      // Only capture if it looks like visible text
+      if (event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
+        return;
 
-                      // Explicitly ignore backspace and similar keys that might have text but shouldn't trigger search
-                      if (event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete || event.key === Qt.Key_Escape)
-                      return;
+      // Explicitly ignore backspace and similar keys that might have text but shouldn't trigger search
+      if (event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete || event.key === Qt.Key_Escape)
+        return;
 
-                      wasCollapsedBeforeSearch = true;
-                      sidebarExpanded = true;
-                      searchInput.text = event.text;
-                      Qt.callLater(() => {
-                                     if (searchInput.inputItem) {
-                                       searchInput.inputItem.forceActiveFocus();
-                                       // Cursor moves to end automatically usually, but let's be safe
-                                       searchInput.inputItem.cursorPosition = 1;
-                                     }
-                                   });
-                      event.accepted = true;
-                    }
-                  }
+      wasCollapsedBeforeSearch = true;
+      sidebarExpanded = true;
+      searchInput.text = event.text;
+      Qt.callLater(() => {
+        if (searchInput.inputItem) {
+          searchInput.inputItem.forceActiveFocus();
+          // Cursor moves to end automatically usually, but let's be safe
+          searchInput.inputItem.cursorPosition = 1;
+        }
+      });
+      event.accepted = true;
+    }
+  }
 
   // Scroll functions
   function scrollDown() {
@@ -831,7 +836,7 @@ Item {
       Item {
         id: sidebar
 
-        Layout.preferredWidth: Math.round(root.sidebarExpanded ? 212 * Style.uiScaleRatio : sidebarToggle.width + Style.margin2M)
+        Layout.preferredWidth: Math.round(root.sidebarExpanded ? 244 * Style.uiScaleRatio : sidebarToggle.width + Style.margin2M)
         Layout.fillHeight: true
         Layout.alignment: Qt.AlignTop
 
@@ -873,26 +878,17 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Math.round(toggleRow.implicitHeight + Style.margin2S)
 
-            Rectangle {
+            NStateLayer {
               id: sidebarToggle
               width: Math.round(toggleRow.implicitWidth + Style.margin2S)
               height: parent.height
               anchors.left: parent.left
               radius: height / 2
-              color: toggleMouseArea.containsMouse || activeFocus ? HydraColor.mSurfaceContainerHigh : "transparent"
-              border.color: activeFocus ? HydraColor.mPrimary : "transparent"
-              border.width: activeFocus ? Style.borderM : 0
-              activeFocusOnTab: true
+              hovering: toggleMouseArea.containsMouse
+              pressed: toggleMouseArea.pressed
+              focusPolicy: Qt.StrongFocus
               Accessible.role: Accessible.Button
               Accessible.name: root.sidebarExpanded ? I18n.tr("tooltips.collapse") : I18n.tr("tooltips.expand")
-
-              Behavior on color {
-                enabled: !HydraColor.isTransitioning
-                ColorAnimation {
-                  duration: Style.animationFast
-                  easing.type: Easing.InOutQuad
-                }
-              }
 
               RowLayout {
                 id: toggleRow
@@ -903,7 +899,7 @@ Item {
 
                 NIcon {
                   icon: root.sidebarExpanded ? "layout-sidebar-right-expand" : "layout-sidebar-left-expand"
-                  color: toggleMouseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
+                  color: HydraColor.mOnSurface
                   pointSize: Style.fontSizeXL
                 }
               }
@@ -928,6 +924,18 @@ Item {
 
               Keys.onReturnPressed: root.sidebarExpanded = !root.sidebarExpanded
               Keys.onSpacePressed: root.sidebarExpanded = !root.sidebarExpanded
+            }
+
+            NText {
+              anchors.left: sidebarToggle.right
+              anchors.leftMargin: Style.marginM
+              anchors.right: parent.right
+              anchors.verticalCenter: parent.verticalCenter
+              visible: root.sidebarExpanded
+              text: "Hydra"
+              pointSize: Style.fontSizeL
+              font.weight: Style.fontWeightSemiBold
+              elide: Text.ElideRight
             }
           }
 
@@ -979,26 +987,17 @@ Item {
                 }
               }
 
-              Rectangle {
+              NStateLayer {
                 id: searchCollapsedButton
                 width: Math.round(searchCollapsedRow.implicitWidth + Style.margin2S)
                 height: parent.height
                 anchors.left: parent.left
                 radius: height / 2
-                color: searchCollapsedMouseArea.containsMouse || activeFocus ? HydraColor.mSurfaceContainerHigh : "transparent"
-                border.color: activeFocus ? HydraColor.mPrimary : "transparent"
-                border.width: activeFocus ? Style.borderM : 0
-                activeFocusOnTab: true
+                hovering: searchCollapsedMouseArea.containsMouse
+                pressed: searchCollapsedMouseArea.pressed
+                focusPolicy: Qt.StrongFocus
                 Accessible.role: Accessible.Button
                 Accessible.name: I18n.tr("common.search")
-
-                Behavior on color {
-                  enabled: !HydraColor.isTransitioning
-                  ColorAnimation {
-                    duration: Style.animationFast
-                    easing.type: Easing.InOutQuad
-                  }
-                }
 
                 RowLayout {
                   id: searchCollapsedRow
@@ -1009,7 +1008,7 @@ Item {
 
                   NIcon {
                     icon: "search"
-                    color: searchCollapsedMouseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
+                    color: HydraColor.mOnSurface
                     pointSize: Style.fontSizeXL
                   }
                 }
@@ -1045,10 +1044,48 @@ Item {
             }
           }
 
+          RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: Style.marginS
+            Layout.bottomMargin: Style.marginS
+            spacing: Style.marginM
+            visible: root.sidebarExpanded
+
+            NImageRounded {
+              Layout.preferredWidth: Style.baseWidgetSize * Style.uiScaleRatio
+              Layout.preferredHeight: Layout.preferredWidth
+              radius: width / 2
+              imagePath: Settings.preprocessPath(Settings.data.general.avatarImage)
+              fallbackIcon: "person"
+              fallbackIconSize: Style.fontSizeL
+              Accessible.ignored: true
+            }
+
+            ColumnLayout {
+              Layout.fillWidth: true
+              spacing: Style.marginXXS
+
+              NText {
+                Layout.fillWidth: true
+                text: HostService.displayName
+                pointSize: Style.fontSizeM
+                font.weight: Style.fontWeightSemiBold
+                elide: Text.ElideRight
+              }
+
+              NText {
+                Layout.fillWidth: true
+                text: I18n.tr("common.settings")
+                pointSize: Style.fontSizeXS
+                color: HydraColor.mOnSurfaceVariant
+                elide: Text.ElideRight
+              }
+            }
+          }
+
           Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.bottomMargin: Style.marginXL
 
             // Search results list
             NListView {
@@ -1080,22 +1117,17 @@ Item {
                 }
               }
 
-              delegate: Rectangle {
+              delegate: NStateLayer {
                 id: resultItem
                 width: searchResultsList.width - (searchResultsList.verticalScrollBarActive ? Style.marginM : 0)
                 height: resultColumn.implicitHeight + Style.margin2M
                 radius: Style.iRadiusL
                 readonly property bool selected: index === root.searchSelectedIndex
                 readonly property bool effectiveHover: !root.ignoreMouseHover && resultMouseArea.containsMouse
-                color: selected ? HydraColor.mSecondaryContainer : (effectiveHover ? HydraColor.mSurfaceContainerHigh : "transparent")
-
-                Behavior on color {
-                  enabled: !HydraColor.isTransitioning
-                  ColorAnimation {
-                    duration: Style.animationFast
-                    easing.type: Easing.InOutQuad
-                  }
-                }
+                baseColor: selected ? HydraColor.mSecondaryContainer : "transparent"
+                stateColor: selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
+                hovering: effectiveHover
+                pressed: resultMouseArea.pressed
 
                 ColumnLayout {
                   id: resultColumn
@@ -1182,42 +1214,32 @@ Item {
                   text: I18n.tr(section)
                   pointSize: Style.fontSizeXS
                   font.weight: Style.fontWeightMedium
-                  font.capitalization: Font.AllUppercase
                   color: HydraColor.mOnSurfaceVariant
                   wrapMode: Text.WordWrap
                   Accessible.role: Accessible.Heading
                 }
               }
 
-              delegate: Rectangle {
+              delegate: NStateLayer {
                 id: tabItem
                 width: sidebarList.width
                 height: Math.max(Math.round(32 * Style.uiScaleRatio), tabEntryRow.implicitHeight + Style.margin2XS)
                 radius: height / 2
-                color: selected ? HydraColor.mSecondaryContainer : (tabItem.hovering ? HydraColor.mSurfaceContainerHigh : "transparent")
-                border.color: activeFocus ? HydraColor.mPrimary : "transparent"
-                border.width: activeFocus ? Style.borderM : 0
-                activeFocusOnTab: true
+                baseColor: selected ? HydraColor.mSecondaryContainer : "transparent"
+                stateColor: tabTextColor
+                pressed: tabMouseArea.pressed
+                focusPolicy: Qt.StrongFocus
                 Accessible.role: Accessible.PageTab
                 Accessible.name: I18n.tr(modelData.label)
                 Accessible.selected: selected
                 readonly property bool selected: index === root.currentTabIndex
-                property bool hovering: false
                 property color tabTextColor: selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
-
-                Behavior on color {
-                  enabled: !HydraColor.isTransitioning
-                  ColorAnimation {
-                    duration: Style.animationFast
-                    easing.type: Easing.InOutQuad
-                  }
-                }
 
                 Behavior on tabTextColor {
                   enabled: !HydraColor.isTransitioning
                   ColorAnimation {
-                    duration: Style.animationFast
-                    easing.type: Easing.InOutQuad
+                    duration: tabItem.hovering ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+                    easing.type: Easing.OutCubic
                   }
                 }
 
@@ -1228,10 +1250,9 @@ Item {
                   anchors.rightMargin: Style.marginS
                   spacing: Style.marginM
 
-                  NIcon {
+                  NColorIcon {
                     icon: modelData.icon
-                    color: tabTextColor
-                    pointSize: Style.fontSizeXL
+                    size: Style.baseWidgetSize * Style.uiScaleRatio - Style.marginM
                     Layout.alignment: Qt.AlignVCenter
                   }
 
@@ -1239,9 +1260,10 @@ Item {
                     text: I18n.tr(modelData.label)
                     color: tabTextColor
                     pointSize: Style.fontSizeM
-                    font.weight: Style.fontWeightSemiBold
+                    font.weight: tabItem.selected ? Style.fontWeightSemiBold : Style.fontWeightMedium
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
+                    elide: Text.ElideRight
                     visible: root.sidebarExpanded
                     opacity: root.sidebarExpanded ? 1.0 : 0.0
 
@@ -1255,6 +1277,7 @@ Item {
                 }
 
                 MouseArea {
+                  id: tabMouseArea
                   anchors.fill: parent
                   hoverEnabled: true
                   acceptedButtons: Qt.LeftButton
@@ -1280,7 +1303,7 @@ Item {
                     }
                   }
                   onClicked: {
-                    tabItem.forceActiveFocus();
+                    tabItem.forceActiveFocus(Qt.MouseFocusReason);
                     root.currentTabIndex = index;
                     // Hide tooltip on click
                     if (!root.sidebarExpanded) {
@@ -1302,7 +1325,12 @@ Item {
               Connections {
                 target: root
                 function onCurrentTabIndexChanged() {
-                  Qt.callLater(() => sidebarList.positionViewAtIndex(root.currentTabIndex, ListView.Contain));
+                  Qt.callLater(() => {
+                    if (root.currentTabIndex === 0)
+                      sidebarList.positionViewAtBeginning();
+                    else
+                      sidebarList.positionViewAtIndex(root.currentTabIndex, ListView.Contain);
+                  });
                 }
               }
             }
@@ -1339,10 +1367,10 @@ Item {
             Layout.preferredHeight: Math.round(42 * Style.uiScaleRatio)
             spacing: Style.marginS
 
-            NIcon {
-              icon: root.tabsModel[currentTabIndex]?.icon ?? ""
-              color: HydraColor.mPrimary
-              pointSize: Style.fontSizeXXXL
+            NColorIcon {
+              icon: root.tabsModel[root.currentTabIndex]?.icon ?? ""
+              size: Style.baseWidgetSize * Style.uiScaleRatio
+              Layout.alignment: Qt.AlignVCenter
             }
 
             NText {
@@ -1389,7 +1417,7 @@ Item {
                   id: fadeInAnim
                   from: 0
                   to: 1
-                  duration: Style.animationNormal
+                  duration: Style.animationFast
                   easing.type: Easing.OutCubic
                   running: false
                 }
@@ -1413,7 +1441,8 @@ Item {
                   topPadding: Style.marginL
                   bottomPadding: Style.marginL
                   userRightPadding: Style.marginL
-                  reserveScrollbarSpace: false
+                  reserveScrollbarSpace: true
+                  gradientColor: HydraColor.mSurfaceContainer
 
                   Component.onCompleted: {
                     root.activeScrollView = scrollView;

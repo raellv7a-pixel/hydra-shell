@@ -43,8 +43,7 @@ FloatingWindow {
       isInitialized = true;
       // Legacy tab bars reset to their first subtab. Grouped pages own their
       // expansion state and must not jump past their navigation chips on open.
-      if (subTabId < 0 && settingsContent.activeTabContent
-          && !settingsContent.activeTabContent.navigateToSettingsGroup)
+      if (subTabId < 0 && settingsContent.activeTabContent && !settingsContent.activeTabContent.navigateToSettingsGroup)
         settingsContent.setSubTabIndex(0);
     }
   }
@@ -128,6 +127,7 @@ FloatingWindow {
     SettingsContent {
       id: settingsContent
       anchors.fill: parent
+      screen: root.screen
       onCloseRequested: SettingsPanelService.closeWindow()
     }
   }

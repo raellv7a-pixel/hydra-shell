@@ -245,31 +245,30 @@ ColumnLayout {
   // Chip grid - uniform columns
   GridLayout {
     Layout.fillWidth: true
-    columns: 4
+    columns: Math.max(1, Math.min(4, Math.floor(width / (170 * Style.uiScaleRatio))))
     columnSpacing: Style.marginS
     rowSpacing: Style.marginS
 
     Repeater {
       model: filteredTemplates
 
-      Rectangle {
+      NStateLayer {
         id: chip
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(Style.baseWidgetSize * 0.9)
         radius: Style.iRadiusM
-        color: chipMouse.containsMouse ? HydraColor.mHover : (isActive ? HydraColor.mPrimary : HydraColor.mSurface)
-        border.color: isActive ? HydraColor.mPrimary : HydraColor.mOutline
-        border.width: Style.borderS
+        baseColor: isActive ? HydraColor.mPrimary : HydraColor.mSurface
+        stateColor: isActive ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+        focusColor: stateColor
+        hovering: chipMouse.containsMouse
+        pressed: chipMouse.pressed
+        focusPolicy: Qt.StrongFocus
+        Keys.onReturnPressed: root.toggleTemplate(chip.modelData.id)
+        Keys.onSpacePressed: root.toggleTemplate(chip.modelData.id)
 
         required property int index
         required property var modelData
         readonly property bool isActive: root.isTemplateActive(modelData.id)
-
-        Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
-        }
 
         NText {
           id: chipText
@@ -277,7 +276,7 @@ ColumnLayout {
           width: parent.width - Style.margin2L
           text: chip.modelData.name
           pointSize: Style.fontSizeS
-          color: chipMouse.containsMouse ? HydraColor.mOnHover : (isActive ? HydraColor.mOnPrimary : HydraColor.mOnSurface)
+          color: isActive ? HydraColor.mOnPrimary : HydraColor.mOnSurface
           horizontalAlignment: Text.AlignHCenter
           elide: Text.ElideRight
 
@@ -326,14 +325,14 @@ ColumnLayout {
     label: I18n.tr("panels.color-scheme.templates-cursor-size-label")
     description: I18n.tr("panels.color-scheme.templates-cursor-size-description")
     model: [16, 20, 22, 24, 28, 32, 40, 48, 56, 64].map(s => ({
-                                                                "key": String(s),
-                                                                "name": s + "px"
-                                                              }))
+      "key": String(s),
+      "name": s + "px"
+    }))
     currentKey: String(Settings.data.templates.cursorSize)
     onSelected: key => {
-                  Settings.data.templates.cursorSize = parseInt(key, 10);
-                  Quickshell.execDetached(["python3", TemplateRegistry.cursorGenerateScript, root.primaryHex(), key]);
-                }
+      Settings.data.templates.cursorSize = parseInt(key, 10);
+      Quickshell.execDetached(["python3", TemplateRegistry.cursorGenerateScript, root.primaryHex(), key]);
+    }
   }
 
   NDivider {
@@ -347,11 +346,11 @@ ColumnLayout {
     description: I18n.tr("panels.color-scheme.templates-misc-user-templates-description")
     checked: Settings.data.templates.enableUserTheming
     onToggled: checked => {
-                 Settings.data.templates.enableUserTheming = checked;
-                 if (checked) {
-                   TemplateRegistry.writeUserTemplatesToml();
-                 }
-                 AppThemeService.generate();
-               }
+      Settings.data.templates.enableUserTheming = checked;
+      if (checked) {
+        TemplateRegistry.writeUserTemplatesToml();
+      }
+      AppThemeService.generate();
+    }
   }
 }

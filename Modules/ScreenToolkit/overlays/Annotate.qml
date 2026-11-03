@@ -350,14 +350,14 @@ Variants {
     Process {
       id: pixelateProc
       onExited: code => {
-                  if (!root.isVisible)
-                  return;
-                  if (code === 0) {
-                    overlayWin._pixelCacheBust++;
-                    overlayWin.pixelImgReady = false;
-                    overlayWin.pixelImgReady = true;
-                  }
-                }
+        if (!root.isVisible)
+          return;
+        if (code === 0) {
+          overlayWin._pixelCacheBust++;
+          overlayWin.pixelImgReady = false;
+          overlayWin.pixelImgReady = true;
+        }
+      }
     }
     property string _lastPreparedPath: ""
     function preparePixelImage() {
@@ -384,50 +384,50 @@ Variants {
     Process {
       id: zoomProc
       onExited: code => {
-                  if (code === 0) {
-                    root.parseAndShowZoomed(root.lastRegion, "/tmp/screen-toolkit-annotate-zoom.png", overlayWin._pendingZoomScale);
-                  }
-                }
+        if (code === 0) {
+          root.parseAndShowZoomed(root.lastRegion, "/tmp/screen-toolkit-annotate-zoom.png", overlayWin._pendingZoomScale);
+        }
+      }
     }
     Process {
       id: copyProc
       onExited: code => {
-                  overlayWin.isSaving = false;
-                  if (code === 0) {
-                    ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.copied"), "", "copy");
-                    root.hide();
-                  } else {
-                    ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.copyFailed"));
-                  }
-                }
+        overlayWin.isSaving = false;
+        if (code === 0) {
+          ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.copied"), "", "copy");
+          root.hide();
+        } else {
+          ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.copyFailed"));
+        }
+      }
     }
     Process {
       id: clipFlattenProc
       onExited: code => {
-                  overlayWin.isSaving = false;
-                  if (code === 0) {
-                    ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.copied"), "", "copy");
-                    root.hide();
-                  } else {
-                    ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.copyFailed"));
-                  }
-                }
+        overlayWin.isSaving = false;
+        if (code === 0) {
+          ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.copied"), "", "copy");
+          root.hide();
+        } else {
+          ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.copyFailed"));
+        }
+      }
     }
     Process {
       id: saveFileProc
       stdout: StdioCollector {}
       onExited: code => {
-                  overlayWin.isSaving = false;
-                  if (code === 0) {
-                    var dest = saveFileProc.stdout.text.trim();
-                    ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.savedTo", {
-                                                                               dest: dest
-                                                                             }), dest, "device-floppy");
-                    root.hide();
-                  } else {
-                    ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.saveFileFailed"));
-                  }
-                }
+        overlayWin.isSaving = false;
+        if (code === 0) {
+          var dest = saveFileProc.stdout.text.trim();
+          ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.savedTo", {
+                                                                     dest: dest
+                                                                   }), dest, "device-floppy");
+          root.hide();
+        } else {
+          ToastService.showError(root.mainInstance?.pluginApi?.tr("annotate.saveFileFailed"));
+        }
+      }
     }
     Process {
       id: cleanupProc
@@ -453,59 +453,59 @@ Variants {
     Process {
       id: flattenForShareProc
       onExited: code => {
-                  if (code !== 0) {
-                    overlayWin.isUploading = false;
-                    overlayWin.uploadFailed = true;
-                    return;
-                  }
-                  overlayWin._doUpload("/tmp/screen-toolkit-share.png");
-                }
+        if (code !== 0) {
+          overlayWin.isUploading = false;
+          overlayWin.uploadFailed = true;
+          return;
+        }
+        overlayWin._doUpload("/tmp/screen-toolkit-share.png");
+      }
     }
     Process {
       id: uploadProc
       stdout: StdioCollector {}
       onExited: code => {
-                  overlayWin.isUploading = false;
-                  var skipPop = root.mainInstance?.pluginApi?.pluginSettings?.shareSkipPopover ?? false;
-                  if (code === 0) {
-                    var url = uploadProc.stdout.text.trim();
-                    if (url.startsWith("http")) {
-                      overlayWin.shareUrl = url;
-                      overlayWin.uploadFailed = false;
-                      if (skipPop) {
-                        overlayWin.showSharePopover = false;
-                        wlCopyUrlProc.exec({
-                                             command: ["bash", "-c", "printf '%s' " + U.shellEscape(url) + " | wl-copy"]
-                                           });
-                        ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.shareUrl"), url, "link");
-                      }
-                      return;
-                    }
-                    // code 0 but no valid URL — treat as code 5
-                    code = 5;
-                  }
-                  // failure path
-                  overlayWin.uploadFailed = true;
-                  overlayWin.shareUrl = "";
-                  const keyMap = {
-                    1: "share-bad-args",
-                    2: "share-file-not-found",
-                    3: "share-missing-dep",
-                    4: "share-request-failed",
-                    5: "share-invalid-response",
-                    6: "share-file-too-large"
-                  };
-                  var msgKey = "messages." + (keyMap[code] ?? "share-unknown-error");
-                  var msg = root.mainInstance?.pluginApi?.tr(msgKey);
-                  if (skipPop) {
-                    overlayWin.showSharePopover = false;
-                    ToastService.showError(msg);
-                  } else {
-                    // popover is open — it already shows uploadFailed state,
-                    // but also fire a toast so the user knows why
-                    ToastService.showError(msg);
-                  }
-                }
+        overlayWin.isUploading = false;
+        var skipPop = root.mainInstance?.pluginApi?.pluginSettings?.shareSkipPopover ?? false;
+        if (code === 0) {
+          var url = uploadProc.stdout.text.trim();
+          if (url.startsWith("http")) {
+            overlayWin.shareUrl = url;
+            overlayWin.uploadFailed = false;
+            if (skipPop) {
+              overlayWin.showSharePopover = false;
+              wlCopyUrlProc.exec({
+                                   command: ["bash", "-c", "printf '%s' " + U.shellEscape(url) + " | wl-copy"]
+                                 });
+              ToastService.showNotice(root.mainInstance?.pluginApi?.tr("annotate.shareUrl"), url, "link");
+            }
+            return;
+          }
+          // code 0 but no valid URL — treat as code 5
+          code = 5;
+        }
+        // failure path
+        overlayWin.uploadFailed = true;
+        overlayWin.shareUrl = "";
+        const keyMap = {
+          1: "share-bad-args",
+          2: "share-file-not-found",
+          3: "share-missing-dep",
+          4: "share-request-failed",
+          5: "share-invalid-response",
+          6: "share-file-too-large"
+        };
+        var msgKey = "messages." + (keyMap[code] ?? "share-unknown-error");
+        var msg = root.mainInstance?.pluginApi?.tr(msgKey);
+        if (skipPop) {
+          overlayWin.showSharePopover = false;
+          ToastService.showError(msg);
+        } else {
+          // popover is open — it already shows uploadFailed state,
+          // but also fire a toast so the user knows why
+          ToastService.showError(msg);
+        }
+      }
     }
     Process {
       id: wlCopyUrlProc
@@ -555,20 +555,20 @@ Variants {
       MouseArea {
         anchors.fill: parent
         onClicked: mouse => {
-                     var ix = overlayWin.localX;
-                     var iy = overlayWin.localY;
-                     var iw = root.regionW;
-                     var ih = root.regionH;
-                     var inRegion = mouse.x >= ix && mouse.x <= ix + iw && mouse.y >= iy && mouse.y <= iy + ih;
-                     var inToolbar = mouse.x >= toolbar.x && mouse.x <= toolbar.x + toolbar.width && mouse.y >= toolbar.y && mouse.y <= toolbar.y + toolbar.height;
-                     var inPopover = (overlayWin.showPopover && mouse.x >= popover.x && mouse.x <= popover.x + popover.width && mouse.y >= popover.y && mouse.y <= popover.y + popover.height) || (overlayWin.showSharePopover && mouse.x >= sharePopover.x && mouse.x <= sharePopover.x + sharePopover.width && mouse.y >= sharePopover.y && mouse.y <= sharePopover.y
-                                                                                                                                                                                                   + sharePopover.height);
-                     if (!inRegion && !inToolbar && !inPopover) {
-                       overlayWin.strokes = [];
-                       _invalidateCache();
-                       root.hide();
-                     }
-                   }
+          var ix = overlayWin.localX;
+          var iy = overlayWin.localY;
+          var iw = root.regionW;
+          var ih = root.regionH;
+          var inRegion = mouse.x >= ix && mouse.x <= ix + iw && mouse.y >= iy && mouse.y <= iy + ih;
+          var inToolbar = mouse.x >= toolbar.x && mouse.x <= toolbar.x + toolbar.width && mouse.y >= toolbar.y && mouse.y <= toolbar.y + toolbar.height;
+          var inPopover = (overlayWin.showPopover && mouse.x >= popover.x && mouse.x <= popover.x + popover.width && mouse.y >= popover.y && mouse.y <= popover.y + popover.height) || (overlayWin.showSharePopover && mouse.x >= sharePopover.x && mouse.x <= sharePopover.x + sharePopover.width && mouse.y >= sharePopover.y && mouse.y <= sharePopover.y
+                                                                                                                                                                                        + sharePopover.height);
+          if (!inRegion && !inToolbar && !inPopover) {
+            overlayWin.strokes = [];
+            _invalidateCache();
+            root.hide();
+          }
+        }
       }
     }
     Rectangle {
@@ -618,16 +618,17 @@ Variants {
           elide: Text.ElideMiddle
           anchors.verticalCenter: parent.verticalCenter
         }
-        Rectangle {
+        NStateLayer {
           width: 28
           height: 28
           radius: Style.radiusS
-          color: _copyUrlMA.containsMouse ? HydraColor.mHover : "transparent"
+          hovering: _copyUrlMA.containsMouse
+          pressed: _copyUrlMA.pressed
           anchors.verticalCenter: parent.verticalCenter
           NIcon {
             anchors.centerIn: parent
             icon: "copy"
-            color: _copyUrlMA.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
+            color: HydraColor.mOnSurface
           }
           MouseArea {
             id: _copyUrlMA
@@ -836,181 +837,181 @@ Variants {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: overlayWin.tool === "text" ? Qt.IBeamCursor : Qt.CrossCursor
         onPressed: mouse => {
-                     if (mouse.button === Qt.RightButton) {
-                       overlayWin.drawing = false;
-                       overlayWin.currentStroke = null;
-                       drawCanvas.eraseAt(mouse.x, mouse.y);
-                       return;
-                     }
-                     overlayWin.showPopover = false;
-                     overlayWin.showSharePopover = false;
-                     if (overlayWin.tool === "step") {
-                       var stepStroke = {
-                         type: "step",
-                         color: overlayWin.drawColor.toString(),
-                         size: overlayWin.drawSize,
-                         x1: mouse.x,
-                         y1: mouse.y,
-                         step: overlayWin.stepCounter
-                       };
-                       overlayWin.stepCounter++;
-                       var ss = overlayWin.strokes.slice();
-                       ss.push(stepStroke);
-                       overlayWin.strokes = ss;
-                       overlayWin._redoStack = [];
-                       var sctx = cacheCanvas.getContext("2d");
-                       overlayWin._drawStrokeToCtx(sctx, stepStroke);
-                       overlayWin._cacheValid = true;
-                       drawCanvas.requestPaint();
-                       return;
-                     }
-                     if (overlayWin.tool === "text") {
-                       overlayWin.textX = mouse.x;
-                       overlayWin.textY = mouse.y;
-                       overlayWin.textMode = true;
-                       textInput.text = "";
-                       textInput.forceActiveFocus();
-                       return;
-                     }
-                     overlayWin.drawing = true;
-                     var col = overlayWin.drawColor.toString();
-                     if (overlayWin.tool === "pencil" || overlayWin.tool === "highlighter") {
-                       overlayWin._lastMouseX = mouse.x;
-                       overlayWin._lastMouseY = mouse.y;
-                       overlayWin._speedSmooth = overlayWin.drawSize;
-                       overlayWin.currentStroke = {
-                         type: overlayWin.tool,
-                         color: col,
-                         size: overlayWin.drawSize,
-                         points: [
-                           {
-                             x: mouse.x,
-                             y: mouse.y,
-                             w: overlayWin.drawSize
-                           }
-                         ]
-                       };
-                     } else if (overlayWin.tool === "blur") {
-                       overlayWin.currentStroke = {
-                         type: "blur",
-                         color: col,
-                         size: overlayWin.drawSize,
-                         x1: mouse.x,
-                         y1: mouse.y,
-                         x2: mouse.x,
-                         y2: mouse.y,
-                         preview: true
-                       };
-                     } else {
-                       overlayWin.currentStroke = {
-                         type: overlayWin.tool,
-                         color: col,
-                         size: overlayWin.drawSize,
-                         x1: mouse.x,
-                         y1: mouse.y,
-                         x2: mouse.x,
-                         y2: mouse.y
-                       };
-                     }
-                   }
+          if (mouse.button === Qt.RightButton) {
+            overlayWin.drawing = false;
+            overlayWin.currentStroke = null;
+            drawCanvas.eraseAt(mouse.x, mouse.y);
+            return;
+          }
+          overlayWin.showPopover = false;
+          overlayWin.showSharePopover = false;
+          if (overlayWin.tool === "step") {
+            var stepStroke = {
+              type: "step",
+              color: overlayWin.drawColor.toString(),
+              size: overlayWin.drawSize,
+              x1: mouse.x,
+              y1: mouse.y,
+              step: overlayWin.stepCounter
+            };
+            overlayWin.stepCounter++;
+            var ss = overlayWin.strokes.slice();
+            ss.push(stepStroke);
+            overlayWin.strokes = ss;
+            overlayWin._redoStack = [];
+            var sctx = cacheCanvas.getContext("2d");
+            overlayWin._drawStrokeToCtx(sctx, stepStroke);
+            overlayWin._cacheValid = true;
+            drawCanvas.requestPaint();
+            return;
+          }
+          if (overlayWin.tool === "text") {
+            overlayWin.textX = mouse.x;
+            overlayWin.textY = mouse.y;
+            overlayWin.textMode = true;
+            textInput.text = "";
+            textInput.forceActiveFocus();
+            return;
+          }
+          overlayWin.drawing = true;
+          var col = overlayWin.drawColor.toString();
+          if (overlayWin.tool === "pencil" || overlayWin.tool === "highlighter") {
+            overlayWin._lastMouseX = mouse.x;
+            overlayWin._lastMouseY = mouse.y;
+            overlayWin._speedSmooth = overlayWin.drawSize;
+            overlayWin.currentStroke = {
+              type: overlayWin.tool,
+              color: col,
+              size: overlayWin.drawSize,
+              points: [
+                {
+                  x: mouse.x,
+                  y: mouse.y,
+                  w: overlayWin.drawSize
+                }
+              ]
+            };
+          } else if (overlayWin.tool === "blur") {
+            overlayWin.currentStroke = {
+              type: "blur",
+              color: col,
+              size: overlayWin.drawSize,
+              x1: mouse.x,
+              y1: mouse.y,
+              x2: mouse.x,
+              y2: mouse.y,
+              preview: true
+            };
+          } else {
+            overlayWin.currentStroke = {
+              type: overlayWin.tool,
+              color: col,
+              size: overlayWin.drawSize,
+              x1: mouse.x,
+              y1: mouse.y,
+              x2: mouse.x,
+              y2: mouse.y
+            };
+          }
+        }
         onPositionChanged: mouse => {
-                             if (mouse.buttons & Qt.RightButton) {
-                               overlayWin.drawing = false;
-                               overlayWin.currentStroke = null;
-                               drawCanvas.eraseAt(mouse.x, mouse.y);
-                               return;
-                             }
-                             if (!overlayWin.drawing || !overlayWin.currentStroke)
-                             return;
-                             if (overlayWin.tool === "pencil" || overlayWin.tool === "highlighter") {
-                               var s = overlayWin.currentStroke;
-                               var pts = s.points.slice();
-                               var newW = s.size;
-                               if (s.type === "pencil") {
-                                 var ddx = mouse.x - overlayWin._lastMouseX;
-                                 var ddy = mouse.y - overlayWin._lastMouseY;
-                                 var speed = Math.sqrt(ddx * ddx + ddy * ddy);
-                                 overlayWin._speedSmooth = overlayWin._speedSmooth * 0.7 + speed * 0.3;
-                                 var minW = Math.max(1, s.size * 0.35);
-                                 var maxW = s.size * 1.6;
-                                 var t = Math.min(overlayWin._speedSmooth, 20) / 20;
-                                 newW = maxW - t * (maxW - minW);
-                               }
-                               overlayWin._lastMouseX = mouse.x;
-                               overlayWin._lastMouseY = mouse.y;
-                               pts.push({
-                                          x: mouse.x,
-                                          y: mouse.y,
-                                          w: newW
-                                        });
-                               if (pts.length > 2000) {
-                                 var committed = overlayWin.strokes.slice();
-                                 committed.push({
-                                                  type: s.type,
-                                                  color: s.color,
-                                                  size: s.size,
-                                                  points: pts
-                                                });
-                                 overlayWin.strokes = committed;
-                                 overlayWin._redoStack = [];
-                                 overlayWin.currentStroke = {
-                                   type: s.type,
-                                   color: s.color,
-                                   size: s.size,
-                                   points: [pts[pts.length - 1]]
-                                 };
-                                 overlayWin._invalidateCache();
-                                 drawCanvas.requestPaint();
-                                 return;
-                               }
-                               overlayWin.currentStroke = {
-                                 type: s.type,
-                                 color: s.color,
-                                 size: s.size,
-                                 points: pts
-                               };
-                             } else {
-                               overlayWin.currentStroke = {
-                                 type: overlayWin.currentStroke.type,
-                                 color: overlayWin.currentStroke.color,
-                                 size: overlayWin.currentStroke.size,
-                                 x1: overlayWin.currentStroke.x1,
-                                 y1: overlayWin.currentStroke.y1,
-                                 x2: mouse.x,
-                                 y2: mouse.y,
-                                 preview: true
-                               };
-                             }
-                             drawCanvas.requestPaint();
-                           }
+          if (mouse.buttons & Qt.RightButton) {
+            overlayWin.drawing = false;
+            overlayWin.currentStroke = null;
+            drawCanvas.eraseAt(mouse.x, mouse.y);
+            return;
+          }
+          if (!overlayWin.drawing || !overlayWin.currentStroke)
+            return;
+          if (overlayWin.tool === "pencil" || overlayWin.tool === "highlighter") {
+            var s = overlayWin.currentStroke;
+            var pts = s.points.slice();
+            var newW = s.size;
+            if (s.type === "pencil") {
+              var ddx = mouse.x - overlayWin._lastMouseX;
+              var ddy = mouse.y - overlayWin._lastMouseY;
+              var speed = Math.sqrt(ddx * ddx + ddy * ddy);
+              overlayWin._speedSmooth = overlayWin._speedSmooth * 0.7 + speed * 0.3;
+              var minW = Math.max(1, s.size * 0.35);
+              var maxW = s.size * 1.6;
+              var t = Math.min(overlayWin._speedSmooth, 20) / 20;
+              newW = maxW - t * (maxW - minW);
+            }
+            overlayWin._lastMouseX = mouse.x;
+            overlayWin._lastMouseY = mouse.y;
+            pts.push({
+                       x: mouse.x,
+                       y: mouse.y,
+                       w: newW
+                     });
+            if (pts.length > 2000) {
+              var committed = overlayWin.strokes.slice();
+              committed.push({
+                               type: s.type,
+                               color: s.color,
+                               size: s.size,
+                               points: pts
+                             });
+              overlayWin.strokes = committed;
+              overlayWin._redoStack = [];
+              overlayWin.currentStroke = {
+                type: s.type,
+                color: s.color,
+                size: s.size,
+                points: [pts[pts.length - 1]]
+              };
+              overlayWin._invalidateCache();
+              drawCanvas.requestPaint();
+              return;
+            }
+            overlayWin.currentStroke = {
+              type: s.type,
+              color: s.color,
+              size: s.size,
+              points: pts
+            };
+          } else {
+            overlayWin.currentStroke = {
+              type: overlayWin.currentStroke.type,
+              color: overlayWin.currentStroke.color,
+              size: overlayWin.currentStroke.size,
+              x1: overlayWin.currentStroke.x1,
+              y1: overlayWin.currentStroke.y1,
+              x2: mouse.x,
+              y2: mouse.y,
+              preview: true
+            };
+          }
+          drawCanvas.requestPaint();
+        }
         onReleased: mouse => {
-                      if (mouse.button === Qt.RightButton)
-                      return;
-                      if (!overlayWin.drawing || !overlayWin.currentStroke)
-                      return;
-                      overlayWin.drawing = false;
-                      var stroke = overlayWin.currentStroke;
-                      if (stroke.type === "blur")
-                      stroke = {
-                        type: "blur",
-                        color: stroke.color,
-                        size: stroke.size,
-                        x1: stroke.x1,
-                        y1: stroke.y1,
-                        x2: stroke.x2,
-                        y2: stroke.y2,
-                        preview: false
-                      };
-                      var s = overlayWin.strokes.slice();
-                      s.push(stroke);
-                      overlayWin.strokes = s;
-                      overlayWin._redoStack = [];
-                      var cctx = cacheCanvas.getContext("2d");
-                      overlayWin._drawStrokeToCtx(cctx, stroke);
-                      overlayWin._cacheValid = true;
-                      overlayWin.currentStroke = null;
-                      drawCanvas.requestPaint();
-                    }
+          if (mouse.button === Qt.RightButton)
+            return;
+          if (!overlayWin.drawing || !overlayWin.currentStroke)
+            return;
+          overlayWin.drawing = false;
+          var stroke = overlayWin.currentStroke;
+          if (stroke.type === "blur")
+            stroke = {
+              type: "blur",
+              color: stroke.color,
+              size: stroke.size,
+              x1: stroke.x1,
+              y1: stroke.y1,
+              x2: stroke.x2,
+              y2: stroke.y2,
+              preview: false
+            };
+          var s = overlayWin.strokes.slice();
+          s.push(stroke);
+          overlayWin.strokes = s;
+          overlayWin._redoStack = [];
+          var cctx = cacheCanvas.getContext("2d");
+          overlayWin._drawStrokeToCtx(cctx, stroke);
+          overlayWin._cacheValid = true;
+          overlayWin.currentStroke = null;
+          drawCanvas.requestPaint();
+        }
       }
       TextInput {
         id: textInput
@@ -1059,18 +1060,18 @@ Variants {
       hoverEnabled: true
       cursorShape: overlayWin.isPanning ? Qt.ClosedHandCursor : Qt.OpenHandCursor
       onPressed: mouse => {
-                   overlayWin.isPanning = true;
-                   overlayWin._panStartX = overlayWin.panX;
-                   overlayWin._panStartY = overlayWin.panY;
-                   overlayWin._panStartMouseX = mouse.x;
-                   overlayWin._panStartMouseY = mouse.y;
-                 }
+        overlayWin.isPanning = true;
+        overlayWin._panStartX = overlayWin.panX;
+        overlayWin._panStartY = overlayWin.panY;
+        overlayWin._panStartMouseX = mouse.x;
+        overlayWin._panStartMouseY = mouse.y;
+      }
       onPositionChanged: mouse => {
-                           if (!overlayWin.isPanning)
-                           return;
-                           overlayWin.panX = overlayWin._panStartX + (mouse.x - overlayWin._panStartMouseX);
-                           overlayWin.panY = overlayWin._panStartY + (mouse.y - overlayWin._panStartMouseY);
-                         }
+        if (!overlayWin.isPanning)
+          return;
+        overlayWin.panX = overlayWin._panStartX + (mouse.x - overlayWin._panStartMouseX);
+        overlayWin.panY = overlayWin._panStartY + (mouse.y - overlayWin._panStartMouseY);
+      }
       onReleased: overlayWin.isPanning = false
     }
     Rectangle {
@@ -1522,11 +1523,14 @@ Variants {
           }
           Repeater {
             model: toolbar.sizeDefs
-            delegate: Rectangle {
+            delegate: NStateLayer {
               width: 28
               height: 24
               radius: Style.radiusS
-              color: overlayWin.drawSize === modelData.size ? HydraColor.mPrimaryContainer : (shH.containsMouse ? HydraColor.mHover : "transparent")
+              baseColor: overlayWin.drawSize === modelData.size ? HydraColor.mPrimaryContainer : "transparent"
+              stateColor: overlayWin.drawSize === modelData.size ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
+              hovering: shH.containsMouse
+              pressed: shH.pressed
               border.color: overlayWin.drawSize === modelData.size ? HydraColor.mPrimary : "transparent"
               border.width: Style.borderS
               Row {
@@ -1605,11 +1609,14 @@ Variants {
           }
           Repeater {
             model: toolbar.sizeDefs
-            delegate: Rectangle {
+            delegate: NStateLayer {
               width: 32
               height: 24
               radius: Style.radiusS
-              color: overlayWin.drawSize === modelData.size ? HydraColor.mPrimaryContainer : (shV.containsMouse ? HydraColor.mHover : "transparent")
+              baseColor: overlayWin.drawSize === modelData.size ? HydraColor.mPrimaryContainer : "transparent"
+              stateColor: overlayWin.drawSize === modelData.size ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
+              hovering: shV.containsMouse
+              pressed: shV.pressed
               border.color: overlayWin.drawSize === modelData.size ? HydraColor.mPrimary : "transparent"
               border.width: Style.borderS
               Row {
@@ -1743,7 +1750,7 @@ Variants {
     anchors.horizontalCenter: vertical ? parent.horizontalCenter : undefined
     anchors.verticalCenter: vertical ? undefined : parent.verticalCenter
   }
-  component ToolBtn: Rectangle {
+  component ToolBtn: NStateLayer {
     property string toolId: ""
     property string iconName: ""
     property string tip: ""
@@ -1751,11 +1758,14 @@ Variants {
     height: 34
     radius: Style.radiusS
     opacity: root.zoomScale > 1.0 ? 0.35 : 1.0
-    color: overlayWin.tool === toolId ? HydraColor.mPrimary : (tbHover.containsMouse ? HydraColor.mHover : "transparent")
+    baseColor: overlayWin.tool === toolId ? HydraColor.mPrimary : "transparent"
+    stateColor: overlayWin.tool === toolId ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+    hovering: tbHover.containsMouse && tbHover.enabled
+    pressed: tbHover.pressed
     NIcon {
       anchors.centerIn: parent
       icon: iconName
-      color: overlayWin.tool === toolId ? HydraColor.mOnPrimary : tbHover.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
+      color: overlayWin.tool === toolId ? HydraColor.mOnPrimary : HydraColor.mOnSurface
     }
     MouseArea {
       id: tbHover
@@ -1773,21 +1783,22 @@ Variants {
       onExited: TooltipService.hide()
     }
   }
-  component ZoomBtn: Rectangle {
+  component ZoomBtn: NStateLayer {
     property string iconName: ""
     property string tip: ""
     property bool btnEnabled: true
     width: 28
     height: 34
     radius: Style.radiusS
-    color: zbHover.containsMouse ? HydraColor.mHover : "transparent"
+    hovering: zbHover.containsMouse
+    pressed: zbHover.pressed
     enabled: btnEnabled
     opacity: enabled ? 1.0 : 0.3
     signal clicked
     NIcon {
       anchors.centerIn: parent
       icon: iconName
-      color: zbHover.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
+      color: HydraColor.mOnSurface
     }
     MouseArea {
       id: zbHover
@@ -1799,7 +1810,7 @@ Variants {
       onExited: TooltipService.hide()
     }
   }
-  component ActionBtn: Rectangle {
+  component ActionBtn: NStateLayer {
     property string iconName: ""
     property string tip: ""
     property bool danger: false
@@ -1808,12 +1819,14 @@ Variants {
     height: 34
     radius: Style.radiusS
     opacity: disabled ? 0.3 : 1.0
-    color: (!disabled && abHover.containsMouse) ? (danger ? Qt.alpha(HydraColor.mError, 0.15) : HydraColor.mHover) : "transparent"
+    stateColor: danger ? HydraColor.mError : HydraColor.mOnSurface
+    hovering: !disabled && abHover.containsMouse
+    pressed: !disabled && abHover.pressed
     signal clicked
     NIcon {
       anchors.centerIn: parent
       icon: iconName
-      color: (!parent.disabled && abHover.containsMouse) && parent.danger ? HydraColor.mError : (!parent.disabled && abHover.containsMouse) ? HydraColor.mOnHover : HydraColor.mOnSurface
+      color: (!parent.disabled && abHover.containsMouse) && parent.danger ? HydraColor.mError : HydraColor.mOnSurface
     }
     MouseArea {
       id: abHover
@@ -1826,7 +1839,8 @@ Variants {
       onExited: TooltipService.hide()
     }
   }
-  component SaveBtn: Rectangle {
+  component SaveBtn: NStateLayer {
+    id: saveButton
     property string iconName: ""
     property string labelText: ""
     property string tip: ""
@@ -1834,7 +1848,10 @@ Variants {
     height: 36
     radius: Style.radiusS
     width: _sbRow.implicitWidth + Style.marginL
-    color: sbHover.containsMouse ? (primary ? HydraColor.mPrimary : HydraColor.mSecondary || HydraColor.mPrimary) : (primary ? HydraColor.mPrimaryContainer || HydraColor.mSurfaceVariant : HydraColor.mSurfaceVariant)
+    baseColor: primary ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceVariant
+    stateColor: primary ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
+    hovering: sbHover.containsMouse && sbHover.enabled
+    pressed: sbHover.pressed
     opacity: overlayWin.isSaving ? 0.5 : 1.0
     signal clicked
     Row {
@@ -1843,11 +1860,11 @@ Variants {
       spacing: Style.marginXS
       NIcon {
         icon: iconName
-        color: sbHover.containsMouse ? HydraColor.mOnPrimary : (primary ? HydraColor.mPrimary : HydraColor.mOnSurface)
+        color: saveButton.stateColor
       }
       NText {
         text: labelText
-        color: sbHover.containsMouse ? HydraColor.mOnPrimary : (primary ? HydraColor.mPrimary : HydraColor.mOnSurface)
+        color: saveButton.stateColor
         font.weight: Font.Bold
         pointSize: Style.fontSizeS
       }
@@ -1863,12 +1880,13 @@ Variants {
       onExited: TooltipService.hide()
     }
   }
-  component DragBtn: Rectangle {
+  component DragBtn: NStateLayer {
     property bool isVertical: false
     width: 30
     height: 30
     radius: Style.radiusS
-    color: dragMA.containsMouse || dragMA.pressed ? HydraColor.mHover : "transparent"
+    hovering: dragMA.containsMouse
+    pressed: dragMA.pressed
     Column {
       anchors.centerIn: parent
       spacing: Style.marginXS
@@ -1905,19 +1923,19 @@ Variants {
       hoverEnabled: true
       cursorShape: Qt.SizeAllCursor
       onPressed: mouse => {
-                   var gp = mapToItem(null, mouse.x, mouse.y);
-                   toolbar._dragSx = gp.x;
-                   toolbar._dragSy = gp.y;
-                   toolbar._dragStx = overlayWin._tbUserX >= 0 ? overlayWin._tbUserX : toolbar.x;
-                   toolbar._dragSty = overlayWin._tbUserY >= 0 ? overlayWin._tbUserY : toolbar.y;
-                 }
+        var gp = mapToItem(null, mouse.x, mouse.y);
+        toolbar._dragSx = gp.x;
+        toolbar._dragSy = gp.y;
+        toolbar._dragStx = overlayWin._tbUserX >= 0 ? overlayWin._tbUserX : toolbar.x;
+        toolbar._dragSty = overlayWin._tbUserY >= 0 ? overlayWin._tbUserY : toolbar.y;
+      }
       onPositionChanged: mouse => {
-                           if (!pressed)
-                           return;
-                           var gp = mapToItem(null, mouse.x, mouse.y);
-                           overlayWin._tbUserX = toolbar._dragStx + (gp.x - toolbar._dragSx);
-                           overlayWin._tbUserY = toolbar._dragSty + (gp.y - toolbar._dragSy);
-                         }
+        if (!pressed)
+          return;
+        var gp = mapToItem(null, mouse.x, mouse.y);
+        overlayWin._tbUserX = toolbar._dragStx + (gp.x - toolbar._dragSx);
+        overlayWin._tbUserY = toolbar._dragSty + (gp.y - toolbar._dragSy);
+      }
       onEntered: TooltipService.show(parent, root.mainInstance?.pluginApi?.tr("annotate.dragToolbar"))
       onExited: TooltipService.hide()
     }

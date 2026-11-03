@@ -1,11 +1,8 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Effects
-import QtQuick.Layouts
 import qs.Commons
 import qs.Services.UI
 
-Rectangle {
+NStateLayer {
   id: root
 
   // Public properties
@@ -17,17 +14,13 @@ Rectangle {
   property bool allowClickWhenDisabled: false
   property bool hot: false
 
-  // Internal properties
-  property bool hovering: false
-  property bool pressed: false
-
   // Color properties
   property color colorBg: HydraColor.smartAlpha(HydraColor.mSurfaceVariant)
   property color colorFg: HydraColor.mPrimary
-  property color colorBgHover: HydraColor.mHover
-  property color colorFgHover: HydraColor.mOnHover
-  property color colorBorder: HydraColor.mOutline
-  property color colorBorderHover: HydraColor.mOutline
+  property color colorBgHover: root.colorBg
+  property color colorFgHover: root.colorFg
+  property color colorBorder: "transparent"
+  property color colorBorderHover: root.colorBorder
 
   // Hot state colors
   property color colorBgHot: HydraColor.mPrimary
@@ -46,27 +39,38 @@ Rectangle {
 
   // Appearance
   opacity: enabled ? 1.0 : 0.6
-  color: {
-    if (root.enabled && root.hovering || pressed) {
-      return colorBgHover;
+  baseColor: root.hot ? root.colorBgHot : root.enabled && root.hovering ? root.colorBgHover : root.colorBg
+  stateColor: root.hot ? root.colorFgHot : root.enabled && root.hovering ? root.colorFgHover : root.colorFg
+  focusColor: root.stateColor
+  focusPolicy: Qt.StrongFocus
+  Accessible.role: Accessible.Button
+  Accessible.name: typeof root.tooltipText === "string" ? root.tooltipText : root.icon
+  Accessible.checkable: true
+  Accessible.checked: root.hot
+  Accessible.onPressAction: if (root.enabled)
+                              root.clicked()
+  property bool keyboardPressed: false
+  function activateFromKeyboard(event) {
+    if (!event.isAutoRepeat && root.enabled) {
+      root.keyboardPressed = true;
+      root.clicked();
     }
-
-    if (hot) {
-      return colorBgHot;
-    }
-    return colorBg;
   }
+  Keys.onReturnPressed: event => root.activateFromKeyboard(event)
+  Keys.onEnterPressed: event => root.activateFromKeyboard(event)
+  Keys.onSpacePressed: event => root.activateFromKeyboard(event)
+  Keys.onReleased: event => {
+    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space)
+      root.keyboardPressed = false;
+    else
+      event.accepted = false;
+  }
+  onActiveFocusChanged: if (!activeFocus)
+                          root.keyboardPressed = false
+  pressed: buttonMouse.pressed || root.keyboardPressed
   radius: Math.min(Style.iRadiusL, width / 2)
   border.color: root.enabled && root.hovering ? colorBorderHover : colorBorder
   border.width: Style.borderS
-
-  Behavior on color {
-    enabled: !HydraColor.isTransitioning
-    ColorAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.InOutQuad
-    }
-  }
 
   TextMetrics {
     id: iconMetrics
@@ -80,15 +84,7 @@ Rectangle {
     icon: root.icon
     pointSize: Math.max(1, Math.round(root.width * 0.48))
     applyUiScale: root.applyUiScale
-    color: {
-      if (root.enabled && root.hovering || pressed) {
-        return colorFgHover;
-      }
-      if (hot) {
-        return colorFgHot;
-      }
-      return colorFg;
-    }
+    color: root.stateColor
     // Center horizontally
     x: Math.round((root.width - iconMetrics.tightBoundingRect.width) / 2) - iconMetrics.tightBoundingRect.x
     // Center vertically accounting for font metrics
@@ -97,13 +93,14 @@ Rectangle {
     Behavior on color {
       enabled: !HydraColor.isTransitioning
       ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
+        duration: root.hovering ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+        easing.type: Easing.OutCubic
       }
     }
   }
 
   MouseArea {
+    id: buttonMouse
     // Always enabled to allow hover/tooltip even when the button is disabled
     enabled: true
     anchors.fill: parent
@@ -128,18 +125,14 @@ Rectangle {
     }
 
     onPressed: function (mouse) {
-      if (root.enabled) {
-        root.pressed = true;
-      }
+      if (root.enabled)
+        root.forceActiveFocus(Qt.MouseFocusReason);
       if (tooltipText && (!Array.isArray(tooltipText) || tooltipText.length > 0)) {
         TooltipService.hide();
       }
     }
 
     onReleased: function (mouse) {
-      root.scale = 1.0;
-      root.pressed = false;
-
       if (!root.enabled && !allowClickWhenDisabled) {
         return;
       }
@@ -158,8 +151,6 @@ Rectangle {
 
     onCanceled: {
       root.hovering = false;
-      root.pressed = false;
-      root.scale = 1.0;
       if (tooltipText && (!Array.isArray(tooltipText) || tooltipText.length > 0)) {
         TooltipService.hide();
       }

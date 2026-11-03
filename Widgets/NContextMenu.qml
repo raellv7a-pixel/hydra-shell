@@ -88,15 +88,11 @@ Popup {
       // Store reference to the popup
       property var popup: root
 
-      background: Rectangle {
-        color: menuItem.hovered && menuItem.enabled ? HydraColor.mSurfaceContainerHighest : "transparent"
+      background: NStateLayer {
+        hovering: menuItem.hovered
+        pressed: menuItem.down
+        focusVisible: menuItem.visualFocus
         radius: Style.iRadiusS
-
-        Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
-        }
       }
 
       contentItem: RowLayout {

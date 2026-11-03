@@ -94,290 +94,294 @@ ColumnLayout {
     }
   }
 
-  NToggle {
-    label: I18n.tr("tooltips.switch-to-dark-mode")
-    description: I18n.tr("panels.color-scheme.dark-mode-switch-description")
-    checked: Settings.data.colorSchemes.darkMode
-    onToggled: checked => {
-                 Settings.data.colorSchemes.darkMode = checked;
-                 root.cacheVersion++;
-               }
-  }
-
-  NToggle {
-    label: I18n.tr("panels.color-scheme.sync-gsettings-label")
-    description: I18n.tr("panels.color-scheme.sync-gsettings-description")
-    checked: Settings.data.colorSchemes.syncGsettings
-    defaultValue: Settings.getDefaultValue("colorSchemes.syncGsettings")
-    onToggled: checked => {
-                 Settings.data.colorSchemes.syncGsettings = checked;
-                 if (checked)
-                 ColorSchemeService.pushSystemColorScheme();
-               }
-  }
-
-  NComboBox {
-    label: I18n.tr("panels.color-scheme.dark-mode-mode-label")
-    description: I18n.tr("panels.color-scheme.dark-mode-mode-description")
-
-    model: [
-      {
-        "name": I18n.tr("panels.color-scheme.dark-mode-mode-off"),
-        "key": "off"
-      },
-      {
-        "name": I18n.tr("panels.color-scheme.dark-mode-mode-manual"),
-        "key": "manual"
-      },
-      {
-        "name": I18n.tr("common.location"),
-        "key": "location"
-      },
-      {
-        "name": I18n.tr("panels.color-scheme.dark-mode-mode-wallpaper"),
-        "key": "wallpaper"
-      }
-    ]
-
-    currentKey: Settings.data.colorSchemes.schedulingMode
-    defaultValue: Settings.getDefaultValue("colorSchemes.schedulingMode")
-
-    onSelected: key => {
-                  Settings.data.colorSchemes.schedulingMode = key;
-                  AppThemeService.generate();
-                }
-  }
-
-  ColumnLayout {
-    spacing: Style.marginS
-    visible: Settings.data.colorSchemes.schedulingMode === "manual"
-
-    NLabel {
-      label: I18n.tr("panels.display.night-light-manual-schedule-label")
-      description: I18n.tr("panels.display.night-light-manual-schedule-description")
-    }
-
-    RowLayout {
-      Layout.fillWidth: false
-      spacing: Style.marginS
-
-      NText {
-        text: I18n.tr("panels.display.night-light-manual-schedule-sunrise")
-        pointSize: Style.fontSizeM
-        color: HydraColor.mOnSurfaceVariant
-      }
-
-      NComboBox {
-        model: root.timeOptions
-        currentKey: Settings.data.colorSchemes.manualSunrise
-        placeholder: I18n.tr("panels.display.night-light-manual-schedule-select-start")
-        onSelected: key => Settings.data.colorSchemes.manualSunrise = key
-        minimumWidth: 120
-      }
-
-      Item {
-        Layout.preferredWidth: 20
-      }
-
-      NText {
-        text: I18n.tr("panels.display.night-light-manual-schedule-sunset")
-        pointSize: Style.fontSizeM
-        color: HydraColor.mOnSurfaceVariant
-      }
-
-      NComboBox {
-        model: root.timeOptions
-        currentKey: Settings.data.colorSchemes.manualSunset
-        placeholder: I18n.tr("panels.display.night-light-manual-schedule-select-stop")
-        onSelected: key => Settings.data.colorSchemes.manualSunset = key
-        minimumWidth: 120
+  NSettingsSection {
+    title: I18n.tr("settings.content.mode-schedule")
+    icon: "sun-moon"
+    NToggle {
+      label: I18n.tr("tooltips.switch-to-dark-mode")
+      description: I18n.tr("panels.color-scheme.dark-mode-switch-description")
+      checked: Settings.data.colorSchemes.darkMode
+      onToggled: checked => {
+        Settings.data.colorSchemes.darkMode = checked;
+        root.cacheVersion++;
       }
     }
-  }
 
-  NDivider {
-    Layout.fillWidth: true
-  }
+    NToggle {
+      label: I18n.tr("panels.color-scheme.sync-gsettings-label")
+      description: I18n.tr("panels.color-scheme.sync-gsettings-description")
+      checked: Settings.data.colorSchemes.syncGsettings
+      defaultValue: Settings.getDefaultValue("colorSchemes.syncGsettings")
+      onToggled: checked => {
+        Settings.data.colorSchemes.syncGsettings = checked;
+        if (checked)
+          ColorSchemeService.pushSystemColorScheme();
+      }
+    }
 
-  NToggle {
-    label: I18n.tr("panels.color-scheme.color-source-use-wallpaper-colors-label")
-    description: I18n.tr("panels.color-scheme.color-source-use-wallpaper-colors-description")
-    checked: Settings.data.colorSchemes.useWallpaperColors
-    defaultValue: Settings.getDefaultValue("colorSchemes.useWallpaperColors")
-    onToggled: checked => {
-                 Settings.data.colorSchemes.useWallpaperColors = checked;
-                 if (checked) {
-                   AppThemeService.generate();
-                 } else {
-                   ToastService.showNotice(I18n.tr("toast.wallpaper-colors.label"), I18n.tr("toast.wallpaper-colors.disabled"), "settings-color-scheme");
-                   if (Settings.data.colorSchemes.predefinedScheme) {
-                     ColorSchemeService.applyScheme(Settings.data.colorSchemes.predefinedScheme);
-                   }
-                 }
-               }
-  }
+    NComboBox {
+      label: I18n.tr("panels.color-scheme.dark-mode-mode-label")
+      description: I18n.tr("panels.color-scheme.dark-mode-mode-description")
 
-  NComboBox {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.color-scheme.wallpaper-monitor-source-label")
-    description: I18n.tr("panels.color-scheme.wallpaper-monitor-source-description")
-    enabled: Settings.data.colorSchemes.useWallpaperColors
-    model: {
-      var m = [];
-      if (Quickshell.screens) {
-        for (var i = 0; i < Quickshell.screens.length; i++) {
-          var screen = Quickshell.screens[i];
-          var name = screen.name;
-          var displayName = name + " (" + screen.width + "x" + screen.height + ")";
-          m.push({
-                   "key": name,
-                   "name": displayName
-                 });
+      model: [
+        {
+          "name": I18n.tr("panels.color-scheme.dark-mode-mode-off"),
+          "key": "off"
+        },
+        {
+          "name": I18n.tr("panels.color-scheme.dark-mode-mode-manual"),
+          "key": "manual"
+        },
+        {
+          "name": I18n.tr("common.location"),
+          "key": "location"
+        },
+        {
+          "name": I18n.tr("panels.color-scheme.dark-mode-mode-wallpaper"),
+          "key": "wallpaper"
         }
-      }
-      return m;
-    }
-    currentKey: Settings.data.colorSchemes.monitorForColors || (screen ? screen.name : "")
-    onSelected: key => {
-                  Settings.data.colorSchemes.monitorForColors = key;
-                  AppThemeService.generate();
-                }
-  }
+      ]
 
-  NBox {
-    visible: Settings.data.colorSchemes.useWallpaperColors
-    Layout.fillWidth: true
-    implicitHeight: descriptionColumn.implicitHeight + Style.margin2L
+      currentKey: Settings.data.colorSchemes.schedulingMode
+      defaultValue: Settings.getDefaultValue("colorSchemes.schedulingMode")
+
+      onSelected: key => {
+        Settings.data.colorSchemes.schedulingMode = key;
+        AppThemeService.generate();
+      }
+    }
 
     ColumnLayout {
-      id: descriptionColumn
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.top: parent.top
-      anchors.margins: Style.marginL
-      spacing: Style.marginM
+      spacing: Style.marginS
+      visible: Settings.data.colorSchemes.schedulingMode === "manual"
 
-      NComboBox {
-        Layout.fillWidth: true
-        label: I18n.tr("panels.color-scheme.wallpaper-method-label")
-        description: I18n.tr("panels.color-scheme.wallpaper-method-description")
-        model: TemplateProcessor.schemeTypes
-        currentKey: Settings.data.colorSchemes.generationMethod
-        onSelected: key => Settings.data.colorSchemes.generationMethod = key
-      }
-
-      NText {
-        Layout.fillWidth: true
-        wrapMode: Text.WordWrap
-        text: I18n.tr("panels.color-scheme.method-description." + Settings.data.colorSchemes.generationMethod)
-        pointSize: Style.fontSizeS
-        color: HydraColor.mOnSurfaceVariant
+      NLabel {
+        label: I18n.tr("panels.display.night-light-manual-schedule-label")
+        description: I18n.tr("panels.display.night-light-manual-schedule-description")
       }
 
       RowLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginM
-        NLabel {
-          Layout.fillWidth: true
-          label: I18n.tr("panels.color-scheme.material-spec-label")
-        }
-        NTabBar {
-          Layout.preferredWidth: 220 * Style.uiScaleRatio
-          distributeEvenly: true
-          enabled: TemplateProcessor.materialSchemeKeys.includes(Settings.data.colorSchemes.generationMethod)
-          opacity: enabled ? 1.0 : 0.6
-          currentIndex: TemplateProcessor.getMaterialSpec() === "2025" ? 0 : 1
-          NTabButton {
-            text: "2025"
-            tabIndex: 0
-            checked: TemplateProcessor.getMaterialSpec() === "2025"
-            onClicked: Settings.data.colorSchemes.materialSpec = "2025"
-          }
-          NTabButton {
-            text: "2021"
-            tabIndex: 1
-            checked: TemplateProcessor.getMaterialSpec() === "2021"
-            onClicked: Settings.data.colorSchemes.materialSpec = "2021"
-          }
-        }
-      }
-      NText {
-        Layout.fillWidth: true
-        wrapMode: Text.WordWrap
-        text: I18n.tr("panels.color-scheme.material-spec-description")
-        pointSize: Style.fontSizeS
-        color: HydraColor.mOnSurfaceVariant
-      }
-
-      NDivider {
-        Layout.fillWidth: true
-      }
-
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: Style.marginM
-
-        NLabel {
-          Layout.fillWidth: true
-          label: I18n.tr("panels.color-scheme.surface-style-label")
-        }
-
-        NTabBar {
-          id: surfaceStyleSelector
-          Layout.preferredWidth: 220 * Style.uiScaleRatio
-          distributeEvenly: true
-          enabled: TemplateProcessor.materialSchemeKeys.includes(Settings.data.colorSchemes.generationMethod)
-          opacity: enabled ? 1.0 : 0.6
-          currentIndex: Settings.data.colorSchemes.surfaceStyle === "tinted" ? 1 : 0
-
-          NTabButton {
-            text: I18n.tr("panels.color-scheme.surface-style-classic")
-            tabIndex: 0
-            checked: Settings.data.colorSchemes.surfaceStyle !== "tinted"
-            onClicked: Settings.data.colorSchemes.surfaceStyle = "classic"
-          }
-
-          NTabButton {
-            text: "Tinted"
-            tabIndex: 1
-            checked: Settings.data.colorSchemes.surfaceStyle === "tinted"
-            onClicked: Settings.data.colorSchemes.surfaceStyle = "tinted"
-          }
-        }
-      }
-
-      NText {
-        Layout.fillWidth: true
-        wrapMode: Text.WordWrap
-        text: I18n.tr(surfaceStyleSelector.enabled ? "panels.color-scheme.surface-style-description" : "panels.color-scheme.surface-style-unsupported")
-        pointSize: Style.fontSizeS
-        color: HydraColor.mOnSurfaceVariant
-      }
-
-      Row {
-        id: colorPreviewRow
+        Layout.fillWidth: false
         spacing: Style.marginS
 
-        property int diameter: 16 * Style.uiScaleRatio
+        NText {
+          text: I18n.tr("panels.display.night-light-manual-schedule-sunrise")
+          pointSize: Style.fontSizeM
+          color: HydraColor.mOnSurfaceVariant
+        }
 
-        Repeater {
-          model: [HydraColor.mPrimary, HydraColor.mSecondary, HydraColor.mTertiary, HydraColor.mError]
+        NComboBox {
+          model: root.timeOptions
+          currentKey: Settings.data.colorSchemes.manualSunrise
+          placeholder: I18n.tr("panels.display.night-light-manual-schedule-select-start")
+          onSelected: key => Settings.data.colorSchemes.manualSunrise = key
+          minimumWidth: 120
+        }
 
-          Rectangle {
-            width: colorPreviewRow.diameter
-            height: colorPreviewRow.diameter
-            radius: width * 0.5
-            color: modelData
+        Item {
+          Layout.preferredWidth: 20
+        }
+
+        NText {
+          text: I18n.tr("panels.display.night-light-manual-schedule-sunset")
+          pointSize: Style.fontSizeM
+          color: HydraColor.mOnSurfaceVariant
+        }
+
+        NComboBox {
+          model: root.timeOptions
+          currentKey: Settings.data.colorSchemes.manualSunset
+          placeholder: I18n.tr("panels.display.night-light-manual-schedule-select-stop")
+          onSelected: key => Settings.data.colorSchemes.manualSunset = key
+          minimumWidth: 120
+        }
+      }
+    }
+  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.palette")
+    icon: "palette"
+    NToggle {
+      label: I18n.tr("panels.color-scheme.color-source-use-wallpaper-colors-label")
+      description: I18n.tr("panels.color-scheme.color-source-use-wallpaper-colors-description")
+      checked: Settings.data.colorSchemes.useWallpaperColors
+      defaultValue: Settings.getDefaultValue("colorSchemes.useWallpaperColors")
+      onToggled: checked => {
+        Settings.data.colorSchemes.useWallpaperColors = checked;
+        if (checked) {
+          AppThemeService.generate();
+        } else {
+          ToastService.showNotice(I18n.tr("toast.wallpaper-colors.label"), I18n.tr("toast.wallpaper-colors.disabled"), "settings-color-scheme");
+          if (Settings.data.colorSchemes.predefinedScheme) {
+            ColorSchemeService.applyScheme(Settings.data.colorSchemes.predefinedScheme);
+          }
+        }
+      }
+    }
+
+    NComboBox {
+      Layout.fillWidth: true
+      label: I18n.tr("panels.color-scheme.wallpaper-monitor-source-label")
+      description: I18n.tr("panels.color-scheme.wallpaper-monitor-source-description")
+      enabled: Settings.data.colorSchemes.useWallpaperColors
+      model: {
+        var m = [];
+        if (Quickshell.screens) {
+          for (var i = 0; i < Quickshell.screens.length; i++) {
+            var screen = Quickshell.screens[i];
+            var name = screen.name;
+            var displayName = name + " (" + screen.width + "x" + screen.height + ")";
+            m.push({
+                     "key": name,
+                     "name": displayName
+                   });
+          }
+        }
+        return m;
+      }
+      currentKey: Settings.data.colorSchemes.monitorForColors || (screen ? screen.name : "")
+      onSelected: key => {
+        Settings.data.colorSchemes.monitorForColors = key;
+        AppThemeService.generate();
+      }
+    }
+  }
+
+  NSettingsSection {
+    title: I18n.tr("settings.content.generation")
+    icon: "wand"
+    visible: Settings.data.colorSchemes.useWallpaperColors
+
+    NBox {
+      visible: Settings.data.colorSchemes.useWallpaperColors
+      Layout.fillWidth: true
+      implicitHeight: descriptionColumn.implicitHeight + Style.margin2L
+
+      ColumnLayout {
+        id: descriptionColumn
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: Style.marginL
+        spacing: Style.marginM
+
+        NComboBox {
+          Layout.fillWidth: true
+          label: I18n.tr("panels.color-scheme.wallpaper-method-label")
+          description: I18n.tr("panels.color-scheme.wallpaper-method-description")
+          model: TemplateProcessor.schemeTypes
+          currentKey: Settings.data.colorSchemes.generationMethod
+          onSelected: key => Settings.data.colorSchemes.generationMethod = key
+        }
+
+        NText {
+          Layout.fillWidth: true
+          wrapMode: Text.WordWrap
+          text: I18n.tr("panels.color-scheme.method-description." + Settings.data.colorSchemes.generationMethod)
+          pointSize: Style.fontSizeS
+          color: HydraColor.mOnSurfaceVariant
+        }
+
+        RowLayout {
+          Layout.fillWidth: true
+          spacing: Style.marginM
+          NLabel {
+            Layout.fillWidth: true
+            label: I18n.tr("panels.color-scheme.material-spec-label")
+          }
+          NTabBar {
+            Layout.preferredWidth: 220 * Style.uiScaleRatio
+            distributeEvenly: true
+            enabled: TemplateProcessor.materialSchemeKeys.includes(Settings.data.colorSchemes.generationMethod)
+            opacity: enabled ? 1.0 : 0.6
+            currentIndex: TemplateProcessor.getMaterialSpec() === "2025" ? 0 : 1
+            NTabButton {
+              text: "2025"
+              tabIndex: 0
+              checked: TemplateProcessor.getMaterialSpec() === "2025"
+              onClicked: Settings.data.colorSchemes.materialSpec = "2025"
+            }
+            NTabButton {
+              text: "2021"
+              tabIndex: 1
+              checked: TemplateProcessor.getMaterialSpec() === "2021"
+              onClicked: Settings.data.colorSchemes.materialSpec = "2021"
+            }
+          }
+        }
+        NText {
+          Layout.fillWidth: true
+          wrapMode: Text.WordWrap
+          text: I18n.tr("panels.color-scheme.material-spec-description")
+          pointSize: Style.fontSizeS
+          color: HydraColor.mOnSurfaceVariant
+        }
+
+        NDivider {
+          Layout.fillWidth: true
+        }
+
+        RowLayout {
+          Layout.fillWidth: true
+          spacing: Style.marginM
+
+          NLabel {
+            Layout.fillWidth: true
+            label: I18n.tr("panels.color-scheme.surface-style-label")
+          }
+
+          NTabBar {
+            id: surfaceStyleSelector
+            Layout.preferredWidth: 220 * Style.uiScaleRatio
+            distributeEvenly: true
+            enabled: TemplateProcessor.materialSchemeKeys.includes(Settings.data.colorSchemes.generationMethod)
+            opacity: enabled ? 1.0 : 0.6
+            currentIndex: Settings.data.colorSchemes.surfaceStyle === "tinted" ? 1 : 0
+
+            NTabButton {
+              text: I18n.tr("panels.color-scheme.surface-style-classic")
+              tabIndex: 0
+              checked: Settings.data.colorSchemes.surfaceStyle !== "tinted"
+              onClicked: Settings.data.colorSchemes.surfaceStyle = "classic"
+            }
+
+            NTabButton {
+              text: "Tinted"
+              tabIndex: 1
+              checked: Settings.data.colorSchemes.surfaceStyle === "tinted"
+              onClicked: Settings.data.colorSchemes.surfaceStyle = "tinted"
+            }
+          }
+        }
+
+        NText {
+          Layout.fillWidth: true
+          wrapMode: Text.WordWrap
+          text: I18n.tr(surfaceStyleSelector.enabled ? "panels.color-scheme.surface-style-description" : "panels.color-scheme.surface-style-unsupported")
+          pointSize: Style.fontSizeS
+          color: HydraColor.mOnSurfaceVariant
+        }
+
+        Row {
+          id: colorPreviewRow
+          spacing: Style.marginS
+
+          property int diameter: 16 * Style.uiScaleRatio
+
+          Repeater {
+            model: [HydraColor.mPrimary, HydraColor.mSecondary, HydraColor.mTertiary, HydraColor.mError]
+
+            Rectangle {
+              width: colorPreviewRow.diameter
+              height: colorPreviewRow.diameter
+              radius: width * 0.5
+              color: modelData
+            }
           }
         }
       }
     }
   }
-
-  NDivider {
-    Layout.fillWidth: true
-  }
-
   ColumnLayout {
     spacing: Style.marginM
     Layout.fillWidth: true
@@ -390,7 +394,7 @@ ColumnLayout {
     }
 
     GridLayout {
-      columns: 2
+      columns: width < 620 * Style.uiScaleRatio ? 1 : 2
       rowSpacing: Style.marginM
       columnSpacing: Style.marginM
       Layout.fillWidth: true

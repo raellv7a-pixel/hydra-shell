@@ -8,6 +8,7 @@ ColumnLayout {
   id: root
   property string title: ""
   property string description: ""
+  property string summary: ""
   property string icon: ""
   property bool expanded: false
   default property alias content: body.children
@@ -19,63 +20,85 @@ ColumnLayout {
   Rectangle {
     id: surface
     Layout.fillWidth: true
-    implicitHeight: heading.implicitHeight + (root.expanded ? body.implicitHeight + Style.marginL : 0) + Style.margin2XL
+    implicitHeight: cardColumn.implicitHeight
     radius: Style.radiusL
-    color: root.expanded || headingHover.containsMouse ? HydraColor.mSurfaceContainer : HydraColor.mSurfaceContainerLow
-    clip: true
-
-    Behavior on color {
-      enabled: !HydraColor.isTransitioning
-      ColorAnimation { duration: headingHover.containsMouse ? Style.hoverEnterDuration : Style.hoverLeaveDuration }
-    }
-    Behavior on implicitHeight {
-      NumberAnimation { duration: Style.animationFast; easing.type: Easing.OutCubic }
-    }
+    color: HydraColor.mSurfaceContainerLow
 
     ColumnLayout {
-      anchors.fill: parent
-      anchors.margins: Style.marginXL
-      spacing: Style.marginL
+      id: cardColumn
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      spacing: 0
 
-      Item {
+      NStateLayer {
         id: heading
         Layout.fillWidth: true
-        implicitHeight: Math.max(Style.baseWidgetSize, titleRow.implicitHeight)
-        activeFocusOnTab: true
+        implicitHeight: Math.max(Style.baseWidgetSize * Style.uiScaleRatio, titleRow.implicitHeight) + Style.margin2M
+        focusPolicy: Qt.StrongFocus
+        radius: Style.radiusL
+        baseColor: HydraColor.mSurfaceContainerLow
+        hovering: headingHover.containsMouse
+        pressed: headingHover.pressed
         Accessible.role: Accessible.Button
         Accessible.name: root.title
-        Accessible.description: root.description + (root.expanded ? "; expandido" : "; recolhido")
+        Accessible.description: !root.expanded && root.summary !== "" ? root.summary : root.description
+        Accessible.checkable: true
+        Accessible.checked: root.expanded
+        Accessible.onPressAction: root.toggled(!root.expanded)
         Keys.onReturnPressed: root.toggled(!root.expanded)
         Keys.onSpacePressed: root.toggled(!root.expanded)
+        Keys.onEnterPressed: root.toggled(!root.expanded)
 
         RowLayout {
           id: titleRow
           anchors.fill: parent
+          anchors.leftMargin: Style.marginL
+          anchors.rightMargin: Style.marginL
+          anchors.topMargin: Style.marginM
+          anchors.bottomMargin: Style.marginM
           spacing: Style.marginM
-          Rectangle {
-            Layout.preferredWidth: Style.baseWidgetSize * Style.uiScaleRatio
-            Layout.preferredHeight: Layout.preferredWidth
-            radius: Style.iRadiusM
-            color: HydraColor.mSecondaryContainer
-            NIcon {
-              anchors.centerIn: parent
-              icon: root.icon
-              color: HydraColor.mOnSecondaryContainer
-              pointSize: Style.fontSizeL
-            }
+          NColorIcon {
+            icon: root.icon
+            size: Math.round(Style.baseWidgetSize * Style.uiScaleRatio * 0.8)
+            Accessible.ignored: true
           }
           ColumnLayout {
             Layout.fillWidth: true
             spacing: Style.marginXXS
-            NText { Layout.fillWidth: true; text: root.title; font.weight: Style.fontWeightSemiBold; pointSize: Style.fontSizeL }
-            NText { text: root.description; visible: root.description !== ""; wrapMode: Text.WordWrap; color: HydraColor.mOnSurfaceVariant; pointSize: Style.fontSizeM; Layout.fillWidth: true }
+            NText {
+              Layout.fillWidth: true
+              text: root.title
+              font.weight: Style.fontWeightSemiBold
+              pointSize: Style.fontSizeXL
+              wrapMode: Text.WordWrap
+              elide: Text.ElideNone
+              Accessible.ignored: true
+            }
+            NText {
+              Layout.fillWidth: true
+              text: !root.expanded && root.summary !== "" ? root.summary : root.description
+              visible: text !== ""
+              wrapMode: Text.WordWrap
+              elide: Text.ElideNone
+              color: HydraColor.mOnSurfaceVariant
+              font.weight: Style.fontWeightRegular
+              pointSize: Style.fontSizeS
+              Accessible.ignored: true
+            }
           }
           NIcon {
-            icon: "chevron-down"
+            icon: "chevron-right"
             color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeM
-            rotation: root.expanded ? 180 : 0
-            Behavior on rotation { NumberAnimation { duration: Style.animationFast } }
+            rotation: root.expanded ? 90 : 0
+            Accessible.ignored: true
+            Behavior on rotation {
+              RotationAnimation {
+                duration: Style.animationFast
+                easing.type: Easing.OutCubic
+              }
+            }
           }
         }
         MouseArea {
@@ -83,22 +106,38 @@ ColumnLayout {
           anchors.fill: parent
           hoverEnabled: true
           cursorShape: Qt.PointingHandCursor
-          onClicked: root.toggled(!root.expanded)
-        }
-        Rectangle {
-          anchors.fill: parent
-          radius: Style.radiusM
-          color: "transparent"
-          border.color: heading.activeFocus ? HydraColor.mPrimary : "transparent"
-          border.width: heading.activeFocus ? Style.borderM : 0
+          onClicked: {
+            heading.forceActiveFocus(Qt.MouseFocusReason);
+            root.toggled(!root.expanded);
+          }
         }
       }
 
       ColumnLayout {
         id: body
         Layout.fillWidth: true
+        Layout.leftMargin: Style.marginXL
+        Layout.rightMargin: Style.marginXL
+        Layout.topMargin: Style.marginM
+        Layout.bottomMargin: Style.marginXL
         visible: root.expanded
         spacing: Style.marginM
+        opacity: 1
+        onVisibleChanged: {
+          if (visible)
+            appearance.restart();
+          else
+            appearance.stop();
+        }
+        NumberAnimation {
+          id: appearance
+          target: body
+          property: "opacity"
+          from: 0
+          to: 1
+          duration: Style.animationFast
+          easing.type: Easing.OutCubic
+        }
       }
     }
   }

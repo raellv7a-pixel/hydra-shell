@@ -8,6 +8,7 @@ import qs.Widgets
 ColumnLayout {
   id: root
   spacing: Style.marginL
+  Layout.fillWidth: true
 
   property string searchText: ""
   property bool showInstalledOnly: false
@@ -70,7 +71,7 @@ ColumnLayout {
       id: themeGrid
       Layout.fillWidth: true
       Layout.preferredHeight: Math.max(cellHeight, Math.ceil(root.filteredThemes.length / Math.max(1, columns)) * cellHeight)
-      readonly property int columns: Math.max(2, Math.floor(availableWidth / (260 * Style.uiScaleRatio)))
+      readonly property int columns: Math.max(1, Math.floor(availableWidth / (260 * Style.uiScaleRatio)))
       cellWidth: Math.floor(availableWidth / columns)
       cellHeight: Math.round(cellWidth * 0.78) + Style.marginXS + Style.fontSizeS + Style.marginM
       model: root.filteredThemes

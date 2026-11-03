@@ -12,9 +12,9 @@ ColumnLayout {
   Layout.fillWidth: true
 
   // List of plugin sources
-  ColumnLayout {
-    spacing: Style.marginM
-    Layout.fillWidth: true
+  NSettingsSection {
+    title: I18n.tr("common.sources")
+    icon: "world"
 
     Repeater {
       id: pluginSourcesRepeater
@@ -69,10 +69,10 @@ ColumnLayout {
             checked: modelData.enabled !== false // Default to true if not set
             baseSize: Style.baseWidgetSize * 0.7
             onToggled: checked => {
-                         PluginRegistry.setSourceEnabled(modelData.url, checked);
-                         PluginService.refreshAvailablePlugins();
-                         ToastService.showNotice(I18n.tr("panels.plugins.title"), I18n.tr("panels.plugins.refresh-refreshing"));
-                       }
+              PluginRegistry.setSourceEnabled(modelData.url, checked);
+              PluginService.refreshAvailablePlugins();
+              ToastService.showNotice(I18n.tr("panels.plugins.title"), I18n.tr("panels.plugins.refresh-refreshing"));
+            }
           }
         }
       }
@@ -96,7 +96,7 @@ ColumnLayout {
     modal: true
     dim: false
     anchors.centerIn: parent
-    width: 500
+    width: Math.min(500 * Style.uiScaleRatio, parent ? parent.width - Style.margin2XL : 500 * Style.uiScaleRatio)
     padding: Style.marginL
 
     background: Rectangle {

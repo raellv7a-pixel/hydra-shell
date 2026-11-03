@@ -33,6 +33,9 @@ Every UI decision must follow these structural invariants:
 - **Settings Navigation Groups:** General, Personalization, Shell Interface, Session and Security, Devices and System, Integrations, Advanced, and About are secondary translated headings. All pages stay directly accessible; sections do not collapse. Preserve the existing whole-sidebar compact toggle and selected-item capsule.
 - **Settings Navigation Model:** Store section keys on the existing `tabsModel`; keep page IDs stable and resolve search destinations by their page label key, not their presentation index. Regenerate `Assets/settings-search-index.json` when the page order changes.
 - **Settings Sidebar Scrolling:** Hide the scrollbar in navigation and search results without disabling scrolling. Cache the small destination list to keep section measurements stable, and keep programmatic page selection in view. The main content scrollbar is unaffected.
+- **Settings Composition:** Adapt iNiR's iRiS organization, not its theme or controls: user identity beneath search, category marks in the sidebar and page title, and compact disclosure headings on quiet tonal cards. General starts with a responsive wallpaper/profile overview and links to Hydra's existing wallpaper and color pages. The wallpaper preview is omitted at narrow widths; all controls and page IDs remain available.
+- **Category Artwork:** `Widgets/NColorIcon.qml` uses the bundled filled Material Symbols Rounded font and the iRiS identity hues centralized in `Commons/ColoredIcons.qml`. These colors and the restrained plate gradient belong to icon artwork only, not selection, state, surfaces, or control styling. `NIcon` remains the monochrome control/action icon. Font provenance and license are in `Assets/Fonts/material-symbols/ATTRIBUTION.txt`.
+- **Reusable Category Keys:** Settings keys and `folder-tools`, `folder-productivity`, `folder-creativity`, `folder-games`, `folder-development`, `folder-multimedia`, `folder-internet`, `folder-system`, `folder-education`, and `folder-utilities` are available through `NColorIcon { icon: "..."; size: ... }`. Unmapped keys retain their actual Tabler artwork on the tile. This does not change the launcher.
 
 ---
 
@@ -49,7 +52,7 @@ All UI colors must derive strictly from Hydra's design tokens in `Commons/HydraC
   - `HydraColor.mOnSurface` (high emphasis: titles, active text)
   - `HydraColor.mOnSurfaceVariant` (medium emphasis: descriptions, labels, hints)
   - `HydraColor.mOutline`, `HydraColor.mOutlineVariant` (semantic borders, subtle dividers when strictly needed)
-- **Zero Hardcoded Colors:** Never introduce literal `#hex` colors or component-specific ad-hoc color schemes.
+- **Zero Hardcoded UI Colors:** Never introduce literal `#hex` colors or component-specific ad-hoc UI schemes. Fixed icon artwork identity colors are the narrow exception defined in §2; they must stay in `ColoredIcons`, never spread into control or surface styling.
 
 ---
 
@@ -75,6 +78,20 @@ Reuse existing tested primitives before creating custom controls:
 - **Interactive Controls:** `NToggle`, `NButton`, `NIconButton`, `NValueSlider`, `NComboBox`, `NTextInput`
 - **Typography & Icons:** `NText`, `NIcon`
 - **Layout & Spacing:** Use proportional tokens from `Commons/Style.qml` (`Style.marginS`, `Style.marginM`, `Style.marginL`, `Style.marginXL`, `Style.controlHeight*`, `Style.iRadius*`).
+
+### 5.1 Settings content hierarchy
+
+- Scope is the content pane and its settings editors, not category/sidebar order. Preserve each existing setting, default, range, dependency, save boundary and operational action.
+- Use one owner scroll (`SettingsContent`). Use `NSettingsGroupCard` for existing major groups and **open** `NSettingsSection` blocks for meaningful subsections. Short forms remain open; device lists, reorder editors, catalogs and monitor canvases retain their specialist layouts.
+- Hierarchy is page title → major group → semantic subsection → control label → description. Subsections use a small `NColorIcon`, primary-colored heading and spacing, not another outlined card.
+- Keep dependent controls adjacent to their master switch. Do not hide transaction recovery, external ownership, validation or busy states inside new disclosure controls.
+- Local navigation opens and scrolls to its destination without closing other groups. Collapsing a group retains its loaded editors. Keep live collapsed summaries in the page's `summaries` map, separate from stable `groups` descriptors, so changing a value never recreates focused controls.
+- Widget editor popups clamp to their parent viewport as well as the screen; keep their existing save/close/debounce contracts when adapting width and height.
+- Compose only bounded, read-only examples: `NSettingsAppearancePreview`, `NSettingsWallpaperPreview`, typography samples and idle timeout summaries. Appearance replay animates only the local sample; wallpaper framing never changes a wallpaper or creates a monitor override. No automatic commands, sound, capture, locking or display changes for demonstration.
+- Reflow from **available content width**, including at small windows and increased UI scale. Catalogs may become one column; threshold warning/critical controls remain paired; monitor actions and recovery controls wrap or stack. Reserve scrollbar space.
+- Group and page fades use `Style.animationFast`; chevrons and hover use existing Style tokens. Do not animate the height of long forms. Reduced motion/performance modes retain instant, functional navigation.
+- Retain translated search destinations when a label becomes a subsection heading. The search-index generator indexes specific `NSettingsSection` titles plus their nested controls; repeated generic `settings.content.*` headings are not extra results. Rebuild `Assets/settings-search-index.json` after reorganizing controls.
+
 
 ---
 
@@ -184,9 +201,16 @@ Every new shell panel, drawer, or surface must satisfy this mandatory checklist 
 ## 9. Motion & State Continuity
 
 - Motion must be intentional: explain state transitions (enter, exit, expand, select) rather than decorate.
-- **Durations:** Keep animations short and snappy (150ms to 250ms). Use `Style.animationFast` and `Style.animationNormal`.
+- **Durations:** Panels/content use `Style.animationFast` and `Style.animationNormal`. Pointer layers use `Style.hoverEnterDuration` / `Style.hoverLeaveDuration` (100ms / 30ms at normal speed), including the existing reduced-motion/performance gates.
 - **Easing:** Prefer standard material easing curves. Avoid aggressive overshoot, bouncing, or physics simulation unless explicitly modeling tactile gestures.
 - **Asymmetric Timing:** Shared hover and highlight states must enter smoothly and leave rapidly to eliminate sluggish pointer trails.
+- **Independent states:** Selection, `hot`, expansion and the current application/source are persistent bases, never replaced by hover. Press takes precedence over hover; disabled controls retain their status but suppress transient layers and focus outlines. Badges, urgency and recording/error colors remain semantic status, not hover artwork.
+- **Shared painting:** Use `NStateLayer` for interactive backgrounds, preserving the owner's capsule, row, tile or button geometry. It owns painting only; input, activation and persistent state stay with the existing control. Its default focus policy is `Qt.NoFocus`; interactive owners explicitly opt into `Qt.StrongFocus`.
+- **Alpha composition:** Transparent/translucent surfaces use source-over weights through `Style.interactionTint`. Do not apply `Qt.tint` directly to a transparent base: its straight-RGB result can multiply the ink opacity again during rendering, producing faint/dark hover instead of a readable layer.
+- **State strength and contrast:** `Style.interactionColor` uses 8% hover / 12% press from semantic palette roles. One ink is chosen for both states, so a transition does not reverse direction. Preserve text contrast of at least 4.5:1 where the base already supports it; do not worsen low-contrast authored/custom pairs or rewrite the palette. `Style.focusOutlineColor` targets a stroke readable across rest/press (3:1), deriving a neutral tone when existing roles are insufficient; do not add decorative permanent outlines or glows.
+- **Focus is not selection:** Button/navigation focus comes from `Control.visualFocus`, not `activeFocus` after a click. Keep its inset stroke separate from the persistent fill. Text/numeric editors may still acknowledge all editing focus. Popup current/cursor feedback must remain distinct from the saved option, which keeps its tonal fill and check mark.
+- **Specialized shapes:** Existing per-corner `NBox` surfaces use `Style.interactionColor` without changing their geometry or menu anchoring. Bar hit targets may exceed their visual button: paint only the visual surface. Solid tiny indicators, scrollbar handles, drag boundaries and domain-specific status marks retain their own roles.
+- **Regression surface:** `Scripts/dev/tests/interaction-states.qml` renders the actual primitives and Settings sidebar through a private checkout facade/XDG environment. Its `highlightLab` IPC exposes state capture and independent hover, press, disabled, keyboard focus, palette, scale and popup-cursor inspection; it is not imported by the live shell.
 
 ---
 

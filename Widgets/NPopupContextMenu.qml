@@ -255,18 +255,13 @@ PopupWindow {
           visible: modelData.visible !== false
           color: "transparent"
 
-          Rectangle {
+          NStateLayer {
             id: innerRect
             anchors.fill: parent
-            color: mouseArea.containsMouse ? HydraColor.mSurfaceContainerHighest : "transparent"
+            hovering: mouseArea.containsMouse
+            pressed: mouseArea.pressed
             radius: Style.radiusS
             opacity: modelData.enabled !== false ? 1.0 : 0.5
-
-            Behavior on color {
-              ColorAnimation {
-                duration: mouseArea.containsMouse ? Style.hoverEnterDuration : Style.hoverLeaveDuration
-              }
-            }
 
             RowLayout {
               anchors.fill: parent
@@ -358,8 +353,8 @@ PopupWindow {
 
     // Force anchor recalculation after showing
     Qt.callLater(() => {
-                   anchor.updateAnchor();
-                 });
+      anchor.updateAnchor();
+    });
   }
 
   function close() {

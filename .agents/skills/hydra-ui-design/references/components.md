@@ -12,12 +12,22 @@ Always reuse these tested primitives instead of assembling ad-hoc combinations (
 - **Purpose:** Collapsible settings section card with icon chip, title, description, and expandable content body.
 - **When to reuse:** Settings pages, configuration dialogs, complex accordion groups.
 - **When NOT to reuse:** Compact popups, dense widgets, or non-expandable cards.
+- **Category mark:** Uses `NColorIcon`; prominent heading, wrapped description, visible keyboard focus and accessible checked state. Collapsing preserves loaded controls and owner-managed expansion state. Optional `summary` replaces the description while collapsed; body appearance fades without height animation.
+
+### `NSettingsGroupPage`
+- **Path:** `Widgets/NSettingsGroupPage.qml`
+- **Purpose:** Shared vertical settings page with `groups`, stable `pageKey`, session expansion state and search/deep-link reveal hooks.
+- **Optional overview:** Supply `header: Component { ... }` for content preceding navigation. The default is absent; do not use this to replace the page's scroll or controls.
+- **Navigation:** `jump(key)` and search reveal open the destination without closing other groups. `toggle(key, open)` changes only that group's session state.
+- **Live summaries:** Bind the `summaries` map by group key; keep `groups` stable so summary changes do not recreate editors.
+- **Example consumer:** `Modules/Panels/Settings/Tabs/GeneralTab.qml`.
 
 ### `NSettingsGroupNav`
 - **Path:** `Widgets/NSettingsGroupNav.qml`
 - **Purpose:** Horizontal jump chip navigation for quickly scrolling to sections within a settings page.
 - **When to reuse:** At the top of settings pages with multiple collapsible cards.
 - **When NOT to reuse:** Traditional tab navigation or single-topic dialogs.
+- **Keyboard:** Enter/Space activates the destination; Left/Right and Home/End move focus between chips.
 
 ### `NBox`
 - **Path:** `Widgets/NBox.qml`
@@ -33,12 +43,41 @@ Always reuse these tested primitives instead of assembling ad-hoc combinations (
 
 ### `NSettingsSection`
 - **Path:** `Widgets/NSettingsSection.qml`
-- **Purpose:** Semantic settings section divider with title and optional action button.
-- **When to reuse:** Grouping multiple related `NBox` cards or fields under a clear heading.
+- **Purpose:** Open semantic subsection with colored icon, title, optional description and consistently aligned controls; no background, border, accordion or nested indentation.
+- **When to reuse:** Grouping complete related controls within a major settings group. Its default content accepts visual controls and supporting nonvisual objects such as file pickers.
+
+| Property | Type | Default | Purpose |
+|---|---|---|---|
+| `icon` | `string` | empty | Optional semantic artwork key. |
+| `title` | `string` | empty | Wrapped subsection heading and accessible group name. |
+| `description` | `string` | empty | Wrapped context below the heading. |
+| `content` | default data alias | empty | Controls and supporting objects; existing handlers stay with their owner. |
+
+### Settings examples
+- **`NSettingsAppearancePreview`:** Bounded read-only illustration of scale, corners, surfaces and shadows. Replay is local and disabled when Style motion durations are zero. Only the illustration loader is visibility-gated; actual form editors remain loaded.
+- **`NSettingsWallpaperPreview`:** Bounded read-only wallpaper framing illustration; `screen` supplies monitor geometry. Uses slot lookup rather than inheriting/creating a monitor wallpaper entry. Centering/tile size are illustrative at sample resolution. No transition engine or wallpaper action is instantiated.
+
+### `NColorIcon`
+- **Path:** `Widgets/NColorIcon.qml`; semantic catalog: `Commons/ColoredIcons.qml`.
+- **API:** `icon` is a semantic key; `size` sets square implicit dimensions and defaults to `Style.baseWidgetSize * Style.uiScaleRatio`.
+- **Purpose:** Filled Material Symbols Rounded artwork on an iRiS-style colored gradient tile. Bundled font; no INIR checkout, system-font installation or runtime download required.
+- **When to reuse:** Settings categories and future category/folder panels (`folder-tools`, `folder-productivity`, `folder-creativity`, `folder-games` and related catalog keys).
+- **When NOT to reuse:** Every action button, status indicator or system tray icon. Keep `NIcon` for monochrome actions and semantic state colors.
+- **Fallback:** Unmapped keys use the actual existing Tabler symbol; a font-load failure is logged and also uses Tabler.
+- **Artwork scope:** Fixed identity hues are icon assets, not Hydra UI color tokens. See `docs/UI_DESIGN.md` §2 and the bundled font attribution/license.
 
 ---
 
 ## 2. Interactive Buttons & Controls
+
+### `NStateLayer`
+- **Path:** `Widgets/NStateLayer.qml`; policy: `Commons/Style.qml`.
+- **Purpose:** Shared background/focus painting, not a replacement activation control. Prefer the normal `N*` widget; use this for its background or an existing specialized interactive surface.
+- **Inputs:** `baseColor` is the persistent surface; `stateColor` is its paired foreground; `hovering` and `pressed` are independent input states. `radius`, `color` and `border` expose the visual surface; `focusColor` is the preferred semantic stroke.
+- **Focus:** `focusVisible` defaults to native `visualFocus`; `focusStrokeColor` is the readable computed stroke. The default policy is `Qt.NoFocus`; actual interactive owners opt into `Qt.StrongFocus`. Mouse activation does not impersonate keyboard focus.
+- **Precedence:** Disabled suppresses transient painting; press wins over hover. Neither replaces selection, expansion or `hot`. Contrast-aware ink uses the same direction for hover/press, with Style motion gates and no layout animation.
+- **Other geometry:** Per-corner `NBox` consumers use `Style.interactionColor` directly, keeping fused menus and custom corner contracts intact. Category icon artwork never supplies state colors.
+
 
 ### `NButton`
 - **Path:** `Widgets/NButton.qml`
@@ -46,6 +85,7 @@ Always reuse these tested primitives instead of assembling ad-hoc combinations (
 - **When to reuse:** Form submission, dialog action triggers, secondary operations.
 - **When NOT to reuse:** Tiny circular icon triggers (use `NIconButton`) or binary toggles (use `NToggle`).
 - **Anti-pattern to avoid:** Building custom clickable buttons with `Rectangle` and `MouseArea`.
+- **Input/visual separation:** Keyboard focus belongs to the visual surface inside the focus scope; the existing pointer activation timing is unchanged. Filled actions retain their color/foreground pair on hover; outlined actions retain their outline.
 
 ### `NIconButton`
 - **Path:** `Widgets/NIconButton.qml`
@@ -55,8 +95,8 @@ Always reuse these tested primitives instead of assembling ad-hoc combinations (
 
 ### `NIconButtonHot`
 - **Path:** `Widgets/NIconButtonHot.qml`
-- **Purpose:** Specialized icon button with instant hover hit detection and hotkey indicator.
-- **When to reuse:** High-traffic toolbar and dock controls requiring hotkey hints.
+- **Purpose:** Stateful icon button with persistent `hot` status, pointer feedback and keyboard focus.
+- **When to reuse:** Compact toggle/status actions in Control Center and equivalent panels. Hover and press do not erase `hot`; disabled controls do not paint a pressed state.
 
 ### `NToggle`
 - **Path:** `Widgets/NToggle.qml`

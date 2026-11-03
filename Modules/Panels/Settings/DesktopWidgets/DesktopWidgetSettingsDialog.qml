@@ -18,11 +18,11 @@ Popup {
   property var screen: null
   property var settingsCache: ({})
 
-  readonly property real maxHeight: (screen ? screen.height : (parent ? parent.height : 800)) * 0.8
+  readonly property real maxHeight: Math.min(screen ? screen.height : 800, parent ? parent.height : 800) * 0.8
 
   signal updateWidgetSettings(string section, int index, var settings)
 
-  width: Math.max(content.implicitWidth + padding * 2, 500)
+  width: Math.min(parent ? parent.width - Style.margin2XL : 900 * Style.uiScaleRatio, Math.max(content.implicitWidth + padding * 2, 500))
   height: Math.min(content.implicitHeight + padding * 2, maxHeight)
   padding: Style.marginXL
   modal: true
@@ -104,13 +104,13 @@ Popup {
             onLoaded: {
               if (item) {
                 Qt.callLater(() => {
-                               var firstInput = findFirstFocusable(item);
-                               if (firstInput) {
-                                 firstInput.forceActiveFocus();
-                               } else {
-                                 focusScope.forceActiveFocus();
-                               }
-                             });
+                  var firstInput = findFirstFocusable(item);
+                  if (firstInput) {
+                    firstInput.forceActiveFocus();
+                  } else {
+                    focusScope.forceActiveFocus();
+                  }
+                });
               }
             }
 
@@ -151,24 +151,24 @@ Popup {
     property real pressY: 0
 
     onPressed: mouse => {
-                 pressX = mouse.x;
-                 pressY = mouse.y;
-                 cursorShape = Qt.ClosedHandCursor;
-               }
+      pressX = mouse.x;
+      pressY = mouse.y;
+      cursorShape = Qt.ClosedHandCursor;
+    }
 
     onReleased: {
       cursorShape = Qt.OpenHandCursor;
     }
 
     onPositionChanged: mouse => {
-                         if (pressed) {
-                           var deltaX = mouse.x - pressX;
-                           var deltaY = mouse.y - pressY;
+      if (pressed) {
+        var deltaX = mouse.x - pressX;
+        var deltaY = mouse.y - pressY;
 
-                           root.x += deltaX;
-                           root.y += deltaY;
-                         }
-                       }
+        root.x += deltaX;
+        root.y += deltaY;
+      }
+    }
   }
 
   Timer {

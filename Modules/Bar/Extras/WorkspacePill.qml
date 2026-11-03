@@ -73,7 +73,7 @@ Item {
     }
   ]
 
-  Rectangle {
+  NStateLayer {
     id: pill
     width: pillContainer.pillWidth
     height: pillContainer.pillHeight
@@ -82,9 +82,7 @@ Item {
     radius: Style.radiusM
     z: 0
 
-    color: {
-      if (pillMouseArea.containsMouse)
-        return HydraColor.mHover;
+    baseColor: {
       if (workspace.isFocused)
         return HydraColor.resolveColorKey(focusedColor);
       if (workspace.isUrgent)
@@ -93,6 +91,9 @@ Item {
         return HydraColor.resolveColorKey(occupiedColor);
       return Qt.alpha(HydraColor.resolveColorKey(emptyColor), 0.3);
     }
+    stateColor: workspace.isFocused ? HydraColor.resolveOnColorKey(focusedColor) : workspace.isUrgent ? HydraColor.mOnError : workspace.isOccupied ? HydraColor.resolveOnColorKey(occupiedColor) : HydraColor.resolveOnColorKey(emptyColor)
+    hovering: pillMouseArea.containsMouse
+    pressed: pillMouseArea.pressed
 
     Loader {
       active: (labelMode !== "none") && (!showLabelsOnlyWhenOccupied || workspace.isOccupied || workspace.isFocused)
@@ -125,8 +126,6 @@ Item {
           verticalAlignment: Text.AlignVCenter
           wrapMode: Text.Wrap
           color: {
-            if (pillMouseArea.containsMouse)
-              return HydraColor.mOnHover;
             if (workspace.isFocused)
               return HydraColor.resolveOnColorKey(focusedColor);
             if (workspace.isUrgent)
@@ -152,13 +151,6 @@ Item {
       NumberAnimation {
         duration: Style.animationNormal
         easing.type: Easing.OutBack
-      }
-    }
-    Behavior on color {
-      enabled: !HydraColor.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
       }
     }
     Behavior on opacity {

@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import "../Helpers/ColorsConvert.js" as ColorsConvert
 import qs.Services.Power
 
 Singleton {
@@ -102,6 +103,69 @@ Singleton {
   readonly property int hoverEnterDuration: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(100 / Settings.data.general.animationSpeed)
   readonly property int hoverLeaveDuration: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(30 / Settings.data.general.animationSpeed)
 
+  // Material state layers tint the existing surface; they never replace selection.
+  readonly property real stateHoverOpacity: 0.08
+  readonly property real statePressedOpacity: 0.12
+
+  function interactionContrast(backgroundColor, foregroundColor) {
+    const surface = Qt.rgba(HydraColor.mSurface.r, HydraColor.mSurface.g, HydraColor.mSurface.b, 1);
+    const background = Qt.tint(surface, backgroundColor);
+    const foreground = Qt.tint(background, foregroundColor);
+    return ColorsConvert.getContrastRatio(background.toString(), foreground.toString());
+  }
+
+  function interactionTint(baseColor, inkColor, opacity) {
+    const base = typeof baseColor === "string" ? Qt.color(baseColor) : baseColor;
+    const ink = typeof inkColor === "string" ? Qt.color(inkColor) : inkColor;
+    if (base.a === 1)
+      return Qt.tint(base, Qt.alpha(ink, opacity));
+    // Qt.tint blends straight RGB; transparent bases need source-over weights
+    // or the state ink is multiplied by its opacity twice when rendered.
+    const baseWeight = base.a * (1 - opacity);
+    const alpha = baseWeight + opacity;
+    return Qt.rgba((base.r * baseWeight + ink.r * opacity) / alpha, (base.g * baseWeight + ink.g * opacity) / alpha, (base.b * baseWeight + ink.b * opacity) / alpha, alpha);
+  }
+
+  function interactionColor(baseColor, foregroundColor, hovered, pressed) {
+    if (!hovered && !pressed)
+      return baseColor;
+
+    // Pick one ink for both states so hover -> press never reverses direction.
+    // Legacy/custom roles may already be below 4.5: do not worsen them.
+    const minimumContrast = Math.min(4.5, interactionContrast(baseColor, foregroundColor));
+    const strongest = interactionTint(baseColor, foregroundColor, statePressedOpacity);
+    let ink = foregroundColor;
+    if (interactionContrast(strongest, foregroundColor) < minimumContrast) {
+      const surfaceTint = interactionTint(baseColor, HydraColor.mSurface, statePressedOpacity);
+      const contentTint = interactionTint(baseColor, HydraColor.mOnSurface, statePressedOpacity);
+      ink = interactionContrast(surfaceTint, foregroundColor) >= interactionContrast(contentTint, foregroundColor) ? HydraColor.mSurface : HydraColor.mOnSurface;
+    }
+    return interactionTint(baseColor, ink, pressed ? statePressedOpacity : stateHoverOpacity);
+  }
+
+  function focusOutlineColor(baseColor, foregroundColor, preferredColor) {
+    const pressedColor = interactionColor(baseColor, foregroundColor, false, true);
+    if (Math.min(interactionContrast(baseColor, preferredColor), interactionContrast(pressedColor, preferredColor)) >= 3)
+      return preferredColor;
+    const surfaceContrast = Math.min(interactionContrast(baseColor, HydraColor.mSurface), interactionContrast(pressedColor, HydraColor.mSurface));
+    const contentContrast = Math.min(interactionContrast(baseColor, HydraColor.mOnSurface), interactionContrast(pressedColor, HydraColor.mOnSurface));
+    if (Math.max(surfaceContrast, contentContrast) >= 3)
+      return contentContrast >= surfaceContrast ? HydraColor.mOnSurface : HydraColor.mSurface;
+    // Legacy palettes can put both neutral roles too close to a filled action.
+    // Adjust their tones only for the stroke; never rewrite the authored roles.
+    let darkInk = HydraColor.mOnSurface;
+    let lightInk = HydraColor.mSurface;
+    for (let step = 0; step < 8; ++step) {
+      darkInk = Qt.darker(darkInk, 1.25);
+      if (Math.min(interactionContrast(baseColor, darkInk), interactionContrast(pressedColor, darkInk)) >= 3)
+        return darkInk;
+      lightInk = Qt.lighter(lightInk, 1.25);
+      if (Math.min(interactionContrast(baseColor, lightInk), interactionContrast(pressedColor, lightInk)) >= 3)
+        return lightInk;
+    }
+    return contentContrast >= surfaceContrast ? HydraColor.mOnSurface : HydraColor.mSurface;
+  }
+
   // Delays
   readonly property int tooltipDelay: 300
   readonly property int tooltipDelayLong: 1200
@@ -117,20 +181,20 @@ Singleton {
   readonly property real barHeight: {
     let h;
     switch (Settings.data.bar.density) {
-      case "mini":
+    case "mini":
       h = (Settings.data.bar.position === "left" || Settings.data.bar.position === "right") ? 23 : 21;
       break;
-      case "compact":
+    case "compact":
       h = (Settings.data.bar.position === "left" || Settings.data.bar.position === "right") ? 27 : 25;
       break;
-      case "comfortable":
+    case "comfortable":
       h = (Settings.data.bar.position === "left" || Settings.data.bar.position === "right") ? 39 : 37;
       break;
-      case "spacious":
+    case "spacious":
       h = (Settings.data.bar.position === "left" || Settings.data.bar.position === "right") ? 49 : 47;
       break;
-      default:
-      case "default":
+    default:
+    case "default":
       h = (Settings.data.bar.position === "left" || Settings.data.bar.position === "right") ? 33 : 31;
     }
     return toOdd(h);
@@ -142,19 +206,19 @@ Singleton {
   readonly property real capsuleHeight: {
     let h;
     switch (Settings.data.bar.density) {
-      case "mini":
+    case "mini":
       h = Math.round(barHeight * 0.90);
       break;
-      case "compact":
+    case "compact":
       h = Math.round(barHeight * 0.85);
       break;
-      case "comfortable":
+    case "comfortable":
       h = Math.round(barHeight * 0.75);
       break;
-      case "spacious":
+    case "spacious":
       h = Math.round(barHeight * 0.65);
       break;
-      default:
+    default:
       h = Math.round(barHeight * 0.82);
       break;
     }

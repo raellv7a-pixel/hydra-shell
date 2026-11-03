@@ -44,11 +44,11 @@ Item {
   Accessible.name: tooltipText
 
   Keys.onPressed: event => {
-                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
-                      root.togglePanel();
-                      event.accepted = true;
-                    }
-                  }
+    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+      root.togglePanel();
+      event.accepted = true;
+    }
+  }
 
   function togglePanel() {
     const panel = PanelService.getPanel("tamagotchiPanel", screen);
@@ -78,24 +78,26 @@ Item {
     ]
 
     onTriggered: action => {
-                   contextMenu.close();
-                   PanelService.closeContextMenu(screen);
-                   if (action === "open")
-                   root.togglePanel();
-                   else if (action === "rest")
-                   TamagotchiService.rest();
-                   else if (action === "widget-settings")
-                   BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-                 }
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
+      if (action === "open")
+        root.togglePanel();
+      else if (action === "rest")
+        TamagotchiService.rest();
+      else if (action === "widget-settings")
+        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+    }
   }
 
-  Rectangle {
+  NStateLayer {
     id: capsule
     anchors.centerIn: parent
     width: root.implicitWidth
     height: root.implicitHeight
     radius: Math.min(Style.iRadiusL, width / 2)
-    color: mouseArea.containsMouse ? HydraColor.mHover : Style.capsuleColor
+    baseColor: Style.capsuleColor
+    hovering: mouseArea.containsMouse
+    pressed: mouseArea.pressed
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
 
@@ -128,11 +130,11 @@ Item {
     onEntered: TooltipService.show(root, root.tooltipText, BarService.getTooltipDirection(root.screenName))
     onExited: TooltipService.hide()
     onClicked: mouse => {
-                 TooltipService.hide();
-                 if (mouse.button === Qt.RightButton)
-                 PanelService.showContextMenu(contextMenu, root, screen);
-                 else
-                 root.togglePanel();
-               }
+      TooltipService.hide();
+      if (mouse.button === Qt.RightButton)
+        PanelService.showContextMenu(contextMenu, root, screen);
+      else
+        root.togglePanel();
+    }
   }
 }

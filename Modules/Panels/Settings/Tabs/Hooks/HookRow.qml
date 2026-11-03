@@ -13,11 +13,23 @@ RowLayout {
   signal editClicked
 
   spacing: Style.marginM
+  Layout.fillWidth: true
 
-  NLabel {
-    label: root.label
-    description: root.description
-    labelColor: root.value ? HydraColor.mPrimary : HydraColor.mOnSurface
+  ColumnLayout {
+    Layout.fillWidth: true
+    spacing: Style.marginXS
+    NLabel {
+      label: root.label
+      description: root.description
+      labelColor: root.value ? HydraColor.mPrimary : HydraColor.mOnSurface
+    }
+    NText {
+      Layout.fillWidth: true
+      text: root.value ? I18n.tr("settings.content.configured") : I18n.tr("settings.content.not-configured")
+      pointSize: Style.fontSizeXS
+      color: HydraColor.mOnSurfaceVariant
+      wrapMode: Text.WordWrap
+    }
   }
 
   NIconButton {

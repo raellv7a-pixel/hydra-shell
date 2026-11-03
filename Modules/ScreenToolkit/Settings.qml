@@ -329,24 +329,22 @@ ColumnLayout {
 
         Repeater {
           model: parent.expiryDefs
-          delegate: Rectangle {
+          delegate: NStateLayer {
             height: 28
             width: _expLabel.implicitWidth + Style.marginM * 2
             radius: Style.radiusM
             enabled: root.x02ApiKey.trim() !== ""
-            color: root.x02Expiry === modelData.id ? HydraColor.mPrimary : (_expMA.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
-            Behavior on color {
-              ColorAnimation {
-                duration: 120
-              }
-            }
+            baseColor: root.x02Expiry === modelData.id ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
+            stateColor: root.x02Expiry === modelData.id ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+            hovering: _expMA.containsMouse
+            pressed: _expMA.pressed
             NText {
               id: _expLabel
               anchors.centerIn: parent
               text: modelData.label
               pointSize: Style.fontSizeXS
               font.weight: root.x02Expiry === modelData.id ? Font.Bold : Font.Normal
-              color: root.x02Expiry === modelData.id ? HydraColor.mOnPrimary : (_expMA.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface)
+              color: root.x02Expiry === modelData.id ? HydraColor.mOnPrimary : HydraColor.mOnSurface
             }
             MouseArea {
               id: _expMA
@@ -370,9 +368,9 @@ ColumnLayout {
       description: pluginApi?.tr("settings.shareSkipPopoverDesc")
       checked: root.shareSkipPopover
       onToggled: v => {
-                   root.shareSkipPopover = v;
-                   saveSettings();
-                 }
+        root.shareSkipPopover = v;
+        saveSettings();
+      }
     }
   }
 
@@ -393,9 +391,9 @@ ColumnLayout {
     description: pluginApi?.tr("settings.recordSkipConfirmationDesc")
     checked: root.recordSkipConfirmation
     onToggled: v => {
-                 root.recordSkipConfirmation = v;
-                 saveSettings();
-               }
+      root.recordSkipConfirmation = v;
+      saveSettings();
+    }
   }
 
   NToggle {
@@ -404,9 +402,9 @@ ColumnLayout {
     description: pluginApi?.tr("settings.recordCopyToClipboardDesc")
     checked: root.recordCopyToClipboard
     onToggled: v => {
-                 root.recordCopyToClipboard = v;
-                 saveSettings();
-               }
+      root.recordCopyToClipboard = v;
+      saveSettings();
+    }
   }
 
   NTextInput {

@@ -155,8 +155,6 @@ NBox {
           baseSize: Style.baseWidgetSize * 0.5
           colorFg: AudioService.muted ? HydraColor.mError : HydraColor.mOnSurface
           colorBg: "transparent"
-          colorBgHover: HydraColor.mHover
-          colorFgHover: HydraColor.mOnHover
           onClicked: AudioService.setOutputMuted(!AudioService.muted)
         }
 
@@ -192,15 +190,15 @@ NBox {
           propagateComposedEvents: true
 
           onWheel: wheel => {
-                     if (outputVolumeSlider.enabled && AudioService.sink) {
-                       const delta = wheel.angleDelta.y || wheel.angleDelta.x;
-                       const step = Settings.data.audio.volumeStep / 100.0; // Convert percentage to 0-1 range
-                       const increment = delta > 0 ? step : -step;
-                       const maxVolume = Settings.data.audio.volumeOverdrive ? 1.5 : 1.0;
-                       const newValue = Math.max(0, Math.min(maxVolume, localOutputVolume + increment));
-                       localOutputVolume = newValue;
-                     }
-                   }
+            if (outputVolumeSlider.enabled && AudioService.sink) {
+              const delta = wheel.angleDelta.y || wheel.angleDelta.x;
+              const step = Settings.data.audio.volumeStep / 100.0; // Convert percentage to 0-1 range
+              const increment = delta > 0 ? step : -step;
+              const maxVolume = Settings.data.audio.volumeOverdrive ? 1.5 : 1.0;
+              const newValue = Math.max(0, Math.min(maxVolume, localOutputVolume + increment));
+              localOutputVolume = newValue;
+            }
+          }
         }
       }
     }
@@ -223,8 +221,6 @@ NBox {
           baseSize: Style.baseWidgetSize * 0.5
           colorFg: AudioService.inputMuted ? HydraColor.mError : HydraColor.mOnSurface
           colorBg: "transparent"
-          colorBgHover: HydraColor.mHover
-          colorFgHover: HydraColor.mOnHover
           onClicked: AudioService.setInputMuted(!AudioService.inputMuted)
         }
 
@@ -260,15 +256,15 @@ NBox {
           propagateComposedEvents: true
 
           onWheel: wheel => {
-                     if (inputVolumeSlider.enabled && AudioService.source) {
-                       const delta = wheel.angleDelta.y || wheel.angleDelta.x;
-                       const step = Settings.data.audio.volumeStep / 100.0; // Convert percentage to 0-1 range
-                       const increment = delta > 0 ? step : -step;
-                       const maxVolume = Settings.data.audio.volumeOverdrive ? 1.5 : 1.0;
-                       const newValue = Math.max(0, Math.min(maxVolume, localInputVolume + increment));
-                       localInputVolume = newValue;
-                     }
-                   }
+            if (inputVolumeSlider.enabled && AudioService.source) {
+              const delta = wheel.angleDelta.y || wheel.angleDelta.x;
+              const step = Settings.data.audio.volumeStep / 100.0; // Convert percentage to 0-1 range
+              const increment = delta > 0 ? step : -step;
+              const maxVolume = Settings.data.audio.volumeOverdrive ? 1.5 : 1.0;
+              const newValue = Math.max(0, Math.min(maxVolume, localInputVolume + increment));
+              localInputVolume = newValue;
+            }
+          }
         }
       }
     }

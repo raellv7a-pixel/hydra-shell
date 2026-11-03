@@ -47,8 +47,6 @@ NIconButton {
   customRadius: Style.radiusL
   colorBg: Style.capsuleColor
   colorFg: iconColor
-  colorBgHover: HydraColor.mHover
-  colorFgHover: HydraColor.mOnHover
   colorBorder: Style.capsuleBorderColor
   colorBorderHover: Style.capsuleBorderColor
 
@@ -64,13 +62,13 @@ NIconButton {
     ]
 
     onTriggered: action => {
-                   contextMenu.close();
-                   PanelService.closeContextMenu(screen);
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
 
-                   if (action === "widget-settings") {
-                     BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-                   }
-                 }
+      if (action === "widget-settings") {
+        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+      }
+    }
   }
 
   onClicked: {

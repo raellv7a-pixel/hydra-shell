@@ -181,11 +181,13 @@ Item {
             value: root.pickedHsv
           }
         ]
-        delegate: Rectangle {
+        delegate: NStateLayer {
           width: root.width
           height: 36
           radius: Style.radiusM
-          color: rh.containsMouse ? HydraColor.mHover : HydraColor.mSurface
+          baseColor: HydraColor.mSurface
+          hovering: rh.containsMouse
+          pressed: rh.pressed
           border.color: Style.capsuleBorderColor
           border.width: Style.capsuleBorderWidth
           Row {

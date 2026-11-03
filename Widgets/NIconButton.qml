@@ -4,7 +4,7 @@ import Quickshell.Widgets
 import qs.Commons
 import qs.Services.UI
 
-Item {
+FocusScope {
   id: root
 
   property real baseSize: Style.baseWidgetSize
@@ -19,13 +19,36 @@ Item {
 
   property color colorBg: HydraColor.smartAlpha(HydraColor.mSurfaceContainerHigh)
   property color colorFg: HydraColor.mPrimary
-  property color colorBgHover: HydraColor.mSurfaceContainerHighest
-  property color colorFgHover: HydraColor.mOnSurface
-  property color colorBorder: HydraColor.mOutline
-  property color colorBorderHover: HydraColor.mOutline
+  property color colorBgHover: root.colorBg
+  property color colorFgHover: root.colorFg
+  property color colorBorder: "transparent"
+  property color colorBorderHover: root.colorBorder
   property real customRadius: -1 // -1 means use default (iRadiusL), otherwise use this value
+  property bool keyboardPressed: false
+  Accessible.role: Accessible.Button
+  Accessible.name: typeof root.tooltipText === "string" ? root.tooltipText : root.icon
+  Accessible.onPressAction: if (root.enabled)
+                              root.clicked()
 
-  // Expose border properties for backwards compatibility (aliases to visualButton)
+  function activateFromKeyboard(event) {
+    if (!event.isAutoRepeat && root.enabled) {
+      root.keyboardPressed = true;
+      root.clicked();
+    }
+  }
+  Keys.onReturnPressed: event => root.activateFromKeyboard(event)
+  Keys.onEnterPressed: event => root.activateFromKeyboard(event)
+  Keys.onSpacePressed: event => root.activateFromKeyboard(event)
+  Keys.onReleased: event => {
+    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space)
+      root.keyboardPressed = false;
+    else
+      event.accepted = false;
+  }
+  onActiveFocusChanged: if (!activeFocus)
+                          root.keyboardPressed = false
+
+  // Visual properties stay on the button, independently of its extended hit area.
   property alias border: visualButton.border
   property alias radius: visualButton.radius
   property alias color: visualButton.color
@@ -48,24 +71,22 @@ Item {
   opacity: enabled ? 1.0 : 0.6
 
   // Visual button - stays at buttonSize, centered in parent
-  Rectangle {
+  NStateLayer {
     id: visualButton
     width: root.buttonSize
     height: root.buttonSize
     anchors.centerIn: parent
 
-    color: root.enabled && root.hovering ? colorBgHover : colorBg
+    baseColor: root.enabled && root.hovering ? root.colorBgHover : root.colorBg
+    stateColor: root.enabled && root.hovering ? root.colorFgHover : root.colorFg
+    focusColor: stateColor
+    hovering: root.hovering
+    pressed: buttonMouse.pressed || root.keyboardPressed
+    focus: true
+    focusPolicy: Qt.StrongFocus
     radius: Math.min((customRadius >= 0 ? customRadius : Style.iRadiusL), width / 2)
     border.color: root.enabled && root.hovering ? colorBorderHover : colorBorder
     border.width: Style.borderS
-
-    Behavior on color {
-      enabled: !HydraColor.isTransitioning
-      ColorAnimation {
-        duration: root.hovering ? Style.hoverEnterDuration : Style.hoverLeaveDuration
-        easing.type: Easing.InOutQuad
-      }
-    }
 
     TextMetrics {
       id: iconMetrics
@@ -95,6 +116,7 @@ Item {
 
   // MouseArea fills root (extends beyond visual button for bar click area)
   MouseArea {
+    id: buttonMouse
     // Always enabled to allow hover/tooltip even when the button is disabled
     enabled: true
     anchors.fill: parent
@@ -116,25 +138,26 @@ Item {
       root.exited();
     }
     onClicked: mouse => {
-                 if (tooltipText && (!Array.isArray(tooltipText) || tooltipText.length > 0)) {
-                   TooltipService.hide(root);
-                 }
-                 if (!root.enabled && !allowClickWhenDisabled) {
-                   return;
-                 }
-                 if (mouse.button === Qt.LeftButton) {
-                   root.clicked();
-                 } else if (mouse.button === Qt.RightButton) {
-                   root.rightClicked();
-                 } else if (mouse.button === Qt.MiddleButton) {
-                   root.middleClicked();
-                 }
-               }
+      visualButton.forceActiveFocus(Qt.MouseFocusReason);
+      if (tooltipText && (!Array.isArray(tooltipText) || tooltipText.length > 0)) {
+        TooltipService.hide(root);
+      }
+      if (!root.enabled && !allowClickWhenDisabled) {
+        return;
+      }
+      if (mouse.button === Qt.LeftButton) {
+        root.clicked();
+      } else if (mouse.button === Qt.RightButton) {
+        root.rightClicked();
+      } else if (mouse.button === Qt.MiddleButton) {
+        root.middleClicked();
+      }
+    }
     onWheel: wheel => {
-               if (root.handleWheel) {
-                 root.wheel(wheel.angleDelta.y);
-               }
-               wheel.accepted = false;
-             }
+      if (root.handleWheel) {
+        root.wheel(wheel.angleDelta.y);
+      }
+      wheel.accepted = false;
+    }
   }
 }

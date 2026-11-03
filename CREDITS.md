@@ -12,6 +12,7 @@ open-source projects and contributors.
 
 - **MrDowntempo** - Creator of the Noctalia Owl and moon logo (upstream branding, no longer shipped)
 - **[SaberJ2X](https://www.reddit.com/user/SaberJ64/)** - Creator of Talia, the Noctalia mascot
+- **[iNiR / iRiS](https://github.com/raellv7a-pixel/iNiR)** - Settings organization and colored category artwork reference. Hydra retains its own controls, state, semantic surfaces and independently authored QML implementation.
 
 ## Core Framework
 
@@ -46,6 +47,7 @@ open-source projects and contributors.
 
 ## Icons
 - **[Tabler Icons](https://tabler.io/icons)** - Icon set used throughout the shell
+- **[Google Material Symbols Rounded](https://github.com/google/material-design-icons)** (Apache-2.0) - Bundled full-repertoire filled static font for `NColorIcon`. Modified font notice, pinned upstream revision, reproduction instructions and license are in `Assets/Fonts/material-symbols/`.
 - **[Riyan Resdian on Noun Project](https://thenounproject.com/creator/yaicon/)** - Plug icon
 
 ## Cursor Theme

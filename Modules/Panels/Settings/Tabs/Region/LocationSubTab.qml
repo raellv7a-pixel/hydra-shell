@@ -30,26 +30,22 @@ ColumnLayout {
     currentKey: Settings.data.general.language
     settingsPath: "general.language"
     onSelected: key => {
-                  // Need to change language on next frame using "callLater" or it will pull the rug below our feet: the NComboBox would be rebuilt immediately before it can close properly.
-                  Qt.callLater(() => {
-                                 Settings.data.general.language = key;
-                                 if (key === "") {
-                                   I18n.detectLanguage(); // Re-detect system language if "Automatic" is selected
-                                 } else {
-                                   I18n.setLanguage(key); // Set specific language
-                                 }
-                               });
-                }
-  }
-
-  NDivider {
-    Layout.fillWidth: true
+      // Need to change language on next frame using "callLater" or it will pull the rug below our feet: the NComboBox would be rebuilt immediately before it can close properly.
+      Qt.callLater(() => {
+        Settings.data.general.language = key;
+        if (key === "") {
+          I18n.detectLanguage(); // Re-detect system language if "Automatic" is selected
+        } else {
+          I18n.setLanguage(key); // Set specific language
+        }
+      });
+    }
   }
 
   // Location
-  ColumnLayout {
-    Layout.fillWidth: true
-    spacing: Style.marginS
+  NSettingsSection {
+    title: I18n.tr("common.location")
+    icon: "map-pin"
 
     // Auto-locate
     RowLayout {
@@ -75,7 +71,7 @@ ColumnLayout {
 
     NTextInput {
       visible: !Settings.data.location.autoLocate
-      Layout.maximumWidth: root.width / 2
+      Layout.fillWidth: true
       label: I18n.tr("panels.location.location-search-label")
       description: I18n.tr("panels.location.location-search-description")
       text: Settings.data.location.name
@@ -97,13 +93,15 @@ ColumnLayout {
                                                        }) : ""
       pointSize: Style.fontSizeS
       color: HydraColor.mOnSurfaceVariant
+      Layout.fillWidth: true
+      wrapMode: Text.WordWrap
       font.italic: true
     }
   }
 
-  ColumnLayout {
-    spacing: Style.marginL
-    Layout.fillWidth: true
+  NSettingsSection {
+    title: I18n.tr("settings.content.weather")
+    icon: "cloud"
 
     NToggle {
       label: I18n.tr("panels.location.weather-enabled-label")

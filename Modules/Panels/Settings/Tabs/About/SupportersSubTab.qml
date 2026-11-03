@@ -54,7 +54,7 @@ ColumnLayout {
     Repeater {
       model: root.supporters.length
 
-      delegate: Rectangle {
+      delegate: NStateLayer {
         id: supporterCard
 
         property bool hasGithub: !!root.supporters[index].github_username
@@ -62,21 +62,9 @@ ColumnLayout {
         width: Math.max(Math.round(supportersFlow.width / 2 - Style.marginL - 1), Math.round(Style.baseWidgetSize * 4.5))
         height: Math.round(Style.baseWidgetSize * 2.6)
         radius: Style.radiusM
-        color: supporterArea.containsMouse && hasGithub ? HydraColor.mHover : Qt.alpha(HydraColor.mPrimary, 0.05)
-        border.width: Style.borderM
-        border.color: supporterArea.containsMouse && hasGithub ? HydraColor.mPrimary : Qt.alpha(HydraColor.mPrimary, 0.5)
-
-        Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
-        }
-
-        Behavior on border.color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
-        }
+        baseColor: Qt.alpha(HydraColor.mPrimary, 0.05)
+        hovering: supporterArea.containsMouse && hasGithub
+        pressed: supporterArea.pressed && hasGithub
 
         RowLayout {
           anchors.fill: parent
@@ -180,7 +168,7 @@ ColumnLayout {
             NText {
               text: root.supporters[index].name || root.supporters[index].github_username || "Unknown"
               font.weight: Style.fontWeightBold
-              color: supporterArea.containsMouse && supporterCard.hasGithub ? HydraColor.mOnHover : HydraColor.mOnSurface
+              color: HydraColor.mOnSurface
               elide: Text.ElideRight
               Layout.fillWidth: true
               pointSize: Style.fontSizeS

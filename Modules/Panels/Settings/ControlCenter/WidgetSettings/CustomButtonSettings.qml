@@ -103,200 +103,208 @@ ColumnLayout {
     _settings.saveSettings();
   }
 
-  RowLayout {
-    spacing: Style?.marginM ?? 8
+  NSettingsSection {
+    title: I18n.tr("settings.content.identity")
+    icon: "info"
+    RowLayout {
+      spacing: Style?.marginM ?? 8
 
-    NLabel {
-      label: I18n.tr("common.icon")
-      description: I18n.tr("panels.control-center.shortcuts-custom-button-icon-description")
-    }
+      NLabel {
+        label: I18n.tr("common.icon")
+        description: I18n.tr("panels.control-center.shortcuts-custom-button-icon-description")
+      }
 
-    NIcon {
-      Layout.alignment: Qt.AlignVCenter
-      icon: _settings.icon || (widgetMetadata && widgetMetadata.icon ? widgetMetadata.icon : "")
-      pointSize: Style?.fontSizeXL ?? 24
-      visible: (_settings.icon || (widgetMetadata && widgetMetadata.icon ? widgetMetadata.icon : "")) !== ""
-    }
+      NIcon {
+        Layout.alignment: Qt.AlignVCenter
+        icon: _settings.icon || (widgetMetadata && widgetMetadata.icon ? widgetMetadata.icon : "")
+        pointSize: Style?.fontSizeXL ?? 24
+        visible: (_settings.icon || (widgetMetadata && widgetMetadata.icon ? widgetMetadata.icon : "")) !== ""
+      }
 
-    NButton {
-      text: I18n.tr("common.browse")
-      onClicked: iconPicker.open()
-    }
-  }
-
-  NIconPicker {
-    id: iconPicker
-    initialIcon: _settings.icon
-    onIconSelected: function (iconName) {
-      _settings.icon = iconName;
-      saveSettings();
-    }
-  }
-
-  NTextInput {
-    Layout.fillWidth: true
-    label: I18n.tr("bar.custom-button.general-tooltip-text-label")
-    description: I18n.tr("bar.custom-button.general-tooltip-text-description")
-    placeholderText: I18n.tr("placeholders.enter-tooltip")
-    text: _settings.generalTooltipText
-    onTextChanged: {
-      _settings.generalTooltipText = text;
-      saveSettings();
-    }
-    defaultValue: widgetMetadata.generalTooltipText
-  }
-
-  NToggle {
-    Layout.fillWidth: true
-    label: I18n.tr("bar.custom-button.show-exec-tooltip-label")
-    description: I18n.tr("bar.custom-button.show-exec-tooltip-description")
-    checked: _settings.showExecTooltip
-    onToggled: checked => {
-                 _settings.showExecTooltip = checked;
-                 saveSettings();
-               }
-    defaultValue: widgetMetadata.showExecTooltip
-  }
-
-  NTextInput {
-    Layout.fillWidth: true
-    label: I18n.tr("bar.custom-button.left-click-label")
-    description: I18n.tr("bar.custom-button.left-click-description")
-    placeholderText: I18n.tr("placeholders.enter-command")
-    text: _settings.onClicked
-    onTextChanged: {
-      _settings.onClicked = text;
-      saveSettings();
-    }
-    defaultValue: widgetMetadata.onClicked
-  }
-
-  NTextInput {
-    Layout.fillWidth: true
-    label: I18n.tr("bar.custom-button.right-click-label")
-    description: I18n.tr("bar.custom-button.right-click-description")
-    placeholderText: I18n.tr("placeholders.enter-command")
-    text: _settings.onRightClicked
-    onTextChanged: {
-      _settings.onRightClicked = text;
-      saveSettings();
-    }
-    defaultValue: widgetMetadata.onRightClicked
-  }
-
-  NTextInput {
-    Layout.fillWidth: true
-    label: I18n.tr("bar.custom-button.middle-click-label")
-    description: I18n.tr("bar.custom-button.middle-click-description")
-    placeholderText: I18n.tr("placeholders.enter-command")
-    text: _settings.onMiddleClicked
-    onTextChanged: {
-      _settings.onMiddleClicked = text;
-      saveSettings();
-    }
-    defaultValue: widgetMetadata.onMiddleClicked
-  }
-
-  NDivider {}
-
-  NToggle {
-    id: enableOnStateLogicToggle
-    Layout.fillWidth: true
-    label: I18n.tr("panels.control-center.shortcuts-custom-button-enable-on-state-logic-label")
-    description: I18n.tr("panels.control-center.shortcuts-custom-button-enable-on-state-logic-description")
-    checked: _settings.enableOnStateLogic
-    onToggled: checked => {
-                 _settings.enableOnStateLogic = checked;
-                 saveSettings();
-               }
-    defaultValue: widgetMetadata.enableOnStateLogic
-  }
-
-  ColumnLayout {
-    Layout.fillWidth: true
-    visible: root.rootSettings && root.rootSettings.enableOnStateLogic
-    spacing: Style?.marginM ?? 8
-
-    NLabel {
-      label: I18n.tr("panels.control-center.shortcuts-custom-button-state-checks-label")
-    }
-
-    Repeater {
-      model: root.rootSettings ? root.rootSettings._stateChecksListModel : null
-      delegate: Item {
-        property int currentIndex: index
-
-        implicitHeight: contentRow.implicitHeight
-        Layout.fillWidth: true
-
-        RowLayout {
-          id: contentRow
-          anchors.fill: parent
-          spacing: Style?.marginM ?? 8
-
-          NTextInput {
-            Layout.fillWidth: true
-            placeholderText: I18n.tr("panels.control-center.shortcuts-custom-button-state-checks-command")
-            text: model.command
-            onTextChanged: {
-              updateStateCheck(currentIndex, text, model.icon);
-            }
-          }
-
-          RowLayout {
-            Layout.alignment: Qt.AlignVCenter
-            spacing: Style?.marginS ?? 4
-
-            NIcon {
-              icon: model.icon
-              pointSize: Style?.fontSizeL ?? 20
-              visible: model.icon !== undefined && model.icon !== ""
-            }
-
-            NIconButton {
-              icon: "folder"
-              tooltipText: I18n.tr("common.browse")
-              baseSize: Style?.buttonSizeS ?? 24
-              onClicked: iconPickerDelegate.open()
-            }
-
-            NIconButton {
-              icon: "close"
-              tooltipText: I18n.tr("panels.control-center.shortcuts-custom-button-state-checks-remove")
-              baseSize: Style?.buttonSizeS ?? 24
-              colorBorder: Qt.alpha(HydraColor.mOutline, Style.opacityLight)
-              colorBg: HydraColor.mError
-              colorFg: HydraColor.mOnError
-              colorBgHover: Qt.alpha(HydraColor.mError, Style.opacityMedium)
-              colorFgHover: HydraColor.mOnError
-              onClicked: {
-                removeStateCheck(currentIndex);
-              }
-            }
-          }
-        }
-
-        NIconPicker {
-          id: iconPickerDelegate
-          initialIcon: model.icon
-          onIconSelected: function (iconName) {
-            updateStateCheck(currentIndex, model.command, iconName);
-          }
-        }
+      NButton {
+        text: I18n.tr("common.browse")
+        onClicked: iconPicker.open()
       }
     }
 
-    Item {
-      Layout.fillWidth: true
+    NIconPicker {
+      id: iconPicker
+      initialIcon: _settings.icon
+      onIconSelected: function (iconName) {
+        _settings.icon = iconName;
+        saveSettings();
+      }
     }
 
-    RowLayout {
+    NTextInput {
       Layout.fillWidth: true
+      label: I18n.tr("bar.custom-button.general-tooltip-text-label")
+      description: I18n.tr("bar.custom-button.general-tooltip-text-description")
+      placeholderText: I18n.tr("placeholders.enter-tooltip")
+      text: _settings.generalTooltipText
+      onTextChanged: {
+        _settings.generalTooltipText = text;
+        saveSettings();
+      }
+      defaultValue: widgetMetadata.generalTooltipText
+    }
+
+    NToggle {
+      Layout.fillWidth: true
+      label: I18n.tr("bar.custom-button.show-exec-tooltip-label")
+      description: I18n.tr("bar.custom-button.show-exec-tooltip-description")
+      checked: _settings.showExecTooltip
+      onToggled: checked => {
+        _settings.showExecTooltip = checked;
+        saveSettings();
+      }
+      defaultValue: widgetMetadata.showExecTooltip
+    }
+  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.commands")
+    icon: "terminal"
+    NTextInput {
+      Layout.fillWidth: true
+      label: I18n.tr("bar.custom-button.left-click-label")
+      description: I18n.tr("bar.custom-button.left-click-description")
+      placeholderText: I18n.tr("placeholders.enter-command")
+      text: _settings.onClicked
+      onTextChanged: {
+        _settings.onClicked = text;
+        saveSettings();
+      }
+      defaultValue: widgetMetadata.onClicked
+    }
+
+    NTextInput {
+      Layout.fillWidth: true
+      label: I18n.tr("bar.custom-button.right-click-label")
+      description: I18n.tr("bar.custom-button.right-click-description")
+      placeholderText: I18n.tr("placeholders.enter-command")
+      text: _settings.onRightClicked
+      onTextChanged: {
+        _settings.onRightClicked = text;
+        saveSettings();
+      }
+      defaultValue: widgetMetadata.onRightClicked
+    }
+
+    NTextInput {
+      Layout.fillWidth: true
+      label: I18n.tr("bar.custom-button.middle-click-label")
+      description: I18n.tr("bar.custom-button.middle-click-description")
+      placeholderText: I18n.tr("placeholders.enter-command")
+      text: _settings.onMiddleClicked
+      onTextChanged: {
+        _settings.onMiddleClicked = text;
+        saveSettings();
+      }
+      defaultValue: widgetMetadata.onMiddleClicked
+    }
+  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.feedback")
+    icon: "circle-dot"
+    NToggle {
+      id: enableOnStateLogicToggle
+      Layout.fillWidth: true
+      label: I18n.tr("panels.control-center.shortcuts-custom-button-enable-on-state-logic-label")
+      description: I18n.tr("panels.control-center.shortcuts-custom-button-enable-on-state-logic-description")
+      checked: _settings.enableOnStateLogic
+      onToggled: checked => {
+        _settings.enableOnStateLogic = checked;
+        saveSettings();
+      }
+      defaultValue: widgetMetadata.enableOnStateLogic
+    }
+
+    ColumnLayout {
+      Layout.fillWidth: true
+      visible: root.rootSettings && root.rootSettings.enableOnStateLogic
       spacing: Style?.marginM ?? 8
 
-      NButton {
-        text: I18n.tr("panels.control-center.shortcuts-custom-button-state-checks-add")
-        onClicked: addStateCheck()
+      NLabel {
+        label: I18n.tr("panels.control-center.shortcuts-custom-button-state-checks-label")
+      }
+
+      Repeater {
+        model: root.rootSettings ? root.rootSettings._stateChecksListModel : null
+        delegate: Item {
+          property int currentIndex: index
+
+          implicitHeight: contentRow.implicitHeight
+          Layout.fillWidth: true
+
+          RowLayout {
+            id: contentRow
+            anchors.fill: parent
+            spacing: Style?.marginM ?? 8
+
+            NTextInput {
+              Layout.fillWidth: true
+              placeholderText: I18n.tr("panels.control-center.shortcuts-custom-button-state-checks-command")
+              text: model.command
+              onTextChanged: {
+                updateStateCheck(currentIndex, text, model.icon);
+              }
+            }
+
+            RowLayout {
+              Layout.alignment: Qt.AlignVCenter
+              spacing: Style?.marginS ?? 4
+
+              NIcon {
+                icon: model.icon
+                pointSize: Style?.fontSizeL ?? 20
+                visible: model.icon !== undefined && model.icon !== ""
+              }
+
+              NIconButton {
+                icon: "folder"
+                tooltipText: I18n.tr("common.browse")
+                baseSize: Style?.buttonSizeS ?? 24
+                onClicked: iconPickerDelegate.open()
+              }
+
+              NIconButton {
+                icon: "close"
+                tooltipText: I18n.tr("panels.control-center.shortcuts-custom-button-state-checks-remove")
+                baseSize: Style?.buttonSizeS ?? 24
+                colorBorder: Qt.alpha(HydraColor.mOutline, Style.opacityLight)
+                colorBg: HydraColor.mError
+                colorFg: HydraColor.mOnError
+                colorBgHover: Qt.alpha(HydraColor.mError, Style.opacityMedium)
+                colorFgHover: HydraColor.mOnError
+                onClicked: {
+                  removeStateCheck(currentIndex);
+                }
+              }
+            }
+          }
+
+          NIconPicker {
+            id: iconPickerDelegate
+            initialIcon: model.icon
+            onIconSelected: function (iconName) {
+              updateStateCheck(currentIndex, model.command, iconName);
+            }
+          }
+        }
+      }
+
+      Item {
+        Layout.fillWidth: true
+      }
+
+      RowLayout {
+        Layout.fillWidth: true
+        spacing: Style?.marginM ?? 8
+
+        NButton {
+          text: I18n.tr("panels.control-center.shortcuts-custom-button-state-checks-add")
+          onClicked: addStateCheck()
+        }
       }
     }
   }

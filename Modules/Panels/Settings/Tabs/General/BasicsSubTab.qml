@@ -11,69 +11,66 @@ import qs.Widgets
 ColumnLayout {
   id: root
 
-  // Profile section
-  RowLayout {
-    Layout.fillWidth: true
-    spacing: Style.marginL
+  Layout.fillWidth: true
+  spacing: Style.marginXL
+  NSettingsSection {
+    title: I18n.tr("settings.content.profile")
+    icon: "user"
+    // Profile section
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: Style.marginL
 
-    // Avatar preview
-    NImageRounded {
-      Layout.preferredWidth: 128 * Style.uiScaleRatio
-      Layout.preferredHeight: width
-      radius: width / 2
-      imagePath: Settings.preprocessPath(Settings.data.general.avatarImage)
-      fallbackIcon: "person"
-      borderColor: HydraColor.mPrimary
-      borderWidth: Style.borderM
-      Layout.alignment: Qt.AlignTop
-    }
-
-    ColumnLayout {
-      NText {
-        text: HostService.displayName
-        pointSize: Style.fontSizeM
-        color: HydraColor.mPrimary
+      // Avatar preview
+      NImageRounded {
+        Layout.preferredWidth: 80 * Style.uiScaleRatio
+        Layout.preferredHeight: width
+        radius: width / 2
+        imagePath: Settings.preprocessPath(Settings.data.general.avatarImage)
+        fallbackIcon: "person"
+        borderColor: HydraColor.mPrimary
+        borderWidth: Style.borderM
+        Layout.alignment: Qt.AlignTop
       }
 
-      NTextInputButton {
-        label: I18n.tr("panels.general.profile-picture-label")
-        description: I18n.tr("panels.general.profile-picture-description")
-        text: Settings.data.general.avatarImage
-        placeholderText: '~/.face' // don't translate path
-        buttonIcon: "photo"
-        buttonTooltip: I18n.tr("panels.general.profile-tooltip")
-        onInputTextChanged: text => Settings.data.general.avatarImage = text
-        onButtonClicked: {
-          avatarPicker.openFilePicker();
+      ColumnLayout {
+        NText {
+          text: HostService.displayName
+          pointSize: Style.fontSizeM
+          color: HydraColor.mPrimary
+        }
+
+        NTextInputButton {
+          label: I18n.tr("panels.general.profile-picture-label")
+          description: I18n.tr("panels.general.profile-picture-description")
+          text: Settings.data.general.avatarImage
+          placeholderText: '~/.face' // don't translate path
+          buttonIcon: "photo"
+          buttonTooltip: I18n.tr("panels.general.profile-tooltip")
+          onInputTextChanged: text => Settings.data.general.avatarImage = text
+          onButtonClicked: {
+            avatarPicker.openFilePicker();
+          }
+        }
+      }
+    }
+
+    NFilePicker {
+      id: avatarPicker
+      title: I18n.tr("panels.general.profile-select-avatar")
+      selectionMode: "files"
+      initialPath: Settings.preprocessPath(Settings.data.general.avatarImage).substr(0, Settings.preprocessPath(Settings.data.general.avatarImage).lastIndexOf("/")) || Quickshell.env("HOME")
+      nameFilters: ImageCacheService.basicImageFilters
+      onAccepted: paths => {
+        if (paths.length > 0) {
+          Settings.data.general.avatarImage = paths[0];
         }
       }
     }
   }
-
-  NFilePicker {
-    id: avatarPicker
-    title: I18n.tr("panels.general.profile-select-avatar")
-    selectionMode: "files"
-    initialPath: Settings.preprocessPath(Settings.data.general.avatarImage).substr(0, Settings.preprocessPath(Settings.data.general.avatarImage).lastIndexOf("/")) || Quickshell.env("HOME")
-    nameFilters: ImageCacheService.basicImageFilters
-    onAccepted: paths => {
-                  if (paths.length > 0) {
-                    Settings.data.general.avatarImage = paths[0];
-                  }
-                }
-  }
-
-  NDivider {
-    Layout.fillWidth: true
-    Layout.topMargin: Style.marginM
-    Layout.bottomMargin: Style.marginM
-  }
-
-  // Fonts
-  ColumnLayout {
-    spacing: Style.marginL
-    Layout.fillWidth: true
-
+  NSettingsSection {
+    title: I18n.tr("settings.content.typography")
+    icon: "text-size"
     // Font configuration section
     ColumnLayout {
       spacing: Style.marginL
@@ -133,88 +130,97 @@ ColumnLayout {
         text: Math.floor(Settings.data.ui.fontFixedScale * 100) + "%"
       }
     }
-  }
-
-  NDivider {
-    Layout.fillWidth: true
-    Layout.topMargin: Style.marginM
-    Layout.bottomMargin: Style.marginM
-  }
-
-  NToggle {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.general.reverse-scrolling-label")
-    description: I18n.tr("panels.general.reverse-scrolling-description")
-    checked: Settings.data.general.reverseScroll
-    defaultValue: Settings.getDefaultValue("general.reverseScroll")
-    onToggled: checked => Settings.data.general.reverseScroll = checked
-  }
-
-  NToggle {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.general.smooth-scrolling-label")
-    description: I18n.tr("panels.general.smooth-scrolling-description")
-    checked: Settings.data.general.smoothScrollEnabled
-    defaultValue: Settings.getDefaultValue("general.smoothScrollEnabled")
-    onToggled: checked => Settings.data.general.smoothScrollEnabled = checked
-  }
-
-  NDivider {
-    Layout.fillWidth: true
-    Layout.topMargin: Style.marginM
-    Layout.bottomMargin: Style.marginM
-  }
-
-  RowLayout {
-    spacing: Style.marginL
-    Layout.fillWidth: true
-
-    NButton {
-      icon: "wand"
-      text: I18n.tr("panels.general.launch-setup-wizard")
-      outlined: true
+    NText {
       Layout.fillWidth: true
-      onClicked: {
-        var targetScreen = PanelService.openedPanel ? PanelService.openedPanel.screen : (Quickshell.screens.length > 0 ? Quickshell.screens[0] : null);
-        if (!targetScreen) {
-          return;
-        }
-        var setupPanel = PanelService.getPanel("setupWizardPanel", targetScreen);
-        if (setupPanel) {
-          setupPanel.telemetryOnlyMode = false;
-          setupPanel.open();
-        } else {
-          Qt.callLater(() => {
-                         var sp = PanelService.getPanel("setupWizardPanel", targetScreen);
-                         if (sp) {
-                           sp.telemetryOnlyMode = false;
-                           sp.open();
-                         }
-                       });
-        }
-      }
+      text: I18n.tr("settings.content.font-sample")
+      pointSize: Style.fontSizeL
+      wrapMode: Text.WordWrap
+    }
+    NText {
+      Layout.fillWidth: true
+      text: "Hydra 0123456789 · {} [] ()"
+      family: Settings.data.ui.fontFixed
+      wrapMode: Text.WordWrap
+    }
+  }
+
+  NSettingsSection {
+    title: I18n.tr("settings.content.scrolling")
+    icon: "mouse"
+    NToggle {
+      Layout.fillWidth: true
+      label: I18n.tr("panels.general.reverse-scrolling-label")
+      description: I18n.tr("panels.general.reverse-scrolling-description")
+      checked: Settings.data.general.reverseScroll
+      defaultValue: Settings.getDefaultValue("general.reverseScroll")
+      onToggled: checked => Settings.data.general.reverseScroll = checked
     }
 
-    NButton {
-      icon: "external-link"
-      text: I18n.tr("common.documentation")
-      outlined: true
+    NToggle {
       Layout.fillWidth: true
-      onClicked: {
-        Qt.openUrlExternally("https://docs.noctalia.dev");
-      }
+      label: I18n.tr("panels.general.smooth-scrolling-label")
+      description: I18n.tr("panels.general.smooth-scrolling-description")
+      checked: Settings.data.general.smoothScrollEnabled
+      defaultValue: Settings.getDefaultValue("general.smoothScrollEnabled")
+      onToggled: checked => Settings.data.general.smoothScrollEnabled = checked
     }
-
-    NButton {
-      icon: "json"
-      text: I18n.tr("panels.general.copy-settings")
-      outlined: true
+  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.resources")
+    icon: "help"
+    GridLayout {
+      columns: width < 660 * Style.uiScaleRatio ? 1 : 3
+      rowSpacing: Style.marginM
+      columnSpacing: Style.marginL
       Layout.fillWidth: true
-      onClicked: {
-        var plainData = QtObj2JS.qtObjectToPlainObject(Settings.data);
-        var json = JSON.stringify(plainData, null, 2);
-        Quickshell.execDetached(["wl-copy", json]);
-        ToastService.showNotice(I18n.tr("panels.general.settings-copied"));
+
+      NButton {
+        icon: "wand"
+        text: I18n.tr("panels.general.launch-setup-wizard")
+        outlined: true
+        Layout.fillWidth: true
+        onClicked: {
+          var targetScreen = PanelService.openedPanel ? PanelService.openedPanel.screen : (Quickshell.screens.length > 0 ? Quickshell.screens[0] : null);
+          if (!targetScreen) {
+            return;
+          }
+          var setupPanel = PanelService.getPanel("setupWizardPanel", targetScreen);
+          if (setupPanel) {
+            setupPanel.telemetryOnlyMode = false;
+            setupPanel.open();
+          } else {
+            Qt.callLater(() => {
+              var sp = PanelService.getPanel("setupWizardPanel", targetScreen);
+              if (sp) {
+                sp.telemetryOnlyMode = false;
+                sp.open();
+              }
+            });
+          }
+        }
+      }
+
+      NButton {
+        icon: "external-link"
+        text: I18n.tr("common.documentation")
+        outlined: true
+        Layout.fillWidth: true
+        onClicked: {
+          Qt.openUrlExternally("https://docs.noctalia.dev");
+        }
+      }
+
+      NButton {
+        icon: "json"
+        text: I18n.tr("panels.general.copy-settings")
+        outlined: true
+        Layout.fillWidth: true
+        onClicked: {
+          var plainData = QtObj2JS.qtObjectToPlainObject(Settings.data);
+          var json = JSON.stringify(plainData, null, 2);
+          Quickshell.execDetached(["wl-copy", json]);
+          ToastService.showNotice(I18n.tr("panels.general.settings-copied"));
+        }
       }
     }
   }

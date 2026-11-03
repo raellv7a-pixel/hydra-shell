@@ -58,11 +58,11 @@ Item {
   readonly property bool revealed: !forceClose && (forceOpen || showPill)
   readonly property bool hasIcon: root.icon !== ""
 
-  // Always prioritize hover color, then the custom one and finally the fallback color
-  readonly property color bgColor: hovered ? HydraColor.mHover : (customBackgroundColor.a > 0) ? customBackgroundColor : Style.capsuleColor
-  readonly property color fgColor: hovered ? HydraColor.mOnHover : (customTextIconColor.a > 0) ? customTextIconColor : HydraColor.mOnSurface
-  readonly property color iconFgColor: hovered ? HydraColor.mOnHover : (customIconColor.a > 0) ? customIconColor : (customTextIconColor.a > 0) ? customTextIconColor : HydraColor.mOnSurface
-  readonly property color textFgColor: hovered ? HydraColor.mOnHover : (customTextColor.a > 0) ? customTextColor : (customTextIconColor.a > 0) ? customTextIconColor : HydraColor.mOnSurface
+  // Keep the configured surface and foreground while acknowledging interaction.
+  readonly property color bgColor: Style.interactionColor(customBackgroundColor.a > 0 ? customBackgroundColor : Style.capsuleColor, fgColor, root.enabled && hovered, root.enabled && pillPointer.pressed)
+  readonly property color fgColor: customTextIconColor.a > 0 ? customTextIconColor : HydraColor.mOnSurface
+  readonly property color iconFgColor: customIconColor.a > 0 ? customIconColor : customTextIconColor.a > 0 ? customTextIconColor : HydraColor.mOnSurface
+  readonly property color textFgColor: customTextColor.a > 0 ? customTextColor : customTextIconColor.a > 0 ? customTextIconColor : HydraColor.mOnSurface
 
   readonly property real iconSize: Style.toOdd(pillHeight * 0.48)
 
@@ -110,8 +110,8 @@ Item {
     Behavior on color {
       enabled: !HydraColor.isTransitioning
       ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
+        duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
+        easing.type: Easing.OutCubic
       }
     }
   }
@@ -302,6 +302,7 @@ Item {
   }
 
   MouseArea {
+    id: pillPointer
     anchors.fill: parent
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
@@ -326,15 +327,15 @@ Item {
       TooltipService.hide();
     }
     onClicked: mouse => {
-                 TooltipService.hide();
-                 if (mouse.button === Qt.LeftButton) {
-                   root.clicked();
-                 } else if (mouse.button === Qt.RightButton) {
-                   root.rightClicked();
-                 } else if (mouse.button === Qt.MiddleButton) {
-                   root.middleClicked();
-                 }
-               }
+      TooltipService.hide();
+      if (mouse.button === Qt.LeftButton) {
+        root.clicked();
+      } else if (mouse.button === Qt.RightButton) {
+        root.rightClicked();
+      } else if (mouse.button === Qt.MiddleButton) {
+        root.middleClicked();
+      }
+    }
     onWheel: wheel => root.wheel(wheel.angleDelta.y)
   }
 

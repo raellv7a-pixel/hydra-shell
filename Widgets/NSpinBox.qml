@@ -96,14 +96,8 @@ RowLayout {
     implicitHeight: Math.round((root.baseSize - 4) / 2) * 2
     radius: Style.iRadiusS
     color: HydraColor.mSurfaceVariant
-    border.color: (root.hovering || decreaseArea.containsMouse || increaseArea.containsMouse) ? HydraColor.mHover : HydraColor.mOutline
-    border.width: Style.borderS
-
-    Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationFast
-      }
-    }
+    border.color: valueInput.activeFocus ? HydraColor.mPrimary : HydraColor.mOutline
+    border.width: valueInput.activeFocus ? Style.borderM : Style.borderS
 
     // Mouse area for hover and scroll
     MouseArea {
@@ -121,14 +115,14 @@ RowLayout {
         root.exited();
       }
       onWheel: wheel => {
-                 if (wheel.angleDelta.y > 0 && root.value < root.to) {
-                   let newValue = Math.min(root.to, root.value + root.stepSize);
-                   root.value = newValue;
-                 } else if (wheel.angleDelta.y < 0 && root.value > root.from) {
-                   let newValue = Math.max(root.from, root.value - root.stepSize);
-                   root.value = newValue;
-                 }
-               }
+        if (wheel.angleDelta.y > 0 && root.value < root.to) {
+          let newValue = Math.min(root.to, root.value + root.stepSize);
+          root.value = newValue;
+        } else if (wheel.angleDelta.y < 0 && root.value > root.from) {
+          let newValue = Math.max(root.from, root.value - root.stepSize);
+          root.value = newValue;
+        }
+      }
     }
 
     // Decrease button (left)
@@ -141,25 +135,22 @@ RowLayout {
       anchors.left: parent.left
       opacity: (root.enabled && root.value > root.from) || decreaseArea.containsMouse ? 1.0 : 0.3
 
-      Rectangle {
+      NStateLayer {
         anchors.centerIn: parent
         width: parent.height
         height: width
         radius: spinBoxContainer.radius
-        color: HydraColor.mHover
-        opacity: decreaseArea.containsMouse ? 1.0 : 0.0
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
-          }
-        }
+        stateColor: HydraColor.mPrimary
+        hovering: decreaseArea.containsMouse
+        pressed: decreaseArea.pressed
+        enabled: decreaseArea.enabled
       }
 
       NIcon {
         anchors.centerIn: parent
         icon: "chevron-left"
         pointSize: Style.fontSizeS
-        color: decreaseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mPrimary
+        color: HydraColor.mPrimary
       }
 
       MouseArea {
@@ -188,25 +179,22 @@ RowLayout {
       anchors.right: parent.right
       opacity: (root.enabled && root.value < root.to) || increaseArea.containsMouse ? 1.0 : 0.3
 
-      Rectangle {
+      NStateLayer {
         anchors.centerIn: parent
         width: parent.height
         height: width
         radius: spinBoxContainer.radius
-        color: HydraColor.mHover
-        opacity: increaseArea.containsMouse ? 1.0 : 0.0
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Style.animationFast
-          }
-        }
+        stateColor: HydraColor.mPrimary
+        hovering: increaseArea.containsMouse
+        pressed: increaseArea.pressed
+        enabled: increaseArea.enabled
       }
 
       NIcon {
         anchors.centerIn: parent
         icon: "chevron-right"
         pointSize: Style.fontSizeS
-        color: increaseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mPrimary
+        color: HydraColor.mPrimary
       }
 
       MouseArea {

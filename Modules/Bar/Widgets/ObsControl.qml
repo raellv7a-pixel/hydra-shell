@@ -76,9 +76,11 @@ Item {
     return hours > 0 ? `${hours}:${minuteText}:${secondText}` : `${minuteText}:${secondText}`;
   }
 
-  Rectangle {
+  NStateLayer {
     anchors.fill: parent
-    color: mouseArea.containsMouse ? HydraColor.mHover : Style.capsuleColor
+    baseColor: Style.capsuleColor
+    hovering: mouseArea.containsMouse
+    pressed: mouseArea.pressed
     radius: Style.radiusL
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
@@ -148,14 +150,14 @@ Item {
     onExited: TooltipService.hide(root)
     onPressed: TooltipService.hide(root)
     onClicked: mouse => {
-                 if (mouse.button === Qt.LeftButton) {
-                   PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root);
-                 } else if (mouse.button === Qt.MiddleButton) {
-                   ObsControlService.toggleRecord();
-                 } else if (mouse.button === Qt.RightButton) {
-                   PanelService.showContextMenu(contextMenu, root, root.screen);
-                 }
-               }
+      if (mouse.button === Qt.LeftButton) {
+        PanelService.getPanel("obsControlPanel", root.screen)?.toggle(root);
+      } else if (mouse.button === Qt.MiddleButton) {
+        ObsControlService.toggleRecord();
+      } else if (mouse.button === Qt.RightButton) {
+        PanelService.showContextMenu(contextMenu, root, root.screen);
+      }
+    }
   }
 
   NPopupContextMenu {
@@ -173,12 +175,12 @@ Item {
       }
     ]
     onTriggered: action => {
-                   contextMenu.close();
-                   PanelService.closeContextMenu(root.screen);
-                   if (action === "refresh")
-                   ObsControlService.refresh();
-                   else if (action === "settings")
-                   BarService.openWidgetSettings(root.screen, root.section, root.sectionWidgetIndex, root.widgetId, root.widgetSettings);
-                 }
+      contextMenu.close();
+      PanelService.closeContextMenu(root.screen);
+      if (action === "refresh")
+        ObsControlService.refresh();
+      else if (action === "settings")
+        BarService.openWidgetSettings(root.screen, root.section, root.sectionWidgetIndex, root.widgetId, root.widgetSettings);
+    }
   }
 }

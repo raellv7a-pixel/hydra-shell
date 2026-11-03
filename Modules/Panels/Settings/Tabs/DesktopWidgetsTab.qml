@@ -27,23 +27,27 @@ ColumnLayout {
     }
   }
 
-  NToggle {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.desktop-widgets.enabled-label")
-    description: I18n.tr("panels.desktop-widgets.enabled-description")
-    checked: Settings.data.desktopWidgets.enabled
-    defaultValue: Settings.getDefaultValue("desktopWidgets.enabled")
-    onToggled: checked => Settings.data.desktopWidgets.enabled = checked
-  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.visibility")
+    icon: "eye"
+    NToggle {
+      Layout.fillWidth: true
+      label: I18n.tr("panels.desktop-widgets.enabled-label")
+      description: I18n.tr("panels.desktop-widgets.enabled-description")
+      checked: Settings.data.desktopWidgets.enabled
+      defaultValue: Settings.getDefaultValue("desktopWidgets.enabled")
+      onToggled: checked => Settings.data.desktopWidgets.enabled = checked
+    }
 
-  NToggle {
-    Layout.fillWidth: true
-    enabled: Settings.data.desktopWidgets.enabled
-    label: I18n.tr("panels.desktop-widgets.overview-enabled-label")
-    description: I18n.tr("panels.desktop-widgets.overview-enabled-description")
-    checked: Settings.data.desktopWidgets.overviewEnabled
-    defaultValue: Settings.getDefaultValue("desktopWidgets.overviewEnabled")
-    onToggled: checked => Settings.data.desktopWidgets.overviewEnabled = checked
+    NToggle {
+      Layout.fillWidth: true
+      enabled: Settings.data.desktopWidgets.enabled
+      label: I18n.tr("panels.desktop-widgets.overview-enabled-label")
+      description: I18n.tr("panels.desktop-widgets.overview-enabled-description")
+      checked: Settings.data.desktopWidgets.overviewEnabled
+      defaultValue: Settings.getDefaultValue("desktopWidgets.overviewEnabled")
+      onToggled: checked => Settings.data.desktopWidgets.overviewEnabled = checked
+    }
   }
 
   ColumnLayout {
@@ -74,43 +78,47 @@ ColumnLayout {
       }
     }
 
-    // One NSectionEditor per monitor
-    Repeater {
-      model: Quickshell.screens
+    NSettingsSection {
+      title: I18n.tr("settings.content.layout")
+      icon: "layout-dashboard"
+      // One NSectionEditor per monitor
+      Repeater {
+        model: Quickshell.screens
 
-      NSectionEditor {
-        required property var modelData
-        readonly property real compositorScale: {
-          const info = CompositorService.displayScales[modelData.name];
-          return (info && info.scale) ? info.scale : 1.0;
+        NSectionEditor {
+          required property var modelData
+          readonly property real compositorScale: {
+            const info = CompositorService.displayScales[modelData.name];
+            return (info && info.scale) ? info.scale : 1.0;
+          }
+
+          Layout.fillWidth: true
+          sectionName: modelData.name
+          sectionSubtitle: {
+            // Format scale to 2 decimal places to prevent overly long text
+            var formattedScale = compositorScale.toFixed(2);
+            return "(" + modelData.width + "x" + modelData.height + " @ " + formattedScale + "x)";
+          }
+
+          sectionId: modelData.name
+          screen: modelData
+          settingsDialogComponent: Qt.resolvedUrl(Quickshell.shellDir + "/Modules/Panels/Settings/DesktopWidgets/DesktopWidgetSettingsDialog.qml")
+          widgetRegistry: DesktopWidgetRegistry
+          widgetModel: getWidgetsForMonitor(modelData.name)
+          availableWidgets: root.availableWidgetsModel
+          availableSections: root.getScreenNames()
+          sectionLabels: root.getScreenLabels()
+          sectionIcons: root.getScreenIcons()
+          draggable: false // Desktop widgets are positioned by X,Y, not list order
+          crossSectionDraggable: true
+          maxWidgets: -1
+          onAddWidget: (widgetId, section) => _addWidgetToMonitor(modelData.name, widgetId)
+          onRemoveWidget: (section, index) => _removeWidgetFromMonitor(modelData.name, index)
+          onMoveWidget: (fromSection, index, toSection) => _moveWidgetToMonitor(fromSection, index, toSection)
+          onUpdateWidgetSettings: (section, index, settings) => _updateWidgetSettingsForMonitor(modelData.name, index, settings)
+          pluginSettingsEntryPoints: ["desktopWidgetSettings", "settings"]
+          onOpenPluginSettingsRequested: (manifest, entryPoint) => pluginSettingsDialog.openPluginSettings(manifest, entryPoint)
         }
-
-        Layout.fillWidth: true
-        sectionName: modelData.name
-        sectionSubtitle: {
-          // Format scale to 2 decimal places to prevent overly long text
-          var formattedScale = compositorScale.toFixed(2);
-          return "(" + modelData.width + "x" + modelData.height + " @ " + formattedScale + "x)";
-        }
-
-        sectionId: modelData.name
-        screen: modelData
-        settingsDialogComponent: Qt.resolvedUrl(Quickshell.shellDir + "/Modules/Panels/Settings/DesktopWidgets/DesktopWidgetSettingsDialog.qml")
-        widgetRegistry: DesktopWidgetRegistry
-        widgetModel: getWidgetsForMonitor(modelData.name)
-        availableWidgets: root.availableWidgetsModel
-        availableSections: root.getScreenNames()
-        sectionLabels: root.getScreenLabels()
-        sectionIcons: root.getScreenIcons()
-        draggable: false // Desktop widgets are positioned by X,Y, not list order
-        crossSectionDraggable: true
-        maxWidgets: -1
-        onAddWidget: (widgetId, section) => _addWidgetToMonitor(modelData.name, widgetId)
-        onRemoveWidget: (section, index) => _removeWidgetFromMonitor(modelData.name, index)
-        onMoveWidget: (fromSection, index, toSection) => _moveWidgetToMonitor(fromSection, index, toSection)
-        onUpdateWidgetSettings: (section, index, settings) => _updateWidgetSettingsForMonitor(modelData.name, index, settings)
-        pluginSettingsEntryPoints: ["desktopWidgetSettings", "settings"]
-        onOpenPluginSettingsRequested: (manifest, entryPoint) => pluginSettingsDialog.openPluginSettings(manifest, entryPoint)
       }
     }
   }

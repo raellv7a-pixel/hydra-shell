@@ -329,8 +329,10 @@ Item {
       Layout.fillWidth: true
       Layout.preferredHeight: miscSettingsCol.implicitHeight + Style.margin2XL
 
-      ColumnLayout {
+      NSettingsSection {
         id: miscSettingsCol
+        title: I18n.tr("settings.content.availability")
+        icon: "plane"
         anchors.fill: parent
         anchors.margins: Style.marginXL
         spacing: Style.marginM
@@ -453,8 +455,8 @@ Item {
         model: NetworkService.supportedSecurityTypes
         currentKey: addNetworkPopup.customSecurityKey
         onSelected: key => {
-                      addNetworkPopup.customSecurityKey = key;
-                    }
+          addNetworkPopup.customSecurityKey = key;
+        }
       }
 
       ColumnLayout {
@@ -1520,13 +1522,13 @@ Item {
     }
 
     onAccepted: paths => {
-                  if (paths.length > 0) {
-                    if (isForAddNetwork) {
-                      addNetworkPopup.customEnterpriseCaCert = paths[0];
-                    } else {
-                      root.enterpriseCaCert = paths[0];
-                    }
-                  }
-                }
+      if (paths.length > 0) {
+        if (isForAddNetwork) {
+          addNetworkPopup.customEnterpriseCaCert = paths[0];
+        } else {
+          root.enterpriseCaCert = paths[0];
+        }
+      }
+    }
   }
 }

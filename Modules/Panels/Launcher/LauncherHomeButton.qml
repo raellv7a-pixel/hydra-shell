@@ -14,15 +14,14 @@ Button {
   hoverEnabled: !Settings.data.appLauncher.ignoreMouseInput
   padding: launcher.metrics.padding
   Accessible.name: text
-  background: Rectangle {
+  background: NStateLayer {
     radius: root.cornerRadius
-    color: root.down ? HydraColor.mPrimaryContainer : (root.hovered ? HydraColor.mSurfaceContainerHighest : root.surface)
-    border.width: root.activeFocus ? Style.borderM : 0
-    border.color: HydraColor.mPrimary
-    Behavior on color {
-      enabled: !HydraColor.isTransitioning
-      ColorAnimation { duration: root.hovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration }
-    }
+    baseColor: root.surface
+    stateColor: root.foreground
+    focusColor: root.foreground
+    hovering: root.hovered
+    pressed: root.down
+    focusVisible: root.visualFocus
   }
   contentItem: NText {
     text: root.text
@@ -39,7 +38,9 @@ Button {
     if (event.key === Qt.Key_Menu || (event.key === Qt.Key_F10 && (event.modifiers & Qt.ShiftModifier))) {
       root.contextRequested();
       event.accepted = true;
-    } else root.launcher.handleHomeItemKey(event, root);
+    } else
+      root.launcher.handleHomeItemKey(event, root);
   }
-  onActiveFocusChanged: if (activeFocus) launcher.ensureHomeItemVisible(root)
+  onActiveFocusChanged: if (activeFocus)
+                          launcher.ensureHomeItemVisible(root)
 }

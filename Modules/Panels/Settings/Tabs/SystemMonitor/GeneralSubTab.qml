@@ -11,95 +11,103 @@ ColumnLayout {
 
   property var screen
 
-  NToggle {
-    Layout.fillWidth: true
-    Layout.topMargin: Style.marginM
-    label: I18n.tr("panels.system-monitor.enable-dgpu-monitoring-label")
-    description: I18n.tr("panels.system-monitor.enable-dgpu-monitoring-description")
-    checked: Settings.data.systemMonitor.enableDgpuMonitoring
-    defaultValue: Settings.getDefaultValue("systemMonitor.enableDgpuMonitoring")
-    onToggled: checked => Settings.data.systemMonitor.enableDgpuMonitoring = checked
-  }
-
-  // Colors Section
-  RowLayout {
-    Layout.fillWidth: true
-    spacing: Style.marginM
-
+  NSettingsSection {
+    title: I18n.tr("settings.content.collection")
+    icon: "cpu"
     NToggle {
-      label: I18n.tr("panels.system-monitor.use-custom-highlight-colors-label")
-      description: I18n.tr("panels.system-monitor.use-custom-highlight-colors-description")
-      checked: Settings.data.systemMonitor.useCustomColors
-      defaultValue: Settings.getDefaultValue("systemMonitor.useCustomColors")
-      onToggled: checked => {
-                   // If enabling custom colors and no custom color is saved, persist current theme colors
-                   if (checked) {
-                     if (!Settings.data.systemMonitor.warningColor || Settings.data.systemMonitor.warningColor === "") {
-                       Settings.data.systemMonitor.warningColor = HydraColor.mTertiary.toString();
-                     }
-                     if (!Settings.data.systemMonitor.criticalColor || Settings.data.systemMonitor.criticalColor === "") {
-                       Settings.data.systemMonitor.criticalColor = HydraColor.mError.toString();
-                     }
-                   }
-                   Settings.data.systemMonitor.useCustomColors = checked;
-                 }
+      Layout.fillWidth: true
+      Layout.topMargin: Style.marginM
+      label: I18n.tr("panels.system-monitor.enable-dgpu-monitoring-label")
+      description: I18n.tr("panels.system-monitor.enable-dgpu-monitoring-description")
+      checked: Settings.data.systemMonitor.enableDgpuMonitoring
+      defaultValue: Settings.getDefaultValue("systemMonitor.enableDgpuMonitoring")
+      onToggled: checked => Settings.data.systemMonitor.enableDgpuMonitoring = checked
     }
   }
-
-  RowLayout {
-    Layout.fillWidth: true
-    spacing: Style.marginXL
-    visible: Settings.data.systemMonitor.useCustomColors
-
-    ColumnLayout {
+  NSettingsSection {
+    title: I18n.tr("settings.content.indicators")
+    icon: "palette"
+    // Colors Section
+    RowLayout {
       Layout.fillWidth: true
       spacing: Style.marginM
 
-      NText {
-        text: I18n.tr("panels.system-monitor.warning-color-label")
-        pointSize: Style.fontSizeM
-      }
-
-      NColorPicker {
-        screen: root.screen
-        Layout.preferredWidth: Style.sliderWidth
-        Layout.preferredHeight: Style.baseWidgetSize
-        enabled: Settings.data.systemMonitor.useCustomColors
-        selectedColor: Settings.data.systemMonitor.warningColor || HydraColor.mTertiary
-        onColorSelected: color => Settings.data.systemMonitor.warningColor = color
+      NToggle {
+        label: I18n.tr("panels.system-monitor.use-custom-highlight-colors-label")
+        description: I18n.tr("panels.system-monitor.use-custom-highlight-colors-description")
+        checked: Settings.data.systemMonitor.useCustomColors
+        defaultValue: Settings.getDefaultValue("systemMonitor.useCustomColors")
+        onToggled: checked => {
+          // If enabling custom colors and no custom color is saved, persist current theme colors
+          if (checked) {
+            if (!Settings.data.systemMonitor.warningColor || Settings.data.systemMonitor.warningColor === "") {
+              Settings.data.systemMonitor.warningColor = HydraColor.mTertiary.toString();
+            }
+            if (!Settings.data.systemMonitor.criticalColor || Settings.data.systemMonitor.criticalColor === "") {
+              Settings.data.systemMonitor.criticalColor = HydraColor.mError.toString();
+            }
+          }
+          Settings.data.systemMonitor.useCustomColors = checked;
+        }
       }
     }
 
-    ColumnLayout {
+    GridLayout {
       Layout.fillWidth: true
-      spacing: Style.marginM
+      columns: width < 520 * Style.uiScaleRatio ? 1 : 2
+      columnSpacing: Style.marginXL
+      rowSpacing: Style.marginM
+      visible: Settings.data.systemMonitor.useCustomColors
 
-      NText {
-        text: I18n.tr("panels.system-monitor.critical-color-label")
-        pointSize: Style.fontSizeM
+      ColumnLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+
+        NText {
+          text: I18n.tr("panels.system-monitor.warning-color-label")
+          pointSize: Style.fontSizeM
+        }
+
+        NColorPicker {
+          screen: root.screen
+          Layout.preferredWidth: Style.sliderWidth
+          Layout.preferredHeight: Style.baseWidgetSize
+          enabled: Settings.data.systemMonitor.useCustomColors
+          selectedColor: Settings.data.systemMonitor.warningColor || HydraColor.mTertiary
+          onColorSelected: color => Settings.data.systemMonitor.warningColor = color
+        }
       }
 
-      NColorPicker {
-        screen: root.screen
-        Layout.preferredWidth: Style.sliderWidth
-        Layout.preferredHeight: Style.baseWidgetSize
-        enabled: Settings.data.systemMonitor.useCustomColors
-        selectedColor: Settings.data.systemMonitor.criticalColor || HydraColor.mError
-        onColorSelected: color => Settings.data.systemMonitor.criticalColor = color
+      ColumnLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+
+        NText {
+          text: I18n.tr("panels.system-monitor.critical-color-label")
+          pointSize: Style.fontSizeM
+        }
+
+        NColorPicker {
+          screen: root.screen
+          Layout.preferredWidth: Style.sliderWidth
+          Layout.preferredHeight: Style.baseWidgetSize
+          enabled: Settings.data.systemMonitor.useCustomColors
+          selectedColor: Settings.data.systemMonitor.criticalColor || HydraColor.mError
+          onColorSelected: color => Settings.data.systemMonitor.criticalColor = color
+        }
       }
     }
   }
-
-  NDivider {
-    Layout.fillWidth: true
-  }
-
-  NTextInput {
-    label: I18n.tr("panels.system-monitor.external-monitor-label")
-    description: I18n.tr("panels.system-monitor.external-monitor-description")
-    placeholderText: I18n.tr("panels.system-monitor.external-monitor-placeholder")
-    text: Settings.data.systemMonitor.externalMonitor
-    defaultValue: Settings.getDefaultValue("systemMonitor.externalMonitor")
-    onTextChanged: Settings.data.systemMonitor.externalMonitor = text
+  NSettingsSection {
+    title: I18n.tr("settings.content.applications")
+    icon: "external-link"
+    NTextInput {
+      label: I18n.tr("panels.system-monitor.external-monitor-label")
+      description: I18n.tr("panels.system-monitor.external-monitor-description")
+      placeholderText: I18n.tr("panels.system-monitor.external-monitor-placeholder")
+      text: Settings.data.systemMonitor.externalMonitor
+      defaultValue: Settings.getDefaultValue("systemMonitor.externalMonitor")
+      onTextChanged: Settings.data.systemMonitor.externalMonitor = text
+    }
   }
 }

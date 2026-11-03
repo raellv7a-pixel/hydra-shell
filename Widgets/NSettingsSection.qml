@@ -2,21 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Commons
 
-// A titled group of settings controls, inspired by End4's ContentSection:
-// an icon + bold title header followed by a column of controls, with no
-// border or background of its own — grouping comes from typography and
-// spacing alone, not a card container.
-//
-// Meant for tabs to adopt incrementally; existing Settings tabs keep using
-// NDivider between groups until migrated to this one at a time.
-//
-// Usage:
-//   NSettingsSection {
-//     icon: "sync-alt"
-//     title: I18n.tr("panels.background.parallax-title")
-//     NToggle { ... }
-//     NComboBox { ... }
-//   }
+// Open subsections separate related controls without adding another card or
+// collapsing form state. The owning group provides the containing surface.
 ColumnLayout {
   id: root
 
@@ -25,32 +12,45 @@ ColumnLayout {
   property string description: ""
 
   Layout.fillWidth: true
-  spacing: Style.marginS
+  Layout.minimumWidth: 0
+  Layout.topMargin: Style.marginM
+  spacing: Style.marginL
+  Accessible.role: Accessible.Grouping
+  Accessible.name: title
+  Accessible.description: description
 
-  default property alias content: contentColumn.children
+  default property alias content: contentColumn.data
 
   RowLayout {
     Layout.fillWidth: true
-    spacing: Style.marginS
+    Layout.minimumWidth: 0
+    spacing: Style.marginM
     visible: root.title !== "" || root.icon !== ""
 
-    NIcon {
+    NColorIcon {
       icon: root.icon
-      pointSize: Style.fontSizeL
-      color: HydraColor.mPrimary
+      size: Math.round(22 * Style.uiScaleRatio)
       visible: root.icon !== ""
+      Layout.alignment: Qt.AlignTop
+      Accessible.ignored: true
     }
 
     ColumnLayout {
       Layout.fillWidth: true
+      Layout.minimumWidth: 0
       spacing: Style.marginXXS
 
       NText {
+        Layout.fillWidth: true
+        Layout.minimumWidth: 0
         text: root.title
-        pointSize: Style.fontSizeM
-        font.weight: Style.fontWeightBold
-        color: HydraColor.mOnSurface
+        pointSize: Style.fontSizeL
+        font.weight: Style.fontWeightSemiBold
+        color: HydraColor.mPrimary
+        wrapMode: Text.WordWrap
+        elide: Text.ElideNone
         visible: root.title !== ""
+        Accessible.ignored: true
       }
 
       NText {
@@ -59,17 +59,20 @@ ColumnLayout {
         color: HydraColor.mOnSurfaceVariant
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
+        Layout.minimumWidth: 0
         visible: root.description !== ""
+        elide: Text.ElideNone
+        Accessible.ignored: true
       }
     }
   }
 
-  // Indented under the title (past the icon column) so content visually
-  // belongs to this section's header, End4-style.
+  // Controls share one alignment, even on narrow panes; nested indentation
+  // would consume the space their descriptions and editors need.
   ColumnLayout {
     id: contentColumn
     Layout.fillWidth: true
-    Layout.leftMargin: root.icon !== "" ? (Style.fontSizeL + Style.marginS) : 0
+    Layout.minimumWidth: 0
     spacing: Style.marginM
   }
 }

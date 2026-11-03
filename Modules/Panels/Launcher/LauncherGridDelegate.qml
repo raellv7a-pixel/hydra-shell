@@ -39,7 +39,7 @@ Item {
     anchors.fill: parent
     anchors.margins: Style.marginXXS
     radius: Style.radiusL
-    color: gridEntryContainer.isSelected ? HydraColor.mPrimaryContainer : (gridEntryContainer.isHovered ? HydraColor.mSurfaceContainerHigh : HydraColor.mSurfaceContainerLow)
+    color: Style.interactionColor(gridEntryContainer.isSelected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerLow, gridEntryContainer.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface, gridEntryContainer.isHovered, mouseArea.pressed)
     forceOpaque: false
     border.color: gridEntryContainer.isContextMenuTarget ? HydraColor.mPrimary : (gridEntryContainer.isSelected ? HydraColor.mPrimary : "transparent")
     border.width: gridEntryContainer.isContextMenuTarget ? Style.borderM : (gridEntryContainer.isSelected ? Style.borderS : 0)
@@ -55,7 +55,7 @@ Item {
 
     Behavior on color {
       ColorAnimation {
-        duration: gridEntryContainer.isSelected || gridEntryContainer.isHovered ? Style.hoverEnterDuration : 0
+        duration: gridEntryContainer.isSelected || gridEntryContainer.isHovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
         easing.type: Easing.OutCubic
       }
     }
@@ -137,11 +137,11 @@ Item {
           }
 
           onStatusChanged: status => {
-                             if (status === Image.Error) {
-                               gridIconLoader.visible = true;
-                               gridImagePreview.visible = false;
-                             }
-                           }
+            if (status === Image.Error) {
+              gridIconLoader.visible = true;
+              gridImagePreview.visible = false;
+            }
+          }
         }
 
         Loader {
@@ -268,14 +268,14 @@ Item {
     enabled: !Settings.data.appLauncher.ignoreMouseInput
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: mouse => {
-                 if (mouse.button === Qt.RightButton) {
-                   launcher.toggleAppPanel(modelData);
-                   mouse.accepted = true;
-                 } else if (mouse.button === Qt.LeftButton) {
-                   launcher.selectedIndex = gridEntryContainer.entryIndex;
-                   launcher.activate();
-                   mouse.accepted = true;
-                 }
-               }
+      if (mouse.button === Qt.RightButton) {
+        launcher.toggleAppPanel(modelData);
+        mouse.accepted = true;
+      } else if (mouse.button === Qt.LeftButton) {
+        launcher.selectedIndex = gridEntryContainer.entryIndex;
+        launcher.activate();
+        mouse.accepted = true;
+      }
+    }
   }
 }

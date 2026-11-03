@@ -17,10 +17,9 @@ ColumnLayout {
     return I18n.tr("panels.dashboard." + key);
   }
 
-  ColumnLayout {
-    spacing: Style.marginL
-    Layout.fillWidth: true
-
+  NSettingsSection {
+    title: I18n.tr("settings.content.placement")
+    icon: "layout"
     NComboBox {
       id: controlCenterPosition
       label: I18n.tr("common.position")
@@ -92,60 +91,60 @@ ColumnLayout {
       model: {
         const paths = Object.keys(SystemStatService.diskPercents).sort();
         return paths.map(path => ({
-                                    key: path,
-                                    name: path
-                                  }));
+          key: path,
+          name: path
+        }));
       }
-      currentKey: Settings.data.controlCenter.diskPath || "/"
-      onSelected: key => Settings.data.controlCenter.diskPath = key
-      defaultValue: Settings.getDefaultValue("controlCenter.diskPath") || "/"
-    }
+        currentKey: Settings.data.controlCenter.diskPath || "/"
+        onSelected: key => Settings.data.controlCenter.diskPath = key
+        defaultValue: Settings.getDefaultValue("controlCenter.diskPath") || "/"
+      }
+      }
+        NSettingsSection {
+        title: root.dtr("settingsDimensions")
+        icon: "dimensions"
 
-    NHeader {
-      label: root.dtr("settingsDimensions")
-    }
+        NValueSlider {
+        Layout.fillWidth: true
+        label: root.dtr("settingsPanelWidth")
+        from: 800
+        to: 1400
+        stepSize: 20
+        showReset: true
+        value: Settings.data.controlCenter.panelWidth
+        onMoved: val => Settings.data.controlCenter.panelWidth = Math.round(val)
+        defaultValue: Settings.getDefaultValue("controlCenter.panelWidth")
+        text: Settings.data.controlCenter.panelWidth + "px"
+      }
 
-    NValueSlider {
-      Layout.fillWidth: true
-      label: root.dtr("settingsPanelWidth")
-      from: 800
-      to: 1400
-      stepSize: 20
-      showReset: true
-      value: Settings.data.controlCenter.panelWidth
-      onMoved: val => Settings.data.controlCenter.panelWidth = Math.round(val)
-      defaultValue: Settings.getDefaultValue("controlCenter.panelWidth")
-      text: Settings.data.controlCenter.panelWidth + "px"
-    }
+        NValueSlider {
+        Layout.fillWidth: true
+        label: root.dtr("settingsPanelHeight")
+        from: 500
+        to: 950
+        stepSize: 20
+        showReset: true
+        value: Settings.data.controlCenter.panelHeight
+        onMoved: val => Settings.data.controlCenter.panelHeight = Math.round(val)
+        defaultValue: Settings.getDefaultValue("controlCenter.panelHeight")
+        text: Settings.data.controlCenter.panelHeight + "px"
+      }
 
-    NValueSlider {
-      Layout.fillWidth: true
-      label: root.dtr("settingsPanelHeight")
-      from: 500
-      to: 950
-      stepSize: 20
-      showReset: true
-      value: Settings.data.controlCenter.panelHeight
-      onMoved: val => Settings.data.controlCenter.panelHeight = Math.round(val)
-      defaultValue: Settings.getDefaultValue("controlCenter.panelHeight")
-      text: Settings.data.controlCenter.panelHeight + "px"
-    }
+        NValueSlider {
+        Layout.fillWidth: true
+        label: root.dtr("settingsPanelScale")
+        from: 0.7
+        to: 1.3
+        stepSize: 0.05
+        showReset: true
+        value: Settings.data.controlCenter.panelScale
+        onMoved: val => Settings.data.controlCenter.panelScale = Math.round(val * 100) / 100
+        defaultValue: Settings.getDefaultValue("controlCenter.panelScale")
+        text: Math.round(Settings.data.controlCenter.panelScale * 100) + "%"
+      }
+      }
 
-    NValueSlider {
-      Layout.fillWidth: true
-      label: root.dtr("settingsPanelScale")
-      from: 0.7
-      to: 1.3
-      stepSize: 0.05
-      showReset: true
-      value: Settings.data.controlCenter.panelScale
-      onMoved: val => Settings.data.controlCenter.panelScale = Math.round(val * 100) / 100
-      defaultValue: Settings.getDefaultValue("controlCenter.panelScale")
-      text: Math.round(Settings.data.controlCenter.panelScale * 100) + "%"
-    }
-  }
-
-  Rectangle {
-    Layout.fillHeight: true
-  }
-}
+        Rectangle {
+        Layout.fillHeight: true
+      }
+      }

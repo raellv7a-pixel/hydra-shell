@@ -15,9 +15,17 @@ SmartPanel {
   panelAnchorHorizontalCenter: !isFramed
   panelAnchorVerticalCenter: true
   property string sourceKind: "monitor"
-  function onEscapePressed() { ScreenShareService.cancel(); }
-  onClosed: { if (ScreenShareService.panel === root) ScreenShareService.cancel(); }
-  Component.onDestruction: { if (ScreenShareService.panel === root) ScreenShareService.reset(); }
+  function onEscapePressed() {
+    ScreenShareService.cancel();
+  }
+  onClosed: {
+    if (ScreenShareService.panel === root)
+      ScreenShareService.cancel();
+  }
+  Component.onDestruction: {
+    if (ScreenShareService.panel === root)
+      ScreenShareService.reset();
+  }
   onOpened: {
     sourceKind = ScreenShareService.request?.types.includes("monitor") ? "monitor" : "window";
     contentItem?.forceActiveFocus();
@@ -28,13 +36,23 @@ SmartPanel {
     readonly property var request: ScreenShareService.request
     readonly property var sources: root.sourceKind === "monitor" ? (request?.outputs || []) : (request?.windows || [])
     Keys.onEscapePressed: ScreenShareService.cancel()
-    Keys.onReturnPressed: { if (ScreenShareService.selections.length) ScreenShareService.respond(ScreenShareService.selections); }
-    Keys.onEnterPressed: { if (ScreenShareService.selections.length) ScreenShareService.respond(ScreenShareService.selections); }
+    Keys.onReturnPressed: {
+      if (ScreenShareService.selections.length)
+        ScreenShareService.respond(ScreenShareService.selections);
+    }
+    Keys.onEnterPressed: {
+      if (ScreenShareService.selections.length)
+        ScreenShareService.respond(ScreenShareService.selections);
+    }
     ColumnLayout {
       anchors.fill: parent
       anchors.margins: Style.marginL
       spacing: Style.marginM
-      NText { text: "Compartilhar tela"; pointSize: Style.fontSizeXL; font.weight: Style.fontWeightSemiBold }
+      NText {
+        text: "Compartilhar tela"
+        pointSize: Style.fontSizeXL
+        font.weight: Style.fontWeightSemiBold
+      }
       NText {
         Layout.fillWidth: true
         text: content.request?.multiple ? "Escolha uma ou mais fontes para compartilhar." : "Escolha um monitor ou uma janela para compartilhar."
@@ -53,7 +71,10 @@ SmartPanel {
             textColor: root.sourceKind === modelData ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
             activeFocusOnTab: true
             Keys.onSpacePressed: clicked()
-            onClicked: { root.sourceKind = modelData; grid.currentIndex = 0; }
+            onClicked: {
+              root.sourceKind = modelData;
+              grid.currentIndex = 0;
+            }
           }
         }
       }
@@ -72,7 +93,8 @@ SmartPanel {
         ScrollBar.vertical: ScrollBar {}
         Keys.onSpacePressed: {
           const row = content.sources[currentIndex];
-          if (row) ScreenShareService.toggle(root.sourceKind, row.name || row.identifier);
+          if (row)
+            ScreenShareService.toggle(root.sourceKind, row.name || row.identifier);
         }
         delegate: Item {
           required property var modelData
@@ -81,13 +103,15 @@ SmartPanel {
           height: grid.cellHeight
           readonly property string value: modelData.name || modelData.identifier
           readonly property bool selected: ScreenShareService.selected(root.sourceKind, value)
-          Rectangle {
+          NStateLayer {
             anchors.fill: parent
             anchors.margins: Style.marginXS
             radius: Style.radiusM
-            color: parent.selected ? HydraColor.mPrimaryContainer : (pointer.containsMouse ? HydraColor.mSurfaceContainerHigh : HydraColor.mSurfaceContainerLow)
-            border.width: grid.activeFocus && grid.currentIndex === index ? Style.borderM : 0
-            border.color: HydraColor.mPrimary
+            baseColor: parent.selected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerLow
+            stateColor: parent.selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
+            hovering: pointer.containsMouse
+            pressed: pointer.pressed
+            focusVisible: grid.activeFocus && grid.currentIndex === index
             ColumnLayout {
               anchors.fill: parent
               anchors.margins: Style.marginM
@@ -102,11 +126,27 @@ SmartPanel {
                   fallbackIcon: "app-window"
                   borderWidth: 0
                 }
-                NIcon { visible: root.sourceKind === "monitor"; icon: "device-desktop"; pointSize: Style.fontSizeXXXL; color: HydraColor.mOnSurfaceVariant }
-                Item { Layout.fillWidth: true }
-                NIcon { visible: selected; icon: "check"; color: HydraColor.mPrimary }
+                NIcon {
+                  visible: root.sourceKind === "monitor"
+                  icon: "device-desktop"
+                  pointSize: Style.fontSizeXXXL
+                  color: HydraColor.mOnSurfaceVariant
+                }
+                Item {
+                  Layout.fillWidth: true
+                }
+                NIcon {
+                  visible: selected
+                  icon: "check"
+                  color: HydraColor.mPrimary
+                }
               }
-              NText { Layout.fillWidth: true; text: modelData.title || modelData.name || modelData.app_id || "Janela"; elide: Text.ElideRight; font.weight: Style.fontWeightSemiBold }
+              NText {
+                Layout.fillWidth: true
+                text: modelData.title || modelData.name || modelData.app_id || "Janela"
+                elide: Text.ElideRight
+                font.weight: Style.fontWeightSemiBold
+              }
               NText {
                 Layout.fillWidth: true
                 text: root.sourceKind === "monitor" ? modelData.width + " × " + modelData.height + " · " + (modelData.description || modelData.name) : (modelData.app_id || "Aplicativo sem identificador")
@@ -119,18 +159,45 @@ SmartPanel {
               id: pointer
               anchors.fill: parent
               hoverEnabled: true
-              onClicked: { grid.currentIndex = index; grid.forceActiveFocus(); ScreenShareService.toggle(root.sourceKind, value); }
+              onClicked: {
+                grid.currentIndex = index;
+                grid.forceActiveFocus();
+                ScreenShareService.toggle(root.sourceKind, value);
+              }
             }
           }
         }
-        NText { anchors.centerIn: parent; visible: grid.count === 0; text: content.request ? "Nenhuma fonte disponível nesta categoria." : "Carregando fontes…"; color: HydraColor.mOnSurfaceVariant }
+        NText {
+          anchors.centerIn: parent
+          visible: grid.count === 0
+          text: content.request ? "Nenhuma fonte disponível nesta categoria." : "Carregando fontes…"
+          color: HydraColor.mOnSurfaceVariant
+        }
       }
       RowLayout {
         Layout.fillWidth: true
-        NText { text: ScreenShareService.selections.length + " selecionada(s)"; color: HydraColor.mOnSurfaceVariant }
-        Item { Layout.fillWidth: true }
-        NButton { text: "Cancelar"; backgroundColor: HydraColor.mSurfaceContainerHigh; textColor: HydraColor.mOnSurface; activeFocusOnTab: true; Keys.onSpacePressed: clicked(); onClicked: ScreenShareService.cancel() }
-        NButton { text: "Compartilhar"; enabled: ScreenShareService.selections.length > 0; activeFocusOnTab: true; Keys.onSpacePressed: clicked(); onClicked: ScreenShareService.respond(ScreenShareService.selections) }
+        NText {
+          text: ScreenShareService.selections.length + " selecionada(s)"
+          color: HydraColor.mOnSurfaceVariant
+        }
+        Item {
+          Layout.fillWidth: true
+        }
+        NButton {
+          text: "Cancelar"
+          backgroundColor: HydraColor.mSurfaceContainerHigh
+          textColor: HydraColor.mOnSurface
+          activeFocusOnTab: true
+          Keys.onSpacePressed: clicked()
+          onClicked: ScreenShareService.cancel()
+        }
+        NButton {
+          text: "Compartilhar"
+          enabled: ScreenShareService.selections.length > 0
+          activeFocusOnTab: true
+          Keys.onSpacePressed: clicked()
+          onClicked: ScreenShareService.respond(ScreenShareService.selections)
+        }
       }
     }
   }

@@ -18,7 +18,9 @@ ColumnLayout {
     onToggled: checked => Settings.data.wallpaper.automationEnabled = checked
   }
 
-  ColumnLayout {
+  NSettingsSection {
+    title: I18n.tr("settings.content.rotation")
+    icon: "refresh"
     enabled: Settings.data.wallpaper.automationEnabled
     spacing: Style.marginL
     Layout.fillWidth: true

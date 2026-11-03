@@ -22,11 +22,7 @@ RowLayout {
 
   Layout.fillWidth: true
   spacing: Style.marginM
-  activeFocusOnTab: true
-  Accessible.role: Accessible.CheckBox
-  Accessible.name: root.label
-  Accessible.description: root.description
-  Accessible.checked: root.checked
+  activeFocusOnTab: false
 
   readonly property bool isValueChanged: (defaultValue !== undefined) && (checked !== defaultValue)
   readonly property string indicatorTooltip: defaultValue !== undefined ? I18n.tr("panels.indicator.default-value", {
@@ -44,7 +40,7 @@ RowLayout {
     indicatorTooltip: root.indicatorTooltip
   }
 
-  Rectangle {
+  NStateLayer {
     id: switcher
 
     opacity: enabled ? 1.0 : 0.6
@@ -53,21 +49,20 @@ RowLayout {
     implicitWidth: Math.round(root.baseSize * .85) * 2
     implicitHeight: Math.round(root.baseSize * .5) * 2
     radius: Math.min(Style.iRadiusL, height / 2)
-    color: root.checked ? HydraColor.mPrimary : HydraColor.mSurfaceContainerHighest
-    border.color: root.activeFocus ? HydraColor.mPrimary : (root.checked ? "transparent" : HydraColor.mOutline)
-    border.width: root.activeFocus ? Style.borderM : (root.checked ? 0 : Style.borderS)
-
-    Behavior on color {
-      ColorAnimation {
-        duration: Style.animationFast
-      }
-    }
-
-    Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationFast
-      }
-    }
+    baseColor: root.checked ? HydraColor.mPrimary : HydraColor.mSurfaceContainerHighest
+    stateColor: root.checked ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+    focusColor: root.checked ? HydraColor.mOnPrimary : HydraColor.mPrimary
+    hovering: root.hovering
+    pressed: switchMouse.pressed
+    focusPolicy: Qt.StrongFocus
+    Accessible.role: Accessible.CheckBox
+    Accessible.name: root.label
+    Accessible.description: root.description
+    Accessible.checkable: true
+    Accessible.checked: root.checked
+    Accessible.onPressAction: root.toggled(!root.checked)
+    border.color: root.checked ? "transparent" : HydraColor.mOutline
+    border.width: root.checked ? 0 : Style.borderS
 
     Rectangle {
       implicitWidth: Math.round(root.baseSize * 0.4) * 2
@@ -89,6 +84,7 @@ RowLayout {
     }
 
     MouseArea {
+      id: switchMouse
       enabled: root.enabled
       anchors.fill: parent
       cursorShape: Qt.PointingHandCursor
@@ -96,19 +92,19 @@ RowLayout {
       onEntered: {
         if (!enabled)
           return;
-        hovering = true;
+        root.hovering = true;
         root.entered();
       }
       onExited: {
         if (!enabled)
           return;
-        hovering = false;
+        root.hovering = false;
         root.exited();
       }
       onClicked: {
         if (!enabled)
           return;
-        root.forceActiveFocus();
+        switcher.forceActiveFocus(Qt.MouseFocusReason);
         root.toggled(!root.checked);
       }
     }

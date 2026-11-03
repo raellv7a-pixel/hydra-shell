@@ -4,8 +4,10 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 
-ColumnLayout {
+NSettingsSection {
   id: root
+  title: I18n.tr("settings.content.screen-finish")
+  icon: "border-radius"
   spacing: Style.marginL
   Layout.fillWidth: true
 

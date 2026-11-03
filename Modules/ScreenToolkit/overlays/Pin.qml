@@ -269,35 +269,35 @@ Item {
               property real _itemStartX: 0
               property real _itemStartY: 0
               onPressed: mouse => {
-                           if (mouse.button === Qt.RightButton) {
-                             ctxMenu.open(mouse.x, mouse.y);
-                             mouse.accepted = true;
-                             return;
-                           }
-                           pinDelegate._dragging = true;
-                           root._dragActive = true;          // ADD THIS
-                           _dragStart = mapToItem(null, mouse.x, mouse.y);
-                           _itemStartX = pinDelegate.x;
-                           _itemStartY = pinDelegate.y;
-                         }
+                if (mouse.button === Qt.RightButton) {
+                  ctxMenu.open(mouse.x, mouse.y);
+                  mouse.accepted = true;
+                  return;
+                }
+                pinDelegate._dragging = true;
+                root._dragActive = true;          // ADD THIS
+                _dragStart = mapToItem(null, mouse.x, mouse.y);
+                _itemStartX = pinDelegate.x;
+                _itemStartY = pinDelegate.y;
+              }
               onPositionChanged: mouse => {
-                                   if (!pinDelegate._dragging)
-                                   return;
-                                   var p = mapToItem(null, mouse.x, mouse.y);
-                                   var par = pinDelegate.parent;
-                                   pinDelegate.x = Math.max(-(pinDelegate.pinW - 60), Math.min(par ? par.width - 60 : 9999, _itemStartX + (p.x - _dragStart.x)));
-                                   pinDelegate.y = Math.max(0, Math.min(par ? par.height - 40 : 9999, _itemStartY + (p.y - _dragStart.y)));
-                                 }
+                if (!pinDelegate._dragging)
+                  return;
+                var p = mapToItem(null, mouse.x, mouse.y);
+                var par = pinDelegate.parent;
+                pinDelegate.x = Math.max(-(pinDelegate.pinW - 60), Math.min(par ? par.width - 60 : 9999, _itemStartX + (p.x - _dragStart.x)));
+                pinDelegate.y = Math.max(0, Math.min(par ? par.height - 40 : 9999, _itemStartY + (p.y - _dragStart.y)));
+              }
               onReleased: mouse => {
-                            if (mouse.button === Qt.RightButton)
-                            return;
-                            pinDelegate._dragging = false;
-                            root._dragActive = false;         // ADD THIS
-                            root.updatePin(pinDelegate._myIndex, {
-                                             posX: pinDelegate.x,
-                                             posY: pinDelegate.y
-                                           });
-                          }
+                if (mouse.button === Qt.RightButton)
+                  return;
+                pinDelegate._dragging = false;
+                root._dragActive = false;         // ADD THIS
+                root.updatePin(pinDelegate._myIndex, {
+                                 posX: pinDelegate.x,
+                                 posY: pinDelegate.y
+                               });
+              }
             }
             Rectangle {
               id: controlStrip
@@ -370,15 +370,15 @@ Item {
                     property real _startX: 0
                     property real _startOp: 1.0
                     onPressed: mouse => {
-                                 _startX = mouse.x;
-                                 _startOp = Math.max(0.05, Math.min(1.0, mouse.x / opTrack.width));
-                                 pinDelegate.pinOpacity = _startOp;
-                               }
+                      _startX = mouse.x;
+                      _startOp = Math.max(0.05, Math.min(1.0, mouse.x / opTrack.width));
+                      pinDelegate.pinOpacity = _startOp;
+                    }
                     onPositionChanged: mouse => {
-                                         if (!(mouse.buttons & Qt.LeftButton))
-                                         return;
-                                         pinDelegate.pinOpacity = Math.max(0.05, Math.min(1.0, _startOp + (mouse.x - _startX) / opTrack.width));
-                                       }
+                      if (!(mouse.buttons & Qt.LeftButton))
+                        return;
+                      pinDelegate.pinOpacity = Math.max(0.05, Math.min(1.0, _startOp + (mouse.x - _startX) / opTrack.width));
+                    }
                     onReleased: root.updatePin(pinDelegate._myIndex, {
                                                  pinOpacity: pinDelegate.pinOpacity
                                                })
@@ -644,45 +644,45 @@ Item {
     property real _startX: 0
     property real _startY: 0
     onPressed: mouse => {
-                 root._dragActive = true;          // ADD THIS
-                 var pt = mapToItem(pinDelegate.parent, mouse.x, mouse.y);
-                 _startPt = pt;
-                 _startW = pinDelegate.pinW;
-                 _startH = pinDelegate.pinH;
-                 _startX = pinDelegate.x;
-                 _startY = pinDelegate.y;
-                 mouse.accepted = true;
-               }
+      root._dragActive = true;          // ADD THIS
+      var pt = mapToItem(pinDelegate.parent, mouse.x, mouse.y);
+      _startPt = pt;
+      _startW = pinDelegate.pinW;
+      _startH = pinDelegate.pinH;
+      _startX = pinDelegate.x;
+      _startY = pinDelegate.y;
+      mouse.accepted = true;
+    }
     onPositionChanged: mouse => {
-                         if (!pressed)
-                         return;
-                         var pt = mapToItem(pinDelegate.parent, mouse.x, mouse.y);
-                         var dx = pt.x - _startPt.x;
-                         var dy = pt.y - _startPt.y;
-                         var nw = _startW, nh = _startH;
-                         var nx = _startX, ny = _startY;
-                         if (mode === 0) {
-                           nw = Math.max(80, _startW + dx);
-                           nh = Math.max(60, _startH + dy);
-                         } else if (mode === 1) {
-                           nw = Math.max(80, _startW - dx);
-                           nh = Math.max(60, _startH + dy);
-                           nx = _startX + (_startW - nw);
-                         } else if (mode === 2) {
-                           nw = Math.max(80, _startW + dx);
-                           nh = Math.max(60, _startH - dy);
-                           ny = _startY + (_startH - nh);
-                         } else if (mode === 3) {
-                           nw = Math.max(80, _startW - dx);
-                           nh = Math.max(60, _startH - dy);
-                           nx = _startX + (_startW - nw);
-                           ny = _startY + (_startH - nh);
-                         }
-                         pinDelegate.pinW = nw;
-                         pinDelegate.pinH = nh;
-                         pinDelegate.x = nx;
-                         pinDelegate.y = ny;
-                       }
+      if (!pressed)
+        return;
+      var pt = mapToItem(pinDelegate.parent, mouse.x, mouse.y);
+      var dx = pt.x - _startPt.x;
+      var dy = pt.y - _startPt.y;
+      var nw = _startW, nh = _startH;
+      var nx = _startX, ny = _startY;
+      if (mode === 0) {
+        nw = Math.max(80, _startW + dx);
+        nh = Math.max(60, _startH + dy);
+      } else if (mode === 1) {
+        nw = Math.max(80, _startW - dx);
+        nh = Math.max(60, _startH + dy);
+        nx = _startX + (_startW - nw);
+      } else if (mode === 2) {
+        nw = Math.max(80, _startW + dx);
+        nh = Math.max(60, _startH - dy);
+        ny = _startY + (_startH - nh);
+      } else if (mode === 3) {
+        nw = Math.max(80, _startW - dx);
+        nh = Math.max(60, _startH - dy);
+        nx = _startX + (_startW - nw);
+        ny = _startY + (_startH - nh);
+      }
+      pinDelegate.pinW = nw;
+      pinDelegate.pinH = nh;
+      pinDelegate.x = nx;
+      pinDelegate.y = ny;
+    }
     onReleased: {
       root._dragActive = false;         // ADD THIS
       root.updatePin(pinDelegate._myIndex, {
@@ -706,7 +706,7 @@ Item {
       }
     }
   }
-  component MenuItem: Rectangle {
+  component MenuItem: NStateLayer {
     property string mIcon: ""
     property string mLabel: ""
     property bool mEnabled: true
@@ -714,7 +714,8 @@ Item {
     width: parent.width
     height: 32
     radius: Style.radiusS
-    color: miMA.containsMouse && mEnabled ? HydraColor.mHover : "transparent"
+    hovering: miMA.containsMouse && mEnabled
+    pressed: miMA.pressed && mEnabled
     opacity: mEnabled ? 1.0 : 0.38
     Row {
       anchors {

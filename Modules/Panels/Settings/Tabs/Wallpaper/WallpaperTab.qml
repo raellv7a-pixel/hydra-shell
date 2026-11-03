@@ -22,11 +22,31 @@ NSettingsGroupPage {
   }
 
   property string specificFolderMonitorName: ""
+  summaries: ({
+                automation: Settings.data.wallpaper.automationEnabled ? I18n.tr("settings.content.rotation-summary", {
+                                                                                  minutes: Math.round(Settings.data.wallpaper.randomIntervalSec / 60)
+                                                                                }) : I18n.tr("common.disabled")
+              })
 
   groups: [
-    { key: "general", labelKey: "common.general", icon: "image", content: generalContent },
-    { key: "look", labelKey: "common.look", icon: "palette", content: lookContent },
-    { key: "automation", labelKey: "common.automation", icon: "settings-automation", content: automationContent }
+    {
+      key: "general",
+      labelKey: "common.general",
+      icon: "image",
+      content: generalContent
+    },
+    {
+      key: "look",
+      labelKey: "common.look",
+      icon: "palette",
+      content: lookContent
+    },
+    {
+      key: "automation",
+      labelKey: "common.automation",
+      icon: "settings-automation",
+      content: automationContent
+    }
   ]
 
   Component {
@@ -37,8 +57,16 @@ NSettingsGroupPage {
       onOpenMonitorFolderPicker: monitorName => root.openMonitorFolderPicker(monitorName)
     }
   }
-  Component { id: lookContent; LookAndFeelSubTab { screen: root.screen } }
-  Component { id: automationContent; AutomationSubTab {} }
+  Component {
+    id: lookContent
+    LookAndFeelSubTab {
+      screen: root.screen
+    }
+  }
+  Component {
+    id: automationContent
+    AutomationSubTab {}
+  }
 
   NFilePicker {
     id: mainFolderPicker
@@ -46,10 +74,10 @@ NSettingsGroupPage {
     title: I18n.tr("setup.wallpaper.dir-select-title")
     initialPath: Settings.data.wallpaper.directory || Quickshell.env("HOME") + "/Pictures"
     onAccepted: paths => {
-                  if (paths.length > 0) {
-                    Settings.data.wallpaper.directory = paths[0];
-                  }
-                }
+      if (paths.length > 0) {
+        Settings.data.wallpaper.directory = paths[0];
+      }
+    }
   }
 
   NFilePicker {
@@ -58,9 +86,9 @@ NSettingsGroupPage {
     title: I18n.tr("panels.wallpaper.settings-select-monitor-folder")
     initialPath: WallpaperService.getMonitorDirectory(specificFolderMonitorName) || Quickshell.env("HOME") + "/Pictures"
     onAccepted: paths => {
-                  if (paths.length > 0) {
-                    WallpaperService.setMonitorDirectory(specificFolderMonitorName, paths[0]);
-                  }
-                }
+      if (paths.length > 0) {
+        WallpaperService.setMonitorDirectory(specificFolderMonitorName, paths[0]);
+      }
+    }
   }
 }

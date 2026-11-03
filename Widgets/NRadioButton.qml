@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls.Basic
 import qs.Commons
 import qs.Widgets
 
@@ -9,6 +9,13 @@ RadioButton {
   property real pointSize: Style.fontSizeM
 
   implicitWidth: outerCircle.implicitWidth + Style.marginS + contentItem.implicitWidth
+
+  background: NStateLayer {
+    radius: Math.min(width, height) / 2
+    hovering: root.hovered
+    pressed: root.down
+    focusVisible: root.visualFocus
+  }
 
   indicator: Rectangle {
     id: outerCircle

@@ -82,32 +82,27 @@ Item {
     ]
 
     onTriggered: action => {
-                   contextMenu.close();
-                   PanelService.closeContextMenu(screen);
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
 
-                   if (action === "widget-settings") {
-                     BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-                   }
-                 }
+      if (action === "widget-settings") {
+        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+      }
+    }
   }
 
-  Rectangle {
+  NStateLayer {
     id: visualCapsule
     x: Style.pixelAlignCenter(parent.width, width)
     y: Style.pixelAlignCenter(parent.height, height)
     width: root.contentWidth
     height: root.contentHeight
-    color: mouseArea.containsMouse ? HydraColor.mHover : Style.capsuleColor
+    baseColor: Style.capsuleColor
+    hovering: mouseArea.containsMouse
+    pressed: mouseArea.pressed
     radius: Math.min(Style.iRadiusL, width / 2)
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
-
-    Behavior on color {
-      ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.InOutQuad
-      }
-    }
 
     Image {
       id: iconImage
@@ -146,10 +141,10 @@ Item {
       TooltipService.hide();
     }
     onClicked: mouse => {
-                 TooltipService.hide();
-                 if (mouse.button === Qt.RightButton) {
-                   PanelService.showContextMenu(contextMenu, root, screen);
-                 }
-               }
+      TooltipService.hide();
+      if (mouse.button === Qt.RightButton) {
+        PanelService.showContextMenu(contextMenu, root, screen);
+      }
+    }
   }
 }

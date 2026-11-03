@@ -29,7 +29,7 @@ NBox {
   radius: Style.radiusL
   bottomLeftRadius: entry.isPanelAnchor ? Style.radiusXXS : Style.radiusL
   bottomRightRadius: entry.isPanelAnchor ? Style.radiusXXS : Style.radiusL
-  color: entry.isSelected ? HydraColor.mPrimaryContainer : (entry.isHovered ? HydraColor.mSurfaceContainerHigh : "transparent")
+  color: Style.interactionColor(entry.isSelected ? HydraColor.mPrimaryContainer : "transparent", entry.isSelected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface, entry.isHovered, mouseArea.pressed)
   border.color: (entry.isContextMenuTarget && !entry.isPanelAnchor) ? HydraColor.mPrimary : "transparent"
   border.width: (entry.isContextMenuTarget && !entry.isPanelAnchor) ? Style.borderM : 0
   z: entry.isContextMenuTarget ? 10 : 0
@@ -50,7 +50,7 @@ NBox {
 
   Behavior on color {
     ColorAnimation {
-      duration: entry.isSelected ? Style.hoverEnterDuration : (entry.isHovered ? Style.hoverEnterDuration : 0)
+      duration: entry.isSelected || entry.isHovered ? Style.hoverEnterDuration : Style.hoverLeaveDuration
       easing.type: Easing.OutCubic
     }
   }
@@ -171,11 +171,11 @@ NBox {
           }
 
           onStatusChanged: status => {
-                             if (status === Image.Error) {
-                               iconLoader.visible = true;
-                               imagePreview.visible = false;
-                             }
-                           }
+            if (status === Image.Error) {
+              iconLoader.visible = true;
+              imagePreview.visible = false;
+            }
+          }
         }
 
         // Color swatch - shown for clipboard color entries
@@ -331,14 +331,14 @@ NBox {
     enabled: !Settings.data.appLauncher.ignoreMouseInput
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: mouse => {
-                 if (mouse.button === Qt.RightButton) {
-                   launcher.toggleAppPanel(modelData);
-                   mouse.accepted = true;
-                 } else if (mouse.button === Qt.LeftButton) {
-                   launcher.selectedIndex = entry.entryIndex;
-                   launcher.activate();
-                   mouse.accepted = true;
-                 }
-               }
+      if (mouse.button === Qt.RightButton) {
+        launcher.toggleAppPanel(modelData);
+        mouse.accepted = true;
+      } else if (mouse.button === Qt.LeftButton) {
+        launcher.selectedIndex = entry.entryIndex;
+        launcher.activate();
+        mouse.accepted = true;
+      }
+    }
   }
 }

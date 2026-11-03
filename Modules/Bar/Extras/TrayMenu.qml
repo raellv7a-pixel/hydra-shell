@@ -52,8 +52,8 @@ PopupWindow {
   onImplicitHeightChanged: {
     if (visible && anchorItem) {
       Qt.callLater(() => {
-                     anchor.updateAnchor();
-                   });
+        anchor.updateAnchor();
+      });
     }
   }
 
@@ -184,8 +184,8 @@ PopupWindow {
 
     // Force update after showing.
     Qt.callLater(() => {
-                   root.anchor.updateAnchor();
-                 });
+      root.anchor.updateAnchor();
+    });
   }
 
   function hideMenu() {
@@ -280,10 +280,11 @@ PopupWindow {
             visible: modelData?.isSeparator ?? false
           }
 
-          Rectangle {
+          NStateLayer {
             id: innerRect
             anchors.fill: parent
-            color: mouseArea.containsMouse ? HydraColor.mHover : "transparent"
+            hovering: mouseArea.containsMouse && (modelData?.enabled ?? true)
+            pressed: mouseArea.pressed && (modelData?.enabled ?? true)
             radius: Style.radiusS
             visible: !(modelData?.isSeparator ?? false)
 
@@ -307,9 +308,9 @@ PopupWindow {
                 readonly property bool isChecked: modelData?.checkState === Qt.Checked || (modelData?.checked ?? false)
 
                 // Color Logic
-                readonly property color activeColor: mouseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mPrimary
-                readonly property color checkMarkColor: mouseArea.containsMouse ? HydraColor.mHover : HydraColor.mOnPrimary
-                readonly property color borderColor: isChecked ? activeColor : (mouseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface)
+                readonly property color activeColor: HydraColor.mPrimary
+                readonly property color checkMarkColor: HydraColor.mOnPrimary
+                readonly property color borderColor: isChecked ? activeColor : HydraColor.mOnSurface
 
                 // Checkbox Visuals
                 Rectangle {
@@ -375,7 +376,7 @@ PopupWindow {
               NText {
                 id: text
                 Layout.fillWidth: true
-                color: (modelData?.enabled ?? true) ? (mouseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface) : HydraColor.mOnSurfaceVariant
+                color: (modelData?.enabled ?? true) ? HydraColor.mOnSurface : HydraColor.mOnSurfaceVariant
                 text: modelData?.text !== "" ? modelData?.text.replace(/[\n\r]+/g, ' ') : "..."
                 pointSize: Style.fontSizeS
                 verticalAlignment: Text.AlignVCenter
@@ -396,7 +397,7 @@ PopupWindow {
                 applyUiScale: false
                 verticalAlignment: Text.AlignVCenter
                 visible: modelData?.hasChildren ?? false
-                color: (mouseArea.containsMouse ? HydraColor.mOnTertiary : HydraColor.mOnSurface)
+                color: HydraColor.mOnSurface
               }
             }
 
@@ -408,72 +409,72 @@ PopupWindow {
               acceptedButtons: Qt.LeftButton | Qt.RightButton
 
               onClicked: mouse => {
-                           if (modelData && !modelData.isSeparator) {
-                             if (modelData.hasChildren) {
-                               // Click on items with children toggles submenu
-                               if (entry.subMenu) {
-                                 // Close existing submenu
-                                 entry.subMenu.hideMenu();
-                                 entry.subMenu.destroy();
-                                 entry.subMenu = null;
-                               } else {
-                                 // Close any other open submenus first
-                                 for (var i = 0; i < columnLayout.children.length; i++) {
-                                   const sibling = columnLayout.children[i];
-                                   if (sibling !== entry && sibling.subMenu) {
-                                     sibling.subMenu.hideMenu();
-                                     sibling.subMenu.destroy();
-                                     sibling.subMenu = null;
-                                   }
-                                 }
+                if (modelData && !modelData.isSeparator) {
+                  if (modelData.hasChildren) {
+                    // Click on items with children toggles submenu
+                    if (entry.subMenu) {
+                      // Close existing submenu
+                      entry.subMenu.hideMenu();
+                      entry.subMenu.destroy();
+                      entry.subMenu = null;
+                    } else {
+                      // Close any other open submenus first
+                      for (var i = 0; i < columnLayout.children.length; i++) {
+                        const sibling = columnLayout.children[i];
+                        if (sibling !== entry && sibling.subMenu) {
+                          sibling.subMenu.hideMenu();
+                          sibling.subMenu.destroy();
+                          sibling.subMenu = null;
+                        }
+                      }
 
-                                 // Determine submenu opening direction
-                                 let openLeft = false;
-                                 const barPosition = Settings.getBarPositionForScreen(root.screen?.name);
-                                 const globalPos = entry.mapToItem(null, 0, 0);
+                      // Determine submenu opening direction
+                      let openLeft = false;
+                      const barPosition = Settings.getBarPositionForScreen(root.screen?.name);
+                      const globalPos = entry.mapToItem(null, 0, 0);
 
-                                 if (barPosition === "right") {
-                                   openLeft = true;
-                                 } else if (barPosition === "left") {
-                                   openLeft = false;
-                                 } else {
-                                   openLeft = (root.widgetSection === "right");
-                                 }
+                      if (barPosition === "right") {
+                        openLeft = true;
+                      } else if (barPosition === "left") {
+                        openLeft = false;
+                      } else {
+                        openLeft = (root.widgetSection === "right");
+                      }
 
-                                 // Open new submenu
-                                 entry.subMenu = Qt.createComponent("TrayMenu.qml").createObject(root, {
-                                                                                                   "menu": modelData,
-                                                                                                   "isSubMenu": true,
-                                                                                                   "screen": root.screen
-                                                                                                 });
+                      // Open new submenu
+                      entry.subMenu = Qt.createComponent("TrayMenu.qml").createObject(root, {
+                                                                                        "menu": modelData,
+                                                                                        "isSubMenu": true,
+                                                                                        "screen": root.screen
+                                                                                      });
 
-                                 if (entry.subMenu) {
-                                   const overlap = 60;
-                                   entry.subMenu.anchorItem = entry;
-                                   entry.subMenu.anchorX = openLeft ? -overlap : overlap;
-                                   entry.subMenu.anchorY = 0;
-                                   entry.subMenu.visible = true;
-                                   // Force anchor update with new position
-                                   Qt.callLater(() => {
-                                                  entry.subMenu.anchor.updateAnchor();
-                                                });
-                                 }
-                               }
-                             } else {
-                               // Click on regular items triggers them
-                               modelData.triggered();
-                               root.hideMenu();
+                      if (entry.subMenu) {
+                        const overlap = 60;
+                        entry.subMenu.anchorItem = entry;
+                        entry.subMenu.anchorX = openLeft ? -overlap : overlap;
+                        entry.subMenu.anchorY = 0;
+                        entry.subMenu.visible = true;
+                        // Force anchor update with new position
+                        Qt.callLater(() => {
+                          entry.subMenu.anchor.updateAnchor();
+                        });
+                      }
+                    }
+                  } else {
+                    // Click on regular items triggers them
+                    modelData.triggered();
+                    root.hideMenu();
 
-                               // Close the drawer if it's open
-                               if (root.screen) {
-                                 const panel = PanelService.getPanel("trayDrawerPanel", root.screen);
-                                 if (panel && panel.visible) {
-                                   panel.close();
-                                 }
-                               }
-                             }
-                           }
-                         }
+                    // Close the drawer if it's open
+                    if (root.screen) {
+                      const panel = PanelService.getPanel("trayDrawerPanel", root.screen);
+                      if (panel && panel.visible) {
+                        panel.close();
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
 

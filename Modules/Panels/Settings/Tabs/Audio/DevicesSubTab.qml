@@ -16,17 +16,20 @@ ColumnLayout {
     id: sinks
   }
 
-  ColumnLayout {
-    spacing: Style.marginXS
-    Layout.fillWidth: true
-    Layout.bottomMargin: Style.marginL
-
-    NLabel {
-      label: I18n.tr("panels.audio.devices-output-device-label")
-      description: I18n.tr("panels.audio.devices-output-device-description")
+  NSettingsSection {
+    title: I18n.tr("panels.audio.devices-output-device-label")
+    description: I18n.tr("panels.audio.devices-output-device-description")
+    icon: "volume"
+    NText {
+      visible: outputDevices.count === 0
+      text: I18n.tr("settings.content.no-audio-devices")
+      Layout.fillWidth: true
+      color: HydraColor.mOnSurfaceVariant
+      wrapMode: Text.WordWrap
     }
 
     Repeater {
+      id: outputDevices
       model: AudioService.sinks
       NRadioButton {
         ButtonGroup.group: sinks
@@ -46,16 +49,20 @@ ColumnLayout {
     id: sources
   }
 
-  ColumnLayout {
-    spacing: Style.marginXS
-    Layout.fillWidth: true
-
-    NLabel {
-      label: I18n.tr("panels.audio.devices-input-device-label")
-      description: I18n.tr("panels.audio.devices-input-device-description")
+  NSettingsSection {
+    title: I18n.tr("panels.audio.devices-input-device-label")
+    description: I18n.tr("panels.audio.devices-input-device-description")
+    icon: "microphone"
+    NText {
+      visible: inputDevices.count === 0
+      text: I18n.tr("settings.content.no-audio-devices")
+      Layout.fillWidth: true
+      color: HydraColor.mOnSurfaceVariant
+      wrapMode: Text.WordWrap
     }
 
     Repeater {
+      id: inputDevices
       model: AudioService.sources
       NRadioButton {
         ButtonGroup.group: sources

@@ -10,49 +10,48 @@ ColumnLayout {
   spacing: Style.marginL
   Layout.fillWidth: true
 
-  // Master enable
-  NToggle {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.idle.enable-label")
-    description: I18n.tr("panels.idle.enable-description")
-    checked: Settings.data.idle.enabled
-    defaultValue: Settings.getDefaultValue("idle.enabled")
-    onToggled: checked => Settings.data.idle.enabled = checked
-  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.availability")
+    icon: "clock"
+    // Master enable
+    NToggle {
+      Layout.fillWidth: true
+      label: I18n.tr("panels.idle.enable-label")
+      description: I18n.tr("panels.idle.enable-description")
+      checked: Settings.data.idle.enabled
+      defaultValue: Settings.getDefaultValue("idle.enabled")
+      onToggled: checked => Settings.data.idle.enabled = checked
+    }
 
-  // Live idle status
-  RowLayout {
-    Layout.fillWidth: true
-    enabled: Settings.data.idle.enabled
-    visible: IdleService.nativeIdleMonitorAvailable
+    // Live idle status
+    RowLayout {
+      Layout.fillWidth: true
+      enabled: Settings.data.idle.enabled
+      visible: IdleService.nativeIdleMonitorAvailable
+
+      NLabel {
+        label: I18n.tr("panels.idle.status-label")
+        description: I18n.tr("panels.idle.status-description")
+      }
+
+      Item {
+        Layout.fillWidth: true
+      }
+
+      NText {
+        Layout.alignment: Qt.AlignBottom | Qt.AlignRight
+        text: IdleService.idleSeconds > 0 ? I18n.trp("common.second", IdleService.idleSeconds) : I18n.tr("common.active")
+        family: Settings.data.ui.fontFixed
+        pointSize: Style.fontSizeM
+        color: IdleService.idleSeconds > 0 ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
+      }
+    }
 
     NLabel {
-      label: I18n.tr("panels.idle.status-label")
-      description: I18n.tr("panels.idle.status-description")
-    }
-
-    Item {
-      Layout.fillWidth: true
-    }
-
-    NText {
-      Layout.alignment: Qt.AlignBottom | Qt.AlignRight
-      text: IdleService.idleSeconds > 0 ? I18n.trp("common.second", IdleService.idleSeconds) : I18n.tr("common.active")
-      family: Settings.data.ui.fontFixed
-      pointSize: Style.fontSizeM
-      color: IdleService.idleSeconds > 0 ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
+      visible: !IdleService.nativeIdleMonitorAvailable
+      description: I18n.tr("panels.idle.unavailable")
     }
   }
-
-  NLabel {
-    visible: !IdleService.nativeIdleMonitorAvailable
-    description: I18n.tr("panels.idle.unavailable")
-  }
-
-  NDivider {
-    Layout.fillWidth: true
-  }
-
   IdleCommandEditPopup {
     id: editPopup
     parent: Overlay.overlay
@@ -81,16 +80,38 @@ ColumnLayout {
   }
 
   // Timeout spinboxes and resume commands
-  ColumnLayout {
-    Layout.fillWidth: true
-    spacing: Style.marginL
+  NSettingsSection {
+    title: I18n.tr("panels.idle.timeouts-label")
+    description: I18n.tr("panels.idle.timeouts-description")
+    icon: "timeline"
     enabled: Settings.data.idle.enabled
 
-    NLabel {
-      label: I18n.tr("panels.idle.timeouts-label")
-      description: I18n.tr("panels.idle.timeouts-description")
+    Flow {
+      Layout.fillWidth: true
+      spacing: Style.marginL
+      Repeater {
+        model: [
+          {
+            name: I18n.tr("panels.idle.screen-off-label"),
+            seconds: Settings.data.idle.screenOffTimeout
+          },
+          {
+            name: I18n.tr("panels.idle.lock-label"),
+            seconds: Settings.data.idle.lockTimeout
+          },
+          {
+            name: I18n.tr("common.suspend"),
+            seconds: Settings.data.idle.suspendTimeout
+          }
+        ].sort((a, b) => (a.seconds || Infinity) - (b.seconds || Infinity))
+        NText {
+          required property var modelData
+          text: modelData.name + " · " + (modelData.seconds > 0 ? I18n.trp("common.second", modelData.seconds) : I18n.tr("common.disabled"))
+          pointSize: Style.fontSizeS
+          color: HydraColor.mOnSurfaceVariant
+        }
+      }
     }
-
     DefaultActionRow {
       actionName: I18n.tr("panels.idle.screen-off-label")
       actionDescription: I18n.tr("panels.idle.screen-off-description")
@@ -100,13 +121,13 @@ ColumnLayout {
       resumeCommand: Settings.data.idle.resumeScreenOffCommand
       onActionTimeoutChanged: val => Settings.data.idle.screenOffTimeout = val
       onActionCommandChanged: cmd => {
-                                Settings.data.idle.screenOffCommand = cmd;
-                                Settings.saveImmediate();
-                              }
+        Settings.data.idle.screenOffCommand = cmd;
+        Settings.saveImmediate();
+      }
       onActionResumeCommandChanged: cmd => {
-                                      Settings.data.idle.resumeScreenOffCommand = cmd;
-                                      Settings.saveImmediate();
-                                    }
+        Settings.data.idle.resumeScreenOffCommand = cmd;
+        Settings.saveImmediate();
+      }
     }
 
     DefaultActionRow {
@@ -118,13 +139,13 @@ ColumnLayout {
       resumeCommand: Settings.data.idle.resumeLockCommand
       onActionTimeoutChanged: val => Settings.data.idle.lockTimeout = val
       onActionCommandChanged: cmd => {
-                                Settings.data.idle.lockCommand = cmd;
-                                Settings.saveImmediate();
-                              }
+        Settings.data.idle.lockCommand = cmd;
+        Settings.saveImmediate();
+      }
       onActionResumeCommandChanged: cmd => {
-                                      Settings.data.idle.resumeLockCommand = cmd;
-                                      Settings.saveImmediate();
-                                    }
+        Settings.data.idle.resumeLockCommand = cmd;
+        Settings.saveImmediate();
+      }
     }
 
     DefaultActionRow {
@@ -136,19 +157,19 @@ ColumnLayout {
       resumeCommand: Settings.data.idle.resumeSuspendCommand
       onActionTimeoutChanged: val => Settings.data.idle.suspendTimeout = val
       onActionCommandChanged: cmd => {
-                                Settings.data.idle.suspendCommand = cmd;
-                                Settings.saveImmediate();
-                              }
+        Settings.data.idle.suspendCommand = cmd;
+        Settings.saveImmediate();
+      }
       onActionResumeCommandChanged: cmd => {
-                                      Settings.data.idle.resumeSuspendCommand = cmd;
-                                      Settings.saveImmediate();
-                                    }
+        Settings.data.idle.resumeSuspendCommand = cmd;
+        Settings.saveImmediate();
+      }
     }
-
-    NDivider {
-      Layout.fillWidth: true
-    }
-
+  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.transitions")
+    icon: "player-play"
+    enabled: Settings.data.idle.enabled
     NSpinBox {
       label: I18n.tr("panels.idle.fade-duration-label")
       description: I18n.tr("panels.idle.fade-duration-description")

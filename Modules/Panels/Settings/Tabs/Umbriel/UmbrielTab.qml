@@ -10,12 +10,36 @@ ColumnLayout {
   property var scrollView: null
   readonly property var settingsStore: UmbrielSettingsStore
   readonly property var groups: [
-    { key: "keybinds", title: "Atalhos", icon: "keyboard" },
-    { key: "overview", title: "Visão Geral", icon: "layout-dashboard" },
-    { key: "switcher", title: "Alternador de Janelas", icon: "layout-dashboard" },
-    { key: "interaction", title: "Interação Hydra", icon: "keyboard" },
-    { key: "corners", title: "Cantos Ativos", icon: "focus-2" },
-    { key: "sharing", title: "Compartilhamento", icon: "screen-share" }
+    {
+      key: "keybinds",
+      title: "Atalhos",
+      icon: "keyboard"
+    },
+    {
+      key: "overview",
+      title: "Visão Geral",
+      icon: "layout-dashboard"
+    },
+    {
+      key: "switcher",
+      title: "Alternador de Janelas",
+      icon: "layout-dashboard"
+    },
+    {
+      key: "interaction",
+      title: "Interação Hydra",
+      icon: "keyboard"
+    },
+    {
+      key: "corners",
+      title: "Cantos Ativos",
+      icon: "focus-2"
+    },
+    {
+      key: "sharing",
+      title: "Compartilhamento",
+      icon: "screen-share"
+    }
   ]
   readonly property var expandedGroups: SettingsPanelService.umbrielGroupState
   Layout.fillWidth: true
@@ -28,43 +52,44 @@ ColumnLayout {
   Timer {
     id: jumpTimer
     property string key: ""
-    interval: Style.animationNormal + 40
+    interval: Style.animationFaster + 40
     onTriggered: root.scrollTo(key)
   }
 
-  function showOnly(key) {
-    SettingsPanelService.umbrielGroupState = {
-      keybinds: key === "keybinds",
-      overview: key === "overview",
-      switcher: key === "switcher",
-      interaction: key === "interaction",
-      corners: key === "corners",
-      sharing: key === "sharing"
-    };
-  }
-
   function toggle(key, open) {
-    SettingsPanelService.umbrielGroupState = Object.assign({}, expandedGroups, { [key]: open });
+    SettingsPanelService.umbrielGroupState = Object.assign({}, expandedGroups, {
+                                                             [key]: open
+                                                           });
   }
   function jump(key) {
-    showOnly(key);
+    if (!groups.some(group => group.key === key))
+      return;
+    toggle(key, true);
     jumpTimer.key = key;
     jumpTimer.restart();
   }
   function scrollTo(key) {
-    if (!root.scrollView) return;
+    if (!root.scrollView)
+      return;
     const flick = root.scrollView.contentItem;
-    const card = {keybinds: keybindsGroup, overview: overviewGroup, switcher: switcherGroup,
-      interaction: interactionGroup, corners: cornersGroup, sharing: sharingGroup}[key];
+    const card = {
+      keybinds: keybindsGroup,
+      overview: overviewGroup,
+      switcher: switcherGroup,
+      interaction: interactionGroup,
+      corners: cornersGroup,
+      sharing: sharingGroup
+    }[key];
     const y = card.mapToItem(flick.contentItem, 0, 0).y;
     flick.contentY = Math.max(0, Math.min(y, flick.contentHeight - flick.height));
   }
   function revealSettingsGroup(key) {
-    if (expandedGroups.hasOwnProperty(key))
-      showOnly(key);
+    if (groups.some(group => group.key === key))
+      toggle(key, true);
   }
   function navigateToSettingsGroup(index) {
-    if (index >= 0 && index < groups.length) jump(groups[index].key);
+    if (index >= 0 && index < groups.length)
+      jump(groups[index].key);
   }
 
   NText {
@@ -103,7 +128,9 @@ ColumnLayout {
     }
     RowLayout {
       Layout.fillWidth: true
-      Item { Layout.fillWidth: true }
+      Item {
+        Layout.fillWidth: true
+      }
       NButton {
         text: "Reverter"
         backgroundColor: HydraColor.mSurfaceContainerHigh
@@ -125,7 +152,9 @@ ColumnLayout {
     icon: "keyboard"
     expanded: root.expandedGroups.keybinds
     onToggled: open => root.toggle("keybinds", open)
-    UmbrielKeybindsCard { Layout.fillWidth: true }
+    UmbrielKeybindsCard {
+      Layout.fillWidth: true
+    }
   }
   NSettingsGroupCard {
     id: overviewGroup
@@ -134,7 +163,9 @@ ColumnLayout {
     icon: "layout-dashboard"
     expanded: root.expandedGroups.overview
     onToggled: open => root.toggle("overview", open)
-    UmbrielOverviewCard { Layout.fillWidth: true }
+    UmbrielOverviewCard {
+      Layout.fillWidth: true
+    }
   }
   NSettingsGroupCard {
     id: switcherGroup
@@ -143,7 +174,9 @@ ColumnLayout {
     icon: "layout-dashboard"
     expanded: root.expandedGroups.switcher ?? false
     onToggled: open => root.toggle("switcher", open)
-    UmbrielSwitcherCard { Layout.fillWidth: true }
+    UmbrielSwitcherCard {
+      Layout.fillWidth: true
+    }
   }
   NSettingsGroupCard {
     id: interactionGroup
@@ -152,7 +185,9 @@ ColumnLayout {
     icon: "keyboard"
     expanded: root.expandedGroups.interaction ?? false
     onToggled: open => root.toggle("interaction", open)
-    UmbrielInteractionCard { Layout.fillWidth: true }
+    UmbrielInteractionCard {
+      Layout.fillWidth: true
+    }
   }
   NSettingsGroupCard {
     id: cornersGroup
@@ -161,7 +196,9 @@ ColumnLayout {
     icon: "focus-2"
     expanded: root.expandedGroups.corners
     onToggled: open => root.toggle("corners", open)
-    UmbrielHotCornersCard { Layout.fillWidth: true }
+    UmbrielHotCornersCard {
+      Layout.fillWidth: true
+    }
   }
   NSettingsGroupCard {
     id: sharingGroup
@@ -170,6 +207,8 @@ ColumnLayout {
     icon: "screen-share"
     expanded: root.expandedGroups.sharing ?? false
     onToggled: open => root.toggle("sharing", open)
-    UmbrielSharingCard { Layout.fillWidth: true }
+    UmbrielSharingCard {
+      Layout.fillWidth: true
+    }
   }
 }

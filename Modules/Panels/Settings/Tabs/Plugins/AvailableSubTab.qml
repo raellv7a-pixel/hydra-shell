@@ -42,29 +42,6 @@ ColumnLayout {
     return author;
   }
 
-  // Tag filter chips in collapsible
-  NTagFilter {
-    tags: root.pseudoTags.concat(root.availableTags)
-    selectedTag: root.selectedTag
-    onSelectedTagChanged: root.selectedTag = selectedTag
-    label: I18n.tr("panels.plugins.filter-tags-label")
-    description: I18n.tr("panels.plugins.filter-tags-description")
-    expanded: true
-
-    formatTag: function (tag) {
-      if (tag === "")
-        return I18n.tr("launcher.categories.all");
-      if (tag === "official")
-        return I18n.tr("common.official");
-      if (tag === "downloaded")
-        return I18n.tr("panels.plugins.filter-downloaded");
-      if (tag === "notDownloaded")
-        return I18n.tr("panels.plugins.filter-not-downloaded");
-      return tag;
-    }
-  }
-
-  // Search input with refresh button
   RowLayout {
     Layout.fillWidth: true
     spacing: Style.marginM
@@ -88,11 +65,34 @@ ColumnLayout {
       }
     }
   }
+  // Tag filter chips in collapsible
+  NTagFilter {
+    tags: root.pseudoTags.concat(root.availableTags)
+    selectedTag: root.selectedTag
+    onSelectedTagChanged: root.selectedTag = selectedTag
+    label: I18n.tr("panels.plugins.filter-tags-label")
+    description: I18n.tr("panels.plugins.filter-tags-description")
+    expanded: true
+
+    formatTag: function (tag) {
+      if (tag === "")
+        return I18n.tr("launcher.categories.all");
+      if (tag === "official")
+        return I18n.tr("common.official");
+      if (tag === "downloaded")
+        return I18n.tr("panels.plugins.filter-downloaded");
+      if (tag === "notDownloaded")
+        return I18n.tr("panels.plugins.filter-not-downloaded");
+      return tag;
+    }
+  }
+
+  // Search input with refresh button
 
   // Available plugins list
-  ColumnLayout {
-    spacing: Style.marginM
-    Layout.fillWidth: true
+  NSettingsSection {
+    title: I18n.tr("common.available")
+    icon: "download"
 
     Repeater {
       id: availablePluginsRepeater
@@ -194,9 +194,12 @@ ColumnLayout {
             }
 
             NText {
+              Layout.fillWidth: true
+              Layout.minimumWidth: 0
+              wrapMode: Text.WordWrap
               text: modelData.name
               color: HydraColor.mPrimary
-              elide: Text.ElideRight
+              elide: Text.ElideNone
             }
 
             // Official badge (Hydra Team maintained)
@@ -226,11 +229,10 @@ ColumnLayout {
                 }
               }
             }
-
-            // Spacer
-            Item {
-              Layout.fillWidth: true
-            }
+          }
+          Flow {
+            Layout.fillWidth: true
+            spacing: Style.marginM
 
             // Open plugin page button
             NIconButton {

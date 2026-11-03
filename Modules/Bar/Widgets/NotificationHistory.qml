@@ -96,17 +96,17 @@ NIconButton {
     ]
 
     onTriggered: action => {
-                   contextMenu.close();
-                   PanelService.closeContextMenu(screen);
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
 
-                   if (action === "toggle-dnd") {
-                     NotificationService.doNotDisturb = !NotificationService.doNotDisturb;
-                   } else if (action === "clear-history") {
-                     NotificationService.clearHistory();
-                   } else if (action === "widget-settings") {
-                     BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-                   }
-                 }
+      if (action === "toggle-dnd") {
+        NotificationService.doNotDisturb = !NotificationService.doNotDisturb;
+      } else if (action === "clear-history") {
+        NotificationService.clearHistory();
+      } else if (action === "widget-settings") {
+        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+      }
+    }
   }
 
   onClicked: {
@@ -130,7 +130,7 @@ NIconButton {
       height: 7
       width: height
       radius: Style.radiusXS
-      color: root.hovering ? HydraColor.mOnHover : (root.badgeColor || HydraColor.mError)
+      color: root.badgeColor || HydraColor.mError
       border.color: HydraColor.mSurface
       border.width: Style.borderS
       visible: count > 0

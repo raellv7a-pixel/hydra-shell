@@ -713,11 +713,14 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             Repeater {
               model: root.installedLangs
-              delegate: Rectangle {
+              delegate: NStateLayer {
                 height: 24
                 width: chipLangText.implicitWidth + Style.marginM * 2
                 radius: Style.radiusS
-                color: root.selectedOcrLang === modelData ? HydraColor.mPrimary : (chipMA.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
+                baseColor: root.selectedOcrLang === modelData ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
+                stateColor: root.selectedOcrLang === modelData ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+                hovering: chipMA.containsMouse
+                pressed: chipMA.pressed
                 NText {
                   id: chipLangText
                   anchors.centerIn: parent
@@ -892,11 +895,14 @@ Item {
                 hint: ""
               }
             ]
-            delegate: Rectangle {
+            delegate: NStateLayer {
               height: 26
               width: fmtLabel.implicitWidth + (modelData.hint !== "" ? fmtHint.implicitWidth + Style.marginXS : 0) + Style.marginM * 2 + Style.marginS
               radius: Style.radiusS
-              color: root.selectedRecordFormat === modelData.id ? HydraColor.mPrimary : (fmtArea.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
+              baseColor: root.selectedRecordFormat === modelData.id ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
+              stateColor: root.selectedRecordFormat === modelData.id ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+              hovering: fmtArea.containsMouse
+              pressed: fmtArea.pressed
               Row {
                 anchors.centerIn: parent
                 spacing: Style.marginXS
@@ -911,7 +917,7 @@ Item {
                   id: fmtHint
                   visible: modelData.hint !== ""
                   text: modelData.hint
-                  color: root.selectedRecordFormat === modelData.id ? Qt.rgba(1, 1, 1, 0.65) : HydraColor.mOnSurfaceVariant
+                  color: root.selectedRecordFormat === modelData.id ? Qt.alpha(HydraColor.mOnPrimary, 0.65) : HydraColor.mOnSurfaceVariant
                   pointSize: Style.fontSizeXS
                 }
               }
@@ -935,11 +941,14 @@ Item {
             height: 26
             verticalAlignment: Text.AlignVCenter
           }
-          Rectangle {
+          NStateLayer {
             height: 26
             width: audioOutIcon.implicitWidth + audioOutLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
             radius: Style.radiusS
-            color: root.recordAudioOutput ? HydraColor.mPrimary : (audioOutArea.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
+            baseColor: root.recordAudioOutput ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
+            stateColor: root.recordAudioOutput ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+            hovering: audioOutArea.containsMouse
+            pressed: audioOutArea.pressed
             Row {
               anchors.centerIn: parent
               spacing: Style.marginXS
@@ -967,11 +976,14 @@ Item {
               onExited: TooltipService.hide()
             }
           }
-          Rectangle {
+          NStateLayer {
             height: 26
             width: micIcon.implicitWidth + micLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
             radius: Style.radiusS
-            color: root.recordAudioInput ? HydraColor.mPrimary : (micArea.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
+            baseColor: root.recordAudioInput ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
+            stateColor: root.recordAudioInput ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+            hovering: micArea.containsMouse
+            pressed: micArea.pressed
             Row {
               anchors.centerIn: parent
               spacing: Style.marginXS
@@ -999,11 +1011,14 @@ Item {
               onExited: TooltipService.hide()
             }
           }
-          Rectangle {
+          NStateLayer {
             height: 26
             width: cursorIcon.implicitWidth + cursorLabel.implicitWidth + Style.marginM * 2 + Style.marginS + Style.marginXS
             radius: Style.radiusS
-            color: root.recordCursor ? HydraColor.mPrimary : (cursorArea.containsMouse ? HydraColor.mHover : HydraColor.mSurfaceVariant)
+            baseColor: root.recordCursor ? HydraColor.mPrimary : HydraColor.mSurfaceVariant
+            stateColor: root.recordCursor ? HydraColor.mOnPrimary : HydraColor.mOnSurface
+            hovering: cursorArea.containsMouse
+            pressed: cursorArea.pressed
             Row {
               anchors.centerIn: parent
               spacing: Style.marginXS
@@ -1240,12 +1255,14 @@ Item {
     Column {
       anchors.centerIn: parent
       spacing: Style.marginXS
-      Rectangle {
+      NStateLayer {
         width: Math.min(btn.width - 8, 42)
         height: Math.min(btn.width - 8, 42)
         radius: Style.radiusM
         anchors.horizontalCenter: parent.horizontalCenter
-        color: ba.containsMouse ? HydraColor.mHover : HydraColor.mSurface
+        baseColor: HydraColor.mSurface
+        hovering: ba.containsMouse
+        pressed: ba.pressed
         border.color: btn._accented ? btn._accentColor : ba.containsMouse ? HydraColor.mOnSurfaceVariant : "transparent"
         border.width: btn._accented ? 2 : ba.containsMouse ? 1 : 0
         clip: true
@@ -1320,7 +1337,7 @@ Item {
         NIcon {
           anchors.centerIn: parent
           icon: btn.icon
-          color: btn._accented ? btn._accentColor : ba.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
+          color: btn._accented ? btn._accentColor : HydraColor.mOnSurface
           Behavior on color {
             ColorAnimation {
               duration: 120
@@ -1347,14 +1364,14 @@ Item {
           cursorShape: Qt.PointingHandCursor
           enabled: !btn.running || btn.recording
           onClicked: mouse => {
-                       ripple.cx = mouse.x;
-                       ripple.cy = mouse.y;
-                       ripple.width = 0;
-                       ripple.height = 0;
-                       ripple.opacity = 0.3;
-                       rippleAnim.restart();
-                       btn.triggered();
-                     }
+            ripple.cx = mouse.x;
+            ripple.cy = mouse.y;
+            ripple.width = 0;
+            ripple.height = 0;
+            ripple.opacity = 0.3;
+            rippleAnim.restart();
+            btn.triggered();
+          }
           onEntered: TooltipService.show(btn, btn.tooltip !== "" ? btn.tooltip : btn.label)
           onExited: TooltipService.hide()
         }

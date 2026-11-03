@@ -14,6 +14,7 @@ Item {
   property real borderWidth: 0
   property color borderColor: "transparent"
   property int imageFillMode: Image.PreserveAspectCrop
+  property size imageSourceSize: Qt.size(-1, -1)
 
   readonly property bool _isAnimated: imagePath.toLowerCase().endsWith(".gif")
   readonly property Item imageSource: imageSourceLoader.item
@@ -40,6 +41,7 @@ Item {
       Image {
         visible: false
         source: root.imagePath
+        sourceSize: root.imageSourceSize
         mipmap: true
         smooth: true
         asynchronous: true

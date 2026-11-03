@@ -20,31 +20,30 @@ ColumnLayout {
   default property alias content: contentLayout.children
 
   // Header with clickable area
-  Rectangle {
+  NStateLayer {
     id: headerContainer
     Layout.fillWidth: true
     Layout.preferredHeight: headerContent.implicitHeight + Style.margin2M
-    color: headerArea.containsMouse ? HydraColor.mSurfaceContainerHighest : (root.expanded ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh)
+    baseColor: root.expanded ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
+    stateColor: root.expanded ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
     radius: Style.iRadiusM
-    border.color: HydraColor.mOutline
-    border.width: Style.borderS
+    hovering: headerArea.containsMouse
+    pressed: headerArea.pressed
+    focusPolicy: Qt.StrongFocus
+    Accessible.role: Accessible.Button
+    Accessible.name: root.label
+    Accessible.checkable: true
+    Accessible.checked: root.expanded
 
-    // Smooth color transitions
-    Behavior on color {
-      enabled: root._userInteracted
-      ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
+    function activate() {
+      root._userInteracted = true;
+      root.expanded = !root.expanded;
+      root.toggled(root.expanded);
     }
-
-    Behavior on border.color {
-      enabled: root._userInteracted
-      ColorAnimation {
-        duration: Style.animationNormal
-        easing.type: Easing.OutCubic
-      }
-    }
+    Keys.onReturnPressed: activate()
+    Keys.onEnterPressed: activate()
+    Keys.onSpacePressed: activate()
+    Accessible.onPressAction: activate()
 
     MouseArea {
       id: headerArea
@@ -53,9 +52,8 @@ ColumnLayout {
       hoverEnabled: true
 
       onClicked: {
-        root._userInteracted = true;
-        root.expanded = !root.expanded;
-        root.toggled(root.expanded);
+        headerContainer.forceActiveFocus(Qt.MouseFocusReason);
+        headerContainer.activate();
       }
     }
 
@@ -100,7 +98,7 @@ ColumnLayout {
           text: root.label
           pointSize: Style.fontSizeL
           font.weight: Style.fontWeightSemiBold
-          color: root.expanded && !headerArea.containsMouse ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
+          color: root.expanded ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
           wrapMode: Text.WordWrap
 
           Behavior on color {
@@ -115,7 +113,7 @@ ColumnLayout {
           text: root.description
           pointSize: Style.fontSizeS
           font.weight: Style.fontWeightRegular
-          color: root.expanded && !headerArea.containsMouse ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
+          color: root.expanded ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurfaceVariant
           Layout.fillWidth: true
           wrapMode: Text.WordWrap
           visible: root.description !== ""

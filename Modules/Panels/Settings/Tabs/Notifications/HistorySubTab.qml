@@ -10,43 +10,50 @@ ColumnLayout {
   Layout.fillWidth: true
   enabled: Settings.data.notifications.enabled
 
-  NToggle {
-    label: I18n.tr("panels.notifications.history-clear-dismiss-label")
-    description: I18n.tr("panels.notifications.history-clear-dismiss-description")
-    checked: Settings.data.notifications.clearDismissed
-    onToggled: checked => Settings.data.notifications.clearDismissed = checked
-    defaultValue: Settings.getDefaultValue("notifications.clearDismissed")
-  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.history")
+    icon: "history"
+    NToggle {
+      label: I18n.tr("panels.notifications.history-clear-dismiss-label")
+      description: I18n.tr("panels.notifications.history-clear-dismiss-description")
+      checked: Settings.data.notifications.clearDismissed
+      onToggled: checked => Settings.data.notifications.clearDismissed = checked
+      defaultValue: Settings.getDefaultValue("notifications.clearDismissed")
+    }
 
-  NToggle {
-    label: I18n.tr("panels.notifications.settings-markdown-label")
-    description: I18n.tr("panels.notifications.settings-markdown-description")
-    checked: Settings.data.notifications.enableMarkdown
-    onToggled: checked => Settings.data.notifications.enableMarkdown = checked
-    defaultValue: Settings.getDefaultValue("notifications.enableMarkdown")
-  }
+    NToggle {
+      label: I18n.tr("panels.notifications.history-low-urgency-label")
+      description: I18n.tr("panels.notifications.history-low-urgency-description")
+      checked: Settings.data.notifications?.saveToHistory?.low !== false
+      onToggled: checked => Settings.data.notifications.saveToHistory.low = checked
+      defaultValue: Settings.getDefaultValue("notifications.saveToHistory.low")
+    }
 
-  NToggle {
-    label: I18n.tr("panels.notifications.history-low-urgency-label")
-    description: I18n.tr("panels.notifications.history-low-urgency-description")
-    checked: Settings.data.notifications?.saveToHistory?.low !== false
-    onToggled: checked => Settings.data.notifications.saveToHistory.low = checked
-    defaultValue: Settings.getDefaultValue("notifications.saveToHistory.low")
-  }
+    NToggle {
+      label: I18n.tr("panels.notifications.history-normal-urgency-label")
+      description: I18n.tr("panels.notifications.history-normal-urgency-description")
+      checked: Settings.data.notifications?.saveToHistory?.normal !== false
+      onToggled: checked => Settings.data.notifications.saveToHistory.normal = checked
+      defaultValue: Settings.getDefaultValue("notifications.saveToHistory.normal")
+    }
 
-  NToggle {
-    label: I18n.tr("panels.notifications.history-normal-urgency-label")
-    description: I18n.tr("panels.notifications.history-normal-urgency-description")
-    checked: Settings.data.notifications?.saveToHistory?.normal !== false
-    onToggled: checked => Settings.data.notifications.saveToHistory.normal = checked
-    defaultValue: Settings.getDefaultValue("notifications.saveToHistory.normal")
+    NToggle {
+      label: I18n.tr("panels.notifications.history-critical-urgency-label")
+      description: I18n.tr("panels.notifications.history-critical-urgency-description")
+      checked: Settings.data.notifications?.saveToHistory?.critical !== false
+      onToggled: checked => Settings.data.notifications.saveToHistory.critical = checked
+      defaultValue: Settings.getDefaultValue("notifications.saveToHistory.critical")
+    }
   }
-
-  NToggle {
-    label: I18n.tr("panels.notifications.history-critical-urgency-label")
-    description: I18n.tr("panels.notifications.history-critical-urgency-description")
-    checked: Settings.data.notifications?.saveToHistory?.critical !== false
-    onToggled: checked => Settings.data.notifications.saveToHistory.critical = checked
-    defaultValue: Settings.getDefaultValue("notifications.saveToHistory.critical")
+  NSettingsSection {
+    title: I18n.tr("settings.content.formatting")
+    icon: "text-size"
+    NToggle {
+      label: I18n.tr("panels.notifications.settings-markdown-label")
+      description: I18n.tr("panels.notifications.settings-markdown-description")
+      checked: Settings.data.notifications.enableMarkdown
+      onToggled: checked => Settings.data.notifications.enableMarkdown = checked
+      defaultValue: Settings.getDefaultValue("notifications.enableMarkdown")
+    }
   }
 }

@@ -243,39 +243,39 @@ RowLayout {
           fontSize: Style.fontSizeS
 
           Keys.onPressed: event => {
-                            if (Keybinds.checkKey(event, 'enter', Settings)) {
-                              selectHighlighted();
-                              combo.popup.close();
-                              event.accepted = true;
-                              return;
-                            }
+            if (Keybinds.checkKey(event, 'enter', Settings)) {
+              selectHighlighted();
+              combo.popup.close();
+              event.accepted = true;
+              return;
+            }
 
-                            if (Keybinds.checkKey(event, 'escape', Settings)) {
-                              combo.popup.close();
-                              event.accepted = true;
-                              return;
-                            }
+            if (Keybinds.checkKey(event, 'escape', Settings)) {
+              combo.popup.close();
+              event.accepted = true;
+              return;
+            }
 
-                            if (Keybinds.checkKey(event, 'up', Settings)) {
-                              if (listView.currentIndex > 0) {
-                                listView.currentIndex--;
-                                if (root.selectOnNavigation)
-                                selectHighlighted();
-                              }
-                              event.accepted = true;
-                              return;
-                            }
+            if (Keybinds.checkKey(event, 'up', Settings)) {
+              if (listView.currentIndex > 0) {
+                listView.currentIndex--;
+                if (root.selectOnNavigation)
+                  selectHighlighted();
+              }
+              event.accepted = true;
+              return;
+            }
 
-                            if (Keybinds.checkKey(event, 'down', Settings)) {
-                              if (listView.currentIndex < listView.count - 1) {
-                                listView.currentIndex++;
-                                if (root.selectOnNavigation)
-                                selectHighlighted();
-                              }
-                              event.accepted = true;
-                              return;
-                            }
-                          }
+            if (Keybinds.checkKey(event, 'down', Settings)) {
+              if (listView.currentIndex < listView.count - 1) {
+                listView.currentIndex++;
+                if (root.selectOnNavigation)
+                  selectHighlighted();
+              }
+              event.accepted = true;
+              return;
+            }
+          }
 
           function selectHighlighted() {
             if (listView.currentIndex >= 0 && listView.model && listView.currentIndex < listView.model.count) {
@@ -312,6 +312,8 @@ RowLayout {
               bottomPadding: Style.marginS
               hoverEnabled: true
               highlighted: ListView.view.currentIndex === index
+              readonly property bool isSelected: !!listView.model && index >= 0 && index < listView.model.count && listView.model.get(index).key === root.currentKey
+              Accessible.selected: isSelected
 
               onHoveredChanged: {
                 if (hovered) {
@@ -332,7 +334,8 @@ RowLayout {
                 NText {
                   text: name
                   pointSize: Style.fontSizeM
-                  color: highlighted ? HydraColor.mOnHover : HydraColor.mOnSurface
+                  color: delegateRoot.isSelected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
+                  font.weight: delegateRoot.isSelected ? Style.fontWeightSemiBold : Style.fontWeightRegular
                   verticalAlignment: Text.AlignVCenter
                   elide: Text.ElideRight
                   Layout.fillWidth: true
@@ -379,17 +382,27 @@ RowLayout {
                         else
                           return Style.fontSizeXS;
                       }
-                      color: highlighted ? HydraColor.mOnHover : (badgeData && badgeData.color ? badgeData.color : HydraColor.mOnSurface)
+                      color: delegateRoot.isSelected ? HydraColor.mOnSecondaryContainer : (badgeData && badgeData.color ? badgeData.color : HydraColor.mOnSurface)
                       Layout.preferredWidth: Math.round(Style.baseWidgetSize * 0.6)
                       Layout.preferredHeight: Math.round(Style.baseWidgetSize * 0.6)
                       visible: badgeData && badgeData.icon !== undefined && badgeData.icon !== ""
                     }
                   }
                 }
+                NIcon {
+                  icon: "check"
+                  pointSize: Style.fontSizeS
+                  color: HydraColor.mOnSecondaryContainer
+                  visible: delegateRoot.isSelected
+                  Accessible.ignored: true
+                }
               }
-              background: Rectangle {
-                anchors.fill: parent
-                color: highlighted ? HydraColor.mHover : "transparent"
+              background: NStateLayer {
+                baseColor: delegateRoot.isSelected ? HydraColor.mSecondaryContainer : "transparent"
+                stateColor: delegateRoot.isSelected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
+                hovering: delegateRoot.hovered || delegateRoot.highlighted
+                pressed: delegateRoot.down
+                focusVisible: delegateRoot.highlighted && !delegateRoot.hovered
                 radius: Style.iRadiusS
               }
             }
@@ -423,10 +436,10 @@ RowLayout {
           listView.currentIndex = Math.max(0, root.findIndexInActiveModel(root.currentKey));
           // Small delay to ensure the popup is fully rendered
           Qt.callLater(() => {
-                         if (searchInput && searchInput.inputItem) {
-                           searchInput.inputItem.forceActiveFocus();
-                         }
-                       });
+            if (searchInput && searchInput.inputItem) {
+              searchInput.inputItem.forceActiveFocus();
+            }
+          });
         } else {
           root.searchText = "";
         }

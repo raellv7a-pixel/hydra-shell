@@ -32,11 +32,8 @@ ColumnLayout {
   readonly property real maximumSceneScale: 0.25 * Style.uiScaleRatio
   readonly property var sceneBounds: MonitorGeometry.computeSceneBounds(root.outputs)
   readonly property real viewportWidth: sceneScrollWrapper.availableWidth
-  readonly property real viewportHeight: root.isDragging ? root.dragState.viewportHeight :
-                                         Math.max(280 * Style.uiScaleRatio, Math.min(560 * Style.uiScaleRatio,
-                                         root.viewportWidth * sceneBounds.height / sceneBounds.width + scenePadding * 2))
-  readonly property var viewport: MonitorGeometry.fitViewport(sceneBounds, viewportWidth, viewportHeight,
-                                                            scenePadding, minimumSceneScale, maximumSceneScale, sceneFitFraction)
+  readonly property real viewportHeight: root.isDragging ? root.dragState.viewportHeight : Math.max(280 * Style.uiScaleRatio, Math.min(560 * Style.uiScaleRatio, root.viewportWidth * sceneBounds.height / sceneBounds.width + scenePadding * 2))
+  readonly property var viewport: MonitorGeometry.fitViewport(sceneBounds, viewportWidth, viewportHeight, scenePadding, minimumSceneScale, maximumSceneScale, sceneFitFraction)
   readonly property var activeSceneBounds: root.isDragging ? root.dragState.bounds : root.sceneBounds
   readonly property real activeSceneScale: root.isDragging ? root.dragState.scale : root.viewport.scale
   readonly property real activeSceneOffsetX: root.isDragging ? root.dragState.offsetX : root.viewport.offsetX
@@ -57,7 +54,10 @@ ColumnLayout {
       maxX = Math.max(maxX, layoutToCanvasX(rect.x + rect.width) + scenePadding);
       maxY = Math.max(maxY, layoutToCanvasY(rect.y + rect.height) + scenePadding);
     }
-    return { width: maxX, height: maxY };
+    return {
+      width: maxX,
+      height: maxY
+    };
   }
 
   function layoutToCanvasX(val) {
@@ -82,12 +82,22 @@ ColumnLayout {
     if (!output)
       return;
     root.dragState = {
-      outputId: outputId, x: output.x, y: output.y, mouseX: mouseX, mouseY: mouseY,
-      bounds: root.sceneBounds, scale: root.viewport.scale,
-      offsetX: root.viewport.offsetX, offsetY: root.viewport.offsetY,
-      canvasSize: root.requiredSceneSize, viewportHeight: root.viewportHeight
+      outputId: outputId,
+      x: output.x,
+      y: output.y,
+      mouseX: mouseX,
+      mouseY: mouseY,
+      bounds: root.sceneBounds,
+      scale: root.viewport.scale,
+      offsetX: root.viewport.offsetX,
+      offsetY: root.viewport.offsetY,
+      canvasSize: root.requiredSceneSize,
+      viewportHeight: root.viewportHeight
     };
-    root.dragPosition = { x: output.x, y: output.y };
+    root.dragPosition = {
+      x: output.x,
+      y: output.y
+    };
     root.dragMoved = false;
   }
 
@@ -154,24 +164,25 @@ ColumnLayout {
   }
 
   // Sub-tab Bar
-  NTabBar {
+  NSettingsGroupNav {
     id: subTabBar
-    Layout.fillWidth: true
-    currentIndex: root.activeSubTab
-    distributeEvenly: true
-
-    NTabButton {
-      text: "Arranjo Visual das Telas"
-      tabIndex: 0
-      checked: root.activeSubTab === 0
-      onClicked: root.activeSubTab = 0
-    }
-    NTabButton {
-      text: "Configuração outputs.toml"
-      tabIndex: 1
-      checked: root.activeSubTab === 1
-      onClicked: root.activeSubTab = 1
-    }
+    groups: [
+      {
+        key: "visual",
+        title: I18n.tr("settings.content.monitor-visual"),
+        icon: "device-desktop"
+      },
+      {
+        key: "config",
+        title: I18n.tr("settings.content.monitor-toml"),
+        icon: "code"
+      }
+    ]
+    expandedGroups: ({
+                       visual: root.activeSubTab === 0,
+                       config: root.activeSubTab === 1
+                     })
+    onGroupSelected: key => root.activeSubTab = key === "config" ? 1 : 0
   }
 
   // ==========================================
@@ -186,17 +197,20 @@ ColumnLayout {
     // Transaction Countdown / Confirmation Card
     Rectangle {
       Layout.fillWidth: true
-      Layout.preferredHeight: 64
+      Layout.preferredHeight: confirmationLayout.implicitHeight + Style.margin2M
       visible: MonitorService.transactionState === "confirming"
       color: Qt.alpha(HydraColor.mPrimary, 0.15)
       border.color: HydraColor.mPrimary
       border.width: 1
       radius: Style.radiusM
 
-      RowLayout {
+      GridLayout {
+        id: confirmationLayout
+        columns: width < 620 * Style.uiScaleRatio ? 1 : 4
+        columnSpacing: Style.marginM
+        rowSpacing: Style.marginM
         anchors.fill: parent
         anchors.margins: Style.marginM
-        spacing: Style.marginM
 
         NIcon {
           icon: "alert-circle"
@@ -208,12 +222,16 @@ ColumnLayout {
           Layout.fillWidth: true
           spacing: 2
           NText {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
             text: "Manter nova configuração de telas?"
             font.weight: Style.fontWeightBold
             color: HydraColor.mOnSurface
             pointSize: Style.fontSizeM
           }
           NText {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
             text: "Revertendo automaticamente em " + MonitorService.confirmationRemainingSeconds + " segundos se não for confirmada..."
             color: HydraColor.mOnSurfaceVariant
             pointSize: Style.fontSizeS
@@ -241,17 +259,20 @@ ColumnLayout {
     // Rollback Failed Card
     Rectangle {
       Layout.fillWidth: true
-      Layout.preferredHeight: 64
+      Layout.preferredHeight: rollbackLayout.implicitHeight + Style.margin2M
       visible: MonitorService.transactionState === "rollback_failed"
       color: Qt.alpha(HydraColor.mError, 0.15)
       border.color: HydraColor.mError
       border.width: 1
       radius: Style.radiusM
 
-      RowLayout {
+      GridLayout {
+        id: rollbackLayout
+        columns: width < 620 * Style.uiScaleRatio ? 1 : 3
+        columnSpacing: Style.marginM
+        rowSpacing: Style.marginM
         anchors.fill: parent
         anchors.margins: Style.marginM
-        spacing: Style.marginM
 
         NIcon {
           icon: "alert-triangle"
@@ -466,199 +487,209 @@ ColumnLayout {
       spacing: Style.marginM
       visible: root.selectedOutput !== null
 
-      NToggle {
-        Layout.fillWidth: true
-        label: "Ativar Monitor"
-        description: "Habilita ou desabilita a saída de vídeo deste monitor"
-        enabled: !MonitorService.isBusy
-        checked: root.selectedOutput ? (root.selectedOutput.active !== false && !root.selectedOutput.disabled) : true
-        onToggled: checked => {
-                     if (root.selectedOutput) {
-                       MonitorService.updateOutput(root.selectedOutput.outputId, {
-                                                     "active": checked,
-                                                     "disabled": !checked
-                                                   });
-                     }
-                   }
-      }
-
-      // Explicit Main Monitor Control
-      NButton {
-        Layout.fillWidth: true
-        text: (root.selectedOutput && root.selectedOutput.isPrimary) ? "Monitor Principal Definido (Origem 0, 0)" : "Definir como Monitor Principal"
-        icon: "star"
-        backgroundColor: (root.selectedOutput && root.selectedOutput.isPrimary) ? Qt.alpha(HydraColor.mPrimary, 0.2) : HydraColor.mSurfaceVariant
-        textColor: (root.selectedOutput && root.selectedOutput.isPrimary) ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
-        enabled: !MonitorService.isBusy && root.selectedOutput && root.selectedOutput.active !== false && !root.selectedOutput.disabled && !root.selectedOutput.isPrimary
-        onClicked: {
-          if (root.selectedOutput) {
-            MonitorService.setPrimaryOutput(root.selectedOutput.outputId);
-          }
-        }
-      }
-
-      NComboBox {
-        Layout.fillWidth: true
-        label: "Espelhar Tela (Mirror)"
-        description: "Espelha o conteúdo exibido em outro monitor"
-        enabled: !MonitorService.isBusy
-        currentKey: root.selectedOutput ? (root.selectedOutput.mirror || "") : ""
-        model: {
-          var list = [
-                {
-                  key: "",
-                  name: "Nenhum (Tela Independente)"
-                }
-              ];
-          for (var i = 0; i < root.outputs.length; i++) {
-            var out = root.outputs[i];
-            if (root.selectedOutput && out.outputId !== root.selectedOutput.outputId) {
-              list.push({
-                          key: out.outputId,
-                          name: "Espelhar " + out.name
-                        });
+      NSettingsSection {
+        title: I18n.tr("settings.content.availability")
+        icon: "device-desktop"
+        NToggle {
+          Layout.fillWidth: true
+          label: "Ativar Monitor"
+          description: "Habilita ou desabilita a saída de vídeo deste monitor"
+          enabled: !MonitorService.isBusy
+          checked: root.selectedOutput ? (root.selectedOutput.active !== false && !root.selectedOutput.disabled) : true
+          onToggled: checked => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutput(root.selectedOutput.outputId, {
+                                            "active": checked,
+                                            "disabled": !checked
+                                          });
             }
           }
-          return list;
         }
-        onSelected: key => {
-                      if (root.selectedOutput) {
-                        MonitorService.updateOutput(root.selectedOutput.outputId, {
-                                                      "mirror": key
-                                                    });
-                      }
-                    }
-      }
 
-      NComboBox {
-        id: resCombo
-        Layout.fillWidth: true
-        label: "Resolução & Taxa de Atualização"
-        description: "Modos de exibição suportados pelo compositor para esta tela"
-        enabled: !MonitorService.isBusy
-        model: root.resolutionModel(root.selectedOutput)
-        currentKey: root.selectedOutput ? (root.selectedOutput.modeId || (root.selectedOutput.width + "x" + root.selectedOutput.height + "@" + Math.round(root.selectedOutput.refresh))) : ""
-        onSelected: key => {
-                      if (root.selectedOutput) {
-                        var modes = root.selectedOutput.availableModes || [];
-                        var matched = null;
-                        for (var i = 0; i < modes.length; i++) {
-                          if (modes[i].id === key || modes[i].key === key) {
-                            matched = modes[i];
-                            break;
-                          }
-                        }
+        // Explicit Main Monitor Control
+        NButton {
+          Layout.fillWidth: true
+          text: (root.selectedOutput && root.selectedOutput.isPrimary) ? "Monitor Principal Definido (Origem 0, 0)" : "Definir como Monitor Principal"
+          icon: "star"
+          backgroundColor: (root.selectedOutput && root.selectedOutput.isPrimary) ? Qt.alpha(HydraColor.mPrimary, 0.2) : HydraColor.mSurfaceVariant
+          textColor: (root.selectedOutput && root.selectedOutput.isPrimary) ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
+          enabled: !MonitorService.isBusy && root.selectedOutput && root.selectedOutput.active !== false && !root.selectedOutput.disabled && !root.selectedOutput.isPrimary
+          onClicked: {
+            if (root.selectedOutput) {
+              MonitorService.setPrimaryOutput(root.selectedOutput.outputId);
+            }
+          }
+        }
 
-                        if (matched) {
-                          MonitorService.updateOutput(root.selectedOutput.outputId, {
-                                                        "width": matched.width,
-                                                        "height": matched.height,
-                                                        "refresh": matched.refresh,
-                                                        "modeId": matched.id
-                                                      });
-                        }
-                      }
-                    }
-      }
-
-      // Resolution-aware Discrete Scale Ladder ComboBox
-      NComboBox {
-        Layout.fillWidth: true
-        label: "Escala do Monitor"
-        description: "Selecione o fator de escala discreto (DPI) baseado na resolução desta tela"
-        enabled: !MonitorService.isBusy
-        currentKey: String(root.selectedOutput ? (root.selectedOutput.scale || 1.0) : 1.0)
-        model: {
-          if (!root.selectedOutput)
-            return [
+        NComboBox {
+          Layout.fillWidth: true
+          label: "Espelhar Tela (Mirror)"
+          description: "Espelha o conteúdo exibido em outro monitor"
+          enabled: !MonitorService.isBusy
+          currentKey: root.selectedOutput ? (root.selectedOutput.mirror || "") : ""
+          model: {
+            var list = [
                   {
-                    key: "1",
-                    name: "100% (1.0x)"
+                    key: "",
+                    name: "Nenhum (Tela Independente)"
                   }
                 ];
-          var ladder = MonitorGeometry.getScaleLadder(root.selectedOutput.width, root.selectedOutput.height, root.selectedOutput.transform);
-          var list = [];
-          for (var i = 0; i < ladder.length; i++) {
-            var s = ladder[i];
-            var pct = Math.round(s * 100);
-            list.push({
-                        key: String(s),
-                        name: pct + "% (" + s + "x)"
-                      });
+            for (var i = 0; i < root.outputs.length; i++) {
+              var out = root.outputs[i];
+              if (root.selectedOutput && out.outputId !== root.selectedOutput.outputId) {
+                list.push({
+                            key: out.outputId,
+                            name: "Espelhar " + out.name
+                          });
+              }
+            }
+            return list;
           }
-          return list;
+          onSelected: key => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutput(root.selectedOutput.outputId, {
+                                            "mirror": key
+                                          });
+            }
+          }
         }
-        onSelected: key => {
-                      if (root.selectedOutput) {
-                        var parsed = parseFloat(key) || 1.0;
-                        MonitorService.updateOutput(root.selectedOutput.outputId, {
-                                                      "scale": parsed
-                                                    });
-                      }
-                    }
       }
+      NSettingsSection {
+        title: I18n.tr("settings.content.geometry")
+        icon: "dimensions"
+        NComboBox {
+          id: resCombo
+          Layout.fillWidth: true
+          label: "Resolução & Taxa de Atualização"
+          description: "Modos de exibição suportados pelo compositor para esta tela"
+          enabled: !MonitorService.isBusy
+          model: root.resolutionModel(root.selectedOutput)
+          currentKey: root.selectedOutput ? (root.selectedOutput.modeId || (root.selectedOutput.width + "x" + root.selectedOutput.height + "@" + Math.round(root.selectedOutput.refresh))) : ""
+          onSelected: key => {
+            if (root.selectedOutput) {
+              var modes = root.selectedOutput.availableModes || [];
+              var matched = null;
+              for (var i = 0; i < modes.length; i++) {
+                if (modes[i].id === key || modes[i].key === key) {
+                  matched = modes[i];
+                  break;
+                }
+              }
 
-      NComboBox {
-        Layout.fillWidth: true
-        label: "Orientação / Rotação da Tela"
-        description: "Gira a exibição do monitor em ângulos de 90 graus"
-        enabled: !MonitorService.isBusy
-        currentKey: String(root.selectedOutput ? (root.selectedOutput.transform || 0) : 0)
-        model: [
-          {
-            key: "0",
-            name: "Normal (0° - Paisagem)"
-          },
-          {
-            key: "1",
-            name: "90° Rotação (Retrato)"
-          },
-          {
-            key: "2",
-            name: "180° Invertido"
-          },
-          {
-            key: "3",
-            name: "270° Rotação"
+              if (matched) {
+                MonitorService.updateOutput(root.selectedOutput.outputId, {
+                                              "width": matched.width,
+                                              "height": matched.height,
+                                              "refresh": matched.refresh,
+                                              "modeId": matched.id
+                                            });
+              }
+            }
           }
-        ]
-        onSelected: key => {
-                      if (root.selectedOutput) {
-                        MonitorService.updateOutput(root.selectedOutput.outputId, {
-                                                      "transform": parseInt(key)
-                                                    });
-                      }
+        }
+
+        // Resolution-aware Discrete Scale Ladder ComboBox
+        NComboBox {
+          Layout.fillWidth: true
+          label: "Escala do Monitor"
+          description: "Selecione o fator de escala discreto (DPI) baseado na resolução desta tela"
+          enabled: !MonitorService.isBusy
+          currentKey: String(root.selectedOutput ? (root.selectedOutput.scale || 1.0) : 1.0)
+          model: {
+            if (!root.selectedOutput)
+              return [
+                    {
+                      key: "1",
+                      name: "100% (1.0x)"
                     }
-      }
+                  ];
+            var ladder = MonitorGeometry.getScaleLadder(root.selectedOutput.width, root.selectedOutput.height, root.selectedOutput.transform);
+            var list = [];
+            for (var i = 0; i < ladder.length; i++) {
+              var s = ladder[i];
+              var pct = Math.round(s * 100);
+              list.push({
+                          key: String(s),
+                          name: pct + "% (" + s + "x)"
+                        });
+            }
+            return list;
+          }
+          onSelected: key => {
+            if (root.selectedOutput) {
+              var parsed = parseFloat(key) || 1.0;
+              MonitorService.updateOutput(root.selectedOutput.outputId, {
+                                            "scale": parsed
+                                          });
+            }
+          }
+        }
 
-      NValueSlider {
-        Layout.fillWidth: true
-        label: "Posição Horizontal X (px)"
-        enabled: !MonitorService.isBusy
-        from: -3840
-        to: 7680
-        stepSize: 10
-        value: root.selectedOutput ? (root.selectedOutput.x || 0) : 0
-        onMoved: val => {
-                   if (root.selectedOutput) {
-                     MonitorService.updateOutputPosition(root.selectedOutput.outputId, Math.round(val), root.selectedOutput.y);
-                   }
-                 }
+        NComboBox {
+          Layout.fillWidth: true
+          label: "Orientação / Rotação da Tela"
+          description: "Gira a exibição do monitor em ângulos de 90 graus"
+          enabled: !MonitorService.isBusy
+          currentKey: String(root.selectedOutput ? (root.selectedOutput.transform || 0) : 0)
+          model: [
+            {
+              key: "0",
+              name: "Normal (0° - Paisagem)"
+            },
+            {
+              key: "1",
+              name: "90° Rotação (Retrato)"
+            },
+            {
+              key: "2",
+              name: "180° Invertido"
+            },
+            {
+              key: "3",
+              name: "270° Rotação"
+            }
+          ]
+          onSelected: key => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutput(root.selectedOutput.outputId, {
+                                            "transform": parseInt(key)
+                                          });
+            }
+          }
+        }
       }
+      NSettingsSection {
+        title: I18n.tr("settings.content.placement")
+        icon: "arrows-move"
+        NValueSlider {
+          Layout.fillWidth: true
+          label: "Posição Horizontal X (px)"
+          enabled: !MonitorService.isBusy
+          from: -3840
+          to: 7680
+          stepSize: 10
+          value: root.selectedOutput ? (root.selectedOutput.x || 0) : 0
+          onMoved: val => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutputPosition(root.selectedOutput.outputId, Math.round(val), root.selectedOutput.y);
+            }
+          }
+        }
 
-      NValueSlider {
-        Layout.fillWidth: true
-        label: "Posição Vertical Y (px)"
-        enabled: !MonitorService.isBusy
-        from: -2160
-        to: 4320
-        stepSize: 10
-        value: root.selectedOutput ? (root.selectedOutput.y || 0) : 0
-        onMoved: val => {
-                   if (root.selectedOutput) {
-                     MonitorService.updateOutputPosition(root.selectedOutput.outputId, root.selectedOutput.x, Math.round(val));
-                   }
-                 }
+        NValueSlider {
+          Layout.fillWidth: true
+          label: "Posição Vertical Y (px)"
+          enabled: !MonitorService.isBusy
+          from: -2160
+          to: 4320
+          stepSize: 10
+          value: root.selectedOutput ? (root.selectedOutput.y || 0) : 0
+          onMoved: val => {
+            if (root.selectedOutput) {
+              MonitorService.updateOutputPosition(root.selectedOutput.outputId, root.selectedOutput.x, Math.round(val));
+            }
+          }
+        }
       }
     }
 
@@ -669,7 +700,7 @@ ColumnLayout {
     // ----------------------------------------------------
     // 3. ACTION BAR (FULL WIDTH AT BOTTOM)
     // ----------------------------------------------------
-    RowLayout {
+    Flow {
       Layout.fillWidth: true
       spacing: Style.marginM
 
@@ -705,10 +736,6 @@ ColumnLayout {
         }
       }
 
-      Item {
-        Layout.fillWidth: true
-      } // Spacer
-
       NButton {
         text: "Restaurar Padrão"
         icon: "refresh"
@@ -743,7 +770,6 @@ ColumnLayout {
       Layout.fillWidth: true
     }
 
-
     NText {
       text: "Umbriel — hydra/outputs.toml:"
       pointSize: Style.fontSizeS
@@ -776,7 +802,7 @@ ColumnLayout {
       }
     }
 
-    RowLayout {
+    Flow {
       Layout.fillWidth: true
       spacing: Style.marginM
 

@@ -42,7 +42,6 @@ RowLayout {
     icon: root.actionButtonIcon
     backgroundColor: HydraColor.mSecondary
     textColor: HydraColor.mOnSecondary
-    hoverColor: HydraColor.mHover
     enabled: root.actionButtonEnabled
 
     onClicked: {

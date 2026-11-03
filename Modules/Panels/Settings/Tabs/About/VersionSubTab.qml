@@ -12,21 +12,6 @@ import qs.Widgets
 
 ColumnLayout {
   id: root
-  opacity: 0
-
-  onSystemInfoLoadingChanged: {
-    if (!systemInfoLoading)
-      tabAppearAnim.start();
-  }
-
-  NumberAnimation on opacity {
-    id: tabAppearAnim
-    from: 0
-    to: 1
-    duration: Style.animationSlowest
-    easing.type: Easing.OutCubic
-    running: false
-  }
 
   property string latestVersion: GitHubService.latestVersion
   property string currentVersion: UpdateService.currentVersion
@@ -68,6 +53,7 @@ ColumnLayout {
   property bool systemInfoAvailable: true
 
   spacing: Style.marginL
+  Layout.fillWidth: true
 
   function getModule(type) {
     if (!root.systemInfo)
@@ -320,666 +306,685 @@ ColumnLayout {
     stderr: StdioCollector {}
   }
 
-  RowLayout {
-    Layout.alignment: Qt.AlignHCenter
-    spacing: Style.marginXL
+  NSettingsSection {
+    title: I18n.tr("settings.content.versions")
+    icon: "info"
+    GridLayout {
+      Layout.fillWidth: true
+      columns: width < 620 * Style.uiScaleRatio ? 1 : 2
+      columnSpacing: Style.marginXL
+      rowSpacing: Style.marginL
 
-    // Hydra logo
-    Image {
-      source: "../../../../../Assets/hydra.svg"
-      width: 96 * Style.uiScaleRatio
-      height: width
-      fillMode: Image.PreserveAspectFit
-      sourceSize.width: width
-      sourceSize.height: height
-      mipmap: true
-      smooth: true
-      Layout.alignment: Qt.AlignBottom
-      rotation: Settings.isDebug ? 180 : 0
+      // Hydra logo
+      Image {
+        source: "../../../../../Assets/hydra.svg"
+        width: 96 * Style.uiScaleRatio
+        height: width
+        fillMode: Image.PreserveAspectFit
+        sourceSize.width: width
+        sourceSize.height: height
+        mipmap: true
+        smooth: true
+        Layout.alignment: Qt.AlignBottom
+        rotation: Settings.isDebug ? 180 : 0
 
-      Behavior on rotation {
-        NumberAnimation {
-          duration: Style.animationSlowest
-          easing.type: Easing.OutBack
-        }
-      }
-
-      property int debugTapCount: 0
-
-      Timer {
-        id: debugTapTimer
-        interval: 5000
-        onTriggered: parent.debugTapCount = 0
-      }
-
-      MouseArea {
-        anchors.fill: parent
-        onClicked: {
-          if (parent.debugTapCount === 0) {
-            debugTapTimer.restart();
+        Behavior on rotation {
+          NumberAnimation {
+            duration: Style.animationSlowest
+            easing.type: Easing.OutBack
           }
-          parent.debugTapCount++;
-          if (parent.debugTapCount >= 8) {
-            parent.debugTapCount = 0;
-            debugTapTimer.stop();
-            Settings.isDebug = !Settings.isDebug;
-            if (Settings.isDebug) {
-              ToastService.showNotice("Debug", I18n.tr("panels.about.debug-enabled"));
-            } else {
-              ToastService.showNotice("Debug", I18n.tr("panels.about.debug-disabled"));
+        }
+
+        property int debugTapCount: 0
+
+        Timer {
+          id: debugTapTimer
+          interval: 5000
+          onTriggered: parent.debugTapCount = 0
+        }
+
+        MouseArea {
+          anchors.fill: parent
+          onClicked: {
+            if (parent.debugTapCount === 0) {
+              debugTapTimer.restart();
             }
-          }
-        }
-      }
-    }
-
-    ColumnLayout {
-      NHeader {
-        label: "Hydra Shell"
-      }
-
-      // Versions
-      GridLayout {
-        columns: 2
-        rowSpacing: Style.marginXS
-        columnSpacing: Style.marginM
-
-        // Installed Version (Shell)
-        NText {
-          text: "Hydra Shell:"
-          color: HydraColor.mOnSurfaceVariant
-          Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-        }
-
-        RowLayout {
-          spacing: Style.marginS
-
-          NText {
-            text: root.currentVersion
-            color: HydraColor.mOnSurface
-            font.weight: Style.fontWeightBold
-          }
-
-          // Git commit in parentheses
-          NText {
-            id: commitText
-            visible: root.isGitVersion
-            text: "(" + (root.commitInfo || I18n.tr("common.loading")) + ")"
-            color: commitMouseArea.containsMouse ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
-            font.underline: commitMouseArea.containsMouse && root.commitInfo
-
-            MouseArea {
-              id: commitMouseArea
-              anchors.fill: parent
-              hoverEnabled: true
-              cursorShape: root.commitInfo ? Qt.PointingHandCursor : Qt.ArrowCursor
-              onEntered: {
-                if (root.commitInfo) {
-                  TooltipService.show(commitText, I18n.tr("panels.about.view-commit"));
-                }
-              }
-              onExited: TooltipService.hide()
-              onClicked: {
-                if (root.commitInfo) {
-                  Quickshell.execDetached(["xdg-open", "https://github.com/raellv7a-pixel/hydra-shell/commit/" + root.commitInfo]);
-                }
+            parent.debugTapCount++;
+            if (parent.debugTapCount >= 8) {
+              parent.debugTapCount = 0;
+              debugTapTimer.stop();
+              Settings.isDebug = !Settings.isDebug;
+              if (Settings.isDebug) {
+                ToastService.showNotice("Debug", I18n.tr("panels.about.debug-enabled"));
+              } else {
+                ToastService.showNotice("Debug", I18n.tr("panels.about.debug-disabled"));
               }
             }
           }
+        }
+      }
 
-          // Update status indicator
-          NIcon {
-            id: upToDateIcon
-            visible: root.isUpToDate
-            icon: "circle-check"
-            pointSize: Style.fontSizeM
-            color: HydraColor.mPrimary
+      ColumnLayout {
+        Layout.fillWidth: true
+        Layout.minimumWidth: 0
+        NHeader {
+          label: "Hydra Shell"
+        }
 
-            MouseArea {
-              anchors.fill: parent
-              hoverEnabled: true
-              onEntered: TooltipService.show(upToDateIcon, I18n.tr("panels.about.up-to-date"))
-              onExited: TooltipService.hide()
+        // Versions
+        GridLayout {
+          id: versionsGrid
+          Layout.fillWidth: true
+          Layout.minimumWidth: 0
+          columns: width < 500 * Style.uiScaleRatio ? 1 : 2
+          rowSpacing: Style.marginXS
+          columnSpacing: Style.marginM
+
+          // Installed Version (Shell)
+          NText {
+            text: "Hydra Shell:"
+            color: HydraColor.mOnSurfaceVariant
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+          }
+
+          RowLayout {
+            spacing: Style.marginS
+
+            NText {
+              text: root.currentVersion
+              color: HydraColor.mOnSurface
+              font.weight: Style.fontWeightBold
+            }
+
+            // Git commit in parentheses
+            NText {
+              id: commitText
+              visible: root.isGitVersion
+              text: "(" + (root.commitInfo || I18n.tr("common.loading")) + ")"
+              color: commitMouseArea.containsMouse ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
+              pointSize: Style.fontSizeXS
+              font.underline: commitMouseArea.containsMouse && root.commitInfo
+
+              MouseArea {
+                id: commitMouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: root.commitInfo ? Qt.PointingHandCursor : Qt.ArrowCursor
+                onEntered: {
+                  if (root.commitInfo) {
+                    TooltipService.show(commitText, I18n.tr("panels.about.view-commit"));
+                  }
+                }
+                onExited: TooltipService.hide()
+                onClicked: {
+                  if (root.commitInfo) {
+                    Quickshell.execDetached(["xdg-open", "https://github.com/raellv7a-pixel/hydra-shell/commit/" + root.commitInfo]);
+                  }
+                }
+              }
+            }
+
+            // Update status indicator
+            NIcon {
+              id: upToDateIcon
+              visible: root.isUpToDate
+              icon: "circle-check"
+              pointSize: Style.fontSizeM
+              color: HydraColor.mPrimary
+
+              MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: TooltipService.show(upToDateIcon, I18n.tr("panels.about.up-to-date"))
+                onExited: TooltipService.hide()
+              }
+            }
+
+            NIcon {
+              id: updateAvailableIcon
+              visible: root.updateAvailable
+              icon: "arrow-up-circle"
+              pointSize: Style.fontSizeS
+              color: HydraColor.mPrimary
+
+              MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: TooltipService.show(updateAvailableIcon, I18n.tr("panels.about.update-available"))
+                onExited: TooltipService.hide()
+              }
             }
           }
 
-          NIcon {
-            id: updateAvailableIcon
+          // Latest Version (Shell)
+          NText {
             visible: root.updateAvailable
-            icon: "arrow-up-circle"
-            pointSize: Style.fontSizeS
-            color: HydraColor.mPrimary
-
-            MouseArea {
-              anchors.fill: parent
-              hoverEnabled: true
-              onEntered: TooltipService.show(updateAvailableIcon, I18n.tr("panels.about.update-available"))
-              onExited: TooltipService.hide()
-            }
+            text: I18n.tr("panels.about.hydra-available")
+            color: HydraColor.mOnSurfaceVariant
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
           }
-        }
-
-        // Latest Version (Shell)
-        NText {
-          visible: root.updateAvailable
-          text: I18n.tr("panels.about.hydra-available")
-          color: HydraColor.mOnSurfaceVariant
-          Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-        }
-
-        NText {
-          visible: root.updateAvailable
-          text: root.latestVersion
-          color: HydraColor.mOnSurface
-          font.weight: Style.fontWeightBold
-        }
-
-        // Divider-like spacing
-        Item {
-          visible: root.qsUpdateAvailable || root.updateAvailable
-          Layout.columnSpan: 2
-          Layout.preferredHeight: Style.marginXS
-        }
-
-        // Quickshell Version
-        NText {
-          visible: root.qsVersion !== ""
-          text: "Hydra QS:"
-          color: HydraColor.mOnSurfaceVariant
-          Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-        }
-
-        RowLayout {
-          visible: root.qsVersion !== ""
-          spacing: Style.marginS
 
           NText {
-            text: root.qsVersion.startsWith("v") ? root.qsVersion : "v" + root.qsVersion
+            visible: root.updateAvailable
+            text: root.latestVersion
             color: HydraColor.mOnSurface
             font.weight: Style.fontWeightBold
           }
 
-          // Git revision in parentheses
-          NText {
-            id: qsRevisionText
-            visible: root.qsRevision !== ""
-            text: "(" + root.qsRevision + ")"
-            color: qsRevisionMouseArea.containsMouse ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
-            pointSize: Style.fontSizeXS
-            font.underline: qsRevisionMouseArea.containsMouse
+          // Divider-like spacing
+          Item {
+            visible: root.qsUpdateAvailable || root.updateAvailable
+            Layout.columnSpan: versionsGrid.columns
+            Layout.preferredHeight: Style.marginXS
+          }
 
-            MouseArea {
-              id: qsRevisionMouseArea
-              anchors.fill: parent
-              hoverEnabled: true
-              cursorShape: Qt.PointingHandCursor
-              onEntered: TooltipService.show(qsRevisionText, I18n.tr("panels.about.view-commit"))
-              onExited: TooltipService.hide()
-              onClicked: {
-                Quickshell.execDetached(["xdg-open", "https://github.com/noctalia-dev/noctalia-qs/commit/" + root.qsRevision]);
+          // Quickshell Version
+          NText {
+            visible: root.qsVersion !== ""
+            text: "Hydra QS:"
+            color: HydraColor.mOnSurfaceVariant
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+          }
+
+          RowLayout {
+            visible: root.qsVersion !== ""
+            spacing: Style.marginS
+
+            NText {
+              text: root.qsVersion.startsWith("v") ? root.qsVersion : "v" + root.qsVersion
+              color: HydraColor.mOnSurface
+              font.weight: Style.fontWeightBold
+            }
+
+            // Git revision in parentheses
+            NText {
+              id: qsRevisionText
+              visible: root.qsRevision !== ""
+              text: "(" + root.qsRevision + ")"
+              color: qsRevisionMouseArea.containsMouse ? HydraColor.mPrimary : HydraColor.mOnSurfaceVariant
+              pointSize: Style.fontSizeXS
+              font.underline: qsRevisionMouseArea.containsMouse
+
+              MouseArea {
+                id: qsRevisionMouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onEntered: TooltipService.show(qsRevisionText, I18n.tr("panels.about.view-commit"))
+                onExited: TooltipService.hide()
+                onClicked: {
+                  Quickshell.execDetached(["xdg-open", "https://github.com/noctalia-dev/noctalia-qs/commit/" + root.qsRevision]);
+                }
+              }
+            }
+
+            // Update status indicator
+            NIcon {
+              id: qsUpToDateIcon
+              visible: root.qsIsUpToDate
+              icon: "circle-check"
+              pointSize: Style.fontSizeM
+              color: HydraColor.mPrimary
+
+              MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: TooltipService.show(qsUpToDateIcon, I18n.tr("panels.about.up-to-date"))
+                onExited: TooltipService.hide()
+              }
+            }
+
+            NIcon {
+              id: qsUpdateAvailableIcon
+              visible: root.qsUpdateAvailable
+              icon: "arrow-up-circle"
+              pointSize: Style.fontSizeS
+              color: HydraColor.mPrimary
+
+              MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: TooltipService.show(qsUpdateAvailableIcon, I18n.tr("panels.about.update-available"))
+                onExited: TooltipService.hide()
               }
             }
           }
 
-          // Update status indicator
-          NIcon {
-            id: qsUpToDateIcon
-            visible: root.qsIsUpToDate
-            icon: "circle-check"
-            pointSize: Style.fontSizeM
-            color: HydraColor.mPrimary
-
-            MouseArea {
-              anchors.fill: parent
-              hoverEnabled: true
-              onEntered: TooltipService.show(qsUpToDateIcon, I18n.tr("panels.about.up-to-date"))
-              onExited: TooltipService.hide()
-            }
-          }
-
-          NIcon {
-            id: qsUpdateAvailableIcon
+          // Latest Quickshell Version
+          NText {
             visible: root.qsUpdateAvailable
-            icon: "arrow-up-circle"
-            pointSize: Style.fontSizeS
-            color: HydraColor.mPrimary
-
-            MouseArea {
-              anchors.fill: parent
-              hoverEnabled: true
-              onEntered: TooltipService.show(qsUpdateAvailableIcon, I18n.tr("panels.about.update-available"))
-              onExited: TooltipService.hide()
-            }
+            text: I18n.tr("panels.about.hydra-available")
+            color: HydraColor.mOnSurfaceVariant
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
           }
-        }
 
-        // Latest Quickshell Version
-        NText {
-          visible: root.qsUpdateAvailable
-          text: I18n.tr("panels.about.hydra-available")
-          color: HydraColor.mOnSurfaceVariant
-          Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-        }
-
-        NText {
-          visible: root.qsUpdateAvailable
-          text: GitHubService.latestQSVersion
-          color: HydraColor.mOnSurface
-          font.weight: Style.fontWeightBold
+          NText {
+            visible: root.qsUpdateAvailable
+            text: GitHubService.latestQSVersion
+            color: HydraColor.mOnSurface
+            font.weight: Style.fontWeightBold
+          }
         }
       }
     }
-  }
 
-  GridLayout {
-    id: actionsGrid
-    Layout.alignment: Qt.AlignHCenter
-    Layout.topMargin: Style.marginM
-    Layout.bottomMargin: Style.marginM
-    rowSpacing: Style.marginM
-    columnSpacing: Style.marginM
-
-    columns: (changelogBtn.implicitWidth + copyBtn.implicitWidth + supportBtn.implicitWidth + 2 * columnSpacing) < root.width ? 3 : 1
-
-    NButton {
-      id: changelogBtn
-      icon: "sparkles"
-      text: I18n.tr("panels.about.changelog")
-      outlined: true
+    GridLayout {
+      id: actionsGrid
       Layout.alignment: Qt.AlignHCenter
-      onClicked: {
-        var screen = PanelService.openedPanel?.screen || SettingsPanelService.settingsWindow?.screen || PanelService.findScreenForPanels();
-        SettingsPanelService.close(screen);
-        UpdateService.viewChangelog(screen);
-      }
-    }
+      Layout.topMargin: Style.marginM
+      Layout.bottomMargin: Style.marginM
+      rowSpacing: Style.marginM
+      columnSpacing: Style.marginM
 
-    NButton {
-      id: copyBtn
-      icon: "copy"
-      text: I18n.tr("panels.about.copy-info")
-      outlined: true
-      Layout.alignment: Qt.AlignHCenter
-      onClicked: root.copyInfoToClipboard()
-    }
+      columns: (changelogBtn.implicitWidth + copyBtn.implicitWidth + supportBtn.implicitWidth + 2 * columnSpacing) < parent.width ? 3 : 1
 
-    NButton {
-      id: supportBtn
-      icon: "heart"
-      text: I18n.tr("panels.about.support")
-      outlined: true
-      Layout.alignment: Qt.AlignHCenter
-      onClicked: {
-        Quickshell.execDetached(["xdg-open", "https://buymeacoffee.com/hydra"]);
-        ToastService.showNotice(I18n.tr("panels.about.support"), I18n.tr("toast.donation-opened"));
-      }
-    }
-  }
-
-  NToggle {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.about.changelog-on-startup")
-    description: I18n.tr("panels.about.changelog-on-startup-desc")
-    checked: Settings.data.general.showChangelogOnStartup
-    onToggled: checked => Settings.data.general.showChangelogOnStartup = checked
-  }
-
-  // System Information Section
-  NDivider {
-    Layout.fillWidth: true
-  }
-
-  NHeader {
-    label: I18n.tr("panels.about.system-title")
-  }
-
-  // Error state (fastfetch not installed)
-  ColumnLayout {
-    visible: !root.systemInfoAvailable
-    Layout.fillWidth: true
-    spacing: Style.marginS
-
-    NText {
-      text: I18n.tr("panels.about.system-not-installed")
-      color: HydraColor.mOnSurfaceVariant
-    }
-
-    NText {
-      text: I18n.tr("panels.about.system-install-hint")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: Style.fontSizeXS
-    }
-  }
-
-  // System info grid
-  GridLayout {
-    id: sysInfo
-    readonly property real textSize: Style.fontSizeS
-
-    visible: root.systemInfoAvailable && root.systemInfo
-    Layout.fillWidth: true
-    columns: 2
-    rowSpacing: Style.marginXS
-    columnSpacing: Style.marginM
-
-    // OS
-    NText {
-      text: I18n.tr("panels.about.system-os")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const os = root.getModule("OS");
-        return os?.result?.prettyName || "N/A";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
-
-    // Kernel
-    NText {
-      text: I18n.tr("panels.about.system-kernel")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const kernel = root.getModule("Kernel");
-        return kernel?.result?.release || "N/A";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
-
-    // Host
-    NText {
-      text: I18n.tr("panels.about.system-host")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const title = root.getModule("Title");
-        return title?.result?.hostName || "N/A";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
-
-    // Product name
-    NText {
-      text: I18n.tr("panels.about.system-product")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const title = root.getModule("Host");
-        return title?.result?.name || "N/A";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
-
-    // Board name
-    NText {
-      text: I18n.tr("panels.about.system-board")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const title = root.getModule("Board");
-        return title?.result?.name || "N/A";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
-
-    // Uptime
-    NText {
-      text: I18n.tr("panels.about.system-uptime")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const value = root.getModule("Uptime")?.result?.uptime;
-        return value ? Time.formatVagueHumanReadableDuration(value / 1000) : "-";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
-
-    // CPU
-    NText {
-      text: I18n.tr("panels.about.system-cpu")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const cpu = root.getModule("CPU");
-        if (!cpu?.result)
-          return "N/A";
-        let cpuText = cpu.result.cpu || "N/A";
-        const cores = cpu.result.cores;
-        if (cores?.logical) {
-          cpuText += " (" + cores.logical + " threads)";
+      NButton {
+        id: changelogBtn
+        icon: "sparkles"
+        text: I18n.tr("panels.about.changelog")
+        outlined: true
+        Layout.alignment: Qt.AlignHCenter
+        onClicked: {
+          var screen = PanelService.openedPanel?.screen || SettingsPanelService.settingsWindow?.screen || PanelService.findScreenForPanels();
+          SettingsPanelService.close(screen);
+          UpdateService.viewChangelog(screen);
         }
-        return cpuText;
       }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
 
-    // GPU
-    NText {
-      text: I18n.tr("panels.about.system-gpu")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const gpu = root.getModule("GPU");
-        if (!gpu?.result || !Array.isArray(gpu.result) || gpu.result.length === 0)
-          return "N/A";
-        return gpu.result.map(g => g.name || "Unknown").join(", ");
+      NButton {
+        id: copyBtn
+        icon: "copy"
+        text: I18n.tr("panels.about.copy-info")
+        outlined: true
+        Layout.alignment: Qt.AlignHCenter
+        onClicked: root.copyInfoToClipboard()
       }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
 
-    // Memory
-    NText {
-      text: I18n.tr("panels.about.system-memory")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const mem = root.getModule("Memory");
-        if (!mem?.result)
-          return "N/A";
-        const used = (mem.result.used / root.gigaB).toFixed(1);
-        const total = (mem.result.total / root.gigaB).toFixed(1);
-        return used + " GiB / " + total + " GiB";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
-
-    // Disk
-    NText {
-      text: I18n.tr("panels.about.system-disk")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const disk = root.getModule("Disk");
-        if (!disk?.result || !Array.isArray(disk.result) || disk.result.length === 0)
-          return "N/A";
-        const rootDisk = disk.result.find(d => d.mountpoint === "/");
-        if (!rootDisk?.bytes)
-          return "N/A";
-        const used = (rootDisk.bytes.used / root.gigaD).toFixed(1);
-        const total = (rootDisk.bytes.total / root.gigaD).toFixed(1);
-        return used + " GB / " + total + " GB" + " (" + rootDisk.filesystem + ")";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
-    }
-
-    // WM
-    NText {
-      text: I18n.tr("panels.about.system-wm")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const wm = root.getModule("WM");
-        if (!wm?.result)
-          return "N/A";
-        let wmText = wm.result.prettyName || wm.result.processName || "N/A";
-        if (wm.result.protocolName) {
-          wmText += " (" + wm.result.protocolName + ")";
+      NButton {
+        id: supportBtn
+        icon: "heart"
+        text: I18n.tr("panels.about.support")
+        outlined: true
+        Layout.alignment: Qt.AlignHCenter
+        onClicked: {
+          Quickshell.execDetached(["xdg-open", "https://buymeacoffee.com/hydra"]);
+          ToastService.showNotice(I18n.tr("panels.about.support"), I18n.tr("toast.donation-opened"));
         }
-        return wmText;
       }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
-      Layout.fillWidth: true
-      wrapMode: Text.Wrap
     }
 
-    // Packages
-    NText {
-      text: I18n.tr("panels.about.system-packages")
-      color: HydraColor.mOnSurfaceVariant
-      pointSize: sysInfo.textSize
-    }
-    NText {
-      text: {
-        const pkg = root.getModule("Packages");
-        if (!pkg?.result)
-          return "N/A";
-        const result = pkg.result;
-        if (result.all) {
-          const managers = [];
-          if (result.rpm > 0)
-            managers.push("rpm: " + result.rpm);
-          if (result.pacman > 0)
-            managers.push("pacman: " + result.pacman);
-          if (result.dpkg > 0)
-            managers.push("dpkg: " + result.dpkg);
-          if (result.flatpakSystem > 0 || result.flatpakUser > 0) {
-            const flatpak = (result.flatpakSystem || 0) + (result.flatpakUser || 0);
-            managers.push("flatpak: " + flatpak);
-          }
-          if (result.snap > 0)
-            managers.push("snap: " + result.snap);
-          if (result.nixSystem > 0 || result.nixUser > 0 || result.nixDefault > 0) {
-            const nix = (result.nixSystem || 0) + (result.nixUser || 0) + (result.nixDefault || 0);
-            managers.push("nix: " + nix);
-          }
-          if (result.brew > 0)
-            managers.push("brew: " + result.brew);
-          if (managers.length > 0) {
-            return result.all + " (" + managers.join(", ") + ")";
-          }
-          return result.all.toString();
-        }
-        return "N/A";
-      }
-      color: HydraColor.mOnSurface
-      pointSize: sysInfo.textSize
+    NToggle {
       Layout.fillWidth: true
-      wrapMode: Text.Wrap
+      label: I18n.tr("panels.about.changelog-on-startup")
+      description: I18n.tr("panels.about.changelog-on-startup-desc")
+      checked: Settings.data.general.showChangelogOnStartup
+      onToggled: checked => Settings.data.general.showChangelogOnStartup = checked
     }
 
-    // Monitors (2 items per screen: label + value)
-    Repeater {
-      model: Quickshell.screens.length * 2
+    // System Information Section
+
+  }
+  NSettingsSection {
+    title: I18n.tr("panels.about.system-title")
+    icon: "device-desktop"
+    RowLayout {
+      Layout.fillWidth: true
+      visible: root.systemInfoLoading
+      spacing: Style.marginM
+      NBusyIndicator {
+        running: root.systemInfoLoading
+      }
+      NText {
+        Layout.fillWidth: true
+        text: I18n.tr("common.loading")
+        color: HydraColor.mOnSurfaceVariant
+        wrapMode: Text.WordWrap
+      }
+    }
+    // Error state (fastfetch not installed)
+    ColumnLayout {
+      visible: !root.systemInfoAvailable
+      Layout.fillWidth: true
+      spacing: Style.marginS
 
       NText {
-        readonly property int screenIndex: Math.floor(index / 2)
-        readonly property bool isLabel: index % 2 === 0
-        readonly property var screen: Quickshell.screens[screenIndex]
+        text: I18n.tr("panels.about.system-not-installed")
+        color: HydraColor.mOnSurfaceVariant
+      }
 
-        text: {
-          if (isLabel)
-            return I18n.tr("panels.about.system-monitor");
-          const name = screen?.name || "Unknown";
-          const scales = CompositorService.displayScales || {};
-          const scaleData = scales[name];
-          const scaleValue = (typeof scaleData === "object" && scaleData !== null) ? (scaleData.scale || 1.0) : (scaleData || 1.0);
-          return name + ": " + (screen?.width || 0) + "x" + (screen?.height || 0) + " @ " + scaleValue + "x";
-        }
-        color: isLabel ? HydraColor.mOnSurfaceVariant : HydraColor.mOnSurface
-        pointSize: sysInfo.textSize
-        Layout.fillWidth: !isLabel
-        wrapMode: Text.Wrap
+      NText {
+        text: I18n.tr("panels.about.system-install-hint")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: Style.fontSizeXS
       }
     }
-  }
 
-  // Telemetry Section
-  NDivider {
-    Layout.fillWidth: true
-    Layout.topMargin: Style.marginL
-  }
+    // System info grid
+    GridLayout {
+      id: sysInfo
+      readonly property real textSize: Style.fontSizeS
 
-  NHeader {
-    label: I18n.tr("panels.about.telemetry-title")
-  }
+      visible: root.systemInfoAvailable && root.systemInfo
+      Layout.fillWidth: true
+      columns: 2
+      rowSpacing: Style.marginXS
+      columnSpacing: Style.marginM
 
-  NToggle {
-    Layout.fillWidth: true
-    label: I18n.tr("panels.about.telemetry-enabled")
-    description: I18n.tr("panels.about.telemetry-desc")
-    checked: Settings.data.general.telemetryEnabled
-    onToggled: checked => Settings.data.general.telemetryEnabled = checked
-  }
+      // OS
+      NText {
+        text: I18n.tr("panels.about.system-os")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const os = root.getModule("OS");
+          return os?.result?.prettyName || "N/A";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
 
-  RowLayout {
-    spacing: Style.marginM
+      // Kernel
+      NText {
+        text: I18n.tr("panels.about.system-kernel")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const kernel = root.getModule("Kernel");
+          return kernel?.result?.release || "N/A";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
 
-    NButton {
-      icon: "eye"
-      text: I18n.tr("panels.about.telemetry-show-data")
-      outlined: true
-      onClicked: root.copyTelemetryData()
+      // Host
+      NText {
+        text: I18n.tr("panels.about.system-host")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const title = root.getModule("Title");
+          return title?.result?.hostName || "N/A";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // Product name
+      NText {
+        text: I18n.tr("panels.about.system-product")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const title = root.getModule("Host");
+          return title?.result?.name || "N/A";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // Board name
+      NText {
+        text: I18n.tr("panels.about.system-board")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const title = root.getModule("Board");
+          return title?.result?.name || "N/A";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // Uptime
+      NText {
+        text: I18n.tr("panels.about.system-uptime")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const value = root.getModule("Uptime")?.result?.uptime;
+          return value ? Time.formatVagueHumanReadableDuration(value / 1000) : "-";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // CPU
+      NText {
+        text: I18n.tr("panels.about.system-cpu")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const cpu = root.getModule("CPU");
+          if (!cpu?.result)
+            return "N/A";
+          let cpuText = cpu.result.cpu || "N/A";
+          const cores = cpu.result.cores;
+          if (cores?.logical) {
+            cpuText += " (" + cores.logical + " threads)";
+          }
+          return cpuText;
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // GPU
+      NText {
+        text: I18n.tr("panels.about.system-gpu")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const gpu = root.getModule("GPU");
+          if (!gpu?.result || !Array.isArray(gpu.result) || gpu.result.length === 0)
+            return "N/A";
+          return gpu.result.map(g => g.name || "Unknown").join(", ");
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // Memory
+      NText {
+        text: I18n.tr("panels.about.system-memory")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const mem = root.getModule("Memory");
+          if (!mem?.result)
+            return "N/A";
+          const used = (mem.result.used / root.gigaB).toFixed(1);
+          const total = (mem.result.total / root.gigaB).toFixed(1);
+          return used + " GiB / " + total + " GiB";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // Disk
+      NText {
+        text: I18n.tr("panels.about.system-disk")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const disk = root.getModule("Disk");
+          if (!disk?.result || !Array.isArray(disk.result) || disk.result.length === 0)
+            return "N/A";
+          const rootDisk = disk.result.find(d => d.mountpoint === "/");
+          if (!rootDisk?.bytes)
+            return "N/A";
+          const used = (rootDisk.bytes.used / root.gigaD).toFixed(1);
+          const total = (rootDisk.bytes.total / root.gigaD).toFixed(1);
+          return used + " GB / " + total + " GB" + " (" + rootDisk.filesystem + ")";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // WM
+      NText {
+        text: I18n.tr("panels.about.system-wm")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const wm = root.getModule("WM");
+          if (!wm?.result)
+            return "N/A";
+          let wmText = wm.result.prettyName || wm.result.processName || "N/A";
+          if (wm.result.protocolName) {
+            wmText += " (" + wm.result.protocolName + ")";
+          }
+          return wmText;
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // Packages
+      NText {
+        text: I18n.tr("panels.about.system-packages")
+        color: HydraColor.mOnSurfaceVariant
+        pointSize: sysInfo.textSize
+      }
+      NText {
+        text: {
+          const pkg = root.getModule("Packages");
+          if (!pkg?.result)
+            return "N/A";
+          const result = pkg.result;
+          if (result.all) {
+            const managers = [];
+            if (result.rpm > 0)
+              managers.push("rpm: " + result.rpm);
+            if (result.pacman > 0)
+              managers.push("pacman: " + result.pacman);
+            if (result.dpkg > 0)
+              managers.push("dpkg: " + result.dpkg);
+            if (result.flatpakSystem > 0 || result.flatpakUser > 0) {
+              const flatpak = (result.flatpakSystem || 0) + (result.flatpakUser || 0);
+              managers.push("flatpak: " + flatpak);
+            }
+            if (result.snap > 0)
+              managers.push("snap: " + result.snap);
+            if (result.nixSystem > 0 || result.nixUser > 0 || result.nixDefault > 0) {
+              const nix = (result.nixSystem || 0) + (result.nixUser || 0) + (result.nixDefault || 0);
+              managers.push("nix: " + nix);
+            }
+            if (result.brew > 0)
+              managers.push("brew: " + result.brew);
+            if (managers.length > 0) {
+              return result.all + " (" + managers.join(", ") + ")";
+            }
+            return result.all.toString();
+          }
+          return "N/A";
+        }
+        color: HydraColor.mOnSurface
+        pointSize: sysInfo.textSize
+        Layout.fillWidth: true
+        wrapMode: Text.Wrap
+      }
+
+      // Monitors (2 items per screen: label + value)
+      Repeater {
+        model: Quickshell.screens.length * 2
+
+        NText {
+          readonly property int screenIndex: Math.floor(index / 2)
+          readonly property bool isLabel: index % 2 === 0
+          readonly property var screen: Quickshell.screens[screenIndex]
+
+          text: {
+            if (isLabel)
+              return I18n.tr("panels.about.system-monitor");
+            const name = screen?.name || "Unknown";
+            const scales = CompositorService.displayScales || {};
+            const scaleData = scales[name];
+            const scaleValue = (typeof scaleData === "object" && scaleData !== null) ? (scaleData.scale || 1.0) : (scaleData || 1.0);
+            return name + ": " + (screen?.width || 0) + "x" + (screen?.height || 0) + " @ " + scaleValue + "x";
+          }
+          color: isLabel ? HydraColor.mOnSurfaceVariant : HydraColor.mOnSurface
+          pointSize: sysInfo.textSize
+          Layout.fillWidth: !isLabel
+          wrapMode: Text.Wrap
+        }
+      }
     }
 
-    NButton {
-      icon: "shield-lock"
-      text: I18n.tr("panels.about.privacy-policy")
-      outlined: true
-      onClicked: Quickshell.execDetached(["xdg-open", "https://noctalia.dev/privacy"])
+    // Telemetry Section
+
+  }
+  NSettingsSection {
+    title: I18n.tr("settings.content.privacy")
+    icon: "shield-lock"
+    NToggle {
+      Layout.fillWidth: true
+      label: I18n.tr("panels.about.telemetry-enabled")
+      description: I18n.tr("panels.about.telemetry-desc")
+      checked: Settings.data.general.telemetryEnabled
+      onToggled: checked => Settings.data.general.telemetryEnabled = checked
+    }
+
+    Flow {
+      Layout.fillWidth: true
+      spacing: Style.marginM
+
+      NButton {
+        icon: "eye"
+        text: I18n.tr("panels.about.telemetry-show-data")
+        outlined: true
+        onClicked: root.copyTelemetryData()
+      }
+
+      NButton {
+        icon: "shield-lock"
+        text: I18n.tr("panels.about.privacy-policy")
+        outlined: true
+        onClicked: Quickshell.execDetached(["xdg-open", "https://noctalia.dev/privacy"])
+      }
     }
   }
 }

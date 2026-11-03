@@ -209,15 +209,15 @@ PopupWindow {
       }
     } else {
       windows.forEach((window, index) => {
-                        const windowTitle = (window.title && window.title.trim() !== "") ? window.title : (appId || ("Window " + (index + 1)));
-                        next.push({
-                                    "icon": window.isFocused ? "circle-filled" : "square-rounded",
-                                    "text": windowTitle,
-                                    "action": function () {
-                                      handleFocus(window);
-                                    }
-                                  });
-                      });
+        const windowTitle = (window.title && window.title.trim() !== "") ? window.title : (appId || ("Window " + (index + 1)));
+        next.push({
+                    "icon": window.isFocused ? "circle-filled" : "square-rounded",
+                    "text": windowTitle,
+                    "action": function () {
+                      handleFocus(window);
+                    }
+                  });
+      });
 
       if (menuModeForGroup === "extended") {
         next.push({
@@ -520,10 +520,10 @@ PopupWindow {
 
   function handleCloseAll(windows) {
     windows.forEach(window => {
-                      if (window && CompositorService.getWindowList().some(current => current.id === window.id)) {
-                        CompositorService.closeWindow(window);
-                      }
-                    });
+      if (window && CompositorService.getWindowList().some(current => current.id === window.id)) {
+        CompositorService.closeWindow(window);
+      }
+    });
     if (root.onAppClosed && typeof root.onAppClosed === "function") {
       Qt.callLater(root.onAppClosed);
     }
@@ -604,12 +604,12 @@ PopupWindow {
     WheelHandler {
       acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
       onWheel: event => {
-                 if (!root.isScrollableHovered(event.y))
-                 return;
-                 const delta = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.angleDelta.y / 2;
-                 root.onWheelScroll(delta);
-                 event.accepted = true;
-               }
+        if (!root.isScrollableHovered(event.y))
+          return;
+        const delta = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.angleDelta.y / 2;
+        root.onWheelScroll(delta);
+        event.accepted = true;
+      }
     }
 
     Flickable {
@@ -644,11 +644,12 @@ PopupWindow {
         Repeater {
           model: root.scrollItems
 
-          Rectangle {
+          NStateLayer {
             readonly property bool isSeparator: modelData && modelData.separator === true
             width: scrollColumn.width
             height: root.rowHeightForItem(modelData)
-            color: (!isSeparator && root.hoveredItem === index) ? HydraColor.mHover : "transparent"
+            hovering: !isSeparator && root.hoveredItem === index && root.isItemActionable(index)
+            pressed: scrollPointer.pressed
             radius: Style.radiusXS
 
             Row {
@@ -664,7 +665,7 @@ PopupWindow {
               NIcon {
                 icon: modelData.icon
                 pointSize: Style.fontSizeL
-                color: root.hoveredItem === index ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 visible: icon !== ""
                 anchors.verticalCenter: parent.verticalCenter
               }
@@ -672,7 +673,7 @@ PopupWindow {
               NText {
                 text: modelData.text
                 pointSize: Style.fontSizeS
-                color: root.hoveredItem === index ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
                 anchors.verticalCenter: parent.verticalCenter
                 width: rowLayout.width - ((modelData.icon && modelData.icon !== "") ? (Style.fontSizeL + Style.marginS) : 0)
                 elide: Text.ElideRight
@@ -680,6 +681,7 @@ PopupWindow {
             }
 
             MouseArea {
+              id: scrollPointer
               anchors.fill: parent
               enabled: !parent.isSeparator && root.isItemActionable(index)
               hoverEnabled: true
@@ -737,12 +739,13 @@ PopupWindow {
       Repeater {
         model: root.fixedItems
 
-        Rectangle {
+        NStateLayer {
           id: fixedItemRect
           readonly property int globalIndex: root.fixedItemGlobalIndex(index)
           width: fixedColumn.width
           height: root.rowHeightForItem(modelData)
-          color: root.hoveredItem === globalIndex ? HydraColor.mHover : "transparent"
+          hovering: root.hoveredItem === globalIndex && root.isItemActionable(globalIndex)
+          pressed: fixedPointer.pressed
           radius: Style.radiusXS
 
           Row {
@@ -757,7 +760,7 @@ PopupWindow {
             NIcon {
               icon: modelData.icon
               pointSize: Style.fontSizeL
-              color: root.hoveredItem === fixedItemRect.globalIndex ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               visible: icon !== ""
               anchors.verticalCenter: parent.verticalCenter
             }
@@ -765,7 +768,7 @@ PopupWindow {
             NText {
               text: modelData.text
               pointSize: Style.fontSizeS
-              color: root.hoveredItem === fixedItemRect.globalIndex ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
+              color: HydraColor.mOnSurfaceVariant
               anchors.verticalCenter: parent.verticalCenter
               width: fixedRowLayout.width - ((modelData.icon && modelData.icon !== "") ? (Style.fontSizeL + Style.marginS) : 0)
               elide: Text.ElideRight
@@ -773,6 +776,7 @@ PopupWindow {
           }
 
           MouseArea {
+            id: fixedPointer
             anchors.fill: parent
             enabled: root.isItemActionable(parent.globalIndex)
             hoverEnabled: true

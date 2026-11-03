@@ -651,7 +651,7 @@ Item {
                   readonly property bool selected: root.draftSeedIndex === modelData.index
                   Layout.fillWidth: true
                   Layout.preferredHeight: 34 * Style.uiScaleRatio
-                  color: selected ? HydraColor.mPrimaryContainer : (seedMouse.containsMouse ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainer)
+                  color: Style.interactionColor(selected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainer, selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface, seedMouse.containsMouse, seedMouse.pressed)
                   border.color: selected ? HydraColor.mPrimary : "transparent"
                   RowLayout {
                     anchors.fill: parent

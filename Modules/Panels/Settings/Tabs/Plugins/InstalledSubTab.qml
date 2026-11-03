@@ -32,79 +32,82 @@ ColumnLayout {
     }
   }
 
-  // Auto-update toggle
-  NToggle {
-    label: I18n.tr("panels.plugins.auto-update")
-    description: I18n.tr("panels.plugins.auto-update-description")
-    checked: Settings.data.plugins.autoUpdate
-    onToggled: checked => Settings.data.plugins.autoUpdate = checked
-  }
-
-  // Update notification toggle
-  NToggle {
-    label: I18n.tr("panels.plugins.notify-updates")
-    description: I18n.tr("panels.plugins.notify-updates-description")
-    checked: Settings.data.plugins.notifyUpdates
-    onToggled: checked => Settings.data.plugins.notifyUpdates = checked
-  }
-
-  // Check for updates button
-  NButton {
-    property bool isChecking: Object.keys(PluginService.activeFetches).length > 0
-
-    text: isChecking ? I18n.tr("panels.plugins.checking-for-updates") : I18n.tr("panels.plugins.check-for-updates")
+  NSettingsSection {
+    title: I18n.tr("settings.content.updates")
     icon: "refresh"
-    enabled: !isChecking
-    visible: Object.keys(PluginService.pluginUpdates).length === 0
-    Layout.fillWidth: true
-    onClicked: PluginService.checkForUpdates()
-  }
+    // Auto-update toggle
+    NToggle {
+      label: I18n.tr("panels.plugins.auto-update")
+      description: I18n.tr("panels.plugins.auto-update-description")
+      checked: Settings.data.plugins.autoUpdate
+      onToggled: checked => Settings.data.plugins.autoUpdate = checked
+    }
 
-  // Update All button
-  NButton {
-    property int updateCount: Object.keys(PluginService.pluginUpdates).length
-    property bool isUpdating: false
+    // Update notification toggle
+    NToggle {
+      label: I18n.tr("panels.plugins.notify-updates")
+      description: I18n.tr("panels.plugins.notify-updates-description")
+      checked: Settings.data.plugins.notifyUpdates
+      onToggled: checked => Settings.data.plugins.notifyUpdates = checked
+    }
 
-    text: I18n.tr("panels.plugins.update-all", {
-                    "count": updateCount
-                  })
-    icon: "download"
-    visible: (updateCount > 0)
-    enabled: !isUpdating
-    backgroundColor: HydraColor.mPrimary
-    textColor: HydraColor.mOnPrimary
-    Layout.fillWidth: true
-    onClicked: {
-      isUpdating = true;
-      var pluginIds = Object.keys(PluginService.pluginUpdates);
-      var currentIndex = 0;
+    // Check for updates button
+    NButton {
+      property bool isChecking: Object.keys(PluginService.activeFetches).length > 0
 
-      function updateNext() {
-        if (currentIndex >= pluginIds.length) {
-          isUpdating = false;
-          ToastService.showNotice(I18n.tr("panels.plugins.title"), I18n.tr("panels.plugins.update-all-success"));
-          return;
+      text: isChecking ? I18n.tr("panels.plugins.checking-for-updates") : I18n.tr("panels.plugins.check-for-updates")
+      icon: "refresh"
+      enabled: !isChecking
+      visible: Object.keys(PluginService.pluginUpdates).length === 0
+      Layout.fillWidth: true
+      onClicked: PluginService.checkForUpdates()
+    }
+
+    // Update All button
+    NButton {
+      property int updateCount: Object.keys(PluginService.pluginUpdates).length
+      property bool isUpdating: false
+
+      text: I18n.tr("panels.plugins.update-all", {
+                      "count": updateCount
+                    })
+      icon: "download"
+      visible: (updateCount > 0)
+      enabled: !isUpdating
+      backgroundColor: HydraColor.mPrimary
+      textColor: HydraColor.mOnPrimary
+      Layout.fillWidth: true
+      onClicked: {
+        isUpdating = true;
+        var pluginIds = Object.keys(PluginService.pluginUpdates);
+        var currentIndex = 0;
+
+        function updateNext() {
+          if (currentIndex >= pluginIds.length) {
+            isUpdating = false;
+            ToastService.showNotice(I18n.tr("panels.plugins.title"), I18n.tr("panels.plugins.update-all-success"));
+            return;
+          }
+
+          var pluginId = pluginIds[currentIndex];
+          currentIndex++;
+
+          PluginService.updatePlugin(pluginId, function (success, error) {
+            if (!success) {
+              Logger.w("InstalledSubTab", "Failed to update", pluginId + ":", error);
+            }
+            Qt.callLater(updateNext);
+          });
         }
 
-        var pluginId = pluginIds[currentIndex];
-        currentIndex++;
-
-        PluginService.updatePlugin(pluginId, function (success, error) {
-          if (!success) {
-            Logger.w("InstalledSubTab", "Failed to update", pluginId + ":", error);
-          }
-          Qt.callLater(updateNext);
-        });
+        updateNext();
       }
-
-      updateNext();
     }
   }
-
   // Installed plugins list
-  ColumnLayout {
-    spacing: Style.marginM
-    Layout.fillWidth: true
+  NSettingsSection {
+    title: I18n.tr("common.installed")
+    icon: "plugin"
 
     Repeater {
       id: installedPluginsRepeater
@@ -175,9 +178,12 @@ ColumnLayout {
             }
 
             NText {
+              Layout.fillWidth: true
+              Layout.minimumWidth: 0
+              wrapMode: Text.WordWrap
+              elide: Text.ElideNone
               text: modelData.name
               color: HydraColor.mPrimary
-              elide: Text.ElideRight
             }
 
             // Official badge (Hydra Team maintained)
@@ -207,11 +213,10 @@ ColumnLayout {
                 }
               }
             }
-
-            // Spacer
-            Item {
-              Layout.fillWidth: true
-            }
+          }
+          Flow {
+            Layout.fillWidth: true
+            spacing: Style.marginM
 
             NIconButtonHot {
               icon: "bug"
@@ -300,12 +305,12 @@ ColumnLayout {
               checked: modelData.enabled
               baseSize: Style.baseWidgetSize * 0.7
               onToggled: checked => {
-                           if (checked) {
-                             PluginService.enablePlugin(modelData.compositeKey);
-                           } else {
-                             PluginService.disablePlugin(modelData.compositeKey);
-                           }
-                         }
+                if (checked) {
+                  PluginService.enablePlugin(modelData.compositeKey);
+                } else {
+                  PluginService.disablePlugin(modelData.compositeKey);
+                }
+              }
             }
           }
 

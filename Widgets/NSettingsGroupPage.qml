@@ -13,11 +13,17 @@ ColumnLayout {
   required property string pageKey
   property var scrollView: null
   property var groups: []
+  // Keep live summaries separate from descriptors so value changes do not
+  // replace the Repeater model and recreate focused form controls.
+  property var summaries: ({})
+  property Component header: null
   default property alias content: extras.data
 
   readonly property var expandedGroups: {
     const saved = SettingsPanelService.settingsGroupStates[pageKey];
-    return saved || (groups.length ? { [groups[0].key]: true } : ({}));
+    return saved || (groups.length ? {
+                                       [groups[0].key]: true
+                                     } : ({}));
   }
   readonly property var navigationGroups: groups.filter(group => group.available !== false).map(group => ({
     key: group.key,
@@ -26,39 +32,39 @@ ColumnLayout {
   }))
 
   Layout.fillWidth: true
-  spacing: Style.marginL
-
-  function showOnly(key) {
-    if (!groups.some(group => group.key === key && group.available !== false)) return;
-    const next = {};
-    for (const group of groups) next[group.key] = group.key === key;
-    SettingsPanelService.settingsGroupStates = Object.assign({}, SettingsPanelService.settingsGroupStates, { [pageKey]: next });
-  }
+  spacing: Style.marginM
 
   function toggle(key, open) {
     SettingsPanelService.settingsGroupStates = Object.assign({}, SettingsPanelService.settingsGroupStates, {
-      [pageKey]: Object.assign({}, expandedGroups, { [key]: open })
-    });
+                                                               [pageKey]: Object.assign({}, expandedGroups, {
+                                                                                          [key]: open
+                                                                                        })
+                                                             });
   }
 
   function jump(key) {
-    showOnly(key);
+    if (!groups.some(group => group.key === key && group.available !== false))
+      return;
+    toggle(key, true);
     jumpTimer.key = key;
     jumpTimer.restart();
   }
 
   function scrollTo(key) {
-    if (!scrollView) return;
+    if (!scrollView)
+      return;
     const flick = scrollView.contentItem;
     const index = groups.findIndex(group => group.key === key);
     const card = groupRepeater.itemAt(index);
-    if (!card) return;
+    if (!card)
+      return;
     const y = card.mapToItem(flick.contentItem, 0, 0).y;
     flick.contentY = Math.max(0, Math.min(y, flick.contentHeight - flick.height));
   }
 
   function revealSettingsGroup(key) {
-    showOnly(key);
+    if (groups.some(group => group.key === key && group.available !== false))
+      toggle(key, true);
   }
 
   function navigateToSettingsGroup(index) {
@@ -69,8 +75,15 @@ ColumnLayout {
   Timer {
     id: jumpTimer
     property string key: ""
-    interval: Style.animationNormal + 40
+    interval: Style.animationFaster + 40
     onTriggered: root.scrollTo(key)
+  }
+
+  Loader {
+    Layout.fillWidth: true
+    active: root.header !== null
+    visible: active
+    sourceComponent: root.header
   }
 
   NSettingsGroupNav {
@@ -89,6 +102,7 @@ ColumnLayout {
       title: modelData.title || I18n.tr(modelData.labelKey)
       description: modelData.description || ""
       icon: modelData.icon
+      summary: root.summaries[modelData.key] || ""
       expanded: !!root.expandedGroups[modelData.key]
       onToggled: open => root.toggle(modelData.key, open)
       Loader {
@@ -100,5 +114,9 @@ ColumnLayout {
   }
 
   // Popup, model and Component declarations in the owning page do not take layout space.
-  Item { id: extras; Layout.fillWidth: true; implicitHeight: 0 }
+  Item {
+    id: extras
+    Layout.fillWidth: true
+    implicitHeight: 0
+  }
 }

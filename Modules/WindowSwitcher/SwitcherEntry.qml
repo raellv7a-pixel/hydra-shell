@@ -5,14 +5,17 @@ import qs.Commons
 import qs.Services.Compositor
 import qs.Widgets
 
-Rectangle {
+NStateLayer {
   id: root
   property var windowData: ({})
   property bool selected: false
   property bool vertical: false
   signal chosen
   radius: Style.iRadiusM
-  color: selected ? HydraColor.mPrimaryContainer : (mouse.containsMouse ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainerHigh)
+  baseColor: selected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh
+  stateColor: root.textColor
+  hovering: mouse.containsMouse
+  pressed: mouse.pressed
   readonly property color textColor: selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
   readonly property var appEntry: ThemeIcons.findAppEntry(windowData.appId || "")
   readonly property string workspaceLabel: {

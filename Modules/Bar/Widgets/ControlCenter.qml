@@ -62,8 +62,6 @@ NIconButton {
   customRadius: Style.radiusL
   colorBg: Style.capsuleColor
   colorFg: iconColor
-  colorBgHover: HydraColor.mHover
-  colorFgHover: HydraColor.mOnHover
   colorBorder: Style.capsuleBorderColor
   colorBorderHover: Style.capsuleBorderColor
 
@@ -89,19 +87,19 @@ NIconButton {
     ]
 
     onTriggered: action => {
-                   contextMenu.close();
-                   PanelService.closeContextMenu(screen);
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
 
-                   if (action === "open-launcher") {
-                     PanelService.toggleLauncher(screen);
-                   } else if (action === "open-settings") {
-                     var panel = PanelService.getPanel("settingsPanel", screen);
-                     panel.requestedTab = SettingsPanel.Tab.General;
-                     panel.toggle();
-                   } else if (action === "widget-settings") {
-                     BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-                   }
-                 }
+      if (action === "open-launcher") {
+        PanelService.toggleLauncher(screen);
+      } else if (action === "open-settings") {
+        var panel = PanelService.getPanel("settingsPanel", screen);
+        panel.requestedTab = SettingsPanel.Tab.General;
+        panel.toggle();
+      } else if (action === "widget-settings") {
+        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+      }
+    }
   }
 
   onClicked: {
@@ -135,7 +133,7 @@ NIconButton {
     asynchronous: true
     layer.enabled: (enableColorization) && (useDistroLogo || customIconPath !== "")
     layer.effect: ShaderEffect {
-      property color targetColor: !hovering ? iconColor : HydraColor.mOnHover
+      property color targetColor: iconColor
       property real colorizeMode: 2.0
 
       fragmentShader: Qt.resolvedUrl(Quickshell.shellDir + "/Shaders/qsb/appicon_colorize.frag.qsb")

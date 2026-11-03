@@ -137,36 +137,30 @@ Item {
     ]
 
     onTriggered: action => {
-                   contextMenu.close();
-                   PanelService.closeContextMenu(screen);
+      contextMenu.close();
+      PanelService.closeContextMenu(screen);
 
-                   if (action === "widget-settings") {
-                     BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
-                   }
-                 }
+      if (action === "widget-settings") {
+        BarService.openWidgetSettings(screen, section, sectionWidgetIndex, widgetId, widgetSettings);
+      }
+    }
   }
 
   // ==================== GRAPHIC MODE ====================
 
   // Capsule background (graphic mode only)
-  Rectangle {
+  NStateLayer {
     id: capsule
     visible: root.useGraphicMode
     anchors.centerIn: nBattery
     width: root.isBarVertical ? root.capsuleHeight : nBattery.width + Style.margin2S
     height: root.isBarVertical ? nBattery.height + Style.margin2S : root.capsuleHeight
     radius: Math.min(Style.radiusL, width / 2)
-    color: graphicMouseArea.containsMouse ? HydraColor.mHover : Style.capsuleColor
+    baseColor: Style.capsuleColor
+    hovering: graphicMouseArea.containsMouse
+    pressed: graphicMouseArea.pressed
     border.color: Style.capsuleBorderColor
     border.width: Style.capsuleBorderWidth
-
-    Behavior on color {
-      enabled: !HydraColor.isTransitioning
-      ColorAnimation {
-        duration: Style.animationFast
-        easing.type: Easing.InOutQuad
-      }
-    }
   }
 
   NBattery {
@@ -182,8 +176,8 @@ Item {
     pluggedIn: root.isPluggedIn
     low: root.isLowBattery
     critical: root.isCriticalBattery
-    baseColor: graphicMouseArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
-    textColor: graphicMouseArea.containsMouse ? HydraColor.mHover : HydraColor.mSurface
+    baseColor: HydraColor.mOnSurface
+    textColor: HydraColor.mSurface
   }
 
   MouseArea {
@@ -204,13 +198,13 @@ Item {
       TooltipService.hide();
     }
     onClicked: mouse => {
-                 TooltipService.hide();
-                 if (mouse.button === Qt.RightButton) {
-                   PanelService.showContextMenu(contextMenu, nBattery, screen);
-                 } else {
-                   toggleBatteryPanel();
-                 }
-               }
+      TooltipService.hide();
+      if (mouse.button === Qt.RightButton) {
+        PanelService.showContextMenu(contextMenu, nBattery, screen);
+      } else {
+        toggleBatteryPanel();
+      }
+    }
   }
 
   Timer {

@@ -36,7 +36,7 @@ RowLayout {
     Layout.fillWidth: true
   }
 
-  Rectangle {
+  NStateLayer {
     id: box
 
     opacity: enabled ? 1.0 : 0.6
@@ -44,21 +44,22 @@ RowLayout {
     implicitWidth: Style.toOdd(root.baseSize)
     implicitHeight: Style.toOdd(root.baseSize)
     radius: Style.iRadiusXS * (root.baseSize / root.defaultSize)
-    color: root.checked ? root.activeColor : HydraColor.mSurface
+    baseColor: root.checked ? root.activeColor : HydraColor.mSurface
+    stateColor: root.checked ? root.activeOnColor : HydraColor.mOnSurface
+    focusColor: root.checked ? root.activeOnColor : HydraColor.mPrimary
+    hovering: root.hovering
+    pressed: checkboxMouse.pressed
+    focusPolicy: Qt.StrongFocus
     border.color: HydraColor.mOutline
     border.width: Style.borderS
-
-    Behavior on color {
-      ColorAnimation {
-        duration: Style.animationFast
-      }
-    }
-
-    Behavior on border.color {
-      ColorAnimation {
-        duration: Style.animationFast
-      }
-    }
+    Accessible.role: Accessible.CheckBox
+    Accessible.name: root.label
+    Accessible.description: root.description
+    Accessible.checked: root.checked
+    Accessible.onPressAction: root.toggled(!root.checked)
+    Keys.onReturnPressed: root.toggled(!root.checked)
+    Keys.onEnterPressed: root.toggled(!root.checked)
+    Keys.onSpacePressed: root.toggled(!root.checked)
 
     NIcon {
       visible: root.checked
@@ -70,18 +71,22 @@ RowLayout {
     }
 
     MouseArea {
+      id: checkboxMouse
       anchors.fill: parent
       cursorShape: Qt.PointingHandCursor
       hoverEnabled: true
       onEntered: {
-        hovering = true;
+        root.hovering = true;
         root.entered();
       }
       onExited: {
-        hovering = false;
+        root.hovering = false;
         root.exited();
       }
-      onClicked: root.toggled(!root.checked)
+      onClicked: {
+        box.forceActiveFocus(Qt.MouseFocusReason);
+        root.toggled(!root.checked);
+      }
     }
   }
 }

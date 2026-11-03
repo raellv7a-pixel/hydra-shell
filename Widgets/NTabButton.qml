@@ -5,7 +5,7 @@ import qs.Commons
 import qs.Services.UI
 import qs.Widgets
 
-Rectangle {
+NStateLayer {
   id: root
 
   // Public properties
@@ -35,22 +35,15 @@ Rectangle {
   implicitWidth: contentLayout.implicitWidth + Style.margin2M
 
   radius: height / 2
-  activeFocusOnTab: true
+  focusPolicy: Qt.StrongFocus
   Accessible.role: Accessible.PageTab
   Accessible.name: root.text
   Accessible.selected: root.checked
 
-  color: root.checked ? HydraColor.mSecondaryContainer : (root.isHovered ? HydraColor.mSurfaceContainerHighest : "transparent")
-  border.color: root.activeFocus ? HydraColor.mPrimary : "transparent"
-  border.width: root.activeFocus ? Style.borderM : 0
-
-  Behavior on color {
-    enabled: !HydraColor.isTransitioning
-    ColorAnimation {
-      duration: Style.animationFast
-      easing.type: Easing.OutCubic
-    }
-  }
+  baseColor: root.checked ? HydraColor.mSecondaryContainer : "transparent"
+  stateColor: root.checked ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
+  hovering: root.isHovered
+  pressed: tabMouse.pressed
 
   // Content
   RowLayout {
@@ -108,6 +101,7 @@ Rectangle {
   }
 
   MouseArea {
+    id: tabMouse
     anchors.fill: parent
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
@@ -125,7 +119,7 @@ Rectangle {
       }
     }
     onClicked: {
-      root.forceActiveFocus();
+      root.forceActiveFocus(Qt.MouseFocusReason);
       root.activate();
     }
   }

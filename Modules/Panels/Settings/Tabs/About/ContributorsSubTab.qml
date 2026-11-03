@@ -38,25 +38,13 @@ ColumnLayout {
     Repeater {
       model: Math.min(root.contributors.length, root.topContributorsCount)
 
-      delegate: Rectangle {
+      delegate: NStateLayer {
         width: Math.max(Math.round(topContributorsFlow.width / 2 - Style.marginM - 1), Math.round(Style.baseWidgetSize * 4))
         height: Math.round(Style.baseWidgetSize * 2.3)
         radius: Style.radiusM
-        color: contributorArea.containsMouse ? HydraColor.mHover : "transparent"
-        border.width: 1
-        border.color: contributorArea.containsMouse ? HydraColor.mPrimary : HydraColor.mOutline
-
-        Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
-        }
-
-        Behavior on border.color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
-        }
+        baseColor: HydraColor.mSurfaceContainerLow
+        hovering: contributorArea.containsMouse
+        pressed: contributorArea.pressed
 
         RowLayout {
           anchors.fill: parent
@@ -136,7 +124,7 @@ ColumnLayout {
             NText {
               text: root.contributors[index].login || "Unknown"
               font.weight: Style.fontWeightBold
-              color: contributorArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
+              color: HydraColor.mOnSurface
               elide: Text.ElideRight
               Layout.fillWidth: true
               pointSize: Style.fontSizeS
@@ -149,13 +137,13 @@ ColumnLayout {
               NIcon {
                 icon: "git-commit"
                 pointSize: Style.fontSizeXS
-                color: contributorArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
               }
 
               NText {
                 text: `${(root.contributors[index].contributions || 0).toString()} commits`
                 pointSize: Style.fontSizeXS
-                color: contributorArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurfaceVariant
+                color: HydraColor.mOnSurfaceVariant
               }
             }
           }
@@ -202,32 +190,20 @@ ColumnLayout {
     Repeater {
       model: Math.max(0, root.contributors.length - root.topContributorsCount)
 
-      delegate: Rectangle {
+      delegate: NStateLayer {
         width: nameText.implicitWidth + Style.margin2M
         height: nameText.implicitHeight + Style.margin2S
         radius: Style.radiusS
-        color: nameArea.containsMouse ? HydraColor.mHover : "transparent"
-        border.width: Style.borderS
-        border.color: nameArea.containsMouse ? HydraColor.mPrimary : HydraColor.mOutline
-
-        Behavior on color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
-        }
-
-        Behavior on border.color {
-          ColorAnimation {
-            duration: Style.animationFast
-          }
-        }
+        baseColor: HydraColor.mSurfaceContainerLow
+        hovering: nameArea.containsMouse
+        pressed: nameArea.pressed
 
         NText {
           id: nameText
           anchors.centerIn: parent
           text: root.contributors[index + root.topContributorsCount].login || "Unknown"
           pointSize: Style.fontSizeXS
-          color: nameArea.containsMouse ? HydraColor.mOnHover : HydraColor.mOnSurface
+          color: HydraColor.mOnSurface
           font.weight: Style.fontWeightMedium
 
           Behavior on color {
