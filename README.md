@@ -333,6 +333,33 @@ recriar seus modelos QsMenu. Os outros menus contextuais ainda usam a
 janela genérica. Painéis legados de Bluetooth, Rede e Áudio permanecem nos
 arquivos até confirmar paridade funcional e ausência de consumidores.
 
+### Tempo de Tela
+
+A terceira página do card de clima/calendário mostra **Uso de tela**: total de
+hoje, atividade dos últimos sete dias e aplicativos mais usados. A lista rola
+dentro do espaço do card; a seta abre os detalhes, com períodos de **Hoje,
+3, 7 e 14 dias**, média diária, distribuição por hora e ranking com ícones.
+Voltar retorna à Dashboard sem encerrar o rastreamento.
+
+`Services/System/ScreenTimeService.qml` é inicializado uma vez pela shell e
+acompanha o foco pelo `CompositorService`, mesmo com a Dashboard fechada.
+Bloqueio, Visão Geral e ausência de janela válida pausam a contagem.
+Após **120 segundos sem entrada**, o monitor nativo de inatividade desconta
+o trecho inativo recente dos aplicativos e horários correspondentes.
+Sem suporte ao protocolo nativo de idle, essa detecção não fica disponível;
+as demais condições de pausa continuam funcionando.
+
+O histórico fica em `$XDG_STATE_HOME/hydra/screen-usage.json` (por padrão,
+`~/.local/state/hydra/screen-usage.json`), com gravação atômica periódica,
+retenção de **30 dias** e divisão dos intervalos entre horas e datas.
+O primeiro carregamento migra o histórico dos caches antigos da Hydra ou
+`raell-dashboard`, sem apagar os arquivos de origem. A interface usa os
+mesmos dados nas variantes Material 3 e Tinted Glass.
+
+Regressões nativas isoladas:
+`python -m unittest Scripts.python.tests.test_screen_time_runtime -v`
+(requer `umbriel`, `qs`, `dbus-daemon` e `kitty`).
+
 ## Configurações → Umbriel
 
 A página Umbriel reúne **Atalhos**, **Visão Geral** e **Cantos Ativos** em um

@@ -30,7 +30,7 @@ NBox {
   }
 
   onVisibleChanged: {
-    if (visible && detailTransition && !panelRoot.dashboardPerformanceMode) {
+    if (visible && detailTransition && !panelRoot.dashboardPerformanceMode && Style.animationNormal > 0) {
       detailEnterAnimation.restart();
     } else if (visible && detailTransition) {
       opacity = 1;

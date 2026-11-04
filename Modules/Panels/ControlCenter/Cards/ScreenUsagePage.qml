@@ -3,16 +3,25 @@ import QtQuick.Layouts
 import qs.Commons
 import qs.Widgets
 import qs.Services.System
-Item {
+
+Flickable {
   id: screenUsagePage
 
   required property var panelRoot
 
-  readonly property var topApps: panelRoot.screenUsageTopApps(4)
-  readonly property int maxAppSeconds: panelRoot.screenUsageMaxAppSeconds(topApps)
+  readonly property var topApps: ScreenTimeService.topAppsToday
+  readonly property int maxAppSeconds: ScreenTimeService.maxAppSecondsToday
+  contentWidth: width
+  contentHeight: summaryColumn.implicitHeight + Style.marginM * 2
+  flickableDirection: Flickable.VerticalFlick
+  boundsBehavior: Flickable.StopAtBounds
+  clip: true
 
   ColumnLayout {
-    anchors.fill: parent
+    id: summaryColumn
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.margins: Style.marginM
     spacing: Style.marginS
 
@@ -28,6 +37,7 @@ Item {
 
       ColumnLayout {
         Layout.fillWidth: true
+        Layout.minimumWidth: 0
         spacing: 0
 
         NText {
@@ -48,25 +58,26 @@ Item {
       }
 
       NText {
-        text: panelRoot.durationText(panelRoot.screenUsageTodayTotal())
+        text: ScreenTimeService.todayFormatted
         color: panelRoot.componentAccent("screenUsage")
         pointSize: Style.fontSizeL
         font.weight: Style.fontWeightBold
         font.family: Settings.data.ui.fontFixed
       }
 
-      SubmoduleButton {
-        panelRoot: screenUsagePage.panelRoot
-        labelText: panelRoot.tr("details")
-        targetView: "screenUsage"
-        tooltipText: panelRoot.tr("details")
+      NIconButton {
+        icon: "chevron-right"
+        baseSize: Math.round(28 * screenUsagePage.panelRoot.panelUnit)
+        activeFocusOnTab: true
+        tooltipText: screenUsagePage.panelRoot.tr("details")
+        onClicked: screenUsagePage.panelRoot.activeDetailView = "screenUsage"
       }
     }
 
     DashboardCard {
       panelRoot: screenUsagePage.panelRoot
       Layout.fillWidth: true
-      Layout.preferredHeight: Math.round(76 * panelRoot.panelUnit)
+      Layout.preferredHeight: Math.round(78 * panelRoot.panelUnit)
       color: Style.materialFill(HydraColor.mSurfaceContainerHighest)
       radius: Style.radiusS
 
@@ -76,7 +87,7 @@ Item {
         spacing: Style.marginS
 
         Repeater {
-          model: panelRoot.screenUsageWeekModel()
+          model: ScreenTimeService.weeklyActivity
 
           ColumnLayout {
             Layout.fillWidth: true
@@ -87,21 +98,41 @@ Item {
               Layout.fillWidth: true
               Layout.fillHeight: true
 
+              // Background track
+              Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: Math.max(12, Math.round(16 * panelRoot.panelUnit))
+                radius: Style.radiusXS
+                color: Style.materialFill(HydraColor.mSurfaceContainerLowest)
+              }
+
+              // Active bar
               Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: parent.bottom
-                width: Math.max(14, Math.round(18 * panelRoot.panelUnit))
-                height: Math.max(Math.round(8 * panelRoot.panelUnit), parent.height * modelData.ratio)
+                width: Math.max(12, Math.round(16 * panelRoot.panelUnit))
+                height: Math.max(modelData.totalSeconds > 0 ? Math.round(6 * panelRoot.panelUnit) : 0, parent.height * modelData.ratio)
                 radius: Style.radiusXS
-                color: index === 6 ? panelRoot.componentAccent("screenUsage") : Qt.alpha(panelRoot.componentText("screenUsage", false), 0.38)
+                color: modelData.isToday ? panelRoot.componentAccent("screenUsage") : Qt.alpha(panelRoot.componentAccent("screenUsage"), 0.45)
+
+                Behavior on height {
+                  enabled: !screenUsagePage.panelRoot.dashboardPerformanceMode && Style.animationNormal > 0
+                  NumberAnimation {
+                    duration: Style.animationNormal
+                    easing.type: Easing.OutCubic
+                  }
+                }
               }
             }
 
             NText {
               Layout.fillWidth: true
-              text: modelData.label
-              color: index === 6 ? panelRoot.componentAccent("screenUsage") : panelRoot.componentText("screenUsage", false)
+              text: modelData.dayLabel
+              color: modelData.isToday ? panelRoot.componentAccent("screenUsage") : panelRoot.componentText("screenUsage", false)
               pointSize: Style.fontSizeXXS
+              font.weight: modelData.isToday ? Style.fontWeightBold : Style.fontWeightRegular
               horizontalAlignment: Text.AlignHCenter
               elide: Text.ElideRight
             }
@@ -112,7 +143,6 @@ Item {
 
     ColumnLayout {
       Layout.fillWidth: true
-      Layout.fillHeight: true
       spacing: Style.marginS
 
       NText {
@@ -128,6 +158,7 @@ Item {
         model: screenUsagePage.topApps
 
         ScreenUsageAppRow {
+          required property var modelData
           panelRoot: screenUsagePage.panelRoot
           Layout.fillWidth: true
           appData: modelData
@@ -136,9 +167,10 @@ Item {
       }
 
       NText {
+        visible: screenUsagePage.topApps.length === 0
         Layout.fillWidth: true
         Layout.fillHeight: true
-        visible: screenUsagePage.topApps.length === 0
+        Layout.preferredHeight: Math.round(80 * screenUsagePage.panelRoot.panelUnit)
         text: panelRoot.tr("screenUsageEmpty")
         color: HydraColor.mOnSurfaceVariant
         pointSize: Style.fontSizeS
