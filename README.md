@@ -32,6 +32,28 @@ Com Qt 6.12, os tokens da Hydra vêm de `qs.Commons.HydraColor`
 (`Commons/HydraColor.qml`). O nome evita colisão com o singleton `QtQuick.Color`
 introduzido nessa versão; componentes e extensões devem usar `HydraColor.*`.
 
+## Variantes visuais globais
+
+Em **Configurações → Interface do usuário → Aparência → Aparência do shell**,
+escolha **Material 3** ou **Tinted Glass**. Material 3 continua sendo o padrão,
+inclusive para configurações existentes. A escolha é persistida em
+`ui.visualVariant` e não altera a paleta, a receita de cores, templates, ícones,
+layouts ou navegação.
+
+Tinted Glass usa o wallpaper estático do monitor, desfocado uma vez por janela,
+sob uma camada da paleta Hydra. Os preenchimentos internos mantêm a profundidade;
+a tonalidade/cobertura, o desfoque e a iluminação discreta das bordas são
+ajustáveis. Um acabamento GPU comprime apenas os tons do wallpaper que
+prejudicariam o contraste dos textos, sem substituir o motor de temas.
+
+O material acompanha barra/frame, Dock, Dashboard, Launcher, Configurações,
+notificações, menus e popups compartilhados. O vidro mostra o wallpaper,
+**não as janelas atrás da shell**, e não depende do blur do compositor.
+Desativar **Desfoque de fundo**, ativar desempenho ou usar renderização por
+software mantém fundos sólidos legíveis. Wallpaper desativado, ausente,
+inválido, de cor sólida ou em vídeo também usa o fundo sólido; o vidro não
+reproduz vídeos nem a animação de troca do wallpaper.
+
 ## Temas oficiais e primeiro uso
 
 Novas configurações iniciam em **Hydra Glacier · Escuro · Material 2025**,

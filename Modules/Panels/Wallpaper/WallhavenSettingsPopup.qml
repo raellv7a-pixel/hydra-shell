@@ -82,7 +82,7 @@ Popup {
     onTriggered: root.updateResolution(true)
   }
 
-  background: Rectangle {
+  background: NMaterialSurface {
     id: backgroundRect
     color: HydraColor.mSurface
     radius: Style.radiusL

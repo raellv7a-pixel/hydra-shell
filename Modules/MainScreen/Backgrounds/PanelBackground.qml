@@ -91,7 +91,8 @@ ShapePath {
   readonly property real blRadius: panelBg ? getCornerRadius(panelBg.bottomLeftCornerState) : 0
 
   // ShapePath configuration
-  strokeWidth: -1 // No stroke, fill only
+  strokeWidth: Style.tintedGlass ? Style.borderS : -1
+  strokeColor: Style.materialEdgeColor
 
   // Start point - use tiny off-screen non-degenerate fallback when not renderable.
   // Fallback forms a 1×1 off-screen square where each edge is split between a PathLine
@@ -99,7 +100,7 @@ ShapePath {
   startX: isRenderable ? (panelX + tlRadius * tlMultX) : -0.75
   startY: isRenderable ? panelY : -1
 
-  fillColor: isRenderable ? effectiveBackgroundColor : "transparent"
+  fillColor: isRenderable ? Style.materialColor(effectiveBackgroundColor) : "transparent"
 
   // ========== PATH DEFINITION ==========
   // Draws a rectangle with potentially inverted corners

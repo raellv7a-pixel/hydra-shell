@@ -578,7 +578,7 @@ PopupWindow {
     }
   }
 
-  Rectangle {
+  NMaterialSurface {
     anchors.fill: parent
     anchors.margins: border.width
     color: HydraColor.mSurfaceVariant

@@ -99,7 +99,7 @@ ColumnLayout {
     width: Math.min(500 * Style.uiScaleRatio, parent ? parent.width - Style.margin2XL : 500 * Style.uiScaleRatio)
     padding: Style.marginL
 
-    background: Rectangle {
+    background: NMaterialSurface {
       color: HydraColor.mSurface
       radius: Style.radiusS
       border.color: HydraColor.mPrimary

@@ -91,12 +91,13 @@ Item {
   }
 
   // Background rectangle (apply shadows here)
-  Rectangle {
+  NMaterialSurface {
     id: background
     anchors.fill: parent
     anchors.margins: shadowPadding
     radius: Style.radiusL
-    color: Qt.alpha(HydraColor.mSurfaceContainerHigh, HydraColor.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
+    color: HydraColor.mSurfaceContainerHigh
+    backgroundOpacity: HydraColor.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0
 
     // Colored border based on type
     border.width: Style.borderS

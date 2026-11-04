@@ -22,7 +22,7 @@ ColumnLayout {
     Layout.fillWidth: true
     implicitHeight: cardColumn.implicitHeight
     radius: Style.radiusL
-    color: HydraColor.mSurfaceContainerLow
+    color: Style.materialFill(HydraColor.mSurfaceContainerLow)
 
     ColumnLayout {
       id: cardColumn
@@ -37,7 +37,7 @@ ColumnLayout {
         implicitHeight: Math.max(Style.baseWidgetSize * Style.uiScaleRatio, titleRow.implicitHeight) + Style.margin2M
         focusPolicy: Qt.StrongFocus
         radius: Style.radiusL
-        baseColor: HydraColor.mSurfaceContainerLow
+        baseColor: Style.materialFill(HydraColor.mSurfaceContainerLow)
         hovering: headingHover.containsMouse
         pressed: headingHover.pressed
         Accessible.role: Accessible.Button

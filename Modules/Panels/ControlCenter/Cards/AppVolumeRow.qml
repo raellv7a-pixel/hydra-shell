@@ -22,7 +22,7 @@ DashboardCard {
   }
 
   Layout.preferredHeight: Math.round((streamTitle ? 94 : 76) * panelRoot.panelUnit)
-  color: HydraColor.mSurfaceContainerHighest
+  color: Style.materialFill(HydraColor.mSurfaceContainerHighest)
   radius: Style.radiusS
 
   ColumnLayout {

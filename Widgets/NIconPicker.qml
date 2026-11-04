@@ -37,7 +37,7 @@ Popup {
     searchInput.forceActiveFocus();
   }
 
-  background: Rectangle {
+  background: NMaterialSurface {
     color: HydraColor.mSurface
     radius: Style.iRadiusL
     border.color: HydraColor.mPrimary

@@ -6,7 +6,7 @@ import qs.Widgets
 NBox {
   id: root
   required property var launcher
-  color: HydraColor.mSurfaceContainerLow
+  color: Style.materialFill(HydraColor.mSurfaceContainerLow)
   forceOpaque: true
   border.width: 0
   radius: Style.radiusL

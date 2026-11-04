@@ -663,7 +663,7 @@ PopupWindow {
     scale: 1.0
     transformOrigin: Item.Center
 
-    Rectangle {
+    NMaterialSurface {
       anchors.fill: parent
       anchors.margins: border.width
       color: HydraColor.mSurface

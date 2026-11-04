@@ -24,7 +24,7 @@ Popup {
   property var _savedSlot: null
   property string _selectedAction: "block"
 
-  background: Rectangle {
+  background: NMaterialSurface {
     color: HydraColor.mSurface
     radius: Style.radiusL
     border.color: HydraColor.mOutline

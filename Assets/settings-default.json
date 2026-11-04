@@ -152,6 +152,10 @@
     "smoothScrollEnabled": true
   },
   "ui": {
+    "visualVariant": "material3",
+    "glassTint": 0.56,
+    "glassBlur": 0.85,
+    "glassEdgeLight": 0.12,
     "fontDefault": "",
     "fontFixed": "",
     "fontDefaultScale": 1,

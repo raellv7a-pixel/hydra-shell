@@ -37,6 +37,80 @@ ColumnLayout {
     title: I18n.tr("settings.content.surfaces")
     icon: "layers-intersect"
 
+    NComboBox {
+      id: visualVariant
+      Layout.fillWidth: true
+      minimumWidth: 180 * Style.uiScaleRatio
+      label: I18n.tr("panels.user-interface.visual-variant-label")
+      description: I18n.tr("panels.user-interface.visual-variant-description")
+      model: [
+        { "key": "material3", "name": I18n.tr("panels.user-interface.visual-variant-material3") },
+        { "key": "tinted-glass", "name": I18n.tr("panels.user-interface.visual-variant-tinted-glass") }
+      ]
+      currentKey: Settings.data.ui.visualVariant
+      defaultValue: Settings.getDefaultValue("ui.visualVariant")
+      onSelected: key => Settings.data.ui.visualVariant = key
+      Component.onCompleted: {
+        comboBox.Accessible.name = Qt.binding(() => visualVariant.label);
+        comboBox.Accessible.description = Qt.binding(() => visualVariant.description);
+      }
+    }
+
+    NValueSlider {
+      Layout.fillWidth: true
+      visible: Style.tintedGlass
+      label: I18n.tr("panels.user-interface.glass-tint-label")
+      description: I18n.tr("panels.user-interface.glass-tint-description")
+      from: 0
+      to: 1
+      stepSize: 0.01
+      showReset: true
+      value: Settings.data.ui.glassTint
+      defaultValue: Settings.getDefaultValue("ui.glassTint")
+      onMoved: value => Settings.data.ui.glassTint = value
+      text: Math.round(value * 100) + "%"
+    }
+
+    NValueSlider {
+      Layout.fillWidth: true
+      visible: Style.tintedGlass
+      enabled: Style.glassEffectsEnabled
+      label: I18n.tr("panels.user-interface.glass-blur-label")
+      description: I18n.tr("panels.user-interface.glass-blur-description")
+      from: 0
+      to: 1
+      stepSize: 0.01
+      showReset: true
+      value: Settings.data.ui.glassBlur
+      defaultValue: Settings.getDefaultValue("ui.glassBlur")
+      onMoved: value => Settings.data.ui.glassBlur = value
+      text: Math.round(value * 100) + "%"
+    }
+
+    NValueSlider {
+      Layout.fillWidth: true
+      visible: Style.tintedGlass
+      label: I18n.tr("panels.user-interface.glass-edge-light-label")
+      description: I18n.tr("panels.user-interface.glass-edge-light-description")
+      from: 0
+      to: 0.3
+      stepSize: 0.01
+      showReset: true
+      value: Settings.data.ui.glassEdgeLight
+      defaultValue: Settings.getDefaultValue("ui.glassEdgeLight")
+      onMoved: value => Settings.data.ui.glassEdgeLight = value
+      text: Math.round(value * 100) + "%"
+    }
+
+    NText {
+      Layout.fillWidth: true
+      visible: Style.tintedGlass
+      text: I18n.tr("panels.user-interface.glass-fallback-description")
+      pointSize: Style.fontSizeS
+      color: HydraColor.mOnSurfaceVariant
+      wrapMode: Text.WordWrap
+    }
+
     NToggle {
       label: I18n.tr("panels.user-interface.box-border-label")
       description: I18n.tr("panels.user-interface.box-border-description")

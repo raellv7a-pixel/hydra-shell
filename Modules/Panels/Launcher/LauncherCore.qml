@@ -1238,7 +1238,7 @@ Rectangle {
     NBox {
       Layout.preferredWidth: layoutOptions.implicitWidth + Style.margin2XS
       Layout.preferredHeight: root.metrics.pillHeight + Style.margin2XS
-      color: HydraColor.mSurfaceContainerLow
+      color: Style.materialFill(HydraColor.mSurfaceContainerLow)
       forceOpaque: true
       radius: height / 2
       border.width: 0
@@ -1347,7 +1347,7 @@ Rectangle {
           width: shortcutLabel.implicitWidth + Style.margin2M
           height: shortcutLabel.implicitHeight + Style.margin2XS
           visible: searchInput.text.length === 0 && searchInput.width >= 480 * Style.uiScaleRatio
-          color: HydraColor.mSurfaceContainerHighest
+          color: Style.materialFill(HydraColor.mSurfaceContainerHighest)
           forceOpaque: true
           radius: Style.iRadiusS
           border.width: 0
@@ -1514,7 +1514,7 @@ Rectangle {
 
         NBox {
           anchors.fill: parent
-          color: HydraColor.mSurfaceContainerLow
+          color: Style.materialFill(HydraColor.mSurfaceContainerLow)
           forceOpaque: true
           Layout.fillWidth: true
           Layout.fillHeight: true

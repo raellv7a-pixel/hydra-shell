@@ -55,7 +55,7 @@ Popup {
     }
   }
 
-  background: Rectangle {
+  background: NMaterialSurface {
     color: HydraColor.mSurface
     radius: Style.iRadiusS
     border.color: HydraColor.mPrimary

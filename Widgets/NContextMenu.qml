@@ -61,7 +61,7 @@ Popup {
   width: 180
   padding: Style.marginS
 
-  background: Rectangle {
+  background: NMaterialSurface {
     color: HydraColor.mSurfaceContainerHigh
     border.color: HydraColor.mOutline
     border.width: Style.borderS

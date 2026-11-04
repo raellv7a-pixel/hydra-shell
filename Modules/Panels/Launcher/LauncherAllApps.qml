@@ -194,7 +194,7 @@ Item {
     anchors.bottom: parent.bottom
     width: Style.baseWidgetSize * Style.uiScaleRatio + Style.marginXS
     radius: Style.radiusL
-    color: HydraColor.mSurfaceContainerLow
+    color: Style.materialFill(HydraColor.mSurfaceContainerLow)
     forceOpaque: true
     border.width: 0
     visible: root.catalog.order.length > 0

@@ -37,94 +37,41 @@ Item {
       visible: !Settings.data.bar.useSeparateOpacity
 
       // Enable layer caching to prevent continuous re-rendering
-      layer.enabled: true
-      opacity: Style.effectivePanelOpacity
+      layer.enabled: !Style.tintedGlass
+      opacity: Style.tintedGlass ? 1 : Style.effectivePanelOpacity
 
-      Shape {
-        id: unifiedBackgroundsShape
+      NGlassBackdrop {
+        id: unifiedGlass
         anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-        asynchronous: true
-        enabled: false
-
-        Component.onCompleted: {
-          Logger.d("AllBackgrounds", "AllBackgrounds initialized");
-        }
-
-        /**
-        *  Bar
-        */
-        BarBackground {
-          bar: root.bar
-          shapeContainer: unifiedBackgroundsShape
-          windowRoot: root.windowRoot
-          backgroundColor: HydraColor.mSurfaceContainerLow
-        }
-
-        /**
-        *  Panel Background Slots
-        *  Slot 0: open/opening panel, slot 1: closing panel, slot 2: modal
-        *  overlay (polkit), which stacks on top of slot 0 instead of replacing it.
-        */
-
-        // Slot 0: Currently open/opening panel
-        PanelBackground {
-          assignedPanel: {
-            var p = PanelService.backgroundSlotAssignments[0];
-            // Only render if this panel belongs to this screen
-            return (p && p.screen === root.windowRoot.screen) ? p : null;
-          }
-          shapeContainer: unifiedBackgroundsShape
-          defaultBackgroundColor: panelBackgroundColor
-        }
-
-        // Slot 1: Closing panel (during transitions)
-        PanelBackground {
-          assignedPanel: {
-            var p = PanelService.backgroundSlotAssignments[1];
-            // Only render if this panel belongs to this screen
-            return (p && p.screen === root.windowRoot.screen) ? p : null;
-          }
-          shapeContainer: unifiedBackgroundsShape
-          defaultBackgroundColor: panelBackgroundColor
-        }
-
-        // Slot 2: Modal overlay, drawn over whatever occupies slot 0
-        PanelBackground {
-          assignedPanel: {
-            var p = PanelService.backgroundSlotAssignments[2];
-            return (p && p.screen === root.windowRoot.screen) ? p : null;
-          }
-          shapeContainer: unifiedBackgroundsShape
-          defaultBackgroundColor: panelBackgroundColor
-        }
+        maskSource: unifiedBackgroundsShape
+        tintOpacity: Style.effectivePanelOpacity
       }
 
-      // Apply shadow to the unified backgrounds
-      NDropShadow {
-        anchors.fill: parent
-        source: unifiedBackgroundsShape
-      }
-    }
-
-    // When using separate bar opacity, separate the rendering
-    Item {
-      anchors.fill: parent
-      visible: Settings.data.bar.useSeparateOpacity
-
-      // Panel backgrounds with panel opacity
       Item {
         anchors.fill: parent
-
-        layer.enabled: true
-        opacity: Style.effectivePanelOpacity
+        layer.enabled: Style.tintedGlass
+        opacity: Style.tintedGlass ? (unifiedGlass.ready ? Style.effectivePanelOpacity : 1) : 1
 
         Shape {
-          id: panelBackgroundsShape
+          id: unifiedBackgroundsShape
           anchors.fill: parent
           preferredRendererType: Shape.CurveRenderer
           asynchronous: true
           enabled: false
+
+          Component.onCompleted: {
+            Logger.d("AllBackgrounds", "AllBackgrounds initialized");
+          }
+
+          /**
+          *  Bar
+          */
+          BarBackground {
+            bar: root.bar
+            shapeContainer: unifiedBackgroundsShape
+            windowRoot: root.windowRoot
+            backgroundColor: Style.materialColor(HydraColor.mSurfaceContainerLow)
+          }
 
           /**
           *  Panel Background Slots
@@ -139,7 +86,7 @@ Item {
               // Only render if this panel belongs to this screen
               return (p && p.screen === root.windowRoot.screen) ? p : null;
             }
-            shapeContainer: panelBackgroundsShape
+            shapeContainer: unifiedBackgroundsShape
             defaultBackgroundColor: panelBackgroundColor
           }
 
@@ -150,7 +97,7 @@ Item {
               // Only render if this panel belongs to this screen
               return (p && p.screen === root.windowRoot.screen) ? p : null;
             }
-            shapeContainer: panelBackgroundsShape
+            shapeContainer: unifiedBackgroundsShape
             defaultBackgroundColor: panelBackgroundColor
           }
 
@@ -160,15 +107,94 @@ Item {
               var p = PanelService.backgroundSlotAssignments[2];
               return (p && p.screen === root.windowRoot.screen) ? p : null;
             }
-            shapeContainer: panelBackgroundsShape
+            shapeContainer: unifiedBackgroundsShape
             defaultBackgroundColor: panelBackgroundColor
           }
         }
 
-        // Apply shadow to the panel backgrounds
+        // Apply shadow to the unified backgrounds
         NDropShadow {
           anchors.fill: parent
-          source: panelBackgroundsShape
+          source: unifiedBackgroundsShape
+        }
+      }
+    }
+
+    // When using separate bar opacity, separate the rendering
+    Item {
+      anchors.fill: parent
+      visible: Settings.data.bar.useSeparateOpacity
+
+      // Panel backgrounds with panel opacity
+      Item {
+        anchors.fill: parent
+
+        layer.enabled: !Style.tintedGlass
+        opacity: Style.tintedGlass ? 1 : Style.effectivePanelOpacity
+
+        NGlassBackdrop {
+          id: panelGlass
+          anchors.fill: parent
+          maskSource: panelBackgroundsShape
+          tintOpacity: Style.effectivePanelOpacity
+        }
+
+        Item {
+          anchors.fill: parent
+          layer.enabled: Style.tintedGlass
+          opacity: Style.tintedGlass ? (panelGlass.ready ? Style.effectivePanelOpacity : 1) : 1
+
+          Shape {
+            id: panelBackgroundsShape
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            asynchronous: true
+            enabled: false
+
+            /**
+            *  Panel Background Slots
+            *  Slot 0: open/opening panel, slot 1: closing panel, slot 2: modal
+            *  overlay (polkit), which stacks on top of slot 0 instead of replacing it.
+            */
+
+            // Slot 0: Currently open/opening panel
+            PanelBackground {
+              assignedPanel: {
+                var p = PanelService.backgroundSlotAssignments[0];
+                // Only render if this panel belongs to this screen
+                return (p && p.screen === root.windowRoot.screen) ? p : null;
+              }
+              shapeContainer: panelBackgroundsShape
+              defaultBackgroundColor: panelBackgroundColor
+            }
+
+            // Slot 1: Closing panel (during transitions)
+            PanelBackground {
+              assignedPanel: {
+                var p = PanelService.backgroundSlotAssignments[1];
+                // Only render if this panel belongs to this screen
+                return (p && p.screen === root.windowRoot.screen) ? p : null;
+              }
+              shapeContainer: panelBackgroundsShape
+              defaultBackgroundColor: panelBackgroundColor
+            }
+
+            // Slot 2: Modal overlay, drawn over whatever occupies slot 0
+            PanelBackground {
+              assignedPanel: {
+                var p = PanelService.backgroundSlotAssignments[2];
+                return (p && p.screen === root.windowRoot.screen) ? p : null;
+              }
+              shapeContainer: panelBackgroundsShape
+              defaultBackgroundColor: panelBackgroundColor
+            }
+          }
+
+          // Apply shadow to the panel backgrounds
+          NDropShadow {
+            anchors.fill: parent
+            source: panelBackgroundsShape
+          }
         }
       }
 
@@ -176,27 +202,40 @@ Item {
       Item {
         anchors.fill: parent
 
-        layer.enabled: true
-        opacity: Style.effectiveBarOpacity
+        layer.enabled: !Style.tintedGlass
+        opacity: Style.tintedGlass ? 1 : Style.effectiveBarOpacity
 
-        Shape {
-          id: barBackgroundShape
+        NGlassBackdrop {
+          id: barGlass
           anchors.fill: parent
-          preferredRendererType: Shape.CurveRenderer
-          asynchronous: true
-          enabled: false
-
-          BarBackground {
-            bar: root.bar
-            shapeContainer: barBackgroundShape
-            windowRoot: root.windowRoot
-            backgroundColor: HydraColor.mSurfaceContainerLow
-          }
+          maskSource: barBackgroundShape
+          tintOpacity: Style.effectiveBarOpacity
         }
 
-        NDropShadow {
+        Item {
           anchors.fill: parent
-          source: barBackgroundShape
+          layer.enabled: Style.tintedGlass
+          opacity: Style.tintedGlass ? (barGlass.ready ? Style.effectiveBarOpacity : 1) : 1
+
+          Shape {
+            id: barBackgroundShape
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            asynchronous: true
+            enabled: false
+
+            BarBackground {
+              bar: root.bar
+              shapeContainer: barBackgroundShape
+              windowRoot: root.windowRoot
+              backgroundColor: Style.materialColor(HydraColor.mSurfaceContainerLow)
+            }
+          }
+
+          NDropShadow {
+            anchors.fill: parent
+            source: barBackgroundShape
+          }
         }
       }
     }

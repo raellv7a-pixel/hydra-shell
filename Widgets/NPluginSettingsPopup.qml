@@ -23,7 +23,7 @@ Popup {
   property var currentPluginApi: null
   property bool showToastOnSave: false
 
-  background: Rectangle {
+  background: NMaterialSurface {
     color: HydraColor.mSurface
     radius: Style.radiusL
     border.color: HydraColor.mPrimary

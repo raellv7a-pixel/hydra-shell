@@ -2342,6 +2342,17 @@
       "warning-color-label": "Cor de aviso"
     },
     "user-interface": {
+      "visual-variant-label": "Aparência do shell",
+      "visual-variant-description": "Escolha o acabamento global das superfícies sem alterar a paleta, os ícones ou a disposição.",
+      "visual-variant-material3": "Material 3",
+      "visual-variant-tinted-glass": "Tinted Glass",
+      "glass-tint-label": "Tonalidade do vidro",
+      "glass-tint-description": "Ajuste a cor e a cobertura do vidro. O material adapta os tons do papel de parede para preservar a leitura.",
+      "glass-blur-label": "Desfoque do vidro",
+      "glass-blur-description": "Ajuste o desfoque do papel de parede. Requer Desfoque de fundo e fica desativado no modo de desempenho.",
+      "glass-edge-light-label": "Luz nas bordas do vidro",
+      "glass-edge-light-description": "Ajuste o realce sutil nas bordas das superfícies de vidro.",
+      "glass-fallback-description": "O vidro usa o papel de parede, não as janelas dos aplicativos. Com Desfoque de fundo desativado ou o modo de desempenho ativado, um fundo sólido com a tonalidade da paleta mantém a leitura. Sem papel de parede, o mesmo fundo sólido é usado.",
       "allow-panels-without-bar-description": "Quando ativado, os painéis podem abrir em qualquer tela. Quando desativado, os painéis só abrirão em telas que tenham uma barra, o que pode reduzir o uso de memória.",
       "allow-panels-without-bar-label": "Permitir painéis em telas sem uma barra",
       "animation-disable-description": "Desative todas as animações para uma experiência mais rápida e responsiva.",

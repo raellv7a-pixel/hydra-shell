@@ -27,7 +27,7 @@ Popup {
   property var _savedSlot: null
   property var _testSlot: null
 
-  background: Rectangle {
+  background: NMaterialSurface {
     color: HydraColor.mSurface
     radius: Style.radiusL
     border.color: HydraColor.mOutline

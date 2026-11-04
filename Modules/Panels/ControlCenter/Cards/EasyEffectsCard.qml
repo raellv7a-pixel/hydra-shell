@@ -48,7 +48,7 @@ DashboardCard {
     Rectangle {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.round(54 * panelRoot.panelUnit)
-      color: HydraColor.mSurfaceContainerHighest
+      color: Style.materialFill(HydraColor.mSurfaceContainerHighest)
       radius: Style.radiusS
 
       RowLayout {

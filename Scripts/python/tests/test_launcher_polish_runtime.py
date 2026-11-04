@@ -145,6 +145,18 @@ else:sys.exit(1)
         path = self.lab / "events.jsonl"
         return [json.loads(line) for line in path.read_text().splitlines()] if path.exists() else []
 
+    def test_performance_fallback_presents_launcher_content(self):
+        self.call("performanceLauncher", "true")
+        try:
+            self.wait(lambda: self.call("performanceLauncherState")["ready"])
+            state = self.call("performanceLauncherState")
+            self.assertTrue(state["visible"])
+            self.assertEqual(state["opacity"], 1)
+            self.assertEqual(state["scale"], 1)
+        finally:
+            self.call("performanceLauncher", "false")
+            self.wait(lambda: not self.call("performanceLauncherState")["visible"])
+
     def test_seam_only_during_real_reveal_geometry(self):
         for height, visible in [(100, True), (220, False), (190, True), (0, False)]:
             with self.subTest(height=height):

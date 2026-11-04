@@ -172,7 +172,7 @@ Flickable {
         Layout.preferredHeight: root.wide ? root.sectionHeight : Math.max(root.launcher.metrics.pinnedHeight + Style.margin2L, pinnedBody.implicitHeight) + padding * 2
         Layout.alignment: Qt.AlignTop
         forceOpaque: true
-        color: HydraColor.mSurfaceContainerHigh
+        color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
         border.width: 0
         radius: Style.radiusL
         ColumnLayout {
@@ -243,7 +243,7 @@ Flickable {
         Layout.preferredHeight: root.wide ? root.sectionHeight : Math.max(root.launcher.metrics.pinnedHeight + Style.margin2L, recentBody.implicitHeight) + padding * 2
         Layout.alignment: Qt.AlignTop
         forceOpaque: true
-        color: HydraColor.mSurfaceContainerHigh
+        color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
         border.width: 0
         radius: Style.radiusL
         ColumnLayout {

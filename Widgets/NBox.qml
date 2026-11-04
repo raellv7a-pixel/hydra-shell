@@ -3,7 +3,7 @@ import qs.Commons
 
 // Rounded group container elevated above its parent panel.
 // To be used in side panels and settings panes to group fields or buttons.
-// Opacity is based on panelBackgroundOpacity but clamped to a minimum to avoid full transparency.
+// Inner fills follow the global material while forceOpaque keeps a solid surface.
 
 Item {
   id: root
@@ -30,7 +30,7 @@ Item {
         return root.color;
       }
 
-      return HydraColor.smartAlpha(root.color);
+      return Style.materialFill(HydraColor.smartAlpha(root.color));
     }
   }
 }

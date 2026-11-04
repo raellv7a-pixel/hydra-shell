@@ -67,7 +67,7 @@ Item {
       panelRoot: screenUsagePage.panelRoot
       Layout.fillWidth: true
       Layout.preferredHeight: Math.round(76 * panelRoot.panelUnit)
-      color: HydraColor.mSurfaceContainerHighest
+      color: Style.materialFill(HydraColor.mSurfaceContainerHighest)
       radius: Style.radiusS
 
       RowLayout {

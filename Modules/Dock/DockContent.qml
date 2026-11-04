@@ -21,12 +21,13 @@ Item {
   readonly property bool isAttachedMode: Settings.data.dock.dockType === "attached"
   readonly property string tooltipDirection: dockRoot.dockPosition === "left" ? "right" : (dockRoot.dockPosition === "right" ? "left" : (dockRoot.dockPosition === "top" ? "bottom" : "top"))
 
-  Rectangle {
+  NMaterialSurface {
     id: dockContainer
     // For vertical dock, swap width and height logic
     width: dockRoot.isVertical ? Math.round(dockRoot.iconSize * 1.5) : Math.min(dockLayout.implicitWidth + Style.marginXL, dockRoot.maxWidth)
     height: dockRoot.isVertical ? Math.min(dockLayout.implicitHeight + Style.marginXL, dockRoot.maxHeight) : Math.round(dockRoot.iconSize * 1.5)
-    color: Qt.alpha(HydraColor.mSurface, (isAttachedMode ? 0 : HydraColor.adaptiveOpacity(Settings.data.dock.backgroundOpacity)))
+    color: HydraColor.mSurface
+    backgroundOpacity: isAttachedMode ? 0 : HydraColor.adaptiveOpacity(Settings.data.dock.backgroundOpacity)
 
     // Anchor based on padding to achieve centering shift
     anchors.horizontalCenter: extraLeft > 0 || extraRight > 0 ? undefined : parent.horizontalCenter

@@ -386,11 +386,12 @@ Item {
       z: -1
     }
 
-    Rectangle {
+    NMaterialSurface {
       id: customPopupBg
       anchors.fill: parent
       radius: Style.radiusL
-      color: Qt.alpha(HydraColor.mSurface, 0.95)
+      color: HydraColor.mSurface
+      backgroundOpacity: 0.95
       border.color: HydraColor.mOutline
       border.width: Style.borderS
     }

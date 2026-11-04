@@ -410,7 +410,7 @@ RowLayout {
         }
       }
 
-      background: Rectangle {
+      background: NMaterialSurface {
         color: HydraColor.mSurfaceVariant
         border.color: HydraColor.mOutline
         border.width: Style.borderS

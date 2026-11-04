@@ -32,7 +32,7 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: height / 2
-    color: panelRoot.componentColor(submoduleButton.styleKey, "buttonBackground", submoduleHover.hovered ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHighest)
+    color: panelRoot.componentColor(submoduleButton.styleKey, "buttonBackground", submoduleHover.hovered ? HydraColor.mSecondaryContainer : panelRoot.m3SurfaceContainerHighest)
     border.width: submoduleButton.activeFocus ? Style.borderM : 0
     border.color: panelRoot.componentAccent(submoduleButton.styleKey)
 

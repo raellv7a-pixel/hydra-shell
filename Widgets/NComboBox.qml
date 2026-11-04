@@ -329,7 +329,7 @@ RowLayout {
         }
       }
 
-      background: Rectangle {
+      background: NMaterialSurface {
         color: HydraColor.mSurfaceContainerHigh
         border.color: "transparent"
         border.width: 0

@@ -205,7 +205,7 @@ PopupWindow {
     Keys.onEscapePressed: root.close()
   }
 
-  Rectangle {
+  NMaterialSurface {
     id: menuBackground
     anchors.fill: parent
     color: HydraColor.mSurfaceContainerHigh

@@ -24,7 +24,7 @@ Button {
   Accessible.name: text
   background: NStateLayer {
     radius: root.cornerRadius
-    baseColor: root.surface
+    baseColor: Style.materialFill(root.surface)
     stateColor: root.foreground
     focusColor: root.foreground
     hovering: root.hovered

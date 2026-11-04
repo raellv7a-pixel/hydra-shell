@@ -9,7 +9,7 @@ DashboardCard {
   property int maxSeconds: 1
 
   Layout.preferredHeight: Math.round(66 * panelRoot.panelUnit)
-  color: HydraColor.mSurfaceContainerHighest
+  color: Style.materialFill(HydraColor.mSurfaceContainerHighest)
   radius: Style.radiusS
 
   ColumnLayout {
@@ -63,7 +63,7 @@ DashboardCard {
       Layout.fillWidth: true
       Layout.preferredHeight: Math.max(5, Math.round(6 * panelRoot.panelUnit))
       radius: height / 2
-      color: HydraColor.mSurfaceContainerLow
+      color: Style.materialFill(HydraColor.mSurfaceContainerLow)
 
       Rectangle {
         anchors.left: parent.left

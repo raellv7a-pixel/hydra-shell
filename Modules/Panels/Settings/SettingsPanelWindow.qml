@@ -119,9 +119,10 @@ FloatingWindow {
   }
 
   // Main content
-  Rectangle {
+  NMaterialSurface {
     anchors.fill: parent
-    color: Qt.alpha(HydraColor.mSurfaceContainerLow, Settings.data.ui.panelBackgroundOpacity)
+    color: HydraColor.mSurfaceContainerLow
+    backgroundOpacity: Settings.data.ui.panelBackgroundOpacity
     radius: Style.radiusL
 
     SettingsContent {

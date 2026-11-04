@@ -158,7 +158,7 @@ SmartPanel {
               width: 160
               padding: Style.marginS
 
-              background: Rectangle {
+              background: NMaterialSurface {
                 color: HydraColor.mSurfaceVariant
                 border.color: HydraColor.mOutline
                 border.width: Style.borderS

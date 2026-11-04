@@ -2342,6 +2342,17 @@
       "warning-color-label": "Warning color"
     },
     "user-interface": {
+      "visual-variant-label": "Shell appearance",
+      "visual-variant-description": "Choose the global surface treatment without changing your palette, icons, or layout.",
+      "visual-variant-material3": "Material 3",
+      "visual-variant-tinted-glass": "Tinted Glass",
+      "glass-tint-label": "Glass tint",
+      "glass-tint-description": "Adjust glass colour and coverage. The material adapts wallpaper tones to keep text readable.",
+      "glass-blur-label": "Glass blur",
+      "glass-blur-description": "Adjust wallpaper softening. Requires Blur behind and is disabled in performance mode.",
+      "glass-edge-light-label": "Glass edge light",
+      "glass-edge-light-description": "Adjust the subtle highlight along glass surface edges.",
+      "glass-fallback-description": "Glass samples the wallpaper, not application windows. With Blur behind off or performance mode enabled, a solid palette-tinted fallback keeps surfaces readable. A missing wallpaper also uses the solid fallback.",
       "allow-panels-without-bar-description": "When enabled, panels can open on any screen. When disabled, panels will only open on screens that have a bar, which can reduce memory usage.",
       "allow-panels-without-bar-label": "Allow panels on screens without a bar",
       "animation-disable-description": "Disable all animations for a faster, more responsive experience.",

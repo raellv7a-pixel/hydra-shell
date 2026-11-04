@@ -112,6 +112,7 @@ Variants {
         opacity: launcherPanel.presented ? 1.0 : 0.0
 
         Behavior on opacity {
+          enabled: Style.animationFast > 0
           OpacityAnimator {
             duration: Style.animationFast
             easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
@@ -169,6 +170,7 @@ Variants {
         }
 
         Behavior on opacity {
+          enabled: Style.animationFast > 0
           OpacityAnimator {
             duration: Style.animationFast
             easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
@@ -176,6 +178,7 @@ Variants {
         }
 
         Behavior on scale {
+          enabled: Style.animationFast > 0
           ScaleAnimator {
             duration: Style.animationFast
             easing.type: launcherPanel.presented ? Easing.OutCubic : Easing.InCubic
@@ -250,6 +253,16 @@ Variants {
           return 0;
         }
 
+        NGlassBackdrop {
+          id: launcherGlass
+          x: panelShape.x
+          y: panelShape.y
+          width: panelShape.width
+          height: panelShape.height
+          maskSource: panelShape
+          tintOpacity: Style.materialOpacity(HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
+        }
+
         // Background with inverted corners - extends beyond panel for inverted corners
         Shape {
           id: panelShape
@@ -263,6 +276,7 @@ Variants {
           layer.enabled: true
 
           readonly property real radius: Style.radiusL
+          readonly property real materialAlpha: Style.tintedGlass && !launcherGlass.ready ? 1 : Style.materialOpacity(HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
 
           // Panel dimensions (for path calculations)
           readonly property real panelW: launcherPanel.width
@@ -290,7 +304,7 @@ Variants {
 
           ShapePath {
             strokeWidth: -1
-            fillColor: Qt.alpha(HydraColor.mSurfaceContainer, HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
+            fillColor: Qt.alpha(Style.materialColor(HydraColor.mSurfaceContainer), panelShape.materialAlpha)
 
             // Offset by radius to account for Shape's extended bounds
             startX: panelShape.radius + panelShape.radius * panelShape.tlMultX
@@ -356,7 +370,7 @@ Variants {
           anchors.fill: parent
           color: "transparent"
           radius: Style.radiusL
-          border.color: Qt.alpha(HydraColor.mOutline, 0.32)
+          border.color: Style.tintedGlass ? Style.materialEdgeColor : Qt.alpha(HydraColor.mOutline, 0.32)
           border.width: Style.borderS
           visible: !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
         }
@@ -383,12 +397,14 @@ Variants {
         z: previewBox.z - 1
       }
 
-      NBox {
+      NMaterialSurface {
         id: previewBox
         visible: launcherWindow.previewActive
         width: launcherWindow.previewPanelWidth
         height: Math.round(400 * Style.uiScaleRatio)
-        forceOpaque: true
+        radius: Style.radiusM
+        border.color: Style.boxBorderColor
+        border.width: Style.borderS
         color: HydraColor.mSurfaceContainerLow
         x: {
           if (panelPosition.endsWith("_right"))
@@ -409,6 +425,7 @@ Variants {
 
         opacity: visible && !windowLoader.closing ? 1.0 : 0.0
         Behavior on opacity {
+          enabled: Style.animationFast > 0
           OpacityAnimator {
             duration: Style.animationFast
             easing.type: windowLoader.closing ? Easing.InCubic : Easing.OutCubic

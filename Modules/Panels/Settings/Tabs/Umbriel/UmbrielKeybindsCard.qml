@@ -378,10 +378,11 @@ Item {
     closePolicy: Popup.NoAutoClose
     visible: root.recording
     onOpened: capture.forceActiveFocus()
-    background: Rectangle {
+    background: NMaterialSurface {
       color: HydraColor.mSurface
       radius: Style.radiusL
       border.color: HydraColor.mPrimary
+      border.width: 1
     }
     Item {
       id: capture

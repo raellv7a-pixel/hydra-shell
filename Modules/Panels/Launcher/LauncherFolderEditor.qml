@@ -19,7 +19,7 @@ Rectangle {
     anchors.centerIn: parent
     width: Math.min(root.width - Style.margin2XL, 420 * Style.uiScaleRatio)
     height: form.implicitHeight + Style.margin2XL
-    color: HydraColor.mSurfaceContainerHigh
+    color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
     forceOpaque: true
     border.width: 0
     radius: Style.radiusL

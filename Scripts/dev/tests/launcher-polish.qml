@@ -6,6 +6,7 @@ import qs.Commons
 import qs.Modules.MainScreen.Backgrounds
 import qs.Modules.Panels.Launcher
 import qs.Services.System
+import qs.Services.Power
 import qs.Services.UI
 import qs.Widgets
 
@@ -122,10 +123,32 @@ ShellRoot {
       visible: root.showingLauncher
       isOpen: root.showingLauncher
     }
+    Launcher {
+      id: fallbackLauncher
+      screen: window.screen
+    }
   }
 
   IpcHandler {
     target: "test"
+    function performanceLauncher(open: bool): void {
+      root.showingLauncher = false;
+      Settings.data.ui.visualVariant = open ? "tinted-glass" : "material3";
+      PowerProfileService.hydraPerformanceMode = open;
+      if (open)
+        fallbackLauncher.open();
+      else
+        fallbackLauncher.close();
+    }
+    function performanceLauncherState(): string {
+      const core = fallbackLauncher.launcherCoreRef;
+      return JSON.stringify({
+        visible: fallbackLauncher.isPanelVisible,
+        ready: core?.resultsReady ?? false,
+        opacity: core?.parent?.opacity ?? 0,
+        scale: core?.parent?.scale ?? 0
+      });
+    }
     function home(): void {
       core.goHome();
     }

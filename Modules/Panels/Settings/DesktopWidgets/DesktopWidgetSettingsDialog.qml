@@ -40,7 +40,7 @@ Popup {
     forceActiveFocus();
   }
 
-  background: Rectangle {
+  background: NMaterialSurface {
     id: bgRect
     color: HydraColor.mSurface
     radius: Style.radiusL

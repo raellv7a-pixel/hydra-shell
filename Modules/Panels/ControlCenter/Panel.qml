@@ -84,10 +84,10 @@ Item {
   readonly property real requestedPanelHeight: panelBaseHeight * Style.uiScaleRatio * localScale
   readonly property real autoFitScale: Math.min(1, Math.min(maxPanelWidth / Math.max(1, requestedPanelWidth), maxPanelHeight / Math.max(1, requestedPanelHeight)))
   readonly property real panelUnit: Style.uiScaleRatio * localScale * autoFitScale
-  readonly property color m3SurfaceContainerLow: HydraColor.mSurfaceContainerLow
-  readonly property color m3SurfaceContainer: HydraColor.mSurfaceContainer
-  readonly property color m3SurfaceContainerHigh: HydraColor.mSurfaceContainerHigh
-  readonly property color m3SurfaceContainerHighest: HydraColor.mSurfaceContainerHighest
+  readonly property color m3SurfaceContainerLow: Style.materialFill(HydraColor.mSurfaceContainerLow)
+  readonly property color m3SurfaceContainer: Style.materialFill(HydraColor.mSurfaceContainer)
+  readonly property color m3SurfaceContainerHigh: Style.materialFill(HydraColor.mSurfaceContainerHigh)
+  readonly property color m3SurfaceContainerHighest: Style.materialFill(HydraColor.mSurfaceContainerHighest)
   readonly property color m3PrimaryContainer: HydraColor.mPrimaryContainer
 
   readonly property var geometryPlaceholder: panelContainer

@@ -98,6 +98,7 @@ SmartPanel {
     Component.onCompleted: root.launcherCoreRef = launcherCore
 
     Behavior on opacity {
+      enabled: Style.animationFast > 0
       OpacityAnimator {
         duration: Style.animationFast
         easing.type: presented ? Easing.OutCubic : Easing.InCubic
@@ -105,6 +106,7 @@ SmartPanel {
     }
 
     Behavior on scale {
+      enabled: Style.animationFast > 0
       ScaleAnimator {
         duration: Style.animationFast
         easing.type: presented ? Easing.OutCubic : Easing.InCubic
@@ -133,12 +135,14 @@ SmartPanel {
       z: previewBox.z - 1
     }
 
-    NBox {
+    NMaterialSurface {
       id: previewBox
       visible: root.previewActive
       width: root.previewPanelWidth
       height: Math.round(400 * Style.uiScaleRatio)
-      forceOpaque: true // no blur for now
+      radius: Style.radiusM
+      border.color: Style.boxBorderColor
+      border.width: Style.borderS
       color: HydraColor.mSurfaceContainerLow
       x: root.panelAnchorRight ? -(root.previewPanelWidth + Style.marginM) : ui.width + Style.marginM
       y: {

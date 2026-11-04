@@ -12,7 +12,7 @@ open-source projects and contributors.
 
 - **MrDowntempo** - Creator of the Noctalia Owl and moon logo (upstream branding, no longer shipped)
 - **[SaberJ2X](https://www.reddit.com/user/SaberJ64/)** - Creator of Talia, the Noctalia mascot
-- **[iNiR / iRiS](https://github.com/raellv7a-pixel/iNiR)** - Settings organization and colored category artwork reference. Hydra retains its own controls, state, semantic surfaces and independently authored QML implementation.
+- **[iNiR / iRiS](https://github.com/raellv7a-pixel/iNiR)** - Settings organization, colored category artwork, and Aurora/Frost/Liquid Glass material references. The inspected iNiR source is GPL-3.0; Hydra's Tinted Glass QML, contrast shader and source-sharing implementation are independently authored, with no iRiS source, shaders or assets copied. Hydra retains its own controls, state, palette engine and layouts.
 
 ## Core Framework
 

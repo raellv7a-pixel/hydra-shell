@@ -66,14 +66,15 @@ ColumnLayout {
         source: surface
         autoPaddingEnabled: true
       }
-      NBox {
+      NMaterialSurface {
         id: surface
         anchors.centerIn: parent
         width: Math.min(parent.width - Style.margin2XL, 360 * Style.uiScaleRatio)
         height: form.implicitHeight + Style.margin2L
         radius: Style.radiusM
-        color: HydraColor.mSurfaceContainerHigh
+        color: HydraColor.smartAlpha(HydraColor.mSurfaceContainerHigh)
         border.color: Style.boxBorderColor
+        border.width: Style.borderS
         transform: Translate {
           id: sampleOffset
         }

@@ -545,13 +545,14 @@ Variants {
               }
 
               // Background with border
-              Rectangle {
+              NMaterialSurface {
                 id: cardBackground
                 anchors.fill: parent
                 radius: Style.radiusL
                 border.color: Qt.alpha(HydraColor.mOutline, HydraColor.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
                 border.width: Style.borderS
-                color: Qt.alpha(HydraColor.mSurfaceContainerHigh, HydraColor.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0)
+                color: HydraColor.mSurfaceContainerHigh
+                backgroundOpacity: HydraColor.adaptiveOpacity(Settings.data.notifications.backgroundOpacity) || 1.0
 
                 // Progress bar
                 Rectangle {

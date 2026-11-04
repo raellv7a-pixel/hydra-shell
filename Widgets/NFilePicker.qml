@@ -132,7 +132,7 @@ Popup {
   closePolicy: Popup.CloseOnEscape
   anchors.centerIn: Overlay.overlay
 
-  background: Rectangle {
+  background: NMaterialSurface {
     color: HydraColor.mSurfaceVariant
     radius: Style.iRadiusL
     border.color: HydraColor.mOutline

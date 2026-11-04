@@ -854,7 +854,7 @@ Item {
           id: sidebarSurface
           anchors.fill: parent
           radius: Style.radiusL
-          color: HydraColor.mSurfaceContainerHigh
+          color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
           forceOpaque: true
           border.width: 0
         }

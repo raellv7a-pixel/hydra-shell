@@ -73,8 +73,63 @@ Singleton {
   readonly property real opacityAlmost: 0.95
   readonly property real opacityFull: 1.0
 
-  readonly property real effectivePanelOpacity: PowerProfileService.hydraPerformanceMode ? 1.0 : HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity)
-  readonly property real effectiveBarOpacity: PowerProfileService.hydraPerformanceMode ? 1.0 : Settings.data.bar.backgroundOpacity
+  readonly property bool tintedGlass: Settings.data.ui.visualVariant === "tinted-glass"
+  readonly property bool glassEffectsEnabled: tintedGlass && Settings.data.general.enableBlurBehind && !PowerProfileService.hydraPerformanceMode
+  readonly property real glassBlurAmount: Math.max(0, Math.min(1, Settings.data.ui.glassBlur))
+  readonly property color materialEdgeColor: glassEffectsEnabled ? Qt.alpha(HydraColor.mOnSurface, Math.max(0, Math.min(0.3, Settings.data.ui.glassEdgeLight))) : "transparent"
+  readonly property real glassRequestedOpacity: Math.max(0.12, Math.min(0.96, Settings.data.ui.glassTint))
+  readonly property real glassBodyOpacity: glassSurfaceOpacity(materialColor(HydraColor.mSurfaceContainer))
+  readonly property real effectivePanelOpacity: materialOpacity(PowerProfileService.hydraPerformanceMode ? 1.0 : HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
+  readonly property real effectiveBarOpacity: materialOpacity(PowerProfileService.hydraPerformanceMode ? 1.0 : Settings.data.bar.backgroundOpacity)
+
+  function materialColor(baseColor) {
+    if (!tintedGlass || baseColor.a === 0)
+      return baseColor;
+    const base = Qt.rgba(baseColor.r, baseColor.g, baseColor.b, 1);
+    const tinted = HydraColor.blend(base, HydraColor.mPrimary, 0.02 + 0.08 * Math.max(0, Math.min(1, Settings.data.ui.glassTint)));
+    // Authored palettes stay authored; tint must not reduce their text contrast.
+    return ColorsConvert.getContrastRatio(tinted.toString(), HydraColor.mOnSurfaceVariant.toString()) >= Math.min(4.5, ColorsConvert.getContrastRatio(base.toString(), HydraColor.mOnSurfaceVariant.toString())) ? tinted : base;
+  }
+
+  function materialFill(baseColor) {
+    if (!tintedGlass || baseColor.a === 0)
+      return baseColor;
+    return Qt.alpha(materialColor(baseColor), glassEffectsEnabled ? 0.48 : 1);
+  }
+
+  function materialOpacity(legacyOpacity) {
+    return tintedGlass ? (legacyOpacity === 0 ? 0 : glassBodyOpacity) : legacyOpacity;
+  }
+
+  function glassSurfaceOpacity(surface) {
+    if (!glassEffectsEnabled)
+      return 1;
+    const bounds = glassBackdropBounds(surface, glassRequestedOpacity);
+    return bounds.x <= bounds.y ? glassRequestedOpacity : 1;
+  }
+
+  function glassBackdropBounds(surface, alpha) {
+    if (alpha >= 1)
+      return Qt.vector2d(0, 1);
+    const surfaceLuminance = ColorsConvert.getLuminance(surface.toString());
+    let minimum = 0;
+    let maximum = 1;
+    for (const ink of [HydraColor.mOnSurface, HydraColor.mOnSurfaceVariant]) {
+      const inkLuminance = ColorsConvert.getLuminance(ink.toString());
+      const target = Math.min(4.5, (Math.max(surfaceLuminance, inkLuminance) + 0.05) / (Math.min(surfaceLuminance, inkLuminance) + 0.05));
+      if (inkLuminance > surfaceLuminance)
+        maximum = Math.min(maximum, (inkLuminance + 0.05) / target - 0.05);
+      else
+        minimum = Math.max(minimum, (inkLuminance + 0.05) * target - 0.05);
+    }
+    const toSrgb = value => value <= 0.0031308 ? 12.92 * value : 1.055 * Math.pow(value, 1 / 2.4) - 0.055;
+    // Bound the composited RGB channels, so even a white/black wallpaper
+    // preserves both reading roles. The shader only compresses outlying tones;
+    // the chosen tint and the wallpaper's hue remain visible.
+    const floor = (toSrgb(minimum) - alpha * Math.min(surface.r, surface.g, surface.b)) / (1 - alpha);
+    const ceiling = (toSrgb(maximum) - alpha * Math.max(surface.r, surface.g, surface.b)) / (1 - alpha);
+    return Qt.vector2d(Math.max(0, floor), Math.min(1, ceiling));
+  }
 
   // Shadows
   readonly property real shadowOpacity: 0.85

@@ -77,7 +77,7 @@ Item {
     id: surface
     anchors.fill: parent
     radius: Style.radiusL
-    color: HydraColor.mSurfaceContainerHigh
+    color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
     forceOpaque: true
     border.width: 0
     SwipeView {

@@ -6,7 +6,7 @@ Durable design and interaction guidelines for Hydra Shell. All user-visible surf
 
 ## 1. Visual Identity & Design Foundation
 
-- **Primary Foundation:** Material You / Material 3 adapted to Hydra's distinctive visual identity.
+- **Default Foundation:** Material You / Material 3 adapted to Hydra's distinctive visual identity. `ui.visualVariant` selects `material3` (unchanged default) or `tinted-glass`, independently of the active colour palette and generation recipe.
 - **Composition & Surface References:**
   - Modern Android / Pixel UI serves as the primary reference for surface grouping, tonal elevation, and natural interaction rhythms.
   - Modern Apple / macOS / iOS serves as a secondary reference for breathing room, optical clarity, hierarchy, progressive disclosure, and quiet polish.
@@ -29,11 +29,11 @@ Every UI decision must follow these structural invariants:
 
 - Delimit cards and functional clusters through semantic Material surfaces, rounded shapes, and proportional padding.
 - Permanent structural outlines create visual clutter ("boxes inside boxes"). Reserve borders strictly for active focus, interactive selection, drag states, or semantic error highlights.
-- **Settings Sidebar Surface:** Keep one inset `mSurfaceContainerHigh` surface with `Style.radiusL`, token spacing, and a quiet `NDropShadow` on the background only. The navigation surface remains opaque and legible independently of window translucency or compositor blur; no decorative outline or per-section cards.
+- **Settings Sidebar Surface:** Keep one inset surface with `Style.radiusL`, token spacing, and a quiet `NDropShadow` on the background only. Material 3 retains its opaque `mSurfaceContainerHigh` surface. Tinted Glass uses the shared layered material fill over its contrast-protected wallpaper backing; no per-section cards or decorative outlines.
 - **Settings Navigation Groups:** General, Personalization, Shell Interface, Session and Security, Devices and System, Integrations, Advanced, and About are secondary translated headings. All pages stay directly accessible; sections do not collapse. Preserve the existing whole-sidebar compact toggle and selected-item capsule.
 - **Settings Navigation Model:** Store section keys on the existing `tabsModel`; keep page IDs stable and resolve search destinations by their page label key, not their presentation index. Regenerate `Assets/settings-search-index.json` when the page order changes.
 - **Settings Sidebar Scrolling:** Hide the scrollbar in navigation and search results without disabling scrolling. Cache the small destination list to keep section measurements stable, and keep programmatic page selection in view. The main content scrollbar is unaffected.
-- **Settings Composition:** Adapt iNiR's iRiS organization, not its theme or controls: user identity beneath search, category marks in the sidebar and page title, and compact disclosure headings on quiet tonal cards. General starts with a responsive wallpaper/profile overview and links to Hydra's existing wallpaper and color pages. The wallpaper preview is omitted at narrow widths; all controls and page IDs remain available.
+- **Settings Composition:** Adapt iNiR's iRiS organization, not its controls: user identity beneath search, category marks in the sidebar and page title, and compact disclosure headings on quiet cards. The opt-in Tinted Glass material also references iRiS surfaces; Material 3 keeps Hydra's existing appearance. General starts with a responsive wallpaper/profile overview and links to Hydra's existing wallpaper and color pages. The wallpaper preview is omitted at narrow widths; all controls and page IDs remain available.
 - **Category Artwork:** `Widgets/NColorIcon.qml` uses the bundled filled Material Symbols Rounded font and the iRiS identity hues centralized in `Commons/ColoredIcons.qml`. These colors and the restrained plate gradient belong to icon artwork only, not selection, state, surfaces, or control styling. `NIcon` remains the monochrome control/action icon. Font provenance and license are in `Assets/Fonts/material-symbols/ATTRIBUTION.txt`.
 - **Reusable Category Keys:** Settings keys and `folder-tools`, `folder-productivity`, `folder-creativity`, `folder-games`, `folder-development`, `folder-multimedia`, `folder-internet`, `folder-system`, `folder-education`, and `folder-utilities` are available through `NColorIcon { icon: "..."; size: ... }`. Unmapped keys retain their actual Tabler artwork on the tile. Launcher folders, category filters and catalog navigation reuse this artwork; explicit system-folder icons and installed application icons retain their existing sources.
 
@@ -67,6 +67,18 @@ Every component and surface must work out-of-the-box across all active Hydra the
 - **Light & Dark modes**
 
 Do not branch styling on `surfaceStyle` or active theme name inside UI components; semantic tokens automatically adapt to the generated palette roles.
+
+### 4.1 Global visual materials
+
+- Keep palette generation in `HydraColor`/`AppThemeService`. `Style.materialColor`, `materialFill`, `materialOpacity` and `materialEdgeColor` interpret the current roles; consumers do not branch on the visual variant.
+- Outer rounded surfaces use `NMaterialSurface`; inner groups use `NBox` or `Style.materialFill`, never another backdrop blur. Preserve explicit opaque/custom component choices. Material 3 returns the original colours, alpha and borders.
+- `AllBackgrounds` and the overview Launcher retain their existing paths/corner geometry as glass masks. No separate copy of panel placement, input, lifecycle or content is introduced.
+- `GlassBackdropService` lends one `NGlassSource` per visible window. It reuses `ImageCacheService`, the desktop wallpaper mapping shader and a half-resolution Qt Quick Effects blur. `TransformWatcher` and `windowTransform` keep texture sampling screen-aligned during movement and transforms.
+- `tinted_glass.frag` compresses only wallpaper tones outside the current reading roles' contrast bounds before the palette veil is composed. Target 4.5:1, without claiming to repair an authored palette already below that threshold. Incompatible role pairs and unavailable effects fall back to the opaque material.
+- `ui.glassTint` controls colour/coverage (0–1 input, effective coverage 0.12–0.96); `ui.glassBlur` controls softness (0–1); `ui.glassEdgeLight` controls the restrained material lip (0–0.3). The lip is an opt-in material edge, not an interactive focus outline or glow.
+- Window/item visibility, performance mode, blur preference and software rendering gate acquisition/rendering. Disabled/missing/solid/video wallpaper uses an opaque fallback. Static wallpaper changes and fill modes are followed; transition animation and live-video frames are not mirrored.
+- Launcher opacity/scale animators are bypassed when their duration is zero, so reduced motion and the solid performance fallback still present the content immediately.
+
 
 ---
 

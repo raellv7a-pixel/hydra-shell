@@ -444,7 +444,7 @@ ColumnLayout {
 
     property var pluginToUninstall: null
 
-    background: Rectangle {
+    background: NMaterialSurface {
       color: HydraColor.mSurface
       radius: Style.radiusS
       border.color: HydraColor.mPrimary
