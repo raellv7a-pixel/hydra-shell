@@ -237,3 +237,15 @@ Every new shell panel, drawer, or surface must satisfy this mandatory checklist 
   2. Launch and observe the live preview (`Scripts/dev/lab-preview.sh` or local runtime).
   3. Perform **one** focused pass to resolve visual discrepancies, clipping, or alignment issues.
   4. Stop and request human visual review. Do not iterate endlessly on subjective aesthetic minutiae.
+
+## 12. Unified System Monitor
+
+- `Modules/Panels/SystemStats/SystemStatsPanel.qml` remains a widget-anchored `SmartPanel`; Framed mode forces attachment. The preferred footprint is **440 × 780 logical pixels**, scaled through `Style.uiScaleRatio` and clamped by the existing panel host.
+- `StatsDashboard` provides **System / GPU** tabs with arrow-key navigation, a fixed header/footer and one vertically scrolling page viewport. Large core counts expand inside that viewport rather than creating an inaccessible nested scroll area.
+- System composition: three circular gauges, per-core bars and 1/5/15-minute load, segmented RAM with cache/available memory and top RSS processes, frequency/disk/swap tiles, bidirectional network graph and selectable CPU/memory/temperature history.
+- GPU composition: adapter/driver/link/state identity, usage/temperature/power gauges, explicit limiter availability, segmented VRAM and per-process residency, fan/core/memory clocks and selectable usage/temperature/power/VRAM history.
+- All surfaces and accents use Hydra tokens; charts and gauges do not encode selection or paint decorative outlines. Rings and history paths use Qt Quick Shapes; the network graph reuses `NGraph`.
+- Existing `SystemStatService` supplies system metrics. Panel-local `Telemetry` adds `/proc` metadata and process RSS; selected AMD/Intel sensors use sysfs and DRM fdinfo, while NVIDIA uses its optional driver query. GPU details poll every 3 seconds **only on the GPU page** and respect the existing dedicated-GPU opt-in. Hidden/locked panels stop their additional collection.
+- System history uses the existing one-minute windows without displaying startup placeholders; valid sample counts survive page changes. GPU history is bounded to three minutes while the GPU view is active; leaving that view, changing devices, disabling monitoring or encountering a collection failure clears its session history. Missing samples/sensors remain unknown, never fabricated zeroes. A measured zero RPM is valid.
+- Memory/VRAM use binary GiB/MiB; disk values retain the service's decimal GB. Limiter states unavailable from the driver show an em dash, not an inactive assertion. DRM process accounting is best-effort under the current user's `/proc` permissions.
+- `Scripts/dev/tests/system-stats.qml` is the isolated runtime inspection surface (private checkout facade and XDG/D-Bus, as with the interaction fixture). It renders the real dashboard and telemetry, with IPC for page/scale/theme/monitoring/visibility and capture. Collector boundary regressions live in `Scripts/python/tests/test_system_telemetry.py`.

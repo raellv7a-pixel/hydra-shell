@@ -43,6 +43,13 @@ O compositor Umbriel deve estar instalado antes do instalador da Hydra.
 Use `xdg-desktop-portal-umbriel` para compartilhamento de tela externo; não
 instale o backend Hyprland para uma sessão Umbriel.
 
+O monitor de desempenho usa o Python já obrigatório e `/proc`/sysfs para a
+telemetria de sistema e AMD (`amdgpu`); não requer `rocm-smi`, `amd-smi` nem
+privilégios de administrador. VRAM por processo depende do DRM fdinfo acessível
+ao usuário. A coleta NVIDIA, quando habilitada explicitamente, usa o
+`nvidia-smi` fornecido pelo driver; sensores não expostos permanecem indisponíveis.
+
+
 ## Arch Linux / CachyOS (`pacman`) — opcionais (funcionalidades específicas)
 
 ```bash

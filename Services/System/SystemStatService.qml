@@ -400,7 +400,7 @@ Singleton {
     interval: root.diskIntervalMs
     repeat: true
     running: root.shouldRun
-    triggeredOnStart: true
+    triggeredOnStart: false
     onTriggered: {
       if (dfShell.running) {
         dfShell.write("df --output=target,pcent,used,size,avail --block-size=1 -x efivarfs 2>/dev/null; echo '@@DF_END@@'\n");
@@ -478,6 +478,10 @@ Singleton {
     command: ["sh"]
     stdinEnabled: true
     running: false
+    onStarted: {
+      if (root.shouldRun)
+        dfShell.write("df --output=target,pcent,used,size,avail --block-size=1 -x efivarfs 2>/dev/null; echo '@@DF_END@@'\n");
+    }
 
     onRunningChanged: {
       if (!running && root.shouldRun) {
