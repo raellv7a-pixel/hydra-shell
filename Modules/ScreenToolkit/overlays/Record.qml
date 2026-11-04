@@ -33,12 +33,37 @@ Item {
     return url.startsWith("file://") ? url.slice(7) : url;
   }
   property string recordState: ""
+  property string recordError: ""
+  property bool recordSaved: false
+  property bool _stopRequested: false
+  property bool _stopSignalSent: false
   readonly property bool isRecording: recordState === "recording"
   readonly property bool isConverting: recordState === "converting"
   readonly property bool isDone: recordState === "done"
   signal dismissed
+  function beginSelection(fmt) {
+    if (root.gifPath !== "" && !root.recordSaved)
+      Quickshell.execDetached(["rm", "-f", root.gifPath]);
+    if (root.mp4Path !== "")
+      Quickshell.execDetached(["rm", "-f", root.mp4Path]);
+    root.gifPath = "";
+    root.mp4Path = "";
+    root.format = fmt === "mp4" ? "mp4" : "gif";
+    root.recordError = "";
+    root.recordSaved = false;
+    root.recordState = "selecting";
+  }
+  function cancelSelection() {
+    if (root.recordState === "selecting")
+      root.recordState = "";
+  }
+  function _fail(message) {
+    root.recordError = message;
+    root.recordState = "error";
+    ToastService.showError(message);
+  }
   function startRecording(regionStr, fmt, audOut, audIn, cursor, uiOffsetX, uiOffsetY, screen) {
-    if (root.isRecording || root.isConverting)
+    if (root.isRecording || root.isConverting || wfRecorderProc.running || gifConvertProc.running || saveProc.running)
       return;
     root.format = (fmt === "mp4") ? "mp4" : "gif";
     root.audioOutput = audOut === true;
@@ -56,46 +81,58 @@ Item {
     root.uiX = uiOffsetX || 0;
     root.uiY = uiOffsetY || 0;
     root._primaryScreen = screen ?? Quickshell.screens[0] ?? null;
-    root._recorderBin = (pluginApi?.mainInstance?.detectedRecorder === "wf-recorder") ? "wf-recorder" : "wl-screenrec";
+    root._recorderBin = pluginApi?.mainInstance?.detectedRecorder ?? "";
     root.region = regionStr;
     root.mp4Path = "/tmp/screen-toolkit-record-" + Date.now() + ".mp4";
     root.gifPath = "";
-    root.recordState = "recording";
     root._elapsed = 0;
     root._frameToken = 0;
+    root._stopRequested = false;
+    root._stopSignalSent = false;
+    root.recordSaved = false;
+    root.recordError = "";
+    if (root._recorderBin !== "wf-recorder" && root._recorderBin !== "wl-screenrec") {
+      root._fail(root.pluginApi?.tr("record.missingRecorder"));
+      return;
+    }
+    root.recordState = "recording";
     elapsedTimer.start();
     var cmd;
     if (root._recorderBin === "wf-recorder") {
-      cmd = "wf-recorder -g " + U.shellEscape(regionStr) + (root.audioOutput ? " -a=$(pactl get-default-sink 2>/dev/null).monitor" : root.audioInput ? " -a=$(pactl get-default-source 2>/dev/null)" : "") + " -f " + U.shellEscape(root.mp4Path) + " 2>/dev/null" + "; [ -s " + U.shellEscape(root.mp4Path) + " ] && exit 0 || exit 1";
+      cmd = "exec wf-recorder -g " + U.shellEscape(regionStr) + (root.audioOutput ? " -a=$(pactl get-default-sink 2>/dev/null).monitor" : root.audioInput ? " -a=$(pactl get-default-source 2>/dev/null)" : "") + " -f " + U.shellEscape(root.mp4Path);
     } else {
-      cmd = "wl-screenrec -g " + U.shellEscape(regionStr) + (root.includeCursor ? "" : " --no-cursor") + (root.audioOutput ? " --audio --audio-device $(pactl get-default-sink 2>/dev/null).monitor" : root.audioInput ? " --audio --audio-device $(pactl get-default-source 2>/dev/null)" : "") + " -f " + U.shellEscape(root.mp4Path) + " 2>/dev/null" + "; [ -s "
-          + U.shellEscape(root.mp4Path) + " ] && exit 0 || exit 1";
+      cmd = "exec wl-screenrec -g " + U.shellEscape(regionStr) + (root.includeCursor ? "" : " --no-cursor") + (root.audioOutput ? " --audio --audio-device $(pactl get-default-sink 2>/dev/null).monitor" : root.audioInput ? " --audio --audio-device $(pactl get-default-source 2>/dev/null)" : "") + " -f " + U.shellEscape(root.mp4Path);
     }
     wfRecorderProc.exec({
                           command: ["bash", "-c", cmd]
                         });
   }
   function stopRecording() {
-    if (!root.isRecording)
+    if (!root.isRecording || root._stopRequested)
       return;
-    stopProc.exec({
-                    command: ["bash", root._scriptPath, "stop", root._recorderBin]
-                  });
+    root._stopRequested = true;
+    if (wfRecorderProc.processId) {
+      wfRecorderProc.signal(2);
+      root._stopSignalSent = true;
+    }
   }
   function dismiss() {
-    if (root.isRecording)
-      root.stopRecording();
-    var toClipboard = root.pluginApi?.pluginSettings?.recordCopyToClipboard ?? false;
-    if (root.gifPath !== "" && !toClipboard)
-      stopProc.exec({
-                      command: ["bash", "-c", "rm -f " + U.shellEscape(root.gifPath)]
-                    });
+    if (root.isRecording || root.isConverting || saveProc.running)
+      return;
+    if (root.gifPath !== "" && !root.recordSaved)
+      Quickshell.execDetached(["rm", "-f", root.gifPath]);
+    if (root.mp4Path !== "")
+      Quickshell.execDetached(["rm", "-f", root.mp4Path]);
     root.recordState = "";
+    root.recordError = "";
     root.gifPath = "";
+    root.mp4Path = "";
+    root.recordSaved = false;
     root._primaryScreen = null;
     root.dismissed();
   }
   function _handleDone() {
+    root.recordState = "done";
     var skipConfirm = root.pluginApi?.pluginSettings?.recordSkipConfirmation ?? false;
     var toClipboard = root.pluginApi?.pluginSettings?.recordCopyToClipboard ?? false;
     if (skipConfirm) {
@@ -103,9 +140,6 @@ Item {
     } else if (toClipboard) {
       _copyPathToClipboard(root.gifPath);
       ToastService.showNotice(root.pluginApi?.tr("record.copiedToClipboard"));
-      root.dismiss();
-    } else {
-      root.recordState = "done";
     }
   }
   function _copyPathToClipboard(path) {
@@ -115,13 +149,17 @@ Item {
                   });
   }
   function _saveToFile() {
+    if (root.recordState !== "done" || root.recordSaved || saveProc.running)
+      return;
     var ext = root.format === "mp4" ? ".mp4" : ".gif";
     var home = Quickshell.env("HOME");
     var dir = U.videoDir(home, pluginApi?.pluginSettings?.videoPath);
     var dest = dir + "/" + U.buildFilename("record", ext, pluginApi?.pluginSettings?.filenameFormat);
     saveProc.savedPath = dest;
+    saveProc.sourcePath = root.gifPath;
+    root.recordState = "converting";
     saveProc.exec({
-                    command: ["bash", "-c", "mkdir -p " + U.shellEscape(dir) + " && " + "cp " + U.shellEscape(root.gifPath) + " " + U.shellEscape(dest)]
+                    command: ["bash", "-c", "mkdir -p " + U.shellEscape(dir) + " && cp " + U.shellEscape(root.gifPath) + " " + U.shellEscape(dest) + " && test -s " + U.shellEscape(dest)]
                   });
   }
   function formatTime(secs) {
@@ -131,33 +169,34 @@ Item {
   }
   Process {
     id: wfRecorderProc
+    onStarted: {
+      if (root._stopRequested && !root._stopSignalSent) {
+        wfRecorderProc.signal(2);
+        root._stopSignalSent = true;
+      }
+    }
     onExited: code => {
                 elapsedTimer.stop();
-                var isCleanExit = (code === 0 || code === 130 || code === 2) || (root._recorderBin === "wf-recorder" && code === 1);
-                if (isCleanExit) {
-                  root.recordState = "converting";
-                  var tmpTs = Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss");
-                  var optimOut = "/tmp/screen-toolkit-record-" + tmpTs;
-                  if (root.format === "mp4") {
-                    root.gifPath = optimOut + ".mp4";
-                    var needsRecode = root.audioOutput || root.audioInput;
-                    gifConvertProc.exec({
-                                          command: needsRecode ? ["bash", root._scriptPath, "convert-mp4", root.mp4Path, root.gifPath, "--recode"] : ["bash", root._scriptPath, "convert-mp4", root.mp4Path, root.gifPath]
-                                        });
-                  } else {
-                    root.gifPath = optimOut + ".gif";
-                    gifConvertProc.exec({
-                                          command: ["bash", root._scriptPath, "convert-gif", root.mp4Path, root.gifPath]
-                                        });
-                  }
+                var cleanStop = root._stopRequested && (code === 0 || code === 1 || code === 2 || code === 130);
+                if (!cleanStop) {
+                  root._fail(root.pluginApi?.tr("record.failed"));
+                  return;
+                }
+                root.recordState = "converting";
+                var optimOut = root.mp4Path.slice(0, -4) + "-final";
+                if (root.format === "mp4") {
+                  root.gifPath = optimOut + ".mp4";
+                  var needsRecode = root.audioOutput || root.audioInput;
+                  gifConvertProc.exec({
+                                        command: needsRecode ? ["bash", root._scriptPath, "convert-mp4", root.mp4Path, root.gifPath, "--recode"] : ["bash", root._scriptPath, "convert-mp4", root.mp4Path, root.gifPath]
+                                      });
                 } else {
-                  root.dismiss();
-                  ToastService.showError(root.pluginApi?.tr("record.failed"));
+                  root.gifPath = optimOut + ".gif";
+                  gifConvertProc.exec({
+                                        command: ["bash", root._scriptPath, "convert-gif", root.mp4Path, root.gifPath]
+                                      });
                 }
               }
-  }
-  Process {
-    id: stopProc
   }
   Process {
     id: clipProc
@@ -165,30 +204,32 @@ Item {
   Process {
     id: gifConvertProc
     onExited: code => {
-                root.recordState = "";
                 if (code === 0) {
                   root._frameToken++;
-                  _handleDone();
+                  root._handleDone();
                 } else {
-                  root.dismiss();
-                  ToastService.showError(root.format === "mp4" ? root.pluginApi?.tr("record.saveMp4Failed") : root.pluginApi?.tr("record.saveGifFailed"));
+                  root._fail(code === 3 ? root.pluginApi?.tr("record.missingConverter") : root.format === "mp4" ? root.pluginApi?.tr("record.saveMp4Failed") : root.pluginApi?.tr("record.saveGifFailed"));
                 }
               }
   }
   Process {
     id: saveProc
     property string savedPath: ""
+    property string sourcePath: ""
     onExited: code => {
                 if (code === 0) {
                   var toClipboard = root.pluginApi?.pluginSettings?.recordCopyToClipboard ?? false;
                   if (toClipboard)
-                  _copyPathToClipboard(saveProc.savedPath);
+                    root._copyPathToClipboard(saveProc.savedPath);
                   var msg = toClipboard ? root.pluginApi?.tr("record.savedAndCopied") : root.pluginApi?.tr("record.saved");
+                  root.gifPath = saveProc.savedPath;
+                  root.recordSaved = true;
+                  root.recordState = "done";
+                  Quickshell.execDetached(["rm", "-f", saveProc.sourcePath]);
                   ToastService.showNotice(msg, saveProc.savedPath, "device-floppy");
                 } else {
-                  ToastService.showError(root.format === "mp4" ? root.pluginApi?.tr("record.saveMp4Failed") : root.pluginApi?.tr("record.saveGifFailed"));
+                  root._fail(root.format === "mp4" ? root.pluginApi?.tr("record.saveMp4Failed") : root.pluginApi?.tr("record.saveGifFailed"));
                 }
-                root.dismiss();
               }
   }
   Timer {

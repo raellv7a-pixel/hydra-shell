@@ -16,19 +16,23 @@ Item {
   property var pluginApi: ScreenToolkitService.provider
   implicitWidth: pill.width
   implicitHeight: pill.height
-  readonly property bool _isRecording: (pluginApi?.mainInstance?.recordState ?? "") === "recording"
+  readonly property bool _isRecording: ScreenToolkitService.recordState === "recording"
+  readonly property int _seconds: ScreenToolkitService.recordElapsedSeconds
+  readonly property string _time: (Math.floor(_seconds / 60) < 10 ? "0" : "") + Math.floor(_seconds / 60) + ":" + (_seconds % 60 < 10 ? "0" : "") + _seconds % 60
   BarPill {
     id: pill
     screen: root.screen
     oppositeDirection: BarService.getPillDirection(root)
-    forceClose: true
+    forceOpen: root._isRecording
+    forceClose: !root._isRecording
     icon: "crosshair"
-    tooltipText: pluginApi?.tr("widget.tooltip")
+    text: root._isRecording ? pluginApi?.tr("record.recLabel") + " " + root._time + " " + ScreenToolkitService.recordFormat.toUpperCase() : ""
+    tooltipText: root._isRecording ? pluginApi?.tr("record.stop") : pluginApi?.tr("widget.tooltip")
     onClicked: {
       if (!pluginApi)
         return;
-      if ((pluginApi.mainInstance?.recordState ?? "") === "recording")
-        pluginApi.mainInstance?.runRecordStop();
+      if (root._isRecording)
+        ScreenToolkitService.stopRecording();
       else
         pluginApi.togglePanel(root.screen, pill);
     }

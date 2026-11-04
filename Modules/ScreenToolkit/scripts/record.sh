@@ -6,12 +6,11 @@
 #   convert-mp4  <input> <output>         — finalize MP4: stream-copy (fast path)
 #   convert-mp4  <input> <output> --recode — finalize MP4: re-encode audio to AAC 128k + faststart
 #   convert-gif  <input> <output>         — convert MP4 → palette-optimized GIF at 15 fps
-#   stop         <recorder-bin>           — send SIGINT to the named recorder process
 #
 # Exit codes:
 #   1 — missing / invalid arguments
 #   2 — input file not found
-#   3 — missing dependency (ffmpeg, ffprobe, pkill)
+#   3 — missing dependency (ffmpeg, ffprobe)
 #   4 — conversion or process command failed
 #
 # Used by: Record.qml
@@ -50,9 +49,9 @@ case "$ACTION" in
     RECODE="${4:-}"
     [ -n "$INPUT"  ] || { echo "ERROR: convert-mp4: missing <input>"          >&2; exit 1; }
     [ -n "$OUTPUT" ] || { echo "ERROR: convert-mp4: missing <output>"         >&2; exit 1; }
-    [ -f "$INPUT"  ] || { echo "ERROR: convert-mp4: file not found: $INPUT"   >&2; exit 2; }
-    _require ffmpeg
+    [ -s "$INPUT"  ] || { echo "ERROR: convert-mp4: empty input: $INPUT" >&2; exit 2; }
     if [ "$RECODE" = "--recode" ]; then
+        _require ffmpeg
         ffmpeg -y -i "$INPUT" \
             -c:v copy -c:a aac -b:a 128k -movflags +faststart \
             "$OUTPUT" 2>/dev/null \
@@ -62,14 +61,15 @@ case "$ACTION" in
         mv "$INPUT" "$OUTPUT" \
         || { echo "ERROR: convert-mp4: mv failed" >&2; exit 4; }
     fi
-    _thumb "$OUTPUT"
+    [ -s "$OUTPUT" ] || { echo "ERROR: convert-mp4: empty output: $OUTPUT" >&2; exit 4; }
+    _thumb "$OUTPUT" || true
     ;;
   convert-gif)
     INPUT="${2:-}"
     OUTPUT="${3:-}"
     [ -n "$INPUT"  ] || { echo "ERROR: convert-gif: missing <input>"          >&2; exit 1; }
     [ -n "$OUTPUT" ] || { echo "ERROR: convert-gif: missing <output>"         >&2; exit 1; }
-    [ -f "$INPUT"  ] || { echo "ERROR: convert-gif: file not found: $INPUT"   >&2; exit 2; }
+    [ -s "$INPUT"  ] || { echo "ERROR: convert-gif: empty input: $INPUT" >&2; exit 2; }
     _require ffmpeg
     ffmpeg -y -i "$INPUT" \
         -vf 'fps=15,scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=lanczos,palettegen' \
@@ -79,17 +79,12 @@ case "$ACTION" in
         -lavfi 'fps=15,scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=lanczos[x];[x][1:v]paletteuse' \
         "$OUTPUT" 2>/dev/null \
     || { echo "ERROR: convert-gif: paletteuse pass failed" >&2; exit 4; }
+    [ -s "$OUTPUT" ] || { echo "ERROR: convert-gif: empty output: $OUTPUT" >&2; exit 4; }
     rm -f "$PALETTE" "$INPUT"
-    _thumb "$OUTPUT"
-    ;;
-  stop)
-    BIN="${2:-}"
-    [ -n "$BIN" ] || { echo "ERROR: stop: missing <recorder-bin>" >&2; exit 1; }
-    _require pkill
-    pkill -INT "$BIN" 2>/dev/null || true
+    _thumb "$OUTPUT" || true
     ;;
   *)
-    echo "ERROR: unknown action '${ACTION}'. Expected: thumb | convert-mp4 | convert-gif | stop" >&2
+    echo "ERROR: unknown action '${ACTION}'. Expected: thumb | convert-mp4 | convert-gif" >&2
     exit 1
     ;;
 esac

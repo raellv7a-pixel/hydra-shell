@@ -46,6 +46,10 @@ Item {
   readonly property string recordState: recordOverlay?.recordState ?? ""
   readonly property string recordFormat: recordOverlay?.format ?? "gif"
   readonly property string recordPath: recordOverlay?.gifPath ?? ""
+  readonly property int recordElapsedSeconds: recordOverlay?._elapsed ?? 0
+  readonly property string recordError: recordOverlay?.recordError ?? ""
+  readonly property bool recordSaved: recordOverlay?.recordSaved ?? false
+  property bool dashboardRecording: false
   readonly property bool mirrorVisible: mirrorOverlay.isVisible
   readonly property bool hasPins: pinOverlay.hasPins
   readonly property var mainInstance: pluginApi?.mainInstance ?? null
@@ -54,6 +58,7 @@ Item {
   property int _regionW: 0
   property int _regionH: 0
   property var _regionScreen: null
+  property var _resultScreen: null
   property bool _capsDetected: false
   property bool _sessionChecked: false
   property var _detectedLangs: []
@@ -184,7 +189,7 @@ Item {
         return;
       var skipConfirm = pluginApi.pluginSettings?.recordSkipConfirmation ?? false;
       var toClipboard = pluginApi.pluginSettings?.recordCopyToClipboard ?? false;
-      if (recordOverlay.recordState === "converting" && !skipConfirm && !toClipboard) {
+      if (recordOverlay.recordState === "converting" && !root.dashboardRecording && !skipConfirm && !toClipboard) {
         var screen = recordOverlay._primaryScreen;
         if (screen)
           pluginApi.openPanel(screen);
@@ -195,6 +200,7 @@ Item {
     function onDismissed() {
       if (root.activeTool === "record")
         root.activeTool = "";
+      root.dashboardRecording = false;
     }
   }
   Connections {
@@ -202,7 +208,7 @@ Item {
     function onDone() {
       root.isRunning = false;
       root.activeTool = "colorpicker";
-      pluginApi?.withCurrentScreen(screen => pluginApi.openPanel(screen));
+      pluginApi?.openPanel(root._resultScreen);
     }
     function onFailed() {
       root.isRunning = false;
@@ -215,7 +221,7 @@ Item {
     function onDone() {
       root.isRunning = false;
       root.activeTool = "ocr";
-      pluginApi?.withCurrentScreen(screen => pluginApi.openPanel(screen));
+      pluginApi?.openPanel(root._resultScreen);
     }
     function onFailed(messageKey, messageArg) {
       root.isRunning = false;
@@ -230,7 +236,7 @@ Item {
     function onDone() {
       root.isRunning = false;
       root.activeTool = "qr";
-      pluginApi?.withCurrentScreen(screen => pluginApi.openPanel(screen));
+      pluginApi?.openPanel(root._resultScreen);
     }
     function onFailed() {
       root.isRunning = false;
@@ -257,7 +263,7 @@ Item {
     function onDone() {
       root.isRunning = false;
       root.activeTool = "palette";
-      pluginApi?.withCurrentScreen(screen => pluginApi.openPanel(screen));
+      pluginApi?.openPanel(root._resultScreen);
     }
     function onFailed() {
       root.isRunning = false;
@@ -274,6 +280,7 @@ Item {
                         root._regionW = w;
                         root._regionH = h;
                         root._regionScreen = screen;
+                        root._resultScreen = screen;
                         var scale = screen?.devicePixelRatio ?? 1.0;
                         var sx = screen?.x ?? 0;
                         var sy = screen?.y ?? 0;
@@ -289,6 +296,9 @@ Item {
     onCancelled: {
       root.isRunning = false;
       root.activeTool = "";
+      root.pendingTool = "";
+      recordOverlay.cancelSelection();
+      root.dashboardRecording = false;
     }
   }
   Annotate {
@@ -648,6 +658,7 @@ Item {
       Logger.w("ScreenToolkit", "unknown pendingTool: " + root.pendingTool);
       root.isRunning = false;
     }
+    root.pendingTool = "";
   }
   function copyToClipboard(text) {
     if (!text || text === "")
@@ -656,42 +667,38 @@ Item {
                     command: ["bash", "-c", "printf '%s' " + U.shellEscape(text) + " | wl-copy 2>/dev/null"]
                   });
   }
-  function closeThenLaunch(timer) {
-    if (!pluginApi) {
-      timer.start();
-      return;
-    }
-    pluginApi.withCurrentScreen(screen => {
-                                  if (timer === launchRegionSelector)
-                                  launchRegionSelector.targetScreen = screen;
-                                  timer.start();
-                                });
+  function closeThenLaunch(timer, screen) {
+    var target = screen ?? PanelService.findScreenForPanels();
+    root._resultScreen = target;
+    if (timer === launchRegionSelector)
+      launchRegionSelector.targetScreen = target;
+    timer.start();
   }
   function runTranslate(text, targetLang) {
     ocrOverlay.runTranslate(text, targetLang);
   }
-  function runColorPicker() {
+  function runColorPicker(screen) {
     if (root.isRunning)
       return;
     root.isRunning = true;
     root.activeTool = "";
     colorPickerOverlay.clearResults();
-    closeThenLaunch(launchColorPicker);
+    closeThenLaunch(launchColorPicker, screen);
   }
-  function runOcr(langStr) {
+  function runOcr(langStr, screen) {
     if (root.isRunning)
       return;
     root.pendingLangStr = (langStr && langStr !== "") ? langStr : "eng";
-    _runSlurpTool("ocr");
+    _runSlurpTool("ocr", screen);
   }
-  function runQr() {
-    _runSlurpTool("qr");
+  function runQr(screen) {
+    _runSlurpTool("qr", screen);
   }
-  function runLens() {
-    _runSlurpTool("lens");
+  function runLens(screen) {
+    _runSlurpTool("lens", screen);
   }
-  function runAnnotate() {
-    _runSlurpTool("annotate");
+  function runAnnotate(screen) {
+    _runSlurpTool("annotate", screen);
   }
   function _findScreenForPoint(gx, gy) {
     var screens = Quickshell.screens;
@@ -702,25 +709,24 @@ Item {
     }
     return root._regionScreen ?? (screens.length > 0 ? screens[0] : null);
   }
-  function runAnnotateFullscreen() {
+  function runAnnotateFullscreen(screen) {
     if (root.isRunning)
       return;
     root.isRunning = true;
-    if (!pluginApi) {
-      launchAnnotateFullscreen.start();
+    var target = screen ?? PanelService.findScreenForPanels();
+    if (!target) {
+      root.isRunning = false;
       return;
     }
-    pluginApi.withCurrentScreen(screen => {
-                                  root._regionScreen = screen;
-                                  root._regionX = 0;
-                                  root._regionY = 0;
-                                  root._regionW = Math.round(screen.width * (screen.devicePixelRatio ?? 1.0));
-                                  root._regionH = Math.round(screen.height * (screen.devicePixelRatio ?? 1.0));
-                                  annotateRegionState._pendingRegion = "0,0 " + screen.width + "x" + screen.height;
-                                  annotateRegionState._pendingScreen = screen;
-                                  launchAnnotateFullscreen.targetScreen = screen;
-                                  launchAnnotateFullscreen.start();
-                                });
+    root._regionScreen = target;
+    root._regionX = 0;
+    root._regionY = 0;
+    root._regionW = Math.round(target.width * (target.devicePixelRatio ?? 1.0));
+    root._regionH = Math.round(target.height * (target.devicePixelRatio ?? 1.0));
+    annotateRegionState._pendingRegion = "0,0 " + target.width + "x" + target.height;
+    annotateRegionState._pendingScreen = target;
+    launchAnnotateFullscreen.targetScreen = target;
+    launchAnnotateFullscreen.start();
   }
   function runAnnotateActiveWindow() {
     if (root.isRunning)
@@ -735,13 +741,13 @@ Item {
                                   launchAnnotateActiveWindow.start();
                                 });
   }
-  function runPalette() {
+  function runPalette(screen) {
     if (root.isRunning)
       return;
-    _runSlurpTool("palette");
+    _runSlurpTool("palette", screen);
   }
-  function runPin() {
-    _runSlurpTool("pin");
+  function runPin(screen) {
+    _runSlurpTool("pin", screen);
   }
   function runPinFromFile() {
     if (!pluginApi) {
@@ -772,14 +778,16 @@ Item {
   function runRecordDiscard() {
     recordOverlay.dismiss();
   }
-  function runRecord(format, audioOut, audioIn, cursor) {
+  function runRecord(format, audioOut, audioIn, cursor, screen, fromDashboard) {
     if (root.isRunning || recordOverlay.isRecording || recordOverlay.isConverting)
       return;
     root.pendingRecordFormat = format || "gif";
     root.pendingRecordAudioOut = audioOut === true;
     root.pendingRecordAudioIn = audioIn === true;
     root.pendingRecordCursor = cursor === true;
-    _runSlurpTool("record");
+    root.dashboardRecording = fromDashboard === true;
+    recordOverlay.beginSelection(root.pendingRecordFormat);
+    _runSlurpTool("record", screen);
   }
   function runRecordFullscreen(format, audioOut, audioIn, cursor) {
     if (root.isRunning || recordOverlay.isRecording || recordOverlay.isConverting)
@@ -787,6 +795,7 @@ Item {
     root.pendingRecordFormat = format || "gif";
     root.pendingRecordAudioOut = audioOut === true;
     root.pendingRecordAudioIn = audioIn === true;
+    root.dashboardRecording = false;
     root.pendingRecordCursor = cursor === true;
     if (!pluginApi) {
       launchRecordFullscreen.start();
@@ -799,26 +808,20 @@ Item {
                                   launchRecordFullscreen.start();
                                 });
   }
-  function runMirror() {
-    if (pluginApi) {
-      pluginApi.withCurrentScreen(screen => {
-                                    if (!mirrorOverlay.isVisible)
-                                    mirrorOverlay.show(screen);
-                                  });
-    } else {
-      if (!mirrorOverlay.isVisible)
-        mirrorOverlay.show();
-    }
+  function runMirror(screen) {
+    var target = screen ?? PanelService.findScreenForPanels();
+    if (!mirrorOverlay.isVisible)
+      mirrorOverlay.show(target);
   }
   function runMirrorClose() {
     mirrorOverlay.hide();
   }
-  function _runSlurpTool(tool) {
+  function _runSlurpTool(tool, screen) {
     if (root.isRunning)
       return;
     root.pendingTool = tool;
     root.isRunning = true;
-    closeThenLaunch(launchRegionSelector);
+    closeThenLaunch(launchRegionSelector, screen);
   }
   function detectCapabilities() {
     root._detectedLangs = [];

@@ -258,6 +258,9 @@
     "sharePopoverCopy": "Copiar link"
   },
   "record": {
+    "selecting": "Selecione uma região para gravar",
+    "missingRecorder": "Gravador de tela indisponível (instale wl-screenrec ou wf-recorder)",
+    "missingConverter": "Conversão indisponível (instale ffmpeg)",
     "stop": "Parar",
     "saveMp4": "Salvar como MP4",
     "saveGif": "Salvar como GIF",
@@ -269,7 +272,7 @@
     "region": "Região",
     "savedAndCopied": "Salvo e copiado para a área de transferência",
     "copiedToClipboard": "Copiado para a área de transferência",
-    "failed": "Gravação cancelada ou falhou",
+    "failed": "Falha na gravação de tela",
     "saveMp4Failed": "Falha ao salvar vídeo MP4",
     "saveGifFailed": "Falha ao converter GIF",
     "discard": "Descartar",

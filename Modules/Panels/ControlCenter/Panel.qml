@@ -135,13 +135,6 @@ Item {
 
   property var pendingIpcCommand: []
   property string pendingNativePanelName: ""
-  property string pendingCaptureAction: ""
-  property string pendingScreenshotMode: ""
-  property string pendingRecordFormat: "gif"
-  property string lastRecordStatus: ""
-  property string lastRecordOutputPath: ""
-  property string lastRecordFormat: ""
-  property string toolkitRecordState: ""
   property real localGpuUsage: -1
   property string localGpuName: ""
   property int screenUsageRangeDays: 1
@@ -156,17 +149,7 @@ Item {
   readonly property var easyEffectsRunningCheckCommand: ["bash", "-c", "pgrep -x easyeffects >/dev/null || pgrep -f '(^|/)easyeffects($| )' >/dev/null"]
   readonly property bool audioDetailActive: activeDetailView === "audio"
   readonly property bool screenUsageDetailActive: activeDetailView === "screenUsage"
-  readonly property bool recordStatusPolling: toolkitRecordState !== "" || lastRecordStatus === "selecting" || lastRecordStatus === "recording" || lastRecordStatus === "converting"
   readonly property bool microphoneSignalActive: AudioService.hasInput && !AudioService.inputMuted && !microphoneSpectrumIdle && microphoneSignalLevel > 0.035
-  readonly property bool toolkitRecording: toolkitRecordState === "recording"
-  readonly property string captureScriptPath: {
-    const url = Qt.resolvedUrl("scripts/capture.sh").toString();
-    return url.startsWith("file://") ? url.slice(7) : url;
-  }
-  readonly property string screenshotScriptPath: {
-    const url = Qt.resolvedUrl("scripts/screenshot.sh").toString();
-    return url.startsWith("file://") ? url.slice(7) : url;
-  }
 
   anchors.fill: parent
 
@@ -858,44 +841,8 @@ Item {
     }
   }
 
-  function showCaptureNotice(message, detail, icon) {
-    const body = detail && String(detail).length > 0 ? message + "\n" + detail : message;
-    ToastService.showNotice(root.tr("screenTools"), body, icon || "camera", 3000);
-  }
-
-  function showCaptureError(message) {
-    ToastService.showError(root.tr("screenTools"), message, 3000);
-  }
-
   function openWallpaperSelector() {
     root.toggleNativePanel("wallpaperPanel");
-  }
-
-  function takeDashboardScreenshot(mode) {
-    root.pendingScreenshotMode = mode;
-    root.pendingCaptureAction = "screenshot";
-    deferredCaptureTimer.restart();
-  }
-
-  function startDashboardRecording(format) {
-    if (root.toolkitRecordState !== "" || root.lastRecordStatus === "selecting" || root.lastRecordStatus === "recording" || root.lastRecordStatus === "converting")
-      return;
-
-    root.pendingRecordFormat = format === "mp4" ? "mp4" : "gif";
-    root.pendingCaptureAction = "record-area";
-    deferredCaptureTimer.restart();
-  }
-
-  function stopDashboardRecording() {
-    if (!root.toolkitRecording)
-      return;
-
-    Quickshell.execDetached(["bash", root.captureScriptPath, "stop"]);
-    root.toolkitRecordState = "converting";
-  }
-
-  function runPendingScreenshot() {
-    Quickshell.execDetached(["bash", root.screenshotScriptPath, root.pendingScreenshotMode]);
   }
 
   function parseNotificationActions(actions) {
@@ -1101,73 +1048,6 @@ Item {
         root.pendingNativePanelScreen = null;
       }
     }
-  }
-
-  Timer {
-    id: deferredCaptureTimer
-    interval: 220
-    repeat: false
-    onTriggered: {
-      if (root.pendingCaptureAction === "screenshot") {
-        root.runPendingScreenshot();
-      } else if (root.pendingCaptureAction === "record-area") {
-        root.toolkitRecordState = "selecting";
-        Quickshell.execDetached(["bash", root.captureScriptPath, "start", root.pendingRecordFormat]);
-      }
-      root.pendingCaptureAction = "";
-    }
-  }
-
-  Timer {
-    interval: 700
-    repeat: true
-    running: root.recordStatusPolling
-    triggeredOnStart: true
-    onTriggered: {
-      if (!recordStatusProcess.running)
-        recordStatusProcess.exec({
-                                   command: ["bash", root.captureScriptPath, "status"]
-                                 });
-    }
-  }
-
-  Process {
-    id: recordStatusProcess
-    stdout: StdioCollector {}
-    onExited: code => {
-                if (code !== 0)
-                return;
-
-                const text = String(stdout.text || "").trim();
-                let state = "";
-                let outputPath = "";
-                let format = "";
-                if (text !== "") {
-                  const parts = text.split("|");
-                  if (parts.length >= 3) {
-                    state = parts[0] || "";
-                    format = parts[parts.length - 1] || "";
-                    outputPath = parts.slice(1, parts.length - 1).join("|");
-                  } else if (parts.length === 2) {
-                    state = parts[0] || "";
-                    outputPath = parts[1] || "";
-                  } else if (parts.length === 1) {
-                    state = parts[0] || "";
-                  }
-                }
-                const changed = state !== root.lastRecordStatus || outputPath !== root.lastRecordOutputPath;
-
-                if (changed && state === "done") {
-                  root.showCaptureNotice(root.tr("captureSaved"), outputPath, format === "mp4" ? "video" : "movie");
-                } else if (changed && state === "failed") {
-                  root.showCaptureError(root.tr("captureFailed"));
-                }
-
-                root.toolkitRecordState = (state === "recording" || state === "converting") ? state : "";
-                root.lastRecordStatus = state;
-                root.lastRecordOutputPath = outputPath;
-                root.lastRecordFormat = format;
-              }
   }
 
   Timer {
@@ -1439,7 +1319,7 @@ Item {
               if (cardId === "quick-actions")
                 return Math.round(368 * root.panelUnit);
               if (cardId === "recording")
-                return Math.round((root.toolkitRecording ? 194 : 164) * root.panelUnit);
+                return Math.round((ScreenToolkitService.recordState !== "" ? 194 : 164) * root.panelUnit);
               if (cardId === "shortcuts")
                 return Math.round(128 * root.panelUnit);
               return -1;

@@ -10,6 +10,86 @@ Singleton {
   id: root
 
   property var mainInstance: null
+  readonly property string recordState: mainInstance?.recordState ?? ""
+  readonly property string recordFormat: mainInstance?.recordFormat ?? "gif"
+  readonly property int recordElapsedSeconds: mainInstance?.recordElapsedSeconds ?? 0
+  readonly property string recordPath: mainInstance?.recordPath ?? ""
+  readonly property string recordError: mainInstance?.recordError ?? ""
+  readonly property bool recordSaved: mainInstance?.recordSaved ?? false
+  property string _pendingAction: ""
+  property string _pendingArgument: ""
+  property var _pendingScreen: null
+
+  Timer {
+    id: dashboardLaunchDelay
+    interval: 300
+    repeat: false
+    onTriggered: {
+      var action = root._pendingAction;
+      var argument = root._pendingArgument;
+      var screen = root._pendingScreen;
+      root._pendingAction = "";
+      root._pendingArgument = "";
+      root._pendingScreen = null;
+      var toolkit = root.mainInstance;
+      if (action === "screenshot") {
+        screenshotProc.exec({
+                              command: ["bash", Quickshell.shellDir + "/Modules/Panels/ControlCenter/scripts/screenshot.sh", argument || "region", screen?.name ?? ""]
+                            });
+        return;
+      }
+      if (!toolkit) {
+        ToastService.showError(root.tr("record.failed"));
+        return;
+      }
+      switch (action) {
+      case "colorPicker": toolkit.runColorPicker(screen); break;
+      case "palette": toolkit.runPalette(screen); break;
+      case "ocr": toolkit.runOcr(argument || root.settings.selectedOcrLang || "eng", screen); break;
+      case "qr": toolkit.runQr(screen); break;
+      case "lens": toolkit.runLens(screen); break;
+      case "annotateFullscreen": toolkit.runAnnotateFullscreen(screen); break;
+      case "measure": toolkit.runMeasure(); break;
+      case "pin": toolkit.runPin(screen); break;
+      case "mirror": toolkit.runMirror(screen); break;
+      case "record": toolkit.runRecord(argument === "mp4" ? "mp4" : "gif", false, false, false, screen, true); break;
+      default: Logger.w("ScreenToolkitService", "Unknown dashboard capture action: " + action);
+      }
+    }
+  }
+  Process {
+    id: screenshotProc
+    onExited: code => {
+      if (code !== 0)
+        ToastService.showError(root.tr("messages.capture-failed"));
+    }
+  }
+
+  function launchFromDashboard(action, argument) {
+    if (root._pendingAction !== "" || screenshotProc.running || root.mainInstance?.isRunning || !action)
+      return;
+    if (root.recordState === "selecting" || root.recordState === "recording" || root.recordState === "converting")
+      return;
+    var dashboard = PanelService.openedPanel;
+    var screen = dashboard?.screen ?? PanelService.findScreenForPanels();
+    root._pendingScreen = screen;
+    root._pendingAction = action;
+    root._pendingArgument = argument || "";
+    if (dashboard?.objectName?.startsWith("controlCenterPanel") && dashboard.isPanelOpen)
+      dashboard.closeImmediately();
+    dashboardLaunchDelay.start();
+  }
+
+  function stopRecording() {
+    root.mainInstance?.runRecordStop();
+  }
+  function saveRecording() {
+    root.mainInstance?.runRecordSave();
+  }
+
+  function discardRecording() {
+    root.mainInstance?.runRecordDiscard();
+  }
 
   // Native Settings data store for ScreenToolkit
   property var settings: ({

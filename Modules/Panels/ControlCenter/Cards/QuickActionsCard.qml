@@ -25,7 +25,7 @@ DashboardCard {
       iconName: "color-picker",
       active: false,
       onTriggered: function () {
-        ScreenToolkitService.colorPicker();
+        ScreenToolkitService.launchFromDashboard("colorPicker");
       }
     },
     {
@@ -34,7 +34,7 @@ DashboardCard {
       iconName: "palette",
       active: false,
       onTriggered: function () {
-        ScreenToolkitService.palette();
+        ScreenToolkitService.launchFromDashboard("palette");
       }
     },
     {
@@ -43,7 +43,7 @@ DashboardCard {
       iconName: "scan",
       active: false,
       onTriggered: function () {
-        ScreenToolkitService.ocr();
+        ScreenToolkitService.launchFromDashboard("ocr");
       }
     },
     {
@@ -52,7 +52,7 @@ DashboardCard {
       iconName: "qrcode",
       active: false,
       onTriggered: function () {
-        ScreenToolkitService.qr();
+        ScreenToolkitService.launchFromDashboard("qr");
       }
     },
     {
@@ -61,7 +61,7 @@ DashboardCard {
       iconName: "world-search",
       active: false,
       onTriggered: function () {
-        ScreenToolkitService.lens();
+        ScreenToolkitService.launchFromDashboard("lens");
       }
     },
     {
@@ -70,7 +70,7 @@ DashboardCard {
       iconName: "brush",
       active: false,
       onTriggered: function () {
-        ScreenToolkitService.annotateFullscreen();
+        ScreenToolkitService.launchFromDashboard("annotateFullscreen");
       }
     },
     {
@@ -79,7 +79,7 @@ DashboardCard {
       iconName: "ruler",
       active: false,
       onTriggered: function () {
-        ScreenToolkitService.measure();
+        ScreenToolkitService.launchFromDashboard("measure");
       }
     },
     {
@@ -88,7 +88,7 @@ DashboardCard {
       iconName: "pin",
       active: false,
       onTriggered: function () {
-        ScreenToolkitService.pin();
+        ScreenToolkitService.launchFromDashboard("pin");
       }
     },
     {
@@ -97,7 +97,7 @@ DashboardCard {
       iconName: "camera",
       active: quickActionsCard.screenToolkitMain?.mirrorVisible ?? false,
       onTriggered: function () {
-        ScreenToolkitService.mirror();
+        ScreenToolkitService.launchFromDashboard("mirror");
       }
     }
   ]

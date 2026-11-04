@@ -40,7 +40,9 @@ You can quickly upload screenshots and get a shareable link.
 - **Want more control:** get a free API key from https://up.x02.me/ to increase upload limits and choose expiry from settings: `1h | 1d | 7d | 30d | permanent` (default: 7d).
 
 ### Recording UI behavior
-When recording is active, the plugin icon shows a red pulsing dot. Clicking the icon stops the recording.
+Dashboard recording closes the dashboard before opening the region selector. The Screen Toolkit service owns the selector, recorder and conversion process, so closing or reopening the dashboard does not interrupt a capture. The bar displays REC, elapsed time and format on every configured bar (even without the optional Screen Toolkit widget); click its recording indicator to stop only the recorder started by Hydra. The dashboard also offers Stop.
+
+Once conversion finishes, the dashboard shows the output path and Save/Discard controls. With automatic saving enabled, it retains the saved path and completion status; conversion and recorder failures remain visible until another capture starts. Cancelling the region selector resets the recording state without launching a recorder.
 
 ### Webcam Mirror Features
 

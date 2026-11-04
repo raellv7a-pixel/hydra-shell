@@ -258,6 +258,9 @@
     "sharePopoverCopy": "Copy link"
   },
   "record": {
+    "selecting": "Select a recording region",
+    "missingRecorder": "Screen recorder unavailable (install wl-screenrec or wf-recorder)",
+    "missingConverter": "Conversion unavailable (install ffmpeg)",
     "stop": "Stop",
     "saveMp4": "Save MP4",
     "saveGif": "Save GIF",
@@ -269,7 +272,7 @@
     "region": "Region",
     "savedAndCopied": "Saved and copied to clipboard",
     "copiedToClipboard": "Copied to clipboard",
-    "failed": "Recording failed or cancelled",
+    "failed": "Screen recording failed",
     "saveMp4Failed": "Failed to save MP4",
     "saveGifFailed": "GIF conversion failed",
     "discard": "Discard",

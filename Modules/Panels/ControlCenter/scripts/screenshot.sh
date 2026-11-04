@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
-set -u
+set -euo pipefail
 
 mode="${1:-region}"
+screen="${2:-}"
 
 copy_fullscreen() {
-  grim - | wl-copy --type image/png
+  if [ -n "$screen" ]; then
+    grim -o "$screen" - | wl-copy --type image/png
+  else
+    grim - | wl-copy --type image/png
+  fi
 }
 
 copy_region() {

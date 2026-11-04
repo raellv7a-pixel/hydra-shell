@@ -6,6 +6,7 @@ import Quickshell.Services.UPower
 import Quickshell.Wayland
 import qs.Commons
 import qs.Modules.Bar.Extras
+import "Widgets"
 import qs.Modules.Notification
 import qs.Modules.Panels.Settings
 import qs.Services.Compositor
@@ -615,6 +616,11 @@ Item {
         anchors.bottomMargin: verticalBarMargin + Settings.data.bar.contentPadding
         spacing: Settings.data.bar.widgetSpacing
 
+        RecordingStatus {
+          screen: root.screen
+          Layout.alignment: Qt.AlignHCenter
+        }
+
         Repeater {
           model: root.rightWidgetsModel
           delegate: BarWidgetLoader {
@@ -741,6 +747,11 @@ Item {
         anchors.rightMargin: horizontalBarMargin + Settings.data.bar.contentPadding
         y: Style.pixelAlignCenter(parent.height, height)
         spacing: Settings.data.bar.widgetSpacing
+
+        RecordingStatus {
+          screen: root.screen
+          Layout.alignment: Qt.AlignVCenter
+        }
 
         Repeater {
           model: root.rightWidgetsModel
