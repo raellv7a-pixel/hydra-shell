@@ -157,6 +157,32 @@ else:sys.exit(1)
             self.call("performanceLauncher", "false")
             self.wait(lambda: not self.call("performanceLauncherState")["visible"])
 
+    def test_search_height_fits_results_and_caps_large_lists(self):
+        self.call("performanceLauncher", "true")
+        try:
+            self.wait(lambda: self.call("performanceLauncherState")["ready"])
+            for layout in ("grid", "columns", "list"):
+                with self.subTest(layout=layout):
+                    self.call("searchHost", "Code", layout)
+                    self.wait(lambda: self.call("searchHostState")["count"] == 1
+                              and self.call("searchHostState")["height"] < 400)
+                    one = self.call("searchHostState")
+                    self.assertGreater(one["height"], one["contentHeight"])
+                    self.call("searchHost", "app-", layout)
+                    self.wait(lambda: self.call("searchHostState")["count"] > 1
+                              and self.call("searchHostState")["height"] > one["height"])
+                    many = self.call("searchHostState")
+                    self.assertLess(many["height"], 800)
+                    self.assertGreaterEqual(many["contentHeight"], many["viewportHeight"])
+                    if layout == "list":
+                        self.assertGreater(many["contentHeight"], many["viewportHeight"])
+                    self.call("searchHost", "xxxxxxxxxxxxxxxxxxxx", layout)
+                    self.wait(lambda: self.call("searchHostState")["count"] == 0
+                              and self.call("searchHostState")["height"] < 400)
+        finally:
+            self.call("performanceLauncher", "false")
+            self.wait(lambda: not self.call("performanceLauncherState")["visible"])
+
     def test_seam_only_during_real_reveal_geometry(self):
         for height, visible in [(100, True), (220, False), (190, True), (0, False)]:
             with self.subTest(height=height):
@@ -265,6 +291,22 @@ else:sys.exit(1)
         self.assertEqual(self.call("catalogState")["panel"], "")
         self.call("catalogKey", 0x01000012)  # Left follows alphabetical order
         self.assertEqual(self.call("catalogState")["selected"], "Beta")
+
+    def test_launcher_categories_are_single_source_in_home_and_catalog(self):
+        self.call("prepareCatalog")
+        self.call("home")
+        home = self.call("launcherVisualState")
+        self.assertEqual(home["state"], "home")
+        self.assertFalse(home["categoryPillsVisible"])
+        self.call("launcherViewport", 960)
+        self.call("prepareCatalog")
+        catalog = self.call("launcherVisualState")
+        self.assertEqual(catalog["state"], "all_apps")
+        self.assertTrue(catalog["sidebarVisible"])
+        self.assertFalse(catalog["categoryPillsVisible"])
+        self.call("launcherSearch", "app")
+        self.wait(lambda: self.call("launcherVisualState")["state"] == "search")
+        self.assertFalse(self.call("launcherVisualState")["categoryPillsVisible"])
 
     def test_manual_subfolders_bound_depth_preserve_missing_apps_and_close_on_deletion(self):
         self.call("prepare")

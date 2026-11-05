@@ -41,7 +41,7 @@ Rectangle {
   readonly property bool catalogActive: effectiveState === "all_apps"
   readonly property bool catalogSidebarVisible: catalogActive && width >= 900 * Style.uiScaleRatio
   readonly property bool animationsDisabled: Style.animationFast === 0
-  readonly property real homePreferredHeight: contentLayout.implicitHeight + metrics.outerPadding * 2
+  readonly property real contentPreferredHeight: contentLayout.implicitHeight + metrics.outerPadding * 2
   function scrollHomeVertically(event) { if (home.visible) home.scrollVertically(event); }
   readonly property var browseModel: browse
   readonly property var parentFolder: activeFolderId === "__pinned" ? { id: "__pinned", name: I18n.tr("launcher-home.pinned"), icon: "pin", mode: "pinned", entries: browse.pinned, children: [] } : browse.folders.find(folder => folder.id === activeFolderId) || null
@@ -351,11 +351,6 @@ Rectangle {
 
   function ensureHomeItemVisible(item) {
     if (home.visible && (!folderExpanded || item === folderAnchor)) home.ensureVisible(item);
-  }
-
-  function focusHomeCategories() {
-    if (categoryTabs.visible) categoryTabs.focusFirst();
-    else focusSearchInput();
   }
 
   function handleHomeItemKey(event, item) {
@@ -992,8 +987,7 @@ Rectangle {
         focusExpandedFolder();
         event.accepted = true;
       } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab) {
-        if (categoryTabs.visible) categoryTabs.focusFirst();
-        else home.focusFirst();
+        home.focusFirst();
         event.accepted = true;
       }
       return;
@@ -1305,12 +1299,12 @@ Rectangle {
     }
     LauncherCatalogHeader {
       launcher: root
-      visible: root.catalogActive
+      visible: root.catalogActive && root.hasCoverBanner && root.profileWallpaperPath !== ""
       Layout.fillWidth: true
-      Layout.preferredHeight: Math.round(112 * Style.uiScaleRatio)
+      Layout.preferredHeight: Math.round(80 * Style.uiScaleRatio)
       Layout.leftMargin: root.metrics.padding
       Layout.rightMargin: root.metrics.padding
-      Layout.bottomMargin: root.metrics.gapS
+      Layout.bottomMargin: root.metrics.gapXS
     }
 
 
@@ -1397,11 +1391,11 @@ Rectangle {
       }
     }
 
-    // Unified category tabs (works with any provider that has categories)
+    // Category tabs remain available for searchable providers; home and catalog use their own navigation.
     LauncherCategoryPills {
       id: categoryTabs
       launcher: root
-      visible: root.showProviderCategories
+      visible: root.effectiveState === "search" && root.showProviderCategories
       Layout.fillWidth: true
       Layout.leftMargin: root.metrics.padding
       Layout.rightMargin: root.metrics.padding
@@ -1431,6 +1425,7 @@ Rectangle {
     NSlideSwapView {
       id: resultsSwapView
       visible: root.effectiveState === "search"
+      implicitHeight: Math.max(root.entryHeight, item ? (root.isSingleView ? item.implicitHeight : item.contentHeight) : 0)
       Layout.fillWidth: true
       Layout.leftMargin: root.metrics.outerPadding
       Layout.rightMargin: root.metrics.outerPadding
@@ -1509,6 +1504,7 @@ Rectangle {
       id: singleViewComponent
 
       Item {
+        implicitHeight: descriptionScrollView.contentHeight + Style.fontSizeL + Style.marginXL + Style.margin2L
         Layout.fillWidth: true
         Layout.fillHeight: true
 

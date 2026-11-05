@@ -9,7 +9,7 @@ Item {
   id: root
   property var screen: null
   property string wallpaper: ""
-  readonly property bool ready: enabledWallpaper && image.status === Image.Ready && (!nativeSizeMode || nativeWidth > 0 && nativeHeight > 0)
+  readonly property bool ready: enabledWallpaper && image.status === Image.Ready && mapped.status !== ShaderEffect.Error && (!nativeSizeMode || nativeWidth > 0 && nativeHeight > 0)
   readonly property Item texture: Style.glassBlurAmount > 0 ? blurredTexture : mappedTexture
   readonly property bool enabledWallpaper: !!screen && Settings.data.wallpaper.enabled && !!wallpaper && !WallpaperService.isSolidColorPath(wallpaper) && !/\.(webm|mp4|mkv|mov)$/i.test(wallpaper)
   readonly property real fillMode: {

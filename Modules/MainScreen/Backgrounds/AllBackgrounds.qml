@@ -37,8 +37,8 @@ Item {
       visible: !Settings.data.bar.useSeparateOpacity
 
       // Enable layer caching to prevent continuous re-rendering
-      layer.enabled: !Style.tintedGlass
-      opacity: Style.tintedGlass ? 1 : Style.effectivePanelOpacity
+      layer.enabled: !Style.customMaterial
+      opacity: Style.customMaterial ? 1 : Style.effectivePanelOpacity
 
       NGlassBackdrop {
         id: unifiedGlass
@@ -49,8 +49,8 @@ Item {
 
       Item {
         anchors.fill: parent
-        layer.enabled: Style.tintedGlass
-        opacity: Style.tintedGlass ? (unifiedGlass.ready ? Style.effectivePanelOpacity : 1) : 1
+        layer.enabled: Style.customMaterial
+        opacity: Style.customMaterial ? (unifiedGlass.ready ? Style.effectivePanelOpacity : 1) : 1
 
         Shape {
           id: unifiedBackgroundsShape
@@ -118,6 +118,10 @@ Item {
           source: unifiedBackgroundsShape
         }
       }
+      NMaterialFinish {
+        anchors.fill: parent
+        maskSource: unifiedBackgroundsShape
+      }
     }
 
     // When using separate bar opacity, separate the rendering
@@ -129,8 +133,8 @@ Item {
       Item {
         anchors.fill: parent
 
-        layer.enabled: !Style.tintedGlass
-        opacity: Style.tintedGlass ? 1 : Style.effectivePanelOpacity
+        layer.enabled: !Style.customMaterial
+        opacity: Style.customMaterial ? 1 : Style.effectivePanelOpacity
 
         NGlassBackdrop {
           id: panelGlass
@@ -141,8 +145,8 @@ Item {
 
         Item {
           anchors.fill: parent
-          layer.enabled: Style.tintedGlass
-          opacity: Style.tintedGlass ? (panelGlass.ready ? Style.effectivePanelOpacity : 1) : 1
+          layer.enabled: Style.customMaterial
+          opacity: Style.customMaterial ? (panelGlass.ready ? Style.effectivePanelOpacity : 1) : 1
 
           Shape {
             id: panelBackgroundsShape
@@ -196,14 +200,18 @@ Item {
             source: panelBackgroundsShape
           }
         }
+        NMaterialFinish {
+          anchors.fill: parent
+          maskSource: panelBackgroundsShape
+        }
       }
 
       // Bar background with separate opacity
       Item {
         anchors.fill: parent
 
-        layer.enabled: !Style.tintedGlass
-        opacity: Style.tintedGlass ? 1 : Style.effectiveBarOpacity
+        layer.enabled: !Style.customMaterial
+        opacity: Style.customMaterial ? 1 : Style.effectiveBarOpacity
 
         NGlassBackdrop {
           id: barGlass
@@ -214,8 +222,8 @@ Item {
 
         Item {
           anchors.fill: parent
-          layer.enabled: Style.tintedGlass
-          opacity: Style.tintedGlass ? (barGlass.ready ? Style.effectiveBarOpacity : 1) : 1
+          layer.enabled: Style.customMaterial
+          opacity: Style.customMaterial ? (barGlass.ready ? Style.effectiveBarOpacity : 1) : 1
 
           Shape {
             id: barBackgroundShape
@@ -236,6 +244,11 @@ Item {
             anchors.fill: parent
             source: barBackgroundShape
           }
+        }
+        NMaterialFinish {
+          anchors.fill: parent
+          maskSource: barBackgroundShape
+          surfaceColor: Style.materialColor(HydraColor.mSurfaceContainerLow)
         }
       }
     }

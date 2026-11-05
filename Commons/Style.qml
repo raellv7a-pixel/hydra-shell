@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import "../Helpers/ColorsConvert.js" as ColorsConvert
+import "../Helpers/MaterialProfiles.js" as MaterialProfiles
 import qs.Services.Power
 
 Singleton {
@@ -25,22 +26,22 @@ Singleton {
   readonly property int fontWeightBold: 700
 
   // Container Radii: major layout sections (sidebars, cards, content panels)
-  readonly property int radiusXXXS: Math.round(3 * Settings.data.general.radiusRatio)
-  readonly property int radiusXXS: Math.round(4 * Settings.data.general.radiusRatio)
-  readonly property int radiusXS: Math.round(8 * Settings.data.general.radiusRatio)
-  readonly property int radiusS: Math.round(12 * Settings.data.general.radiusRatio)
-  readonly property int radiusM: Math.round(16 * Settings.data.general.radiusRatio)
-  readonly property int radiusL: Math.round(20 * Settings.data.general.radiusRatio)
+  readonly property int radiusXXXS: Math.round(3 * Settings.data.general.radiusRatio * materialRadiusScale)
+  readonly property int radiusXXS: Math.round(4 * Settings.data.general.radiusRatio * materialRadiusScale)
+  readonly property int radiusXS: Math.round(8 * Settings.data.general.radiusRatio * materialRadiusScale)
+  readonly property int radiusS: Math.round(12 * Settings.data.general.radiusRatio * materialRadiusScale)
+  readonly property int radiusM: Math.round(16 * Settings.data.general.radiusRatio * materialRadiusScale)
+  readonly property int radiusL: Math.round(20 * Settings.data.general.radiusRatio * materialRadiusScale)
 
-  // Input radii: interactive elements (buttons, toggles, text fields)
-  readonly property int iRadiusXXXS: Math.round(3 * Settings.data.general.iRadiusRatio)
-  readonly property int iRadiusXXS: Math.round(4 * Settings.data.general.iRadiusRatio)
-  readonly property int iRadiusXS: Math.round(8 * Settings.data.general.iRadiusRatio)
-  readonly property int iRadiusS: Math.round(12 * Settings.data.general.iRadiusRatio)
-  readonly property int iRadiusM: Math.round(16 * Settings.data.general.iRadiusRatio)
-  readonly property int iRadiusL: Math.round(20 * Settings.data.general.iRadiusRatio)
+  // Input radii follow the material without changing control sizes or hit targets.
+  readonly property int iRadiusXXXS: Math.round(3 * Settings.data.general.iRadiusRatio * materialRadiusScale)
+  readonly property int iRadiusXXS: Math.round(4 * Settings.data.general.iRadiusRatio * materialRadiusScale)
+  readonly property int iRadiusXS: Math.round(8 * Settings.data.general.iRadiusRatio * materialRadiusScale)
+  readonly property int iRadiusS: Math.round(12 * Settings.data.general.iRadiusRatio * materialRadiusScale)
+  readonly property int iRadiusM: Math.round(16 * Settings.data.general.iRadiusRatio * materialRadiusScale)
+  readonly property int iRadiusL: Math.round(20 * Settings.data.general.iRadiusRatio * materialRadiusScale)
 
-  readonly property int screenRadius: Math.round(20 * Settings.data.general.screenRadiusRatio)
+  readonly property int screenRadius: Math.round(20 * Settings.data.general.screenRadiusRatio * materialRadiusScale)
 
   // Border
   readonly property int borderS: Math.max(1, Math.round(1 * uiScaleRatio))
@@ -73,32 +74,77 @@ Singleton {
   readonly property real opacityAlmost: 0.95
   readonly property real opacityFull: 1.0
 
-  readonly property bool tintedGlass: Settings.data.ui.visualVariant === "tinted-glass"
-  readonly property bool glassEffectsEnabled: tintedGlass && Settings.data.general.enableBlurBehind && !PowerProfileService.hydraPerformanceMode
-  readonly property real glassBlurAmount: Math.max(0, Math.min(1, Settings.data.ui.glassBlur))
-  readonly property color materialEdgeColor: glassEffectsEnabled ? Qt.alpha(HydraColor.mOnSurface, Math.max(0, Math.min(0.3, Settings.data.ui.glassEdgeLight))) : "transparent"
-  readonly property real glassRequestedOpacity: Math.max(0.12, Math.min(0.96, Settings.data.ui.glassTint))
+  readonly property var visualProfileIds: MaterialProfiles.ids
+  readonly property string visualVariant: MaterialProfiles.resolveId(Settings.data.ui.visualVariant)
+  readonly property var materialProfile: MaterialProfiles.resolve(visualVariant)
+  readonly property bool customMaterial: visualVariant !== "material3"
+  readonly property bool profileUsesGlass: materialProfile.glass
+  readonly property bool materialEffectsEnabled: customMaterial && Settings.data.general.enableBlurBehind && !PowerProfileService.hydraPerformanceMode
+  readonly property bool glassEffectsEnabled: profileUsesGlass && materialEffectsEnabled
+  readonly property real materialRadiusScale: materialProfile.radius
+  readonly property real materialMotionScale: materialProfile.motion
+  readonly property real materialLightAmount: materialProfile.light * Math.max(0, Math.min(1, Settings.data.ui.materialLighting))
+  readonly property real materialChromeAmount: materialProfile.chrome * Math.max(0, Math.min(1, Settings.data.ui.materialLighting))
+  readonly property real materialBloomAmount: materialProfile.bloom * Math.max(0, Math.min(1, Settings.data.ui.materialLighting))
+  readonly property real materialAuroraAmount: materialProfile.aurora * Math.max(0, Math.min(1, Settings.data.ui.materialLighting))
+  readonly property real materialTextureAmount: materialProfile.texture * Math.max(0, Math.min(1, Settings.data.ui.materialTexture))
+  readonly property real materialRefractionAmount: materialProfile.refraction * Math.max(0, Math.min(1, Settings.data.ui.materialRefraction))
+  readonly property real materialPaperAmount: materialProfile.paper * Math.max(0, Math.min(1, Settings.data.ui.materialTexture))
+  readonly property real materialSaturation: materialProfile.saturation
+  readonly property color materialHighlightColor: visualVariant === "afterglow" ? HydraColor.blend(HydraColor.mPrimary, Qt.hsla(0.09, Math.min(0.65, HydraColor.mPrimary.hslSaturation + 0.15), HydraColor.mPrimary.hslLightness, 1), 0.8) : HydraColor.mPrimary
+  readonly property real glassBlurAmount: MaterialProfiles.scaled(materialProfile.blur, Settings.data.ui.glassBlur, 0.85, 0, 1)
+  readonly property real materialEdgeAmount: MaterialProfiles.scaled(materialProfile.edge, Settings.data.ui.glassEdgeLight, 0.12, 0, 0.3)
+  readonly property color materialEdgeColor: materialEffectsEnabled ? Qt.alpha(HydraColor.mOnSurface, materialEdgeAmount) : "transparent"
+  readonly property real glassRequestedOpacity: MaterialProfiles.scaled(materialProfile.opacity, Settings.data.ui.glassTint, 0.56, 0.12, 0.96)
   readonly property real glassBodyOpacity: glassSurfaceOpacity(materialColor(HydraColor.mSurfaceContainer))
   readonly property real effectivePanelOpacity: materialOpacity(PowerProfileService.hydraPerformanceMode ? 1.0 : HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
   readonly property real effectiveBarOpacity: materialOpacity(PowerProfileService.hydraPerformanceMode ? 1.0 : Settings.data.bar.backgroundOpacity)
 
   function materialColor(baseColor) {
-    if (!tintedGlass || baseColor.a === 0)
+    if (!customMaterial || baseColor.a === 0)
       return baseColor;
     const base = Qt.rgba(baseColor.r, baseColor.g, baseColor.b, 1);
-    const tinted = HydraColor.blend(base, HydraColor.mPrimary, 0.02 + 0.08 * Math.max(0, Math.min(1, Settings.data.ui.glassTint)));
-    // Authored palettes stay authored; tint must not reduce their text contrast.
-    return ColorsConvert.getContrastRatio(tinted.toString(), HydraColor.mOnSurfaceVariant.toString()) >= Math.min(4.5, ColorsConvert.getContrastRatio(base.toString(), HydraColor.mOnSurfaceVariant.toString())) ? tinted : base;
+    const strength = visualVariant === "tinted-glass" ? 0.02 + 0.08 * Math.max(0, Math.min(1, Settings.data.ui.glassTint)) : MaterialProfiles.scaled(materialProfile.tint, Settings.data.ui.glassTint, 0.56, 0, 0.3);
+    let tinted = HydraColor.blend(base, HydraColor.mPrimary, strength);
+    if (visualVariant === "tinted-glass")
+      return ColorsConvert.getContrastRatio(tinted.toString(), HydraColor.mOnSurfaceVariant.toString()) >= Math.min(4.5, ColorsConvert.getContrastRatio(base.toString(), HydraColor.mOnSurfaceVariant.toString())) ? tinted : base;
+    if (visualVariant !== "tinted-glass") {
+      const muted = Qt.hsla(Math.max(0, tinted.hslHue), tinted.hslSaturation * Math.min(1, materialProfile.saturation), tinted.hslLightness, 1);
+      tinted = HydraColor.blend(tinted, muted, 0.65);
+      if (materialProfile.paper > 0) {
+        const pigment = Qt.hsla(Math.max(0, HydraColor.mTertiary.hslHue), Math.min(0.12, HydraColor.mTertiary.hslSaturation), tinted.hslLightness, 1);
+        tinted = HydraColor.blend(tinted, pigment, materialProfile.paper * 0.3);
+      }
+      if (materialProfile.depth > 0)
+        tinted = Settings.data.colorSchemes.darkMode ? Qt.darker(tinted, 1 + materialProfile.depth) : Qt.lighter(tinted, 1 + materialProfile.depth * 0.25);
+    }
+    // Keep authored/dynamic ink pairs readable; never force a dark surface under dark ink.
+    for (const ink of [HydraColor.mOnSurface, HydraColor.mOnSurfaceVariant]) {
+      if (ColorsConvert.getContrastRatio(tinted.toString(), ink.toString()) < Math.min(4.5, ColorsConvert.getContrastRatio(base.toString(), ink.toString())))
+        return base;
+    }
+    return tinted;
   }
 
   function materialFill(baseColor) {
-    if (!tintedGlass || baseColor.a === 0)
+    if (!customMaterial || baseColor.a === 0)
       return baseColor;
-    return Qt.alpha(materialColor(baseColor), glassEffectsEnabled ? 0.48 : 1);
+    return Qt.alpha(materialColor(baseColor), glassEffectsEnabled ? materialProfile.innerAlpha : (visualVariant === "tinted-glass" ? 1 : baseColor.a));
+  }
+  function materialRelief(baseColor, amount) {
+    if (baseColor.a === 0)
+      return baseColor;
+    const relief = HydraColor.blend(baseColor, amount > 0 ? HydraColor.mOnSurface : HydraColor.mSurface, Math.abs(amount));
+    for (const ink of [HydraColor.mOnSurface, HydraColor.mOnSurfaceVariant]) {
+      if (ColorsConvert.getContrastRatio(relief.toString(), ink.toString()) < Math.min(4.5, ColorsConvert.getContrastRatio(baseColor.toString(), ink.toString())))
+        return baseColor;
+    }
+    return Qt.alpha(relief, baseColor.a);
   }
 
+
   function materialOpacity(legacyOpacity) {
-    return tintedGlass ? (legacyOpacity === 0 ? 0 : glassBodyOpacity) : legacyOpacity;
+    return customMaterial ? (legacyOpacity === 0 ? 0 : glassBodyOpacity) : legacyOpacity;
   }
 
   function glassSurfaceOpacity(surface) {
@@ -132,7 +178,7 @@ Singleton {
   }
 
   // Shadows
-  readonly property real shadowOpacity: 0.85
+  readonly property real shadowOpacity: Math.min(1, 0.85 * materialProfile.shadow)
   readonly property real shadowBlur: 1.0
   readonly property int shadowBlurMax: 22
   readonly property real shadowHorizontalOffset: Settings.data.general.shadowOffsetX
@@ -149,11 +195,11 @@ Singleton {
   //     toggles) — a small controlled overshoot, not OutBounce/OutElastic.
   //   - Easing.InOutQuad: passive state changes (hover/color fades) that
   //     aren't a direct response to a press.
-  readonly property int animationFaster: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(75 / Settings.data.general.animationSpeed)
-  readonly property int animationFast: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(150 / Settings.data.general.animationSpeed)
-  readonly property int animationNormal: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(300 / Settings.data.general.animationSpeed)
-  readonly property int animationSlow: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(450 / Settings.data.general.animationSpeed)
-  readonly property int animationSlowest: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(750 / Settings.data.general.animationSpeed)
+  readonly property int animationFaster: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(75 * materialMotionScale / Settings.data.general.animationSpeed)
+  readonly property int animationFast: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(150 * materialMotionScale / Settings.data.general.animationSpeed)
+  readonly property int animationNormal: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(300 * materialMotionScale / Settings.data.general.animationSpeed)
+  readonly property int animationSlow: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(450 * materialMotionScale / Settings.data.general.animationSpeed)
+  readonly property int animationSlowest: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(750 * materialMotionScale / Settings.data.general.animationSpeed)
   // Pointer feedback settles quickly on leave so rapid traversal never trails.
   readonly property int hoverEnterDuration: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(100 / Settings.data.general.animationSpeed)
   readonly property int hoverLeaveDuration: (Settings.data.general.animationDisabled || PowerProfileService.hydraPerformanceMode) ? 0 : Math.round(30 / Settings.data.general.animationSpeed)

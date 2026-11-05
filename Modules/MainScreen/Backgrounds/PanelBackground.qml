@@ -91,7 +91,7 @@ ShapePath {
   readonly property real blRadius: panelBg ? getCornerRadius(panelBg.bottomLeftCornerState) : 0
 
   // ShapePath configuration
-  strokeWidth: Style.tintedGlass ? Style.borderS : -1
+  strokeWidth: Style.customMaterial ? Style.borderS : -1
   strokeColor: Style.materialEdgeColor
 
   // Start point - use tiny off-screen non-degenerate fallback when not renderable.

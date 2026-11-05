@@ -12,6 +12,7 @@ LauncherHomeButton {
   surface: selected ? HydraColor.mSecondaryContainer : HydraColor.mSurfaceContainerHigh
   foreground: selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
   pressFeedback: true
+  raisedSurface: true
   Accessible.selected: selected
   onSelectedChanged: if (selected) launcher.folderAnchor = root
   Component.onCompleted: if (selected) launcher.folderAnchor = root

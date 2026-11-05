@@ -10,6 +10,7 @@ Button {
   property color foreground: HydraColor.mOnSurface
   property real cornerRadius: Style.radiusL
   property bool pressFeedback: false
+  property bool raisedSurface: false
   scale: pressFeedback && down && Style.animationFast > 0 ? 0.98 : 1
   Behavior on scale {
     enabled: root.pressFeedback && Style.animationFast > 0
@@ -22,6 +23,17 @@ Button {
   topPadding: launcher.metrics.gapS
   bottomPadding: launcher.metrics.gapS
   Accessible.name: text
+  NDropShadow {
+    z: -2
+    anchors.fill: root.background
+    source: root.background
+    visible: root.raisedSurface && root.visible
+    autoPaddingEnabled: true
+    shadowColor: HydraColor.mShadow
+    shadowOpacity: Style.shadowOpacity * Style.opacityLight
+    shadowHorizontalOffset: 0
+    shadowVerticalOffset: Style.marginXXS
+  }
   background: NStateLayer {
     radius: root.cornerRadius
     baseColor: Style.materialFill(root.surface)

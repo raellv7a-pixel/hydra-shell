@@ -3103,7 +3103,7 @@
   },
   {
     "labelKey": "panels.user-interface.visual-variant-label",
-    "descriptionKey": "panels.user-interface.visual-variant-description",
+    "descriptionKey": "panels.user-interface.visual-profile-description-",
     "widget": "NComboBox",
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
@@ -3113,7 +3113,7 @@
   },
   {
     "labelKey": "panels.user-interface.glass-tint-label",
-    "descriptionKey": "panels.user-interface.glass-tint-description",
+    "descriptionKey": null,
     "widget": "NValueSlider",
     "tab": 1,
     "tabLabel": "panels.user-interface.title",
@@ -3133,7 +3133,37 @@
   },
   {
     "labelKey": "panels.user-interface.glass-edge-light-label",
-    "descriptionKey": "panels.user-interface.glass-edge-light-description",
+    "descriptionKey": null,
+    "widget": "NValueSlider",
+    "tab": 1,
+    "tabLabel": "panels.user-interface.title",
+    "subTab": 0,
+    "group": "appearance",
+    "subTabLabel": "common.appearance"
+  },
+  {
+    "labelKey": "panels.user-interface.material-lighting-label",
+    "descriptionKey": "panels.user-interface.material-lighting-description",
+    "widget": "NValueSlider",
+    "tab": 1,
+    "tabLabel": "panels.user-interface.title",
+    "subTab": 0,
+    "group": "appearance",
+    "subTabLabel": "common.appearance"
+  },
+  {
+    "labelKey": "panels.user-interface.material-texture-label",
+    "descriptionKey": "panels.user-interface.material-texture-description",
+    "widget": "NValueSlider",
+    "tab": 1,
+    "tabLabel": "panels.user-interface.title",
+    "subTab": 0,
+    "group": "appearance",
+    "subTabLabel": "common.appearance"
+  },
+  {
+    "labelKey": "panels.user-interface.material-refraction-label",
+    "descriptionKey": "panels.user-interface.material-refraction-description",
     "widget": "NValueSlider",
     "tab": 1,
     "tabLabel": "panels.user-interface.title",

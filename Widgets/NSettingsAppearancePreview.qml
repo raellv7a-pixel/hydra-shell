@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Commons
 
-// A bounded illustration, not a second set of settings or a live shell panel.
+// Bounded, deferred material sample; replay never changes global preferences.
 ColumnLayout {
   id: root
   Layout.fillWidth: true
@@ -29,7 +29,7 @@ ColumnLayout {
       Keys.onReturnPressed: clicked()
       Keys.onSpacePressed: clicked()
       onClicked: {
-        if (sample.item)
+        if (sample.status === Loader.Ready && sample.item)
           sample.item.replay();
       }
     }
@@ -38,12 +38,14 @@ ColumnLayout {
   Loader {
     id: sample
     Layout.fillWidth: true
-    Layout.preferredHeight: 150 * Style.uiScaleRatio
+    Layout.preferredHeight: 240 * Style.uiScaleRatio
     active: root.visible
+    asynchronous: true
     sourceComponent: Item {
       id: illustration
       function replay() {
-        movement.restart();
+        if (Style.animationNormal > 0)
+          movement.restart();
       }
       clip: true
       Accessible.ignored: true
@@ -69,7 +71,7 @@ ColumnLayout {
       NMaterialSurface {
         id: surface
         anchors.centerIn: parent
-        width: Math.min(parent.width - Style.margin2XL, 360 * Style.uiScaleRatio)
+        width: Math.max(0, Math.min(parent.width - Style.margin2XL, 420 * Style.uiScaleRatio))
         height: form.implicitHeight + Style.margin2L
         radius: Style.radiusM
         color: HydraColor.smartAlpha(HydraColor.mSurfaceContainerHigh)
@@ -91,38 +93,25 @@ ColumnLayout {
               size: 24 * Style.uiScaleRatio
             }
             NText {
-              text: "Hydra"
+              text: I18n.tr("panels.user-interface.visual-variant-" + Style.visualVariant)
               Layout.fillWidth: true
               pointSize: Style.fontSizeL
               font.weight: Style.fontWeightSemiBold
-            }
-            Rectangle {
-              implicitWidth: 32 * Style.uiScaleRatio
-              implicitHeight: 18 * Style.uiScaleRatio
-              radius: Math.min(Style.iRadiusS, height / 2)
-              color: HydraColor.mPrimary
-              Rectangle {
-                width: 12 * Style.uiScaleRatio
-                height: width
-                anchors.right: parent.right
-                anchors.rightMargin: 3 * Style.uiScaleRatio
-                anchors.verticalCenter: parent.verticalCenter
-                radius: Math.min(Style.iRadiusS, height / 2)
-                color: HydraColor.mOnPrimary
-              }
+              wrapMode: Text.WordWrap
             }
           }
-          Rectangle {
+          NToggle {
+            label: I18n.tr("panels.user-interface.tooltips-label")
+            checked: true
+          }
+          NValueSlider {
             Layout.fillWidth: true
-            implicitHeight: 8 * Style.uiScaleRatio
-            radius: Math.min(Style.iRadiusS, height / 2)
-            color: HydraColor.mSurfaceVariant
-            Rectangle {
-              width: parent.width * 0.55
-              height: parent.height
-              radius: parent.radius
-              color: HydraColor.mPrimary
-            }
+            label: I18n.tr("panels.user-interface.material-lighting-label")
+            from: 0
+            to: 1
+            value: 0.65
+            stepSize: 0.01
+            text: Math.round(value * 100) + "%"
           }
         }
       }
@@ -133,14 +122,6 @@ ColumnLayout {
           property: "x"
           from: Style.marginXL
           to: 0
-          duration: Style.animationNormal
-          easing.type: Easing.OutCubic
-        }
-        NumberAnimation {
-          target: surface
-          property: "opacity"
-          from: 0.4
-          to: 1
           duration: Style.animationNormal
           easing.type: Easing.OutCubic
         }

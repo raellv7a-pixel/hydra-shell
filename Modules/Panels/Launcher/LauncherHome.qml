@@ -59,14 +59,14 @@ Flickable {
     else allApps.forceActiveFocus();
   }
   function navigateFolder(index, event) {
-    if (event.key === Qt.Key_Up) launcher.focusHomeCategories();
+    if (event.key === Qt.Key_Up) launcher.focusSearchInput();
     else if (event.key === Qt.Key_Down) {
       if (launcher.folderExpanded) focusExpanded();
       else allApps.forceActiveFocus();
     }
     else if (event.key === Qt.Key_Left || event.key === Qt.Key_Right) {
       const target = index + (event.key === Qt.Key_Left ? -1 : 1);
-      if (target < 0) launcher.focusHomeCategories();
+      if (target < 0) launcher.focusSearchInput();
       else if (target >= folderCards.count) allApps.forceActiveFocus();
       else folderCards.focusIndex(target);
     } else return false;
@@ -147,6 +147,7 @@ Flickable {
       Layout.preferredHeight: root.launcher.metrics.allAppsHeight
       surface: HydraColor.mPrimaryContainer
       foreground: HydraColor.mOnPrimaryContainer
+      raisedSurface: true
       onClicked: launcher.openAllApps("all")
       contentItem: RowLayout {
         spacing: root.launcher.metrics.gapL
@@ -165,22 +166,34 @@ Flickable {
       columns: root.wide ? 2 : 1
       columnSpacing: root.launcher.metrics.gapL
       rowSpacing: root.launcher.metrics.gapL
-      NBox {
+      Item {
         Layout.fillWidth: true
         Layout.preferredWidth: root.width * 0.55
-        readonly property real padding: root.launcher.metrics.padding
-        Layout.preferredHeight: root.wide ? root.sectionHeight : Math.max(root.launcher.metrics.pinnedHeight + Style.margin2L, pinnedBody.implicitHeight) + padding * 2
+        Layout.preferredHeight: root.wide ? root.sectionHeight : Math.max(root.launcher.metrics.pinnedHeight + Style.margin2L, pinnedBody.implicitHeight) + root.launcher.metrics.padding * 2
         Layout.alignment: Qt.AlignTop
-        forceOpaque: true
-        color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
-        border.width: 0
-        radius: Style.radiusL
+        NDropShadow {
+          anchors.fill: pinnedPanel
+          source: pinnedPanel
+          autoPaddingEnabled: true
+          shadowColor: HydraColor.mShadow
+          shadowOpacity: Style.shadowOpacity * Style.opacityLight
+          shadowHorizontalOffset: 0
+          shadowVerticalOffset: Style.marginXXS
+        }
+        NBox {
+          id: pinnedPanel
+          anchors.fill: parent
+          forceOpaque: true
+          color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
+          border.width: 0
+          radius: Style.radiusL
+        }
         ColumnLayout {
           id: pinnedBody
           anchors.left: parent.left
           anchors.right: parent.right
           anchors.top: parent.top
-          anchors.margins: parent.padding
+          anchors.margins: root.launcher.metrics.padding
           spacing: root.browse.pinned.length ? root.launcher.metrics.gapM : root.launcher.metrics.gapXS
           RowLayout {
             Layout.fillWidth: true
@@ -236,22 +249,34 @@ Flickable {
           NText { visible: root.browse.pinned.length === 0; Layout.fillWidth: true; text: I18n.tr("launcher-home.no-pinned"); color: HydraColor.mOnSurfaceVariant; wrapMode: Text.Wrap; pointSize: Style.fontSizeS }
         }
       }
-      NBox {
+      Item {
         Layout.fillWidth: true
         Layout.preferredWidth: root.width * 0.45
-        readonly property real padding: root.launcher.metrics.padding
-        Layout.preferredHeight: root.wide ? root.sectionHeight : Math.max(root.launcher.metrics.pinnedHeight + Style.margin2L, recentBody.implicitHeight) + padding * 2
+        Layout.preferredHeight: root.wide ? root.sectionHeight : Math.max(root.launcher.metrics.pinnedHeight + Style.margin2L, recentBody.implicitHeight) + root.launcher.metrics.padding * 2
         Layout.alignment: Qt.AlignTop
-        forceOpaque: true
-        color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
-        border.width: 0
-        radius: Style.radiusL
+        NDropShadow {
+          anchors.fill: recentPanel
+          source: recentPanel
+          autoPaddingEnabled: true
+          shadowColor: HydraColor.mShadow
+          shadowOpacity: Style.shadowOpacity * Style.opacityLight
+          shadowHorizontalOffset: 0
+          shadowVerticalOffset: Style.marginXXS
+        }
+        NBox {
+          id: recentPanel
+          anchors.fill: parent
+          forceOpaque: true
+          color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
+          border.width: 0
+          radius: Style.radiusL
+        }
         ColumnLayout {
           id: recentBody
           anchors.left: parent.left
           anchors.right: parent.right
           anchors.top: parent.top
-          anchors.margins: parent.padding
+          anchors.margins: root.launcher.metrics.padding
           spacing: root.launcher.metrics.gapS
           RowLayout {
             Layout.fillWidth: true

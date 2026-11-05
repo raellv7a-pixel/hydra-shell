@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Commons
 
-// Outer surface: wallpaper frost, a legible theme-coloured veil and a quiet lip.
+// Outer surface: shared wallpaper, a legible palette veil and material finish.
 // Content remains a sibling of these paints; it is never blurred or faded.
 Item {
   id: root
@@ -13,7 +13,7 @@ Item {
   property alias topRightRadius: paint.topRightRadius
   property alias bottomLeftRadius: paint.bottomLeftRadius
   property alias bottomRightRadius: paint.bottomRightRadius
-  readonly property real materialAlpha: Style.tintedGlass ? (glass.ready ? glass.tintOpacity : 1) : backgroundOpacity
+  readonly property real materialAlpha: Style.customMaterial ? (Style.profileUsesGlass && glass.ready ? glass.tintOpacity : 1) : backgroundOpacity
 
   NGlassBackdrop {
     id: glass
@@ -46,8 +46,15 @@ Item {
   Rectangle {
     id: paint
     anchors.fill: parent
-    color: root.color.a === 0 || root.backgroundOpacity === 0 ? "transparent" : Qt.alpha(Style.materialColor(root.color), (Style.tintedGlass ? 1 : root.color.a) * root.materialAlpha)
-    border.color: Style.tintedGlass ? (root.color.a === 0 || root.backgroundOpacity === 0 ? "transparent" : Style.materialEdgeColor) : legacyBorder.border.color
-    border.width: Style.tintedGlass ? Style.borderS : legacyBorder.border.width
+    color: root.color.a === 0 || root.backgroundOpacity === 0 ? "transparent" : Qt.alpha(Style.materialColor(root.color), (Style.customMaterial ? 1 : root.color.a) * root.materialAlpha)
+    border.color: Style.customMaterial ? (root.color.a === 0 || root.backgroundOpacity === 0 ? "transparent" : Style.materialEdgeColor) : legacyBorder.border.color
+    border.width: Style.customMaterial ? Style.borderS : legacyBorder.border.width
+  }
+
+  NMaterialFinish {
+    anchors.fill: parent
+    visible: root.color.a > 0 && root.backgroundOpacity > 0
+    maskSource: mask
+    surfaceColor: Style.materialColor(root.color)
   }
 }

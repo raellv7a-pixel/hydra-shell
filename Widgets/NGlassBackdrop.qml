@@ -17,7 +17,8 @@ Item {
   readonly property var host: QsWindow.contentItem
   readonly property var entry: GlassBackdropService.find(host)
   readonly property Item backdrop: entry?.source ?? null
-  readonly property bool ready: root.visible && (window?.visible ?? false) && tintOpacity < 1 && Style.glassEffectsEnabled && effectsSupported && (backdrop?.ready ?? false)
+  readonly property bool available: root.visible && (window?.visible ?? false) && tintOpacity < 1 && Style.profileUsesGlass && Style.glassEffectsEnabled && effectsSupported && (backdrop?.ready ?? false)
+  readonly property bool ready: available && (renderLoader.item?.healthy ?? true)
   readonly property matrix4x4 backdropTransform: {
     sceneTransform.transform;
     root.window?.windowTransform;
@@ -47,7 +48,7 @@ Item {
 
   Loader {
     id: sourceLoader
-    active: root.visible && (root.window?.visible ?? false) && root.tintOpacity < 1 && Style.glassEffectsEnabled && root.effectsSupported && root.host !== null && (!root.entry || root.entry.owner === root)
+    active: root.visible && (root.window?.visible ?? false) && Settings.data.wallpaper.enabled && root.tintOpacity < 1 && Style.profileUsesGlass && Style.glassEffectsEnabled && root.effectsSupported && root.host !== null && (!root.entry || root.entry.owner === root)
     sourceComponent: NGlassSource {
       screen: root.window?.screen ?? null
     }
@@ -62,9 +63,11 @@ Item {
   }
 
   Loader {
+    id: renderLoader
     anchors.fill: parent
-    active: root.ready
+    active: root.available
     sourceComponent: Item {
+      readonly property bool healthy: wallpaperShader.status !== ShaderEffect.Error
       ShaderEffectSource {
         id: silhouette
         sourceItem: root.ready ? root.maskSource : null
@@ -78,13 +81,21 @@ Item {
         anchors.fill: parent
         visible: root.ready
         ShaderEffect {
+          id: wallpaperShader
           transform: Matrix4x4 {
             matrix: root.backdropTransform
           }
           width: root.backdrop?.width ?? 1
           height: root.backdrop?.height ?? 1
           property variant source: root.backdrop?.texture ?? null
+          property variant maskTexture: silhouette
           property vector2d toneBounds: root.backdropBounds
+          property vector2d sourceSize: Qt.vector2d(root.backdrop?.width ?? 1, root.backdrop?.height ?? 1)
+          property vector2d maskSize: Qt.vector2d(root.width, root.height)
+          property matrix4x4 maskFromSource: root.backdropTransform
+          property matrix4x4 sourceFromMask: root.backdropTransform.inverted()
+          property real refractionAmount: Style.materialRefractionAmount
+          property real saturation: Style.materialSaturation
           fragmentShader: Quickshell.shellPath("Shaders/qsb/tinted_glass.frag.qsb")
         }
       }

@@ -54,7 +54,7 @@ SmartPanel {
   readonly property int totalBaseWidth: LauncherGeometry.panelWidth(screen?.width || width, Style.uiScaleRatio, Math.max(frameThickness, Style.marginL), Settings.data.appLauncher.density, launcherCoreRef?.catalogActive || false)
 
   preferredWidth: totalBaseWidth
-  preferredHeight: LauncherGeometry.panelHeight(screen?.height || height, Style.uiScaleRatio, Math.max(barHeight, Style.marginL), !launcherCoreRef || launcherCoreRef.effectiveState === "home" ? launcherCoreRef?.homePreferredHeight || 540 * Style.uiScaleRatio : 0, Settings.data.appLauncher.density)
+  preferredHeight: LauncherGeometry.panelHeight(screen?.height || height, Style.uiScaleRatio, Math.max(barHeight, Style.marginL), launcherCoreRef?.catalogActive ? 0 : launcherCoreRef?.contentPreferredHeight || 540 * Style.uiScaleRatio, Settings.data.appLauncher.density)
   preferredWidthRatio: 0
   preferredHeightRatio: 0
   panelBackgroundColor: HydraColor.mSurfaceContainer

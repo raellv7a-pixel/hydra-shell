@@ -4,21 +4,26 @@ import "Helpers/LauncherArtwork.js" as LauncherArtwork
 import qs.Commons
 import qs.Widgets
 
-NBox {
+Item {
   id: root
   required property var launcher
-  color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
-  forceOpaque: true
-  radius: Style.radiusL
-  border.width: 0
   readonly property var provider: launcher.defaultProvider
-  readonly property var categoryRows: {
-    const pinned = Settings.data.appLauncher.pinnedApps;
-    const hidden = Settings.data.appLauncher.hiddenApps;
-    return launcher.providerCategories.filter(category => category !== "all").map(category => ({
-      category: category,
-      count: provider.entries.filter(app => provider.appMatchesCategory(app, category) && (category === "Hidden" || !provider.isAppHidden(app))).length
-    }));
+  NDropShadow {
+    anchors.fill: surface
+    source: surface
+    autoPaddingEnabled: true
+    shadowColor: HydraColor.mShadow
+    shadowOpacity: Style.shadowOpacity * Style.opacityLight
+    shadowHorizontalOffset: 0
+    shadowVerticalOffset: Style.marginXXS
+  }
+  NBox {
+    id: surface
+    anchors.fill: parent
+    color: Style.materialFill(HydraColor.mSurfaceContainerHigh)
+    forceOpaque: true
+    radius: Style.radiusL
+    border.width: 0
   }
   Flickable {
     anchors.fill: parent
@@ -65,15 +70,18 @@ NBox {
         }
       }
       LauncherHomeButton {
+        id: allAppsButton
+        readonly property bool selected: root.provider.selectedCategory === "all"
         launcher: root.launcher
         text: I18n.tr("launcher-home.all-apps")
         Layout.fillWidth: true
         implicitHeight: Math.max(Math.round(72 * Style.uiScaleRatio), contentItem.implicitHeight + topPadding + bottomPadding)
         leftPadding: Style.marginL
         rightPadding: Style.marginM
-        surface: HydraColor.mPrimaryContainer
-        foreground: HydraColor.mOnPrimaryContainer
-        Accessible.selected: true
+        surface: selected ? HydraColor.mPrimaryContainer : "transparent"
+        foreground: selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurface
+        raisedSurface: selected
+        Accessible.selected: selected
         onClicked: launcher.openAllApps("all")
         Rectangle {
           anchors.left: parent.left
@@ -83,6 +91,7 @@ NBox {
           height: parent.height - Style.margin2XL
           radius: width / 2
           color: HydraColor.mPrimary
+          visible: allAppsButton.selected
           Accessible.ignored: true
         }
         contentItem: RowLayout {
@@ -95,13 +104,13 @@ NBox {
           ColumnLayout {
             Layout.fillWidth: true
             spacing: Style.marginXXS
-            NText { Layout.fillWidth: true; text: I18n.tr("launcher-home.all-apps"); font.weight: Style.fontWeightSemiBold; color: HydraColor.mOnPrimaryContainer; elide: Text.ElideRight }
+            NText { Layout.fillWidth: true; text: I18n.tr("launcher-home.all-apps"); font.weight: Style.fontWeightSemiBold; color: allAppsButton.foreground; elide: Text.ElideRight }
             NText {
               Layout.fillWidth: true
               Layout.minimumWidth: 0
               text: I18n.tr("launcher-home.installed-count", {count: root.launcher.browseModel.visibleApps.length})
               pointSize: Style.fontSizeS
-              color: HydraColor.mOnPrimaryContainer
+              color: allAppsButton.selected ? HydraColor.mOnPrimaryContainer : HydraColor.mOnSurfaceVariant
               wrapMode: Text.WordWrap
               elide: Text.ElideNone
             }
@@ -120,21 +129,22 @@ NBox {
         Accessible.role: Accessible.Heading
       }
       Repeater {
-        model: root.categoryRows
+        model: root.launcher.providerCategories.filter(category => category !== "all")
         LauncherHomeButton {
           id: categoryButton
-          required property var modelData
+          required property string modelData
           launcher: root.launcher
           Layout.fillWidth: true
           implicitHeight: Math.max(Math.round(48 * Style.uiScaleRatio), contentItem.implicitHeight + topPadding + bottomPadding)
           leftPadding: Style.marginL
           rightPadding: Style.marginM
-          readonly property bool selected: root.provider.selectedCategory === modelData.category
+          readonly property bool selected: root.provider.selectedCategory === modelData
+          raisedSurface: selected
           surface: selected ? HydraColor.mSecondaryContainer : "transparent"
           foreground: selected ? HydraColor.mOnSecondaryContainer : HydraColor.mOnSurface
-          text: root.provider.getCategoryName(modelData.category)
+          text: root.provider.getCategoryName(modelData)
           Accessible.selected: selected
-          onClicked: launcher.openAllApps(modelData.category)
+          onClicked: launcher.openAllApps(modelData)
           Rectangle {
             anchors.left: parent.left
             anchors.leftMargin: Style.marginXXS
@@ -149,7 +159,7 @@ NBox {
           contentItem: RowLayout {
             spacing: Style.marginS
             NColorIcon {
-              icon: LauncherArtwork.categoryIcon(categoryButton.modelData.category, root.provider, root.provider)
+              icon: LauncherArtwork.categoryIcon(categoryButton.modelData, root.provider, root.provider)
               size: Math.round(26 * Style.uiScaleRatio)
               Layout.minimumWidth: size
             }
@@ -162,21 +172,6 @@ NBox {
               color: categoryButton.foreground
               wrapMode: Text.WordWrap
               elide: Text.ElideNone
-            }
-            Rectangle {
-              Layout.minimumWidth: Style.marginXL + Style.marginS
-              Layout.preferredWidth: Math.max(Layout.minimumWidth, categoryCount.implicitWidth + Style.margin2S)
-              Layout.preferredHeight: categoryCount.implicitHeight + Style.margin2XXS
-              radius: Style.radiusXXS
-              color: categoryButton.selected ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainer
-              NText {
-                id: categoryCount
-                anchors.centerIn: parent
-                text: categoryButton.modelData.count
-                pointSize: Style.fontSizeS
-                font.weight: Style.fontWeightMedium
-                color: HydraColor.mOnSurfaceVariant
-              }
             }
           }
         }

@@ -149,6 +149,24 @@ ShellRoot {
         scale: core?.parent?.scale ?? 0
       });
     }
+    function searchHost(query: string, layout: string): void {
+      const hostCore = fallbackLauncher.launcherCoreRef;
+      Settings.data.appLauncher.viewMode = layout;
+      hostCore.defaultProvider.entries = hostCore.defaultProvider.entries.filter(app => app.id === "code" || String(app.id).startsWith("app-"));
+      hostCore.closeAppPanel();
+      hostCore.providers = [hostCore.defaultProvider];
+      hostCore.searchText = query;
+      hostCore.updateResults();
+    }
+    function searchHostState(): string {
+      const hostCore = fallbackLauncher.launcherCoreRef;
+      return JSON.stringify({
+        count: hostCore?.results.length,
+        viewportHeight: hostCore?.resultsView?.height,
+        height: fallbackLauncher.preferredHeight,
+        contentHeight: hostCore?.resultsView?.contentHeight
+      });
+    }
     function home(): void {
       core.goHome();
     }
@@ -187,6 +205,22 @@ ShellRoot {
       ShellState.recordLauncherUsage("app-000");
       core.searchText = "";
       core.openAllApps("all");
+    }
+    function launcherVisualState(): string {
+      const pills = root.findItem(core, "shown");
+      return JSON.stringify({
+        state: core.effectiveState,
+        categoryPillsVisible: pills?.visible ?? false,
+        sidebarVisible: core.catalogSidebarVisible,
+        contentPreferredHeight: core.contentPreferredHeight
+      });
+    }
+    function launcherViewport(width: int): void {
+      core.x = 20;
+      core.width = width;
+    }
+    function launcherSearch(text: string): void {
+      core.searchText = text;
     }
     function catalogState(): string {
       const catalog = root.findItem(core, "alphabet");

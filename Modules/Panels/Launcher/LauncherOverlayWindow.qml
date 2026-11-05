@@ -136,7 +136,7 @@ Variants {
       Item {
         id: launcherPanel
         width: LauncherGeometry.panelWidth(parent.width, Style.uiScaleRatio, launcherWindow.barThickness, Settings.data.appLauncher.density, launcherCore.catalogActive)
-        height: LauncherGeometry.panelHeight(parent.height, Style.uiScaleRatio, launcherWindow.barThickness, launcherCore.effectiveState === "home" ? launcherCore.homePreferredHeight : 0, Settings.data.appLauncher.density)
+        height: LauncherGeometry.panelHeight(parent.height, Style.uiScaleRatio, launcherWindow.barThickness, launcherCore.catalogActive ? 0 : launcherCore.contentPreferredHeight, Settings.data.appLauncher.density)
         clip: false
         property bool presented: false
 
@@ -276,7 +276,7 @@ Variants {
           layer.enabled: true
 
           readonly property real radius: Style.radiusL
-          readonly property real materialAlpha: Style.tintedGlass && !launcherGlass.ready ? 1 : Style.materialOpacity(HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
+          readonly property real materialAlpha: Style.customMaterial && !launcherGlass.ready ? 1 : Style.materialOpacity(HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
 
           // Panel dimensions (for path calculations)
           readonly property real panelW: launcherPanel.width
@@ -364,13 +364,20 @@ Variants {
             }
           }
         }
+        NMaterialFinish {
+          x: panelShape.x
+          y: panelShape.y
+          width: panelShape.width
+          height: panelShape.height
+          maskSource: panelShape
+        }
 
         // Border
         Rectangle {
           anchors.fill: parent
           color: "transparent"
           radius: Style.radiusL
-          border.color: Style.tintedGlass ? Style.materialEdgeColor : Qt.alpha(HydraColor.mOutline, 0.32)
+          border.color: Style.customMaterial ? Style.materialEdgeColor : Qt.alpha(HydraColor.mOutline, 0.32)
           border.width: Style.borderS
           visible: !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
         }

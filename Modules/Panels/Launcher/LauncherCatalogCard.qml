@@ -32,13 +32,24 @@ AbstractButton {
     launcher.selectedIndex = entryIndex;
     launcher.ignoreMouseHover = true;
   }
+  NDropShadow {
+    z: -2
+    anchors.fill: root.background
+    source: root.background
+    visible: root.visible && (root.selected || root.visualFocus || (root.hovered && !root.launcher.ignoreMouseHover && !root.launcher.appPanelOpen))
+    autoPaddingEnabled: true
+    shadowColor: HydraColor.mShadow
+    shadowOpacity: Style.shadowOpacity * Style.opacityLight
+    shadowHorizontalOffset: 0
+    shadowVerticalOffset: Style.marginXXS
+  }
 
   background: NBox {
     radius: Style.radiusM
     forceOpaque: true
     bottomLeftRadius: root.connectedToPanel ? Style.radiusXXS : Style.radiusM
     bottomRightRadius: root.connectedToPanel ? Style.radiusXXS : Style.radiusM
-    color: Style.materialFill(Style.interactionColor(root.selected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh, root.foreground, root.hovered && !root.launcher.ignoreMouseHover && !root.launcher.appPanelOpen, root.down))
+    color: Style.materialFill(Style.interactionColor(root.selected ? HydraColor.mPrimaryContainer : root.hovered && !root.launcher.ignoreMouseHover && !root.launcher.appPanelOpen ? HydraColor.mSurfaceContainerHighest : HydraColor.mSurfaceContainerHigh, root.foreground, root.hovered && !root.launcher.ignoreMouseHover && !root.launcher.appPanelOpen, root.down))
     border.width: root.keyboardCurrent || root.visualFocus ? Style.borderM : 0
     border.color: Style.focusOutlineColor(root.selected ? HydraColor.mPrimaryContainer : HydraColor.mSurfaceContainerHigh, root.foreground, HydraColor.mPrimary)
 

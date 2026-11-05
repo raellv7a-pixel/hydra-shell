@@ -42,11 +42,11 @@ ColumnLayout {
       Layout.fillWidth: true
       minimumWidth: 180 * Style.uiScaleRatio
       label: I18n.tr("panels.user-interface.visual-variant-label")
-      description: I18n.tr("panels.user-interface.visual-variant-description")
-      model: [
-        { "key": "material3", "name": I18n.tr("panels.user-interface.visual-variant-material3") },
-        { "key": "tinted-glass", "name": I18n.tr("panels.user-interface.visual-variant-tinted-glass") }
-      ]
+      description: I18n.tr("panels.user-interface.visual-profile-description-" + Style.visualVariant)
+      model: Style.visualProfileIds.map(id => ({
+        "key": id,
+        "name": I18n.tr("panels.user-interface.visual-variant-" + id)
+      }))
       currentKey: Settings.data.ui.visualVariant
       defaultValue: Settings.getDefaultValue("ui.visualVariant")
       onSelected: key => Settings.data.ui.visualVariant = key
@@ -58,9 +58,9 @@ ColumnLayout {
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.tintedGlass
+      visible: Style.customMaterial
       label: I18n.tr("panels.user-interface.glass-tint-label")
-      description: I18n.tr("panels.user-interface.glass-tint-description")
+      description: I18n.tr(Style.profileUsesGlass ? "panels.user-interface.glass-tint-description" : "panels.user-interface.material-tint-description")
       from: 0
       to: 1
       stepSize: 0.01
@@ -73,7 +73,7 @@ ColumnLayout {
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.tintedGlass
+      visible: Style.profileUsesGlass
       enabled: Style.glassEffectsEnabled
       label: I18n.tr("panels.user-interface.glass-blur-label")
       description: I18n.tr("panels.user-interface.glass-blur-description")
@@ -89,9 +89,9 @@ ColumnLayout {
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.tintedGlass
+      visible: Style.customMaterial
       label: I18n.tr("panels.user-interface.glass-edge-light-label")
-      description: I18n.tr("panels.user-interface.glass-edge-light-description")
+      description: I18n.tr(Style.profileUsesGlass ? "panels.user-interface.glass-edge-light-description" : "panels.user-interface.material-edge-light-description")
       from: 0
       to: 0.3
       stepSize: 0.01
@@ -102,9 +102,57 @@ ColumnLayout {
       text: Math.round(value * 100) + "%"
     }
 
+    NValueSlider {
+      Layout.fillWidth: true
+      visible: Style.customMaterial && (Style.materialProfile.light > 0 || Style.materialProfile.chrome > 0 || Style.materialProfile.bloom > 0)
+      enabled: Style.materialEffectsEnabled
+      label: I18n.tr("panels.user-interface.material-lighting-label")
+      description: I18n.tr("panels.user-interface.material-lighting-description")
+      from: 0
+      to: 1
+      stepSize: 0.01
+      showReset: true
+      value: Settings.data.ui.materialLighting
+      defaultValue: Settings.getDefaultValue("ui.materialLighting")
+      onMoved: value => Settings.data.ui.materialLighting = value
+      text: Math.round(value * 100) + "%"
+    }
+
+    NValueSlider {
+      Layout.fillWidth: true
+      visible: Style.customMaterial && Style.materialProfile.texture > 0
+      enabled: Style.materialEffectsEnabled
+      label: I18n.tr("panels.user-interface.material-texture-label")
+      description: I18n.tr("panels.user-interface.material-texture-description")
+      from: 0
+      to: 1
+      stepSize: 0.01
+      showReset: true
+      value: Settings.data.ui.materialTexture
+      defaultValue: Settings.getDefaultValue("ui.materialTexture")
+      onMoved: value => Settings.data.ui.materialTexture = value
+      text: Math.round(value * 100) + "%"
+    }
+
+    NValueSlider {
+      Layout.fillWidth: true
+      visible: Style.profileUsesGlass && Style.materialProfile.refraction > 0
+      enabled: Style.glassEffectsEnabled
+      label: I18n.tr("panels.user-interface.material-refraction-label")
+      description: I18n.tr("panels.user-interface.material-refraction-description")
+      from: 0
+      to: 1
+      stepSize: 0.01
+      showReset: true
+      value: Settings.data.ui.materialRefraction
+      defaultValue: Settings.getDefaultValue("ui.materialRefraction")
+      onMoved: value => Settings.data.ui.materialRefraction = value
+      text: Math.round(value * 100) + "%"
+    }
+
     NText {
       Layout.fillWidth: true
-      visible: Style.tintedGlass
+      visible: Style.profileUsesGlass
       text: I18n.tr("panels.user-interface.glass-fallback-description")
       pointSize: Style.fontSizeS
       color: HydraColor.mOnSurfaceVariant

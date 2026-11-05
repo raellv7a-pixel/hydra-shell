@@ -567,7 +567,7 @@ Variants {
           }
         }
 
-        Rectangle {
+        NMaterialSurface {
           id: background
           anchors.fill: parent
           anchors.margins: Style.marginM * 1.5

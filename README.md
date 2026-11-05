@@ -35,8 +35,9 @@ introduzido nessa versão; componentes e extensões devem usar `HydraColor.*`.
 ## Variantes visuais globais
 
 Em **Configurações → Interface do usuário → Aparência → Aparência do shell**,
-escolha **Material 3** ou **Tinted Glass**. Material 3 continua sendo o padrão,
-inclusive para configurações existentes. A escolha é persistida em
+escolha **Material 3**, **Tinted Glass**, **Liquid Glass**, **Frost**, **Aurora**,
+**Obsidian**, **Lume**, **Afterglow**, **Y2K** ou **Washi**. Material 3 continua
+sendo o padrão, inclusive para configurações existentes. A escolha é persistida em
 `ui.visualVariant` e não altera a paleta, a receita de cores, templates, ícones,
 layouts ou navegação.
 
@@ -46,8 +47,23 @@ a tonalidade/cobertura, o desfoque e a iluminação discreta das bordas são
 ajustáveis. Um acabamento GPU comprime apenas os tons do wallpaper que
 prejudicariam o contraste dos textos, sem substituir o motor de temas.
 
+Os oito perfis compartilham esse pipeline: Liquid Glass acrescenta lentes e
+refração nas bordas; Frost prioriza difusão e cobertura; Aurora acrescenta luz
+colorida pela paleta; Obsidian usa superfícies sólidas e geometria definida;
+Lume combina cobertura leve e contraste adaptativo; Afterglow traz chrome
+quente, bloom e grão/scanlines; Y2K combina chrome mais marcado e vidro;
+Washi aplica pigmentos suaves e fibras de papel fosco. Washi é uma linguagem
+de material, não outro motor de renderização. Cores do wallpaper continuam
+vindo do sistema dinâmico da Hydra, sem uma segunda extração de paleta.
+
+Além de cobertura, blur e bordas, os perfis relevantes expõem **Iluminação**,
+**Textura** e **Refração** (`ui.materialLighting`, `ui.materialTexture`,
+`ui.materialRefraction`, de 0 a 1). A prévia usa os componentes reais sem
+executar ações do sistema. Acabamentos são estáticos e compartilhados;
+cards cromados usam gradientes nativos em vez de blur ou shader por controle.
+
 O material acompanha barra/frame, Dock, Dashboard, Launcher, Configurações,
-notificações, menus e popups compartilhados. O vidro mostra o wallpaper,
+notificações, OSD, menus e popups compartilhados. O vidro mostra o wallpaper,
 **não as janelas atrás da shell**, e não depende do blur do compositor.
 Desativar **Desfoque de fundo**, ativar desempenho ou usar renderização por
 software mantém fundos sólidos legíveis. Wallpaper desativado, ausente,
