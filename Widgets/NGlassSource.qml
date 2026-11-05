@@ -7,6 +7,8 @@ import qs.Services.UI
 
 Item {
   id: root
+  // Texture producer only: no intermediate pass may paint outside a surface mask.
+  visible: false
   property var screen: null
   property string wallpaper: ""
   readonly property bool ready: enabledWallpaper && image.status === Image.Ready && mapped.status !== ShaderEffect.Error && (!nativeSizeMode || nativeWidth > 0 && nativeHeight > 0)
@@ -19,6 +21,8 @@ Item {
   }
   readonly property bool nativeSizeMode: fillMode < 0.5 || fillMode > 3.5
   readonly property size halfSize: Qt.size(Math.max(1, Math.round(width / 2)), Math.max(1, Math.round(height / 2)))
+  readonly property real outputScale: screen ? CompositorService.getDisplayScale(screen.name) : 1
+  readonly property size sampleSize: Style.glassBlurAmount > 0 ? halfSize : Qt.size(Math.max(1, Math.round(width * outputScale)), Math.max(1, Math.round(height * outputScale)))
   property string imagePath: ""
   property int nativeWidth: 0
   property int nativeHeight: 0
@@ -111,7 +115,7 @@ Item {
     id: image
     visible: false
     source: root.enabledWallpaper ? root.imagePath : ""
-    sourceSize: root.nativeSizeMode ? Qt.size(Math.max(1, Math.round(root.nativeWidth / 2)), Math.max(1, Math.round(root.nativeHeight / 2))) : root.halfSize
+    sourceSize: root.nativeSizeMode ? Qt.size(Math.max(1, Math.round(root.nativeWidth / (Style.glassBlurAmount > 0 ? 2 : 1))), Math.max(1, Math.round(root.nativeHeight / (Style.glassBlurAmount > 0 ? 2 : 1)))) : root.sampleSize
     fillMode: Image.Stretch
     asynchronous: true
     cache: true
@@ -142,7 +146,7 @@ Item {
   ShaderEffectSource {
     id: mappedTexture
     sourceItem: root.ready ? mapped : null
-    textureSize: root.halfSize
+    textureSize: root.sampleSize
     hideSource: true
     live: true
     visible: false
@@ -152,7 +156,7 @@ Item {
     id: blurred
     anchors.fill: parent
     visible: root.ready && Style.glassBlurAmount > 0
-    source: visible ? mappedTexture : null
+    source: root.ready && Style.glassBlurAmount > 0 ? mappedTexture : null
     autoPaddingEnabled: false
     blurEnabled: root.ready && Style.glassBlurAmount > 0
     blur: Style.glassBlurAmount

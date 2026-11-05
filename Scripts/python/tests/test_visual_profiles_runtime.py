@@ -117,6 +117,30 @@ class VisualProfilesRuntimeTests(unittest.TestCase):
         self.assertEqual(state["alpha"], 1)
         self.call("adjustments", 1, 1, 1)
 
+    def test_edge_light_is_independent_and_zero_unloads_finish(self):
+        self.call("effects", "true")
+        self.call("reduced", "false")
+        self.call("select", "tinted-glass", "false")
+        self.call("adjustments", 0, 0, 0)
+        try:
+            self.call("glass", 0, 0, 1)
+            self.wait(lambda: any(shader["url"].endswith("material_finish.frag.qsb")
+                                  and shader.get("status") == 1
+                                  for shader in self.call("snapshot")["shaders"]))
+            state = self.call("snapshot")
+            self.assertEqual(state["lighting"], 0)
+            self.assertTrue(all(shader.get("status", 0) != 2 and not shader["log"]
+                                for shader in state["shaders"]))
+            self.call("glass", 0, 0, 0)
+            self.wait(lambda: not any(shader["url"].endswith("material_finish.frag.qsb")
+                                      for shader in self.call("snapshot")["shaders"]))
+            state = self.call("snapshot")
+            self.assertEqual(state["alpha"], 1)
+            self.assertEqual(state["sources"], 0)
+        finally:
+            self.call("glass", 0.56, 0.85, 0.4)
+            self.call("adjustments", 1, 1, 1)
+
     def test_selected_profile_persists_across_process_restart(self):
         self.call("select", "y2k", "false")
         self.call("save")
@@ -132,6 +156,35 @@ class VisualProfilesRuntimeTests(unittest.TestCase):
         self.assertEqual(state["alpha"], 1)
         self.assertEqual(state["sources"], 0)
         self.call("effects", "true")
+
+    @unittest.skipUnless(shutil.which("magick"), "ImageMagick required for raster comparison")
+    def test_wallpaper_source_never_paints_outside_surface_masks(self):
+        wallpaper = self.lab / "checker.png"
+        subprocess.run(["magick", "-size", "256x256", "pattern:checkerboard", str(wallpaper)], check=True)
+        self.call("effects", "true")
+        self.call("reduced", "false")
+        self.call("glass", 0.56, 0.85, 0.4)
+        self.call("adjustments", 1, 1, 1)
+        self.call("select", "material3", "false")
+        self.call("wallpaper", wallpaper)
+        try:
+            def outside_pixels(name):
+                path = self.lab / (name + ".png")
+                self.call("capture", path)
+                self.wait(lambda: path.exists() and path.read_bytes().endswith(b"\x00\x00\x00\x00IEND\xaeB`\x82"))
+                return subprocess.check_output([
+                    "magick", str(path), "-gravity", "southeast", "-crop", "32x32+8+8",
+                    "+repage", "-depth", "8", "rgba:-",
+                ])
+
+            baseline = outside_pixels("opaque-reading-surface")
+            self.call("select", "frost", "false")
+            self.wait(lambda: self.call("snapshot")["alpha"] < 1)
+            self.assertEqual(self.call("snapshot")["sources"], 1)
+            self.assertEqual(outside_pixels("frost-reading-surface"), baseline)
+        finally:
+            self.call("wallpaperEnabled", "false")
+            self.wait(lambda: self.call("snapshot")["sources"] == 0)
 
 
 if __name__ == "__main__":

@@ -47,8 +47,8 @@ Item {
     id: paint
     anchors.fill: parent
     color: root.color.a === 0 || root.backgroundOpacity === 0 ? "transparent" : Qt.alpha(Style.materialColor(root.color), (Style.customMaterial ? 1 : root.color.a) * root.materialAlpha)
-    border.color: Style.customMaterial ? (root.color.a === 0 || root.backgroundOpacity === 0 ? "transparent" : Style.materialEdgeColor) : legacyBorder.border.color
-    border.width: Style.customMaterial ? Style.borderS : legacyBorder.border.width
+    border.color: legacyBorder.border.color
+    border.width: legacyBorder.border.width
   }
 
   NMaterialFinish {
@@ -56,5 +56,7 @@ Item {
     visible: root.color.a > 0 && root.backgroundOpacity > 0
     maskSource: mask
     surfaceColor: Style.materialColor(root.color)
+    cornerRadii: Qt.vector4d(paint.topLeftRadius, paint.topRightRadius, paint.bottomLeftRadius, paint.bottomRightRadius)
+    strength: root.color.a
   }
 }

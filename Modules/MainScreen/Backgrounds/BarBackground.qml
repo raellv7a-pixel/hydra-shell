@@ -144,8 +144,7 @@ ShapePath {
   }
 
   // ShapePath configuration
-  strokeWidth: Style.customMaterial && isRenderable ? Style.borderS : -1
-  strokeColor: isRenderable ? Qt.rgba(Style.materialEdgeColor.r, Style.materialEdgeColor.g, Style.materialEdgeColor.b, Style.materialEdgeColor.a * opacityFactor) : "transparent"
+  strokeWidth: -1
   fillColor: isRenderable ? Qt.rgba(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a * opacityFactor) : "transparent"
   fillRule: isFramed ? ShapePath.OddEvenFill : ShapePath.WindingFill
 

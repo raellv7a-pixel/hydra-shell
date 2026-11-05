@@ -259,7 +259,7 @@ Variants {
           y: panelShape.y
           width: panelShape.width
           height: panelShape.height
-          maskSource: panelShape
+          maskSource: panelMask
           tintOpacity: Style.materialOpacity(HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
         }
 
@@ -303,6 +303,7 @@ Variants {
           readonly property real brMultY: getMultY(launcherPanel.bottomRightCornerState)
 
           ShapePath {
+            id: panelPath
             strokeWidth: -1
             fillColor: Qt.alpha(Style.materialColor(HydraColor.mSurfaceContainer), panelShape.materialAlpha)
 
@@ -364,12 +365,29 @@ Variants {
             }
           }
         }
+        // Geometry is independent of the palette veil, including at zero tint.
+        Shape {
+          id: panelMask
+          x: panelShape.x
+          y: panelShape.y
+          width: panelShape.width
+          height: panelShape.height
+          visible: false
+          preferredRendererType: Shape.CurveRenderer
+          ShapePath {
+            strokeWidth: -1
+            fillColor: Qt.rgba(1, 1, 1, 1)
+            startX: panelPath.startX
+            startY: panelPath.startY
+            pathElements: panelPath.pathElements
+          }
+        }
         NMaterialFinish {
           x: panelShape.x
           y: panelShape.y
           width: panelShape.width
           height: panelShape.height
-          maskSource: panelShape
+          maskSource: panelMask
         }
 
         // Border
@@ -377,9 +395,9 @@ Variants {
           anchors.fill: parent
           color: "transparent"
           radius: Style.radiusL
-          border.color: Style.customMaterial ? Style.materialEdgeColor : Qt.alpha(HydraColor.mOutline, 0.32)
+          border.color: Qt.alpha(HydraColor.mOutline, 0.32)
           border.width: Style.borderS
-          visible: !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
+          visible: !Style.customMaterial && !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
         }
 
         LauncherCore {
