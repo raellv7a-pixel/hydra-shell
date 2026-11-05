@@ -93,18 +93,18 @@ ColumnLayout {
       label: I18n.tr("panels.user-interface.glass-edge-light-label")
       description: I18n.tr(Style.profileUsesGlass ? "panels.user-interface.glass-edge-light-description" : "panels.user-interface.material-edge-light-description")
       from: 0
-      to: 1
+      to: 0.3
       stepSize: 0.01
       showReset: true
-      value: Settings.data.ui.glassEdgeLight / 0.3
-      defaultValue: Settings.getDefaultValue("ui.glassEdgeLight") / 0.3
-      onMoved: value => Settings.data.ui.glassEdgeLight = value * 0.3
+      value: Settings.data.ui.glassEdgeLight
+      defaultValue: Settings.getDefaultValue("ui.glassEdgeLight")
+      onMoved: value => Settings.data.ui.glassEdgeLight = value
       text: Math.round(value * 100) + "%"
     }
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.customMaterial && (Style.materialProfile.light > 0 || Style.materialProfile.chrome > 0 || Style.materialProfile.bloom > 0 || Style.materialProfile.aurora > 0)
+      visible: Style.customMaterial && (Style.materialProfile.light > 0 || Style.materialProfile.chrome > 0 || Style.materialProfile.bloom > 0)
       enabled: Style.materialEffectsEnabled
       label: I18n.tr("panels.user-interface.material-lighting-label")
       description: I18n.tr("panels.user-interface.material-lighting-description")
@@ -120,7 +120,7 @@ ColumnLayout {
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.customMaterial && (Style.materialProfile.texture > 0 || Style.materialProfile.paper > 0)
+      visible: Style.customMaterial && Style.materialProfile.texture > 0
       enabled: Style.materialEffectsEnabled
       label: I18n.tr("panels.user-interface.material-texture-label")
       description: I18n.tr("panels.user-interface.material-texture-description")

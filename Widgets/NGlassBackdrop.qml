@@ -12,22 +12,12 @@ Item {
   readonly property bool effectsSupported: GraphicsInfo.api !== GraphicsInfo.Software
   property real tintOpacity: Style.glassBodyOpacity
   property color surfaceColor: Style.materialColor(HydraColor.mSurfaceContainer)
-  readonly property real lightingHeadroom: Math.min(0.6, Math.max(Style.materialProfile.edge, Style.materialProfile.light, Style.materialProfile.chrome, Style.materialProfile.bloom, Style.materialProfile.aurora) * 0.6)
-  readonly property vector2d backdropBounds: {
-    const bounds = Style.glassBackdropBounds(surfaceColor, tintOpacity);
-    // Keep room for the surface's own light without changing the reading limits.
-    // Recipe-based, so moving an edge slider never darkens the entire wallpaper.
-    const reserve = (bounds.y - bounds.x) * lightingHeadroom;
-    const floor = bounds.x > 0 ? bounds.x + reserve * (bounds.y < 1 ? 0.5 : 1) : bounds.x;
-    const ceiling = bounds.y < 1 ? bounds.y - reserve * (bounds.x > 0 ? 0.5 : 1) : bounds.y;
-    return Qt.vector2d(floor, ceiling);
-  }
-  readonly property bool contrastSupported: backdropBounds.x <= backdropBounds.y
+  readonly property vector2d backdropBounds: Style.glassBackdropBounds(surfaceColor, tintOpacity)
   readonly property var window: QsWindow.window
   readonly property var host: QsWindow.contentItem
   readonly property var entry: GlassBackdropService.find(host)
   readonly property Item backdrop: entry?.source ?? null
-  readonly property bool available: root.visible && (window?.visible ?? false) && tintOpacity < 1 && contrastSupported && Style.profileUsesGlass && Style.glassEffectsEnabled && Style.materialOpticsActive && effectsSupported && (backdrop?.ready ?? false)
+  readonly property bool available: root.visible && (window?.visible ?? false) && tintOpacity < 1 && Style.profileUsesGlass && Style.glassEffectsEnabled && effectsSupported && (backdrop?.ready ?? false)
   readonly property bool ready: available && (renderLoader.item?.healthy ?? true)
   readonly property matrix4x4 backdropTransform: {
     sceneTransform.transform;
@@ -58,7 +48,7 @@ Item {
 
   Loader {
     id: sourceLoader
-    active: root.visible && (root.window?.visible ?? false) && Settings.data.wallpaper.enabled && root.tintOpacity < 1 && root.contrastSupported && Style.profileUsesGlass && Style.glassEffectsEnabled && Style.materialOpticsActive && root.effectsSupported && root.host !== null && (!root.entry || root.entry.owner === root)
+    active: root.visible && (root.window?.visible ?? false) && Settings.data.wallpaper.enabled && root.tintOpacity < 1 && Style.profileUsesGlass && Style.glassEffectsEnabled && root.effectsSupported && root.host !== null && (!root.entry || root.entry.owner === root)
     sourceComponent: NGlassSource {
       screen: root.window?.screen ?? null
     }
@@ -81,10 +71,8 @@ Item {
       ShaderEffectSource {
         id: silhouette
         sourceItem: root.ready ? root.maskSource : null
-        textureSize: Qt.size(Math.max(1, Math.ceil(root.width)), Math.max(1, Math.ceil(root.height)))
         hideSource: false
         live: true
-        mipmap: Style.materialRefractionAmount > 0
         visible: false
       }
 
@@ -108,7 +96,6 @@ Item {
           property matrix4x4 sourceFromMask: root.backdropTransform.inverted()
           property real refractionAmount: Style.materialRefractionAmount
           property real saturation: Style.materialSaturation
-          property real pixelScale: Style.uiScaleRatio
           fragmentShader: Quickshell.shellPath("Shaders/qsb/tinted_glass.frag.qsb")
         }
       }

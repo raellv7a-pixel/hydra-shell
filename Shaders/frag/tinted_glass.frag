@@ -12,16 +12,14 @@ layout(std140, binding = 0) uniform buf {
     mat4 sourceFromMask;
     float refractionAmount;
     float saturation;
-    float pixelScale;
 };
 layout(binding = 1) uniform sampler2D source;
 layout(binding = 2) uniform sampler2D maskTexture;
 
 float silhouette(vec2 uv) {
-    float reach = max(1.0, 8.0 * pixelScale);
-    vec2 inset = min(uv, 1.0 - uv) * maskSize;
-    float boundary = smoothstep(-reach, reach, min(inset.x, inset.y));
-    return textureLod(maskTexture, clamp(uv, vec2(0.0), vec2(1.0)), log2(reach)).a * boundary;
+    if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0))))
+        return 0.0;
+    return texture(maskTexture, uv).a;
 }
 
 void main() {
@@ -29,15 +27,14 @@ void main() {
     if (refractionAmount > 0.0) {
         vec2 local = (maskFromSource * vec4(sampleUv * sourceSize, 0.0, 1.0)).xy;
         vec2 uv = local / max(maskSize, vec2(1.0));
-        vec2 dx = vec2(16.0 * pixelScale / max(maskSize.x, 1.0), 0.0);
-        vec2 dy = vec2(0.0, 16.0 * pixelScale / max(maskSize.y, 1.0));
+        vec2 dx = vec2(4.0 / max(maskSize.x, 1.0), 0.0);
+        vec2 dy = vec2(0.0, 4.0 / max(maskSize.y, 1.0));
         vec2 gradient = vec2(silhouette(uv + dx) - silhouette(uv - dx),
                              silhouette(uv + dy) - silhouette(uv - dy));
         // Bend only the existing shared wallpaper texture, not the painted ink.
         // Local mask normals also work at holes and disconnected panel bodies.
-        vec2 centered = clamp(uv, vec2(0.0), vec2(1.0)) * 2.0 - 1.0;
-        vec2 lens = centered * max(0.0, 1.0 - dot(centered, centered) * 0.5) * 8.0;
-        vec2 offset = (gradient * 24.0 + lens) * pixelScale * clamp(refractionAmount, 0.0, 1.0);
+        vec2 lens = sin(clamp(uv, vec2(0.0), vec2(1.0)) * 6.2831853) * 0.65;
+        vec2 offset = (gradient * 7.0 + lens) * clamp(refractionAmount, 0.0, 1.0);
         vec2 sourceOffset = (sourceFromMask * vec4(offset, 0.0, 0.0)).xy;
         sampleUv = clamp(sampleUv + sourceOffset / max(sourceSize, vec2(1.0)), vec2(0.0), vec2(1.0));
     }
@@ -45,9 +42,10 @@ void main() {
     vec3 paper = pixel.rgb / max(pixel.a, 0.0001);
     float luminance = dot(paper, vec3(0.2126, 0.7152, 0.0722));
     paper = clamp(mix(vec3(luminance), paper, clamp(saturation, 0.0, 2.0)), vec3(0.0), vec3(1.0));
-    // Preserve spatial contrast even in bright scenes: clipping every highlight
-    // to the same ceiling erased the signal that blur and refraction act on.
-    // The affine map stays inside both reading bounds, after all optical changes.
-    paper = mix(vec3(toneBounds.x), vec3(toneBounds.y), paper);
+    // Apply contrast limits after refraction and saturation, preserving alpha.
+    float peak = max(paper.r, max(paper.g, paper.b));
+    paper *= min(1.0, toneBounds.y / max(peak, 0.0001));
+    float trough = min(paper.r, min(paper.g, paper.b));
+    paper = mix(paper, vec3(1.0), max(0.0, (toneBounds.x - trough) / max(1.0 - trough, 0.0001)));
     fragColor = vec4(paper * pixel.a, pixel.a) * qt_Opacity;
 }

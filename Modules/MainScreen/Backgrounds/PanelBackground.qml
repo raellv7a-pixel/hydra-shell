@@ -91,7 +91,8 @@ ShapePath {
   readonly property real blRadius: panelBg ? getCornerRadius(panelBg.bottomLeftCornerState) : 0
 
   // ShapePath configuration
-  strokeWidth: -1
+  strokeWidth: Style.customMaterial ? Style.borderS : -1
+  strokeColor: Style.materialEdgeColor
 
   // Start point - use tiny off-screen non-degenerate fallback when not renderable.
   // Fallback forms a 1×1 off-screen square where each edge is split between a PathLine

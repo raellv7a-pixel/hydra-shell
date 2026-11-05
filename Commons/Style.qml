@@ -91,13 +91,11 @@ Singleton {
   readonly property real materialRefractionAmount: materialProfile.refraction * Math.max(0, Math.min(1, Settings.data.ui.materialRefraction))
   readonly property real materialPaperAmount: materialProfile.paper * Math.max(0, Math.min(1, Settings.data.ui.materialTexture))
   readonly property real materialSaturation: materialProfile.saturation
-  readonly property color materialHighlightColor: materialProfile.warmth > 0 ? HydraColor.blend(HydraColor.mPrimary, Qt.hsla(0.09, Math.min(0.65, HydraColor.mPrimary.hslSaturation + 0.15), HydraColor.mPrimary.hslLightness, 1), materialProfile.warmth) : HydraColor.mPrimary
-  readonly property real glassBlurAmount: MaterialProfiles.calibrated(materialProfile.blur, Settings.data.ui.glassBlur, 0.85, Math.min(1, materialProfile.blur * 1.2))
-  readonly property real materialEdgeAmount: MaterialProfiles.calibrated(materialProfile.edge, Settings.data.ui.glassEdgeLight / 0.3, 0.4, Math.min(1, materialProfile.edge * 1.65))
-  readonly property real materialTintAmount: MaterialProfiles.calibrated(materialProfile.tint, Settings.data.ui.glassTint, 0.56, Math.min(0.3, materialProfile.tint * 1.8))
-  readonly property real materialInnerAlpha: MaterialProfiles.calibrated(materialProfile.innerAlpha, Settings.data.ui.glassTint, 0.56, Math.min(0.96, materialProfile.innerAlpha * 1.65))
-  readonly property real glassRequestedOpacity: profileUsesGlass ? MaterialProfiles.calibrated(materialProfile.opacity, Settings.data.ui.glassTint, 0.56, Math.min(0.96, materialProfile.opacity * 1.65)) : 0
-  readonly property bool materialOpticsActive: glassRequestedOpacity > 0 || glassBlurAmount > 0 || materialEdgeAmount > 0 || materialLightAmount > 0 || materialChromeAmount > 0 || materialBloomAmount > 0 || materialAuroraAmount > 0 || materialTextureAmount > 0 || materialPaperAmount > 0 || materialRefractionAmount > 0
+  readonly property color materialHighlightColor: visualVariant === "afterglow" ? HydraColor.blend(HydraColor.mPrimary, Qt.hsla(0.09, Math.min(0.65, HydraColor.mPrimary.hslSaturation + 0.15), HydraColor.mPrimary.hslLightness, 1), 0.8) : HydraColor.mPrimary
+  readonly property real glassBlurAmount: MaterialProfiles.scaled(materialProfile.blur, Settings.data.ui.glassBlur, 0.85, 0, 1)
+  readonly property real materialEdgeAmount: MaterialProfiles.scaled(materialProfile.edge, Settings.data.ui.glassEdgeLight, 0.12, 0, 0.3)
+  readonly property color materialEdgeColor: materialEffectsEnabled ? Qt.alpha(HydraColor.mOnSurface, materialEdgeAmount) : "transparent"
+  readonly property real glassRequestedOpacity: MaterialProfiles.scaled(materialProfile.opacity, Settings.data.ui.glassTint, 0.56, 0.12, 0.96)
   readonly property real glassBodyOpacity: glassSurfaceOpacity(materialColor(HydraColor.mSurfaceContainer))
   readonly property real effectivePanelOpacity: materialOpacity(PowerProfileService.hydraPerformanceMode ? 1.0 : HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
   readonly property real effectiveBarOpacity: materialOpacity(PowerProfileService.hydraPerformanceMode ? 1.0 : Settings.data.bar.backgroundOpacity)
@@ -106,38 +104,51 @@ Singleton {
     if (!customMaterial || baseColor.a === 0)
       return baseColor;
     const base = Qt.rgba(baseColor.r, baseColor.g, baseColor.b, 1);
-    let tinted = HydraColor.blend(base, HydraColor.mPrimary, materialTintAmount);
-    if (materialProfile.saturation < 1) {
-      const muted = Qt.hsla(Math.max(0, tinted.hslHue), tinted.hslSaturation * materialProfile.saturation, tinted.hslLightness, 1);
+    const strength = visualVariant === "tinted-glass" ? 0.02 + 0.08 * Math.max(0, Math.min(1, Settings.data.ui.glassTint)) : MaterialProfiles.scaled(materialProfile.tint, Settings.data.ui.glassTint, 0.56, 0, 0.3);
+    let tinted = HydraColor.blend(base, HydraColor.mPrimary, strength);
+    if (visualVariant === "tinted-glass")
+      return ColorsConvert.getContrastRatio(tinted.toString(), HydraColor.mOnSurfaceVariant.toString()) >= Math.min(4.5, ColorsConvert.getContrastRatio(base.toString(), HydraColor.mOnSurfaceVariant.toString())) ? tinted : base;
+    if (visualVariant !== "tinted-glass") {
+      const muted = Qt.hsla(Math.max(0, tinted.hslHue), tinted.hslSaturation * Math.min(1, materialProfile.saturation), tinted.hslLightness, 1);
       tinted = HydraColor.blend(tinted, muted, 0.65);
+      if (materialProfile.paper > 0) {
+        const pigment = Qt.hsla(Math.max(0, HydraColor.mTertiary.hslHue), Math.min(0.12, HydraColor.mTertiary.hslSaturation), tinted.hslLightness, 1);
+        tinted = HydraColor.blend(tinted, pigment, materialProfile.paper * 0.3);
+      }
+      if (materialProfile.depth > 0)
+        tinted = Settings.data.colorSchemes.darkMode ? Qt.darker(tinted, 1 + materialProfile.depth) : Qt.lighter(tinted, 1 + materialProfile.depth * 0.25);
     }
-    if (materialProfile.paper > 0 && materialTintAmount > 0) {
-      const pigment = Qt.hsla(Math.max(0, HydraColor.mTertiary.hslHue), Math.min(0.12, HydraColor.mTertiary.hslSaturation), tinted.hslLightness, 1);
-      const pigmentAmount = MaterialProfiles.calibrated(materialProfile.paper * 0.3, Settings.data.ui.glassTint, 0.56, materialProfile.paper * 0.45);
-      tinted = HydraColor.blend(tinted, pigment, pigmentAmount);
-    }
-    if (materialProfile.depth > 0)
-      tinted = Settings.data.colorSchemes.darkMode ? Qt.darker(tinted, 1 + materialProfile.depth) : Qt.lighter(tinted, 1 + materialProfile.depth * 0.25);
     // Keep authored/dynamic ink pairs readable; never force a dark surface under dark ink.
     for (const ink of [HydraColor.mOnSurface, HydraColor.mOnSurfaceVariant]) {
       if (ColorsConvert.getContrastRatio(tinted.toString(), ink.toString()) < Math.min(4.5, ColorsConvert.getContrastRatio(base.toString(), ink.toString())))
-        return baseColor;
+        return base;
     }
-    return Qt.alpha(tinted, baseColor.a);
+    return tinted;
   }
 
   function materialFill(baseColor) {
     if (!customMaterial || baseColor.a === 0)
       return baseColor;
-    return Qt.alpha(materialColor(baseColor), baseColor.a * (glassEffectsEnabled && materialOpticsActive ? materialInnerAlpha : 1));
+    return Qt.alpha(materialColor(baseColor), glassEffectsEnabled ? materialProfile.innerAlpha : (visualVariant === "tinted-glass" ? 1 : baseColor.a));
+  }
+  function materialRelief(baseColor, amount) {
+    if (baseColor.a === 0)
+      return baseColor;
+    const relief = HydraColor.blend(baseColor, amount > 0 ? HydraColor.mOnSurface : HydraColor.mSurface, Math.abs(amount));
+    for (const ink of [HydraColor.mOnSurface, HydraColor.mOnSurfaceVariant]) {
+      if (ColorsConvert.getContrastRatio(relief.toString(), ink.toString()) < Math.min(4.5, ColorsConvert.getContrastRatio(baseColor.toString(), ink.toString())))
+        return baseColor;
+    }
+    return Qt.alpha(relief, baseColor.a);
   }
 
+
   function materialOpacity(legacyOpacity) {
-    return customMaterial ? legacyOpacity * glassBodyOpacity : legacyOpacity;
+    return customMaterial ? (legacyOpacity === 0 ? 0 : glassBodyOpacity) : legacyOpacity;
   }
 
   function glassSurfaceOpacity(surface) {
-    if (!glassEffectsEnabled || !materialOpticsActive)
+    if (!glassEffectsEnabled)
       return 1;
     const bounds = glassBackdropBounds(surface, glassRequestedOpacity);
     return bounds.x <= bounds.y ? glassRequestedOpacity : 1;

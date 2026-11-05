@@ -126,12 +126,6 @@ ShellRoot {
       ImageCacheService.init();
       WallpaperService.changeWallpaper(path, window.screen.name);
     }
-    function wallpaperEnabled(enabled: bool): void { Settings.data.wallpaper.enabled = enabled; }
-    function glass(tint: real, blur: real, edge: real): void {
-      Settings.data.ui.glassTint = tint;
-      Settings.data.ui.glassBlur = blur;
-      Settings.data.ui.glassEdgeLight = edge * 0.3;
-    }
     function adjustments(lighting: real, texture: real, refraction: real): void {
       Settings.data.ui.materialLighting = lighting;
       Settings.data.ui.materialTexture = texture;
@@ -147,9 +141,6 @@ ShellRoot {
         effects: Style.materialEffectsEnabled, glass: Style.glassEffectsEnabled,
         alpha: panel.materialAlpha, radius: panel.radius, animation: Style.animationFast,
         lighting: Style.materialLightAmount, texture: Style.materialTextureAmount, paper: Style.materialPaperAmount,
-        edge: Style.materialEdgeAmount, blur: Style.glassBlurAmount,
-        tint: Style.glassRequestedOpacity, refraction: Style.materialRefractionAmount,
-        bounds: Style.glassBackdropBounds(Style.materialColor(HydraColor.mSurfaceContainer), Style.glassRequestedOpacity),
         finishes: finishes.length,
         shaders: shaders.map(shader => ({ url: String(shader.fragmentShader), status: shader.status, log: shader.log || "" })),
         sources: GlassBackdropService.entries.length

@@ -26,20 +26,20 @@ Item {
     border.color: Style.boxBorderColor
     border.width: Style.borderS
     color: {
-      if (root.forceOpaque) {
+      if (forceOpaque) {
         return root.color;
       }
 
       return Style.materialFill(HydraColor.smartAlpha(root.color));
     }
-  }
-
-  NMaterialFinish {
-    anchors.fill: parent
-    visible: !root.forceOpaque && root.color.a > 0
-    maskSource: bg
-    surfaceColor: Qt.rgba(bg.color.r, bg.color.g, bg.color.b, 1)
-    cornerRadii: Qt.vector4d(bg.topLeftRadius, bg.topRightRadius, bg.bottomLeftRadius, bg.bottomRightRadius)
-    strength: 0.35 * root.color.a
+    gradient: Style.materialEffectsEnabled && Style.materialChromeAmount > 0.1 && bg.color.a > 0 ? chrome : null
+    Gradient {
+      id: chrome
+      GradientStop { position: 0; color: Style.materialRelief(bg.color, Style.materialChromeAmount * 0.08) }
+      GradientStop { position: 0.44; color: bg.color }
+      GradientStop { position: 0.48; color: Style.materialRelief(bg.color, Style.materialChromeAmount * 0.14) }
+      GradientStop { position: 0.55; color: Style.materialRelief(bg.color, -Style.materialChromeAmount * 0.18) }
+      GradientStop { position: 1; color: bg.color }
+    }
   }
 }
