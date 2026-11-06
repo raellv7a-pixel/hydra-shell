@@ -24,12 +24,33 @@ Item {
     const r = Style.radiusL;
     const joins = [];
     const attached = panel.contentItem?.allowAttach ?? (Settings.data.ui.panelsAttachedToBar || panel.forceAttachToBar);
-    if (attached && root.framed && (body.x <= root.insets.x + 1 || body.y <= root.insets.y + 1 || body.x + body.width >= root.width - root.insets.z - 1 || body.y + body.height >= root.height - root.insets.w - 1))
+    const frameLeft = attached && root.framed && body.x <= root.insets.x + 1;
+    const frameTop = attached && root.framed && body.y <= root.insets.y + 1;
+    const frameRight = attached && root.framed && body.x + body.width >= root.width - root.insets.z - 1;
+    const frameBottom = attached && root.framed && body.y + body.height >= root.height - root.insets.w - 1;
+    if (frameLeft || frameTop || frameRight || frameBottom)
       joins.push("frame");
     else if (attached && root.barShown && !root.framed && (Math.abs(body.y - (root.bar.y + root.bar.height)) <= 2 || Math.abs(body.x - (root.bar.x + root.bar.width)) <= 2 || Math.abs(body.y + body.height - root.bar.y) <= 2 || Math.abs(body.x + body.width - root.bar.x) <= 2))
       joins.push("bar");
-    return {id: "panel-" + index, x: body.x, y: body.y, width: body.width, height: body.height,
-      radius: r, joins: joins, fuse: IrisStyle.fuseDeep, paints: false};
+    // SmartPanel's inverted attachment corners are structural, not material
+    // melt. Bury the convex cap inside the frame, then form the shoulder with
+    // the original SDF union (its zero contour reaches k/4 from a junction).
+    const left = frameLeft ? r : 0;
+    const top = frameTop ? r : 0;
+    const right = frameRight ? r : 0;
+    const bottom = frameBottom ? r : 0;
+    // The frame is one SDF: cap the union before it can reach another,
+    // deliberately detached edge of this panel.
+    const clearance = Math.max(0, Math.min(
+      frameLeft ? Infinity : body.x - root.insets.x,
+      frameTop ? Infinity : body.y - root.insets.y,
+      frameRight ? Infinity : root.width - root.insets.z - body.x - body.width,
+      frameBottom ? Infinity : root.height - root.insets.w - body.y - body.height));
+    return {id: "panel-" + index, x: body.x - left, y: body.y - top,
+      width: body.width + left + right, height: body.height + top + bottom,
+      radius: r, joins: joins,
+      fuse: joins.includes("frame") ? Math.min(Math.max(IrisStyle.fuseDeep, 4 * r), clearance) : IrisStyle.fuseDeep,
+      paints: false};
   })
   readonly property var barShapes: {
     const bodies = [];
