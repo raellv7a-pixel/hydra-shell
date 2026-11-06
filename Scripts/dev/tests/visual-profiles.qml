@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -8,6 +10,7 @@ import qs.Services.Power
 import qs.Services.UI
 import qs.Widgets
 import qs.Widgets.Iris
+import qs.Modules.MainScreen.Backgrounds
 
 // Private facade only: renders actual material primitives without host operations.
 ShellRoot {
@@ -15,6 +18,10 @@ ShellRoot {
   property bool light: false
   property bool paletteReady: false
   property string outputName: ""
+  property bool probeMode: false
+  property real probeLip: 8
+  property real probeOpacity: 1
+  property bool nativeFrameProbe: false
   function applyPalette() {
     if (!paletteReady) return;
     HydraColor.previewDarkMode = !light;
@@ -48,7 +55,37 @@ ShellRoot {
         GradientStop { position: 0.5; color: HydraColor.mSurface }
         GradientStop { position: 1; color: HydraColor.mTertiaryContainer }
       }
+      Rectangle { anchors.fill: parent; visible: root.probeMode; color: "#ffffff" }
+      Item {
+        id: barGeometry
+        readonly property real barHeight: Style.getBarHeightForScreen(window.screen.name)
+        readonly property bool isHidden: false
+        width: canvas.width
+        height: barHeight
+      }
+      Loader {
+        anchors.fill: parent
+        active: root.nativeFrameProbe
+        sourceComponent: IrisBackgrounds { bar: barGeometry; windowRoot: window }
+      }
+      Loader {
+        anchors.fill: parent
+        active: root.probeMode
+        sourceComponent: IrisField {
+          opacity: root.probeOpacity
+          framed: true
+          frameInsets: Qt.vector4d(8, 32, 8, 8)
+          cornerRadius: 12
+          sceneSize: Qt.size(width, height)
+          tint: "black"
+          light: "red"
+          lightInScene: true
+          frameBevelLimits: Qt.vector4d(root.probeLip, root.probeLip, root.probeLip, root.probeLip)
+          shapes: [{id: "probe", x: 200, y: 16, width: 440, height: 384, radius: 24, fuse: 64, joins: ["frame"], paints: false}]
+        }
+      }
       ColumnLayout {
+        visible: !root.probeMode && !root.nativeFrameProbe
         anchors.centerIn: parent
         width: Math.min(parent.width - Style.margin2XL, 1050 * Style.uiScaleRatio)
         spacing: Style.marginXL
@@ -130,6 +167,20 @@ ShellRoot {
     function adjustments(lighting: real, texture: real): void {
       Settings.data.ui.materialLighting = lighting;
       Settings.data.ui.materialTexture = texture;
+    }
+    function probe(enabled: bool, lip: real): void { root.probeMode = enabled; root.probeLip = lip; }
+    function fade(amount: real): void { root.probeOpacity = amount; }
+    function nativeFrame(enabled: bool, capsules: bool): void {
+      Settings.data.bar.barType = "framed";
+      Settings.data.bar.position = "top";
+      Settings.data.bar.density = "default";
+      Settings.data.bar.frameThickness = 8;
+      Settings.data.bar.frameRadius = 12;
+      Settings.data.bar.useSeparateOpacity = false;
+      Settings.data.bar.showCapsule = capsules;
+      Settings.data.bar.monitors = [];
+      Settings.data.ui.panelBackgroundOpacity = 1;
+      root.nativeFrameProbe = enabled;
     }
     function save(): void { Settings.saveImmediate(); }
     function snapshot(): string {

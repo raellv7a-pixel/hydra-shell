@@ -44,6 +44,7 @@ Item {
         width: root.width + 2 * reach
         height: root.height + 2 * reach
         tint: IrisStyle.bodySurface
+        glassTint: IrisStyle.glassTint * root.backgroundOpacity
         readonly property var origin: {
           void placement.transform;
           return IrisHostGeometry.scenePoint(root, field.x, field.y);
@@ -57,11 +58,6 @@ Item {
           width: root.width, height: root.height,
           radius: paint.radius, fuse: 0, paints: false
         }]
-      }
-      IrisLightWash {
-        anchors.fill: parent
-        light: IrisStyle.accent
-        radius: paint.radius
       }
       IrisReadingPlate {
         visible: !root.readingCards

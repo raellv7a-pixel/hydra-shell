@@ -18,6 +18,10 @@ Directly reused/adapted upstream material:
   Hydra's asymmetric bar; an unpainted reference body preserves bar joins with
   separate opacity without painting that bar twice. The fixed light-paper ramp
   follows the lighting slider (100% is upstream-equivalent, zero disables it).
+  The frame's metallic lip is bounded by the actual free gutter of Hydra's bar;
+  adjoining limits blend at frame corners, without changing the body bevel.
+  Inherited Qt opacity is applied once to the completed material, rather than
+  separately inside source-over layers; original opaque lighting/shadow solves remain.
   Original SDF, joins, normals, grade, signal and silhouette-shadow equations remain.
 - modules/iris/field/IrisGlassBackdrops.qml -> same-named Widgets/Iris singleton,
   adapted with stable owner leases and Qt-guarded references for host teardown.
@@ -26,8 +30,11 @@ Directly reused/adapted upstream material:
   half-resolution grade-before-blur pipeline retained. Unused Leak branch omitted.
 - modules/iris/background/IrisAfterglowWallpaper.qml and .frag -> corresponding
   Widgets/Iris and Shaders/frag/iris_afterglow_wallpaper.frag. Paths adapted.
-- modules/iris/components/IrisLightWash.qml and .frag -> corresponding Widgets/Iris
-  and Shaders/frag/iris_light_wash.frag. Imports/paths adapted; equations unchanged.
+- modules/iris/components/IrisLightWash.qml and .frag -> integrated into IrisField.
+  Original stops, fall and dither are retained, sampled in output space for the
+  shared bar/frame/panel chassis and locally for independent surfaces. The joined
+  SDF supplies coverage and the light is composed before the metallic finish;
+  no separate rounded-panel overlay or redundant light-wash pass remains.
 - Material subset of modules/iris/style/IrisStyle.qml and curated material values
   of modules/iris/settings/IrisThemes.qml -> Widgets/Iris/IrisStyle.qml and
   Helpers/MaterialProfiles.js. Only settings/service inputs and intensity controls

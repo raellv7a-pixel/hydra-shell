@@ -1,6 +1,6 @@
 // Copyright (C) 2025-2026 snowarch
 // Based on iNiR by snowarch (https://github.com/snowarch/inir).
-// Modified for Hydra: host imports, explicit frame inputs and shader paths (2026-11-05).
+// Modified for Hydra: host/frame inputs, shader paths and shared IrisLightWash composition (2026-11-05).
 // GPL-3.0 with upstream NOTICE section 7 terms; see LICENSES/iNiR.
 pragma ComponentBehavior: Bound
 
@@ -26,6 +26,13 @@ Item {
     // Geometry-only reference owned by another field (separate bar opacity).
     property string unpaintedShape: ""
     property real glassTint: IrisStyle.glassTint
+    // Original IrisLightWash inputs, composed inside this silhouette before
+    // its finish. A chassis uses one output-space ramp across bar and panels.
+    property color light: IrisStyle.accent
+    property string lightFrom: "top"
+    property bool lightInScene: false
+    property vector4d frameBevelLimits: Qt.vector4d(IrisStyle.afterglowShape.x, IrisStyle.afterglowShape.x,
+        IrisStyle.afterglowShape.x, IrisStyle.afterglowShape.x)
     readonly property int capacity: 20
     // The bodies' shadow is drawn by the pass itself, from the joined silhouette (IrisField.frag `shade`).
     readonly property real shadowFall: Math.round(3 * IrisStyle.density)
@@ -215,13 +222,33 @@ Item {
         readonly property vector4d frameInsets: root.frameInsets
         readonly property color tint: root.tint
         readonly property vector4d options: Qt.vector4d(root.framed && !root.paintsFrame ? 1 : 0,
-            root.unpaintedShape ? root.shapes.findIndex(shape => shape.id === root.unpaintedShape) + 1 : 0, IrisStyle.lighting, 0)
+            root.unpaintedShape ? root.shapes.findIndex(shape => shape.id === root.unpaintedShape) + 1 : 0,
+            IrisStyle.lighting, root.lightInScene ? 1 : 0)
         readonly property vector4d quiet: root.quietRect
         readonly property color rim: root.rim
         readonly property color sheen: root.sheen
         readonly property vector4d edgeGlass: IrisStyle.afterglow ? Qt.vector4d(0, 0, 1, 0)
             : Qt.vector4d(IrisStyle.glassEdgeLight, IrisStyle.glassEdgeLine, Math.max(1, Math.round(IrisStyle.glassEdgeWidth * IrisStyle.density)), IrisStyle.edgeLit ? 1 : 0)
         readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, 0, 0)
+        readonly property bool lightAcross: root.lightFrom === "left" || root.lightFrom === "right"
+        readonly property vector4d lightBox: {
+            const body = root.shapes[0]
+            return root.lightInScene
+                ? Qt.vector4d(0, 0, 1 / Math.max(1, root.sceneSize.width), 1 / Math.max(1, root.sceneSize.height))
+                : Qt.vector4d(body?.x ?? 0, body?.y ?? 0, 1 / Math.max(1, body?.width ?? root.width), 1 / Math.max(1, body?.height ?? root.height))
+        }
+        readonly property real lightFall: {
+            const extent = 1 / (pass.lightAcross ? pass.lightBox.z : pass.lightBox.w)
+            const radius = root.lightInScene ? root.cornerRadius : root.shapes[0]?.radius ?? 0
+            return Math.min(0.7, Math.max(0.12, Math.max(IrisStyle.lightReach, 1.5 * radius) / extent))
+        }
+        readonly property vector4d lightRamp: Qt.vector4d(pass.lightFall * 0.45, pass.lightFall,
+            pass.lightAcross ? 1 : 0, root.lightFrom === "bottom" || root.lightFrom === "right" ? 1 : 0)
+        readonly property color lightStrong: Qt.alpha(IrisStyle.aura(root.light),
+            IrisStyle.aura(root.light).a * Math.min(1, IrisStyle.tweak("lightReach", 0.5, 3)))
+        readonly property color lightFading: Qt.alpha(IrisStyle.auraFading(root.light),
+            IrisStyle.auraFading(root.light).a * Math.min(1, IrisStyle.tweak("lightReach", 0.5, 3)))
+        readonly property vector4d frameBevelLimits: root.frameBevelLimits
         readonly property vector4d glowMix: IrisStyle.afterglowMix
         readonly property vector4d glowShadow: IrisStyle.afterglowShadow
         readonly property vector4d glowLight: IrisStyle.afterglowLight

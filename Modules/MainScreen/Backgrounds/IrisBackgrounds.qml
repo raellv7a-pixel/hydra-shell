@@ -18,6 +18,14 @@ Item {
   readonly property bool separate: Settings.data.bar.useSeparateOpacity
   readonly property real barPresence: barShown && !bar?.isHidden ? 1 : 0
   readonly property vector4d insets: Qt.vector4d(barPosition === "left" ? bar.width : band, barPosition === "top" ? bar.height : band, barPosition === "right" ? bar.width : band, barPosition === "bottom" ? bar.height : band)
+  readonly property real barLipClearance: Settings.data.bar.showCapsule
+      ? Math.max(1, Math.floor((root.bar.barHeight - Style.getCapsuleHeightForScreen(root.windowRoot.screen?.name)) / 2))
+      : IrisStyle.afterglowShape.x
+  readonly property vector4d bevelLimits: Qt.vector4d(
+      barPosition === "left" ? barLipClearance : IrisStyle.afterglowShape.x,
+      barPosition === "top" ? barLipClearance : IrisStyle.afterglowShape.x,
+      barPosition === "right" ? barLipClearance : IrisStyle.afterglowShape.x,
+      barPosition === "bottom" ? barLipClearance : IrisStyle.afterglowShape.x)
   readonly property var panels: Settings.data.ui.panelBackgroundOpacity <= 0 ? [] : PanelService.backgroundSlotAssignments.filter(panel => panel && panel.screen === root.windowRoot.screen && panel.panelRegion?.visible && panel.panelRegion.panelItem?.width > 0 && panel.panelRegion.panelItem?.height > 0)
   readonly property var panelShapes: root.panels.map((panel, index) => {
     const body = panel.panelRegion.panelItem;
@@ -76,6 +84,9 @@ Item {
     frameInsets: root.insets
     cornerRadius: root.frameRadius
     sceneSize: Qt.size(root.width, root.height)
+    lightInScene: true
+    lightFrom: root.barPosition
+    frameBevelLimits: root.bevelLimits
     glassTint: IrisStyle.glassTint * (root.separate ? Settings.data.bar.backgroundOpacity : Settings.data.ui.panelBackgroundOpacity)
     shapes: root.separate ? root.barShapes : root.barShapes.concat(root.panelShapes)
   }
@@ -91,6 +102,9 @@ Item {
       paintsFrame: false
       unpaintedShape: "bar"
       sceneSize: Qt.size(root.width, root.height)
+      lightInScene: true
+      lightFrom: root.barPosition
+      frameBevelLimits: root.bevelLimits
       glassTint: IrisStyle.glassTint * Settings.data.ui.panelBackgroundOpacity
       shapes: root.barShapes.filter(shape => shape.id === "bar").map(shape => Object.assign({}, shape, {paints: true})).concat(root.panelShapes)
     }
@@ -104,11 +118,6 @@ Item {
       y: body?.y ?? 0
       width: body?.width ?? 0
       height: body?.height ?? 0
-      IrisLightWash {
-        anchors.fill: parent
-        radius: Style.radiusL
-        light: IrisStyle.accent
-      }
       IrisReadingPlate {
         visible: !(modelData.contentItem?.materialReadingCards ?? false)
         anchors.fill: parent

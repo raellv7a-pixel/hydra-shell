@@ -71,7 +71,11 @@ implementa distorção de UV.
 OSD, menus e popups. `IrisBackgrounds` reúne frame e painéis usando a geometria
 e o ciclo de vida Hydra. Extensões pontuais permitem quatro espessuras do frame,
 referências geométricas sem pintura dupla com opacidade separada e desligamento
-da rampa clara pelo slider de iluminação. Material 3 mantém seu renderer nativo.
+da rampa clara pelo slider de iluminação. A luz original de `IrisLightWash` está
+integrada ao mesmo pass, antes do acabamento, com uma rampa contínua na barra,
+frame e painéis. O bisel metálico do frame respeita o espaço livre das cápsulas,
+sem alterar sua geometria, opacidade ou o bisel dos painéis.
+Material 3 mantém seu renderer nativo.
 Desempenho/software desativa os efeitos e usa superfícies
 opacas; desativar Desfoque de fundo desativa o vidro, não a iluminação sólida.
 

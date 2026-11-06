@@ -1,6 +1,6 @@
 #version 440
 // Copyright (C) 2025-2026 snowarch. Based on iNiR by snowarch (https://github.com/snowarch/inir).
-// Modified for Hydra (2026-11-05): independent frame insets for the existing asymmetric bar.
+// Modified for Hydra (2026-11-05): host frame inputs and original light-wash composition in the shared field.
 // GPL-3.0 with upstream NOTICE section 7 terms; see LICENSES/iNiR.
 // One pass of the iRiS field. Every body iRiS draws on an output is a rounded
 // box in a signed-distance field, smooth-unioned: a shape that comes near
@@ -132,6 +132,14 @@ layout(std140, binding = 0) uniform buf {
     vec4 leakAt0; vec4 leakAt1; vec4 leakAt2;
     vec4 leakForm0; vec4 leakForm1; vec4 leakForm2;
     vec4 leakHue0; vec4 leakHue1; vec4 leakHue2;
+    // Original IrisLightWash: premultiplied stops, normalized fall, and the
+    // sampling rect (xy origin, zw inverse size). options.w selects output space.
+    vec4 lightStrong;
+    vec4 lightFading;
+    vec4 lightRamp;
+    vec4 lightBox;
+    // Space left by actual bar controls for the frame's metallic lip (L/T/R/B).
+    vec4 frameBevelLimits;
 } u;
 layout(binding = 1) uniform sampler2D backdrop;
 
@@ -444,7 +452,7 @@ void main() {
     float coverage = 1.0 - smoothstep(-0.7, 0.7, united);
     if (u.options.x > 0.5 && u.field.y > 0.5)
         coverage *= smoothstep(-0.7, 0.7, frameDistance);
-    float fillAlpha = coverage * u.tint.a * u.qt_Opacity;
+    float fillAlpha = coverage * u.tint.a;
     vec3 colour = u.tint.rgb * fillAlpha;
     float alpha = fillAlpha;
     vec3 share = anyGlass ? weights / max(1e-4, weights.x + weights.y + weights.z) : vec3(1.0, 0.0, 0.0);
@@ -461,13 +469,33 @@ void main() {
     if (u.glass.x < 0.5) { share.x += share.y; share.y = 0.0; }
     vec3 behind = share.y > 0.0 ? texture(backdrop, clamp((p + u.scene.xy) / max(u.scene.zw, vec2(1.0)), 0.0, 1.0)).rgb : vec3(0.0);
     if (share.x < 0.999) {
-        float a = coverage * u.qt_Opacity;
+        float a = coverage;
         vec4 solid = vec4(u.tint.rgb, 1.0) * u.tint.a;
         vec4 glassy = vec4(mix(behind, u.tint.rgb, u.glass.z), 1.0);
         vec4 blurred = vec4(u.tint.rgb * u.glass.z, u.glass.z);
         vec4 mixed = (solid * share.x + glassy * share.y + blurred * share.z) * a;
         colour = mixed.rgb;
         alpha = mixed.a;
+    }
+    if (u.lightStrong.a > 0.0) {
+        // Same three stops and dither as IrisLightWash.frag, masked once by the
+        // joined field, not by a rounded panel rectangle laid over its bevel.
+        vec2 lightPoint = u.options.w > 0.5 ? frameP : p;
+        vec2 lightUV = (lightPoint - u.lightBox.xy) * u.lightBox.zw;
+        float t = u.lightRamp.z > 0.5 ? lightUV.x : lightUV.y;
+        if (u.lightRamp.w > 0.5) t = 1.0 - t;
+        float fadeAt = max(u.lightRamp.x, 1e-4);
+        float goneAt = max(u.lightRamp.y, fadeAt + 1e-4);
+        vec4 wash = t < fadeAt ? mix(u.lightStrong, u.lightFading, t / fadeAt)
+            : mix(u.lightFading, vec4(0.0), clamp((t - fadeAt) / (goneAt - fadeAt), 0.0, 1.0));
+        float noise = wash.a > 0.0 ? (ign(floor(lightPoint)) - 0.5) / 255.0 : 0.0;
+        wash = max(wash + vec4(noise), vec4(0.0));
+        // Base colour already carries coverage. Attenuate it by
+        // the intrinsic light alpha, then mask the added light only once.
+        float lightAlpha = wash.a;
+        wash *= coverage;
+        colour = wash.rgb + colour * (1.0 - lightAlpha);
+        alpha = wash.a + alpha * (1.0 - lightAlpha);
     }
     if (u.glowMix.x > 0.5) {
         bool paper = u.glowShadow.a > 0.5;
@@ -484,7 +512,16 @@ void main() {
         if (u.field.y > 0.5) {
             float w = exp(-clamp(frameDistance - united, 0.0, 60.0) / 12.0);
             gouraudSum += w * chassisLight;
-            lipSum += w * bevel;
+            // Preserve the original lip solve, but fit its frame share into the
+            // clearance of Hydra's tighter bar. Blend adjoining wall limits at
+            // corners rather than switching thickness along a diagonal.
+            vec4 walls = abs(vec4(frameP - (frameCentre - frameHalf),
+                (frameCentre + frameHalf) - frameP));
+            float nearest = min(min(walls.x, walls.y), min(walls.z, walls.w));
+            vec4 nearWall = max(vec4(0.0), vec4(max(1.0, u.field.w)) - (walls - nearest));
+            nearWall *= nearWall;
+            float frameLip = min(bevel, dot(nearWall, u.frameBevelLimits) / max(1e-4, dot(nearWall, vec4(1.0))));
+            lipSum += w * frameLip;
             weightSum += w;
         }
         for (int i = 0; i < 20; ++i) {
@@ -589,13 +626,13 @@ void main() {
         }
         vec3 material = mix(lit, env, amount);
         material += u.glowBloom.rgb * bloom * (paper ? 0.12 : 0.3) * exp(-max(depth, 0.0) / radiusBloom) * (0.35 + 0.65 * max(facing, 0.0));
-        float a = mix(alpha, coverage * u.qt_Opacity, max(amount.r, max(amount.g, amount.b)));
+        float a = mix(alpha, coverage, max(amount.r, max(amount.g, amount.b)));
         colour = min(material, vec3(1.0)) * a;
         alpha = a;
 
         // The band round the screen blooms at half: it is a frame, not a light. Paper never blooms: it read as a white cloud.
         if (united > 0.0 && !paper) {
-            float halo = bloom * exp(-united / radiusBloom) * (0.45 + 0.55 * max(facing, 0.0)) * (1.0 - coverage) * u.qt_Opacity;
+            float halo = bloom * exp(-united / radiusBloom) * (0.45 + 0.55 * max(facing, 0.0)) * (1.0 - coverage);
             // By nearness, not by a threshold: a switch at the band drew a line out of every shoulder.
             if (u.field.y > 0.5)
                 halo *= 1.0 - 0.5 * exp(-max(frameDistance - united, 0.0) / 24.0);
@@ -646,7 +683,7 @@ void main() {
             const vec3 lumaW = vec3(0.2126, 0.7152, 0.0722);
             vec3 base = u.tint.rgb;
             vec3 frost = mix(behind, u.tint.rgb, u.glass.z);
-            float a = coverage * u.qt_Opacity;
+            float a = coverage;
             vec3 solidC = vec3(0.0);
             vec3 glassC = vec3(0.0);
             if (paper) {
@@ -718,7 +755,7 @@ void main() {
                 float window = 1.0 - smoothstep(2.4 * reach, 3.8 * reach, united);
                 vec3 halo = leak * fall * window * spill * (paper ? 0.45 : 0.85) * (0.35 + 0.65 * facing)
                     * max(0.0, 1.0 + grain * (0.6 + 1.4 * tail) * dust);
-                colour += halo * (1.0 - coverage) * u.qt_Opacity;
+                colour += halo * (1.0 - coverage);
             }
         }
     }
@@ -731,7 +768,7 @@ void main() {
         vec2 g = unitedSlope;
         float facing = clamp(-g.y / max(length(g), 1e-4), 0.0, 1.0);
         float lip = coverage * (1.0 - smoothstep(u.edgeGlass.z - 0.5, u.edgeGlass.z + 0.5, depth));
-        float seal = lip * mix(u.edgeGlass.y, u.edgeGlass.x, facing * facing) * glassShare * u.sheen.a * u.qt_Opacity;
+        float seal = lip * mix(u.edgeGlass.y, u.edgeGlass.x, facing * facing) * glassShare * u.sheen.a;
         colour = u.sheen.rgb * seal + colour * (1.0 - seal);
         alpha = seal + alpha * (1.0 - seal);
     }
@@ -739,7 +776,7 @@ void main() {
         // A band just inside the silhouette, so it lands on the body's own edge
         // rather than half outside it.
         float inner = 1.0 - smoothstep(-0.7, 0.7, united + max(0.5, u.edge.x));
-        float rimAlpha = max(0.0, coverage - inner) * u.rim.a * u.qt_Opacity;
+        float rimAlpha = max(0.0, coverage - inner) * u.rim.a;
         colour = u.rim.rgb * rimAlpha + colour * (1.0 - rimAlpha);
         alpha = rimAlpha + alpha * (1.0 - rimAlpha);
     }
@@ -752,7 +789,7 @@ void main() {
         float etched = 1.0 - smoothstep(0.0, width, abs(inside - 1.25));
         float satin = exp(-inside / (width * 2.4));
         float treatment = u.frameLight.x < 1.5 ? etched : satin;
-        float lightAlpha = coverage * wall * treatment * u.frameLight.y * u.frameLight.z * u.qt_Opacity;
+        float lightAlpha = coverage * wall * treatment * u.frameLight.y * u.frameLight.z;
         colour = u.frameInk.rgb * lightAlpha + colour * (1.0 - lightAlpha);
         alpha = lightAlpha + alpha * (1.0 - lightAlpha);
     }
@@ -802,7 +839,7 @@ void main() {
         if (withFrame < FAR)
             thrown = max(thrown, max(0.0, blurredEdge(withFrame / sigma) - blurredEdge(frameShade / sigma)));
         // Under glass the body shows what is behind it: the shadow stays outside, never a grey film inside.
-        float reachHere = thrown * u.qt_Opacity * (1.0 - coverage * (share.y + share.z)) * (1.0 - alpha);
+        float reachHere = thrown * (1.0 - coverage * (share.y + share.z)) * (1.0 - alpha);
         shadowAlpha = u.shade.a * reachHere;
         colour += u.shade.rgb * reachHere;
         alpha += shadowAlpha;
@@ -820,5 +857,7 @@ void main() {
         colour *= outsideReference;
         alpha *= outsideReference;
     }
-    fragColor = vec4(colour, alpha);
+    // Compose the complete material first. Applying inherited Qt opacity to
+    // each source-over layer darkens fades and exposes an opaque body's shadow.
+    fragColor = vec4(colour, alpha) * u.qt_Opacity;
 }

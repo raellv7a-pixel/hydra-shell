@@ -94,6 +94,82 @@ class VisualProfilesRuntimeTests(unittest.TestCase):
         text = subprocess.check_output(["qs", "ipc", "-p", str(cls.lab), "call", "materials", method, *map(str, args)], env=cls.env, text=True, stderr=subprocess.DEVNULL, timeout=3)
         return json.loads(text) if text.strip() else None
 
+    def capture_pixels(self, name):
+        # Qt writes P6 directly; keep the renderer regression dependency-free.
+        path = self.lab / f"{name}.ppm"
+        self.call("capture", str(path))
+        self.wait(lambda: path.exists() and path.stat().st_size > 1200 * 900 * 3)
+        with path.open("rb") as image:
+            self.assertEqual(image.readline().strip(), b"P6")
+            width, height = map(int, image.readline().split())
+            self.assertEqual(image.readline().strip(), b"255")
+            pixels = image.read()
+        self.assertEqual(len(pixels), width * height * 3)
+        return lambda x, y: tuple(pixels[(y * width + x) * 3:(y * width + x + 1) * 3])
+
+    def test_chassis_opacity_fades_the_composed_material_once(self):
+        self.call("select", "aurora", "false")
+        self.call("reduced", "false")
+        self.call("effects", "false")
+        self.call("adjustments", 1, 0)
+        self.call("probe", "true", 8)
+        self.addCleanup(self.call, "probe", "false", 8)
+        self.addCleanup(self.call, "fade", 1)
+        full = self.capture_pixels("chassis-opaque")
+        self.call("fade", 0)
+        clear = self.capture_pixels("chassis-transparent")
+        self.call("fade", .5)
+        half = self.capture_pixels("chassis-half-opacity")
+        for point in ((420, 31), (420, 33)):
+            expected = [(a + b) / 2 for a, b in zip(full(*point), clear(*point))]
+            self.assertLessEqual(max(abs(a - b) for a, b in zip(half(*point), expected)), 2)
+
+    def test_chassis_light_crosses_the_bar_panel_join_and_switches_off(self):
+        self.call("select", "aurora", "false")
+        self.call("reduced", "false")
+        self.call("effects", "false")
+        self.call("probe", "true", 8)
+        self.addCleanup(self.call, "probe", "false", 8)
+        self.call("adjustments", 0, 0)
+        dark = self.capture_pixels("chassis-light-off")
+        self.call("adjustments", 1, 0)
+        lit = self.capture_pixels("chassis-light-on")
+        # One output-space light, no second rectangle beginning at the panel.
+        bar, panel = (420, 31), (420, 33)
+        self.assertGreater(lit(*bar)[0], dark(*bar)[0] + 10)
+        self.assertGreater(lit(*panel)[0], dark(*panel)[0] + 10)
+        self.assertLessEqual(max(abs(a - b) for a, b in zip(lit(*bar), lit(*panel))), 4)
+        self.assertLessEqual(max(dark(*bar) + dark(*panel)), 2)
+        # The original finite ramp must not turn into a uniform full-body veil.
+        self.assertLessEqual(max(abs(a - b) for a, b in zip(lit(420, 380), dark(420, 380))), 2)
+
+    def test_frame_bevel_fits_bar_clearance_without_flattening_body_bevel(self):
+        self.call("select", "y2k", "false")
+        self.call("reduced", "false")
+        self.call("effects", "false")
+        self.call("adjustments", 1, 0)
+        self.call("probe", "true", 8)
+        self.addCleanup(self.call, "probe", "false", 8)
+        wide = self.capture_pixels("frame-lip-wide")
+        self.call("probe", "true", 3)
+        narrow = self.capture_pixels("frame-lip-narrow")
+        # A tight native bar can reserve room for its capsules without losing
+        # the independent body's original rounded, wider metallic finish.
+        self.assertGreater(max(abs(a - b) for a, b in zip(wide(100, 28), narrow(100, 28))), 10)
+        self.assertLessEqual(max(abs(a - b) for a, b in zip(wide(420, 398), narrow(420, 398))), 2)
+
+    def test_native_frame_reserves_the_capsule_gutter(self):
+        self.call("select", "y2k", "false")
+        self.call("reduced", "false")
+        self.call("effects", "false")
+        self.call("adjustments", 1, 0)
+        self.call("nativeFrame", "true", "false")
+        self.addCleanup(self.call, "nativeFrame", "false", "true")
+        wide = self.capture_pixels("native-frame-without-capsules")
+        self.call("nativeFrame", "true", "true")
+        narrow = self.capture_pixels("native-frame-with-capsules")
+        self.assertGreater(max(abs(a - b) for a, b in zip(wide(100, 27), narrow(100, 27))), 10)
+
     def test_shared_backdrop_releases_and_recreates_after_renderer_teardown(self):
         self.call("select", "liquid-glass", "false")
         self.call("effects", "true")
