@@ -1,0 +1,14 @@
+module qs.Widgets.Iris
+singleton IrisStyle 1.0 IrisStyle.qml
+singleton IrisMood 1.0 IrisMood.qml
+singleton IrisWashi 1.0 IrisWashi.qml
+singleton Lume 1.0 Lume.qml
+singleton WallpaperLuma 1.0 WallpaperLuma.qml
+singleton IrisGlassBackdrops 1.0 IrisGlassBackdrops.qml
+IrisField 1.0 IrisField.qml
+IrisLightWash 1.0 IrisLightWash.qml
+IrisGlassSource 1.0 IrisGlassSource.qml
+IrisWallpaperView 1.0 IrisWallpaperView.qml
+IrisAfterglowWallpaper 1.0 IrisAfterglowWallpaper.qml
+IrisReadingPlate 1.0 IrisReadingPlate.qml
+singleton IrisHostGeometry 1.0 IrisHostGeometry.qml

@@ -100,7 +100,7 @@ ShapePath {
   startX: isRenderable ? (panelX + tlRadius * tlMultX) : -0.75
   startY: isRenderable ? panelY : -1
 
-  fillColor: isRenderable ? Style.materialColor(effectiveBackgroundColor) : "transparent"
+  fillColor: isRenderable ? effectiveBackgroundColor : "transparent"
 
   // ========== PATH DEFINITION ==========
   // Draws a rectangle with potentially inverted corners

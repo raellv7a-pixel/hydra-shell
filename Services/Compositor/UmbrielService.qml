@@ -10,6 +10,7 @@ Item {
 
   property ListModel workspaces: ListModel {}
   property var windows: []
+  property var layers: []
   property int focusedWindowIndex: -1
   property var workspaceCache: ({})
   property var outputs: []
@@ -41,7 +42,7 @@ Item {
 
   Process {
     id: subscription
-    command: ["umbriel", "subscribe", "workspaces,windows,overview,keyboard_layout,submap,screencast"]
+    command: ["umbriel", "subscribe", "workspaces,windows,layers,overview,keyboard_layout,submap,screencast"]
     stdout: SplitParser { onRead: line => root.handleEvent(line) }
     stderr: SplitParser { onRead: line => Logger.w("UmbrielService", "IPC subscription:", line) }
     onExited: exitCode => {
@@ -74,6 +75,10 @@ Item {
           windowListChanged();
           activeWindowChanged();
         }
+        break;
+      case "layers":
+        if (Array.isArray(event.data))
+          layers = event.data;
         break;
       case "overview":
         if (typeof event.data?.open === "boolean")

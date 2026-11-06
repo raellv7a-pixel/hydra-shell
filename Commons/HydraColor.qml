@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 import qs.Services.Power
+import qs.Widgets.Iris
 
 /*
 Hydra is not strictly a Material Design project, it supports both some predefined
@@ -56,30 +57,47 @@ Singleton {
     onTriggered: root.isTransitioning = false
   }
 
-  // --- Key Colors: These are the main accent colors that define your app's style
-  property color mPrimary: defaultColors.mPrimary
-  property color mOnPrimary: defaultColors.mOnPrimary
-  property color mSecondary: defaultColors.mSecondary
-  property color mOnSecondary: defaultColors.mOnSecondary
-  property color mTertiary: defaultColors.mTertiary
-  property color mOnTertiary: defaultColors.mOnTertiary
+  // Keep wallpaper/theme inputs separate from the original iNiR palette solver's output.
+  property var sourceColors: ({
+    mPrimary: defaultColors.mPrimary, mOnPrimary: defaultColors.mOnPrimary,
+    mSecondary: defaultColors.mSecondary, mOnSecondary: defaultColors.mOnSecondary,
+    mTertiary: defaultColors.mTertiary, mOnTertiary: defaultColors.mOnTertiary,
+    mSurface: defaultColors.mSurface, mOnSurface: defaultColors.mOnSurface,
+    mSurfaceVariant: defaultColors.mSurfaceVariant, mOnSurfaceVariant: defaultColors.mOnSurfaceVariant,
+    mOutline: defaultColors.mOutline, mHover: defaultColors.mHover, mOnHover: defaultColors.mOnHover,
+    mError: defaultColors.mError, mOnError: defaultColors.mOnError, mShadow: defaultColors.mShadow
+  })
+  readonly property color sourcePrimary: sourceColors.mPrimary
+  readonly property color sourceSecondary: sourceColors.mSecondary
+  readonly property color sourceTertiary: sourceColors.mTertiary
+  readonly property color sourceSurface: sourceColors.mSurface
+  readonly property var materialPalette: IrisStyle.profile.iris ? IrisWashi.palette(IrisStyle.scheme) : ({})
+  function setSourceColor(key, value) {
+    sourceColors = Object.assign({}, sourceColors, {[key]: value});
+  }
+  property color mPrimary: materialPalette.accent ?? sourceColors.mPrimary
+  property color mOnPrimary: materialPalette.onAccent ?? sourceColors.mOnPrimary
+  property color mSecondary: materialPalette.highlight ?? sourceColors.mSecondary
+  property color mOnSecondary: materialPalette.onHighlight ?? sourceColors.mOnSecondary
+  property color mTertiary: materialPalette.accent ?? sourceColors.mTertiary
+  property color mOnTertiary: materialPalette.onAccent ?? sourceColors.mOnTertiary
 
   // --- Utility Colors: These colors serve specific, universal purposes like indicating errors
-  property color mError: defaultColors.mError
-  property color mOnError: defaultColors.mOnError
+  property color mError: sourceColors.mError
+  property color mOnError: sourceColors.mOnError
 
   // --- Surface and Variant Colors: These provide additional options for surfaces and their contents, creating visual hierarchy
-  property color mSurface: defaultColors.mSurface
-  property color mOnSurface: defaultColors.mOnSurface
+  property color mSurface: materialPalette.surface ?? sourceColors.mSurface
+  property color mOnSurface: materialPalette.text ?? sourceColors.mOnSurface
 
-  property color mSurfaceVariant: defaultColors.mSurfaceVariant
-  property color mOnSurfaceVariant: defaultColors.mOnSurfaceVariant
+  property color mSurfaceVariant: materialPalette.surfaceHighest ?? sourceColors.mSurfaceVariant
+  property color mOnSurfaceVariant: materialPalette.textSecondary ?? sourceColors.mOnSurfaceVariant
 
-  property color mOutline: defaultColors.mOutline
-  property color mShadow: defaultColors.mShadow
+  property color mOutline: materialPalette.textTertiary ?? sourceColors.mOutline
+  property color mShadow: sourceColors.mShadow
 
-  property color mHover: defaultColors.mHover
-  property color mOnHover: defaultColors.mOnHover
+  property color mHover: materialPalette.accent ?? sourceColors.mHover
+  property color mOnHover: materialPalette.onAccent ?? sourceColors.mOnHover
 
   // Optional engine roles. Replaced on EVERY load so a later legacy/predefined
   // file cannot retain containers from the previous wallpaper palette.
@@ -96,22 +114,22 @@ Singleton {
     "mTertiaryContainer": defaultColors.mTertiaryContainer,
     "mOnTertiaryContainer": defaultColors.mOnTertiaryContainer
   })
-  property color _surfaceContainerLowest: surfaceContainerRoles.mSurfaceContainerLowest ?? mSurface
-  property color _surfaceContainerLow: surfaceContainerRoles.mSurfaceContainerLow ?? blend(mSurface, mSurfaceVariant, 0.18)
-  property color _surfaceContainer: surfaceContainerRoles.mSurfaceContainer ?? blend(mSurface, mSurfaceVariant, 0.36)
-  property color _surfaceContainerHigh: surfaceContainerRoles.mSurfaceContainerHigh ?? blend(mSurface, mSurfaceVariant, 0.56)
-  property color _surfaceContainerHighest: surfaceContainerRoles.mSurfaceContainerHighest ?? blend(mSurface, mSurfaceVariant, 0.76)
+  property color _surfaceContainerLowest: materialPalette.surface ?? surfaceContainerRoles.mSurfaceContainerLowest ?? mSurface
+  property color _surfaceContainerLow: materialPalette.surface ?? surfaceContainerRoles.mSurfaceContainerLow ?? blend(mSurface, mSurfaceVariant, 0.18)
+  property color _surfaceContainer: materialPalette.surface ?? surfaceContainerRoles.mSurfaceContainer ?? blend(mSurface, mSurfaceVariant, 0.36)
+  property color _surfaceContainerHigh: materialPalette.surfaceHigh ?? surfaceContainerRoles.mSurfaceContainerHigh ?? blend(mSurface, mSurfaceVariant, 0.56)
+  property color _surfaceContainerHighest: materialPalette.surfaceHighest ?? surfaceContainerRoles.mSurfaceContainerHighest ?? blend(mSurface, mSurfaceVariant, 0.76)
   readonly property color mSurfaceContainerLowest: _surfaceContainerLowest
   readonly property color mSurfaceContainerLow: _surfaceContainerLow
   readonly property color mSurfaceContainer: _surfaceContainer
   readonly property color mSurfaceContainerHigh: _surfaceContainerHigh
   readonly property color mSurfaceContainerHighest: _surfaceContainerHighest
-  property color _primaryContainer: surfaceContainerRoles.mPrimaryContainer ?? blend(mSurfaceContainerHigh, mPrimary, 0.22)
-  property color _onPrimaryContainer: surfaceContainerRoles.mOnPrimaryContainer ?? mOnSurface
-  property color _secondaryContainer: surfaceContainerRoles.mSecondaryContainer ?? blend(mSurfaceContainerHigh, mSecondary, 0.20)
-  property color _onSecondaryContainer: surfaceContainerRoles.mOnSecondaryContainer ?? mOnSurface
-  property color _tertiaryContainer: surfaceContainerRoles.mTertiaryContainer ?? blend(mSurfaceContainerHigh, mTertiary, 0.20)
-  property color _onTertiaryContainer: surfaceContainerRoles.mOnTertiaryContainer ?? mOnSurface
+  property color _primaryContainer: materialPalette.accentContainer ?? surfaceContainerRoles.mPrimaryContainer ?? blend(mSurfaceContainerHigh, mPrimary, 0.22)
+  property color _onPrimaryContainer: materialPalette.onAccentContainer ?? surfaceContainerRoles.mOnPrimaryContainer ?? mOnSurface
+  property color _secondaryContainer: materialPalette.accentContainer ?? surfaceContainerRoles.mSecondaryContainer ?? blend(mSurfaceContainerHigh, mSecondary, 0.20)
+  property color _onSecondaryContainer: materialPalette.onAccentContainer ?? surfaceContainerRoles.mOnSecondaryContainer ?? mOnSurface
+  property color _tertiaryContainer: materialPalette.accentContainer ?? surfaceContainerRoles.mTertiaryContainer ?? blend(mSurfaceContainerHigh, mTertiary, 0.20)
+  property color _onTertiaryContainer: materialPalette.onAccentContainer ?? surfaceContainerRoles.mOnTertiaryContainer ?? mOnSurface
   readonly property color mPrimaryContainer: _primaryContainer
   readonly property color mOnPrimaryContainer: _onPrimaryContainer
   readonly property color mSecondaryContainer: _secondaryContainer
@@ -333,97 +351,97 @@ Singleton {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mPrimary = customColorsData.mPrimary;
+      root.setSourceColor("mPrimary", customColorsData.mPrimary);
     }
     function onMOnPrimaryChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mOnPrimary = customColorsData.mOnPrimary;
+      root.setSourceColor("mOnPrimary", customColorsData.mOnPrimary);
     }
     function onMSecondaryChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mSecondary = customColorsData.mSecondary;
+      root.setSourceColor("mSecondary", customColorsData.mSecondary);
     }
     function onMOnSecondaryChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mOnSecondary = customColorsData.mOnSecondary;
+      root.setSourceColor("mOnSecondary", customColorsData.mOnSecondary);
     }
     function onMTertiaryChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mTertiary = customColorsData.mTertiary;
+      root.setSourceColor("mTertiary", customColorsData.mTertiary);
     }
     function onMOnTertiaryChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mOnTertiary = customColorsData.mOnTertiary;
+      root.setSourceColor("mOnTertiary", customColorsData.mOnTertiary);
     }
     function onMErrorChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mError = customColorsData.mError;
+      root.setSourceColor("mError", customColorsData.mError);
     }
     function onMOnErrorChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mOnError = customColorsData.mOnError;
+      root.setSourceColor("mOnError", customColorsData.mOnError);
     }
     function onMSurfaceChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mSurface = customColorsData.mSurface;
+      root.setSourceColor("mSurface", customColorsData.mSurface);
     }
     function onMOnSurfaceChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mOnSurface = customColorsData.mOnSurface;
+      root.setSourceColor("mOnSurface", customColorsData.mOnSurface);
     }
     function onMSurfaceVariantChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mSurfaceVariant = customColorsData.mSurfaceVariant;
+      root.setSourceColor("mSurfaceVariant", customColorsData.mSurfaceVariant);
     }
     function onMOnSurfaceVariantChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mOnSurfaceVariant = customColorsData.mOnSurfaceVariant;
+      root.setSourceColor("mOnSurfaceVariant", customColorsData.mOnSurfaceVariant);
     }
     function onMOutlineChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mOutline = customColorsData.mOutline;
+      root.setSourceColor("mOutline", customColorsData.mOutline);
     }
     function onMShadowChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mShadow = customColorsData.mShadow;
+      root.setSourceColor("mShadow", customColorsData.mShadow);
     }
     function onMHoverChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mHover = customColorsData.mHover;
+      root.setSourceColor("mHover", customColorsData.mHover);
     }
     function onMOnHoverChanged() {
       if (!root.skipTransition) {
         startTransition();
       }
-      root.mOnHover = customColorsData.mOnHover;
+      root.setSourceColor("mOnHover", customColorsData.mOnHover);
     }
   }
   // ----------------------------------------------------------------
@@ -441,7 +459,7 @@ Singleton {
     ];
     for (let i = 0; i < baseKeys.length; i++) {
       const key = baseKeys[i];
-      snapshot[key] = root[key].toString();
+      snapshot[key] = (root.sourceColors[key] ?? root[key]).toString();
     }
     const containerKeys = [
       "mSurfaceContainerLowest", "mSurfaceContainerLow", "mSurfaceContainer",
@@ -451,7 +469,8 @@ Singleton {
     ];
     for (let i = 0; i < containerKeys.length; i++) {
       const key = containerKeys[i];
-      snapshot[key] = (root.surfaceContainerRoles[key] !== undefined ? root.surfaceContainerRoles[key] : root[key]).toString();
+      if (root.surfaceContainerRoles[key] !== undefined)
+        snapshot[key] = root.surfaceContainerRoles[key].toString();
     }
     return snapshot;
   }
@@ -481,12 +500,14 @@ Singleton {
       "mSurface", "mOnSurface", "mSurfaceVariant", "mOnSurfaceVariant",
       "mOutline", "mShadow", "mHover", "mOnHover"
     ];
+    const nextSources = Object.assign({}, root.sourceColors);
     for (let i = 0; i < baseKeys.length; i++) {
       const key = baseKeys[i];
       if (paletteObj[key] !== undefined) {
-        root[key] = paletteObj[key];
+        nextSources[key] = paletteObj[key];
       }
     }
+    root.sourceColors = nextSources;
     const containerKeys = [
       "mSurfaceContainerLowest", "mSurfaceContainerLow", "mSurfaceContainer",
       "mSurfaceContainerHigh", "mSurfaceContainerHighest", "mPrimaryContainer",
@@ -669,8 +690,10 @@ Singleton {
       // stick across loads. This FileView is read-only except ENOENT defaults.
       try {
         const next = JSON.parse(text());
+        const nextSources = {};
         for (const key of ["mPrimary", "mOnPrimary", "mSecondary", "mOnSecondary", "mTertiary", "mOnTertiary", "mError", "mOnError", "mSurface", "mOnSurface", "mSurfaceVariant", "mOnSurfaceVariant", "mOutline", "mShadow", "mHover", "mOnHover"])
-          root[key] = next[key] ?? defaultColors[key];
+          nextSources[key] = next[key] ?? defaultColors[key];
+        root.sourceColors = nextSources;
         const optionalKeys = ["mSurfaceContainerLowest", "mSurfaceContainerLow", "mSurfaceContainer", "mSurfaceContainerHigh", "mSurfaceContainerHighest", "mPrimaryContainer", "mOnPrimaryContainer", "mSecondaryContainer", "mOnSecondaryContainer", "mTertiaryContainer", "mOnTertiaryContainer"];
         const containersChanged = optionalKeys.some(key => next[key] !== root.surfaceContainerRoles[key]);
         root.surfaceContainerRoles = next;

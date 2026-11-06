@@ -18,7 +18,7 @@ sudo pacman -S --needed \
     grim slurp hyprpicker wl-clipboard \
     tesseract tesseract-data-eng tesseract-data-por \
     imagemagick zbar curl ffmpeg jq gifski \
-    python python-gobject \
+    python python-gobject python-numpy python-opencv go \
     xdg-desktop-portal xdg-desktop-portal-gtk \
     wf-recorder translate-shell adw-gtk-theme \
     brightnessctl ddcutil wlsunset cliphist wget playerctl \
@@ -38,6 +38,15 @@ Os binários e metadata em `Native/Input/` são gerados localmente, não version
 
 Qt 6.12 exporta `QtQuick.Color`; o singleton de cores da Hydra é
 `qs.Commons.HydraColor`, evitando essa colisão sem alterar paletas ou tokens.
+
+### Materiais portados da iNiR
+
+`Go` compila o solver Washi original no cache do usuário quando suas fontes
+mudam; os seis arquivos de produção não têm dependências externas de módulo.
+O sampler regional Lume usa Python, NumPy e OpenCV (`python-opencv` no Arch).
+O pacote Nix fornece os mesmos runtimes. Sem o sampler, as áreas de leitura
+permanecem opacas até haver análise válida; isso não equivale a Lume funcional.
+Não há download nem instalação de bibliotecas ao renderizar materiais.
 
 O compositor Umbriel deve estar instalado antes do instalador da Hydra.
 Use `xdg-desktop-portal-umbriel` para compartilhamento de tela externo; não

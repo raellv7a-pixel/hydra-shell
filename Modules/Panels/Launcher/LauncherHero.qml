@@ -7,6 +7,7 @@ import qs.Commons
 import qs.Services.Power
 import qs.Services.System
 import qs.Widgets
+import qs.Widgets.Iris
 
 Item {
   id: root
@@ -134,11 +135,22 @@ Item {
           blur: Math.max(0, Math.min(1, Settings.data.appLauncher.heroBlurIntensity))
           blurMax: 32
         }
-        // Retain the authored overlay preference as image dimming, not a light veil.
+        // Original Lume veil/frost solve for this image's crop and actual ink.
         Rectangle {
           anchors.fill: parent
           radius: Style.radiusL
-          color: Qt.alpha(HydraColor.mShadow, Settings.data.appLauncher.coverOverlay * 0.20)
+          color: {
+            const authored = Settings.data.appLauncher.coverOverlay * 0.20;
+            if (!Style.customMaterial) return Qt.alpha(HydraColor.mShadow, authored);
+            void WallpaperLuma.revision;
+            const sample = root.presented ? WallpaperLuma.sample(WallpaperLuma.imagePath(root.launcher.profileWallpaperPath),
+                Math.max(1, Math.round(root.width)), Math.max(1, Math.round(root.height)), 0, 0, root.width, root.height, "fill") : null;
+            const base = root.lightText ? Qt.color("black") : Qt.color("white");
+            const needed = !sample ? 1 : root.lightText
+                ? Lume.veil(sample.level, sample.spread, 1, base, root.foreground, 4.5, authored, 0.86)
+                : Lume.frost(sample.level, sample.spread, 1, base, root.foreground, 4.5, 0, 0.86);
+            return Qt.alpha(base, needed);
+          }
         }
         RowLayout {
           id: greeting

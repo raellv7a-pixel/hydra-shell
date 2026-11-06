@@ -370,6 +370,13 @@ ColumnLayout {
         NHeader {
           label: "Hydra Shell"
         }
+        NText {
+          Layout.fillWidth: true
+          text: "Based on iNiR by snowarch (https://github.com/snowarch/inir)"
+          color: HydraColor.mOnSurfaceVariant
+          pointSize: Style.fontSizeS
+          wrapMode: Text.Wrap
+        }
 
         // Versions
         GridLayout {

@@ -2,6 +2,10 @@
 
 Fork pessoal e fortemente customizado do [Noctalia Shell](https://github.com/noctalia-dev/noctalia-shell), com sessão nativa **Umbriel**. A Hydra mantém protocolos Wayland genéricos para captura/idle, mas estado e ações de compositor vêm exclusivamente da Umbriel.
 
+Based on iNiR by snowarch (https://github.com/snowarch/inir).
+Versão modificada: a Hydra integra o renderer de superfícies e os solvers
+originais da iNiR/iRiS; não é a iNiR nem utiliza sua marca ou interface.
+
 ---
 
 ## Instalação
@@ -37,38 +41,50 @@ introduzido nessa versão; componentes e extensões devem usar `HydraColor.*`.
 Em **Configurações → Interface do usuário → Aparência → Aparência do shell**,
 escolha **Material 3**, **Tinted Glass**, **Liquid Glass**, **Frost**, **Aurora**,
 **Obsidian**, **Lume**, **Afterglow**, **Y2K** ou **Washi**. Material 3 continua
-sendo o padrão, inclusive para configurações existentes. A escolha é persistida em
-`ui.visualVariant` e não altera a paleta, a receita de cores, templates, ícones,
-layouts ou navegação.
+sendo o padrão. `ui.visualVariant` seleciona o material sem alterar layouts,
+navegação, ícones ou templates externos. Os perfis iNiR resolvem sua própria
+paleta de superfícies/tinta com o solver Washi original; Material 3 e Tinted
+Glass preservam a paleta Hydra.
 
-Tinted Glass usa o wallpaper estático do monitor, desfocado uma vez por janela,
-sob uma camada da paleta Hydra. Os preenchimentos internos mantêm a profundidade;
-a tonalidade/cobertura, o desfoque e a iluminação discreta das bordas são
-ajustáveis. Um acabamento GPU comprime apenas os tons do wallpaper que
-prejudicariam o contraste dos textos, sem substituir o motor de temas.
+O port em `Widgets/Iris/` reutiliza o campo SDF original: união geométrica,
+bordas direcionais, sombras da silhueta e Afterglow são renderizados no mesmo
+pass. `IrisGlassBackdrops` compartilha a fonte de wallpaper por janela; a
+graduação Afterglow precede o blur em meia resolução. Cards internos usam os
+preenchimentos originais e placas de leitura Lume, não outro shader de acabamento.
 
-Os oito perfis compartilham esse pipeline: Liquid Glass acrescenta lentes e
-refração nas bordas; Frost prioriza difusão e cobertura; Aurora acrescenta luz
-colorida pela paleta; Obsidian usa superfícies sólidas e geometria definida;
-Lume combina cobertura leve e contraste adaptativo; Afterglow traz chrome
-quente, bloom e grão/scanlines; Y2K combina chrome mais marcado e vidro;
-Washi aplica pigmentos suaves e fibras de papel fosco. Washi é uma linguagem
-de material, não outro motor de renderização. Cores do wallpaper continuam
-vindo do sistema dinâmico da Hydra, sem uma segunda extração de paleta.
+Liquid Glass usa cantos/fusão arredondados e aura intensa; Frost usa grafite,
+difusão e pouca fusão; Aurora usa pigmentação e luz interna de grande alcance.
+Obsidian é preto sólido, angular e sem aura. Lume conserva a análise regional
+do wallpaper e os cálculos originais de legibilidade. Afterglow usa metal dusk
+quente; Y2K usa vidro midnight e chrome cyber. Washi é a linguagem original de
+paleta papel/tinta — não uma textura procedural de fibras.
 
-Além de cobertura, blur e bordas, os perfis relevantes expõem **Iluminação**,
-**Textura** e **Refração** (`ui.materialLighting`, `ui.materialTexture`,
-`ui.materialRefraction`, de 0 a 1). A prévia usa os componentes reais sem
-executar ações do sistema. Acabamentos são estáticos e compartilhados;
-cards cromados usam gradientes nativos em vez de blur ou shader por controle.
+**Tonalidade, blur, luz nas bordas, iluminação e textura** são intensidades
+de 0 a 1 do material selecionado. Zero desativa o efeito; 100% usa o parâmetro
+curado original. Os novos defaults são 1; valores já salvos são preservados.
+As placas de leitura são independentes da cobertura do vidro para manter
+texto legível quando a tonalidade está em zero. Controles sem efeito no perfil
+não são exibidos. A refração inventada foi removida: o campo original não
+implementa distorção de UV.
 
-O material acompanha barra/frame, Dock, Dashboard, Launcher, Configurações,
-notificações, OSD, menus e popups compartilhados. O vidro mostra o wallpaper,
-**não as janelas atrás da shell**, e não depende do blur do compositor.
-Desativar **Desfoque de fundo**, ativar desempenho ou usar renderização por
-software mantém fundos sólidos legíveis. Wallpaper desativado, ausente,
-inválido, de cor sólida ou em vídeo também usa o fundo sólido; o vidro não
-reproduz vídeos nem a animação de troca do wallpaper.
+`NMaterialSurface` integra o renderer no Dock, Configurações, notificações,
+OSD, menus e popups. `IrisBackgrounds` reúne frame e painéis usando a geometria
+e o ciclo de vida Hydra. Extensões pontuais permitem quatro espessuras do frame,
+referências geométricas sem pintura dupla com opacidade separada e desligamento
+da rampa clara pelo slider de iluminação. Material 3 mantém seu renderer nativo.
+Desempenho/software desativa os efeitos e usa superfícies
+opacas; desativar Desfoque de fundo desativa o vidro, não a iluminação sólida.
+
+O vidro amostra o wallpaper, não janelas de aplicativos. Wallpaper estático
+e cores sólidas são suportados; vídeo e transições de wallpaper ainda não são
+espelhados. Esses casos usam o material sólido. Para validar, execute a shell
+de desenvolvimento somente em uma Umbriel aninhada com HOME/XDG/DBus privados,
+nunca diretamente sobre a sessão principal.
+
+As posições de janelas e layers vêm da assinatura existente da Umbriel:
+o Qt Wayland não informa a posição real de uma janela flutuante. Até o host
+ser identificado, a superfície usa material sólido, sem inventar coordenadas.
+O registro por janela libera referências Qt quando o proprietário é destruído.
 
 ## Temas oficiais e primeiro uso
 
@@ -659,9 +675,14 @@ Este projeto é um fork do [Noctalia Shell](https://github.com/noctalia-dev/noct
 
 ## Licença
 
-Código original sob MIT — ver [LICENSE](./LICENSE).
-O port do Tinted de [Matugen Studio](https://github.com/raellx22/Matugen-Studio/blob/cad6db3b178ee73c73bbd1facb869e3aaa16e49a/src-tauri/src/commands/color.rs)
-(`Scripts/python/src/theming/lib/tinted.py`) mantém GPL-2.0-or-later — ver
-[LICENSE.tinted](./Scripts/python/src/theming/lib/LICENSE.tinted).
-A distribuição do pipeline combinado deve respeitar os termos GPL; este port
-não é uma relicença MIT do código do Studio.
+Os arquivos originalmente Hydra/Noctalia conservam seus avisos MIT em
+[LICENSE](./LICENSE). O port iNiR/iRiS é GPL-3.0, com termos adicionais da seção
+7: [LICENSES/iNiR/LICENSE](./LICENSES/iNiR/LICENSE) e
+[NOTICE](./LICENSES/iNiR/NOTICE). A distribuição da shell combinada deve cumprir
+a GPLv3 e esses termos; **o conjunto integrado não é exclusivamente MIT**.
+As modificações e a proveniência estão em [NOTICE](./NOTICE).
+
+O port Tinted de [Matugen Studio](https://github.com/raellx22/Matugen-Studio/blob/cad6db3b178ee73c73bbd1facb869e3aaa16e49a/src-tauri/src/commands/color.rs)
+(`Scripts/python/src/theming/lib/tinted.py`) mantém GPL-2.0-or-later
+([LICENSE.tinted](./Scripts/python/src/theming/lib/LICENSE.tinted)); sua opção
+de distribuição GPLv3 é compatível com o conjunto. Nenhum port é relicenciado MIT.

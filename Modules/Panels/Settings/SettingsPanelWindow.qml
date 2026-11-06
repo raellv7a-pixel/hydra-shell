@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.Commons
 import qs.Services.UI
+import qs.Services.Compositor
 import qs.Widgets
 
 FloatingWindow {
@@ -18,6 +19,21 @@ FloatingWindow {
   implicitWidth: Math.round(1280 * Style.uiScaleRatio)
   implicitHeight: Math.round(840 * Style.uiScaleRatio)
   color: "transparent"
+  // Wayland deliberately reports synthetic toplevel positions to Qt.
+  // Reuse Umbriel's existing reactive window snapshot, retaining its opaque ID.
+  property string materialWindowId: ""
+  readonly property var materialWindow: {
+    const windows = CompositorService.getWindowList();
+    return windows.find(w => w.id === root.materialWindowId && w.pid === Quickshell.processId)
+        ?? windows.find(w => w.pid === Quickshell.processId && w.title === root.title)
+        ?? null;
+  }
+  readonly property var materialGlobalOrigin: materialWindow ? Qt.point(materialWindow.x, materialWindow.y) : null
+  function rememberMaterialWindow(): void {
+    if (root.visible && root.materialWindow && root.materialWindowId !== root.materialWindow.id)
+      root.materialWindowId = root.materialWindow.id;
+  }
+  onMaterialWindowChanged: Qt.callLater(root.rememberMaterialWindow)
 
   visible: false
 
@@ -67,6 +83,7 @@ FloatingWindow {
       SettingsPanelService.isWindowOpen = true;
     } else {
       isInitialized = false;
+      root.materialWindowId = "";
       SettingsPanelService.isWindowOpen = false;
     }
   }
@@ -123,6 +140,7 @@ FloatingWindow {
     anchors.fill: parent
     color: HydraColor.mSurfaceContainerLow
     backgroundOpacity: Settings.data.ui.panelBackgroundOpacity
+    readingCards: true
     radius: Style.radiusL
 
     SettingsContent {

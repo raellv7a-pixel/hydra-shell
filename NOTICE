@@ -1,0 +1,56 @@
+Hydra Shell — integrated surface port, modified 2026-11-05
+
+Based on iNiR by snowarch (https://github.com/snowarch/inir)
+Copyright (C) 2025-2026 snowarch
+Upstream revision: d9ec3eae11b5c8fe51fe0ea362b1fd4d14db1b8c
+
+The complete original license and additional GPLv3 section 7 terms are preserved
+in LICENSES/iNiR/LICENSE and LICENSES/iNiR/NOTICE. This modified project is Hydra
+Shell, not iNiR or iRiS; no upstream name, logo, mascot or visual-identity license
+is claimed. Original Hydra/Noctalia MIT notices remain in LICENSE and source.
+The integrated program must be distributed in compliance with GPLv3 and the
+upstream additional terms, not represented as exclusively MIT.
+
+Directly reused/adapted upstream material:
+- modules/iris/field/IrisField.qml and IrisField.frag -> Widgets/Iris/IrisField.qml
+  and Shaders/frag/iris_field.frag. Host imports, explicit frame inputs, shared
+  provider ownership and paths adapted. Independent frame insets accommodate
+  Hydra's asymmetric bar; an unpainted reference body preserves bar joins with
+  separate opacity without painting that bar twice. The fixed light-paper ramp
+  follows the lighting slider (100% is upstream-equivalent, zero disables it).
+  Original SDF, joins, normals, grade, signal and silhouette-shadow equations remain.
+- modules/iris/field/IrisGlassBackdrops.qml -> same-named Widgets/Iris singleton,
+  adapted with stable owner leases and Qt-guarded references for host teardown.
+- modules/iris/field/IrisGlassSource.qml -> Widgets/Iris/IrisGlassSource.qml.
+  Hydra wallpaper/cache mapping is supplied by IrisWallpaperView; original
+  half-resolution grade-before-blur pipeline retained. Unused Leak branch omitted.
+- modules/iris/background/IrisAfterglowWallpaper.qml and .frag -> corresponding
+  Widgets/Iris and Shaders/frag/iris_afterglow_wallpaper.frag. Paths adapted.
+- modules/iris/components/IrisLightWash.qml and .frag -> corresponding Widgets/Iris
+  and Shaders/frag/iris_light_wash.frag. Imports/paths adapted; equations unchanged.
+- Material subset of modules/iris/style/IrisStyle.qml and curated material values
+  of modules/iris/settings/IrisThemes.qml -> Widgets/Iris/IrisStyle.qml and
+  Helpers/MaterialProfiles.js. Only settings/service inputs and intensity controls
+  adapted; no IrisThemes.apply() layout side effects imported.
+- modules/iris/style/IrisMood.qml, IrisWashi.qml and services/Lume.qml,
+  WallpaperLuma.qml -> Widgets/Iris singletons. Original sampling, palette solving,
+  veil/frost and plate composition retained; host services/paths adapted.
+- scripts/colors/washi/{main,colour,language,iris,material,washi}.go and three
+  upstream regression tests -> Scripts/materials/washi/. Production Go sources
+  are unchanged. scripts/colors/washi.sh adapted as Scripts/materials/washi.sh.
+- defaults/iris-washi.json -> Assets/Iris/iris-washi.json, unchanged initial palette.
+- Necessary luma-grid subset of scripts/images/least_busy_region.py ->
+  Scripts/materials/wallpaper_luma.py. Hydra cache paths and letterbox colour adapted.
+- Original ColorUtils.mix/relativeLuminance and Places reading-plate equations
+  incorporated in IrisStyle/Lume and the Hydra host IrisReadingPlate.
+- IrisHostGeometry adapts original explicit host offsets to Umbriel's existing
+  window/layer subscription. Reading cards solve with Hydra's secondary ink;
+  LauncherHero applies the same original veil/frost solve to its own image crop.
+
+Ryoku revision f7197d72de8a21e44b0bea922bdd915f28f6b327 was inspected as a host
+integration reference. Its divergent field/shader implementation was not copied.
+No second shell, upstream interface, unrelated service stack or branding is bundled.
+
+Corresponding QML, GLSL, Go and Python sources, compilation launcher and existing
+Shaders compilation script accompany the generated QSB files. Preserve these
+sources and the required notices/README/About/welcome attribution when distributing.

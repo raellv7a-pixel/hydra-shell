@@ -88,7 +88,7 @@ RUNTIME_PACMAN=(
   tesseract tesseract-data-eng tesseract-data-por
   imagemagick zbar curl ffmpeg jq gifski
   # File pickers or scripted tooling (python3 for EDS calendar + pick-file.sh)
-  python python-gobject
+  python python-gobject python-numpy python-opencv go
   # Generic portal/file chooser support; screen sharing uses the Umbriel backend.
   xdg-desktop-portal xdg-desktop-portal-gtk
   # Screen recording, OCR translation, GTK3 theming for @define-color overrides

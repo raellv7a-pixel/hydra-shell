@@ -10,12 +10,14 @@
   kdePackages,
   mkShellNoCC,
   python3,
+  go,
 }:
 mkShellNoCC {
   #it's faster than mkDerivation / mkShell
   packages = [
     quickshell
-    (python3.withPackages (pp: [ (pp.callPackage ./materialyoucolor.nix { }) ]))
+    go
+    (python3.withPackages (pp: [ (pp.callPackage ./materialyoucolor.nix { }) pp.numpy pp.opencv4 ]))
 
     # nix
     nixfmt # formatter

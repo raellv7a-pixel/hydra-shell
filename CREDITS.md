@@ -12,8 +12,8 @@ open-source projects and contributors.
 
 - **MrDowntempo** - Creator of the Noctalia Owl and moon logo (upstream branding, no longer shipped)
 - **[SaberJ2X](https://www.reddit.com/user/SaberJ64/)** - Creator of Talia, the Noctalia mascot
-- **[iNiR / iRiS](https://github.com/snowarch/inir)** (snowarch, GPL-3.0) - Settings organization, category artwork references and the Liquid Glass, Frost, Aurora, Obsidian, Lume, Afterglow, Y2K and Washi visual concepts. Washi's paper/pigment direction also acknowledges iNiR's Gakuseei/Ricelin references. Hydra's material recipes, contrast/refraction and procedural finish shaders, source sharing and settings integration are independently authored; no GPL source, shaders, textures or other assets were copied. Hydra retains its MIT implementation, controls, palette engine, state and layouts.
-- **[Ryoku Arch](https://github.com/Ryoku-dev/ryoku)** - Technical reference for independent screen-time tracking, hourly history and Digital Wellbeing information hierarchy. The inspected source is GPL-3.0; Hydra's service and dashboard implementation are independently authored, with no Ryoku source or assets copied.
+- **Based on iNiR by snowarch (https://github.com/snowarch/inir)** — Copyright (C) 2025–2026 snowarch. Renderer SDF, iluminação, sombras, graduação Afterglow, materiais, solver Washi e análise/legibilidade Lume reutilizados diretamente da revisão `d9ec3eae11b5c8fe51fe0ea362b1fd4d14db1b8c`. Hydra adapta imports, serviços, parâmetros, geometria do host e empacotamento. GPLv3 com termos adicionais da seção 7; avisos integrais em `LICENSES/iNiR/`, modificações em `NOTICE`. A Hydra mantém seu nome, logo e interface; o port não licencia a identidade iNiR/iRiS.
+- **[Ryoku Arch](https://github.com/Ryoku-dev/ryoku)** — Revisão `f7197d72de8a21e44b0bea922bdd915f28f6b327` estudada como referência de integração/portabilidade do subtree iNiR. Não foi utilizado seu renderer divergente nem embutida uma segunda shell. A implementação anterior de screen-time permanece independente.
 
 ## Core Framework
 
@@ -71,6 +71,6 @@ open-source projects and contributors.
 - All the contributors and users who have helped make Noctalia (and therefore Hydra Shell) better
 
 ## License
-Hydra Shell is licensed under the MIT License, inherited from Noctalia Shell. See [LICENSE](LICENSE) for details.
+Os arquivos originalmente Hydra/Noctalia mantêm MIT ([LICENSE](LICENSE)). O programa combinado com o port iNiR/iRiS deve ser distribuído sob GPLv3 e os termos adicionais upstream ([LICENSES/iNiR/NOTICE](LICENSES/iNiR/NOTICE)); não é exclusivamente MIT. Os avisos e as fontes correspondentes dos componentes incorporados devem acompanhar a distribuição.
 
 Each dependency listed above is governed by its own respective license. Please refer to their individual projects for licensing information.

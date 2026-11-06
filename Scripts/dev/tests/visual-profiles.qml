@@ -7,6 +7,7 @@ import qs.Commons
 import qs.Services.Power
 import qs.Services.UI
 import qs.Widgets
+import qs.Widgets.Iris
 
 // Private facade only: renders actual material primitives without host operations.
 ShellRoot {
@@ -126,24 +127,25 @@ ShellRoot {
       ImageCacheService.init();
       WallpaperService.changeWallpaper(path, window.screen.name);
     }
-    function adjustments(lighting: real, texture: real, refraction: real): void {
+    function adjustments(lighting: real, texture: real): void {
       Settings.data.ui.materialLighting = lighting;
       Settings.data.ui.materialTexture = texture;
-      Settings.data.ui.materialRefraction = refraction;
     }
     function save(): void { Settings.saveImmediate(); }
     function snapshot(): string {
-      const finishes = root.inspect(canvas, item => item.hasFinish !== undefined);
+      const fields = root.inspect(canvas, item => item.shapes !== undefined && item.backdropSource !== undefined);
       const shaders = root.inspect(canvas, item => item.fragmentShader !== undefined);
       return JSON.stringify({
         ready: root.paletteReady && Settings.isLoaded,
         profile: Style.visualVariant, selected: Settings.data.ui.visualVariant,
+        primary: String(HydraColor.mPrimary), sourcePrimary: String(HydraColor.sourcePrimary),
+        surface: String(HydraColor.mSurface), sourceSurface: String(HydraColor.sourceSurface),
         effects: Style.materialEffectsEnabled, glass: Style.glassEffectsEnabled,
-        alpha: panel.materialAlpha, radius: panel.radius, animation: Style.animationFast,
-        lighting: Style.materialLightAmount, texture: Style.materialTextureAmount, paper: Style.materialPaperAmount,
-        finishes: finishes.length,
+        radius: panel.radius, animation: Style.animationFast,
+        lighting: IrisStyle.lighting, texture: IrisStyle.afterglowSignal,
+        fields: fields.length,
         shaders: shaders.map(shader => ({ url: String(shader.fragmentShader), status: shader.status, log: shader.log || "" })),
-        sources: GlassBackdropService.entries.length
+        sources: IrisGlassBackdrops.providers.length
       });
     }
     function capture(path: string): void { canvas.grabToImage(result => console.log("MATERIAL_CAPTURE", path, result.saveToFile(path))); }

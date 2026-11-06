@@ -27,9 +27,18 @@ Item {
 
   anchors.fill: parent
 
+  Loader {
+    anchors.fill: parent
+    active: Style.customMaterial && Style.materialEffectsEnabled
+    sourceComponent: IrisBackgrounds {
+      bar: root.bar
+      windowRoot: root.windowRoot
+    }
+  }
   // Unified background container
   Item {
     anchors.fill: parent
+    visible: !Style.customMaterial || !Style.materialEffectsEnabled
 
     // When not using separate bar opacity, use unified approach (original behavior)
     Item {
@@ -37,20 +46,14 @@ Item {
       visible: !Settings.data.bar.useSeparateOpacity
 
       // Enable layer caching to prevent continuous re-rendering
-      layer.enabled: !Style.customMaterial
-      opacity: Style.customMaterial ? 1 : Style.effectivePanelOpacity
+      layer.enabled: true
+      opacity: Style.effectivePanelOpacity
 
-      NGlassBackdrop {
-        id: unifiedGlass
-        anchors.fill: parent
-        maskSource: unifiedBackgroundsShape
-        tintOpacity: Style.effectivePanelOpacity
-      }
 
       Item {
         anchors.fill: parent
-        layer.enabled: Style.customMaterial
-        opacity: Style.customMaterial ? (unifiedGlass.ready ? Style.effectivePanelOpacity : 1) : 1
+        layer.enabled: false
+        opacity: 1
 
         Shape {
           id: unifiedBackgroundsShape
@@ -70,7 +73,7 @@ Item {
             bar: root.bar
             shapeContainer: unifiedBackgroundsShape
             windowRoot: root.windowRoot
-            backgroundColor: Style.materialColor(HydraColor.mSurfaceContainerLow)
+            backgroundColor: HydraColor.mSurfaceContainerLow
           }
 
           /**
@@ -118,10 +121,6 @@ Item {
           source: unifiedBackgroundsShape
         }
       }
-      NMaterialFinish {
-        anchors.fill: parent
-        maskSource: unifiedBackgroundsShape
-      }
     }
 
     // When using separate bar opacity, separate the rendering
@@ -133,20 +132,14 @@ Item {
       Item {
         anchors.fill: parent
 
-        layer.enabled: !Style.customMaterial
-        opacity: Style.customMaterial ? 1 : Style.effectivePanelOpacity
+        layer.enabled: true
+        opacity: Style.effectivePanelOpacity
 
-        NGlassBackdrop {
-          id: panelGlass
-          anchors.fill: parent
-          maskSource: panelBackgroundsShape
-          tintOpacity: Style.effectivePanelOpacity
-        }
 
         Item {
           anchors.fill: parent
-          layer.enabled: Style.customMaterial
-          opacity: Style.customMaterial ? (panelGlass.ready ? Style.effectivePanelOpacity : 1) : 1
+          layer.enabled: false
+          opacity: 1
 
           Shape {
             id: panelBackgroundsShape
@@ -200,30 +193,20 @@ Item {
             source: panelBackgroundsShape
           }
         }
-        NMaterialFinish {
-          anchors.fill: parent
-          maskSource: panelBackgroundsShape
-        }
       }
 
       // Bar background with separate opacity
       Item {
         anchors.fill: parent
 
-        layer.enabled: !Style.customMaterial
-        opacity: Style.customMaterial ? 1 : Style.effectiveBarOpacity
+        layer.enabled: true
+        opacity: Style.effectiveBarOpacity
 
-        NGlassBackdrop {
-          id: barGlass
-          anchors.fill: parent
-          maskSource: barBackgroundShape
-          tintOpacity: Style.effectiveBarOpacity
-        }
 
         Item {
           anchors.fill: parent
-          layer.enabled: Style.customMaterial
-          opacity: Style.customMaterial ? (barGlass.ready ? Style.effectiveBarOpacity : 1) : 1
+          layer.enabled: false
+          opacity: 1
 
           Shape {
             id: barBackgroundShape
@@ -236,7 +219,7 @@ Item {
               bar: root.bar
               shapeContainer: barBackgroundShape
               windowRoot: root.windowRoot
-              backgroundColor: Style.materialColor(HydraColor.mSurfaceContainerLow)
+              backgroundColor: HydraColor.mSurfaceContainerLow
             }
           }
 
@@ -244,11 +227,6 @@ Item {
             anchors.fill: parent
             source: barBackgroundShape
           }
-        }
-        NMaterialFinish {
-          anchors.fill: parent
-          maskSource: barBackgroundShape
-          surfaceColor: Style.materialColor(HydraColor.mSurfaceContainerLow)
         }
       }
     }

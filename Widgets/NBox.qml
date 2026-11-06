@@ -1,5 +1,9 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
+import Quickshell
 import qs.Commons
+import qs.Widgets.Iris
 
 // Rounded group container elevated above its parent panel.
 // To be used in side panels and settings panes to group fields or buttons.
@@ -18,6 +22,11 @@ Item {
   property alias topRightRadius: bg.topRightRadius
   property alias bottomLeftRadius: bg.bottomLeftRadius
   property alias bottomRightRadius: bg.bottomRightRadius
+  TransformWatcher {
+    id: placement
+    a: root.QsWindow.contentItem
+    b: root
+  }
 
   Rectangle {
     id: bg
@@ -26,20 +35,20 @@ Item {
     border.color: Style.boxBorderColor
     border.width: Style.borderS
     color: {
-      if (forceOpaque) {
-        return root.color;
+      if (!IrisStyle.glassy || root.color.a <= 0)
+        return root.forceOpaque ? root.color : Style.materialFill(HydraColor.smartAlpha(root.color));
+      const highest = Style.sameRgb(root.color, HydraColor.mSurfaceContainerHighest) || Qt.colorEqual(root.color, IrisStyle.surfaceHighest);
+      const surfaceRole = highest || Qt.colorEqual(root.color, IrisStyle.surfaceHigh)
+          || Style.sameRgb(root.color, HydraColor.mSurface) || Style.sameRgb(root.color, HydraColor.mSurfaceContainerLow)
+          || Style.sameRgb(root.color, HydraColor.mSurfaceContainer) || Style.sameRgb(root.color, HydraColor.mSurfaceContainerHigh);
+      if (surfaceRole) {
+        void placement.transform;
+        const p = IrisHostGeometry.scenePoint(root, 0, 0);
+        if (!p) return IrisStyle.surfaceOpaque;
+        return IrisStyle.readingFill(IrisHostGeometry.screenFor(root.QsWindow.window)?.name ?? "", p.x, p.y, root.width, root.height, highest);
       }
-
+      if (root.forceOpaque) return root.color;
       return Style.materialFill(HydraColor.smartAlpha(root.color));
-    }
-    gradient: Style.materialEffectsEnabled && Style.materialChromeAmount > 0.1 && bg.color.a > 0 ? chrome : null
-    Gradient {
-      id: chrome
-      GradientStop { position: 0; color: Style.materialRelief(bg.color, Style.materialChromeAmount * 0.08) }
-      GradientStop { position: 0.44; color: bg.color }
-      GradientStop { position: 0.48; color: Style.materialRelief(bg.color, Style.materialChromeAmount * 0.14) }
-      GradientStop { position: 0.55; color: Style.materialRelief(bg.color, -Style.materialChromeAmount * 0.18) }
-      GradientStop { position: 1; color: bg.color }
     }
   }
 }

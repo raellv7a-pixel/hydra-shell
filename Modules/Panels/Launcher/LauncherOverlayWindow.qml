@@ -135,6 +135,7 @@ Variants {
       // Launcher panel with position-based anchoring
       Item {
         id: launcherPanel
+        readonly property bool hasMaterialShadow: Style.customMaterial && Style.materialEffectsEnabled
         width: LauncherGeometry.panelWidth(parent.width, Style.uiScaleRatio, launcherWindow.barThickness, Settings.data.appLauncher.density, launcherCore.catalogActive)
         height: LauncherGeometry.panelHeight(parent.height, Style.uiScaleRatio, launcherWindow.barThickness, launcherCore.catalogActive ? 0 : launcherCore.contentPreferredHeight, Settings.data.appLauncher.density)
         clip: false
@@ -253,14 +254,11 @@ Variants {
           return 0;
         }
 
-        NGlassBackdrop {
-          id: launcherGlass
-          x: panelShape.x
-          y: panelShape.y
-          width: panelShape.width
-          height: panelShape.height
-          maskSource: panelShape
-          tintOpacity: Style.materialOpacity(HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
+        NMaterialSurface {
+          anchors.fill: parent
+          radius: Style.radiusL
+          visible: Style.customMaterial
+          backgroundOpacity: Settings.data.ui.panelBackgroundOpacity
         }
 
         // Background with inverted corners - extends beyond panel for inverted corners
@@ -271,12 +269,12 @@ Variants {
           y: -radius
           width: launcherPanel.width + radius * 2
           height: launcherPanel.height + radius * 2
-          visible: panelW > 0 && panelH > 0
+          visible: !Style.customMaterial && panelW > 0 && panelH > 0
           opacity: launcherPanel.opacity
           layer.enabled: true
 
           readonly property real radius: Style.radiusL
-          readonly property real materialAlpha: Style.customMaterial && !launcherGlass.ready ? 1 : Style.materialOpacity(HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity))
+          readonly property real materialAlpha: HydraColor.adaptiveOpacity(Settings.data.ui.panelBackgroundOpacity)
 
           // Panel dimensions (for path calculations)
           readonly property real panelW: launcherPanel.width
@@ -304,7 +302,7 @@ Variants {
 
           ShapePath {
             strokeWidth: -1
-            fillColor: Qt.alpha(Style.materialColor(HydraColor.mSurfaceContainer), panelShape.materialAlpha)
+            fillColor: Qt.alpha(HydraColor.mSurfaceContainer, panelShape.materialAlpha)
 
             // Offset by radius to account for Shape's extended bounds
             startX: panelShape.radius + panelShape.radius * panelShape.tlMultX
@@ -364,13 +362,6 @@ Variants {
             }
           }
         }
-        NMaterialFinish {
-          x: panelShape.x
-          y: panelShape.y
-          width: panelShape.width
-          height: panelShape.height
-          maskSource: panelShape
-        }
 
         // Border
         Rectangle {
@@ -379,7 +370,7 @@ Variants {
           radius: Style.radiusL
           border.color: Style.customMaterial ? Style.materialEdgeColor : Qt.alpha(HydraColor.mOutline, 0.32)
           border.width: Style.borderS
-          visible: !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
+          visible: !Style.customMaterial && !launcherPanel.touchingLeft && !launcherPanel.touchingRight && !launcherPanel.touchingTop && !launcherPanel.touchingBottom
         }
 
         LauncherCore {

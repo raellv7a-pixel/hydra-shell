@@ -10,7 +10,8 @@
     wlr-randr
     imagemagick
     wget
-    (python3.withPackages (pp: [ materialyoucolor ] ++ lib.optional calendarSupport pp.pygobject3))
+    go
+    (python3.withPackages (pp: [ materialyoucolor pp.numpy pp.opencv4 ] ++ lib.optional calendarSupport pp.pygobject3))
   ],
 
   lib,
@@ -27,6 +28,7 @@
   wlr-randr,
   imagemagick,
   wget,
+  go,
   # GTK3 theme so @define-color overrides from the theming templates actually
   # apply — plain GTK3 apps (no libadwaita) fall back to a non-themeable
   # embedded Adwaita stub without it. Exposed via XDG_DATA_DIRS, not PATH:
@@ -55,14 +57,11 @@ let
         /Assets/Screenshots
         /Scripts/dev
         /nix
-        /LICENSE
-        /README.md
         /flake.nix
         /flake.lock
         /shell.nix
         /lefthook.yml
         /CLAUDE.md
-        /CREDITS.md
       ]);
   };
 
@@ -107,7 +106,7 @@ stdenvNoCC.mkDerivation {
   meta = {
     description = "A sleek and minimal desktop shell thoughtfully crafted for Wayland, built with Quickshell.";
     homepage = "https://github.com/raellv7a-pixel/hydra-shell";
-    license = lib.licenses.mit;
+    license = [ lib.licenses.mit lib.licenses.gpl3Only ];
     mainProgram = "hydra-shell";
   };
 }

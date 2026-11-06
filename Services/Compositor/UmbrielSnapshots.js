@@ -22,6 +22,7 @@ function windows(entries, workspaceCache) {
     return {
       id: String(entry.id), handle: String(entry.id), title: entry.title || "",
       appId: entry.app_id || "", workspaceId: entry.workspace || "",
+      pid: entry.pid ?? -1,
       workspaceHandle: entry.workspace || "", output: workspace ? workspace.output : (entry.output || ""),
       // focused is per-workspace in Umbriel; active is global keyboard focus.
       isFocused: entry.active === true, isActive: entry.active === true,

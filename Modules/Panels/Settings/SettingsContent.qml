@@ -34,6 +34,7 @@ import qs.Widgets
 
 Item {
   id: root
+  readonly property bool materialReadingCards: true
 
   Component.onDestruction: SystemStatService.unregisterComponent("settings")
 

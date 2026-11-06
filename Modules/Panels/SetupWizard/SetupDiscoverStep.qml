@@ -88,6 +88,13 @@ NScrollView {
       Layout.fillWidth: true
       wrapMode: Text.WordWrap
     }
+    NText {
+      Layout.fillWidth: true
+      text: "Based on iNiR by snowarch (https://github.com/snowarch/inir)"
+      color: HydraColor.mOnSurfaceVariant
+      pointSize: Style.fontSizeS
+      wrapMode: Text.Wrap
+    }
 
     // Mini desktop canvas simulation
     NBox {

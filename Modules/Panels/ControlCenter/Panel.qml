@@ -22,6 +22,7 @@ import qs.Widgets
 
 Item {
   id: root
+  readonly property bool materialReadingCards: true
 
   readonly property var cfg: Settings.data.controlCenter
 

@@ -1,8 +1,8 @@
 /*
 * Hydra – made by https://github.com/hydra-dev
-* Licensed under the MIT License.
-* Forks and modifications are allowed under the MIT License,
-* but proper credit must be given to the original author.
+* Original Hydra/Noctalia files retain MIT; integrated iNiR surfaces are GPLv3.
+* Based on iNiR by snowarch (https://github.com/snowarch/inir).
+* See LICENSE, NOTICE and LICENSES/iNiR for the combined distribution terms.
 */
 
 //@ pragma Env QT_FFMPEG_DECODING_HW_DEVICE_TYPES=vaapi,vdpau

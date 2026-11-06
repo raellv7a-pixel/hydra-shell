@@ -744,12 +744,11 @@ Singleton {
     // ui
     property JsonObject ui: JsonObject {
       property string visualVariant: "material3"
-      property real glassTint: 0.56
-      property real glassBlur: 0.85
-      property real glassEdgeLight: 0.12
+      property real glassTint: 1.0
+      property real glassBlur: 1.0
+      property real glassEdgeLight: 1.0
       property real materialLighting: 1.0
       property real materialTexture: 1.0
-      property real materialRefraction: 1.0
       property string fontDefault: ""
       property string fontFixed: ""
       property real fontDefaultScale: 1.0

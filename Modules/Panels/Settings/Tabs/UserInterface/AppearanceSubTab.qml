@@ -58,7 +58,7 @@ ColumnLayout {
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.customMaterial
+      visible: Style.customMaterial && (Style.profileUsesGlass || Style.materialProfile.tint > 0)
       label: I18n.tr("panels.user-interface.glass-tint-label")
       description: I18n.tr(Style.profileUsesGlass ? "panels.user-interface.glass-tint-description" : "panels.user-interface.material-tint-description")
       from: 0
@@ -89,11 +89,11 @@ ColumnLayout {
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.customMaterial
+      visible: Style.customMaterial && (Style.profileUsesGlass || Style.materialProfile.afterglow || Style.materialProfile.rim)
       label: I18n.tr("panels.user-interface.glass-edge-light-label")
       description: I18n.tr(Style.profileUsesGlass ? "panels.user-interface.glass-edge-light-description" : "panels.user-interface.material-edge-light-description")
       from: 0
-      to: 0.3
+      to: 1
       stepSize: 0.01
       showReset: true
       value: Settings.data.ui.glassEdgeLight
@@ -104,7 +104,7 @@ ColumnLayout {
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.customMaterial && (Style.materialProfile.light > 0 || Style.materialProfile.chrome > 0 || Style.materialProfile.bloom > 0)
+      visible: Style.customMaterial && (Style.materialProfile.aura !== "off" || Style.materialProfile.afterglow)
       enabled: Style.materialEffectsEnabled
       label: I18n.tr("panels.user-interface.material-lighting-label")
       description: I18n.tr("panels.user-interface.material-lighting-description")
@@ -120,7 +120,7 @@ ColumnLayout {
 
     NValueSlider {
       Layout.fillWidth: true
-      visible: Style.customMaterial && Style.materialProfile.texture > 0
+      visible: Style.customMaterial && Style.materialProfile.afterglow
       enabled: Style.materialEffectsEnabled
       label: I18n.tr("panels.user-interface.material-texture-label")
       description: I18n.tr("panels.user-interface.material-texture-description")
@@ -131,22 +131,6 @@ ColumnLayout {
       value: Settings.data.ui.materialTexture
       defaultValue: Settings.getDefaultValue("ui.materialTexture")
       onMoved: value => Settings.data.ui.materialTexture = value
-      text: Math.round(value * 100) + "%"
-    }
-
-    NValueSlider {
-      Layout.fillWidth: true
-      visible: Style.profileUsesGlass && Style.materialProfile.refraction > 0
-      enabled: Style.glassEffectsEnabled
-      label: I18n.tr("panels.user-interface.material-refraction-label")
-      description: I18n.tr("panels.user-interface.material-refraction-description")
-      from: 0
-      to: 1
-      stepSize: 0.01
-      showReset: true
-      value: Settings.data.ui.materialRefraction
-      defaultValue: Settings.getDefaultValue("ui.materialRefraction")
-      onMoved: value => Settings.data.ui.materialRefraction = value
       text: Math.round(value * 100) + "%"
     }
 

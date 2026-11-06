@@ -1,60 +1,73 @@
-import QtQuick
-import qs.Commons
+pragma ComponentBehavior: Bound
 
-// Outer surface: shared wallpaper, a legible palette veil and material finish.
-// Content remains a sibling of these paints; it is never blurred or faded.
+import QtQuick
+import Quickshell
+import qs.Commons
+import qs.Widgets.Iris
+
+// Hydra host for the original iNiR field and light wash. Content is not captured.
 Item {
   id: root
   property color color: HydraColor.mSurfaceContainer
   property real backgroundOpacity: 1
+  property bool readingCards: false
   property alias radius: paint.radius
-  property alias border: legacyBorder.border
+  property alias border: paint.border
   property alias topLeftRadius: paint.topLeftRadius
   property alias topRightRadius: paint.topRightRadius
   property alias bottomLeftRadius: paint.bottomLeftRadius
   property alias bottomRightRadius: paint.bottomRightRadius
-  readonly property real materialAlpha: Style.customMaterial ? (Style.profileUsesGlass && glass.ready ? glass.tintOpacity : 1) : backgroundOpacity
+  readonly property bool hasMaterialShadow: material.active && Settings.data.general.enableShadows
 
-  NGlassBackdrop {
-    id: glass
-    anchors.fill: parent
-    visible: root.color.a > 0 && root.backgroundOpacity > 0
-    maskSource: mask
-    surfaceColor: Style.materialColor(root.color)
-    tintOpacity: Style.glassSurfaceOpacity(surfaceColor)
-  }
-
-  Rectangle {
-    id: mask
-    anchors.fill: parent
-    visible: false
-    color: Qt.rgba(1, 1, 1, 1)
-    radius: paint.radius
-    topLeftRadius: paint.topLeftRadius
-    topRightRadius: paint.topRightRadius
-    bottomLeftRadius: paint.bottomLeftRadius
-    bottomRightRadius: paint.bottomRightRadius
-  }
-
-  Rectangle {
-    id: legacyBorder
-    visible: false
-    color: "transparent"
-    border.width: 0
+  TransformWatcher {
+    id: placement
+    a: root.QsWindow.contentItem
+    b: root
   }
 
   Rectangle {
     id: paint
     anchors.fill: parent
-    color: root.color.a === 0 || root.backgroundOpacity === 0 ? "transparent" : Qt.alpha(Style.materialColor(root.color), (Style.customMaterial ? 1 : root.color.a) * root.materialAlpha)
-    border.color: Style.customMaterial ? (root.color.a === 0 || root.backgroundOpacity === 0 ? "transparent" : Style.materialEdgeColor) : legacyBorder.border.color
-    border.width: Style.customMaterial ? Style.borderS : legacyBorder.border.width
+    visible: !Style.customMaterial || !IrisStyle.effectsEnabled
+    color: Style.customMaterial ? (root.color.a > 0 && root.backgroundOpacity > 0 ? IrisStyle.bodySurface : "transparent") : Qt.alpha(root.color, root.color.a * root.backgroundOpacity)
   }
 
-  NMaterialFinish {
+  Loader {
+    id: material
+    active: Style.customMaterial && IrisStyle.effectsEnabled && root.color.a > 0 && root.backgroundOpacity > 0
     anchors.fill: parent
-    visible: root.color.a > 0 && root.backgroundOpacity > 0
-    maskSource: mask
-    surfaceColor: Style.materialColor(root.color)
+    sourceComponent: Item {
+      IrisField {
+        id: field
+        x: -reach
+        y: -reach
+        width: root.width + 2 * reach
+        height: root.height + 2 * reach
+        tint: IrisStyle.bodySurface
+        readonly property var origin: {
+          void placement.transform;
+          return IrisHostGeometry.scenePoint(root, field.x, field.y);
+        }
+        wallpaperAllowed: origin !== null
+        sceneOrigin: origin ?? Qt.point(0, 0)
+        sceneSize: Qt.size(root.QsWindow.window?.screen?.width ?? root.width,
+                           root.QsWindow.window?.screen?.height ?? root.height)
+        shapes: [{
+          id: "surface", x: reach, y: reach,
+          width: root.width, height: root.height,
+          radius: paint.radius, fuse: 0, paints: false
+        }]
+      }
+      IrisLightWash {
+        anchors.fill: parent
+        light: IrisStyle.accent
+        radius: paint.radius
+      }
+      IrisReadingPlate {
+        visible: !root.readingCards
+        anchors.fill: parent
+        radius: paint.radius
+      }
+    }
   }
 }
